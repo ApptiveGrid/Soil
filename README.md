@@ -1,5 +1,7 @@
 # Soil
 
+[![CI matrix](https://github.com//ApptiveGrid/Soil/actions/workflows/build.yml/badge.svg)](https://github.com//ApptiveGrid/Soil/actions/workflows/build.yml)
+
 Soil aims to be a lightweight OO database for pharo that supports ACID transactions. It will utilize MVCC for concurrency control and history management of data.
 
 This project is at its very start and we are in exploration phase about the things we need.
