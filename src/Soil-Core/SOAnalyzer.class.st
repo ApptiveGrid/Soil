@@ -1,12 +1,16 @@
 Class {
 	#name : #SOAnalyzer,
 	#superclass : #FLAnalyzer,
+	#instVars : [
+		'transaction'
+	],
 	#category : #'Soil-Core'
 }
 
 { #category : #'as yet unclassified' }
 SOAnalyzer >> databaseMapper [ 
 	^ SOMapper new
+		transaction: transaction
 ]
 
 { #category : #protected }
@@ -30,4 +34,9 @@ SOAnalyzer >> privateMappers [
 		add: self generalMapper;
 		reduceRight: [:left :right | left next: right ];
 		yourself
+]
+
+{ #category : #accessing }
+SOAnalyzer >> transaction: aSOTransaction [ 
+	transaction := aSOTransaction
 ]

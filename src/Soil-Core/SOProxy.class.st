@@ -2,12 +2,27 @@ Class {
 	#name : #SOProxy,
 	#superclass : #Object,
 	#instVars : [
-		'name'
+		'id',
+		'transaction'
 	],
 	#category : #'Soil-Core'
 }
 
+{ #category : #'reflective operations' }
+SOProxy >> doesNotUnderstand: aMessage [ 
+	| realObject |
+	realObject := transaction 
+		objectWithId: id 
+		ifNone: [ Error signal: 'cannot load' ].
+	^ aMessage sendTo: realObject
+]
+
 { #category : #accessing }
-SOProxy >> name: aString [ 
-	name := aString
+SOProxy >> id: anInteger [ 
+	id := anInteger
+]
+
+{ #category : #'as yet unclassified' }
+SOProxy >> soilLoadedIn: aTransaction [ 
+	transaction := aTransaction  
 ]
