@@ -14,19 +14,20 @@ transaction makeRoot: anObject
 ```
 
 should be sufficient to mark any object as a cluster root. When the graph is serialized to disk all references to a cluster root are replaced by a proxy object pointing to that cluster and the cluster itself is serialized separately.
-For this to work clusters need to be **discoverable**. Each cluster gets a clusterId on the storage medium to be able to retrieve it. The proxy that replaces a cluster root on serialization holds the cluster id of the referenced cluster to load dynamically.
+For this to work clusters need to be _discoverable_. Each cluster gets a clusterId on the storage medium to be able to retrieve it. The proxy that replaces a cluster root on serialization holds the cluster id of the referenced cluster to load dynamically.
 
 When a transaction is written to disk, a graph is serialized to bytes that get stored. Pharo already includes a very good object serializer: **Fuel**. We use **Fuel** to serialize the sliced clusters to disk and bigger part of the database is already in place.
 
 __note:__ Proxies are serialized with Fuel means that the information about references to other clusters is encoded within Fuel. We need a way to have that information on a lower level in order to traverse the structure without having the need to materialize everything
 
+To see it in action have a look at _#testSerializingRootTwoCluster_
 ## MVCC
 
-MVCC stands for __multi version concurrency control__ and is the way many modern databases treat concurrency. MVCC never changes a written object on disk. It always creates a new version of the object which is appended to the store the objects live in. Each version is tagged with a timestamp or sequencial id. When a transaction is created it also creates a timestamp and only ready object versions that have the same timestamp or one that is older. This way consequent reads from the database always get the state at that particular time. Writes of objects to the store are invisible to a transaction if they are written after the transaction has been created. Maintaing a read timestamp in a transaction also raises conflicts when the read timestamp and the actual timestamp of the object in the store differ
+MVCC stands for _multi version concurrency control_ and is the way many modern databases treat concurrency. MVCC never changes a written object on disk. It always creates a new version of the object which is appended to the store the objects live in. Each version is tagged with a timestamp or sequencial id. When a transaction is created it also creates a timestamp and only ready object versions that have the same timestamp or one that is older. This way consequent reads from the database always get the state at that particular time. Writes of objects to the store are invisible to a transaction if they are written after the transaction has been created. Maintaing a read timestamp in a transaction also raises conflicts when the read timestamp and the actual timestamp of the object in the store differ
 
 # file locking
 
-When data is written to the disk, e.g. appending a new version of an object to the store, the necessary structures are locked on disk. This is done by using regional locking capabilities of the underlaying operating system. Regional locking sets a lock to a region of bytes in a file with offset and length. This way multiple non-conflicting locks can be made to the same file. In other databases this is usually called row level locking. Functionality for this file locking is already implemented using **unifiedFFI*** to access the **fcntl*** system call which provides the regional locking
+When data is written to the disk, e.g. appending a new version of an object to the store, the necessary structures are locked on disk. This is done by using regional locking capabilities of the underlaying operating system. Regional locking sets a lock to a region of bytes in a file with offset and length. This way multiple non-conflicting locks can be made to the same file. In other databases this is usually called row level locking. Functionality for this file locking is already implemented using **unifiedFFI** to access the **fcntl** system call which provides the regional locking
 
 # garbage collection
 
