@@ -2,7 +2,8 @@ Class {
 	#name : #Soil,
 	#superclass : #Object,
 	#instVars : [
-		'path'
+		'path',
+		'segments'
 	],
 	#category : #'Soil-Core'
 }
@@ -15,13 +16,21 @@ Soil class >> path: aString [
 
 { #category : #'as yet unclassified' }
 Soil >> cleanFiles [
-	path children do: #delete
+	path children do: #deleteAll
+]
+
+{ #category : #initialization }
+Soil >> initializeDatabase [
+	(SOObjectSegment new 
+		soil: self;
+		id: 1) initializeDatabase
+	
 ]
 
 { #category : #'as yet unclassified' }
 Soil >> materializationWithId: anInteger ifNone: aBlock [
 	| file |
-	file := (path / anInteger asString) asFileReference.
+	file := (path / anInteger index asString) asFileReference.
 	file exists ifFalse: [ ^ aBlock value ].
 	
 	^ FLMaterializer newDefault materializeFrom: file binaryReadStream
@@ -42,4 +51,10 @@ Soil >> path [
 Soil >> path: aString [ 
 	path := aString asFileReference.
 	path ensureCreateDirectory  
+]
+
+{ #category : #accessing }
+Soil >> segments [ 
+	^ segments ifNil: [ 
+		segments := self loadSegments ]
 ]

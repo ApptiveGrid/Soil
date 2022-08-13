@@ -30,6 +30,12 @@ SoilTest >> simpleGraph [
 ]
 
 { #category : #tests }
+SoilTest >> testInitializeDatabase [
+	soil initializeDatabase.
+	self assert: (soil path / #segments / '1' / #index) exists
+]
+
+{ #category : #tests }
 SoilTest >> testSerializingRootOneCluster [
 	| tx tx2 materializedRoot |
 	tx := soil newTransaction.
@@ -56,7 +62,6 @@ SoilTest >> testSerializingRootTwoCluster [
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: materializedRoot nested reference class equals: SOProxy.
-	self halt.
 	self assert: materializedRoot nested reference nested label equals: 'nested under cluster'
 	
 ]
