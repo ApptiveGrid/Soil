@@ -1,0 +1,32 @@
+name: CI
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the development branch
+on:
+  pull_request:
+    types: [assigned, opened, synchronize, reopened]
+    
+  push:
+    branches:
+      - development
+  
+jobs:
+  build:
+    strategy:
+      matrix:
+        pharoversion: [ Pharo64-11, Pharo64-10 ]
+    name: ${{ matrix.pharoversion }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hpi-swa/setup-smalltalkCI@v1
+        id: smalltalkci
+        with:
+          smalltalk-version: ${{ matrix.pharoversion }}
+      - run: smalltalkci -s ${{ steps.smalltalkci.outputs.smalltalk-version }}
+        shell: bash
+        timeout-minutes: 15
+
