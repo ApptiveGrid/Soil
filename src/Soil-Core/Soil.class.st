@@ -16,11 +16,13 @@ Soil class >> path: aString [
 
 { #category : #'as yet unclassified' }
 Soil >> cleanFiles [
-	path children do: #deleteAll
+	path children do: #deleteAll.
+	path delete
 ]
 
 { #category : #initialization }
 Soil >> initializeDatabase [
+	path exists ifTrue: [ SODatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
 	(SOObjectSegment new 
 		soil: self;
 		id: 1) initializeDatabase
