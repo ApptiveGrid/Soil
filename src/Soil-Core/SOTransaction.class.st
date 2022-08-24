@@ -14,8 +14,10 @@ Class {
 SOTransaction >> commit [
 	| stream lastId |
 	lastId := 1.
+	"iterate over all object ids to assign numbers before they get serialized"
+	objects keys do: [ :id  |
+		(id index = 0) ifTrue: [ lastId := lastId + 1. id index: lastId ] ].
 	objects keysAndValuesDo: [ :id :object | | file |
-		(id index = 0) ifTrue: [ lastId := lastId + 1. id index: lastId ].
 		stream := (soil path / id index asString) binaryWriteStream.
 		FLSerializer newDefault 
 			analyzer: (SOAnalyzer new transaction: self);
@@ -27,7 +29,10 @@ SOTransaction >> commit [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> idOf: anObject [ 
-	^ objectIndex at: anObject
+	| id |
+	id := objectIndex at: anObject.
+	(id index = 0) ifTrue: [ Error signal: 'index of object id is not initialized' ].
+	^ id
 ]
 
 { #category : #initialization }
