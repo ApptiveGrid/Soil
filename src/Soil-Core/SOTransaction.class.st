@@ -19,7 +19,7 @@ SOTransaction >> commit [
 		(id index = 0) ifTrue: [ lastId := lastId + 1. id index: lastId ] ].
 	objects keysAndValuesDo: [ :id :object | | file |
 		stream := (soil path / id index asString) binaryWriteStream.
-		FLSerializer newDefault 
+		FLSerializer new 
 			analyzer: (SOAnalyzer new transaction: self);
 			serialize: object on: stream.
 			stream 
