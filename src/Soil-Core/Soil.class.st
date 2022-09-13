@@ -20,13 +20,6 @@ Soil >> cleanFiles [
 	path delete
 ]
 
-{ #category : #accessing }
-Soil >> defaultSegment [
-	^ SOObjectSegment new
-		id: 1;
-		soil: self
-]
-
 { #category : #initialization }
 Soil >> initializeDatabase [
 	path exists ifTrue: [ SODatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
@@ -34,14 +27,6 @@ Soil >> initializeDatabase [
 		objectRepository: objectRepository;
 		id: 1) initializeDatabase
 	
-]
-
-{ #category : #'as yet unclassified' }
-Soil >> materializationWithId: objectId ifNone: aBlock [
-	| indexFile objectFile position bytes |
-	bytes := self objectRepository at: objectId.
-	
-	^ FLMaterializer materializeFrom: bytes readStream
 ]
 
 { #category : #transactions }
@@ -70,10 +55,4 @@ Soil >> path [
 Soil >> path: aString [ 
 	path := aString asFileReference.
 	self open
-]
-
-{ #category : #accessing }
-Soil >> serializer [
-	^ FLSerializer new
-		when: [ :o | o isRoot ] substituteBy: [ :a |self halt]
 ]
