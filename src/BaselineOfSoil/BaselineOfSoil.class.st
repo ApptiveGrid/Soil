@@ -23,5 +23,5 @@ BaselineOfSoil >> fuel: spec [
 	
 	spec baseline: 'Fuel' with: [ 
 		spec 
-			repository: 'github://theseion/Fuel:5.0.6/repository']
+			repository: 'github://theseion/Fuel:5.1.0/repository']
 ]
