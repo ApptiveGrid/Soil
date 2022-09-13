@@ -69,7 +69,6 @@ Soil >> path [
 { #category : #accessing }
 Soil >> path: aString [ 
 	path := aString asFileReference.
-	path ensureCreateDirectory .
 	self open
 ]
 
