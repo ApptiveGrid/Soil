@@ -16,7 +16,9 @@ SoilTest >> path [
 SoilTest >> setUp [ 
 	super setUp.
 	soil := Soil path: self path.
-	soil cleanFiles
+	soil 
+		cleanFiles;
+		initializeDatabase 
 ]
 
 { #category : #tests }
@@ -31,8 +33,14 @@ SoilTest >> simpleGraph [
 
 { #category : #tests }
 SoilTest >> testInitializeDatabase [
-	soil initializeDatabase.
 	self assert: (soil path / #segments / '1' / #index) exists
+]
+
+{ #category : #tests }
+SoilTest >> testInitializeDatabaseFailsIfExisting [
+	self 
+		should: [ soil initializeDatabase ]
+		raise: Error
 ]
 
 { #category : #tests }
@@ -41,8 +49,6 @@ SoilTest >> testSerializingRootOneCluster [
 	tx := soil newTransaction.
 	tx root: self simpleGraph.
 	tx commit.
-	self assert: (soil path / '1') exists.
-	self deny: (soil path / '2') exists.
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: materializedRoot nested reference class equals: SOTestClusterRoot  
@@ -57,8 +63,6 @@ SoilTest >> testSerializingRootTwoCluster [
 	tx makeRoot: graph nested reference. 
 	tx root: graph. 
 	tx commit.
-	self assert: (soil path / '1') exists.
-	self assert: (soil path / '2') exists.
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: materializedRoot nested reference class equals: SOProxy.

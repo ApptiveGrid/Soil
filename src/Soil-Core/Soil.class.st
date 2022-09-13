@@ -3,7 +3,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'path',
-		'segments'
+		'objectRepository'
 	],
 	#category : #'Soil-Core'
 }
@@ -16,29 +16,48 @@ Soil class >> path: aString [
 
 { #category : #'as yet unclassified' }
 Soil >> cleanFiles [
-	path children do: #deleteAll
+	path children do: #deleteAll.
+	path delete
+]
+
+{ #category : #accessing }
+Soil >> defaultSegment [
+	^ SOObjectSegment new
+		id: 1;
+		soil: self
 ]
 
 { #category : #initialization }
 Soil >> initializeDatabase [
+	path exists ifTrue: [ SODatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
 	(SOObjectSegment new 
-		soil: self;
+		objectRepository: objectRepository;
 		id: 1) initializeDatabase
 	
 ]
 
 { #category : #'as yet unclassified' }
-Soil >> materializationWithId: anInteger ifNone: aBlock [
-	| file |
-	file := (path / anInteger index asString) asFileReference.
-	file exists ifFalse: [ ^ aBlock value ].
+Soil >> materializationWithId: objectId ifNone: aBlock [
+	| indexFile objectFile position bytes |
+	bytes := self objectRepository at: objectId.
 	
-	^ FLMaterializer newDefault materializeFrom: file binaryReadStream
+	^ FLMaterializer materializeFrom: bytes readStream
 ]
 
 { #category : #transactions }
 Soil >> newTransaction [
 	^ SOTransaction new 
+		soil: self
+]
+
+{ #category : #accessing }
+Soil >> objectRepository [
+	^ objectRepository
+]
+
+{ #category : #'instance creation' }
+Soil >> open [
+	objectRepository := SOObjectRepository new 
 		soil: self
 ]
 
@@ -50,11 +69,12 @@ Soil >> path [
 { #category : #accessing }
 Soil >> path: aString [ 
 	path := aString asFileReference.
-	path ensureCreateDirectory  
+	path ensureCreateDirectory .
+	self open
 ]
 
 { #category : #accessing }
-Soil >> segments [ 
-	^ segments ifNil: [ 
-		segments := self loadSegments ]
+Soil >> serializer [
+	^ FLSerializer new
+		when: [ :o | o isRoot ] substituteBy: [ :a |self halt]
 ]

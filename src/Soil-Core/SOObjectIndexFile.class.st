@@ -1,79 +1,63 @@
 Class {
 	#name : #SOObjectIndexFile,
-	#superclass : #Object,
+	#superclass : #SOSegmentFile,
 	#instVars : [
-		'id',
-		'segment',
-		'fileVersion',
-		'fuelVersion',
-		'lastObjectIndex',
-		'stream'
+		'lastObjectIndex'
 	],
 	#category : #'Soil-Core'
 }
 
-{ #category : #accessing }
-SOObjectIndexFile >> fileVersion [
-	^ fileVersion
-]
-
-{ #category : #accessing }
-SOObjectIndexFile >> fileVersion: anInteger [ 
-	self stream position: self header size.
-	stream nextPutAll: (anInteger asByteArrayOfSize: self fileVersionSize)
-]
-
 { #category : #'as yet unclassified' }
-SOObjectIndexFile >> fileVersionSize [
-	^ 2
+SOObjectIndexFile >> allocateNewIndex [
+	| lastIndex |
+	lastIndex := self lastObjectIndex + 1.
+	self lastObjectIndex: lastIndex.
+	^ lastIndex
 ]
 
 { #category : #accessing }
-SOObjectIndexFile >> fuelVersion [
-	^ fuelVersion
+SOObjectIndexFile >> at: index [ 
+	stream position: (self indexPositionAt: index).
+	^ (stream next: 8) asInteger 
 ]
 
 { #category : #accessing }
-SOObjectIndexFile >> fuelVersion: anInteger [ 
-	stream position: self header size + self fileVersionSize.
-	stream nextPutAll: (anInteger asByteArrayOfSize: self fuelVersionSize)
+SOObjectIndexFile >> at: index putPosition: position [ 
+	stream position: (self indexPositionAt: index).
+	stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize).
+	stream flush
 ]
 
-{ #category : #'as yet unclassified' }
-SOObjectIndexFile >> fuelVersionSize [
-	^ 2
-]
-
-{ #category : #writing }
-SOObjectIndexFile >> header [ 
-	^ 'SOIL|OBJECT INDEX' asByteArray
+{ #category : #accessing }
+SOObjectIndexFile >> indexPositionAt: anInteger [ 
+	^ self headerSize + self objectIndexSize + (anInteger - 1 * self objectIndexSize)
 ]
 
 { #category : #initialization }
-SOObjectIndexFile >> initializeDatabase [
-	self stream 
-		position: 0;
-		nextPutAll: self header asByteArray.
-	self fileVersion: 1.
-	self fuelVersion: 1.
+SOObjectIndexFile >> initializeStart [
 	self lastObjectIndex: 1.
-	self stream 
-		flush; 
-		close
-	
+	"intialize the slot for the root object"
+	self at: 1 putPosition: 0.
 ]
 
 { #category : #accessing }
 SOObjectIndexFile >> lastObjectIndex [
 	^ lastObjectIndex ifNil: [ 
-		lastObjectIndex := 1 ]
+		stream position: self headerSize.
+		lastObjectIndex := (stream next: self objectIndexSize) asInteger ]
 ]
 
 { #category : #accessing }
 SOObjectIndexFile >> lastObjectIndex: anInteger [ 
 	self stream 
-		position: self header size + self fileVersionSize + self fuelVersionSize ;
-		nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize)
+		position: self headerSize;
+		nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize).
+	lastObjectIndex := anInteger 
+]
+
+{ #category : #accessing }
+SOObjectIndexFile >> nextIndex [
+	^ self lastObjectIndex + 1
 ]
 
 { #category : #'as yet unclassified' }
@@ -87,18 +71,12 @@ SOObjectIndexFile >> path [
 ]
 
 { #category : #accessing }
-SOObjectIndexFile >> segment: aSOObjectSegment [ 
-	segment := aSOObjectSegment 
+SOObjectIndexFile >> positionAt: anInteger [ 
+	stream position: (self indexPositionAt: anInteger).
+	^ (stream next: self objectIndexSize) asInteger
 ]
 
 { #category : #accessing }
-SOObjectIndexFile >> stream [
-	^ stream ifNil: [ 
-		stream := self path binaryWriteStream ]
-]
-
-{ #category : #writing }
-SOObjectIndexFile >> writeHeaderOn: aStream [ 
-	aStream 
-		nextPutAll: self header asByteArray
+SOObjectIndexFile >> prefix [ 
+	^ 'SOIL|OBJECT INDEX' asByteArray
 ]
