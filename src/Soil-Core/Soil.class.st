@@ -16,6 +16,7 @@ Soil class >> path: aString [
 
 { #category : #'as yet unclassified' }
 Soil >> cleanFiles [
+	path exists ifFalse: [ ^ self ].
 	path children do: #deleteAll.
 	path delete
 ]
