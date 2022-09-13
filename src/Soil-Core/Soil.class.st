@@ -16,15 +16,9 @@ Soil class >> path: aString [
 
 { #category : #'as yet unclassified' }
 Soil >> cleanFiles [
+	path exists ifFalse: [ ^ self ].
 	path children do: #deleteAll.
 	path delete
-]
-
-{ #category : #accessing }
-Soil >> defaultSegment [
-	^ SOObjectSegment new
-		id: 1;
-		soil: self
 ]
 
 { #category : #initialization }
@@ -34,14 +28,6 @@ Soil >> initializeDatabase [
 		objectRepository: objectRepository;
 		id: 1) initializeDatabase
 	
-]
-
-{ #category : #'as yet unclassified' }
-Soil >> materializationWithId: objectId ifNone: aBlock [
-	| indexFile objectFile position bytes |
-	bytes := self objectRepository at: objectId.
-	
-	^ FLMaterializer materializeFrom: bytes readStream
 ]
 
 { #category : #transactions }
@@ -69,12 +55,5 @@ Soil >> path [
 { #category : #accessing }
 Soil >> path: aString [ 
 	path := aString asFileReference.
-	path ensureCreateDirectory .
 	self open
-]
-
-{ #category : #accessing }
-Soil >> serializer [
-	^ FLSerializer new
-		when: [ :o | o isRoot ] substituteBy: [ :a |self halt]
 ]
