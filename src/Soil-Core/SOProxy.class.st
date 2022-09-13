@@ -17,6 +17,15 @@ SOProxy >> doesNotUnderstand: aMessage [
 	^ aMessage sendTo: realObject
 ]
 
+{ #category : #serialization }
+SOProxy >> fuelAfterMaterialization [ 
+	| record |
+	record := SOCurrentRecord value.
+	id := record references at: id.
+	transaction := record transaction.
+
+]
+
 { #category : #accessing }
 SOProxy >> id: anInteger [ 
 	id := anInteger

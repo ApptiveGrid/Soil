@@ -1,9 +1,8 @@
 Class {
 	#name : #SOObjectFile,
-	#superclass : #SOBinaryFile,
+	#superclass : #SOSegmentFile,
 	#instVars : [
 		'id',
-		'segment',
 		'fuelVersion'
 	],
 	#category : #'Soil-Core'
@@ -12,13 +11,16 @@ Class {
 { #category : #'as yet unclassified' }
 SOObjectFile >> appendBytes: aCollection [ 
 	stream position: stream size.
-	stream nextPutAll: aCollection
+	stream nextPutAll: aCollection.
+	stream flush
 ]
 
 { #category : #accessing }
 SOObjectFile >> atPosition: anInteger [ 
+	| length |
 	stream position: anInteger.
-	^ stream next: 3
+	length := (stream next: 8) asInteger.
+	^ stream next: length
 ]
 
 { #category : #accessing }
@@ -56,7 +58,7 @@ SOObjectFile >> initializeStart [
 
 { #category : #accessing }
 SOObjectFile >> path [
-	^ segment path / #index
+	^ segment path / #objects
 ]
 
 { #category : #writing }
@@ -68,11 +70,6 @@ SOObjectFile >> prefix [
 SOObjectFile >> readHeader [
 	super readHeader.
 	fuelVersion := (stream next: self fuelVersionSize) asInteger
-]
-
-{ #category : #accessing }
-SOObjectFile >> segment: aSOObjectSegment [ 
-	segment := aSOObjectSegment 
 ]
 
 { #category : #accessing }

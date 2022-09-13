@@ -1,5 +1,5 @@
 Class {
-	#name : #SOObjectManagerTest,
+	#name : #SOObjectRepositoryTest,
 	#superclass : #TestCase,
 	#instVars : [
 		'reference',
@@ -9,9 +9,9 @@ Class {
 }
 
 { #category : #tests }
-SOObjectManagerTest >> testStoreObject [ 
+SOObjectRepositoryTest >> testStoreObject [ 
 	| manager id obj |
-	manager := SOObjectManager new.
+	manager := SOObjectRepository new.
 	manager index: (SOObjectIndexFile new 
 		stream: (ReadWriteStream with: ByteArray new);
 		initializeDatabase;

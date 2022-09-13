@@ -1,0 +1,113 @@
+Class {
+	#name : #SOObjectRecord,
+	#superclass : #Object,
+	#instVars : [
+		'changed',
+		'object',
+		'transaction',
+		'objectId',
+		'references'
+	],
+	#category : #'Soil-Core'
+}
+
+{ #category : #accessing }
+SOObjectRecord >> changed: aBoolean [
+	changed := aBoolean 
+]
+
+{ #category : #testing }
+SOObjectRecord >> hasChanged [
+	^ changed 
+]
+
+{ #category : #accessing }
+SOObjectRecord >> indexOf: anObjectId [
+	| index |
+	index := references indexOf: anObjectId.
+	^ index isZero 
+		ifTrue: [ 
+			references addLast: anObjectId.
+			references size ]
+		ifFalse: [ index ]
+]
+
+{ #category : #initialization }
+SOObjectRecord >> initialize [ 
+	super initialize.
+	changed := false.
+	references := OrderedCollection new
+]
+
+{ #category : #accessing }
+SOObjectRecord >> object [
+	^ object
+]
+
+{ #category : #accessing }
+SOObjectRecord >> object: anObject [
+	object := anObject
+]
+
+{ #category : #accessing }
+SOObjectRecord >> objectId [
+	^ objectId
+]
+
+{ #category : #accessing }
+SOObjectRecord >> objectId: aSOObjectId [ 
+	
+	objectId := aSOObjectId 
+]
+
+{ #category : #accessing }
+SOObjectRecord >> references [
+	^ references
+]
+
+{ #category : #accessing }
+SOObjectRecord >> references: aCollection [ 
+	references := aCollection
+]
+
+{ #category : #serializing }
+SOObjectRecord >> serialize [
+	^ ByteArray streamContents: [ :stream |
+		self serializeOn: stream ]
+				
+]
+
+{ #category : #serializing }
+SOObjectRecord >> serializeObject [
+	^ ByteArray streamContents: [ :s |
+		transaction serializer 
+			when: [ :obj | (obj = object) not and: [ transaction isRoot: obj ] ] 
+			substituteBy: [ :obj | SOProxy new id: (self indexOf: (transaction objectIndex at: obj) objectId) ];
+			object: object;
+			onStream: s;
+			serialize ].
+]
+
+{ #category : #serializing }
+SOObjectRecord >> serializeOn: stream [
+	| objectBytes |
+	objectBytes := self serializeObject.
+	stream nextPutAll: (((references size * 8) + 2 + objectBytes size) asByteArrayOfSize: 8).
+	stream nextPutAll: ((references size) asByteArrayOfSize: 2).
+	
+	references do: [ :ref |
+		stream nextPutAll: (ref index asByteArrayOfSize: 8) ].
+	stream 
+		"nextPutAll: (bytes size asByteArrayOfSize: 8);"
+		nextPutAll: objectBytes .
+]
+
+{ #category : #accessing }
+SOObjectRecord >> transaction [
+	^ transaction
+]
+
+{ #category : #accessing }
+SOObjectRecord >> transaction: aSOTransaction [ 
+	transaction := aSOTransaction 
+]

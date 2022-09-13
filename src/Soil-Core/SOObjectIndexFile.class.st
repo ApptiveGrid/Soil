@@ -1,6 +1,6 @@
 Class {
 	#name : #SOObjectIndexFile,
-	#superclass : #SOBinaryFile,
+	#superclass : #SOSegmentFile,
 	#instVars : [
 		'lastObjectIndex'
 	],
@@ -8,9 +8,16 @@ Class {
 }
 
 { #category : #accessing }
+SOObjectIndexFile >> at: index [ 
+	stream position: (self indexPositionAt: index).
+	^ (stream next: 8) asInteger 
+]
+
+{ #category : #accessing }
 SOObjectIndexFile >> at: index putPosition: position [ 
 	stream position: (self indexPositionAt: index).
-	stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize)
+	stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize).
+	stream flush
 ]
 
 { #category : #accessing }
@@ -41,6 +48,11 @@ SOObjectIndexFile >> lastObjectIndex: anInteger [
 { #category : #'as yet unclassified' }
 SOObjectIndexFile >> objectIndexSize [
 	^ 8
+]
+
+{ #category : #accessing }
+SOObjectIndexFile >> path [
+	^ segment path / #index
 ]
 
 { #category : #accessing }

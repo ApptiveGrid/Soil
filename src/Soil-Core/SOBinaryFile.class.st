@@ -54,6 +54,11 @@ SOBinaryFile >> initializeStart [
 	self subclassResponsibility 
 ]
 
+{ #category : #accessing }
+SOBinaryFile >> open [
+	stream := File openForWriteFileNamed:  self path pathString 
+]
+
 { #category : #utilities }
 SOBinaryFile >> prefix [
 	self subclassResponsibility 
