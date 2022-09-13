@@ -9,9 +9,19 @@ BaselineOfSoil >> baseline: spec [
 	<baseline>
 
 	spec for: #'common' do: [
-		spec package: #'Soil-Core' with: [  ].
-		spec package: #'Soil-Core-Tests' with: [ spec requires: #('Soil-Core') ] ].
+		spec package: #'Soil-Core' with: [ spec requires: #('Fuel') ].
+		spec package: #'Soil-Core-Tests' with: [ spec requires: #('Soil-Core') ].
+		
+	self fuel: spec].
 
 	spec 
 		group: 'default' with: #( 'Soil-Core' 'Soil-Core-Tests' ) 
+]
+
+{ #category : #'as yet unclassified' }
+BaselineOfSoil >> fuel: spec [
+	
+	spec baseline: 'Fuel' with: [ 
+		spec 
+			repository: 'github://theseion/Fuel:5.0.6/repository']
 ]

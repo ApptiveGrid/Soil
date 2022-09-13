@@ -115,11 +115,14 @@ SOTransaction >> objectRepository [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> objectWithId: anInteger ifNone: aBlock [
-	| m |
-	m := self materializationWithId: anInteger ifNone: aBlock.
-	"m objects do: [ :each | each soilLoadedIn: self ]."
-	^ m object
+SOTransaction >> objectWithId: objectId ifNone: aBlock [
+	| record |
+	objects at: objectId ifPresent: [ :rec | ^ rec object ].
+	
+	record := self materializationWithId: objectId ifNone: aBlock.
+	objects at: objectId put: record.
+	objectIndex at: record object put: record.
+	^ record object
 ]
 
 { #category : #accessing }
