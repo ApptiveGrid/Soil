@@ -63,8 +63,6 @@ SoilTest >> testSerializingRootTwoCluster [
 	tx makeRoot: graph nested reference. 
 	tx root: graph. 
 	tx commit.
-"	self assert: (soil path / '1') exists.
-	self assert: (soil path / '2') exists."
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: materializedRoot nested reference class equals: SOProxy.

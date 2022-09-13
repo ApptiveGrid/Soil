@@ -7,6 +7,14 @@ Class {
 	#category : #'Soil-Core'
 }
 
+{ #category : #'as yet unclassified' }
+SOObjectIndexFile >> allocateNewIndex [
+	| lastIndex |
+	lastIndex := self lastObjectIndex + 1.
+	self lastObjectIndex: lastIndex.
+	^ lastIndex
+]
+
 { #category : #accessing }
 SOObjectIndexFile >> at: index [ 
 	stream position: (self indexPositionAt: index).

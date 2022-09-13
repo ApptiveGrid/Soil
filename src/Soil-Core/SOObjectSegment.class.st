@@ -23,6 +23,11 @@ SOObjectSegment >> addNewRaw: aByteArray [
 	^ objectIndex 
 ]
 
+{ #category : #'as yet unclassified' }
+SOObjectSegment >> allocateNextIndex [
+	^ self indexFile allocateNewIndex
+]
+
 { #category : #accessing }
 SOObjectSegment >> at: anInteger [ 
 	| position |

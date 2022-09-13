@@ -4,7 +4,6 @@ Class {
 	#instVars : [
 		'soil',
 		'objects',
-		'newObjects',
 		'objectIndex'
 	],
 	#category : #'Soil-Core'
@@ -14,12 +13,12 @@ Class {
 SOTransaction >> abort [
 	soil := nil.
 	objects := nil.
-	newObjects := nil.
 	objectIndex := nil
 ]
 
 { #category : #adding }
 SOTransaction >> addClusterObject: anObject [ 
+	objectIndex at: anObject ifPresent: [ ^ self ].
 	self 
 		atObjectId: self newObjectId 
 		putObject: anObject.
@@ -43,11 +42,10 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 
 { #category : #accessing }
 SOTransaction >> commit [
-	| lastId bytes |
-	lastId := 1.
+	| bytes |
 	"iterate over all object ids to assign numbers before they get serialized"
 	objects keys do: [ :id  |
-		(id index = 0) ifTrue: [ lastId := lastId + 1. id index: lastId ] ].
+		(id index = 0) ifTrue: [ id index: (self objectRepository segmentWithId: id segment) allocateNextIndex ] ].
 	objects keysAndValuesDo: [ :id :record |
 		record hasChanged ifTrue: [ 
 			bytes := record serialize. 
@@ -73,7 +71,7 @@ SOTransaction >> initialize [
 
 { #category : #testing }
 SOTransaction >> isAborted [
-	^ soil isNil & objects isNil & newObjects isNil & objectIndex isNil
+	^ soil isNil & objects isNil & objectIndex isNil
 ]
 
 { #category : #testing }
