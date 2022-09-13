@@ -1,16 +1,31 @@
 Class {
 	#name : #SOObjectIndexFile,
-	#superclass : #SOBinaryFile,
+	#superclass : #SOSegmentFile,
 	#instVars : [
 		'lastObjectIndex'
 	],
 	#category : #'Soil-Core'
 }
 
+{ #category : #'as yet unclassified' }
+SOObjectIndexFile >> allocateNewIndex [
+	| lastIndex |
+	lastIndex := self lastObjectIndex + 1.
+	self lastObjectIndex: lastIndex.
+	^ lastIndex
+]
+
+{ #category : #accessing }
+SOObjectIndexFile >> at: index [ 
+	stream position: (self indexPositionAt: index).
+	^ (stream next: 8) asInteger 
+]
+
 { #category : #accessing }
 SOObjectIndexFile >> at: index putPosition: position [ 
 	stream position: (self indexPositionAt: index).
-	stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize)
+	stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize).
+	stream flush
 ]
 
 { #category : #accessing }
@@ -20,7 +35,9 @@ SOObjectIndexFile >> indexPositionAt: anInteger [
 
 { #category : #initialization }
 SOObjectIndexFile >> initializeStart [
-	self lastObjectIndex: 0
+	self lastObjectIndex: 1.
+	"intialize the slot for the root object"
+	self at: 1 putPosition: 0.
 ]
 
 { #category : #accessing }
@@ -38,9 +55,19 @@ SOObjectIndexFile >> lastObjectIndex: anInteger [
 	lastObjectIndex := anInteger 
 ]
 
+{ #category : #accessing }
+SOObjectIndexFile >> nextIndex [
+	^ self lastObjectIndex + 1
+]
+
 { #category : #'as yet unclassified' }
 SOObjectIndexFile >> objectIndexSize [
 	^ 8
+]
+
+{ #category : #accessing }
+SOObjectIndexFile >> path [
+	^ segment path / #index
 ]
 
 { #category : #accessing }
