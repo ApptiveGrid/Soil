@@ -27,7 +27,9 @@ SOObjectIndexFile >> indexPositionAt: anInteger [
 
 { #category : #initialization }
 SOObjectIndexFile >> initializeStart [
-	self lastObjectIndex: 0
+	self lastObjectIndex: 1.
+	"intialize the slot for the root object"
+	self at: 1 putPosition: 0.
 ]
 
 { #category : #accessing }
@@ -43,6 +45,11 @@ SOObjectIndexFile >> lastObjectIndex: anInteger [
 		position: self headerSize;
 		nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize).
 	lastObjectIndex := anInteger 
+]
+
+{ #category : #accessing }
+SOObjectIndexFile >> nextIndex [
+	^ self lastObjectIndex + 1
 ]
 
 { #category : #'as yet unclassified' }

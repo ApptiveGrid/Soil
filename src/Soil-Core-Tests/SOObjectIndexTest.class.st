@@ -10,7 +10,7 @@ SOObjectIndexTest >> testInitializeOnStream [
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectIndexFile new stream: stream.
 		index initializeDatabase ].
-	self assert: bytes size equals: index headerSize + index objectIndexSize.
+	self assert: bytes size equals: index headerSize + index objectIndexSize +8 .
  	prefix := bytes copyFrom: 1 to: index prefix size.
 	self assert: prefix equals: 'SOIL|OBJECT INDEX' asByteArray.
 	fileVersion := bytes copyFrom: index prefix size + 1 to: (index prefix size + index fileVersionSize).

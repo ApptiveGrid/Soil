@@ -10,6 +10,14 @@ Class {
 	#category : #'Soil-Core'
 }
 
+{ #category : #aborting }
+SOTransaction >> abort [
+	soil := nil.
+	objects := nil.
+	newObjects := nil.
+	objectIndex := nil
+]
+
 { #category : #adding }
 SOTransaction >> addClusterObject: anObject [ 
 	self 
@@ -35,32 +43,17 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 
 { #category : #accessing }
 SOTransaction >> commit [
-	| lastId bytes recordBytes |
+	| lastId bytes |
 	lastId := 1.
 	"iterate over all object ids to assign numbers before they get serialized"
 	objects keys do: [ :id  |
 		(id index = 0) ifTrue: [ lastId := lastId + 1. id index: lastId ] ].
 	objects keysAndValuesDo: [ :id :record |
 		record hasChanged ifTrue: [ 
-			recordBytes := record serialize. 
-			bytes := ByteArray streamContents: [ :s |
-				self serializer 
-					when: [ :obj | (obj = record object) not and: [ self isRoot: obj ] ] 
-					substituteBy: [ :obj | SOProxy new id: (record indexOf: (objectIndex at: obj) objectId) ];
-					object: record object;
-					onStream: s;
-					serialize ].
-			recordBytes := ByteArray streamContents: [ :s |
-					s nextPutAll: (((record references size * 8) + 2 + bytes size) asByteArrayOfSize: 8).
-					s nextPutAll: ((record references size) asByteArrayOfSize: 2).
-					record references do: [ :ref |
-						s nextPutAll: (ref index asByteArrayOfSize: 8) ].
-				s 
-					"nextPutAll: (bytes size asByteArrayOfSize: 8);"
-					nextPutAll: bytes ].
+			bytes := record serialize. 
 			self objectRepository 
 				at: id 
-				put: recordBytes ] ]
+				put: bytes ] ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -79,6 +72,11 @@ SOTransaction >> initialize [
 ]
 
 { #category : #testing }
+SOTransaction >> isAborted [
+	^ soil isNil & objects isNil & newObjects isNil & objectIndex isNil
+]
+
+{ #category : #testing }
 SOTransaction >> isRoot: anObject [
 	self flag: #todo.
 	"this is surely not true but a shortcut for now"
@@ -94,20 +92,11 @@ SOTransaction >> makeRoot: anObject [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> materializationWithId: aSOObjectId ifNone: aBlock [
-	| bytes s refSize refs record |
-	bytes := self objectRepository at: aSOObjectId.
-	s := bytes readStream.
-	refSize := (s next: 2) asInteger.
-	refs := OrderedCollection new.
-	1 to: refSize do: [:n | refs add: (SOObjectId new index: (s next: 8) asInteger)]. 
-	record := SOObjectRecord new 
+	| bytes record |
+	^ (self objectRepository at: aSOObjectId)
 		transaction: self;
-		references: refs;
-		objectId: aSOObjectId.
-	SOCurrentRecord 
-		value: record 
-		during: [ record object: (FLMaterializer materializeFrom: s) ].
-	^ record
+		objectId: aSOObjectId;
+		materializeObject.
 	
 ]
 

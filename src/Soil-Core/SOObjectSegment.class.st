@@ -13,6 +13,16 @@ Class {
 	#category : #'Soil-Core'
 }
 
+{ #category : #adding }
+SOObjectSegment >> addNewRaw: aByteArray [ 
+	| objectIndex |
+	objectIndex := self indexFile nextIndex.
+	self 
+		at: objectIndex 
+		putBytes: aByteArray.
+	^ objectIndex 
+]
+
 { #category : #accessing }
 SOObjectSegment >> at: anInteger [ 
 	| position |
@@ -27,6 +37,22 @@ SOObjectSegment >> at: anInteger putBytes: bytes [
 	objectFile appendBytes: bytes.
 	self indexFile at: anInteger putPosition: position.
 	^ bytes
+]
+
+{ #category : #accessing }
+SOObjectSegment >> at: anInteger putObject: anObject [ 
+	| record |
+	record := SOObjectRecord new 
+		object: anObject;
+		serializeObject.
+	self halt.
+]
+
+{ #category : #accessing }
+SOObjectSegment >> basicAt: anInteger length:  length [
+	| position |
+	position := self indexFile positionAt: anInteger.
+	^ self objectFile basicAtPosition: position length: length
 ]
 
 { #category : #accessing }
@@ -49,6 +75,11 @@ SOObjectSegment >> indexFile [
 			open ]
 ]
 
+{ #category : #accessing }
+SOObjectSegment >> indexFile: aSOObjectIndexFile [ 
+	indexFile := aSOObjectIndexFile
+]
+
 { #category : #initialization }
 SOObjectSegment >> initializeDatabase [
 	self path ensureCreateDirectory.
@@ -69,6 +100,11 @@ SOObjectSegment >> objectFile [
 		objectFile := SOObjectFile new
 			segment: self;
 			open ]
+]
+
+{ #category : #accessing }
+SOObjectSegment >> objectFile: aSOObjectFile [ 
+	objectFile := aSOObjectFile
 ]
 
 { #category : #accessing }

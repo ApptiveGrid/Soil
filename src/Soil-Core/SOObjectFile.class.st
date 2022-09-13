@@ -19,7 +19,12 @@ SOObjectFile >> appendBytes: aCollection [
 SOObjectFile >> atPosition: anInteger [ 
 	| length |
 	stream position: anInteger.
-	length := (stream next: 8) asInteger.
+	^ SOObjectRecord readFrom: stream
+]
+
+{ #category : #accessing }
+SOObjectFile >> basicAtPosition: anInteger length: length [
+	stream position: anInteger.
 	^ stream next: length
 ]
 

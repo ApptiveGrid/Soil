@@ -6,10 +6,22 @@ Class {
 		'object',
 		'transaction',
 		'objectId',
-		'references'
+		'references',
+		'bytes'
 	],
 	#category : #'Soil-Core'
 }
+
+{ #category : #'instance creation' }
+SOObjectRecord class >> readFrom: aStream [
+	^ self new 
+		readFrom: aStream
+]
+
+{ #category : #accessing }
+SOObjectRecord >> bytes [
+	^ bytes
+]
 
 { #category : #accessing }
 SOObjectRecord >> changed: aBoolean [
@@ -39,6 +51,13 @@ SOObjectRecord >> initialize [
 	references := OrderedCollection new
 ]
 
+{ #category : #'as yet unclassified' }
+SOObjectRecord >> materializeObject [
+	object := SOCurrentRecord 
+		value: self
+		during: [ FLMaterializer materializeFromByteArray: bytes ]
+]
+
 { #category : #accessing }
 SOObjectRecord >> object [
 	^ object
@@ -58,6 +77,17 @@ SOObjectRecord >> objectId [
 SOObjectRecord >> objectId: aSOObjectId [ 
 	
 	objectId := aSOObjectId 
+]
+
+{ #category : #'instance creation' }
+SOObjectRecord >> readFrom: stream [ 
+	| numberOfReferences objectSize |
+	numberOfReferences := (stream next: 2) asInteger.
+	references := OrderedCollection new.
+	1 to: numberOfReferences do: [:n | references add: (SOObjectId new index: (stream next: 8) asInteger)]. 
+	objectSize := (stream next: 8) asInteger.
+	bytes := stream next: objectSize.
+		
 ]
 
 { #category : #accessing }
@@ -92,13 +122,12 @@ SOObjectRecord >> serializeObject [
 SOObjectRecord >> serializeOn: stream [
 	| objectBytes |
 	objectBytes := self serializeObject.
-	stream nextPutAll: (((references size * 8) + 2 + objectBytes size) asByteArrayOfSize: 8).
 	stream nextPutAll: ((references size) asByteArrayOfSize: 2).
 	
 	references do: [ :ref |
 		stream nextPutAll: (ref index asByteArrayOfSize: 8) ].
 	stream 
-		"nextPutAll: (bytes size asByteArrayOfSize: 8);"
+		nextPutAll: (objectBytes size asByteArrayOfSize: 8);
 		nextPutAll: objectBytes .
 ]
 
