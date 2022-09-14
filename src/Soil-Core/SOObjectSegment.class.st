@@ -96,6 +96,11 @@ SOObjectSegment >> initializeFilesystem [
 		initializeFilesystem 
 ]
 
+{ #category : #ids }
+SOObjectSegment >> newObjectId [
+	^ SOObjectId segment: id index: 0 
+]
+
 { #category : #'as yet unclassified' }
 SOObjectSegment >> objectFile [
 	^ objectFile ifNil: [ 

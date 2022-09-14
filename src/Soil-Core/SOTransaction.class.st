@@ -110,7 +110,7 @@ SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 
 { #category : #'instance creation' }
 SOTransaction >> newObjectId [ 
-	^ SOObjectId segment: 1 index: 0
+	^ self objectRepository newObjectId
 ]
 
 { #category : #accessing }
@@ -139,16 +139,21 @@ SOTransaction >> root [
 		ifFound: [ :assoc | ^ assoc value ].
 	
 	^ self 
-		materializationWithId: (SOObjectId segment: 1 index: 1) 
+		materializationWithId: self rootObjectId  
 		ifNone: [ nil ].
 ]
 
 { #category : #accessing }
 SOTransaction >> root: anObject [
 
-	| objectId |
-	objectId := SOObjectId segment: 1 index: 1.
-	self atObjectId: objectId putObject: anObject
+	self 
+		atObjectId: self rootObjectId  
+		putObject: anObject
+]
+
+{ #category : #accessing }
+SOTransaction >> rootObjectId [
+	^ SOObjectId segment: 1 index: 1
 ]
 
 { #category : #accessing }

@@ -34,6 +34,11 @@ SOObjectRepository >> at: objectId put: bytes [
 	segment at: objectId index putBytes: bytes	
 ]
 
+{ #category : #accessing }
+SOObjectRepository >> defaultSegment [
+	^ self segments first 
+]
+
 { #category : #initialization }
 SOObjectRepository >> initializeFilesystem [
 	(soil path / #segments) ensureCreateDirectory 
@@ -49,6 +54,11 @@ SOObjectRepository >> loadSegments [
 			id: directory basename asInteger;
 			objectRepository: self  ]
 	
+]
+
+{ #category : #accessing }
+SOObjectRepository >> newObjectId [
+	^ self defaultSegment newObjectId
 ]
 
 { #category : #accessing }
