@@ -45,13 +45,19 @@ SOTransaction >> commit [
 	| bytes |
 	"iterate over all object ids to assign numbers before they get serialized"
 	objects keys do: [ :id  |
-		(id index = 0) ifTrue: [ id index: (self objectRepository segmentWithId: id segment) allocateNextIndex ] ].
+		(id index = 0) ifTrue: [ id setIndex: (self objectRepository segmentAt: id segment) allocateNextIndex ] ].
 	objects keysAndValuesDo: [ :id :record |
 		record hasChanged ifTrue: [ 
 			bytes := record serialize. 
 			self objectRepository 
 				at: id 
-				put: bytes ] ]
+				put: bytes ] ].
+	self abort
+]
+
+{ #category : #aborting }
+SOTransaction >> dirtyObjects [
+	^ (objects select: [ :each | each hasChanged ]) collect: #object
 ]
 
 { #category : #'as yet unclassified' }
@@ -65,8 +71,8 @@ SOTransaction >> idOf: anObject [
 { #category : #initialization }
 SOTransaction >> initialize [ 
 	super initialize.
-	objects := Dictionary new.
-	objectIndex := Dictionary new.
+	objects := IdentityDictionary new.
+	objectIndex := IdentityDictionary new.
 ]
 
 { #category : #testing }
@@ -89,19 +95,22 @@ SOTransaction >> makeRoot: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> materializationWithId: aSOObjectId ifNone: aBlock [
-	| bytes record |
-	^ (self objectRepository at: aSOObjectId)
+SOTransaction >> materializationWithId: objectId ifNone: aBlock [
+	| record |
+	record := (self objectRepository at: objectId)
 		transaction: self;
-		objectId: aSOObjectId;
+		objectId: objectId;
 		materializeObject.
+	objects at: objectId put: record.
+	objectIndex at: record object put: record.
+	^ record object 
+
 	
 ]
 
 { #category : #'instance creation' }
 SOTransaction >> newObjectId [ 
-	^ SOObjectId new 
-		index: 0
+	^ SOObjectId segment: 1 index: 0
 ]
 
 { #category : #accessing }
@@ -119,28 +128,26 @@ SOTransaction >> objectWithId: objectId ifNone: aBlock [
 	| record |
 	objects at: objectId ifPresent: [ :rec | ^ rec object ].
 	
-	record := self materializationWithId: objectId ifNone: aBlock.
-	objects at: objectId put: record.
-	objectIndex at: record object put: record.
-	^ record object
+	^ self materializationWithId: objectId ifNone: aBlock.
+
 ]
 
 { #category : #accessing }
 SOTransaction >> root [
-	| m |
-	m := (self materializationWithId: (SOObjectId new segment: 1; index: 1) ifNone: [ nil ]).
-	"m objects do: [ :each | each soilLoadedIn: self ].
-	^ m root"
-	^ m object
+	objects associations
+		detect: [ :assoc | (assoc key segment = 1) & (assoc key index = 1) ]
+		ifFound: [ :assoc | ^ assoc value ].
+	
+	^ self 
+		materializationWithId: (SOObjectId segment: 1 index: 1) 
+		ifNone: [ nil ].
 ]
 
 { #category : #accessing }
 SOTransaction >> root: anObject [
 
 	| objectId |
-	objectId := SOObjectId new
-		            segment: 1;
-		            index: 1.
+	objectId := SOObjectId segment: 1 index: 1.
 	self atObjectId: objectId putObject: anObject
 ]
 

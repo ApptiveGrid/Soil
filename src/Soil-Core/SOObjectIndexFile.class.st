@@ -51,7 +51,8 @@ SOObjectIndexFile >> lastObjectIndex [
 SOObjectIndexFile >> lastObjectIndex: anInteger [ 
 	self stream 
 		position: self headerSize;
-		nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize).
+		nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
+		flush.
 	lastObjectIndex := anInteger 
 ]
 

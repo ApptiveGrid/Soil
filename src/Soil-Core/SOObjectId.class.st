@@ -8,14 +8,21 @@ Class {
 	#category : #'Soil-Core'
 }
 
+{ #category : #'instance creation' }
+SOObjectId class >> segment: segmentId index: index [
+	^ self new 
+		segment: segmentId index: index
+]
+
 { #category : #accessing }
 SOObjectId >> index [
 	^ index
 ]
 
-{ #category : #accessing }
-SOObjectId >> index: anInteger [ 
-	index := anInteger
+{ #category : #initialization }
+SOObjectId >> initialize [ 
+	super initialize.
+	segment := 1
 ]
 
 { #category : #printing }
@@ -31,7 +38,12 @@ SOObjectId >> segment [
 ]
 
 { #category : #accessing }
-SOObjectId >> segment: anObject [
+SOObjectId >> segment: segmentNo index: segmentIndex [ 
+	segment := segmentNo.
+	index := segmentIndex 
+]
 
-	segment := anObject
+{ #category : #accessing }
+SOObjectId >> setIndex: anInteger [ 
+	index := anInteger 
 ]

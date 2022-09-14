@@ -22,11 +22,15 @@ Soil >> cleanFiles [
 ]
 
 { #category : #initialization }
-Soil >> initializeDatabase [
-	path exists ifTrue: [ SODatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
-	(SOObjectSegment new 
+Soil >> initializeFilesystem [
+	(path exists and: [ path hasChildren ]) 
+		ifTrue: [ SODatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
+	(objectRepository 
+		initializeFilesystem;
+		addNewSegment) initializeFilesystem.
+	"(SOObjectSegment new 
 		objectRepository: objectRepository;
-		id: 1) initializeDatabase
+		id: 1) initializeDatabase"
 	
 ]
 

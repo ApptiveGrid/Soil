@@ -1,0 +1,73 @@
+Class {
+	#name : #SOObjectRepository,
+	#superclass : #Object,
+	#instVars : [
+		'soil',
+		'segments'
+	],
+	#category : #'Soil-Core'
+}
+
+{ #category : #adding }
+SOObjectRepository >> addNewSegment [
+	| newSegment |
+	newSegment := (SOObjectSegment new 
+			id: self segments size + 1;
+			objectRepository: self) 
+				initializeFilesystem .
+	segments := self segments copyWith: newSegment.
+	^ newSegment
+
+]
+
+{ #category : #accessing }
+SOObjectRepository >> at: objectid [ 
+	| segment |
+	segment := self segmentAt: objectid segment.
+	^ segment at: objectid index
+]
+
+{ #category : #accessing }
+SOObjectRepository >> at: objectId put: bytes [ 
+	| position segment |
+	segment := self segmentAt: objectId segment.
+	segment at: objectId index putBytes: bytes	
+]
+
+{ #category : #initialization }
+SOObjectRepository >> initializeFilesystem [
+	(soil path / #segments) ensureCreateDirectory 
+]
+
+{ #category : #initialization }
+SOObjectRepository >> loadSegments [
+	| path b |
+	path := soil path / #segments.
+	path exists ifFalse: [ SOSoilNotInitialized signal: 'soil instance on ', path pathString, ' has not been initialized' ].
+	^ path directories collect: [ :directory |
+		SOObjectSegment new 
+			id: directory basename asInteger;
+			objectRepository: self  ]
+	
+]
+
+{ #category : #accessing }
+SOObjectRepository >> segmentAt: anInteger [ 
+	^ self segments at: anInteger 
+]
+
+{ #category : #accessing }
+SOObjectRepository >> segments [ 
+	^ segments ifNil: [ 
+		segments := self loadSegments ]
+]
+
+{ #category : #accessing }
+SOObjectRepository >> soil [
+	^ soil
+]
+
+{ #category : #accessing }
+SOObjectRepository >> soil: aSoil [ 
+	soil := aSoil 
+]

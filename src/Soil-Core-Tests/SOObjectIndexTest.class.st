@@ -9,7 +9,7 @@ SOObjectIndexTest >> testInitializeOnStream [
 	| index bytes prefix fileVersion |
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectIndexFile new stream: stream.
-		index initializeDatabase ].
+		index initializeFilesystem ].
 	self assert: bytes size equals: index headerSize + index objectIndexSize +8 .
  	prefix := bytes copyFrom: 1 to: index prefix size.
 	self assert: prefix equals: 'SOIL|OBJECT INDEX' asByteArray.
@@ -22,7 +22,7 @@ SOObjectIndexTest >> testInitializedFileVersion [
 	| index bytes newIndex |
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectIndexFile new stream: stream.
-		index initializeDatabase ].
+		index initializeFilesystem ].
 	newIndex := SOObjectIndexFile new 
 		stream: bytes readStream;
 		readHeader.
@@ -34,7 +34,7 @@ SOObjectIndexTest >> testWriteAndReadFirstObject [
 	| index bytes newIndex n2 |
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectIndexFile new stream: stream.
-		index initializeDatabase ].
+		index initializeFilesystem ].
 	newIndex := SOObjectIndexFile new 
 		stream: (ReadWriteStream with: bytes);
 		readHeader.
