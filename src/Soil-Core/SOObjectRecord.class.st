@@ -84,7 +84,7 @@ SOObjectRecord >> readFrom: stream [
 	| numberOfReferences objectSize |
 	numberOfReferences := (stream next: 2) asInteger.
 	references := OrderedCollection new.
-	1 to: numberOfReferences do: [:n | references add: (SOObjectId new index: (stream next: 8) asInteger)]. 
+	1 to: numberOfReferences do: [:n | references add: (SOObjectId segment: 1 index: (stream next: 8) asInteger)]. 
 	objectSize := (stream next: 8) asInteger.
 	bytes := stream next: objectSize.
 		
