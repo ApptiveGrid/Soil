@@ -21,7 +21,6 @@ SOObjectRepositoryTest >> testSegmentInitializationFromDisk [
 	| disk soil |
 	disk := FileSystem memory.
 	soil := Soil path: disk root.
-	self halt.
 	soil initializeFilesystem.
 	soil objectRepository instVarNamed: #segments put: nil.
 	(disk root / #segments / '1') ensureCreateDirectory.

@@ -10,15 +10,13 @@ Class {
 
 { #category : #adding }
 SOObjectRepository >> addNewSegment [
-	| currentSegments index |
-	currentSegments := self segments.
-	index := currentSegments size + 1.
-	segments := Array new: index.
-	^ segments 
-		at: index 
-		put: (SOObjectSegment new 
-			id: index;
-			objectRepository: self)
+	| newSegment |
+	newSegment := (SOObjectSegment new 
+			id: self segments size + 1;
+			objectRepository: self) 
+				initializeFilesystem .
+	segments := self segments copyWith: newSegment.
+	^ newSegment
 
 ]
 
