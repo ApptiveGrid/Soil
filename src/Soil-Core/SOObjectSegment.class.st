@@ -86,17 +86,14 @@ SOObjectSegment >> indexFile: aSOObjectIndexFile [
 ]
 
 { #category : #initialization }
-SOObjectSegment >> initializeDatabase [
+SOObjectSegment >> initializeFilesystem [
 	self path ensureCreateDirectory.
 	SOObjectFile new
 		segment: self;
-		fileVersion: 1;
-		fuelVersion: 1;
-		initializeDatabase.
+		initializeFilesystem.
 	SOObjectIndexFile new
 		segment: self;
-		fileVersion: 1;
-		initializeDatabase 
+		initializeFilesystem 
 ]
 
 { #category : #'as yet unclassified' }

@@ -45,7 +45,7 @@ SOTransaction >> commit [
 	| bytes |
 	"iterate over all object ids to assign numbers before they get serialized"
 	objects keys do: [ :id  |
-		(id index = 0) ifTrue: [ id setIndex: (self objectRepository segmentWithId: id segment) allocateNextIndex ] ].
+		(id index = 0) ifTrue: [ id setIndex: (self objectRepository segmentAt: id segment) allocateNextIndex ] ].
 	objects keysAndValuesDo: [ :id :record |
 		record hasChanged ifTrue: [ 
 			bytes := record serialize. 

@@ -32,7 +32,7 @@ SOBinaryFile >> headerSize [
 ]
 
 { #category : #initialization }
-SOBinaryFile >> initializeDatabase [
+SOBinaryFile >> initializeFilesystem [
 	self initializeHeader.
 	self initializeStart.
 	self stream 

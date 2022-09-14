@@ -9,7 +9,7 @@ SOObjectFileTest >> testInitializeOnStream [
 	| index bytes prefix fileVersion fuelVersion |
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectFile new stream: stream.
-		index initializeDatabase ].
+		index initializeFilesystem ].
 	self assert: bytes size equals: index headerSize.
 	prefix := bytes copyFrom: 1 to: index prefix size.
 	self assert: prefix equals: 'SOIL|OBJECT ' asByteArray.
@@ -25,7 +25,7 @@ SOObjectFileTest >> testInitializedFileVersion [
 	| index bytes newIndex |
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectIndexFile new stream: stream.
-		index initializeDatabase ].
+		index initializeFilesystem ].
 	newIndex := SOObjectIndexFile new 
 		stream: bytes readStream;
 		readHeader.
@@ -37,7 +37,7 @@ SOObjectFileTest >> testInitializedFuelVersion [
 	| index bytes newIndex |
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectFile new stream: stream.
-		index initializeDatabase ].
+		index initializeFilesystem ].
 	newIndex := SOObjectFile new 
 		stream: bytes readStream;
 		readHeader.
@@ -49,7 +49,7 @@ SOObjectFileTest >> testWriteAndReadFirstObject [
 	| index bytes newIndex n2 |
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectIndexFile new stream: stream.
-		index initializeDatabase ].
+		index initializeFilesystem ].
 	newIndex := SOObjectIndexFile new 
 		stream: (ReadWriteStream with: bytes);
 		readHeader.

@@ -14,11 +14,11 @@ SOObjectSegmentTest >> newMemorySegment [
 	segment := SOObjectSegment new.
 	segment indexFile: (SOObjectIndexFile new 
 		stream: (ReadWriteStream with: ByteArray new);
-		initializeDatabase;
+		initializeFilesystem;
 		yourself).
 	segment objectFile: (SOObjectFile new 
 		stream: (ReadWriteStream with: ByteArray new);
-		initializeDatabase;
+		initializeFilesystem;
 		yourself).
 	^ segment
 ]

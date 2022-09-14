@@ -18,7 +18,7 @@ SoilTest >> setUp [
 	soil := Soil path: self path.
 	soil 
 		cleanFiles;
-		initializeDatabase 
+		initializeFilesystem 
 ]
 
 { #category : #tests }
@@ -39,7 +39,7 @@ SoilTest >> testInitializeDatabase [
 { #category : #tests }
 SoilTest >> testInitializeDatabaseFailsIfExisting [
 	self 
-		should: [ soil initializeDatabase ]
+		should: [ soil initializeFilesystem ]
 		raise: Error
 ]
 
