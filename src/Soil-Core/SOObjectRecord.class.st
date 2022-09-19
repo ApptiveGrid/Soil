@@ -53,9 +53,10 @@ SOObjectRecord >> initialize [
 
 { #category : #'as yet unclassified' }
 SOObjectRecord >> materializeObject [
-	object := SOCurrentRecord 
-		value: self
-		during: [ FLMaterializer materializeFromByteArray: bytes ]
+	object := SOMaterializer new 
+		record: self;
+		onStream: bytes readStream;
+		materializeRoot
 ]
 
 { #category : #accessing }

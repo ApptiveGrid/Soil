@@ -26,6 +26,15 @@ SOProxy >> fuelAfterMaterialization [
 
 ]
 
+{ #category : #serialization }
+SOProxy >> fuelAfterMaterialization: aMaterialization [
+	| record |
+	record := aMaterialization record.
+	id := record references at: id.
+	transaction := record transaction.
+
+]
+
 { #category : #accessing }
 SOProxy >> id: anInteger [ 
 	id := anInteger

@@ -23,5 +23,5 @@ BaselineOfSoil >> fuel: spec [
 	
 	spec baseline: 'Fuel' with: [ 
 		spec 
-			repository: 'github://ApptiveGrid/Fuel/repository']
+			repository: 'github://ApptiveGrid/Fuel:development/repository']
 ]
