@@ -20,6 +20,11 @@ SoilMaterializer >> materialize [
 	^ self nextObject
 ]
 
+{ #category : #'instance creation' }
+SoilMaterializer >> newObject [
+	self halt.
+]
+
 { #category : #reading }
 SoilMaterializer >> nextArray: aClass [ 
 	| array |
@@ -29,9 +34,43 @@ SoilMaterializer >> nextArray: aClass [
 	^ array
 ]
 
+{ #category : #reading }
+SoilMaterializer >> nextAssociation: aClass [ 
+	| association |
+	association := aClass new.
+	self register: association.
+	^ association
+		key: self nextObject;
+		value: self nextObject
+]
+
 { #category : #accessing }
 SoilMaterializer >> nextByte [
 	^ stream next
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextByteArray: aClass [ 
+	| byteArray |
+	byteArray := aClass new: self nextLengthEncodedInteger.
+	self register: byteArray.
+	1 to: byteArray size do: [:i | 
+		byteArray 
+			at: i 
+			put: self nextByte ].
+	^byteArray
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextCharacter [
+	^ Character codePoint: self nextByte
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextClass [
+	^ Smalltalk 
+		at: self nextString asSymbol 
+		ifAbsent: nil
 ]
 
 { #category : #reading }
@@ -50,6 +89,31 @@ SoilMaterializer >> nextLengthEncodedInteger [
 { #category : #'memory scanning' }
 SoilMaterializer >> nextObject [ 
 	^ (TypeCodeMapping at: self nextByte) soilMaterialize: self 
+]
+
+{ #category : #'as yet unclassified' }
+SoilMaterializer >> nextPositiveInteger [
+	^ self nextLargePositiveInteger 
+]
+
+{ #category : #materializing }
+SoilMaterializer >> nextSmallFloat64: aClass [ 
+	"We multiply the Boxesfloat by 1, this way we create a SmallFloat if possible"
+	^ BoxedFloat64 basicNew
+		  at: 1 put: self nextObject;
+		  at: 2 put: self nextObject;
+		  * 1
+]
+
+{ #category : #actions }
+SoilMaterializer >> nextString [
+	| buf len string |
+	buf := ByteArray new: (len := self nextPositiveInteger).
+	stream readInto: buf startingAt: 1 count: len.
+	string := buf asString.
+	self register: string.
+	^ string
+
 ]
 
 { #category : #accessing }

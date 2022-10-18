@@ -28,6 +28,12 @@ SoilMemoryStream >> nextPutByte: anInteger [
 	stream nextPut: anInteger 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilMemoryStream >> nextPutBytesFrom: aCollection len: anInteger [ 
+	stream putBytesFrom: aCollection len: anInteger 
+
+]
+
 { #category : #accessing }
 SoilMemoryStream >> stream: aStream [ 
 	stream := aStream

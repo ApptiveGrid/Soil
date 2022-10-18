@@ -2,12 +2,21 @@ Class {
 	#name : #SoilTypeCodes,
 	#superclass : #SharedPool,
 	#classVars : [
-		'ArrayCode',
-		'LargeNegativeIntegerCode',
-		'LargePositiveIntegerCode',
-		'NewObjectCode',
+		'TypeCodeArray',
+		'TypeCodeAssociation',
+		'TypeCodeByteArray',
+		'TypeCodeCharacter',
+		'TypeCodeClass',
+		'TypeCodeDoubleByteCharacter',
+		'TypeCodeFalse',
+		'TypeCodeFloat',
+		'TypeCodeLargeNegativeInteger',
+		'TypeCodeLargePositiveInteger',
 		'TypeCodeMapping',
-		'UndefinedCode'
+		'TypeCodeObject',
+		'TypeCodeString',
+		'TypeCodeTrue',
+		'TypeCodeUndefined'
 	],
 	#category : #'Soil-Core'
 }
@@ -24,20 +33,35 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 
 	TypeCodeMapping := Array new: 255.
 	TypeCodeMapping
-		at: NewObjectCode              put: nil;
-		at: UndefinedCode 					put: UndefinedObject;
-		at: LargePositiveIntegerCode 	put: [ :materializer | materializer nextLargePositiveInteger ];
-		at: LargeNegativeIntegerCode 	put: #bar;
-		at: ArrayCode 						put: Array.
-
+		at: TypeCodeObject              	put: [ :materializer | materializer newObject ];
+		at: TypeCodeUndefined 				put: UndefinedObject;
+		at: TypeCodeLargePositiveInteger 	put: [ :materializer | materializer nextLargePositiveInteger ];
+		at: TypeCodeLargeNegativeInteger 	put: [ :materializer | materializer nextLargeNegativeInteger ];
+		at: TypeCodeArray 						put: Array;
+		at: TypeCodeAssociation 				put: Association;
+		at: TypeCodeTrue 						put: true;
+		at: TypeCodeFalse 						put: false;
+		at: TypeCodeFloat 						put: Float;
+		at: TypeCodeByteArray 				put: ByteArray;
+		at: TypeCodeCharacter 				put: Character;
+		at: TypeCodeClass 						put: Class;
+		at: TypeCodeString 					put: String
 ]
 
 { #category : #initialization }
 SoilTypeCodes class >> initializeTypeCodes [ 
 	<script>
-	NewObjectCode := 1.
-	UndefinedCode := 2.
-	LargePositiveIntegerCode := 3.
-	LargeNegativeIntegerCode := 4.
-	ArrayCode := 5.
+	TypeCodeObject := 1.
+	TypeCodeUndefined := 2.
+	TypeCodeLargePositiveInteger := 3.
+	TypeCodeLargeNegativeInteger := 4.
+	TypeCodeArray := 5.
+	TypeCodeAssociation := 6.
+	TypeCodeTrue := 7.
+	TypeCodeFalse := 8.
+	TypeCodeFloat := 9.
+	TypeCodeByteArray := 10.
+	TypeCodeCharacter := 11.
+	TypeCodeClass := 12.
+	TypeCodeString := 13
 ]

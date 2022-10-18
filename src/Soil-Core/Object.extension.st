@@ -11,8 +11,7 @@ Object >> soilBasicSerialize: serializer [
 	self flag: #question.
 	"How many layouts there are??"
 	classInfo isVariable ifTrue: [ serializer nextPutLengthEncodedInteger: self basicSize ].
-	classInfo isBits ifTrue: [ self halt ].
-	classInfo isBytes ifTrue: [ self halt ].
+	"classInfo isBytes ifTrue: [ self halt ]."
 	classInfo isBytes ifFalse: [
 		classInfo instVarIndexes do: [:i | (self instVarAt: i) soilSerialize: serializer ].
 		instSize := self class instSize.
@@ -25,6 +24,11 @@ Object >> soilBasicSerialize: serializer [
 { #category : #'*Soil-Core' }
 Object >> soilLoadedIn: aTransaction [ 
 
+]
+
+{ #category : #'*Soil-Core' }
+Object class >> soilMaterialize: aSoilMaterializer [ 
+	self shouldBeImplemented.
 ]
 
 { #category : #'*Soil-Core' }

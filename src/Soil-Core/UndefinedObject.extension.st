@@ -1,6 +1,11 @@
 Extension { #name : #UndefinedObject }
 
 { #category : #'*Soil-Core' }
-UndefinedObject >> soilSerialize: serializer [ 
+UndefinedObject >> soilBasicSerialize: serializer [ 
 	serializer nextPutNil: self
+]
+
+{ #category : #'*Soil-Core' }
+UndefinedObject >> soilSerialize: serializer [ 
+	self soilBasicSerialize: serializer 
 ]
