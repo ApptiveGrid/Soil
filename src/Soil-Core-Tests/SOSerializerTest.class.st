@@ -9,5 +9,5 @@ SOSerializerTest >> testBasicSerialize [
 	| serializer bytes |
 	serializer := SoilSerializer new.
 	bytes := serializer serialize: SOTestClusterRoot new.
-	self halt.
+	self assert: bytes equals: #[ 1 1 2 ]
 ]

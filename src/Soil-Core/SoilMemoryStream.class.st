@@ -14,6 +14,11 @@ SoilMemoryStream class >> on: aStream [
 ]
 
 { #category : #accessing }
+SoilMemoryStream >> contents [
+	^ stream flush; contents
+]
+
+{ #category : #accessing }
 SoilMemoryStream >> flush [
 	stream flush
 ]

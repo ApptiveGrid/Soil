@@ -15,6 +15,11 @@ SOClassDescription class >> for: aClass [
 		initializeFromClass: aClass
 ]
 
+{ #category : #'as yet unclassified' }
+SOClassDescription >> classId [
+	^ 1
+]
+
 { #category : #initialization }
 SOClassDescription >> initializeFromClass: aClass [ 
 	class := aClass.
