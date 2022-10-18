@@ -73,6 +73,44 @@ SoilMaterializer >> nextClass [
 		ifAbsent: nil
 ]
 
+{ #category : #'as yet unclassified' }
+SoilMaterializer >> nextDate [
+	self shouldBeImplemented.
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextDate: aClass [ 
+	| date |
+	date := aClass 
+		julianDayNumber: 2415386 + self nextPositiveInteger 
+		offset: self nextPositiveInteger.
+	self register: date.
+	^ date
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextDictionary: aClass [ 
+	| size dict key |
+	size := self nextLengthEncodedInteger.
+	dict := aClass new: size.
+	self register: dict.
+	size timesRepeat: [
+		key := self nextObject.
+		dict at: key put: self nextObject.
+	].
+	^dict
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextFraction: aClass [ 
+	| fraction |
+	fraction := aClass
+		numerator: self nextLengthEncodedInteger
+		denominator: self nextLengthEncodedInteger.
+	self register: fraction.
+	^ fraction
+]
+
 { #category : #reading }
 SoilMaterializer >> nextLargePositiveInteger [
 	^ self nextLengthEncodedInteger 

@@ -41,7 +41,7 @@ SoilSerializer >> classDescriptionFor: aClass [
 
 { #category : #writing }
 SoilSerializer >> nextPutArray: anArray [ 
-	stream nextPutByte: TypeCodeArray.
+	self nextPutByte: TypeCodeArray.
 	self nextPutLengthEncodedInteger: anArray size.
 	1 to: anArray size do: [:i | 
 		(anArray at: i) soilSerialize: self ].
@@ -99,8 +99,44 @@ SoilSerializer >> nextPutClass: aClass [
 ]
 
 { #category : #writing }
+SoilSerializer >> nextPutDate: aDate [ 
+	self 
+		nextPutByte: TypeCodeDate; 
+		nextPutLengthEncodedInteger: aDate julianDayNumber - 2415386; 
+		nextPutLengthEncodedInteger: aDate offset hours
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutDictionary: aDictionary [ 
+	self 
+		nextPutByte: TypeCodeDictionary;
+		nextPutLengthEncodedInteger: aDictionary size.
+	aDictionary keysAndValuesDo: [:key :value |
+		key soilSerialize: self.
+		value soilSerialize: self ]
+]
+
+{ #category : #writing }
 SoilSerializer >> nextPutFalse: aBoolean [ 
 	self nextPutByte: TypeCodeFalse 
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutFraction: aNumber [ 
+	self
+		nextPutByte: TypeCodeFraction;
+		nextPutLengthEncodedInteger: aNumber numerator;
+		nextPutLengthEncodedInteger: aNumber denominator
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutIdentityDictionary: anIdentityDictionary [ 
+	self 
+		nextPutByte: TypeCodeIdentityDictionary;
+		nextPutLengthEncodedInteger: anIdentityDictionary size.
+	anIdentityDictionary keysAndValuesDo: [:key :value |
+		key soilSerialize: self.
+		value soilSerialize: self ]
 ]
 
 { #category : #writing }
@@ -118,8 +154,9 @@ SoilSerializer >> nextPutLargeNegativeInteger: anInteger [
 
 { #category : #'as yet unclassified' }
 SoilSerializer >> nextPutLargePositiveInteger: anInteger [ 
-	stream nextPutByte: TypeCodeLargePositiveInteger.
-	self nextPutLengthEncodedInteger: anInteger
+	self 
+		nextPutByte: TypeCodeLargePositiveInteger;
+		nextPutLengthEncodedInteger: anInteger
 ]
 
 { #category : #'as yet unclassified' }
@@ -140,7 +177,7 @@ SoilSerializer >> nextPutNil: anUndefinedObject [
 
 { #category : #'as yet unclassified' }
 SoilSerializer >> nextPutObjectType [
-	stream nextPutByte: TypeCodeObject 
+	self nextPutByte: TypeCodeObject 
 ]
 
 { #category : #'as yet unclassified' }
