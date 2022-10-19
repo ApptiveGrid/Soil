@@ -14,5 +14,5 @@ Character class >> soilMaterialize: materializer [
 { #category : #'*Soil-Core' }
 Character >> soilSerialize: serializer [ 
 	"Immediate object, no registration needed"
-	self odbBasicSerialize: serializer
+	self soilBasicSerialize: serializer
 ]

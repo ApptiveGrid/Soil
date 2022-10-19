@@ -7,11 +7,6 @@ Class {
 	#category : #'Soil-Core-Tests'
 }
 
-{ #category : #testing }
-SoilSerializationTest >> expectedFailures [ 
-	^ #( testSerializationBoxedFloat64Twice testSerializationByteLayout testSerializationFractionTwice testSerializationProcessSchedulerCode)
-]
-
 { #category : #running }
 SoilSerializationTest >> setUp [
 	super setUp.
