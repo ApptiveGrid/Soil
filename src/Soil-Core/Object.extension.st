@@ -37,6 +37,10 @@ Object >> soilMaterialize: materializer [
 ]
 
 { #category : #'*Soil-Core' }
+Object >> soilMaterialized: materializer [
+]
+
+{ #category : #'*Soil-Core' }
 Object >> soilSerialize: aSoilSerializer [ 
 	aSoilSerializer 
 		registerObject: self 
