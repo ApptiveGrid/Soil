@@ -29,7 +29,7 @@ SOObjectRepository >> at: objectid [
 
 { #category : #accessing }
 SOObjectRepository >> at: objectId put: bytes [ 
-	| position segment |
+	| segment |
 	segment := self segmentAt: objectId segment.
 	segment at: objectId index putBytes: bytes	
 ]
@@ -46,7 +46,7 @@ SOObjectRepository >> initializeFilesystem [
 
 { #category : #initialization }
 SOObjectRepository >> loadSegments [
-	| path b |
+	| path |
 	path := soil path / #segments.
 	path exists ifFalse: [ SOSoilNotInitialized signal: 'soil instance on ', path pathString, ' has not been initialized' ].
 	^ path directories collect: [ :directory |
