@@ -29,7 +29,7 @@ SOClassDescription >> initializeFromClass: aClass [
 
 { #category : #public }
 SOClassDescription >> instVarIndexes [
-	^ class instVarNames collect: [ :n | class instVarNames indexOf: n ]
+	^ class allInstVarNames collect: [ :n | class allInstVarNames indexOf: n ]
 ]
 
 { #category : #testing }
@@ -45,4 +45,16 @@ SOClassDescription >> isBytes [
 { #category : #testing }
 SOClassDescription >> isVariable [
 	^ class isVariable 
+]
+
+{ #category : #accessing }
+SOClassDescription >> name [
+
+	^ name
+]
+
+{ #category : #accessing }
+SOClassDescription >> name: anObject [
+
+	name := anObject
 ]

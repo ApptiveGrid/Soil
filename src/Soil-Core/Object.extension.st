@@ -6,7 +6,7 @@ Object >> soilBasicSerialize: serializer [
 	classInfo := serializer classDescriptionFor: self class.
 	serializer 
 		nextPutObjectType;
-		nextPutByte: classInfo classId.
+		nextPutString: classInfo name.
 	 
 	self flag: #question.
 	"How many layouts there are??"
@@ -18,7 +18,11 @@ Object >> soilBasicSerialize: serializer [
 		"on variable sized objects size > instVars"
 		instSize + 1 to: instSize + self basicSize do: [:i | 
 			(self instVarAt: i) soilSerialize: serializer ].
-		^self].
+	^self].
+	self class isWords
+		ifFalse: [ serializer nextPutBytesFrom: self len: self basicSize ]
+		ifTrue: [ 1 to: self basicSize do: [:i | serializer nextPutLengthEncodedInteger: (self basicAt: i)]].
+		
 ]
 
 { #category : #'*Soil-Core' }
@@ -27,8 +31,9 @@ Object >> soilLoadedIn: aTransaction [
 ]
 
 { #category : #'*Soil-Core' }
-Object class >> soilMaterialize: aSoilMaterializer [ 
-	self shouldBeImplemented.
+Object >> soilMaterialize: materializer [
+
+	^ self
 ]
 
 { #category : #'*Soil-Core' }

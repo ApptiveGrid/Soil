@@ -22,7 +22,27 @@ SoilMaterializer >> materialize [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	self halt.
+	| name object basicSize classInfo iSize varArray order deserializer objectClass |
+	name := self nextObject.
+	objectClass := Smalltalk at: name asSymbol.
+	objectClass isVariable 
+		ifTrue: [ object := objectClass basicNew: (basicSize := self nextLengthEncodedInteger) ]
+		ifFalse: [
+			basicSize := 0.
+			object := objectClass basicNew.
+		].
+	self registerObject: object.
+	object class isBytes ifTrue: [
+		objectClass isWords 
+			ifTrue: [1 to: basicSize do: [:i | object basicAt: i put: stream primitive getInteger]]
+			ifFalse: [ stream readInto: object startingAt: 1 count: basicSize ].
+		^object
+	].
+	iSize := "classInfo realInstSize" object class allInstVarNames size.
+	1 to: iSize do: [:i | object instVarAt: i put: (self nextObject) ].
+	iSize + 1 to: iSize + basicSize do: [:i | object instVarAt: i put: self nextObject ].
+	^ object
+	
 ]
 
 { #category : #reading }

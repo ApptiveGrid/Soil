@@ -211,6 +211,11 @@ SoilSerializer >> nextPutPositiveInteger: anInteger [
 ]
 
 { #category : #writing }
+SoilSerializer >> nextPutProcessorScheduler: aProcessorScheduler [ 
+	self nextPutByte: TypeCodeProcessScheduler 
+]
+
+{ #category : #writing }
 SoilSerializer >> nextPutSmallFloat64: aFloat [ 
 	self
 		nextPutByte: TypeCodeSmallFloat64;
