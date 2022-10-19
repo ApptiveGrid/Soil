@@ -136,7 +136,7 @@ SOTransaction >> objectWithId: objectId ifNone: aBlock [
 SOTransaction >> root [
 	objects associations
 		detect: [ :assoc | (assoc key segment = 1) & (assoc key index = 1) ]
-		ifFound: [ :assoc | ^ assoc value ].
+		ifFound: [ :assoc | ^ assoc value object ].
 	
 	^ self 
 		materializationWithId: self rootObjectId  
@@ -159,7 +159,7 @@ SOTransaction >> rootObjectId [
 { #category : #accessing }
 SOTransaction >> serializer [
 	| serializer |
-	serializer := FLSerializer new.
+	serializer := SOSerializer new.
 	serializer
 		"when: [ :obj | (obj = serializer object) not and: [ self isRoot: obj ] ] substituteBy: [ :obj | self idOf: obj. ]".
 	^ serializer

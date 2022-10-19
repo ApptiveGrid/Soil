@@ -3,10 +3,16 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'path',
-		'objectRepository'
+		'objectRepository',
+		'characterEncoder'
 	],
 	#category : #'Soil-Core'
 }
+
+{ #category : #accessing }
+Soil class >> characterEncoding: aString [ 
+	SoilObjectCodec characterEncoding: aString
+]
 
 { #category : #'instance creation' }
 Soil class >> path: aString [ 
