@@ -271,7 +271,7 @@ SoilSerializer >> nextPutTrue: aBoolean [
 { #category : #writing }
 SoilSerializer >> nextPutWideString: aWideString [ 
 		| buf |
-	buf := aWideString utf8Encoded. "self class encodeString: aWideString."
+	buf := self class encodeString: aWideString.
 	self
 		nextPutByte: TypeCodeWideString;
 		nextPutLengthEncodedInteger: buf size;

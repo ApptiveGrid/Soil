@@ -488,7 +488,7 @@ SoilSerializationTest >> testSerializationObject [
 	| object serialized materialized |
 	object := Object new.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[1 13 6 79 98 106 101 99 116].
+	self assert: serialized equals: #[1 6 79 98 106 101 99 116].
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: Object
@@ -887,7 +887,7 @@ SoilSerializationTest >> testSerializationUUID [
 	
 	self 
 		assert: serialized
-		equals: #[1 13 4 85 85 73 68 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206].
+		equals: #[1 4 85 85 73 68 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206].
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object
@@ -960,10 +960,10 @@ SoilSerializationTest >> testSerializationWideStringUTF16 [
 		with: 16r0155 asCharacter
 		with: 16r0111 asCharacter.
 	self assert: string isWideString.
-	"ODBEncodingStream characterEncoding: #utf16."
-	self fail.
+	Soil characterEncoding: #utf16.
+
 	serialized := SoilSerializer serializeToBytes: string.
-	self assert: serialized equals: #[29 10 239 152 128 239 152 131 197 149 196 145].
+	self assert: serialized equals: #[29 8 246 0 246 3 1 85 1 17].
 	self assert: (serialized at: 1) equals: TypeCodeWideString.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -980,11 +980,11 @@ SoilSerializationTest >> testSerializationWideStringUTF32 [
 		with: 16r0155 asCharacter
 		with: 16r0111 asCharacter.
 	self assert: string isWideString.
-	"ODBEncodingStream characterEncoding: #utf32."
-	
+	Soil characterEncoding: #utf32.
+		
 	serialized := SoilSerializer serializeToBytes: string.
-	self assert: serialized equals: #[0 0 1 0 0 0 36 16 0 0 246 0 0 0 246 3 0 0 1 85 0 0 1 17].
-	self assert: (serialized at: 7) equals: TypeCodeWideString.
+	self assert: serialized equals: #[29 16 0 0 246 0 0 0 246 3 0 0 1 85 0 0 1 17].
+	self assert: (serialized at: 1) equals: TypeCodeWideString.
 	
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: string.
@@ -999,11 +999,11 @@ SoilSerializationTest >> testSerializationWideStringUTF8 [
 		with: 16r0155 asCharacter
 		with: 16r0111 asCharacter.
 	self assert: string isWideString.
-	"ODBEncodingStream characterEncoding: #utf8."
+	Soil characterEncoding: #utf8.
 	
 	serialized := SoilSerializer serializeToBytes: string.
-	self assert: serialized equals: #[0 0 1 0 0 0 36 10 239 152 128 239 152 131 197 149 196 145].
-	self assert: (serialized at: 7) equals: TypeCodeWideString.
+	self assert: serialized equals: #[29 10 239 152 128 239 152 131 197 149 196 145].
+	self assert: (serialized at: 1) equals: TypeCodeWideString.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: string.

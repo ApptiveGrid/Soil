@@ -267,7 +267,7 @@ SoilMaterializer >> nextWideString [
 	length := self nextLengthEncodedInteger.
 	buf := ByteArray new: length.
 	stream readInto: buf startingAt: 1 count: length.
-	wideString := buf utf8Decoded. 
+	wideString := self class decodeBytes: buf. 
 	self registerObject: wideString. 
 	^ wideString
 ]
