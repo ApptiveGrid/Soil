@@ -6,7 +6,7 @@ Object >> soilBasicSerialize: serializer [
 	classInfo := serializer classDescriptionFor: self class.
 	serializer 
 		nextPutObjectType;
-		nextPutString: classInfo name.
+		basicNextPutString: classInfo name.
 	 
 	self flag: #question.
 	"How many layouts there are??"

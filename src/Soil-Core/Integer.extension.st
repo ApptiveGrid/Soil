@@ -9,11 +9,13 @@ Integer >> soilBasicSerialize: serializer [
 { #category : #'*Soil-Core' }
 Integer >> soilSerialize: serializer [
 	"Small Integers are immediate objects, no registration needed"
-	self isLarge ifTrue: [ 
-		serializer 
-			registerObject: self
-			ifAbsent: [ 
-				self soilBasicSerialize: serializer.
-				^ self ] ].
-	self soilBasicSerialize: serializer
+	self isLarge 
+		ifTrue: [ 
+			serializer 
+				registerObject: self
+				ifAbsent: [ 
+					self soilBasicSerialize: serializer.
+					^ self ] ]
+		ifFalse: [ self soilBasicSerialize: serializer ]
+	
 ]

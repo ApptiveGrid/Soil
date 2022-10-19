@@ -15,6 +15,14 @@ SoilMaterializer class >> materializeFromBytes: aByteArray [
 		materialize
 ]
 
+{ #category : #actions }
+SoilMaterializer >> basicNextString [
+	| buf length |
+	buf := ByteArray new: (length := self nextPositiveInteger).
+	stream readInto: buf startingAt: 1 count: length.
+	^ buf asString
+]
+
 { #category : #'as yet unclassified' }
 SoilMaterializer >> materialize [
 	^ self nextObject
@@ -22,8 +30,8 @@ SoilMaterializer >> materialize [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| name object basicSize classInfo iSize varArray order deserializer objectClass |
-	name := self nextObject.
+	| name object basicSize iSize objectClass |
+	name := self basicNextString .
 	objectClass := Smalltalk at: name asSymbol.
 	objectClass isVariable 
 		ifTrue: [ object := objectClass basicNew: (basicSize := self nextLengthEncodedInteger) ]
@@ -136,6 +144,13 @@ SoilMaterializer >> nextIdentityDictionary: aClass [
 	self shouldBeImplemented.
 ]
 
+{ #category : #'as yet unclassified' }
+SoilMaterializer >> nextInternalReference [
+	| index |
+	index := self nextLengthEncodedInteger.
+	^ objects at: index
+]
+
 { #category : #reading }
 SoilMaterializer >> nextLargeNegativeInteger [
 	| integer |
@@ -150,7 +165,13 @@ SoilMaterializer >> nextLargeNegativeInteger [
 
 { #category : #reading }
 SoilMaterializer >> nextLargePositiveInteger [
-	^ self nextLengthEncodedInteger 
+	| integer |
+	integer := self nextLengthEncodedInteger.
+	^ integer isLarge
+	  ifTrue: [ 
+		self registerObject: integer.
+		integer ]
+	  ifFalse: [ integer ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -214,10 +235,8 @@ SoilMaterializer >> nextSmallFloat64: aClass [
 
 { #category : #actions }
 SoilMaterializer >> nextString [
-	| buf len string |
-	buf := ByteArray new: (len := self nextPositiveInteger).
-	stream readInto: buf startingAt: 1 count: len.
-	string := buf asString.
+	| string |
+	string := self basicNextString.
 	self registerObject: string.
 	^ string
 

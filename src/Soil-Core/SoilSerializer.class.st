@@ -39,6 +39,12 @@ SoilSerializer >> classDescriptionFor: aClass [
 		ifAbsentPut: [ SOClassDescription for: aClass ]
 ]
 
+{ #category : #initialization }
+SoilSerializer >> initialize [ 
+	super initialize.
+	objects := OrderedCollection new
+]
+
 { #category : #writing }
 SoilSerializer >> nextPutArray: anArray [ 
 	self nextPutByte: TypeCodeArray.
@@ -144,6 +150,13 @@ SoilSerializer >> nextPutInteger: anInteger [
 	(anInteger < 0)
 		ifTrue: [ self nextPutLargeNegativeInteger: anInteger ] 
 		ifFalse: [ self nextPutLargePositiveInteger: anInteger ]
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutInternalReference: anInteger [ 
+	self 
+		nextPutByte: TypeCodeInternalReference; 
+		nextPutLengthEncodedInteger: anInteger 
 ]
 
 { #category : #'as yet unclassified' }
@@ -291,16 +304,12 @@ SoilSerializer >> rawStream: aWriteStream [
 ]
 
 { #category : #registry }
-SoilSerializer >> registerObject: anObject [
-	objects ifNil: [ objects := Set new ].
-	(objects includes: anObject) ifTrue: [ self halt ].
-	objects add: anObject  
-]
-
-{ #category : #registry }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
-	objects ifNil: [ objects := Set new ].
-	(objects includes: anObject) ifFalse: [
+	| index |
+	index := objects indexOf: anObject.
+	(index > 0)
+		ifTrue: [ self nextPutInternalReference: index ]
+		ifFalse: [
 			objects add: anObject.
 			aBlock value ]
 

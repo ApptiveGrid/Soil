@@ -414,6 +414,7 @@ SoilSerializationTest >> testSerializationLargeIntegerTwice [
 	"Second LargeInteger, reference to the first"
 	self assert: (serialized at: 13) equals: TypeCodeInternalReference.
 	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: object first identicalTo: object second.
 	self assert: materialized equals: object.
@@ -509,7 +510,7 @@ SoilSerializationTest >> testSerializationObjectTwice [
 	self assert: (serialized at: 2) equals: 2.
 	"here the object ist stored (not tested)"
 	"Then we get a reference to the second instance"
-	self assert: (serialized at: 15) equals: TypeCodeInternalReference.
+	self assert: (serialized at: 11) equals: TypeCodeInternalReference.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: array first identicalTo: array second.
 	"identity is preserved"
@@ -769,7 +770,7 @@ SoilSerializationTest >> testSerializationStringTwice [
 	"First String"
 	self assert: (serialized at: 3) equals: TypeCodeString.
 	"Second String is stored as an internal reference"
-	self assert: (serialized at: 5) equals: TypeCodeInternalReference.
+	self assert: (serialized at: 6) equals: TypeCodeInternalReference.
 	
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
@@ -784,7 +785,7 @@ SoilSerializationTest >> testSerializationStringTwice [
 	"First String"
 	self assert: (serialized at: 3) equals: TypeCodeString.
 	"Second String is stored as an internal reference"
-	self assert: (serialized at: 9) equals: TypeCodeInternalReference.
+	self assert: (serialized at: 10) equals: TypeCodeInternalReference.
 	
 
 	
