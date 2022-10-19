@@ -588,9 +588,8 @@ SoilSerializationTest >> testSerializationSet [
 	"Set uses the hash to find elements, this might be identity, which changes"
 
 	| set object2 serialized materialized |
-	self skip.
 	set := Set new.
-	object2 := ODBTestClass1 new.
+	object2 := SOTestClass1 new.
 	set add: object2.
 
 	serialized := SoilSerializer serializeToBytes: set.

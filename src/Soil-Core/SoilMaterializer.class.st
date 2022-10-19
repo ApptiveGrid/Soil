@@ -49,6 +49,7 @@ SoilMaterializer >> newObject [
 	iSize := "classInfo realInstSize" object class allInstVarNames size.
 	1 to: iSize do: [:i | object instVarAt: i put: (self nextObject) ].
 	iSize + 1 to: iSize + basicSize do: [:i | object instVarAt: i put: self nextObject ].
+	object soilMaterialized: self.
 	^ object
 	
 ]
