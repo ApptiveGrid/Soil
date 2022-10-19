@@ -340,13 +340,7 @@ SoilSerializationTest >> testSerializationIdentityDictionary [
 	| object serialized materialized |
 	object := IdentityDictionary newFrom: { #test->2 . #now->4 }.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: (
-			serialized = 
-			"the order of association in the dict is different between Pharo9 and Pharo10, no idea why"
-			#[19 2 27 4 116 101 115 116 3 2 27 3 110 111 119 3 4]
-		or: [ 
-			serialized = 
-			#[0 0 1 0 0 0 38 2 18 4 116 101 115 116 52 18 3 110 111 119 54]]).
+	self assert: serialized equals: #[19 2 27 4 116 101 115 116 3 2 27 3 110 111 119 3 4].
 
 	self assert: (serialized at: 1) equals: TypeCodeIdentityDictionary.
 
