@@ -19,10 +19,20 @@ Class {
 		'TypeCodeLargeNegativeInteger',
 		'TypeCodeLargePositiveInteger',
 		'TypeCodeMapping',
+		'TypeCodeMessage',
+		'TypeCodeMessageSend',
 		'TypeCodeObject',
+		'TypeCodeOrderedCollection',
+		'TypeCodeProcessScheduler',
+		'TypeCodeSmallFloat64',
 		'TypeCodeString',
+		'TypeCodeSymbol',
+		'TypeCodeSystemDictionary',
+		'TypeCodeTime',
 		'TypeCodeTrue',
-		'TypeCodeUndefined'
+		'TypeCodeUndefined',
+		'TypeCodeWideString',
+		'TypeCodeWideSymbol'
 	],
 	#category : #'Soil-Core'
 }
@@ -48,6 +58,7 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeTrue 						put: true;
 		at: TypeCodeFalse 						put: false;
 		at: TypeCodeFloat 						put: Float;
+		at: TypeCodeSmallFloat64  			put: Float;
 		at: TypeCodeByteArray 				put: ByteArray;
 		at: TypeCodeCharacter 				put: Character;
 		at: TypeCodeClass 						put: Class;
@@ -57,7 +68,17 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeFraction 					put: Fraction;
 		at: TypeCodeInternalReference 		put: [ :materializer | materializer nextInternalReference ];
 		at: TypeCodeExternalReference  	put: [ :materializer | materializer nextExternalReference ];
-		at: TypeCodeIdentityDictionary 	put: IdentityDictionary 
+		at: TypeCodeIdentityDictionary 	put: IdentityDictionary;
+		at: TypeCodeProcessScheduler  		put: Processor;
+		at: TypeCodeSystemDictionary 		put: Smalltalk globals;
+		at: TypeCodeWideSymbol 				put: WideSymbol;
+		at: TypeCodeMessage 					put: Message;
+		at: TypeCodeMessageSend  			put: MessageSend;
+		at: TypeCodeOrderedCollection   	put: OrderedCollection;
+		at: TypeCodeSymbol 					put: Symbol;
+		at: TypeCodeTime 						put: Time;
+		at: TypeCodeWideString 				put: WideString 
+					
 ]
 
 { #category : #initialization }
@@ -82,4 +103,14 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeInternalReference := 17.
 	TypeCodeExternalReference := 18.
 	TypeCodeIdentityDictionary := 19.
+	TypeCodeProcessScheduler := 20.
+	TypeCodeSmallFloat64 := 21.
+	TypeCodeSystemDictionary := 22.
+	TypeCodeWideSymbol := 23.
+	TypeCodeMessage := 24.
+	TypeCodeMessageSend := 25.
+	TypeCodeOrderedCollection := 26.
+	TypeCodeSymbol := 27.
+	TypeCodeTime := 28.
+	TypeCodeWideString := 29.
 ]

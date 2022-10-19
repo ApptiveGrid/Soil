@@ -29,7 +29,7 @@ SoilMaterializer >> newObject [
 SoilMaterializer >> nextArray: aClass [ 
 	| array |
 	array := aClass new: self nextLengthEncodedInteger.
-	self register: array.
+	self registerObject: array.
 	1 to: array size do: [ :index | array at: index put: self nextObject ].
 	^ array
 ]
@@ -38,7 +38,7 @@ SoilMaterializer >> nextArray: aClass [
 SoilMaterializer >> nextAssociation: aClass [ 
 	| association |
 	association := aClass new.
-	self register: association.
+	self registerObject: association.
 	^ association
 		key: self nextObject;
 		value: self nextObject
@@ -53,7 +53,7 @@ SoilMaterializer >> nextByte [
 SoilMaterializer >> nextByteArray: aClass [ 
 	| byteArray |
 	byteArray := aClass new: self nextLengthEncodedInteger.
-	self register: byteArray.
+	self registerObject: byteArray.
 	1 to: byteArray size do: [:i | 
 		byteArray 
 			at: i 
@@ -82,9 +82,9 @@ SoilMaterializer >> nextDate [
 SoilMaterializer >> nextDate: aClass [ 
 	| date |
 	date := aClass 
-		julianDayNumber: 2415386 + self nextPositiveInteger 
-		offset: self nextPositiveInteger.
-	self register: date.
+		julianDayNumber: 2415386 + self nextLengthEncodedInteger 
+		offset: (Duration hours: self nextLengthEncodedInteger).
+	self registerObject: date.
 	^ date
 ]
 
@@ -93,7 +93,7 @@ SoilMaterializer >> nextDictionary: aClass [
 	| size dict key |
 	size := self nextLengthEncodedInteger.
 	dict := aClass new: size.
-	self register: dict.
+	self registerObject: dict.
 	size timesRepeat: [
 		key := self nextObject.
 		dict at: key put: self nextObject.
@@ -107,8 +107,20 @@ SoilMaterializer >> nextFraction: aClass [
 	fraction := aClass
 		numerator: self nextLengthEncodedInteger
 		denominator: self nextLengthEncodedInteger.
-	self register: fraction.
+	self registerObject: fraction.
 	^ fraction
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextLargeNegativeInteger [
+	| integer |
+	"Large Integers are normal objects (need to be registered), small integers are immediate"
+	integer := 0 - self nextLengthEncodedInteger.
+	^ integer isLarge
+		  ifTrue: [ 
+			self registerObject: integer.
+			integer ]
+		  ifFalse: [ integer ]
 ]
 
 { #category : #reading }
@@ -124,9 +136,41 @@ SoilMaterializer >> nextLengthEncodedInteger [
 	^ (self nextLengthEncodedInteger bitShift: 7) bitOr: (value bitAnd: 127)
 ]
 
+{ #category : #reading }
+SoilMaterializer >> nextMessage: aClass [ 
+		| result message |
+	message := aClass new.
+	self registerObject: message.
+	^ message
+		setSelector: self nextObject arguments: self nextObject;
+		yourself
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextMessageSend: aClass [ 
+		| result messageSend |
+	messageSend := aClass new.
+	self registerObject: messageSend.
+	^ messageSend
+		receiver: self nextObject;
+		selector: self nextObject;
+		arguments: self nextObject;
+		yourself
+]
+
 { #category : #'memory scanning' }
 SoilMaterializer >> nextObject [ 
 	^ (TypeCodeMapping at: self nextByte) soilMaterialize: self 
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextOrderedCollection: aClass [ 
+		| size collection |
+	size := self  nextLengthEncodedInteger.
+	collection := aClass new: size.
+	self registerObject: collection.
+	size timesRepeat: [ collection addLast: self nextObject ].
+	^ collection
 ]
 
 { #category : #'as yet unclassified' }
@@ -138,8 +182,8 @@ SoilMaterializer >> nextPositiveInteger [
 SoilMaterializer >> nextSmallFloat64: aClass [ 
 	"We multiply the Boxesfloat by 1, this way we create a SmallFloat if possible"
 	^ BoxedFloat64 basicNew
-		  at: 1 put: self nextObject;
-		  at: 2 put: self nextObject;
+		  at: 1 put: self nextLengthEncodedInteger;
+		  at: 2 put: self nextLengthEncodedInteger;
 		  * 1
 ]
 
@@ -149,9 +193,36 @@ SoilMaterializer >> nextString [
 	buf := ByteArray new: (len := self nextPositiveInteger).
 	stream readInto: buf startingAt: 1 count: len.
 	string := buf asString.
-	self register: string.
+	self registerObject: string.
 	^ string
 
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextTime [
+	| time |
+	time := Time fromSeconds: self nextLengthEncodedInteger.
+	self registerObject: time.
+	^ time
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextWideString [
+	| buf length wideString |
+	length := self nextLengthEncodedInteger.
+	buf := ByteArray new: length.
+	stream readInto: buf startingAt: 1 count: length.
+	wideString := buf utf8Decoded. 
+	self registerObject: wideString. 
+	^ wideString
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextWideSymbol [
+	| buf len |
+	buf := ByteArray new: (len := self nextLengthEncodedInteger).
+	stream readInto: buf startingAt: 1 count: len.
+	^ buf utf8Decoded asSymbol
 ]
 
 { #category : #accessing }
@@ -160,7 +231,7 @@ SoilMaterializer >> rawStream: aStream [
 ]
 
 { #category : #registry }
-SoilMaterializer >> register: anObject [
+SoilMaterializer >> registerObject: anObject [
 	objects ifNil: [ objects := OrderedCollection new ].
 	objects add: anObject 
 ]

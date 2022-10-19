@@ -6,8 +6,7 @@ Class {
 
 { #category : #tests }
 SOSerializerTest >> testBasicSerialize [
-	| serializer bytes |
-	serializer := SoilSerializer new.
-	bytes := serializer serialize: SOTestClusterRoot new.
+	| bytes |
+	bytes := SoilSerializer serializeToBytes: SOTestClusterRoot new.
 	self assert: bytes equals: #[ 1 1 2 ]
 ]

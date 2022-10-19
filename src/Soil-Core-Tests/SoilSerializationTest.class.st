@@ -9,7 +9,7 @@ Class {
 
 { #category : #testing }
 SoilSerializationTest >> expectedFailures [ 
-	^ #( testSerializationBoxedFloat64Twice testSerializationByteLayout testSerializationFractionTwice)
+	^ #( testSerializationBoxedFloat64Twice testSerializationByteLayout testSerializationFractionTwice testSerializationProcessSchedulerCode)
 ]
 
 { #category : #running }
@@ -47,7 +47,7 @@ SoilSerializationTest >> testSerializationBlockClosure [
 	| object serialized  |
 	object := [].
 	"we do not uet support serializing closures"
-	self should: [serialized := ODBSerializer serializeToBytes: object] raise: TestResult error
+	self should: [serialized := SoilSerializer serializeToBytes: object] raise: TestResult error
 ]
 
 { #category : #tests }
@@ -58,18 +58,12 @@ SoilSerializationTest >> testSerializationBoxedFloat64 [
 	serialized := SoilSerializer serializeToBytes: float.
 	self 
 		assert: serialized
-		equals: #[9 3 128 128 176 181 3 3 0].
+		equals: #[9 128 128 176 181 3 0].
 	self assert: (serialized at: 1) equals: TypeCodeFloat.
 	
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: BoxedFloat64.
-	self assert: materialized equals: 2.45227231256843e-45.
-	
-	"can we still de-serialize the old way before we used ODBFloatCode?"
-	materialized := ODBDeserializer deserializeFromBytes: 
-	#[0 1 12 66 111 120 101 100 70 108 111 97 116 54 52 1 1 0 1 0 0 0 2 1 2 128 128 224 234 6 0].
-	self assert: materialized class equals: BoxedFloat64.
-	self assert: materialized equals: 2.45227231256843e-45.
+	self assert: materialized equals: 2.45227231256843e-45
 ]
 
 { #category : #tests }
@@ -80,7 +74,7 @@ SoilSerializationTest >> testSerializationBoxedFloat64Infinity [
 	serialized := SoilSerializer serializeToBytes: float.
 	self 
 		assert: serialized
-		equals: #[9 3 128 128 192 255 7 3 0].
+		equals: #[9 128 128 192 255 7 0].
 	self assert: (serialized at: 1) equals: TypeCodeFloat.
 	
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -92,7 +86,7 @@ SoilSerializationTest >> testSerializationBoxedFloat64Infinity [
 	serialized := SoilSerializer serializeToBytes: float.
 	self 
 		assert: serialized
-		equals: #[9 3 128 128 192 255 15 3 0].
+		equals: #[9 128 128 192 255 15 0].
 	self assert: (serialized at: 1) equals: TypeCodeFloat.
 	
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -166,15 +160,15 @@ SoilSerializationTest >> testSerializationCharacterTwice [
 	character := $a.
 	object := {character. character}.
 
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer  serializeToBytes: object.
 	
 	"First the Array"
-	self assert: (serialized at: 7) equals: ODBArrayCode.
+	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First Character"
-	self assert: (serialized at: 9) equals: ODBCharacterCode.
+	self assert: (serialized at: 3) equals: TypeCodeCharacter.
 	"Second Character, they are immediate objects, so we do store them directly"
-	self assert: (serialized at: 11) equals: ODBCharacterCode.
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	self assert: (serialized at: 5) equals: TypeCodeCharacter.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	
 	self assert: object first identicalTo: object second.
 	self assert: materialized equals: object.
@@ -182,8 +176,8 @@ SoilSerializationTest >> testSerializationCharacterTwice [
 	character := 16rF600 asCharacter.
 	object := {character. character}.
 
-	serialized := ODBSerializer serializeToBytes: object.
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	serialized := SoilSerializer serializeToBytes: object.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: object first identicalTo: object second.
 	self assert: materialized equals: object.
 
@@ -210,9 +204,9 @@ SoilSerializationTest >> testSerializationCompiledMethodLayout [
 	object := (OrderedCollection>>#do:) copy.
 	
 	self assert: object class classLayout class equals: CompiledMethodLayout.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized class classLayout class equals: CompiledMethodLayout.
 ]
@@ -250,9 +244,9 @@ SoilSerializationTest >> testSerializationDoubleByteLayout [
 	object := DoubleByteArray newFrom: #(10 20 30 40).
 	
 	self assert: object class classLayout class equals: DoubleByteLayout.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized class equals: DoubleByteArray.
 	self assert: materialized class classLayout class equals: DoubleByteLayout.
@@ -269,9 +263,9 @@ SoilSerializationTest >> testSerializationDoubleWordLayout [
 	object := DoubleWordArray newFrom: #(10 20 30 40).
 	
 	self assert: object class classLayout class equals: DoubleWordLayout.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized class equals: DoubleWordArray.
 	self assert: materialized class classLayout class equals: DoubleWordLayout.
@@ -302,9 +296,9 @@ SoilSerializationTest >> testSerializationFixedLayout [
 	object := 4@3.
 	
 	self assert: object class classLayout class equals: FixedLayout.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized class equals: Point.
 	self assert: materialized class classLayout class equals: FixedLayout.
@@ -371,37 +365,37 @@ SoilSerializationTest >> testSerializationLargeInteger [
 	"The test in addition tests LargeIntegers, but for the databse, they are just the same"
 	
 	object := 17.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 0 0 0 0 11 17].
-	self assert: (serialized at: 7) equals: ODBLargePositiveIntegerCode.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[3 17].
+	self assert: (serialized at: 1) equals: TypeCodeLargePositiveInteger.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	
 	object := -4.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 0 0 0 0 12 4].
-	self assert: (serialized at: 7) equals: ODBLargeNegativeIntegerCode.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[4 4].
+	self assert: (serialized at: 1) equals: TypeCodeLargeNegativeInteger .
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	
 	
 	object := SmallInteger maxVal + 1.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 1 0 0 0 11 128 128 128 128 128 128 128 128 16].
-	self assert: (serialized at: 7) equals: ODBLargePositiveIntegerCode.
+	serialized := SoilSerializer  serializeToBytes: object.
+	self assert: serialized equals: #[3 128 128 128 128 128 128 128 128 16].
+	self assert: (serialized at: 1) equals: TypeCodeLargePositiveInteger.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	
 	"Negative"
 	object := SmallInteger minVal - 1.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 1 0 0 0 12 129 128 128 128 128 128 128 128 16].
-		self assert: (serialized at: 7) equals: ODBLargeNegativeIntegerCode.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[4 129 128 128 128 128 128 128 128 16].
+		self assert: (serialized at: 1) equals: TypeCodeLargeNegativeInteger.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object
 ]
 
@@ -415,15 +409,15 @@ SoilSerializationTest >> testSerializationLargeIntegerTwice [
 	integer := SmallInteger maxVal + 1.
 	object := {integer. integer}.
 
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	"First the Array"
-	self assert: (serialized at: 7) equals: ODBArrayCode.
+	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First LargeInteger"
-	self assert: (serialized at: 9) equals: ODBLargePositiveIntegerCode.
+	self assert: (serialized at: 3) equals: TypeCodeLargePositiveInteger.
 	"Second LargeInteger, reference to the first"
-	self assert: (serialized at: 19) equals: ODBInternalReferenceCode.
+	self assert: (serialized at: 13) equals: TypeCodeInternalReference.
 	
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: object first identicalTo: object second.
 	self assert: materialized equals: object.
 	
@@ -432,14 +426,14 @@ SoilSerializationTest >> testSerializationLargeIntegerTwice [
 	integer := SmallInteger minVal - 1.
 	object := {integer. integer}.
 
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	
 	"First the Array"
-	self assert: (serialized at: 7) equals: ODBArrayCode.
+	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First LargeInteger"
-	self assert: (serialized at: 9) equals: ODBLargeNegativeIntegerCode.
+	self assert: (serialized at: 3) equals: TypeCodeLargeNegativeInteger.
 	
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: object first identicalTo: object second.
 	self assert: materialized equals: object.
 	"identity is preserved"
@@ -451,11 +445,11 @@ SoilSerializationTest >> testSerializationLargeIntegerTwice [
 SoilSerializationTest >> testSerializationMessage [
 	| object serialized materialized |
 	object := Message selector: #+ argument: 2.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 2 0 0 0 17 18 1 43 35 1 52].
-	self assert: (serialized at: 7) equals: ODBMessageCode.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[24 1 1 1 5 1 3 2].
+	self assert: (serialized at: 1) equals: TypeCodeMessage.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized selector equals: object selector.
 	self assert: materialized arguments equals: object arguments.
 	self assert: materialized lookupClass equals: object lookupClass.
@@ -465,11 +459,11 @@ SoilSerializationTest >> testSerializationMessage [
 SoilSerializationTest >> testSerializationMessageSend [
 	| object serialized materialized |
 	object := MessageSend receiver: 1 selector: #+ argument: 2.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 2 0 0 0 20 51 18 1 43 35 1 52].
-	self assert: (serialized at: 7) equals: ODBMessageSendCode.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[25 3 1 1 1 1 5 1 3 2].
+	self assert: (serialized at: 1) equals: TypeCodeMessageSend.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized selector equals: object selector.
 	self assert: materialized arguments equals: object arguments.
 	self assert: materialized receiver equals: object receiver.
@@ -478,24 +472,27 @@ SoilSerializationTest >> testSerializationMessageSend [
 { #category : #tests }
 SoilSerializationTest >> testSerializationODBPersistentDictionary [
 	| object serialized materialized |
-	object :=  ODBPersistentDictionary new.
+	self flag: #todo. 
+	"come up with a special class for this"
+	
+	"object :=  ODBPersistentDictionary new.
 	object at: #key put: 1.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	self assert: serialized equals: #[0 0 1 0 0 0 83 1 18 3 107 101 121 51].
 	self assert: (serialized at: 7) equals: ODBPersistentDictionaryCode.
 
 	materialized := ODBDeserializer deserializeFromBytes: serialized.
-	self assert: materialized equals: object
+	self assert: materialized equals: object"
 ]
 
 { #category : #tests }
 SoilSerializationTest >> testSerializationObject [
 	| object serialized materialized |
 	object := Object new.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 1 6 79 98 106 101 99 116 0 0 0 1 0 0 0 2 1].
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[1 1].
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: Object
 ]
 
@@ -507,16 +504,16 @@ SoilSerializationTest >> testSerializationObjectTwice [
 	object := Object new.
 	array := {object . object}.
 
-	serialized := ODBSerializer serializeToBytes: array.
+	serialized := SoilSerializer serializeToBytes: array.
 	
 	"First the Array"
-	self assert: (serialized at: 17) equals: ODBArrayCode.
+	self assert: (serialized at: 11) equals: TypeCodeArray.
 	"array of size 2"
-	self assert: (serialized at: 18) equals: 2.
+	self assert: (serialized at: 12) equals: 2.
 	"here the object ist stored (not tested)"
 	"Then we get a reference to the second instance"
-	self assert: (serialized at: 21) equals: ODBInternalReferenceCode.
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	self assert: (serialized at: 15) equals: TypeCodeInternalReference.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: array first identicalTo: array second.
 	"identity is preserved"
 	self assert: materialized first identicalTo: materialized second.
@@ -526,11 +523,11 @@ SoilSerializationTest >> testSerializationObjectTwice [
 SoilSerializationTest >> testSerializationOrderedCollection [
 	| object serialized materialized |
 	object := #(1 2 3 5) asOrderedCollection.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 1 0 0 0 81 4 51 52 53 55].
-	self assert: (serialized at: 7) equals: ODBOrderedCollectionCode.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[26 4 3 1 3 2 3 3 3 5].
+	self assert: (serialized at: 1) equals: TypeCodeOrderedCollection.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object
 ]
 
@@ -539,18 +536,18 @@ SoilSerializationTest >> testSerializationProcess [
 	| object serialized |
 	object := Processor activeProcess.
 	"we do not uet support serializing Processes"
-	self should: [serialized := ODBSerializer serializeToBytes: object] raise: TestResult error
+	self should: [serialized := SoilSerializer serializeToBytes: object] raise: TestResult error
 ]
 
 { #category : #tests }
 SoilSerializationTest >> testSerializationProcessSchedulerCode [
 	| object serialized materialized |
 	object := Processor.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	self assert: serialized equals: #[0 0 0 0 0 0 22].
-	self assert: (serialized at: 7) equals: ODBProcessSchedulerCode.
+	self assert: (serialized at: 7) equals: TypeCodeProcessScheduler.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: Processor
 ]
 
@@ -560,12 +557,12 @@ SoilSerializationTest >> testSerializationScaledDecimal [
 
 	| object serialized materialized |
 	object := 10s2.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	
 	"this is NOT serialized using ODBFractionCode"
-	self deny: (serialized at: 7) equals: ODBFractionCode.
+	self deny: (serialized at: 1) equals: TypeCodeFraction.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: ScaledDecimal.
 	self assert: materialized equals: object
 ]
@@ -578,9 +575,9 @@ SoilSerializationTest >> testSerializationScaledDecimalTwice [
 	scaledDecimal := 10s2.
 	object := {scaledDecimal . scaledDecimal}.
 
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	
 	self assert: object first identicalTo: object second.
 	"identity is preserved"
@@ -598,9 +595,9 @@ SoilSerializationTest >> testSerializationSet [
 	object2 := ODBTestClass1 new.
 	set add: object2.
 
-	serialized := ODBSerializer serializeToBytes: set.
+	serialized := SoilSerializer serializeToBytes: set.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self deny: materialized anyOne identicalTo: set.
 	self assert: (materialized includes:  materialized anyOne)
 ]
@@ -610,19 +607,12 @@ SoilSerializationTest >> testSerializationSmallFloat64 [
 	| float serialized materialized |
 	float := 1.11.
 	self assert: float class equals: SmallFloat64.
-	serialized := ODBSerializer serializeToBytes: float.
-	self assert: serialized equals: #[0 0 0 0 0 0 47 158 138 142 255 7 134 215 199 194 11].
-	self assert: (serialized at: 7) equals: ODBSmallFloat64Code.
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	serialized := SoilSerializer serializeToBytes: float.
+	self assert: serialized equals: #[21 143 133 199 255 3 195 235 163 225 5].
+	self assert: (serialized at: 1) equals: TypeCodeSmallFloat64.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: SmallFloat64.
-	self assert: materialized identicalTo: float.
-	
-	"We changed serialization fixing https://github.com/ApptiveGrid/MoniBase/issues/22
-	This checks that we can load the old serialized Floats after the change"
-	
-	materialized := ODBDeserializer 
-		deserializeFromBytes: #[0 0 1 0 0 0 47 158 138 142 255 7 134 215 199 194 11].
-	self assert: materialized identicalTo: float.
+	self assert: materialized identicalTo: float
 ]
 
 { #category : #'tests-twice' }
@@ -632,15 +622,15 @@ SoilSerializationTest >> testSerializationSmallFloat64Twice [
 	"try to serialize an object that references twice the same small floats"
 	object := {1.11 . 1.11}.
 
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	
 	"First the Array"
-	self assert: (serialized at: 7) equals: ODBArrayCode.
+	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First Float"
-	self assert: (serialized at: 9) equals: ODBSmallFloat64Code.
+	self assert: (serialized at: 3) equals: TypeCodeSmallFloat64.
 	"Second Float: as small floats are immediate, we do not store a reference"
-	self assert: (serialized at: 20) equals: ODBSmallFloat64Code.
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	self assert: (serialized at: 14) equals: TypeCodeSmallFloat64.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized first identicalTo: object first.
 	self assert: materialized second identicalTo: object second.
@@ -652,30 +642,30 @@ SoilSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	
 	float := 0.0.
 	self assert: float class equals: SmallFloat64.
-	serialized := ODBSerializer serializeToBytes: float.
-	self assert: serialized equals: #[0 0 0 0 0 0 47 0 0].
-	self assert: (serialized at: 7) equals: ODBSmallFloat64Code.
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	serialized := SoilSerializer serializeToBytes: float.
+	self assert: serialized equals: #[21 0 0].
+	self assert: (serialized at: 1) equals: TypeCodeSmallFloat64.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: SmallFloat64.
 	self assert: materialized identicalTo: float.
 	self assert: materialized identicalTo: Float zero.
 	
 	float := 1.0.
 	self assert: float class equals: SmallFloat64.
-	serialized := ODBSerializer serializeToBytes: float.
-	self assert: serialized equals: #[0 0 0 0 0 0 47 128 128 128 255 7 0].
-	self assert: (serialized at: 7) equals: ODBSmallFloat64Code.
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	serialized := SoilSerializer serializeToBytes: float.
+	self assert: serialized equals: #[21 128 128 192 255 3 0].
+	self assert: (serialized at: 1) equals: TypeCodeSmallFloat64.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: SmallFloat64.
 	self assert: materialized identicalTo: float.
 	self assert: materialized identicalTo: Float one.
 	
 	float := -0.0.
 	self assert: float class equals: SmallFloat64.
-	serialized := ODBSerializer serializeToBytes: float.
-	self assert: serialized equals: #[0 0 0 0 0 0 47 128 128 128 128 16 0].
-	self assert: (serialized at: 7) equals: ODBSmallFloat64Code.
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	serialized := SoilSerializer serializeToBytes: float.
+	self assert: serialized equals: #[21 128 128 128 128 8 0].
+	self assert: (serialized at: 1) equals: TypeCodeSmallFloat64.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: SmallFloat64.
 	self assert: materialized identicalTo: float.
 	self assert: materialized identicalTo: Float negativeZero.
@@ -683,7 +673,9 @@ SoilSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 
 { #category : #tests }
 SoilSerializationTest >> testSerializationSmallInteger [
-	| object serialized materialized |
+	self flag: #todo.
+	"wait for optimizations to take place"
+	"| object serialized materialized |
 	object := 15.
 	serialized := ODBSerializer serializeToBytes: object.
 	self assert: serialized equals: #[0 0 0 0 0 0 65].
@@ -701,7 +693,7 @@ SoilSerializationTest >> testSerializationSmallInteger [
 	self assert: materialized equals: -3.
 	
 	self assert: ((ODBSerializer serializeToBytes: -1) at: 7) equals: ODBMinusOneCode.
-	self assert: ((ODBSerializer serializeToBytes: -2) at: 7) equals: ODBMinusTwoCode.
+	self assert: ((ODBSerializer serializeToBytes: -2) at: 7) equals: ODBMinusTwoCode."
 ]
 
 { #category : #'tests-encoded-subclasses' }
@@ -710,12 +702,12 @@ SoilSerializationTest >> testSerializationSortedCollection [
 
 	| object serialized materialized |
 	object := SortedCollection new.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	
 	"this is NOT serialized using ODBOrderedCollectionCode"
-	self deny: (serialized at: 7) equals: ODBOrderedCollectionCode.
+	self deny: (serialized at: 1) equals: TypeCodeOrderedCollection.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object
 ]
 
@@ -726,42 +718,42 @@ SoilSerializationTest >> testSerializationString [
 	"empty String"
 	
 	string := ''.
-	serialized := ODBSerializer serializeToBytes: string.
-	self assert: serialized equals:#[0 0 1 0 0 0 70].
-	self assert: (serialized at: 7) equals: ODBSmallStringBaseCode.
+	serialized := SoilSerializer serializeToBytes: string.
+	self assert: serialized equals: #[13 0].
+	self assert: (serialized at: 1) equals: TypeCodeString.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: ''.
 	
 	"Small String with size 1"
 	
-	string := 'h'.
+	"string := 'h'.
 	serialized := ODBSerializer serializeToBytes: string.
 	self assert: serialized equals:#[0 0 1 0 0 0 71 104].
 	self assert: (serialized at: 7) equals: ODBSmallStringBaseCode + string size.
 
 	materialized := ODBDeserializer deserializeFromBytes: serialized.
-	self assert: materialized equals: 'h'.
+	self assert: materialized equals: 'h'."
 	
 	"Small String with size < 10"
 	
-	string := 'hello'.
+	"string := 'hello'.
 	serialized := ODBSerializer serializeToBytes: string.
 	self assert: serialized equals: #[0 0 1 0 0 0 75 104 101 108 108 111].
 	self assert: (serialized at: 7) equals: ODBSmallStringBaseCode + string size.
 
 	materialized := ODBDeserializer deserializeFromBytes: serialized.
-	self assert: materialized equals: 'hello'.
+	self assert: materialized equals: 'hello'."
 
 	"Larger (all other) Strings"
 	
 	string := 'helloWithMoreCharacters'.
-	serialized := ODBSerializer serializeToBytes: string.
+	serialized := SoilSerializer serializeToBytes: string.
 	self 
 		assert: serialized
-		equals: #[0 0 1 0 0 0 34 23 104 101 108 108 111 87 105 116 104 77 111 114 101 67 104 97 114 97 99 116 101 114 115].
-	self assert: (serialized at: 7) equals: ODBStringCode.
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+		equals: #[13 23 104 101 108 108 111 87 105 116 104 77 111 114 101 67 104 97 114 97 99 116 101 114 115].
+	self assert: (serialized at: 1) equals: TypeCodeString.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: string
 ]
 
@@ -773,48 +765,48 @@ SoilSerializationTest >> testSerializationStringTwice [
 	"try to serialize an object that references twice the string"
 	object := {'h' . 'h'}.
 
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	
 	"First the Array"
-	self assert: (serialized at: 7) equals: ODBArrayCode.
+	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First String"
-	self assert: (serialized at: 9) equals: ODBSmallStringBaseCode + 1.
+	self assert: (serialized at: 3) equals: TypeCodeString.
 	"Second String is stored as an internal reference"
-	self assert: (serialized at: 11) equals: ODBInternalReferenceCode.
+	self assert: (serialized at: 5) equals: TypeCodeInternalReference.
 	
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	
 
 	object := {'hello' . 'hello'}.
 
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	
 	"First the Array"
-	self assert: (serialized at: 7) equals: ODBArrayCode.
+	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First String"
-	self assert: (serialized at: 9) equals: ODBSmallStringBaseCode + 5.
+	self assert: (serialized at: 3) equals: TypeCodeString.
 	"Second String is stored as an internal reference"
-	self assert: (serialized at: 15) equals: ODBInternalReferenceCode.
+	self assert: (serialized at: 9) equals: TypeCodeInternalReference.
 	
 
 	
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	
 
 	object := {'helloWithMoreCharacters' . 'helloWithMoreCharacters'}.
 
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	
 	"First the Array"
-	self assert: (serialized at: 7) equals: ODBArrayCode.
+	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First String"
-	self assert: (serialized at: 9) equals: ODBStringCode.
+	self assert: (serialized at: 3) equals: TypeCodeString.
 	"Second String is stored as an internal reference"
-	self assert: (serialized at: 34) equals: ODBInternalReferenceCode.
+	self assert: (serialized at: 28) equals: TypeCodeInternalReference.
 	
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 ]
 
@@ -822,11 +814,11 @@ SoilSerializationTest >> testSerializationStringTwice [
 SoilSerializationTest >> testSerializationSymbol [
 	| object serialized materialized |
 	object := #someSelector.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 0 0 0 0 18 12 115 111 109 101 83 101 108 101 99 116 111 114].
-	self assert: (serialized at: 7) equals: ODBSymbolCode.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[27 12 115 111 109 101 83 101 108 101 99 116 111 114].
+	self assert: (serialized at: 1) equals: TypeCodeSymbol.
 	
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: #someSelector
 ]
 
@@ -835,11 +827,11 @@ SoilSerializationTest >> testSerializationSystemDictionary [
 	| object serialized materialized |
 	object := Smalltalk globals.
 	object at: #Object put: Object.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 0 0 0 0 19].
-	self assert: (serialized at: 7) equals: ODBSystemDictionaryCode.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[ 22 ].
+	self assert: (serialized at: 1) equals: TypeCodeSystemDictionary.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assertCollection: materialized hasSameElements: Smalltalk globals
 ]
 
@@ -849,12 +841,12 @@ SoilSerializationTest >> testSerializationTTLAssociation [
 
 	| object serialized materialized |
 	object := TTLAssociation key: #t value: 1.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	
 	"this is NOT serialized using ODBAssociationCode"
-	self deny: (serialized at: 7) equals: ODBAssociationCode.
+	self deny: (serialized at: 1) equals: TypeCodeAssociation.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: object class.
 	self assert: materialized equals: object
 
@@ -864,11 +856,11 @@ SoilSerializationTest >> testSerializationTTLAssociation [
 SoilSerializationTest >> testSerializationTime [
 	| object serialized materialized |
 	object := Time midnight.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 1 0 0 0 33 0].
-	self assert: (serialized at: 7) equals: ODBTimeCode.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[28 0].
+	self assert: (serialized at: 1) equals: TypeCodeTime.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object
 ]
 
@@ -890,16 +882,16 @@ SoilSerializationTest >> testSerializationUUID [
 
 	| object serialized materialized |
 	object := UUID fromString: 'e42b03f8-3e9a-0d00-862e-bf1701b4bbce'.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	
 	"this is NOT serialized using ODBByteArrayCode"
-	self deny: (serialized at: 7) equals: ODBByteArrayCode.
+	self deny: (serialized at: 1) equals: TypeCodeByteArray.
 	
 	self 
 		assert: serialized
 		equals: #[0 1 4 85 85 73 68 1 1 0 1 0 0 0 2 1 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206].
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object
 ]
 
@@ -907,11 +899,11 @@ SoilSerializationTest >> testSerializationUUID [
 SoilSerializationTest >> testSerializationUndefindedObject [
 	| object serialized materialized |
 	object := nil.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 0 0 0 0 14].
-	self assert: (serialized at: 7) equals: ODBUndefinedObjectCode.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[2].
+	self assert: (serialized at: 1) equals: TypeCodeUndefined.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: nil
 ]
 
@@ -922,9 +914,9 @@ SoilSerializationTest >> testSerializationVariableLayout [
 	object := $a.
 	
 	self assert: object class classLayout class equals: ImmediateLayout.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized class equals: Character.
 	self assert: materialized class classLayout class equals: ImmediateLayout.
@@ -936,12 +928,12 @@ SoilSerializationTest >> testSerializationWeakArray [
 
 	| object serialized materialized |
 	object := WeakArray new.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 	
 	"this is NOT serialized using ODBOrderedCollectionCode"
-	self deny: (serialized at: 7) equals: ODBArrayCode.
+	self deny: (serialized at: 1) equals: TypeCodeArray.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object
 ]
 
@@ -952,9 +944,9 @@ SoilSerializationTest >> testSerializationWeakLayout [
 	object := WeakArray with: 'String'.
 	
 	self assert: object class classLayout class equals: WeakLayout.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized class equals: WeakArray.
 	self assert: materialized class classLayout class equals: WeakLayout.
@@ -970,13 +962,13 @@ SoilSerializationTest >> testSerializationWideStringUTF16 [
 		with: 16r0155 asCharacter
 		with: 16r0111 asCharacter.
 	self assert: string isWideString.
-	ODBEncodingStream characterEncoding: #utf16.
-	
-	serialized := ODBSerializer serializeToBytes: string.
-	self assert: serialized equals: #[0 0 1 0 0 0 36 8 246 0 246 3 1 85 1 17].
-	self assert: (serialized at: 7) equals: ODBWideStringCode.
+	"ODBEncodingStream characterEncoding: #utf16."
+	self fail.
+	serialized := SoilSerializer serializeToBytes: string.
+	self assert: serialized equals: #[29 10 239 152 128 239 152 131 197 149 196 145].
+	self assert: (serialized at: 1) equals: TypeCodeWideString.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: string.
 ]
 
@@ -992,11 +984,11 @@ SoilSerializationTest >> testSerializationWideStringUTF32 [
 	self assert: string isWideString.
 	ODBEncodingStream characterEncoding: #utf32.
 	
-	serialized := ODBSerializer serializeToBytes: string.
+	serialized := SoilSerializer serializeToBytes: string.
 	self assert: serialized equals: #[0 0 1 0 0 0 36 16 0 0 246 0 0 0 246 3 0 0 1 85 0 0 1 17].
-	self assert: (serialized at: 7) equals: ODBWideStringCode.
+	self assert: (serialized at: 7) equals: TypeCodeWideString.
 	
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: string.
 ]
 
@@ -1011,11 +1003,11 @@ SoilSerializationTest >> testSerializationWideStringUTF8 [
 	self assert: string isWideString.
 	ODBEncodingStream characterEncoding: #utf8.
 	
-	serialized := ODBSerializer serializeToBytes: string.
+	serialized := SoilSerializer serializeToBytes: string.
 	self assert: serialized equals: #[0 0 1 0 0 0 36 10 239 152 128 239 152 131 197 149 196 145].
-	self assert: (serialized at: 7) equals: ODBWideStringCode.
+	self assert: (serialized at: 7) equals: TypeCodeWideString.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: string.
 ]
 
@@ -1030,13 +1022,13 @@ SoilSerializationTest >> testSerializationWideSymbol [
 	symbol := symbol asSymbol.
 	self assert: symbol isWideString.
 	
-	ODBEncodingStream characterEncoding: #utf8.
+	"ODBEncodingStream characterEncoding: #utf8."
 	
-	serialized := ODBSerializer serializeToBytes: symbol.
-	self assert: serialized equals: #[0 0 0 0 0 0 48 10 239 152 128 239 152 131 197 149 196 145].
-	self assert: (serialized at: 7) equals: ODBWideSymbolCode.
+	serialized := SoilSerializer serializeToBytes: symbol.
+	self assert: serialized equals: #[23 10 239 152 128 239 152 131 197 149 196 145].
+	self assert: (serialized at: 1) equals: TypeCodeWideSymbol.
 	
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: symbol
 ]
 
@@ -1047,9 +1039,9 @@ SoilSerializationTest >> testSerializationWordLayout [
 	object := IntegerArray new: 5 withAll: 2.
 	
 	self assert: object class classLayout class equals: WordLayout.
-	serialized := ODBSerializer serializeToBytes: object.
+	serialized := SoilSerializer serializeToBytes: object.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized class equals: IntegerArray.
 	self assert: materialized class classLayout class equals: WordLayout.

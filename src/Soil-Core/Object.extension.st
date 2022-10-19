@@ -33,6 +33,6 @@ Object class >> soilMaterialize: aSoilMaterializer [
 
 { #category : #'*Soil-Core' }
 Object >> soilSerialize: aSoilSerializer [ 
-	aSoilSerializer register: self.
+	aSoilSerializer registerObject: self ifPresent: [ self halt ].
 	self soilBasicSerialize: aSoilSerializer 
 ]

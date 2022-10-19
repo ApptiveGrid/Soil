@@ -6,6 +6,11 @@ UndefinedObject >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Core' }
+UndefinedObject class >> soilMaterialize: materializer [
+	^ nil
+]
+
+{ #category : #'*Soil-Core' }
 UndefinedObject >> soilSerialize: serializer [ 
 	self soilBasicSerialize: serializer 
 ]

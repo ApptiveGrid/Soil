@@ -58,8 +58,8 @@ SoilSerializer >> nextPutAssociation: anAssociation [
 SoilSerializer >> nextPutBoxedFloat64: aFloat [ 
 	self
 		nextPutByte: TypeCodeFloat;
-		nextPutInteger: (aFloat at: 1);
-		nextPutInteger: (aFloat at: 2)
+		nextPutLengthEncodedInteger: (aFloat at: 1);
+		nextPutLengthEncodedInteger: (aFloat at: 2)
 ]
 
 { #category : #writing }
@@ -148,7 +148,7 @@ SoilSerializer >> nextPutInteger: anInteger [
 
 { #category : #'as yet unclassified' }
 SoilSerializer >> nextPutLargeNegativeInteger: anInteger [ 
-	stream nextPutByte: TypeCodeLargeNegativeInteger.
+	self nextPutByte: TypeCodeLargeNegativeInteger.
 	self nextPutLengthEncodedInteger: 0 - anInteger
 ]
 
@@ -171,13 +171,36 @@ SoilSerializer >> nextPutLengthEncodedInteger: anInteger [
 ]
 
 { #category : #writing }
+SoilSerializer >> nextPutMessage: aMessage [ 
+	self nextPutByte: TypeCodeMessage.
+	aMessage selector soilSerialize: self.
+	aMessage arguments soilSerialize: self
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutMessageSend: aMessageSend [ 
+	self nextPutByte: TypeCodeMessageSend.
+	aMessageSend receiver soilSerialize: self.
+	aMessageSend selector soilSerialize: self.
+	aMessageSend arguments soilSerialize: self
+]
+
+{ #category : #writing }
 SoilSerializer >> nextPutNil: anUndefinedObject [ 
-	stream nextPutByte: TypeCodeUndefined 
+	self nextPutByte: TypeCodeUndefined 
 ]
 
 { #category : #'as yet unclassified' }
 SoilSerializer >> nextPutObjectType [
 	self nextPutByte: TypeCodeObject 
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutOrderedCollection: aCollection [ 
+	self
+		nextPutByte: TypeCodeOrderedCollection;
+		nextPutLengthEncodedInteger: aCollection size.
+	aCollection do: [:each | each soilSerialize: self ].
 ]
 
 { #category : #'as yet unclassified' }
@@ -188,6 +211,14 @@ SoilSerializer >> nextPutPositiveInteger: anInteger [
 ]
 
 { #category : #writing }
+SoilSerializer >> nextPutSmallFloat64: aFloat [ 
+	self
+		nextPutByte: TypeCodeSmallFloat64;
+		nextPutLengthEncodedInteger: (aFloat at: 1);
+		nextPutLengthEncodedInteger: (aFloat at: 2)
+]
+
+{ #category : #writing }
 SoilSerializer >> nextPutString: aString [ 
 	self
 		nextPutByte: TypeCodeString;
@@ -195,8 +226,48 @@ SoilSerializer >> nextPutString: aString [
 ]
 
 { #category : #writing }
+SoilSerializer >> nextPutSymbol: aSymbol [ 
+	self
+		nextPutByte: TypeCodeSymbol;
+		nextPutLengthEncodedInteger: aSymbol size;
+		nextPutBytesFrom: aSymbol asByteArray len: aSymbol size
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutSystemDictionary: aCollection [ 
+	self nextPutByte: TypeCodeSystemDictionary 
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutTime: aTime [ 
+	self
+		nextPutByte: TypeCodeTime;
+		nextPutLengthEncodedInteger: aTime asSeconds
+]
+
+{ #category : #writing }
 SoilSerializer >> nextPutTrue: aBoolean [ 
 	self nextPutByte: TypeCodeTrue 
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutWideString: aWideString [ 
+		| buf |
+	buf := aWideString utf8Encoded. "self class encodeString: aWideString."
+	self
+		nextPutByte: TypeCodeWideString;
+		nextPutLengthEncodedInteger: buf size;
+		nextPutBytesFrom: buf len: buf size
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutWideSymbol: aSymbol [
+	| buf |
+	buf := aSymbol asString utf8Encoded.
+	self
+		nextPutByte: TypeCodeWideSymbol;
+		nextPutLengthEncodedInteger:  buf size;
+		nextPutBytesFrom: buf len: buf size
 ]
 
 { #category : #public }
@@ -210,9 +281,24 @@ SoilSerializer >> rawStream: aWriteStream [
 ]
 
 { #category : #registry }
-SoilSerializer >> register: anObject [
+SoilSerializer >> registerObject: anObject [
 	objects ifNil: [ objects := Set new ].
 	(objects includes: anObject) ifTrue: [ self halt ].
+	objects add: anObject  
+]
+
+{ #category : #registry }
+SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
+	objects ifNil: [ objects := Set new ].
+	objects add: anObject.
+	(objects includes: anObject) ifFalse: aBlock.
+
+]
+
+{ #category : #registry }
+SoilSerializer >> registerObject: anObject ifPresent: aBlock [
+	objects ifNil: [ objects := Set new ].
+	(objects includes: anObject) ifTrue: aBlock.
 	objects add: anObject  
 ]
 
