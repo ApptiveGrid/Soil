@@ -295,13 +295,6 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 
 ]
 
-{ #category : #registry }
-SoilSerializer >> registerObject: anObject ifPresent: aBlock [
-	objects ifNil: [ objects := Set new ].
-	(objects includes: anObject) ifTrue: aBlock.
-	objects add: anObject  
-]
-
 { #category : #private }
 SoilSerializer >> serialize: anObject [
 	rootObject := anObject.

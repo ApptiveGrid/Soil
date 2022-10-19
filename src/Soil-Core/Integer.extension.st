@@ -12,6 +12,8 @@ Integer >> soilSerialize: serializer [
 	self isLarge ifTrue: [ 
 		serializer 
 			registerObject: self
-			ifPresent: [ ^ self ] ].
+			ifAbsent: [ 
+				self soilBasicSerialize: serializer.
+				^ self ] ].
 	self soilBasicSerialize: serializer
 ]

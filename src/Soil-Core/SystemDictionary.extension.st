@@ -7,6 +7,11 @@ SystemDictionary >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Core' }
+SystemDictionary >> soilMaterialize: materializer [ 
+	^ self
+]
+
+{ #category : #'*Soil-Core' }
 SystemDictionary >> soilSerialize: serializer [
 	"registration not needed, as we always return the current Smalltalk globals value on read"
 	self soilBasicSerialize: serializer
