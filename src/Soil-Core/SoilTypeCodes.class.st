@@ -75,7 +75,7 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeMessage 					put: Message;
 		at: TypeCodeMessageSend  			put: MessageSend;
 		at: TypeCodeOrderedCollection   	put: OrderedCollection;
-		at: TypeCodeSymbol 					put: Symbol;
+		at: TypeCodeSymbol 					put: ByteSymbol;
 		at: TypeCodeTime 						put: Time;
 		at: TypeCodeWideString 				put: WideString 
 					

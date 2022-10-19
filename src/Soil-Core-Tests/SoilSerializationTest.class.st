@@ -443,7 +443,7 @@ SoilSerializationTest >> testSerializationMessage [
 	| object serialized materialized |
 	object := Message selector: #+ argument: 2.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[24 1 1 1 5 1 3 2].
+	self assert: serialized equals: #[24 27 1 43 5 1 3 2].
 	self assert: (serialized at: 1) equals: TypeCodeMessage.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -457,7 +457,7 @@ SoilSerializationTest >> testSerializationMessageSend [
 	| object serialized materialized |
 	object := MessageSend receiver: 1 selector: #+ argument: 2.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[25 3 1 1 1 1 5 1 3 2].
+	self assert: serialized equals: #[25 3 1 27 1 43 5 1 3 2].
 	self assert: (serialized at: 1) equals: TypeCodeMessageSend.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -487,7 +487,7 @@ SoilSerializationTest >> testSerializationObject [
 	| object serialized materialized |
 	object := Object new.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[1 1].
+	self assert: serialized equals: #[1 13 6 79 98 106 101 99 116].
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: Object
@@ -504,9 +504,9 @@ SoilSerializationTest >> testSerializationObjectTwice [
 	serialized := SoilSerializer serializeToBytes: array.
 	
 	"First the Array"
-	self assert: (serialized at: 11) equals: TypeCodeArray.
+	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"array of size 2"
-	self assert: (serialized at: 12) equals: 2.
+	self assert: (serialized at: 2) equals: 2.
 	"here the object ist stored (not tested)"
 	"Then we get a reference to the second instance"
 	self assert: (serialized at: 15) equals: TypeCodeInternalReference.

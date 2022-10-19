@@ -131,6 +131,11 @@ SoilMaterializer >> nextFraction: aClass [
 	^ fraction
 ]
 
+{ #category : #'as yet unclassified' }
+SoilMaterializer >> nextIdentityDictionary: aClass [ 
+	self shouldBeImplemented.
+]
+
 { #category : #reading }
 SoilMaterializer >> nextLargeNegativeInteger [
 	| integer |
@@ -215,6 +220,17 @@ SoilMaterializer >> nextString [
 	string := buf asString.
 	self registerObject: string.
 	^ string
+
+]
+
+{ #category : #actions }
+SoilMaterializer >> nextSymbol [
+	| bytes length |
+	length := self nextLengthEncodedInteger.
+	bytes := ByteArray new: length.
+	stream readInto: bytes startingAt: 1 count: length.
+	^ bytes asString asSymbol
+	
 
 ]
 
