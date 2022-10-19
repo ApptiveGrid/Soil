@@ -270,6 +270,11 @@ SoilSerializer >> nextPutWideSymbol: aSymbol [
 		nextPutBytesFrom: buf len: buf size
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSerializer >> notSupportedError: anObject [ 
+	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
+]
+
 { #category : #public }
 SoilSerializer >> putByte: anInteger [ 
 	stream nextPutByte: anInteger 
