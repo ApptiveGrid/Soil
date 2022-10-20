@@ -308,7 +308,14 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 	(index > 0) ifTrue: [ 
 		self nextPutInternalReference: index.
 		^ self ].
-	externalIndex := externalObjectRegistry indexOf: anObject.
+	externalIndex := externalObjectRegistry
+		ifNotNil: [ externalObjectRegistry indexOf: anObject ]
+		ifNil: [
+			"if there is no external object repository we cannot
+			resolve external objects, hence we treat them as  
+			internal. This might be too dangerous later and might
+			be removed" 
+			0 ].
 	((anObject == rootObject) not and: [ externalIndex > 0 ])
 		ifTrue: [ 
 			self nextPutExternalReference: externalIndex ]
