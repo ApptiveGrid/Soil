@@ -2,8 +2,8 @@ Class {
 	#name : #SOProxy,
 	#superclass : #Object,
 	#instVars : [
-		'id',
-		'transaction'
+		'transaction',
+		'objectId'
 	],
 	#category : #'Soil-Core'
 }
@@ -12,35 +12,29 @@ Class {
 SOProxy >> doesNotUnderstand: aMessage [ 
 	| realObject |
 	realObject := transaction 
-		objectWithId: id 
+		objectWithId: objectId 
 		ifNone: [ Error signal: 'cannot load' ].
 	^ aMessage sendTo: realObject
 ]
 
-{ #category : #serialization }
-SOProxy >> fuelAfterMaterialization [ 
-	| record |
-	record := SOCurrentRecord value.
-	id := record references at: id.
-	transaction := record transaction.
+{ #category : #accessing }
+SOProxy >> objectId [
 
-]
-
-{ #category : #serialization }
-SOProxy >> fuelAfterMaterialization: aMaterialization [
-	| record |
-	record := aMaterialization record.
-	id := record references at: id.
-	transaction := record transaction.
-
+	^ objectId
 ]
 
 { #category : #accessing }
-SOProxy >> id: anInteger [ 
-	id := anInteger
+SOProxy >> objectId: anObject [
+
+	objectId := anObject
 ]
 
 { #category : #'as yet unclassified' }
 SOProxy >> soilLoadedIn: aTransaction [ 
 	transaction := aTransaction  
+]
+
+{ #category : #accessing }
+SOProxy >> transaction: aTransaction [ 
+	transaction := aTransaction 
 ]

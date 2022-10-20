@@ -10,7 +10,7 @@ Class {
 
 { #category : #tests }
 SOObjectSegmentTest >> newMemorySegment [
-	| segment id obj |
+	| segment |
 	segment := SOObjectSegment new.
 	segment indexFile: (SOObjectIndexFile new 
 		stream: (ReadWriteStream with: ByteArray new);

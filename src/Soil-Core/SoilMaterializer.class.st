@@ -2,7 +2,6 @@ Class {
 	#name : #SoilMaterializer,
 	#superclass : #SoilObjectCodec,
 	#instVars : [
-		'stream',
 		'objects'
 	],
 	#category : #'Soil-Core'
@@ -10,9 +9,14 @@ Class {
 
 { #category : #'as yet unclassified' }
 SoilMaterializer class >> materializeFromBytes: aByteArray [
-	^ self new 
-		rawStream: aByteArray readStream;
+	^ (self on: aByteArray readStream)
 		materialize
+]
+
+{ #category : #'as yet unclassified' }
+SoilMaterializer class >> on: aReadStream [
+	^ self new 
+		stream: aReadStream 
 ]
 
 { #category : #actions }
@@ -137,6 +141,13 @@ SoilMaterializer >> nextDictionary: aClass [
 		dict at: key put: self nextObject.
 	].
 	^dict
+]
+
+{ #category : #'as yet unclassified' }
+SoilMaterializer >> nextExternalReference [
+	| index |
+	index := self nextLengthEncodedInteger.
+	^ externalObjectRegistry referenceAt: index
 ]
 
 { #category : #reading }
@@ -288,11 +299,6 @@ SoilMaterializer >> nextWideSymbol [
 	buf := ByteArray new: (len := self nextLengthEncodedInteger).
 	stream readInto: buf startingAt: 1 count: len.
 	^ buf utf8Decoded asSymbol
-]
-
-{ #category : #accessing }
-SoilMaterializer >> rawStream: aStream [ 
-	stream := aStream
 ]
 
 { #category : #registry }

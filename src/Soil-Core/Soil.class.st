@@ -27,6 +27,12 @@ Soil >> cleanFiles [
 	path delete
 ]
 
+{ #category : #'initialize-release' }
+Soil >> close [
+	objectRepository ifNotNil: [ 
+		objectRepository close ]
+]
+
 { #category : #initialization }
 Soil >> initializeFilesystem [
 	(path exists and: [ path hasChildren ]) 

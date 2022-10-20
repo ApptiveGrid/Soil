@@ -34,14 +34,16 @@ SOObjectRecord >> hasChanged [
 ]
 
 { #category : #accessing }
-SOObjectRecord >> indexOf: anObjectId [
+SOObjectRecord >> indexOf: anObject [
 	| index |
-	index := references indexOf: anObjectId.
-	^ index isZero 
-		ifTrue: [ 
-			references addLast: anObjectId.
-			references size ]
-		ifFalse: [ index ]
+	index := references indexOf: anObject.
+	(index > 0) ifTrue: [ ^ index ].
+	transaction objectIndex 
+		at: anObject
+		ifPresent: [ :s | 
+			references add: s.
+			^ references size ].
+	^ 0
 ]
 
 { #category : #initialization }
@@ -53,10 +55,10 @@ SOObjectRecord >> initialize [
 
 { #category : #'as yet unclassified' }
 SOObjectRecord >> materializeObject [
-	object := SOMaterializer new 
-		record: self;
-		onStream: bytes readStream";
-		materializeRoot"
+	object := SoilMaterializer new 
+		stream: bytes readStream;
+		externalObjectRegistry: self;
+		materialize
 ]
 
 { #category : #accessing }
@@ -92,6 +94,14 @@ SOObjectRecord >> readFrom: stream [
 ]
 
 { #category : #accessing }
+SOObjectRecord >> referenceAt: anInteger [ 
+	^ SOProxy new 
+		objectId: (references at: anInteger);
+		transaction: transaction;
+		yourself 
+]
+
+{ #category : #accessing }
 SOObjectRecord >> references [
 	^ references
 ]
@@ -112,11 +122,9 @@ SOObjectRecord >> serialize [
 SOObjectRecord >> serializeObject [
 	^ ByteArray streamContents: [ :s |
 		transaction serializer 
-			when: [ :obj | (obj = object) not and: [ transaction isRoot: obj ] ] 
-			substituteBy: [ :obj | SOProxy new id: (self indexOf: (transaction objectIndex at: obj) objectId) ];
-			object: object;
-			onStream: s;
-			serialize ].
+			stream: s;
+			externalObjectRegistry: self;
+			serialize: object ].
 ]
 
 { #category : #serializing }
@@ -126,7 +134,7 @@ SOObjectRecord >> serializeOn: stream [
 	stream nextPutAll: ((references size) asByteArrayOfSize: 2).
 	
 	references do: [ :ref |
-		stream nextPutAll: (ref index asByteArrayOfSize: 8) ].
+		stream nextPutAll: (ref objectId index asByteArrayOfSize: 8) ].
 	stream 
 		nextPutAll: (objectBytes size asByteArrayOfSize: 8);
 		nextPutAll: objectBytes .

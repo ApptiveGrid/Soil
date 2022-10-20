@@ -157,11 +157,9 @@ SOTransaction >> rootObjectId [
 
 { #category : #accessing }
 SOTransaction >> serializer [
-	| serializer |
-	serializer := SOSerializer new.
-	serializer
-		"when: [ :obj | (obj = serializer object) not and: [ self isRoot: obj ] ] substituteBy: [ :obj | self idOf: obj. ]".
-	^ serializer
+	
+	^ SoilSerializer new.
+
 ]
 
 { #category : #accessing }

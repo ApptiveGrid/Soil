@@ -34,6 +34,11 @@ SOObjectRepository >> at: objectId put: bytes [
 	segment at: objectId index putBytes: bytes	
 ]
 
+{ #category : #'initialize-release' }
+SOObjectRepository >> close [
+	segments do: #close
+]
+
 { #category : #accessing }
 SOObjectRepository >> defaultSegment [
 	^ self segments first 

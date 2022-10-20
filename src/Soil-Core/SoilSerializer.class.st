@@ -2,24 +2,25 @@ Class {
 	#name : #SoilSerializer,
 	#superclass : #SoilObjectCodec,
 	#instVars : [
-		'path',
-		'objectRepository',
 		'rootObject',
 		'objects',
-		'classes',
-		'stream'
+		'classes'
 	],
 	#category : #'Soil-Core'
 }
 
+{ #category : #'instance creation' }
+SoilSerializer class >> on: aStream [ 
+	^ self new 
+		stream: aStream 
+]
+
 { #category : #public }
 SoilSerializer class >> serializeToBytes: anObject [ 
-	| stream |
-	stream := ByteArray new writeStream.
-	self new 
-		rawStream: stream;
-		serialize: anObject.
-	^ stream flush; contents
+
+	^ (self on: ByteArray new writeStream) 
+		serialize: anObject
+
 ]
 
 { #category : #writing }
@@ -120,6 +121,13 @@ SoilSerializer >> nextPutDictionary: aDictionary [
 	aDictionary keysAndValuesDo: [:key :value |
 		key soilSerialize: self.
 		value soilSerialize: self ]
+]
+
+{ #category : #registry }
+SoilSerializer >> nextPutExternalReference: anInteger [
+	self 
+		nextPutByte: TypeCodeExternalReference; 
+		nextPutLengthEncodedInteger: anInteger 
 ]
 
 { #category : #writing }
@@ -293,25 +301,27 @@ SoilSerializer >> notSupportedError: anObject [
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]
 
-{ #category : #public }
-SoilSerializer >> putByte: anInteger [ 
-	stream nextPutByte: anInteger 
-]
-
-{ #category : #accessing }
-SoilSerializer >> rawStream: aWriteStream [ 
-	stream := "SoilMemoryStream on:" aWriteStream 
-]
-
 { #category : #registry }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
-	| index |
+	| index externalIndex |
 	index := objects indexOf: anObject.
-	(index > 0)
-		ifTrue: [ self nextPutInternalReference: index ]
-		ifFalse: [
+	(index > 0) ifTrue: [ 
+		self nextPutInternalReference: index.
+		^ self ].
+	externalIndex := externalObjectRegistry
+		ifNotNil: [ externalObjectRegistry indexOf: anObject ]
+		ifNil: [
+			"if there is no external object repository we cannot
+			resolve external objects, hence we treat them as  
+			internal. This might be too dangerous later and might
+			be removed" 
+			0 ].
+	((anObject == rootObject) not and: [ externalIndex > 0 ])
+		ifTrue: [ 
+			self nextPutExternalReference: externalIndex ]
+		ifFalse: [  
 			objects add: anObject.
-			aBlock value ]
+			aBlock value ] 
 
 ]
 
