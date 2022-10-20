@@ -1,6 +1,10 @@
 Class {
 	#name : #SoilObjectCodec,
 	#superclass : #Object,
+	#instVars : [
+		'externalObjectRegistry',
+		'stream'
+	],
 	#classVars : [
 		'characterEncoder'
 	],
@@ -29,4 +33,15 @@ SoilObjectCodec class >> decodeBytes: aByteArray [
 { #category : #convenience }
 SoilObjectCodec class >> encodeString: aString [ 
 	^ characterEncoder encodeString: aString
+]
+
+{ #category : #accessing }
+SoilObjectCodec >> externalObjectRegistry: anObject [
+
+	externalObjectRegistry := anObject
+]
+
+{ #category : #accessing }
+SoilObjectCodec >> stream: aStream [ 
+	stream := aStream
 ]

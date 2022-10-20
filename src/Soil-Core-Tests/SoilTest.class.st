@@ -58,7 +58,6 @@ SoilTest >> testSerializingRootOneCluster [
 { #category : #tests }
 SoilTest >> testSerializingRootTwoCluster [
 	| tx tx2 materializedRoot graph |
-	self skip.
 	tx := soil newTransaction.
 	graph := self simpleGraph.
 	tx makeRoot: graph nested reference. 

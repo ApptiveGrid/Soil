@@ -27,6 +27,12 @@ SOObjectFile >> basicAtPosition: anInteger length: length [
 	^ stream next: length
 ]
 
+{ #category : #'initialize-release' }
+SOObjectFile >> close [
+	stream ifNotNil: [ 
+		stream close ]
+]
+
 { #category : #accessing }
 SOObjectFile >> fuelVersion [
 	^ fuelVersion

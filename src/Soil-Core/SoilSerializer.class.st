@@ -2,12 +2,9 @@ Class {
 	#name : #SoilSerializer,
 	#superclass : #SoilObjectCodec,
 	#instVars : [
-		'path',
-		'objectRepository',
 		'rootObject',
 		'objects',
-		'classes',
-		'stream'
+		'classes'
 	],
 	#category : #'Soil-Core'
 }
@@ -124,6 +121,13 @@ SoilSerializer >> nextPutDictionary: aDictionary [
 	aDictionary keysAndValuesDo: [:key :value |
 		key soilSerialize: self.
 		value soilSerialize: self ]
+]
+
+{ #category : #registry }
+SoilSerializer >> nextPutExternalReference: anInteger [
+	self 
+		nextPutByte: TypeCodeExternalReference; 
+		nextPutLengthEncodedInteger: anInteger 
 ]
 
 { #category : #writing }
@@ -297,20 +301,20 @@ SoilSerializer >> notSupportedError: anObject [
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]
 
-{ #category : #accessing }
-SoilSerializer >> rawStream: aWriteStream [ 
-	stream := "SoilMemoryStream on:" aWriteStream 
-]
-
 { #category : #registry }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
-	| index |
+	| index externalIndex |
 	index := objects indexOf: anObject.
-	(index > 0)
-		ifTrue: [ self nextPutInternalReference: index ]
-		ifFalse: [
+	(index > 0) ifTrue: [ 
+		self nextPutInternalReference: index.
+		^ self ].
+	externalIndex := externalObjectRegistry indexOf: anObject.
+	((anObject == rootObject) not and: [ externalIndex > 0 ])
+		ifTrue: [ 
+			self nextPutExternalReference: externalIndex ]
+		ifFalse: [  
 			objects add: anObject.
-			aBlock value ]
+			aBlock value ] 
 
 ]
 
@@ -320,9 +324,4 @@ SoilSerializer >> serialize: anObject [
 	rootObject soilSerialize: self.
 	stream flush.
 	^ stream contents
-]
-
-{ #category : #accessing }
-SoilSerializer >> stream: aWriteStream [ 
-	stream := aWriteStream 
 ]

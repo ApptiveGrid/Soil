@@ -67,7 +67,7 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeDictionary 				put: Dictionary;
 		at: TypeCodeFraction 					put: Fraction;
 		at: TypeCodeInternalReference 		put: [ :materializer | materializer nextInternalReference ];
-		at: TypeCodeExternalReference  	put: [ :materializer | "materializer nextExternalReference" ];
+		at: TypeCodeExternalReference  	put: [ :materializer | materializer nextExternalReference ];
 		at: TypeCodeIdentityDictionary 	put: IdentityDictionary;
 		at: TypeCodeProcessScheduler  		put: Processor;
 		at: TypeCodeSystemDictionary 		put: Smalltalk globals;

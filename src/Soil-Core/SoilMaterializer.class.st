@@ -2,7 +2,6 @@ Class {
 	#name : #SoilMaterializer,
 	#superclass : #SoilObjectCodec,
 	#instVars : [
-		'stream',
 		'objects'
 	],
 	#category : #'Soil-Core'
@@ -142,6 +141,13 @@ SoilMaterializer >> nextDictionary: aClass [
 		dict at: key put: self nextObject.
 	].
 	^dict
+]
+
+{ #category : #'as yet unclassified' }
+SoilMaterializer >> nextExternalReference [
+	| index |
+	index := self nextLengthEncodedInteger.
+	^ externalObjectRegistry referenceAt: index
 ]
 
 { #category : #reading }
@@ -299,9 +305,4 @@ SoilMaterializer >> nextWideSymbol [
 SoilMaterializer >> registerObject: anObject [
 	objects ifNil: [ objects := OrderedCollection new ].
 	objects add: anObject 
-]
-
-{ #category : #accessing }
-SoilMaterializer >> stream: aStream [ 
-	stream := aStream
 ]

@@ -60,6 +60,14 @@ SOObjectSegment >> basicAt: anInteger length:  length [
 	^ self objectFile basicAtPosition: position length: length
 ]
 
+{ #category : #'initialize-release' }
+SOObjectSegment >> close [
+	indexFile ifNotNil: [ 
+		indexFile close ].
+	objectFile ifNotNil: [ 
+		objectFile close ]
+]
+
 { #category : #accessing }
 SOObjectSegment >> id [
 
