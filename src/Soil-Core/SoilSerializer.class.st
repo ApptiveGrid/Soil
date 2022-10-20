@@ -6,7 +6,7 @@ Class {
 		'objects',
 		'classes'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Serialization'
 }
 
 { #category : #'instance creation' }

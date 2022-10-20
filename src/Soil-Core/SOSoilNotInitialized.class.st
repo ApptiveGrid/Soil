@@ -1,5 +1,5 @@
 Class {
 	#name : #SOSoilNotInitialized,
 	#superclass : #SOError,
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Error'
 }

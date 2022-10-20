@@ -34,7 +34,7 @@ Class {
 		'TypeCodeWideString',
 		'TypeCodeWideSymbol'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Serialization'
 }
 
 { #category : #initialization }

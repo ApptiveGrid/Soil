@@ -11,7 +11,7 @@ Class {
 	#pools : [
 		'SoilTypeCodes'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Serialization'
 }
 
 { #category : #accessing }
