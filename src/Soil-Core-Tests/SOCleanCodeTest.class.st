@@ -2,7 +2,7 @@ Class {
 	#name : #SOCleanCodeTest,
 	#superclass : #TestCase,
 	#pools : [
-		'ODBTypeCodes'
+		'SoilTypeCodes'
 	],
 	#category : #'Soil-Core-Tests'
 }
