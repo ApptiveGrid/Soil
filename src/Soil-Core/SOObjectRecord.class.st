@@ -53,10 +53,9 @@ SOObjectRecord >> initialize [
 
 { #category : #'as yet unclassified' }
 SOObjectRecord >> materializeObject [
-	object := SOMaterializer new 
-		record: self;
-		onStream: bytes readStream";
-		materializeRoot"
+	object := SoilMaterializer new 
+		stream: bytes readStream;
+		materialize
 ]
 
 { #category : #accessing }
@@ -112,11 +111,8 @@ SOObjectRecord >> serialize [
 SOObjectRecord >> serializeObject [
 	^ ByteArray streamContents: [ :s |
 		transaction serializer 
-			when: [ :obj | (obj = object) not and: [ transaction isRoot: obj ] ] 
-			substituteBy: [ :obj | SOProxy new id: (self indexOf: (transaction objectIndex at: obj) objectId) ];
-			object: object;
-			onStream: s;
-			serialize ].
+			stream: s;
+			serialize: object ].
 ]
 
 { #category : #serializing }

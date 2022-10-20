@@ -10,9 +10,14 @@ Class {
 
 { #category : #'as yet unclassified' }
 SoilMaterializer class >> materializeFromBytes: aByteArray [
-	^ self new 
-		rawStream: aByteArray readStream;
+	^ (self on: aByteArray readStream)
 		materialize
+]
+
+{ #category : #'as yet unclassified' }
+SoilMaterializer class >> on: aReadStream [
+	^ self new 
+		stream: aReadStream 
 ]
 
 { #category : #actions }
@@ -290,13 +295,13 @@ SoilMaterializer >> nextWideSymbol [
 	^ buf utf8Decoded asSymbol
 ]
 
-{ #category : #accessing }
-SoilMaterializer >> rawStream: aStream [ 
-	stream := aStream
-]
-
 { #category : #registry }
 SoilMaterializer >> registerObject: anObject [
 	objects ifNil: [ objects := OrderedCollection new ].
 	objects add: anObject 
+]
+
+{ #category : #accessing }
+SoilMaterializer >> stream: aStream [ 
+	stream := aStream
 ]

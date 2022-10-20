@@ -12,14 +12,18 @@ Class {
 	#category : #'Soil-Core'
 }
 
+{ #category : #'instance creation' }
+SoilSerializer class >> on: aStream [ 
+	^ self new 
+		stream: aStream 
+]
+
 { #category : #public }
 SoilSerializer class >> serializeToBytes: anObject [ 
-	| stream |
-	stream := ByteArray new writeStream.
-	self new 
-		rawStream: stream;
-		serialize: anObject.
-	^ stream flush; contents
+
+	^ (self on: ByteArray new writeStream) 
+		serialize: anObject
+
 ]
 
 { #category : #writing }
@@ -293,11 +297,6 @@ SoilSerializer >> notSupportedError: anObject [
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]
 
-{ #category : #public }
-SoilSerializer >> putByte: anInteger [ 
-	stream nextPutByte: anInteger 
-]
-
 { #category : #accessing }
 SoilSerializer >> rawStream: aWriteStream [ 
 	stream := "SoilMemoryStream on:" aWriteStream 
@@ -321,4 +320,9 @@ SoilSerializer >> serialize: anObject [
 	rootObject soilSerialize: self.
 	stream flush.
 	^ stream contents
+]
+
+{ #category : #accessing }
+SoilSerializer >> stream: aWriteStream [ 
+	stream := aWriteStream 
 ]

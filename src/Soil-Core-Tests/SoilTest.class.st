@@ -46,7 +46,6 @@ SoilTest >> testInitializeDatabaseFailsIfExisting [
 { #category : #tests }
 SoilTest >> testSerializingRootOneCluster [
 	| tx tx2 materializedRoot |
-	self skip.
 	tx := soil newTransaction.
 	tx root: self simpleGraph.
 	tx commit.
