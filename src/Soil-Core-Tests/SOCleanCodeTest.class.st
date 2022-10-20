@@ -11,7 +11,8 @@ Class {
 SOCleanCodeTest class >> cleanupWhiteSpaceTrimRight [
 	<script>
 	| badCases |
-	badCases := (OmniBase package methods, self package methods) select: [ :each | 
+	badCases := (Soil
+	package methods, self package methods) select: [ :each | 
 		            each sourceCode trimRight size ~= each sourceCode size ].
 
 	badCases do: [ :each | 
