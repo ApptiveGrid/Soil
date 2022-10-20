@@ -17,7 +17,7 @@ SoilTest >> setUp [
 	super setUp.
 	soil := Soil path: self path.
 	soil 
-		cleanFiles;
+		destroy;
 		initializeFilesystem 
 ]
 

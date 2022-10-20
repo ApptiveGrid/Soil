@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'objects'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Serialization'
 }
 
 { #category : #'as yet unclassified' }

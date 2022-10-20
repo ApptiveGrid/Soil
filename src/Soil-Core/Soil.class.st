@@ -20,17 +20,17 @@ Soil class >> path: aString [
 		path: aString
 ]
 
-{ #category : #'as yet unclassified' }
-Soil >> cleanFiles [
-	path exists ifFalse: [ ^ self ].
-	path children do: #deleteAll.
-	path delete
-]
-
 { #category : #'initialize-release' }
 Soil >> close [
 	objectRepository ifNotNil: [ 
 		objectRepository close ]
+]
+
+{ #category : #'as yet unclassified' }
+Soil >> destroy [
+	path exists ifFalse: [ ^ self ].
+	path children do: #deleteAll.
+	path delete
 ]
 
 { #category : #initialization }
