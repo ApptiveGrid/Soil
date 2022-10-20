@@ -73,6 +73,15 @@ SoilMaterializer >> nextAssociation: aClass [
 		value: self nextObject
 ]
 
+{ #category : #materializing }
+SoilMaterializer >> nextBoxedFloat64: aClass [ 
+	"We multiply the Boxesfloat by 1, this way we create a SmallFloat if possible"
+	^ BoxedFloat64 basicNew
+		  at: 1 put: self nextLengthEncodedInteger;
+		  at: 2 put: self nextLengthEncodedInteger;
+		  * 1
+]
+
 { #category : #accessing }
 SoilMaterializer >> nextByte [
 	^ stream next
@@ -185,7 +194,7 @@ SoilMaterializer >> nextLengthEncodedInteger [
 
 { #category : #reading }
 SoilMaterializer >> nextMessage: aClass [ 
-		| result message |
+		| message |
 	message := aClass new.
 	self registerObject: message.
 	^ message
@@ -195,7 +204,7 @@ SoilMaterializer >> nextMessage: aClass [
 
 { #category : #reading }
 SoilMaterializer >> nextMessageSend: aClass [ 
-		| result messageSend |
+		| messageSend |
 	messageSend := aClass new.
 	self registerObject: messageSend.
 	^ messageSend

@@ -125,7 +125,6 @@ SOTransaction >> objectRepository [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> objectWithId: objectId ifNone: aBlock [
-	| record |
 	objects at: objectId ifPresent: [ :rec | ^ rec object ].
 	
 	^ self materializationWithId: objectId ifNone: aBlock.

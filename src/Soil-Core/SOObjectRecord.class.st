@@ -55,8 +55,8 @@ SOObjectRecord >> initialize [
 SOObjectRecord >> materializeObject [
 	object := SOMaterializer new 
 		record: self;
-		onStream: bytes readStream;
-		materializeRoot
+		onStream: bytes readStream";
+		materializeRoot"
 ]
 
 { #category : #accessing }
