@@ -161,11 +161,6 @@ SoilMaterializer >> nextFraction: aClass [
 ]
 
 { #category : #'as yet unclassified' }
-SoilMaterializer >> nextIdentityDictionary: aClass [ 
-	self shouldBeImplemented.
-]
-
-{ #category : #'as yet unclassified' }
 SoilMaterializer >> nextInternalReference [
 	| index |
 	index := self nextLengthEncodedInteger.

@@ -351,6 +351,7 @@ SoilSerializationTest >> testSerializationIdentityDictionary [
 	self assert: (serialized at: 1) equals: TypeCodeIdentityDictionary.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
+	self assert: materialized class equals: IdentityDictionary.
 	self assert: materialized equals: object
 ]
 
