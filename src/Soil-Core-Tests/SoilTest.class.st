@@ -8,6 +8,11 @@ Class {
 }
 
 { #category : #accessing }
+SoilTest class >> packageNamesUnderTest [
+	^ #(#'Soil-Core')
+]
+
+{ #category : #accessing }
 SoilTest >> path [ 
 	^ 'soil-tests'
 ]
