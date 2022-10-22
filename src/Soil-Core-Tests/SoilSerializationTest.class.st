@@ -124,7 +124,6 @@ SoilSerializationTest >> testSerializationByteArray [
 { #category : #'tests-layouts' }
 SoilSerializationTest >> testSerializationByteLayout [
 	| object serialized materialized |
-	self skip.
 	"We use SocketAddress as an exampe of a class with a ByteLayout but not specially encoded"
 	object := #[127 0 0 1] asSocketAddress.
 	
@@ -348,6 +347,21 @@ SoilSerializationTest >> testSerializationIdentityDictionary [
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: IdentityDictionary.
 	self assert: materialized equals: object
+]
+
+{ #category : #'tests-layouts' }
+SoilSerializationTest >> testSerializationImmediateLayout [
+	| object serialized materialized |
+	"All Immediate classes are specially encoded, to have a test for every layout, use Character here"
+	object := $a.
+	
+	self assert: object class classLayout class equals: ImmediateLayout.
+	serialized := SoilSerializer serializeToBytes: object.
+
+	materialized := SoilMaterializer materializeFromBytes: serialized.
+	self assert: materialized equals: object.
+	self assert: materialized class equals: Character.
+	self assert: materialized class classLayout class equals: ImmediateLayout.
 ]
 
 { #category : #tests }
@@ -905,15 +919,15 @@ SoilSerializationTest >> testSerializationUndefindedObject [
 SoilSerializationTest >> testSerializationVariableLayout [
 	| object serialized materialized |
 	"All Immediate classes are specially encoded, to have a test for every layout, use Character here"
-	object := $a.
+	object := Path root.
 	
-	self assert: object class classLayout class equals: ImmediateLayout.
+	self assert: object class classLayout class equals: VariableLayout.
 	serialized := SoilSerializer serializeToBytes: object.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
-	self assert: materialized class equals: Character.
-	self assert: materialized class classLayout class equals: ImmediateLayout.
+	self assert: materialized class equals: AbsolutePath.
+	self assert: materialized class classLayout class equals: VariableLayout.
 ]
 
 { #category : #'tests-encoded-subclasses' }
