@@ -10,7 +10,7 @@ Class {
 { #category : #running }
 SoilSerializationTest >> setUp [
 	super setUp.
-	ODBTypeCodes initialize.
+	SoilTypeCodes initialize
 ]
 
 { #category : #tests }
