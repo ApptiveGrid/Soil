@@ -142,10 +142,8 @@ SOCleanCodeTest >> testNoUnusedInstanceVariablesLeft [
 SOCleanCodeTest >> testNoUnusedTemporaryVariablesLeft [
 	"Fail if there are methods who have unused temporary variables"
 	| found  |
-	found := Soil package methods select: [ :m |
-		"before creating the AST (slow), check if there are temps" 
-		((m numTemps - m numArgs) > 0) and: [  
-		m ast temporaries anySatisfy: [ :x | x binding isUsed not] ] ].
+	found := Soil package methods select: [ :m | 
+		m hasTemporaries and: [ m ast temporaries anySatisfy: [ :x | x binding isUsed not] ] ].
 							
 	self 
 		assert: found isEmpty 
