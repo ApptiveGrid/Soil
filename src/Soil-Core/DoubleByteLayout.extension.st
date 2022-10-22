@@ -2,12 +2,13 @@ Extension { #name : #DoubleByteLayout }
 
 { #category : #'*Soil-Core' }
 DoubleByteLayout >> soilBasicSerialize: anObject with: serializer [
-	| classInfo |
+	| classInfo instSize |
 	classInfo := serializer classDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
 		basicNextPutString: classInfo name.
 	
-	serializer nextPutLengthEncodedInteger: anObject basicSize.
-	serializer nextPutBytesFrom: anObject len: anObject basicSize
+	instSize := anObject basicSize.
+	serializer nextPutLengthEncodedInteger: instSize.
+	serializer nextPutBytesFrom: anObject len: instSize
 ]

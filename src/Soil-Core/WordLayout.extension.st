@@ -2,12 +2,13 @@ Extension { #name : #WordLayout }
 
 { #category : #'*Soil-Core' }
 WordLayout >> soilBasicSerialize: anObject with: serializer [
-	| classInfo |
+	| classInfo instSize |
 	classInfo := serializer classDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
 		basicNextPutString: classInfo name.
 	
-	serializer nextPutLengthEncodedInteger: anObject basicSize.
-	1 to: anObject basicSize do: [:i | serializer nextPutLengthEncodedInteger: (anObject basicAt: i)]
+	instSize := anObject basicSize.
+	serializer nextPutLengthEncodedInteger: instSize.
+	1 to: instSize do: [:i | serializer nextPutLengthEncodedInteger: (anObject basicAt: i)]
 ]
