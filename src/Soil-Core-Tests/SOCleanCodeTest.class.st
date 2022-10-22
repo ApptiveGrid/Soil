@@ -78,6 +78,37 @@ SOCleanCodeTest >> testNoUnimplementedCalls [
 ]
 
 { #category : #tests }
+SOCleanCodeTest >> testNoUnsentMessages [
+	"Fail if there are methods implemented whose selectors is not sent anywhere in Pharo.
+	Please add a test or remove the method!"
+	
+	| found knownviolations |
+	found := Soil package allUnsentMessages.
+	
+	"To be fixed, see https://github.com/ApptiveGrid/Soil/issues/24"
+	knownviolations := #(
+		#classId 
+		#versionSize 
+		#flock:operation: 
+		#canLock:from:to:exclusive: 
+		#setNonBlock: #at:putObject: 
+		#nextIdentityDictionary: 
+		#transaction 
+		#unlock:from:to: 
+		#nextDate 
+		#lock:from:to: 
+		#soilLoadedIn: 
+		#nextPutPositiveInteger: 
+		#idOf:).
+	
+	found := found copyWithoutAll: knownviolations.
+	
+	self 
+		assert: found isEmpty 
+		description: ('the following selectors are implemented, but never send', found asString)
+]
+
+{ #category : #tests }
 SOCleanCodeTest >> testNoUnusedClasses [
 	"Fail if there are Classes that are not used. They should either be tested or deleted.
 	(check how to override #isUsed for cases where classes are discovered reflectively)"
