@@ -342,8 +342,7 @@ SoilSerializationTest >> testSerializationIdentityDictionary [
  		or: [ 
  			serialized = 
  			#[19 2 27 3 110 111 119 3 4 27 4 116 101 115 116 3 2] ]).
-	
-	self assert: serialized equals: #[19 2 27 3 110 111 119 3 4 27 4 116 101 115 116 3 2].
+		
 	self assert: (serialized at: 1) equals: TypeCodeIdentityDictionary.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
