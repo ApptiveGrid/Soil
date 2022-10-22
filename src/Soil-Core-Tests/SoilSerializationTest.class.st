@@ -236,8 +236,6 @@ SoilSerializationTest >> testSerializationDictionary [
 SoilSerializationTest >> testSerializationDoubleByteLayout [
 	| object serialized materialized |
 	"We use DoubleByteArray as an exampe of a class with a DoubleByteLayout but not specially encoded"
-	(SystemVersion current major < 10) ifTrue: [ self skip ].
-	"Double layouts not working in Pharo9"
 	object := DoubleByteArray newFrom: #(10 20 30 40).
 	
 	self assert: object class classLayout class equals: DoubleByteLayout.
@@ -253,10 +251,6 @@ SoilSerializationTest >> testSerializationDoubleByteLayout [
 SoilSerializationTest >> testSerializationDoubleWordLayout [
 	| object serialized materialized |
 	"We use DoubleWordArray as an exampe of a class with a DoubleWordLayout but not specially encoded"
-	
-	(SystemVersion current major < 10) ifTrue: [ self skip ].
-	"Double layouts not working in Pharo9"
-	
 	object := DoubleWordArray newFrom: #(10 20 30 40).
 	
 	self assert: object class classLayout class equals: DoubleWordLayout.
