@@ -90,11 +90,17 @@ SoilSerializer >> nextPutBytesFrom: aByteArray len: length [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutCharacter: aCharacter [ 
-	aCharacter asciiValue > 255 ifTrue: [ self halt ].
-	self 
-		nextPutByte: TypeCodeCharacter; 
-		nextPutByte: aCharacter asciiValue
+SoilSerializer >> nextPutCharacter: aCharacter [
+
+	aCharacter asciiValue > 255
+		ifTrue: [ 
+			self
+				nextPutByte: TypeCodeDoubleByteCharacter;
+				nextPutLengthEncodedInteger: aCharacter asInteger ]
+		ifFalse: [ 
+			self
+				nextPutByte: TypeCodeCharacter;
+				nextPutByte: aCharacter asciiValue ]
 ]
 
 { #category : #writing }
@@ -169,8 +175,9 @@ SoilSerializer >> nextPutInternalReference: anInteger [
 
 { #category : #'as yet unclassified' }
 SoilSerializer >> nextPutLargeNegativeInteger: anInteger [ 
-	self nextPutByte: TypeCodeLargeNegativeInteger.
-	self nextPutLengthEncodedInteger: 0 - anInteger
+	self 
+		nextPutByte: TypeCodeLargeNegativeInteger;
+		nextPutLengthEncodedInteger: 0 - anInteger
 ]
 
 { #category : #'as yet unclassified' }
@@ -278,7 +285,7 @@ SoilSerializer >> nextPutTrue: aBoolean [
 
 { #category : #writing }
 SoilSerializer >> nextPutWideString: aWideString [ 
-		| buf |
+	| buf |
 	buf := self class encodeString: aWideString.
 	self
 		nextPutByte: TypeCodeWideString;

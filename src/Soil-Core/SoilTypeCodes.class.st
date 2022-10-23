@@ -77,8 +77,8 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeOrderedCollection   	put: OrderedCollection;
 		at: TypeCodeSymbol 					put: ByteSymbol;
 		at: TypeCodeTime 						put: Time;
-		at: TypeCodeWideString 				put: WideString 
-					
+		at: TypeCodeWideString 				put: WideString;
+		at: TypeCodeDoubleByteCharacter 	put: [ :materializer | materializer nextDoubleByteCharacter]
 ]
 
 { #category : #initialization }
@@ -113,4 +113,5 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeSymbol := 27.
 	TypeCodeTime := 28.
 	TypeCodeWideString := 29.
+	TypeCodeDoubleByteCharacter := 30.
 ]

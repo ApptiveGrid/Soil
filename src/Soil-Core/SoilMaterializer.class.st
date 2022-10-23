@@ -143,6 +143,12 @@ SoilMaterializer >> nextDictionary: aClass [
 	^dict
 ]
 
+{ #category : #reading }
+SoilMaterializer >> nextDoubleByteCharacter [
+	"call to #register: not needed as character is an immediate Object"
+	^ Character value: self nextLengthEncodedInteger
+]
+
 { #category : #'as yet unclassified' }
 SoilMaterializer >> nextExternalReference [
 	| index |

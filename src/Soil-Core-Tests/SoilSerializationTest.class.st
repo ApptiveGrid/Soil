@@ -152,8 +152,6 @@ SoilSerializationTest >> testSerializationCharacter [
 { #category : #'tests-twice' }
 SoilSerializationTest >> testSerializationCharacterTwice [
 	| object character serialized materialized |
-	self skip.
-	"first need to figure out how to handle multi byte characters"
 	character := $a.
 	object := {character. character}.
 
@@ -230,6 +228,18 @@ SoilSerializationTest >> testSerializationDictionary [
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object
+]
+
+{ #category : #tests }
+SoilSerializationTest >> testSerializationDoubleByteCharacter [
+	| object serialized materialized |
+	object := 16rF600 asCharacter.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[30 128 236 3].
+	self assert: (serialized at: 1) equals: TypeCodeDoubleByteCharacter.
+
+	materialized := SoilMaterializer materializeFromBytes: serialized.
+	self assert: materialized equals: object.
 ]
 
 { #category : #'tests-layouts' }
