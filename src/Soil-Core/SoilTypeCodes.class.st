@@ -5,11 +5,11 @@ Class {
 		'TypeCodeArray',
 		'TypeCodeAssociation',
 		'TypeCodeByteArray',
+		'TypeCodeByteCharacter',
 		'TypeCodeCharacter',
 		'TypeCodeClass',
 		'TypeCodeDate',
 		'TypeCodeDictionary',
-		'TypeCodeDoubleByteCharacter',
 		'TypeCodeExternalReference',
 		'TypeCodeFalse',
 		'TypeCodeFloat',
@@ -60,7 +60,7 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeFloat 						put: Float;
 		at: TypeCodeSmallFloat64  			put: Float;
 		at: TypeCodeByteArray 				put: ByteArray;
-		at: TypeCodeCharacter 				put: Character;
+		at: TypeCodeByteCharacter 			put: [ :materializer | materializer nextByteCharacter];
 		at: TypeCodeClass 						put: Class;
 		at: TypeCodeString 					put: String;
 		at: TypeCodeDate 						put: Date;
@@ -78,7 +78,7 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeSymbol 					put: ByteSymbol;
 		at: TypeCodeTime 						put: Time;
 		at: TypeCodeWideString 				put: WideString;
-		at: TypeCodeDoubleByteCharacter 	put: [ :materializer | materializer nextDoubleByteCharacter]
+		at: TypeCodeCharacter 				put: Character
 ]
 
 { #category : #initialization }
@@ -94,7 +94,7 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeFalse := 8.
 	TypeCodeFloat := 9.
 	TypeCodeByteArray := 10.
-	TypeCodeCharacter := 11.
+	TypeCodeByteCharacter := 11.
 	TypeCodeClass := 12.
 	TypeCodeString := 13.
 	TypeCodeDate := 14.
@@ -113,5 +113,5 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeSymbol := 27.
 	TypeCodeTime := 28.
 	TypeCodeWideString := 29.
-	TypeCodeDoubleByteCharacter := 30.
+	TypeCodeCharacter := 30.
 ]

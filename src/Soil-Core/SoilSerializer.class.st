@@ -91,15 +91,15 @@ SoilSerializer >> nextPutBytesFrom: aByteArray len: length [
 
 { #category : #writing }
 SoilSerializer >> nextPutCharacter: aCharacter [
-
+	"we store 8bit characters with TypeCodeByteCharacter to save some space"
 	aCharacter asciiValue > 255
 		ifTrue: [ 
 			self
-				nextPutByte: TypeCodeDoubleByteCharacter;
+				nextPutByte: TypeCodeCharacter;
 				nextPutLengthEncodedInteger: aCharacter asInteger ]
 		ifFalse: [ 
 			self
-				nextPutByte: TypeCodeCharacter;
+				nextPutByte: TypeCodeByteCharacter;
 				nextPutByte: aCharacter asciiValue ]
 ]
 
