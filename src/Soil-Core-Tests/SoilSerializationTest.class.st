@@ -208,7 +208,7 @@ SoilSerializationTest >> testSerializationClass [
 { #category : #'tests-layouts' }
 SoilSerializationTest >> testSerializationCompiledMethodLayout [
 	| object serialized materialized |
-	self skip.
+	<expectedFailure>
 	"Not yet implemented"
 	self flag: #TODO.
 	"We use CompiledMethod as an exampe of a class with a CompiledMethodLayout"
@@ -582,7 +582,7 @@ SoilSerializationTest >> testSerializationScaledDecimal [
 	object := 10s2.
 	serialized := SoilSerializer serializeToBytes: object.
 	
-	"this is NOT serialized using ODBFractionCode"
+	"this is NOT serialized using TypeCodeFraction"
 	self deny: (serialized at: 1) equals: TypeCodeFraction.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -727,7 +727,7 @@ SoilSerializationTest >> testSerializationSortedCollection [
 	object := SortedCollection new.
 	serialized := SoilSerializer serializeToBytes: object.
 	
-	"this is NOT serialized using ODBOrderedCollectionCode"
+	"this is NOT serialized using TypeCodeOrderedCollection"
 	self deny: (serialized at: 1) equals: TypeCodeOrderedCollection.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -866,7 +866,7 @@ SoilSerializationTest >> testSerializationTTLAssociation [
 	object := TTLAssociation key: #t value: 1.
 	serialized := SoilSerializer serializeToBytes: object.
 	
-	"this is NOT serialized using ODBAssociationCode"
+	"this is NOT serialized using TypeCodeAssociation"
 	self deny: (serialized at: 1) equals: TypeCodeAssociation.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -907,7 +907,7 @@ SoilSerializationTest >> testSerializationUUID [
 	object := UUID fromString: 'e42b03f8-3e9a-0d00-862e-bf1701b4bbce'.
 	serialized := SoilSerializer serializeToBytes: object.
 	
-	"this is NOT serialized using ODBByteArrayCode"
+	"this is NOT serialized using TypeCodeByteArray"
 	self deny: (serialized at: 1) equals: TypeCodeByteArray.
 	
 	self 
@@ -933,7 +933,7 @@ SoilSerializationTest >> testSerializationUndefindedObject [
 { #category : #'tests-layouts' }
 SoilSerializationTest >> testSerializationVariableLayout [
 	| object serialized materialized |
-	"All Immediate classes are specially encoded, to have a test for every layout, use Character here"
+	"All Immediate classes are specially encoded, to have a test for every layout"
 	object := Path root.
 	
 	self assert: object class classLayout class equals: VariableLayout.
@@ -953,7 +953,7 @@ SoilSerializationTest >> testSerializationWeakArray [
 	object := WeakArray new.
 	serialized := SoilSerializer serializeToBytes: object.
 	
-	"this is NOT serialized using ODBOrderedCollectionCode"
+	"this is NOT serialized using TypeCodeArray"
 	self deny: (serialized at: 1) equals: TypeCodeArray.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -1044,8 +1044,6 @@ SoilSerializationTest >> testSerializationWideSymbol [
 		with: 16r0111 asCharacter.
 	symbol := symbol asSymbol.
 	self assert: symbol isWideString.
-	
-	"ODBEncodingStream characterEncoding: #utf8."
 	
 	serialized := SoilSerializer serializeToBytes: symbol.
 	self assert: serialized equals: #[23 10 239 152 128 239 152 131 197 149 196 145].

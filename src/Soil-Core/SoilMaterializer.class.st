@@ -122,11 +122,6 @@ SoilMaterializer >> nextClass [
 		ifAbsent: nil
 ]
 
-{ #category : #'as yet unclassified' }
-SoilMaterializer >> nextDate [
-	self shouldBeImplemented.
-]
-
 { #category : #reading }
 SoilMaterializer >> nextDate: aClass [ 
 	| date |

@@ -231,13 +231,6 @@ SoilSerializer >> nextPutOrderedCollection: aCollection [
 	aCollection do: [:each | each soilSerialize: self ].
 ]
 
-{ #category : #'as yet unclassified' }
-SoilSerializer >> nextPutPositiveInteger: anInteger [ 
-	self 
-		nextPutByte: TypeCodeLargePositiveInteger;
-		nextPutLengthEncodedInteger: anInteger
-]
-
 { #category : #writing }
 SoilSerializer >> nextPutProcessorScheduler: aProcessorScheduler [ 
 	self nextPutByte: TypeCodeProcessScheduler 

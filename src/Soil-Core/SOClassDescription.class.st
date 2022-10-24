@@ -32,21 +32,6 @@ SOClassDescription >> instVarIndexes [
 	^ class allInstVarNames collect: [ :n | class allInstVarNames indexOf: n ]
 ]
 
-{ #category : #testing }
-SOClassDescription >> isBits [
-	^ class isBits 
-]
-
-{ #category : #testing }
-SOClassDescription >> isBytes [
-	^ class isBytes 
-]
-
-{ #category : #testing }
-SOClassDescription >> isVariable [
-	^ class isVariable 
-]
-
 { #category : #accessing }
 SOClassDescription >> name [
 
