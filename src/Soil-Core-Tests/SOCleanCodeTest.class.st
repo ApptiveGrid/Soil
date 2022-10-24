@@ -102,9 +102,13 @@ SOCleanCodeTest >> testNoUnsentMessages [
 SOCleanCodeTest >> testNoUnusedClasses [
 	"Fail if there are Classes that are not used. They should either be tested or deleted.
 	(check how to override #isUsed for cases where classes are discovered reflectively)"
-	| found  |
-	self skip.
-	found := Soil package definedClasses reject: [ :class | class isUsed].
+	| found  knownviolations |
+	found := Soil package definedClasses reject: [ :class | class isUsed]. 
+	
+	"To be fixed"
+	knownviolations := #(SOFLock SOBSDFLock).
+	found := found reject: [:class | knownviolations includes: class name  ].
+	
 	self 
 		assert: found isEmpty 
 		description: ('the following classes are unused: ', found asString)
