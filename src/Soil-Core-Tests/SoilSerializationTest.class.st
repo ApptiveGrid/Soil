@@ -121,6 +121,38 @@ SoilSerializationTest >> testSerializationByteArray [
 	self assert: materialized equals: object
 ]
 
+{ #category : #tests }
+SoilSerializationTest >> testSerializationByteCharacter [
+	| object serialized materialized |
+	object := $a.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[11 97].
+	self assert: (serialized at: 1) equals: TypeCodeByteCharacter.
+
+	materialized := SoilMaterializer materializeFromBytes: serialized.
+	self assert: materialized equals: object.
+]
+
+{ #category : #'tests-twice' }
+SoilSerializationTest >> testSerializationByteCharacterTwice [
+	| object character serialized materialized |
+	character := $a.
+	object := {character. character}.
+
+	serialized := SoilSerializer  serializeToBytes: object.
+	
+	"First the Array"
+	self assert: (serialized at: 1) equals: TypeCodeArray.
+	"First Character"
+	self assert: (serialized at: 3) equals: TypeCodeByteCharacter.
+	"Second Character, they are immediate objects, so we do store them directly"
+	self assert: (serialized at: 5) equals: TypeCodeByteCharacter.
+	materialized := SoilMaterializer materializeFromBytes: serialized.
+	
+	self assert: object first identicalTo: object second.
+	self assert: materialized equals: object.
+]
+
 { #category : #'tests-layouts' }
 SoilSerializationTest >> testSerializationByteLayout [
 	| object serialized materialized |
@@ -140,9 +172,9 @@ SoilSerializationTest >> testSerializationByteLayout [
 { #category : #tests }
 SoilSerializationTest >> testSerializationCharacter [
 	| object serialized materialized |
-	object := $a.
+	object := 16rF600 asCharacter.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[11 97].
+	self assert: serialized equals: #[30 128 236 3].
 	self assert: (serialized at: 1) equals: TypeCodeCharacter.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -152,23 +184,6 @@ SoilSerializationTest >> testSerializationCharacter [
 { #category : #'tests-twice' }
 SoilSerializationTest >> testSerializationCharacterTwice [
 	| object character serialized materialized |
-	self skip.
-	"first need to figure out how to handle multi byte characters"
-	character := $a.
-	object := {character. character}.
-
-	serialized := SoilSerializer  serializeToBytes: object.
-	
-	"First the Array"
-	self assert: (serialized at: 1) equals: TypeCodeArray.
-	"First Character"
-	self assert: (serialized at: 3) equals: TypeCodeCharacter.
-	"Second Character, they are immediate objects, so we do store them directly"
-	self assert: (serialized at: 5) equals: TypeCodeCharacter.
-	materialized := SoilMaterializer materializeFromBytes: serialized.
-	
-	self assert: object first identicalTo: object second.
-	self assert: materialized equals: object.
 
 	character := 16rF600 asCharacter.
 	object := {character. character}.

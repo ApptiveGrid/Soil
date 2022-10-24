@@ -104,8 +104,15 @@ SoilMaterializer >> nextByteArray: aClass [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextCharacter [
+SoilMaterializer >> nextByteCharacter [
+	"call to #register: not needed as character is an immediate Object"
 	^ Character codePoint: self nextByte
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextCharacter [
+	"call to #register: not needed as character is an immediate Object"
+	^ Character value: self nextLengthEncodedInteger
 ]
 
 { #category : #reading }
