@@ -7,11 +7,8 @@ DoubleWordLayout >> soilBasicSerialize: anObject with: serializer [
 	serializer 
 		nextPutObjectType;
 		basicNextPutString: classInfo name.
-	serializer nextPutLengthEncodedInteger: anObject basicSize.
-	
-	classInfo instVarIndexes do: [:i | (anObject instVarAt: i) soilSerialize: serializer ].
-		instSize := anObject class instSize.
-		"on variable sized objects size > instVars"
-		instSize + 1 to: instSize + anObject basicSize do: [:i | 
-		(anObject instVarAt: i) soilSerialize: serializer ]
+
+	instSize := anObject basicSize.
+	serializer nextPutLengthEncodedInteger: instSize.
+	1 to: instSize do: [:i | serializer nextPutLengthEncodedInteger: (anObject basicAt: i)]
 ]

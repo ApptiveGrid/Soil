@@ -44,9 +44,9 @@ SoilMaterializer >> newObject [
 			object := objectClass basicNew.
 		].
 	self registerObject: object.
-	object class isBytes ifTrue: [
+	object class isBits ifTrue: [
 		objectClass isWords 
-			ifTrue: [1 to: basicSize do: [:i | object basicAt: i put: stream primitive getInteger]]
+			ifTrue: [1 to: basicSize do: [:i | object basicAt: i put: self nextLengthEncodedInteger]]
 			ifFalse: [ stream readInto: object startingAt: 1 count: basicSize ].
 		^object
 	].
