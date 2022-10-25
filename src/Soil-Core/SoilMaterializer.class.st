@@ -150,13 +150,13 @@ SoilMaterializer >> nextExternalReference [
 
 { #category : #materializing }
 SoilMaterializer >> nextFloat: aClass [ 
-	"We multiply the Boxesfloat by 1, this way we create a SmallFloat if possible"
+	"We multiply the Boxedfloat by 1, this way we create a SmallFloat if possible"
 	| float |
 	float :=  BoxedFloat64 basicNew
 		  at: 1 put: self nextLengthEncodedInteger;
 		  at: 2 put: self nextLengthEncodedInteger;
 		  * 1.
-	"Boxed Floats are normal objects (need to be registered), small integers are immediate"
+	"Boxedfloat is a normal object (needs to be registered), SmallFloat is immediate"
 	float isImmediateObject ifFalse: [self registerObject: float].
 	^float
 ]
