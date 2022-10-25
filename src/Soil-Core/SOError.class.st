@@ -3,3 +3,9 @@ Class {
 	#superclass : #Error,
 	#category : #'Soil-Core-Error'
 }
+
+{ #category : #testing }
+SOError class >> isAbstract [
+		
+	^ self == SOError
+]

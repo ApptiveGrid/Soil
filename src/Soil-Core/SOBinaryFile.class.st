@@ -8,6 +8,12 @@ Class {
 	#category : #'Soil-Core'
 }
 
+{ #category : #testing }
+SOBinaryFile class >> isAbstract [
+		
+	^ self == SOBinaryFile
+]
+
 { #category : #accessing }
 SOBinaryFile >> fileVersion [
 	^ fileVersion
