@@ -694,31 +694,6 @@ SoilSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	self assert: materialized identicalTo: Float negativeZero.
 ]
 
-{ #category : #tests }
-SoilSerializationTest >> testSerializationSmallInteger [
-	self flag: #todo.
-	"wait for optimizations to take place"
-	"| object serialized materialized |
-	object := 15.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 0 0 0 0 65].
-	self assert: (serialized at: 7) equals: ODBSmallPositiveIntegerBaseCode + object.
-
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
-	self assert: materialized equals: 15.
-
-	object := -3.
-	serialized := ODBSerializer serializeToBytes: object.
-	self assert: serialized equals: #[0 0 0 0 0 0 67].
-	self assert: (serialized at: 7) equals: ODBMinusThreeCode.
-
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
-	self assert: materialized equals: -3.
-	
-	self assert: ((ODBSerializer serializeToBytes: -1) at: 7) equals: ODBMinusOneCode.
-	self assert: ((ODBSerializer serializeToBytes: -2) at: 7) equals: ODBMinusTwoCode."
-]
-
 { #category : #'tests-encoded-subclasses' }
 SoilSerializationTest >> testSerializationSortedCollection [
 	"SortedCollection is a subclass of OrderedCollection, make sure it works"
