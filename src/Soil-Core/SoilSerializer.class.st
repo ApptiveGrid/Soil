@@ -62,14 +62,6 @@ SoilSerializer >> nextPutAssociation: anAssociation [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutBoxedFloat64: aFloat [ 
-	self
-		nextPutByte: TypeCodeFloat;
-		nextPutLengthEncodedInteger: (aFloat at: 1);
-		nextPutLengthEncodedInteger: (aFloat at: 2)
-]
-
-{ #category : #writing }
 SoilSerializer >> nextPutByte: anInteger [ 
 	stream nextPut: anInteger
 ]
@@ -139,6 +131,14 @@ SoilSerializer >> nextPutExternalReference: anInteger [
 { #category : #writing }
 SoilSerializer >> nextPutFalse: aBoolean [ 
 	self nextPutByte: TypeCodeFalse 
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutFloat: aFloat [ 
+	self
+		nextPutByte: TypeCodeFloat;
+		nextPutLengthEncodedInteger: (aFloat at: 1);
+		nextPutLengthEncodedInteger: (aFloat at: 2)
 ]
 
 { #category : #writing }
@@ -241,14 +241,6 @@ SoilSerializer >> nextPutPositiveInteger: anInteger [
 { #category : #writing }
 SoilSerializer >> nextPutProcessorScheduler: aProcessorScheduler [ 
 	self nextPutByte: TypeCodeProcessScheduler 
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutSmallFloat64: aFloat [ 
-	self
-		nextPutByte: TypeCodeSmallFloat64;
-		nextPutLengthEncodedInteger: (aFloat at: 1);
-		nextPutLengthEncodedInteger: (aFloat at: 2)
 ]
 
 { #category : #writing }

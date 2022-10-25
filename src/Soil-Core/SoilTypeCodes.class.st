@@ -58,7 +58,6 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeTrue 						put: true;
 		at: TypeCodeFalse 						put: false;
 		at: TypeCodeFloat 						put: Float;
-		at: TypeCodeSmallFloat64  			put: Float;
 		at: TypeCodeByteArray 				put: ByteArray;
 		at: TypeCodeByteCharacter 			put: [ :materializer | materializer nextByteCharacter];
 		at: TypeCodeClass 						put: Class;
@@ -104,7 +103,6 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeExternalReference := 18.
 	TypeCodeIdentityDictionary := 19.
 	TypeCodeProcessScheduler := 20.
-	TypeCodeSmallFloat64 := 21.
 	TypeCodeSystemDictionary := 22.
 	TypeCodeWideSymbol := 23.
 	TypeCodeMessage := 24.
