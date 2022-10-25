@@ -206,7 +206,7 @@ SoilMaterializer >> nextLengthEncodedInteger [
 
 { #category : #reading }
 SoilMaterializer >> nextMessage: aClass [ 
-		| message |
+	| message |
 	message := aClass new.
 	self registerObject: message.
 	^ message

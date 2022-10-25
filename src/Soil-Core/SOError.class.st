@@ -6,6 +6,6 @@ Class {
 
 { #category : #testing }
 SOError class >> isAbstract [
-		
+	<ignoreForCoverage>
 	^ self == SOError
 ]

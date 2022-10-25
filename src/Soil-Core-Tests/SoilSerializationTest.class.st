@@ -516,6 +516,7 @@ SoilSerializationTest >> testSerializationObject [
 	object := Object new.
 	serialized := SoilSerializer serializeToBytes: object.
 	self assert: serialized equals: #[1 6 79 98 106 101 99 116].
+	self assert: (serialized at: 1) equals: TypeCodeObject.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: Object
@@ -725,26 +726,15 @@ SoilSerializationTest >> testSerializationString [
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: ''.
 	
-	"Small String with size 1"
-	
-	"string := 'h'.
-	serialized := ODBSerializer serializeToBytes: string.
-	self assert: serialized equals:#[0 0 1 0 0 0 71 104].
-	self assert: (serialized at: 7) equals: ODBSmallStringBaseCode + string size.
+	"Small String"
+	string := 'a'.
+	serialized := SoilSerializer serializeToBytes: string.
+	self assert: serialized equals: #[13 1 97].
+	self assert: (serialized at: 1) equals: TypeCodeString.
 
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
-	self assert: materialized equals: 'h'."
+	materialized := SoilMaterializer materializeFromBytes: serialized.
+	self assert: materialized equals: 'a'.
 	
-	"Small String with size < 10"
-	
-	"string := 'hello'.
-	serialized := ODBSerializer serializeToBytes: string.
-	self assert: serialized equals: #[0 0 1 0 0 0 75 104 101 108 108 111].
-	self assert: (serialized at: 7) equals: ODBSmallStringBaseCode + string size.
-
-	materialized := ODBDeserializer deserializeFromBytes: serialized.
-	self assert: materialized equals: 'hello'."
-
 	"Larger (all other) Strings"
 	
 	string := 'helloWithMoreCharacters'.

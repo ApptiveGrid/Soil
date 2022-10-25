@@ -10,7 +10,7 @@ Class {
 
 { #category : #testing }
 SOBinaryFile class >> isAbstract [
-		
+	<ignoreForCoverage>
 	^ self == SOBinaryFile
 ]
 

@@ -23,13 +23,13 @@ SoilSerializer class >> serializeToBytes: anObject [
 
 ]
 
-{ #category : #writing }
+{ #category : #'writing - basic' }
 SoilSerializer >> basicNextPutString: aString [ 
 	| buf |
 	buf := aString asByteArray.
 	self
 		nextPutLengthEncodedInteger: buf size;
-		nextPutBytesFrom: buf len: buf size
+		nextPutBytesFrom: buf
 ]
 
 { #category : #public }
@@ -61,7 +61,7 @@ SoilSerializer >> nextPutAssociation: anAssociation [
 	anAssociation value soilSerialize: self.
 ]
 
-{ #category : #writing }
+{ #category : #'writing - basic' }
 SoilSerializer >> nextPutByte: anInteger [ 
 	stream nextPut: anInteger
 ]
@@ -75,8 +75,8 @@ SoilSerializer >> nextPutByteArray: aByteArray [
 		self nextPutByte: (aByteArray at: i)].
 ]
 
-{ #category : #'as yet unclassified' }
-SoilSerializer >> nextPutBytesFrom: aByteArray len: length [ 
+{ #category : #'writing - basic' }
+SoilSerializer >> nextPutBytesFrom: aByteArray [
 	stream nextPutAll: aByteArray 
 
 ]
@@ -218,7 +218,7 @@ SoilSerializer >> nextPutNil: anUndefinedObject [
 	self nextPutByte: TypeCodeUndefined 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #writing }
 SoilSerializer >> nextPutObjectType [
 	self nextPutByte: TypeCodeObject 
 ]
@@ -248,7 +248,7 @@ SoilSerializer >> nextPutSymbol: aSymbol [
 	self
 		nextPutByte: TypeCodeSymbol;
 		nextPutLengthEncodedInteger: aSymbol size;
-		nextPutBytesFrom: aSymbol asByteArray len: aSymbol size
+		nextPutBytesFrom: aSymbol asByteArray
 ]
 
 { #category : #writing }
@@ -275,7 +275,7 @@ SoilSerializer >> nextPutWideString: aWideString [
 	self
 		nextPutByte: TypeCodeWideString;
 		nextPutLengthEncodedInteger: buf size;
-		nextPutBytesFrom: buf len: buf size
+		nextPutBytesFrom: buf
 ]
 
 { #category : #writing }
@@ -285,7 +285,7 @@ SoilSerializer >> nextPutWideSymbol: aSymbol [
 	self
 		nextPutByte: TypeCodeWideSymbol;
 		nextPutLengthEncodedInteger:  buf size;
-		nextPutBytesFrom: buf len: buf size
+		nextPutBytesFrom: buf
 ]
 
 { #category : #'as yet unclassified' }
