@@ -77,15 +77,6 @@ SoilMaterializer >> nextAssociation: aClass [
 		value: self nextObject
 ]
 
-{ #category : #materializing }
-SoilMaterializer >> nextBoxedFloat64: aClass [ 
-	"We multiply the Boxesfloat by 1, this way we create a SmallFloat if possible"
-	^ BoxedFloat64 basicNew
-		  at: 1 put: self nextLengthEncodedInteger;
-		  at: 2 put: self nextLengthEncodedInteger;
-		  * 1
-]
-
 { #category : #accessing }
 SoilMaterializer >> nextByte [
 	^ stream next
@@ -155,6 +146,19 @@ SoilMaterializer >> nextExternalReference [
 	| index |
 	index := self nextLengthEncodedInteger.
 	^ externalObjectRegistry referenceAt: index
+]
+
+{ #category : #materializing }
+SoilMaterializer >> nextFloat: aClass [ 
+	"We multiply the Boxedfloat by 1, this way we create a SmallFloat if possible"
+	| float |
+	float :=  BoxedFloat64 basicNew
+		  at: 1 put: self nextLengthEncodedInteger;
+		  at: 2 put: self nextLengthEncodedInteger;
+		  * 1.
+	"Boxedfloat is a normal object (needs to be registered), SmallFloat is immediate"
+	float isImmediateObject ifFalse: [self registerObject: float].
+	^float
 ]
 
 { #category : #reading }
@@ -245,15 +249,6 @@ SoilMaterializer >> nextOrderedCollection: aClass [
 { #category : #'as yet unclassified' }
 SoilMaterializer >> nextPositiveInteger [
 	^ self nextLargePositiveInteger 
-]
-
-{ #category : #materializing }
-SoilMaterializer >> nextSmallFloat64: aClass [ 
-	"We multiply the Boxesfloat by 1, this way we create a SmallFloat if possible"
-	^ BoxedFloat64 basicNew
-		  at: 1 put: self nextLengthEncodedInteger;
-		  at: 2 put: self nextLengthEncodedInteger;
-		  * 1
 ]
 
 { #category : #actions }

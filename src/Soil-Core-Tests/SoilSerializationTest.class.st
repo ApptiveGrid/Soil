@@ -96,6 +96,8 @@ SoilSerializationTest >> testSerializationBoxedFloat64Twice [
 	"try to serialize an object that references twice the boxed floats"
 	float := 2.45227231256843e-45.
 	object := {float . float}.
+	
+	self deny: float isImmediateObject.
 
 	serialized := SoilSerializer serializeToBytes: object.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -103,8 +105,8 @@ SoilSerializationTest >> testSerializationBoxedFloat64Twice [
 	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First Float"
 	self assert: (serialized at: 3) equals: TypeCodeFloat.
-	"Second Float: should this be an internal reference, not the float again?"
-	self assert: (serialized at: 10) equals: TypeCodeFloat.
+	"Second Float: as this is a real object, we see reference to it"
+	self assert: (serialized at: 10) equals: TypeCodeInternalReference.
 	self assert: object first identicalTo: object second.
 	self assert: materialized equals: object.
 ]
@@ -631,8 +633,8 @@ SoilSerializationTest >> testSerializationSmallFloat64 [
 	float := 1.11.
 	self assert: float class equals: SmallFloat64.
 	serialized := SoilSerializer serializeToBytes: float.
-	self assert: serialized equals: #[21 143 133 199 255 3 195 235 163 225 5].
-	self assert: (serialized at: 1) equals: TypeCodeSmallFloat64.
+	self assert: serialized equals: #[9 143 133 199 255 3 195 235 163 225 5].
+	self assert: (serialized at: 1) equals: TypeCodeFloat.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: SmallFloat64.
 	self assert: materialized identicalTo: float
@@ -650,9 +652,9 @@ SoilSerializationTest >> testSerializationSmallFloat64Twice [
 	"First the Array"
 	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First Float"
-	self assert: (serialized at: 3) equals: TypeCodeSmallFloat64.
+	self assert: (serialized at: 3) equals: TypeCodeFloat.
 	"Second Float: as small floats are immediate, we do not store a reference"
-	self assert: (serialized at: 14) equals: TypeCodeSmallFloat64.
+	self assert: (serialized at: 14) equals: TypeCodeFloat.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized first identicalTo: object first.
@@ -666,8 +668,8 @@ SoilSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	float := 0.0.
 	self assert: float class equals: SmallFloat64.
 	serialized := SoilSerializer serializeToBytes: float.
-	self assert: serialized equals: #[21 0 0].
-	self assert: (serialized at: 1) equals: TypeCodeSmallFloat64.
+	self assert: serialized equals: #[9 0 0].
+	self assert: (serialized at: 1) equals: TypeCodeFloat.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: SmallFloat64.
 	self assert: materialized identicalTo: float.
@@ -676,8 +678,8 @@ SoilSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	float := 1.0.
 	self assert: float class equals: SmallFloat64.
 	serialized := SoilSerializer serializeToBytes: float.
-	self assert: serialized equals: #[21 128 128 192 255 3 0].
-	self assert: (serialized at: 1) equals: TypeCodeSmallFloat64.
+	self assert: serialized equals: #[9 128 128 192 255 3 0].
+	self assert: (serialized at: 1) equals: TypeCodeFloat.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: SmallFloat64.
 	self assert: materialized identicalTo: float.
@@ -686,8 +688,8 @@ SoilSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	float := -0.0.
 	self assert: float class equals: SmallFloat64.
 	serialized := SoilSerializer serializeToBytes: float.
-	self assert: serialized equals: #[21 128 128 128 128 8 0].
-	self assert: (serialized at: 1) equals: TypeCodeSmallFloat64.
+	self assert: serialized equals: #[9 128 128 128 128 8 0].
+	self assert: (serialized at: 1) equals: TypeCodeFloat.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: SmallFloat64.
 	self assert: materialized identicalTo: float.
