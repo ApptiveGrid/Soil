@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'externalObjectRegistry',
-		'stream'
+		'stream',
+		'objects'
 	],
 	#classVars : [
 		'characterEncoder'

@@ -3,7 +3,6 @@ Class {
 	#superclass : #SoilObjectCodec,
 	#instVars : [
 		'rootObject',
-		'objects',
 		'classes'
 	],
 	#category : #'Soil-Core-Serialization'
