@@ -114,7 +114,6 @@ SOCleanCodeTest >> testNoUnusedClasses [
 { #category : #tests }
 SOCleanCodeTest >> testNoUnusedInstanceVariablesLeft [
 	| variables classes validExceptions remaining |
-	self skip.
 	classes := Soil package definedClasses
 	           , (Soil package definedClasses collect: [ :each | each classSide ]).
 	
@@ -123,7 +122,7 @@ SOCleanCodeTest >> testNoUnusedInstanceVariablesLeft [
 	
 	classes := variables collect: [ :each | each definingClass ] as: Set.
 	
-	validExceptions := { }.	
+	validExceptions := { Soil . SOObjectSegment . SOObjectFile}.	
 	
 	remaining := classes asOrderedCollection removeAll: validExceptions; yourself.
 	self assert: remaining isEmpty description: ('the following classes have unused instance variables and should be cleaned: ', remaining asString)

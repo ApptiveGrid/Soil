@@ -1,9 +1,6 @@
 Class {
 	#name : #SoilMaterializer,
 	#superclass : #SoilObjectCodec,
-	#instVars : [
-		'objects'
-	],
 	#category : #'Soil-Core-Serialization'
 }
 
@@ -178,22 +175,16 @@ SoilMaterializer >> nextLargeNegativeInteger [
 	| integer |
 	"Large Integers are normal objects (need to be registered), small integers are immediate"
 	integer := 0 - self nextLengthEncodedInteger.
-	^ integer isLarge
-		  ifTrue: [ 
-			self registerObject: integer.
-			integer ]
-		  ifFalse: [ integer ]
+	integer isImmediateObject ifFalse: [ self registerObject: integer].
+	^integer
 ]
 
 { #category : #reading }
 SoilMaterializer >> nextLargePositiveInteger [
 	| integer |
 	integer := self nextLengthEncodedInteger.
-	^ integer isLarge
-	  ifTrue: [ 
-		self registerObject: integer.
-		integer ]
-	  ifFalse: [ integer ]
+	integer isImmediateObject ifFalse: [ self registerObject: integer].
+	^integer
 ]
 
 { #category : #'as yet unclassified' }
@@ -206,7 +197,7 @@ SoilMaterializer >> nextLengthEncodedInteger [
 
 { #category : #reading }
 SoilMaterializer >> nextMessage: aClass [ 
-		| message |
+	| message |
 	message := aClass new.
 	self registerObject: message.
 	^ message

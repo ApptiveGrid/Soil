@@ -3,7 +3,6 @@ Class {
 	#superclass : #SoilObjectCodec,
 	#instVars : [
 		'rootObject',
-		'objects',
 		'classes'
 	],
 	#category : #'Soil-Core-Serialization'
@@ -23,13 +22,13 @@ SoilSerializer class >> serializeToBytes: anObject [
 
 ]
 
-{ #category : #writing }
+{ #category : #'writing - basic' }
 SoilSerializer >> basicNextPutString: aString [ 
 	| buf |
 	buf := aString asByteArray.
 	self
 		nextPutLengthEncodedInteger: buf size;
-		nextPutBytesFrom: buf len: buf size
+		nextPutBytesFrom: buf
 ]
 
 { #category : #public }
@@ -61,7 +60,7 @@ SoilSerializer >> nextPutAssociation: anAssociation [
 	anAssociation value soilSerialize: self.
 ]
 
-{ #category : #writing }
+{ #category : #'writing - basic' }
 SoilSerializer >> nextPutByte: anInteger [ 
 	stream nextPut: anInteger
 ]
@@ -75,8 +74,8 @@ SoilSerializer >> nextPutByteArray: aByteArray [
 		self nextPutByte: (aByteArray at: i)].
 ]
 
-{ #category : #'as yet unclassified' }
-SoilSerializer >> nextPutBytesFrom: aByteArray len: length [ 
+{ #category : #'writing - basic' }
+SoilSerializer >> nextPutBytesFrom: aByteArray [
 	stream nextPutAll: aByteArray 
 
 ]
@@ -173,21 +172,21 @@ SoilSerializer >> nextPutInternalReference: anInteger [
 		nextPutLengthEncodedInteger: anInteger 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #writing }
 SoilSerializer >> nextPutLargeNegativeInteger: anInteger [ 
 	self 
 		nextPutByte: TypeCodeLargeNegativeInteger;
 		nextPutLengthEncodedInteger: 0 - anInteger
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #writing }
 SoilSerializer >> nextPutLargePositiveInteger: anInteger [ 
 	self 
 		nextPutByte: TypeCodeLargePositiveInteger;
 		nextPutLengthEncodedInteger: anInteger
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'writing - basic' }
 SoilSerializer >> nextPutLengthEncodedInteger: anInteger [ 
 	"store length of integer encoded in a way that the presence of a
 	most significant bit indicates that the next byte is part of
@@ -218,7 +217,7 @@ SoilSerializer >> nextPutNil: anUndefinedObject [
 	self nextPutByte: TypeCodeUndefined 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #writing }
 SoilSerializer >> nextPutObjectType [
 	self nextPutByte: TypeCodeObject 
 ]
@@ -248,7 +247,7 @@ SoilSerializer >> nextPutSymbol: aSymbol [
 	self
 		nextPutByte: TypeCodeSymbol;
 		nextPutLengthEncodedInteger: aSymbol size;
-		nextPutBytesFrom: aSymbol asByteArray len: aSymbol size
+		nextPutBytesFrom: aSymbol asByteArray
 ]
 
 { #category : #writing }
@@ -275,7 +274,7 @@ SoilSerializer >> nextPutWideString: aWideString [
 	self
 		nextPutByte: TypeCodeWideString;
 		nextPutLengthEncodedInteger: buf size;
-		nextPutBytesFrom: buf len: buf size
+		nextPutBytesFrom: buf
 ]
 
 { #category : #writing }
@@ -285,10 +284,10 @@ SoilSerializer >> nextPutWideSymbol: aSymbol [
 	self
 		nextPutByte: TypeCodeWideSymbol;
 		nextPutLengthEncodedInteger:  buf size;
-		nextPutBytesFrom: buf len: buf size
+		nextPutBytesFrom: buf
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #writing }
 SoilSerializer >> notSupportedError: anObject [ 
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]

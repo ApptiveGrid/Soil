@@ -10,5 +10,5 @@ DoubleByteLayout >> soilBasicSerialize: anObject with: serializer [
 	
 	instSize := anObject basicSize.
 	serializer nextPutLengthEncodedInteger: instSize.
-	serializer nextPutBytesFrom: anObject len: instSize
+	serializer nextPutBytesFrom: anObject
 ]
