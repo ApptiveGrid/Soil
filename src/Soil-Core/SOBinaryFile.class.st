@@ -5,7 +5,7 @@ Class {
 		'fileVersion',
 		'stream'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Files'
 }
 
 { #category : #testing }
@@ -25,7 +25,7 @@ SOBinaryFile >> fileVersion: anInteger [
 	stream nextPutAll: (anInteger asByteArrayOfSize: self fileVersionSize)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #utilities }
 SOBinaryFile >> fileVersionSize [
 	^ 2
 ]
