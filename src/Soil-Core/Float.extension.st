@@ -12,7 +12,7 @@ Float class >> soilMaterialize: materializer [
 
 { #category : #'*Soil-Core' }
 Float >> soilSerialize: serializer [
-	"SmallFlots are immediate objects, no registration needed"
+	"SmallFloats are immediate objects, no registration needed"
 	self isImmediateObject ifTrue: [ ^ self soilBasicSerialize: serializer ].
 	super soilSerialize: serializer
 ]

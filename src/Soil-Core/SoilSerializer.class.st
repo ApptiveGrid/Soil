@@ -173,21 +173,21 @@ SoilSerializer >> nextPutInternalReference: anInteger [
 		nextPutLengthEncodedInteger: anInteger 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #writing }
 SoilSerializer >> nextPutLargeNegativeInteger: anInteger [ 
 	self 
 		nextPutByte: TypeCodeLargeNegativeInteger;
 		nextPutLengthEncodedInteger: 0 - anInteger
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #writing }
 SoilSerializer >> nextPutLargePositiveInteger: anInteger [ 
 	self 
 		nextPutByte: TypeCodeLargePositiveInteger;
 		nextPutLengthEncodedInteger: anInteger
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'writing - basic' }
 SoilSerializer >> nextPutLengthEncodedInteger: anInteger [ 
 	"store length of integer encoded in a way that the presence of a
 	most significant bit indicates that the next byte is part of
@@ -288,7 +288,7 @@ SoilSerializer >> nextPutWideSymbol: aSymbol [
 		nextPutBytesFrom: buf
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #writing }
 SoilSerializer >> notSupportedError: anObject [ 
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]
