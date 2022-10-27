@@ -8,6 +8,8 @@ Class {
 		'TypeCodeByteCharacter',
 		'TypeCodeCharacter',
 		'TypeCodeClass',
+		'TypeCodeCompiledBlock',
+		'TypeCodeCompiledMethod',
 		'TypeCodeDate',
 		'TypeCodeDictionary',
 		'TypeCodeExternalReference',
@@ -77,7 +79,9 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeSymbol 					put: ByteSymbol;
 		at: TypeCodeTime 						put: Time;
 		at: TypeCodeWideString 				put: WideString;
-		at: TypeCodeCharacter 				put: Character
+		at: TypeCodeCharacter 				put: Character;
+		at: TypeCodeCompiledBlock  			put: CompiledBlock;
+		at: TypeCodeCompiledMethod 			put: CompiledMethod
 ]
 
 { #category : #initialization }
@@ -112,4 +116,8 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeTime := 28.
 	TypeCodeWideString := 29.
 	TypeCodeCharacter := 30.
+	TypeCodeCompiledBlock := 31.
+	TypeCodeCompiledMethod := 32.
+
+
 ]

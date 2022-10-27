@@ -111,6 +111,59 @@ SoilMaterializer >> nextClass [
 ]
 
 { #category : #reading }
+SoilMaterializer >> nextCompiledBlock: aClass [
+
+ 	| header bytecodesSize compiledBlock |
+
+ 	header := self nextObject.
+ 	bytecodesSize := self nextLengthEncodedInteger.
+	
+ 	compiledBlock := aClass
+ 		newMethod: bytecodesSize
+ 		header: header.
+
+ 	"first the literals"
+ 	"note: we store the outer method here as a copy, more thinking needed"
+ 	1 to: compiledBlock numLiterals do: [:i | 
+ 				compiledBlock literalAt: i put: self nextObject ].			
+
+ 	compiledBlock initialPC 
+ 		to: compiledBlock size
+ 		do: [ :index |
+ 			compiledBlock
+ 				at: index
+ 				put: stream nextByte ].
+ 	^compiledBlock
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextCompiledMethod: aClass [
+
+ 	| header bytecodesPlusTrailerSize compiledMethod |
+
+ 	header :=  self nextObject.
+ 	bytecodesPlusTrailerSize := self nextLengthEncodedInteger.
+
+ 	compiledMethod := aClass
+ 		newMethod: bytecodesPlusTrailerSize
+ 		header: header.
+
+ 	"first the literals"	
+ 	"for now we do store the class pointer in the last literal"	
+ 	1 to: compiledMethod numLiterals do: [:i | 
+ 				compiledMethod literalAt: i  put: self nextObject ].			
+
+ 	"then the bytecodes, we ignore the trailer for now"
+ 	compiledMethod initialPC 
+ 		to: compiledMethod size - compiledMethod trailer size
+ 		do: [ :index |
+ 			compiledMethod
+ 				at: index
+ 				put: self nextByte ].
+ 	^compiledMethod
+]
+
+{ #category : #reading }
 SoilMaterializer >> nextDate: aClass [ 
 	| date |
 	date := aClass 
