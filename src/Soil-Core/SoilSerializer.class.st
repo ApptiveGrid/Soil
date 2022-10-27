@@ -119,7 +119,10 @@ SoilSerializer >> nextPutCompiledBlock: aCompiledMethod [
 	1 to: aCompiledMethod numLiterals do: [ :i | 
 		(aCompiledMethod literalAt: i) soilSerialize: self ].
 	"variable part"
-	self nextPutBytesFrom: aCompiledMethod bytecodes
+	(SystemVersion current major == 11)
+	ifTrue: [self nextPutBytesFrom: aCompiledMethod bytecodes  ]
+	ifFalse: [ self nextPutBytesFrom: aCompiledMethod bytecode ]
+	
 ]
 
 { #category : #writing }
