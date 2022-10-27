@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'lastObjectIndex'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Files'
 }
 
 { #category : #'as yet unclassified' }
@@ -67,7 +67,7 @@ SOObjectIndexFile >> nextIndex [
 	^ self lastObjectIndex + 1
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOObjectIndexFile >> objectIndexSize [
 	^ 8
 ]

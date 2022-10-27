@@ -3,8 +3,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'path',
-		'objectRepository',
-		'characterEncoder'
+		'objectRepository'
 	],
 	#category : #'Soil-Core'
 }

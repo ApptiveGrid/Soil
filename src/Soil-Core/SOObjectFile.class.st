@@ -5,7 +5,7 @@ Class {
 		'id',
 		'fuelVersion'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Files'
 }
 
 { #category : #'as yet unclassified' }

@@ -16,7 +16,7 @@ SoilMaterializer class >> on: aReadStream [
 		stream: aReadStream 
 ]
 
-{ #category : #actions }
+{ #category : #'reading - basic' }
 SoilMaterializer >> basicNextString [
 	| buf length |
 	buf := ByteArray new: (length := self nextPositiveInteger).
@@ -26,7 +26,7 @@ SoilMaterializer >> basicNextString [
 
 { #category : #'as yet unclassified' }
 SoilMaterializer >> materialize [
-	^ self nextObject
+	^ self nextSoilObject
 ]
 
 { #category : #'instance creation' }
@@ -48,8 +48,8 @@ SoilMaterializer >> newObject [
 		^object
 	].
 	iSize := "classInfo realInstSize" object class allInstVarNames size.
-	1 to: iSize do: [:i | object instVarAt: i put: (self nextObject) ].
-	iSize + 1 to: iSize + basicSize do: [:i | object instVarAt: i put: self nextObject ].
+	1 to: iSize do: [:i | object instVarAt: i put: (self nextSoilObject) ].
+	iSize + 1 to: iSize + basicSize do: [:i | object instVarAt: i put: self nextSoilObject ].
 	object soilMaterialized: self.
 	^ object
 	
@@ -60,7 +60,7 @@ SoilMaterializer >> nextArray: aClass [
 	| array |
 	array := aClass new: self nextLengthEncodedInteger.
 	self registerObject: array.
-	1 to: array size do: [ :index | array at: index put: self nextObject ].
+	1 to: array size do: [ :index | array at: index put: self nextSoilObject ].
 	^ array
 ]
 
@@ -70,8 +70,8 @@ SoilMaterializer >> nextAssociation: aClass [
 	association := aClass new.
 	self registerObject: association.
 	^ association
-		key: self nextObject;
-		value: self nextObject
+		key: self nextSoilObject;
+		value: self nextSoilObject
 ]
 
 { #category : #accessing }
@@ -186,20 +186,20 @@ SoilMaterializer >> nextDictionary: aClass [
 	dict := aClass new: size.
 	self registerObject: dict.
 	size timesRepeat: [
-		key := self nextObject.
-		dict at: key put: self nextObject.
+		key := self nextSoilObject.
+		dict at: key put: self nextSoilObject.
 	].
 	^dict
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #reading }
 SoilMaterializer >> nextExternalReference [
 	| index |
 	index := self nextLengthEncodedInteger.
 	^ externalObjectRegistry referenceAt: index
 ]
 
-{ #category : #materializing }
+{ #category : #reading }
 SoilMaterializer >> nextFloat: aClass [ 
 	"We multiply the Boxedfloat by 1, this way we create a SmallFloat if possible"
 	| float |
@@ -222,7 +222,7 @@ SoilMaterializer >> nextFraction: aClass [
 	^ fraction
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #reading }
 SoilMaterializer >> nextInternalReference [
 	| index |
 	index := self nextLengthEncodedInteger.
@@ -246,7 +246,7 @@ SoilMaterializer >> nextLargePositiveInteger [
 	^integer
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'reading - basic' }
 SoilMaterializer >> nextLengthEncodedInteger [
 	| value |
 	value := self nextByte.
@@ -260,25 +260,21 @@ SoilMaterializer >> nextMessage: aClass [
 	message := aClass new.
 	self registerObject: message.
 	^ message
-		setSelector: self nextObject arguments: self nextObject;
+		setSelector: self nextSoilObject arguments: self nextSoilObject;
 		yourself
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextMessageSend: aClass [ 
-		| messageSend |
+SoilMaterializer >> nextMessageSend: aClass [
+
+	| messageSend |
 	messageSend := aClass new.
 	self registerObject: messageSend.
 	^ messageSend
-		receiver: self nextObject;
-		selector: self nextObject;
-		arguments: self nextObject;
-		yourself
-]
-
-{ #category : #'memory scanning' }
-SoilMaterializer >> nextObject [ 
-	^ (TypeCodeMapping at: self nextByte) soilMaterialize: self 
+		  receiver: self nextSoilObject;
+		  selector: self nextSoilObject;
+		  arguments: self nextSoilObject;
+		  yourself
 ]
 
 { #category : #reading }
@@ -287,7 +283,7 @@ SoilMaterializer >> nextOrderedCollection: aClass [
 	size := self  nextLengthEncodedInteger.
 	collection := aClass new: size.
 	self registerObject: collection.
-	size timesRepeat: [ collection addLast: self nextObject ].
+	size timesRepeat: [ collection addLast: self nextSoilObject ].
 	^ collection
 ]
 
@@ -296,7 +292,12 @@ SoilMaterializer >> nextPositiveInteger [
 	^ self nextLargePositiveInteger 
 ]
 
-{ #category : #actions }
+{ #category : #reading }
+SoilMaterializer >> nextSoilObject [ 
+	^ (TypeCodeMapping at: self nextByte) soilMaterialize: self 
+]
+
+{ #category : #reading }
 SoilMaterializer >> nextString [
 	| string |
 	string := self basicNextString.
@@ -305,7 +306,7 @@ SoilMaterializer >> nextString [
 
 ]
 
-{ #category : #actions }
+{ #category : #reading }
 SoilMaterializer >> nextSymbol [
 	| bytes length |
 	length := self nextLengthEncodedInteger.
