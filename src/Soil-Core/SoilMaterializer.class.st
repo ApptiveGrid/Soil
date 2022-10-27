@@ -115,7 +115,7 @@ SoilMaterializer >> nextCompiledBlock: aClass [
 
  	| header bytecodesSize compiledBlock |
 
- 	header := self nextObject.
+ 	header := self nextSoilObject.
  	bytecodesSize := self nextLengthEncodedInteger.
 	
  	compiledBlock := aClass
@@ -127,7 +127,7 @@ SoilMaterializer >> nextCompiledBlock: aClass [
  	"first the literals"
  	"note: we store the outer method here as a copy, more thinking needed"
  	1 to: compiledBlock numLiterals do: [:i | 
- 				compiledBlock literalAt: i put: self nextObject ].			
+ 				compiledBlock literalAt: i put: self nextSoilObject ].			
 
  	compiledBlock initialPC 
  		to: compiledBlock size
@@ -144,7 +144,7 @@ SoilMaterializer >> nextCompiledMethod: aClass [
 
  	| header bytecodesPlusTrailerSize compiledMethod |
 
- 	header :=  self nextObject.
+ 	header :=  self nextSoilObject.
  	bytecodesPlusTrailerSize := self nextLengthEncodedInteger.
 
  	compiledMethod := aClass
@@ -156,7 +156,7 @@ SoilMaterializer >> nextCompiledMethod: aClass [
  	"first the literals"	
  	"for now we do store the class pointer in the last literal"	
  	1 to: compiledMethod numLiterals do: [:i | 
- 				compiledMethod literalAt: i  put: self nextObject ].			
+ 				compiledMethod literalAt: i  put: self nextSoilObject ].			
 
  	"then the bytecodes, we ignore the trailer for now"
  	compiledMethod initialPC 
