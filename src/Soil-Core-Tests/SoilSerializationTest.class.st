@@ -235,7 +235,6 @@ SoilSerializationTest >> testSerializationCompiledMethodLayout [
 { #category : #'tests-layouts' }
 SoilSerializationTest >> testSerializationCompiledMethodLayoutCompiledBlock [
 	| object serialized materialized |
-	self skip. "something wrong but mayne on the level of de-serialing internal references"
  	"This tests CompiledBlock. we use a clean block for now"
  	object := [1+2 "clean block"] compiledBlock.
 
@@ -245,7 +244,9 @@ SoilSerializationTest >> testSerializationCompiledMethodLayoutCompiledBlock [
  	materialized := SoilMaterializer materializeFromBytes: serialized.
 
  	"for #= we need equal outercode to be the same, too"
- 	self assert: materialized bytecode equals: object bytecode.
+ 	(SystemVersion current major == 11)
+		ifTrue: [ self assert: materialized bytecodes equals: object bytecodes. ]
+		ifFalse: [ self assert: materialized bytecode equals: object bytecode. ].
  	self assert: materialized literals equals: object literals.
  	self assert: materialized class classLayout class equals: CompiledMethodLayout
 ]

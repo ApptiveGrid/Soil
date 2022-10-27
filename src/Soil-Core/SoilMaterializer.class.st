@@ -121,6 +121,8 @@ SoilMaterializer >> nextCompiledBlock: aClass [
  	compiledBlock := aClass
  		newMethod: bytecodesSize
  		header: header.
+	
+	self registerObject: compiledBlock.
 
  	"first the literals"
  	"note: we store the outer method here as a copy, more thinking needed"
@@ -132,7 +134,8 @@ SoilMaterializer >> nextCompiledBlock: aClass [
  		do: [ :index |
  			compiledBlock
  				at: index
- 				put: stream nextByte ].
+ 				put: self nextByte ].
+
  	^compiledBlock
 ]
 
@@ -148,6 +151,8 @@ SoilMaterializer >> nextCompiledMethod: aClass [
  		newMethod: bytecodesPlusTrailerSize
  		header: header.
 
+	self registerObject: compiledMethod.
+
  	"first the literals"	
  	"for now we do store the class pointer in the last literal"	
  	1 to: compiledMethod numLiterals do: [:i | 
@@ -160,6 +165,7 @@ SoilMaterializer >> nextCompiledMethod: aClass [
  			compiledMethod
  				at: index
  				put: self nextByte ].
+	
  	^compiledMethod
 ]
 
