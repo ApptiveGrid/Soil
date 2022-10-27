@@ -103,6 +103,50 @@ SoilSerializer >> nextPutClass: aClass [
 ]
 
 { #category : #writing }
+SoilSerializer >> nextPutCompiledBlock: aCompiledMethod [
+	
+	| bytecodesPlusTrailerSize |
+	bytecodesPlusTrailerSize := aCompiledMethod size
+	                            - aCompiledMethod initialPC + 1.
+
+	self
+		nextPutByte: TypeCodeCompiledBlock;
+		nextPutInteger: aCompiledMethod header;
+		nextPutLengthEncodedInteger: bytecodesPlusTrailerSize.
+	"literals"
+	"Here we have to take care about outer code: for now we will serialize it"
+
+	1 to: aCompiledMethod numLiterals do: [ :i | 
+		(aCompiledMethod literalAt: i) soilSerialize: self ].
+	"variable part"
+	(SystemVersion current major == 11)
+	ifTrue: [self nextPutBytesFrom: aCompiledMethod bytecodes  ]
+	ifFalse: [ self nextPutBytesFrom: aCompiledMethod bytecode ]
+	
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutCompiledMethod: aCompiledMethod [
+
+	| bytecodesPlusTrailerSize |
+	bytecodesPlusTrailerSize := aCompiledMethod size
+	                            - aCompiledMethod initialPC + 1.
+
+	self
+		nextPutByte: TypeCodeCompiledMethod;
+		nextPutInteger: aCompiledMethod header;
+		nextPutLengthEncodedInteger: bytecodesPlusTrailerSize.
+	"literals"
+	"for now we do store the class pointer in the last literal"
+	1 to: aCompiledMethod numLiterals do: [ :i | 
+		(aCompiledMethod literalAt: i) soilSerialize: self ].
+	"variable part"
+		(SystemVersion current major == 11)
+	ifTrue: [self nextPutBytesFrom: aCompiledMethod bytecodes  ]
+	ifFalse: [ self nextPutBytesFrom: aCompiledMethod bytecode ]
+]
+
+{ #category : #writing }
 SoilSerializer >> nextPutDate: aDate [ 
 	self 
 		nextPutByte: TypeCodeDate; 

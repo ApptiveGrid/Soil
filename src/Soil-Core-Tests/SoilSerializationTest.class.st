@@ -209,19 +209,46 @@ SoilSerializationTest >> testSerializationClass [
 
 { #category : #'tests-layouts' }
 SoilSerializationTest >> testSerializationCompiledMethodLayout [
+
 	| object serialized materialized |
-	<expectedFailure>
-	"Not yet implemented"
-	self flag: #TODO.
 	"We use CompiledMethod as an exampe of a class with a CompiledMethodLayout"
-	object := (OrderedCollection>>#do:) copy.
-	
-	self assert: object class classLayout class equals: CompiledMethodLayout.
+	object := (OrderedCollection >> #do:) copy.
+
+	self
+		assert: object class classLayout class
+		equals: CompiledMethodLayout.
 	serialized := SoilSerializer serializeToBytes: object.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
+
+	(SystemVersion current major == 11)
+		ifTrue: [ self assert: materialized bytecodes equals: object bytecodes. ]
+		ifFalse: [ self assert: materialized bytecode equals: object bytecode. ].
+	
+	self assert: materialized literals equals: object literals.
 	self assert: materialized equals: object.
-	self assert: materialized class classLayout class equals: CompiledMethodLayout.
+	self
+		assert: materialized class classLayout class
+		equals: CompiledMethodLayout
+]
+
+{ #category : #'tests-layouts' }
+SoilSerializationTest >> testSerializationCompiledMethodLayoutCompiledBlock [
+	| object serialized materialized |
+ 	"This tests CompiledBlock. we use a clean block for now"
+ 	object := [1+2 "clean block"] compiledBlock.
+
+ 	self assert: object class classLayout class equals: CompiledMethodLayout.
+ 	serialized := SoilSerializer serializeToBytes: object.
+
+ 	materialized := SoilMaterializer materializeFromBytes: serialized.
+
+ 	"for #= we need equal outercode to be the same, too"
+ 	(SystemVersion current major == 11)
+		ifTrue: [ self assert: materialized bytecodes equals: object bytecodes. ]
+		ifFalse: [ self assert: materialized bytecode equals: object bytecode. ].
+ 	self assert: materialized literals equals: object literals.
+ 	self assert: materialized class classLayout class equals: CompiledMethodLayout
 ]
 
 { #category : #tests }
