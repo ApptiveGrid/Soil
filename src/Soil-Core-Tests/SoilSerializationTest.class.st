@@ -344,7 +344,7 @@ SoilSerializationTest >> testSerializationFraction [
 	object := 1/2.
 	self assert: object class equals: Fraction.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[16 3 1 3 2].
+	self assert: serialized equals: #[16 1 2].
 	self assert: (serialized at: 1) equals: TypeCodeFraction.
 	
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -364,7 +364,7 @@ SoilSerializationTest >> testSerializationFractionTwice [
 	"First Fraction"
 	self assert: (serialized at: 3) equals: TypeCodeFraction.
 	"Second Fraction, reference to the first"
-	self assert: (serialized at: 8) equals: TypeCodeInternalReference.
+	self assert: (serialized at: 6) equals: TypeCodeInternalReference.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	
 	"identity is preserved"

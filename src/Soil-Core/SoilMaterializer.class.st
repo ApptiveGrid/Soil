@@ -213,11 +213,11 @@ SoilMaterializer >> nextFloat: aClass [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextFraction: aClass [ 
+SoilMaterializer >> nextFraction: aClass [
 	| fraction |
 	fraction := aClass
-		numerator: self nextSoilObject
-		denominator: self nextSoilObject.
+		numerator: self nextLengthEncodedInteger
+		denominator: self nextLengthEncodedInteger.
 	self registerObject: fraction.
 	^ fraction
 ]

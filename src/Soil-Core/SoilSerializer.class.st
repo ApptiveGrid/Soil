@@ -183,10 +183,12 @@ SoilSerializer >> nextPutFloat: aFloat [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutFraction: aNumber [ 
-	self nextPutByte: TypeCodeFraction.
-	aNumber numerator soilSerialize: self.
-	aNumber denominator soilSerialize: self
+SoilSerializer >> nextPutFraction: aNumber [
+	"we know that numerator and denominator are SmallIntegers"
+	self
+		nextPutByte: TypeCodeFraction;
+		nextPutLengthEncodedInteger: aNumber numerator;
+		nextPutLengthEncodedInteger: aNumber denominator
 ]
 
 { #category : #writing }
