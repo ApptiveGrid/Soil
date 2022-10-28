@@ -279,12 +279,13 @@ SoilSerializer >> nextPutProcessorScheduler: aProcessorScheduler [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutScaledDecimal: aNumber [ 
+SoilSerializer >> nextPutScaledDecimal: aNumber [
+	"we know that numerator, denominator and scale are SmallIntegers"
 	self
-		nextPutByte: TypeCodeScaledDecimal.
-		aNumber numerator soilSerialize: self.
-		aNumber denominator soilSerialize: self.
-		aNumber scale soilSerialize: self.
+		nextPutByte: TypeCodeScaledDecimal;
+		nextPutLengthEncodedInteger: aNumber numerator;
+		nextPutLengthEncodedInteger: aNumber denominator;
+		nextPutLengthEncodedInteger: aNumber scale 
 ]
 
 { #category : #writing }
