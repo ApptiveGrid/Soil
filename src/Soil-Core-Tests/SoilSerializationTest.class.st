@@ -344,7 +344,7 @@ SoilSerializationTest >> testSerializationFraction [
 	object := 1/2.
 	self assert: object class equals: Fraction.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[16 1 2].
+	self assert: serialized equals: #[16 3 1 3 2].
 	self assert: (serialized at: 1) equals: TypeCodeFraction.
 	
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -364,7 +364,7 @@ SoilSerializationTest >> testSerializationFractionTwice [
 	"First Fraction"
 	self assert: (serialized at: 3) equals: TypeCodeFraction.
 	"Second Fraction, reference to the first"
-	self assert: (serialized at: 6) equals: TypeCodeInternalReference.
+	self assert: (serialized at: 8) equals: TypeCodeInternalReference.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	
 	"identity is preserved"
@@ -604,7 +604,7 @@ SoilSerializationTest >> testSerializationProcessSchedulerCode [
 	self assert: materialized equals: Processor
 ]
 
-{ #category : #'tests-encoded-subclasses' }
+{ #category : #tests }
 SoilSerializationTest >> testSerializationScaledDecimal [
 	"ScaledDecimal is a subclass of Fraction, make sure it works"
 
@@ -612,8 +612,7 @@ SoilSerializationTest >> testSerializationScaledDecimal [
 	object := 10s2.
 	serialized := SoilSerializer serializeToBytes: object.
 	
-	"this is NOT serialized using TypeCodeFraction"
-	self deny: (serialized at: 1) equals: TypeCodeFraction.
+	self assert: (serialized at: 1) equals: TypeCodeScaledDecimal.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: ScaledDecimal.
