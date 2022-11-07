@@ -19,7 +19,7 @@ SoilMaterializer class >> on: aReadStream [
 { #category : #'reading - basic' }
 SoilMaterializer >> basicNextString [
 	| buf length |
-	buf := ByteArray new: (length := self nextPositiveInteger).
+	buf := ByteArray new: (length := self nextLengthEncodedInteger).
 	stream readInto: buf startingAt: 1 count: length.
 	^ buf asString
 ]
@@ -285,11 +285,6 @@ SoilMaterializer >> nextOrderedCollection: aClass [
 	self registerObject: collection.
 	size timesRepeat: [ collection addLast: self nextSoilObject ].
 	^ collection
-]
-
-{ #category : #'as yet unclassified' }
-SoilMaterializer >> nextPositiveInteger [
-	^ self nextLargePositiveInteger 
 ]
 
 { #category : #reading }
