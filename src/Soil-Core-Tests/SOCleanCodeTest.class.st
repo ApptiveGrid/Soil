@@ -28,6 +28,46 @@ SOCleanCodeTest class >> cleanupWhiteSpaceTrimRight [
 ]
 
 { #category : #tests }
+SOCleanCodeTest >> testCodeCoverage [
+
+	| collector methods coverage testClasses perMethodCoveragePercentage |
+	
+	self skip.
+	"take care: this test interferes with the run coverage feature in the testRunner, we should improve
+	it to not run test tagged <ignoreForCoverage>"
+	collector :=Smalltalk globals at: #CoverageCollector ifPresent: [:class | class new] ifAbsent: [self error: 'class CoverageCollector not found' ].
+	methods := Soil package methods.
+	"Remove all the methods and classes we are not interested in"
+	
+	"subclassResponsibility methods"
+	methods := methods reject: [ :method | 
+		           method isAbstract ].
+	
+	"all methods tagged with <ignoreForCoverage>"
+	methods := methods reject: [ :method | 
+		           method hasPragmaNamed: #ignoreForCoverage ].
+
+	"remove all method from classes in #classNamesNotUnderTest"
+	methods := methods reject: [ :method | 
+		           SoilTest classNamesNotUnderTest includes:
+			           method methodClass instanceSide name ].
+
+	collector methods: methods.
+
+	testClasses := self class package definedClasses select: [ :each | 
+		               each isTestCase ].
+	"we need to remove this test, just remove the whole class for now
+	(we should ignore test tagged with <ignoreForCoverage>)"
+	testClasses := testClasses copyWithout: self class.
+
+	coverage := collector runOn: [ 
+		            testClasses do: [ :class | class buildSuite run ] ].
+	perMethodCoveragePercentage := (100.0 * coverage methods size / coverage collector methods size) rounded.
+	
+	self assert: perMethodCoveragePercentage >= 93.
+]
+
+{ #category : #tests }
 SOCleanCodeTest >> testNoDuplicatedMethodInHierarchy [
 	"There should be no methods in the hierachy that are already in a superclass"
 	
