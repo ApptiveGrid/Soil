@@ -604,7 +604,7 @@ SoilSerializationTest >> testSerializationProcessSchedulerCode [
 	self assert: materialized equals: Processor
 ]
 
-{ #category : #'tests-encoded-subclasses' }
+{ #category : #tests }
 SoilSerializationTest >> testSerializationScaledDecimal [
 	"ScaledDecimal is a subclass of Fraction, make sure it works"
 
@@ -612,9 +612,8 @@ SoilSerializationTest >> testSerializationScaledDecimal [
 	object := 10s2.
 	serialized := SoilSerializer serializeToBytes: object.
 	
-	"this is NOT serialized using TypeCodeFraction"
-	self deny: (serialized at: 1) equals: TypeCodeFraction.
-
+	self assert: (serialized at: 1) equals: TypeCodeScaledDecimal.
+	self assert: serialized equals: #[21 10 1 2].
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: ScaledDecimal.
 	self assert: materialized equals: object

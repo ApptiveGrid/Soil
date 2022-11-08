@@ -47,8 +47,9 @@ SoilSerializer >> initialize [
 
 { #category : #writing }
 SoilSerializer >> nextPutArray: anArray [ 
-	self nextPutByte: TypeCodeArray.
-	self nextPutLengthEncodedInteger: anArray size.
+	self 
+		nextPutByte: TypeCodeArray;
+		nextPutLengthEncodedInteger: anArray size.
 	1 to: anArray size do: [:i | 
 		(anArray at: i) soilSerialize: self ].
 ]
@@ -83,15 +84,12 @@ SoilSerializer >> nextPutBytesFrom: aByteArray [
 { #category : #writing }
 SoilSerializer >> nextPutCharacter: aCharacter [
 	"we store 8bit characters with TypeCodeByteCharacter to save some space"
-	aCharacter asciiValue > 255
-		ifTrue: [ 
-			self
-				nextPutByte: TypeCodeCharacter;
-				nextPutLengthEncodedInteger: aCharacter asInteger ]
-		ifFalse: [ 
-			self
-				nextPutByte: TypeCodeByteCharacter;
-				nextPutByte: aCharacter asciiValue ]
+	| charAsInteger |
+	charAsInteger := aCharacter asInteger.
+	self nextPutByte: (charAsInteger > 255
+			 ifTrue: [ TypeCodeCharacter ]
+			 ifFalse: [ TypeCodeByteCharacter ]).
+	self nextPutLengthEncodedInteger: charAsInteger
 ]
 
 { #category : #writing }
@@ -185,7 +183,8 @@ SoilSerializer >> nextPutFloat: aFloat [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutFraction: aNumber [ 
+SoilSerializer >> nextPutFraction: aNumber [
+	"we know that numerator and denominator are SmallIntegers"
 	self
 		nextPutByte: TypeCodeFraction;
 		nextPutLengthEncodedInteger: aNumber numerator;
@@ -277,6 +276,16 @@ SoilSerializer >> nextPutOrderedCollection: aCollection [
 { #category : #writing }
 SoilSerializer >> nextPutProcessorScheduler: aProcessorScheduler [ 
 	self nextPutByte: TypeCodeProcessScheduler 
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutScaledDecimal: aNumber [
+	"we know that numerator, denominator and scale are SmallIntegers"
+	self
+		nextPutByte: TypeCodeScaledDecimal;
+		nextPutLengthEncodedInteger: aNumber numerator;
+		nextPutLengthEncodedInteger: aNumber denominator;
+		nextPutLengthEncodedInteger: aNumber scale 
 ]
 
 { #category : #writing }

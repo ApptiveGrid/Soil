@@ -19,7 +19,7 @@ SoilMaterializer class >> on: aReadStream [
 { #category : #'reading - basic' }
 SoilMaterializer >> basicNextString [
 	| buf length |
-	buf := ByteArray new: (length := self nextPositiveInteger).
+	buf := ByteArray new: (length := self nextLengthEncodedInteger).
 	stream readInto: buf startingAt: 1 count: length.
 	^ buf asString
 ]
@@ -74,7 +74,7 @@ SoilMaterializer >> nextAssociation: aClass [
 		value: self nextSoilObject
 ]
 
-{ #category : #accessing }
+{ #category : #'reading - basic' }
 SoilMaterializer >> nextByte [
 	^ stream next
 ]
@@ -213,7 +213,7 @@ SoilMaterializer >> nextFloat: aClass [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextFraction: aClass [ 
+SoilMaterializer >> nextFraction: aClass [
 	| fraction |
 	fraction := aClass
 		numerator: self nextLengthEncodedInteger
@@ -287,9 +287,16 @@ SoilMaterializer >> nextOrderedCollection: aClass [
 	^ collection
 ]
 
-{ #category : #'as yet unclassified' }
-SoilMaterializer >> nextPositiveInteger [
-	^ self nextLargePositiveInteger 
+{ #category : #reading }
+SoilMaterializer >> nextScaledDecimal: aClass [
+
+	| scaledDecimal |
+	scaledDecimal := aClass new
+		                 setNumerator: self nextLengthEncodedInteger
+		                 denominator: self nextLengthEncodedInteger
+		                 scale: self nextLengthEncodedInteger.
+	self registerObject: scaledDecimal.
+	^ scaledDecimal
 ]
 
 { #category : #reading }

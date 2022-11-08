@@ -26,7 +26,7 @@ Class {
 		'TypeCodeObject',
 		'TypeCodeOrderedCollection',
 		'TypeCodeProcessScheduler',
-		'TypeCodeSmallFloat64',
+		'TypeCodeScaledDecimal',
 		'TypeCodeString',
 		'TypeCodeSymbol',
 		'TypeCodeSystemDictionary',
@@ -71,6 +71,7 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeExternalReference  	put: [ :materializer | materializer nextExternalReference ];
 		at: TypeCodeIdentityDictionary 	put: IdentityDictionary;
 		at: TypeCodeProcessScheduler  		put: Processor;
+		at: TypeCodeScaledDecimal 			put: ScaledDecimal;
 		at: TypeCodeSystemDictionary 		put: Smalltalk globals;
 		at: TypeCodeWideSymbol 				put: WideSymbol;
 		at: TypeCodeMessage 					put: Message;
@@ -81,7 +82,7 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeWideString 				put: WideString;
 		at: TypeCodeCharacter 				put: Character;
 		at: TypeCodeCompiledBlock  			put: CompiledBlock;
-		at: TypeCodeCompiledMethod 			put: CompiledMethod
+		at: TypeCodeCompiledMethod 			put: CompiledMethod.
 ]
 
 { #category : #initialization }
@@ -107,6 +108,7 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeExternalReference := 18.
 	TypeCodeIdentityDictionary := 19.
 	TypeCodeProcessScheduler := 20.
+	TypeCodeScaledDecimal := 21.
 	TypeCodeSystemDictionary := 22.
 	TypeCodeWideSymbol := 23.
 	TypeCodeMessage := 24.
@@ -117,7 +119,7 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeWideString := 29.
 	TypeCodeCharacter := 30.
 	TypeCodeCompiledBlock := 31.
-	TypeCodeCompiledMethod := 32.
+	TypeCodeCompiledMethod := 32
 
 
 ]
