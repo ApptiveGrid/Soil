@@ -1,6 +1,16 @@
 Extension { #name : #WordLayout }
 
 { #category : #'*Soil-Core' }
+WordLayout >> soilBasicMaterialize: objectClass with: serializer [
+	| object basicSize |
+	 object := objectClass basicNew: (basicSize := serializer nextLengthEncodedInteger).
+	serializer registerObject: object.
+	
+	1 to: basicSize do: [:i | object basicAt: i put: serializer nextLengthEncodedInteger].
+	^object
+]
+
+{ #category : #'*Soil-Core' }
 WordLayout >> soilBasicSerialize: anObject with: serializer [
 	| classInfo instSize |
 	classInfo := serializer classDescriptionFor: anObject class.

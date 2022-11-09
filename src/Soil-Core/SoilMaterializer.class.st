@@ -31,28 +31,10 @@ SoilMaterializer >> materialize [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| name object basicSize iSize objectClass |
+	| name objectClass |
 	name := self basicNextString .
 	objectClass := Smalltalk at: name asSymbol.
-	objectClass isVariable 
-		ifTrue: [ object := objectClass basicNew: (basicSize := self nextLengthEncodedInteger) ]
-		ifFalse: [
-			basicSize := 0.
-			object := objectClass basicNew.
-		].
-	self registerObject: object.
-	object class isBits ifTrue: [
-		objectClass isWords 
-			ifTrue: [1 to: basicSize do: [:i | object basicAt: i put: self nextLengthEncodedInteger]]
-			ifFalse: [ stream readInto: object startingAt: 1 count: basicSize ].
-		^object
-	].
-	iSize := "classInfo realInstSize" object class allInstVarNames size.
-	1 to: iSize do: [:i | object instVarAt: i put: (self nextSoilObject) ].
-	iSize + 1 to: iSize + basicSize do: [:i | object instVarAt: i put: self nextSoilObject ].
-	object soilMaterialized: self.
-	^ object
-	
+	^objectClass classLayout soilBasicMaterialize: objectClass with: self
 ]
 
 { #category : #reading }
@@ -355,4 +337,9 @@ SoilMaterializer >> nextWideSymbol [
 SoilMaterializer >> registerObject: anObject [
 	objects ifNil: [ objects := OrderedCollection new ].
 	objects add: anObject 
+]
+
+{ #category : #accessing }
+SoilMaterializer >> stream [
+	^stream
 ]
