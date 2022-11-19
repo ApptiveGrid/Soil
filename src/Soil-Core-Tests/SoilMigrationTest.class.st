@@ -37,7 +37,7 @@ SoilMigrationTest >> tearDown [
 ]
 
 { #category : #tests }
-SoilMigrationTest >> testSerializingRootTwoCluster [
+SoilMigrationTest >> testMaterializingObjectWithChangedShape [
 	| tx tx2 materializedRoot object |
 	object := migrationClass new.
 	object 
