@@ -109,6 +109,11 @@ SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 ]
 
 { #category : #'instance creation' }
+SOTransaction >> newMaterializer [
+	^ soil newMaterializer 
+]
+
+{ #category : #'instance creation' }
 SOTransaction >> newObjectId [ 
 	^ self objectRepository newObjectId
 ]
@@ -158,7 +163,8 @@ SOTransaction >> rootObjectId [
 { #category : #accessing }
 SOTransaction >> serializer [
 	
-	^ SoilSerializer new.
+	^ SoilSerializer new
+		soil: soil 
 
 ]
 

@@ -2,8 +2,8 @@ Class {
 	#name : #SoilSerializer,
 	#superclass : #SoilObjectCodec,
 	#instVars : [
-		'rootObject',
-		'classes'
+		'clusterRoot',
+		'soil'
 	],
 	#category : #'Soil-Core-Serialization'
 }
@@ -33,10 +33,7 @@ SoilSerializer >> basicNextPutString: aString [
 
 { #category : #public }
 SoilSerializer >> classDescriptionFor: aClass [ 
-	classes ifNil: [ classes := Dictionary new  ].
-	^ classes 
-		at: aClass 
-		ifAbsentPut: [ SOClassDescription for: aClass ]
+	^ soil classRegistry classDescriptionFor: aClass
 ]
 
 { #category : #initialization }
@@ -360,7 +357,7 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 			internal. This might be too dangerous later and might
 			be removed" 
 			0 ].
-	((anObject == rootObject) not and: [ externalIndex > 0 ])
+	((anObject == clusterRoot) not and: [ externalIndex > 0 ])
 		ifTrue: [ 
 			self nextPutExternalReference: externalIndex ]
 		ifFalse: [  
@@ -371,8 +368,13 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 
 { #category : #private }
 SoilSerializer >> serialize: anObject [
-	rootObject := anObject.
-	rootObject soilSerialize: self.
+	clusterRoot := anObject.
+	clusterRoot soilSerialize: self.
 	stream flush.
 	^ stream contents
+]
+
+{ #category : #accessing }
+SoilSerializer >> soil: aSoil [ 
+	soil := aSoil
 ]

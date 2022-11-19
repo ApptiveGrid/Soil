@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'path',
-		'objectRepository'
+		'objectRepository',
+		'classRegistry'
 	],
 	#category : #'Soil-Core'
 }
@@ -17,6 +18,14 @@ Soil class >> characterEncoding: aString [
 Soil class >> path: aString [ 
 	^ self new
 		path: aString
+]
+
+{ #category : #accessing }
+Soil >> classRegistry [
+	^ classRegistry ifNil: [ 
+		classRegistry := SoilClassRegistry new
+			soil: self;
+			yourself ]
 ]
 
 { #category : #'initialize-release' }
@@ -43,6 +52,13 @@ Soil >> initializeFilesystem [
 		objectRepository: objectRepository;
 		id: 1) initializeDatabase"
 	
+]
+
+{ #category : #'instance creation' }
+Soil >> newMaterializer [
+	^ SoilMaterializer new 
+		soil: self;
+		yourself
 ]
 
 { #category : #transactions }

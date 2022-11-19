@@ -1,6 +1,9 @@
 Class {
 	#name : #SoilMaterializer,
 	#superclass : #SoilObjectCodec,
+	#instVars : [
+		'soil'
+	],
 	#category : #'Soil-Core-Serialization'
 }
 
@@ -31,10 +34,13 @@ SoilMaterializer >> materialize [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| name objectClass |
+	| name objectClass classInfo |
 	name := self basicNextString .
-	objectClass := Smalltalk at: name asSymbol.
-	^objectClass classLayout soilBasicMaterialize: objectClass with: self
+	classInfo := soil classRegistry loadIndex: name.
+	objectClass := Smalltalk at: classInfo name asSymbol.
+	^ (objectClass soilClassIndex = name)
+		ifTrue: [ objectClass classLayout soilBasicMaterialize: objectClass with: self ]
+		ifFalse: [ self halt ]
 ]
 
 { #category : #reading }
@@ -337,6 +343,18 @@ SoilMaterializer >> nextWideSymbol [
 SoilMaterializer >> registerObject: anObject [
 	objects ifNil: [ objects := OrderedCollection new ].
 	objects add: anObject 
+]
+
+{ #category : #accessing }
+SoilMaterializer >> soil [
+
+	^ soil
+]
+
+{ #category : #accessing }
+SoilMaterializer >> soil: anObject [
+
+	soil := anObject
 ]
 
 { #category : #accessing }

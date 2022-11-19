@@ -11,3 +11,10 @@ FixedLayout >> soilBasicMaterialize: objectClass with: serializer [
 	object soilMaterialized: serializer.
 	^ object
 ]
+
+{ #category : #'*Soil-Core' }
+FixedLayout >> soilClassIndex [
+	^ String streamContents: [ :stream | 
+		slotScope do: [ :slot  |
+				stream nextPutAll: slot name ] ]
+]

@@ -55,10 +55,15 @@ SOObjectRecord >> initialize [
 
 { #category : #'as yet unclassified' }
 SOObjectRecord >> materializeObject [
-	object := SoilMaterializer new 
+	object := self newMaterializer 
 		stream: bytes readStream;
 		externalObjectRegistry: self;
 		materialize
+]
+
+{ #category : #'instance creation' }
+SOObjectRecord >> newMaterializer [ 
+	^ transaction newMaterializer
 ]
 
 { #category : #accessing }

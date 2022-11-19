@@ -7,6 +7,11 @@ Class >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Core' }
+Class >> soilClassIndex [
+	^ name , self classLayout soilClassIndex 
+]
+
+{ #category : #'*Soil-Core' }
 Class class >> soilMaterialize: materializer [
 
 	^ materializer nextClass
