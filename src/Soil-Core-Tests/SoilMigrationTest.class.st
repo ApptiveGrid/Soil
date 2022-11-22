@@ -39,6 +39,7 @@ SoilMigrationTest >> tearDown [
 { #category : #tests }
 SoilMigrationTest >> testMaterializingObjectWithChangedShape [
 	| tx tx2 materializedRoot object |
+	self skip.
 	object := migrationClass new.
 	object 
 		instVarNamed: #one put: 1;

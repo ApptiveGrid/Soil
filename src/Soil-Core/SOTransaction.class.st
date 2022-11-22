@@ -3,8 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'soil',
-		'objects',
-		'objectIndex'
+		'idMap',
+		'objectMap'
 	],
 	#category : #'Soil-Core'
 }
@@ -12,13 +12,13 @@ Class {
 { #category : #aborting }
 SOTransaction >> abort [
 	soil := nil.
-	objects := nil.
-	objectIndex := nil
+	idMap := nil.
+	objectMap := nil
 ]
 
 { #category : #adding }
 SOTransaction >> addClusterObject: anObject [ 
-	objectIndex at: anObject ifPresent: [ ^ self ].
+	objectMap at: anObject ifPresent: [ ^ self ].
 	self 
 		atObjectId: self newObjectId 
 		putObject: anObject.
@@ -29,41 +29,47 @@ SOTransaction >> addClusterObject: anObject [
 { #category : #accessing }
 SOTransaction >> atObjectId: objectId putObject: anObject [
 	| record |
-	(objects at: anObject ifAbsent: [nil]) ifNotNil: [ Error signal: 'object should not be added already' ].
-	(objectIndex at: objectId ifAbsent: [ nil ]) ifNotNil: [ Error signal: 'did not expect to be present' ].
+	(objectMap at: anObject ifAbsent: [nil]) ifNotNil: [ Error signal: 'object should not be added already' ].
+	(idMap at: objectId ifAbsent: [ nil ]) ifNotNil: [ Error signal: 'did not expect to be present' ].
 	record := SOObjectRecord new
 		changed: true; 
 		object: anObject;
 		objectId: objectId;
 		transaction: self.
-	objects at: objectId put: record.
-	objectIndex at: anObject put: record
+	idMap at: objectId put: record.
+	objectMap at: anObject put: record
 ]
 
 { #category : #accessing }
-SOTransaction >> commit [
+SOTransaction >> checkpoint [
 	| bytes |
 	"iterate over all object ids to assign numbers before they get serialized"
-	objects keys do: [ :id  |
+	idMap keys do: [ :id  |
 		(id index = 0) ifTrue: [ id setIndex: (self objectRepository segmentAt: id segment) allocateNextIndex ] ].
-	objects keysAndValuesDo: [ :id :record |
+	idMap keysAndValuesDo: [ :id :record |
 		record hasChanged ifTrue: [ 
 			bytes := record serialize. 
 			self objectRepository 
 				at: id 
 				put: bytes ] ].
-	self abort
+]
+
+{ #category : #accessing }
+SOTransaction >> commit [
+	self 
+		checkpoint;
+		abort
 ]
 
 { #category : #aborting }
 SOTransaction >> dirtyObjects [
-	^ (objects select: [ :each | each hasChanged ]) collect: #object
+	^ (idMap select: [ :each | each hasChanged ]) collect: #object
 ]
 
 { #category : #'as yet unclassified' }
 SOTransaction >> idOf: anObject [ 
 	| id |
-	id := objectIndex at: anObject.
+	id := objectMap at: anObject.
 	(id index = 0) ifTrue: [ Error signal: 'index of object id is not initialized' ].
 	^ id
 ]
@@ -71,20 +77,20 @@ SOTransaction >> idOf: anObject [
 { #category : #initialization }
 SOTransaction >> initialize [ 
 	super initialize.
-	objects := IdentityDictionary new.
-	objectIndex := IdentityDictionary new.
+	idMap := IdentityDictionary new.
+	objectMap := IdentityDictionary new.
 ]
 
 { #category : #testing }
 SOTransaction >> isAborted [
-	^ soil isNil & objects isNil & objectIndex isNil
+	^ soil isNil & idMap isNil & objectMap isNil
 ]
 
 { #category : #testing }
 SOTransaction >> isRoot: anObject [
 	self flag: #todo.
 	"this is surely not true but a shortcut for now"
-	^ (objectIndex 
+	^ (objectMap 
 		at: anObject 
 		ifAbsent: [ nil ]) notNil
 ]
@@ -101,8 +107,8 @@ SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 		transaction: self;
 		objectId: objectId;
 		materializeObject.
-	objects at: objectId put: record.
-	objectIndex at: record object put: record.
+	idMap at: objectId put: record.
+	objectMap at: record object put: record.
 	^ record object 
 
 	
@@ -120,7 +126,7 @@ SOTransaction >> newObjectId [
 
 { #category : #accessing }
 SOTransaction >> objectIndex [
-	^ objectIndex
+	^ objectMap
 ]
 
 { #category : #'as yet unclassified' }
@@ -130,15 +136,22 @@ SOTransaction >> objectRepository [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> objectWithId: objectId ifNone: aBlock [
-	objects at: objectId ifPresent: [ :rec | ^ rec object ].
+	idMap 
+	at: objectId 
+	ifPresent: [ :record | ^ record object ].
 	
 	^ self materializationWithId: objectId ifNone: aBlock.
 
 ]
 
 { #category : #accessing }
+SOTransaction >> records [
+	^ idMap values
+]
+
+{ #category : #accessing }
 SOTransaction >> root [
-	objects associations
+	idMap associations
 		detect: [ :assoc | (assoc key segment = 1) & (assoc key index = 1) ]
 		ifFound: [ :assoc | ^ assoc value object ].
 	

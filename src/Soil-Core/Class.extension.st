@@ -1,6 +1,11 @@
 Extension { #name : #Class }
 
 { #category : #'*Soil-Core' }
+Class >> isSoilClusterRoot [ 
+	^ false
+]
+
+{ #category : #'*Soil-Core' }
 Class >> soilBasicSerialize: serializer [
 
 	serializer nextPutClass: self

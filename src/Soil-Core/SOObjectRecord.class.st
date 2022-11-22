@@ -37,10 +37,20 @@ SOObjectRecord >> hasChanged [
 SOObjectRecord >> indexOf: anObject [
 	| index |
 	index := references indexOf: anObject.
-	(index > 0) ifTrue: [ ^ index ].
+	(index > 0) ifTrue: [ 
+		"anObject is an external object but has already been registered. Just
+		returning the index of the registered reference"
+		^ index ].
+	(anObject class isSoilClusterRoot) ifTrue: [ 
+		"anObject could be made cluster root per class side setting. In that 
+		case we add it as cluster root to the transaction so the following
+		will find it"
+		transaction addClusterObject: anObject ]. 
 	transaction objectIndex 
 		at: anObject
 		ifPresent: [ :s | 
+			"anObject is an external object. Allocate a new local index and 
+			return that"
 			references add: s.
 			^ references size ].
 	^ 0

@@ -47,11 +47,7 @@ Soil >> initializeFilesystem [
 		ifTrue: [ SODatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
 	(objectRepository 
 		initializeFilesystem;
-		addNewSegment) initializeFilesystem.
-	"(SOObjectSegment new 
-		objectRepository: objectRepository;
-		id: 1) initializeDatabase"
-	
+		addNewSegment) initializeFilesystem
 ]
 
 { #category : #'instance creation' }
