@@ -26,11 +26,6 @@ SoilClassRegistry >> classDescriptionFor: aClass [
 ]
 
 { #category : #'as yet unclassified' }
-SoilClassRegistry >> createClassDescriptionFor: aClass [ 
-	self shouldBeImplemented.
-]
-
-{ #category : #'as yet unclassified' }
 SoilClassRegistry >> loadIndex: aString [ 
 	^ self readClassDescriptionFrom: self path / aString
 ]

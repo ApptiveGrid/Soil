@@ -33,7 +33,7 @@ SoilSerializer >> basicNextPutString: aString [
 
 { #category : #public }
 SoilSerializer >> classDescriptionFor: aClass [ 
-	^ soil classRegistry classDescriptionFor: aClass
+	^ soil classRegistry classDescriptionFor: aClass 
 ]
 
 { #category : #initialization }
