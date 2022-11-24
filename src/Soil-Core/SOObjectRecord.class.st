@@ -7,7 +7,8 @@ Class {
 		'transaction',
 		'objectId',
 		'references',
-		'bytes'
+		'bytes',
+		'committed'
 	],
 	#category : #'Soil-Core'
 }
@@ -18,6 +19,12 @@ SOObjectRecord class >> readFrom: aStream [
 		readFrom: aStream
 ]
 
+{ #category : #'instance creation' }
+SOObjectRecord >> addReference: reference [
+	(reference index = 0) ifTrue: [ Error signal ].
+	references add: reference
+]
+
 { #category : #accessing }
 SOObjectRecord >> bytes [
 	^ bytes
@@ -26,6 +33,11 @@ SOObjectRecord >> bytes [
 { #category : #accessing }
 SOObjectRecord >> changed: aBoolean [
 	changed := aBoolean 
+]
+
+{ #category : #asserting }
+SOObjectRecord >> committed [ 
+	committed := true
 ]
 
 { #category : #testing }
@@ -60,6 +72,7 @@ SOObjectRecord >> indexOf: anObject [
 SOObjectRecord >> initialize [ 
 	super initialize.
 	changed := false.
+	committed := false.
 	references := OrderedCollection new
 ]
 
@@ -102,7 +115,7 @@ SOObjectRecord >> readFrom: stream [
 	| numberOfReferences objectSize |
 	numberOfReferences := (stream next: 2) asInteger.
 	references := OrderedCollection new.
-	1 to: numberOfReferences do: [:n | references add: (SOObjectId segment: 1 index: (stream next: 8) asInteger)]. 
+	1 to: numberOfReferences do: [:n | self addReference: (SOObjectId segment: 1 index: (stream next: 8) asInteger)]. 
 	objectSize := (stream next: 8) asInteger.
 	bytes := stream next: objectSize.
 		
@@ -110,6 +123,7 @@ SOObjectRecord >> readFrom: stream [
 
 { #category : #accessing }
 SOObjectRecord >> referenceAt: anInteger [ 
+	(references at: anInteger) ifNil: [ self halt ]. 
 	^ SOProxy new 
 		objectId: (references at: anInteger);
 		transaction: transaction;
@@ -153,6 +167,11 @@ SOObjectRecord >> serializeOn: stream [
 	stream 
 		nextPutAll: (objectBytes size asByteArrayOfSize: 8);
 		nextPutAll: objectBytes .
+]
+
+{ #category : #asserting }
+SOObjectRecord >> shouldBeCommitted [ 
+	^ changed & committed not
 ]
 
 { #category : #accessing }

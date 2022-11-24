@@ -4,7 +4,9 @@ Class {
 	#instVars : [
 		'class',
 		'name',
-		'instVarNames'
+		'instVarNames',
+		'classIdentifier',
+		'versionIdentifier'
 	],
 	#category : #'Soil-Core'
 }
@@ -16,38 +18,29 @@ SOClassDescription class >> for: aClass [
 ]
 
 { #category : #'as yet unclassified' }
-SOClassDescription class >> soilMaterialize: materializer [ 
-	| classDescription names |
-	classDescription := SOClassDescription new.
-	classDescription 
-		name: materializer basicNextString.
-	names := Array new: materializer nextLengthEncodedInteger.
-	1  to: names size do: [:index |
-		names at: index put: materializer basicNextString ].
-	classDescription instVarNames: names.
-	^ classDescription 
+SOClassDescription >> classIdentifier [ 
+	^ classIdentifier ifNil: [ 
+		classIdentifier := class soilClassIdentifier  ]
 ]
 
-{ #category : #'as yet unclassified' }
-SOClassDescription >> classId [
-	^ 1
-]
+{ #category : #accessing }
+SOClassDescription >> classIdentifier: anObject [
 
-{ #category : #'as yet unclassified' }
-SOClassDescription >> classIndex [
-	^ class soilClassIndex 
+	classIdentifier := anObject
 ]
 
 { #category : #initialization }
 SOClassDescription >> initializeFromClass: aClass [ 
-	class := aClass.
-	name := aClass name.
+	"class := aClass."
+	classIdentifier := aClass soilClassIdentifier.
+	versionIdentifier := aClass soilVersionIdentifier.
+	
 	instVarNames := aClass instVarNames
 ]
 
 { #category : #public }
 SOClassDescription >> instVarIndexes [
-	^ class allInstVarNames collect: [ :n | class allInstVarNames indexOf: n ]
+	^ (Smalltalk at: classIdentifier asSymbol) allInstVarNames collect: [ :n | (Smalltalk at: classIdentifier asSymbol) allInstVarNames indexOf: n ]
 ]
 
 { #category : #accessing }
@@ -75,11 +68,19 @@ SOClassDescription >> name: anObject [
 	class := Smalltalk at: name asSymbol 
 ]
 
+{ #category : #accessing }
+SOClassDescription >> objectClass [
+	^ Smalltalk at: classIdentifier asSymbol
+]
+
 { #category : #'as yet unclassified' }
-SOClassDescription >> soilBasicSerialize: serializer [ 
-	serializer 
-		basicNextPutString: class name;
-		nextPutLengthEncodedInteger: instVarNames size.
-	instVarNames do: [ :n |
-		serializer basicNextPutString: n ]
+SOClassDescription >> versionIdentifier [ 
+	^ versionIdentifier ifNil: [ 
+		versionIdentifier := class soilVersionIdentifier  ]
+]
+
+{ #category : #accessing }
+SOClassDescription >> versionIdentifier: anObject [
+
+	versionIdentifier := anObject
 ]

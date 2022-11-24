@@ -12,8 +12,8 @@ Class >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Core' }
-Class >> soilClassIndex [
-	^ name , self classLayout soilClassIndex 
+Class >> soilClassIdentifier [
+	^ name 
 ]
 
 { #category : #'*Soil-Core' }
@@ -26,4 +26,9 @@ Class class >> soilMaterialize: materializer [
 Class >> soilSerialize: serializer [
 	"registration not needed, as we always return the current class on read"
 	self soilBasicSerialize: serializer
+]
+
+{ #category : #'*Soil-Core' }
+Class >> soilVersionIdentifier [ 
+	^ self classLayout soilVersionIdentifier 
 ]

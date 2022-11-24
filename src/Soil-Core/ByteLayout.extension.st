@@ -17,7 +17,8 @@ ByteLayout >> soilBasicSerialize: anObject with: serializer [
 	classInfo := serializer classDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
-		basicNextPutString: classInfo name.
+		basicNextPutString: classInfo classIdentifier;
+		basicNextPutString: classInfo versionIdentifier.
 
 	serializer nextPutLengthEncodedInteger: anObject basicSize.
 	1 to: anObject basicSize do: [:i |

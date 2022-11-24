@@ -6,7 +6,8 @@ PointerLayout >> soilBasicSerialize: anObject with: serializer [
 	classInfo := serializer classDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
-		basicNextPutString: classInfo classIndex.
+		basicNextPutString: classInfo classIdentifier;
+		basicNextPutString: classInfo versionIdentifier.
 	
 	classInfo instVarIndexes do: [:i | (anObject instVarAt: i) soilSerialize: serializer ].
 ]

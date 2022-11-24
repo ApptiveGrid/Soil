@@ -16,7 +16,8 @@ WordLayout >> soilBasicSerialize: anObject with: serializer [
 	classInfo := serializer classDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
-		basicNextPutString: classInfo name.
+		basicNextPutString: classInfo classIdentifier;
+		basicNextPutString: classInfo versionIdentifier.
 	
 	instSize := anObject basicSize.
 	serializer nextPutLengthEncodedInteger: instSize.

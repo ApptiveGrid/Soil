@@ -31,9 +31,16 @@ SoilSerializer >> basicNextPutString: aString [
 		nextPutBytesFrom: buf
 ]
 
+{ #category : #writing }
+SoilSerializer >> basicNextPutSymbol: aSymbol [ 
+	self
+		nextPutLengthEncodedInteger: aSymbol size;
+		nextPutBytesFrom: aSymbol asByteArray
+]
+
 { #category : #public }
 SoilSerializer >> classDescriptionFor: aClass [ 
-	^ soil classRegistry classDescriptionFor: aClass 
+	^ transaction classDescriptionFor: aClass 
 ]
 
 { #category : #initialization }
@@ -296,8 +303,7 @@ SoilSerializer >> nextPutString: aString [
 SoilSerializer >> nextPutSymbol: aSymbol [ 
 	self
 		nextPutByte: TypeCodeSymbol;
-		nextPutLengthEncodedInteger: aSymbol size;
-		nextPutBytesFrom: aSymbol asByteArray
+		basicNextPutSymbol: aSymbol
 ]
 
 { #category : #writing }
@@ -376,5 +382,5 @@ SoilSerializer >> serialize: anObject [
 
 { #category : #accessing }
 SoilSerializer >> soil: aSoil [ 
-	soil := aSoil
+	soil := aSoil 
 ]

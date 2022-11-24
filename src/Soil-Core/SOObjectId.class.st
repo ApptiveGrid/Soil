@@ -14,6 +14,13 @@ SOObjectId class >> segment: segmentId index: index [
 		segment: segmentId index: index
 ]
 
+{ #category : #'as yet unclassified' }
+SOObjectId class >> soilRawMaterialize: materializer [ 
+	^ self new 
+		segment: materializer nextLengthEncodedInteger
+		index: materializer nextLengthEncodedInteger 
+]
+
 { #category : #accessing }
 SOObjectId >> index [
 	^ index
@@ -23,6 +30,12 @@ SOObjectId >> index [
 SOObjectId >> initialize [ 
 	super initialize.
 	segment := 1
+]
+
+{ #category : #initialization }
+SOObjectId >> initializeId: objectRepository [ 
+	(index = 0) ifFalse: [ ^ self ].
+	index := (objectRepository segmentAt: segment) allocateNextIndex 
 ]
 
 { #category : #printing }
@@ -46,4 +59,12 @@ SOObjectId >> segment: segmentNo index: segmentIndex [
 { #category : #accessing }
 SOObjectId >> setIndex: anInteger [ 
 	index := anInteger 
+]
+
+{ #category : #'as yet unclassified' }
+SOObjectId >> soilRawSerialize: serializer [ 
+	(index = 0) ifTrue: [ Error signal: 'object id not initialized' ].
+	serializer 
+		nextPutLengthEncodedInteger: segment;
+		nextPutLengthEncodedInteger: index
 ]

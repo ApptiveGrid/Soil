@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'soil',
 		'idMap',
-		'objectMap'
+		'objectMap',
+		'classDescriptions'
 	],
 	#category : #'Soil-Core'
 }
@@ -42,16 +43,58 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 
 { #category : #accessing }
 SOTransaction >> checkpoint [
-	| bytes |
+	| bytes changed assoc objectId |
 	"iterate over all object ids to assign numbers before they get serialized"
+	"idMap keys do: [ :id  |
+		(id index = 0) ifTrue: [ id setIndex: (self objectRepository segmentAt: id segment) allocateNextIndex ] ]."
+	[ changed := (idMap associations select: [:each | each value shouldBeCommitted ]) asOrderedCollection. 
+	  changed isEmpty ] whileFalse: [  
 	idMap keys do: [ :id  |
-		(id index = 0) ifTrue: [ id setIndex: (self objectRepository segmentAt: id segment) allocateNextIndex ] ].
-	idMap keysAndValuesDo: [ :id :record |
-		record hasChanged ifTrue: [ 
-			bytes := record serialize. 
-			self objectRepository 
-				at: id 
-				put: bytes ] ].
+		(id index = 0) ifTrue: [ id initializeId: self objectRepository ] ].
+		assoc := changed removeFirst.
+		"assoc key initializeId: self objectRepository."
+		bytes := assoc value serialize. 
+		self objectRepository 
+			at: assoc key 
+			put: bytes.
+		assoc value committed ].
+	classDescriptions do: [ :description |
+		objectId := (objectMap at: description) objectId.
+		objectId initializeId: self objectRepository.
+		soil classRegistry 
+			at: description classIdentifier 
+			put: objectId ].
+	(idMap keys anySatisfy: [ :each | each index = 0 ]) ifTrue: [ self halt ]
+		
+	
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> class: classIdentifier version: versionIdentifier transaction: transaction [  
+	classDescriptions 
+		at: classIdentifier 
+		ifPresent: [ :description | ^ description ].
+	soil classRegistry 
+		atClass: classIdentifier ifPresent: [ :id |
+			^ self objectWithId: id ifNone: [ self halt ]  ].
+	Error signal: 'cannot find class identifier ', classIdentifier asString.
+]
+
+{ #category : #public }
+SOTransaction >> classDescriptionFor: aClass [
+	| classDescription |
+	classDescriptions 
+		at: aClass soilClassIdentifier 
+		ifPresent: [ :description | ^ description ].
+	soil classRegistry 
+		atClass: aClass soilClassIdentifier 
+		ifPresent: [ :description | self halt.^ description ].
+	classDescription := (SOClassDescription for: aClass).
+	self addClusterObject: classDescription.
+	^ classDescriptions
+		at: aClass soilClassIdentifier 
+		put: classDescription
+	
 ]
 
 { #category : #accessing }
@@ -79,6 +122,7 @@ SOTransaction >> initialize [
 	super initialize.
 	idMap := IdentityDictionary new.
 	objectMap := IdentityDictionary new.
+	classDescriptions := Dictionary new
 ]
 
 { #category : #testing }
@@ -117,6 +161,8 @@ SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 { #category : #'instance creation' }
 SOTransaction >> newMaterializer [
 	^ soil newMaterializer 
+		transaction: self;
+		yourself
 ]
 
 { #category : #'instance creation' }
@@ -175,9 +221,11 @@ SOTransaction >> rootObjectId [
 
 { #category : #accessing }
 SOTransaction >> serializer [
-	
+	soil ifNil: [ self halt ].
 	^ SoilSerializer new
-		soil: soil 
+		soil: soil;
+		transaction: self;
+		yourself
 
 ]
 

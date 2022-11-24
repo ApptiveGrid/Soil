@@ -13,7 +13,7 @@ Object >> soilLoadedIn: aTransaction [
 
 { #category : #'*Soil-Core' }
 Object >> soilMaterialize: materializer [
-
+self halt.
 	^ self
 ]
 

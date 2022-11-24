@@ -34,11 +34,14 @@ SoilMaterializer >> materialize [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| name objectClass classInfo |
-	name := self basicNextString .
-	classInfo := soil classRegistry loadIndex: name.
-	objectClass := Smalltalk at: classInfo name asSymbol.
-	^ (objectClass soilClassIndex = name)
+	| objectClass classInfo classIdentifier versionIdentifier |
+	classIdentifier := self basicNextString.
+	versionIdentifier := self basicNextString .
+	classInfo := (classIdentifier = #SOClassDescription)
+		ifTrue: [ SOClassDescription for: SOClassDescription ]
+		ifFalse: [ transaction class: classIdentifier version: versionIdentifier transaction: transaction ].
+	objectClass := classInfo objectClass.
+	^ (objectClass soilVersionIdentifier = versionIdentifier)
 		ifTrue: [ objectClass classLayout soilBasicMaterialize: objectClass with: self ]
 		ifFalse: [ self halt ]
 ]

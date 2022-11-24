@@ -18,3 +18,10 @@ FixedLayout >> soilClassIndex [
 		slotScope do: [ :slot  |
 				stream nextPutAll: slot name ] ]
 ]
+
+{ #category : #'*Soil-Core' }
+FixedLayout >> soilVersionIdentifier [ 
+	^ String streamContents: [ :stream | 
+		slotScope do: [ :slot  |
+				stream nextPutAll: slot name ] ]
+]
