@@ -13,13 +13,6 @@ FixedLayout >> soilBasicMaterialize: objectClass with: serializer [
 ]
 
 { #category : #'*Soil-Core' }
-FixedLayout >> soilClassIndex [
-	^ String streamContents: [ :stream | 
-		slotScope do: [ :slot  |
-				stream nextPutAll: slot name ] ]
-]
-
-{ #category : #'*Soil-Core' }
 FixedLayout >> soilVersionIdentifier [ 
 	^ String streamContents: [ :stream | 
 		slotScope do: [ :slot  |

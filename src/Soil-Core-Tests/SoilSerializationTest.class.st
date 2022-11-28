@@ -38,6 +38,13 @@ SoilSerializationTest >> setUp [
 	transaction := soil newTransaction
 ]
 
+{ #category : #tests }
+SoilSerializationTest >> testBasicSerialize [
+	| bytes |
+	bytes := self serializeToBytes: SOTestClusterRoot new.
+	self assert: bytes equals: #[1 3 2]
+]
+
 { #category : #'tests-layouts' }
 SoilSerializationTest >> testSerializationByteLayout [
 	| object serialized materialized |
@@ -65,7 +72,6 @@ SoilSerializationTest >> testSerializationCompiledMethodLayout [
 	self
 		assert: object class classLayout class
 		equals: CompiledMethodLayout.
-		self halt.
 	serialized := self serializeToBytes: object.
 
 	materialized := self newMaterializer materializeFromBytes: serialized.

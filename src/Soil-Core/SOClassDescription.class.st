@@ -17,11 +17,6 @@ SOClassDescription class >> for: aClass [
 ]
 
 { #category : #'as yet unclassified' }
-SOClassDescription class >> soilPersistentInstVars [
-	^ self instVarNames difference: self soilTransientInstVars 
-]
-
-{ #category : #'as yet unclassified' }
 SOClassDescription class >> soilTransientInstVars [ 
 	^ #( objectId ) 
 ]

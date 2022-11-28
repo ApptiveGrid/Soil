@@ -3,9 +3,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'soil',
-		'index',
-		'nameMap',
-		'idMap'
+		'index'
 	],
 	#category : #'Soil-Core'
 }
