@@ -3,26 +3,18 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'soil',
-		'index'
+		'index',
+		'nameMap',
+		'idMap'
 	],
 	#category : #'Soil-Core'
 }
 
-{ #category : #accessing }
-SoilClassRegistry >> at: identifier put: objectId [
-	| dict |
-	(objectId index = 0) ifTrue: [ Error signal: 'cannot add non-initialized object id' ].
-	dict := self index 
-		at: identifier put: objectId;
-		yourself.
-	self writeIndex: dict
-]
-
-{ #category : #accessing }
-SoilClassRegistry >> atClass: classIdentifier ifPresent: aBlock [
-	^ self index 
-		at: classIdentifier 
-		ifPresent: aBlock
+{ #category : #adding }
+SoilClassRegistry >> addSpecialObjects [
+	self 
+		nameAt: SOClassDescription name 
+		put: (SOObjectId segment: 1 index: 2)
 ]
 
 { #category : #'as yet unclassified' }
@@ -42,6 +34,7 @@ SoilClassRegistry >> classDescriptionFor: aClass [
 		at: aClass soilClassIdentifier
 		ifPresent: [ :pos | ^ pos ].
 	classDescription := SOClassDescription for: aClass.
+	self halt.
 	index 
 		at: aClass soilClassIdentifier 
 		put: classDescription.
@@ -50,27 +43,55 @@ SoilClassRegistry >> classDescriptionFor: aClass [
 
 { #category : #accessing }
 SoilClassRegistry >> index [
-	| indexFile dictionary  materializer size |
-	indexFile := self path / #index.
-	indexFile exists
-		ifTrue: [ 
-			dictionary := Dictionary new.
-			materializer := soil newMaterializer 
-				stream: indexFile binaryReadStream.
-			size := materializer nextLengthEncodedInteger.
-			1 to: size do: [ :n | 
-				dictionary 
-					at: materializer nextSymbol
-					put: (SOObjectId soilRawMaterialize: materializer) ] ]
-		ifFalse: [ 
-			dictionary := Dictionary new.
-			self writeIndex: dictionary ].
-	^ dictionary
+	^ index ifNil: [ 
+		index := self readIndex ]
+]
+
+{ #category : #initialization }
+SoilClassRegistry >> initializeFilesystem [
+	self path ensureCreateDirectory.
+	(self path / #index) binaryWriteStream 
+		nextPutAll: #[ 0 ];
+		flush;
+		close
+]
+
+{ #category : #accessing }
+SoilClassRegistry >> nameAt: classIdentifier ifPresent: aBlock [
+	^ self index 
+		at: classIdentifier 
+		ifPresent: aBlock
+	
+]
+
+{ #category : #accessing }
+SoilClassRegistry >> nameAt: classIdentifier put: objectId [
+	| dict |
+	(objectId index = 0) ifTrue: [ Error signal: 'cannot add non-initialized object id' ].
+	dict := self index 
+		at: classIdentifier put: objectId;
+		yourself.
+	self writeIndex: dict		
 ]
 
 { #category : #accessing }
 SoilClassRegistry >> path [
-	^ (soil path / #'class-registry') ensureCreateDirectory  
+	^ soil path / #'class-registry'
+]
+
+{ #category : #accessing }
+SoilClassRegistry >> readIndex [
+	| indexFile dictionary  materializer size |
+	indexFile := self path / #index.
+	dictionary := Dictionary new.
+	materializer := soil newMaterializer 
+		stream: indexFile binaryReadStream.
+	size := materializer nextLengthEncodedInteger.
+	1 to: size do: [ :n | 
+		dictionary 
+			at: materializer nextSymbol
+			put: (SOObjectId soilRawMaterialize: materializer) ].
+	^ dictionary
 ]
 
 { #category : #accessing }
@@ -82,8 +103,7 @@ SoilClassRegistry >> soil: aSoil [
 SoilClassRegistry >> writeIndex: dictionary [
 	| stream serializer |
 	stream := ByteArray new writeStream.
-	serializer := SoilSerializer new 
-		soil: soil;
+	serializer := soil newSerializer 
 		stream: stream.
 	serializer nextPutLengthEncodedInteger: dictionary size.
 	dictionary keysAndValuesDo: [ :key :value |
@@ -91,7 +111,6 @@ SoilClassRegistry >> writeIndex: dictionary [
 		value soilRawSerialize: serializer ].  
 
 	((self path / #index) ensureDelete; binaryWriteStream)
-		truncate;
 		nextPutAll: (stream flush; contents);
 		flush;
 		close

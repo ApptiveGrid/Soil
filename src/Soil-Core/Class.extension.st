@@ -29,6 +29,11 @@ Class >> soilSerialize: serializer [
 ]
 
 { #category : #'*Soil-Core' }
+Class >> soilTransientInstVars [
+	^ #()
+]
+
+{ #category : #'*Soil-Core' }
 Class >> soilVersionIdentifier [ 
 	^ self classLayout soilVersionIdentifier 
 ]

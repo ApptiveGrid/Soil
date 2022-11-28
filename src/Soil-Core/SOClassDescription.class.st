@@ -2,11 +2,11 @@ Class {
 	#name : #SOClassDescription,
 	#superclass : #Object,
 	#instVars : [
-		'class',
 		'name',
 		'instVarNames',
 		'classIdentifier',
-		'versionIdentifier'
+		'versionIdentifier',
+		'objectId'
 	],
 	#category : #'Soil-Core'
 }
@@ -18,9 +18,18 @@ SOClassDescription class >> for: aClass [
 ]
 
 { #category : #'as yet unclassified' }
+SOClassDescription class >> soilPersistentInstVars [
+	^ self instVarNames difference: self soilTransientInstVars 
+]
+
+{ #category : #'as yet unclassified' }
+SOClassDescription class >> soilTransientInstVars [ 
+	^ #( objectId ) 
+]
+
+{ #category : #'as yet unclassified' }
 SOClassDescription >> classIdentifier [ 
-	^ classIdentifier ifNil: [ 
-		classIdentifier := class soilClassIdentifier  ]
+	^ classIdentifier 
 ]
 
 { #category : #accessing }
@@ -40,7 +49,10 @@ SOClassDescription >> initializeFromClass: aClass [
 
 { #category : #public }
 SOClassDescription >> instVarIndexes [
-	^ (Smalltalk at: classIdentifier asSymbol) allInstVarNames collect: [ :n | (Smalltalk at: classIdentifier asSymbol) allInstVarNames indexOf: n ]
+	| class |
+	class := Smalltalk at: classIdentifier asSymbol. 
+	^ (class allInstVarNames difference: class soilTransientInstVars) 
+		collect: [ :n | class allInstVarNames indexOf: n ]
 ]
 
 { #category : #accessing }
@@ -65,7 +77,6 @@ SOClassDescription >> name [
 SOClassDescription >> name: anObject [
 
 	name := anObject.
-	class := Smalltalk at: name asSymbol 
 ]
 
 { #category : #accessing }
@@ -73,10 +84,19 @@ SOClassDescription >> objectClass [
 	^ Smalltalk at: classIdentifier asSymbol
 ]
 
+{ #category : #accessing }
+SOClassDescription >> objectId [
+	^ objectId
+]
+
+{ #category : #accessing }
+SOClassDescription >> objectId: aSOObjectId [ 
+	objectId := aSOObjectId
+]
+
 { #category : #'as yet unclassified' }
 SOClassDescription >> versionIdentifier [ 
-	^ versionIdentifier ifNil: [ 
-		versionIdentifier := class soilVersionIdentifier  ]
+	^ versionIdentifier
 ]
 
 { #category : #accessing }

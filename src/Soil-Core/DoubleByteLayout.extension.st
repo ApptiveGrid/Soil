@@ -13,12 +13,11 @@ DoubleByteLayout >> soilBasicMaterialize: objectClass with: serializer [
 
 { #category : #'*Soil-Core' }
 DoubleByteLayout >> soilBasicSerialize: anObject with: serializer [
-	| classInfo |
-	classInfo := serializer classDescriptionFor: anObject class.
+	| description |
+	description := serializer classDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
-		basicNextPutString: classInfo classIdentifier;
-		basicNextPutString: classInfo versionIdentifier.
+		nextPutLengthEncodedInteger: description objectId index.
 	
 	serializer nextPutLengthEncodedInteger: anObject basicSize.
 	1 to: anObject basicSize do: [:i |

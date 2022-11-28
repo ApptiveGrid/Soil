@@ -13,12 +13,16 @@ Object >> soilLoadedIn: aTransaction [
 
 { #category : #'*Soil-Core' }
 Object >> soilMaterialize: materializer [
-self halt.
 	^ self
 ]
 
 { #category : #'*Soil-Core' }
 Object >> soilMaterialized: materializer [
+]
+
+{ #category : #'*Soil-Core' }
+Object class >> soilPersistentInstVars [
+	^ self instVarNames difference: self soilTransientInstVars 
 ]
 
 { #category : #'*Soil-Core' }

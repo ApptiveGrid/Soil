@@ -59,42 +59,57 @@ SOTransaction >> checkpoint [
 			put: bytes.
 		assoc value committed ].
 	classDescriptions do: [ :description |
-		objectId := (objectMap at: description) objectId.
+		objectId := description objectId.
 		objectId initializeId: self objectRepository.
 		soil classRegistry 
-			at: description classIdentifier 
+			nameAt: description value classIdentifier 
 			put: objectId ].
-	(idMap keys anySatisfy: [ :each | each index = 0 ]) ifTrue: [ self halt ]
 		
 	
 ]
 
 { #category : #'as yet unclassified' }
 SOTransaction >> class: classIdentifier version: versionIdentifier transaction: transaction [  
+self halt.
 	classDescriptions 
 		at: classIdentifier 
 		ifPresent: [ :description | ^ description ].
 	soil classRegistry 
-		atClass: classIdentifier ifPresent: [ :id |
+		nameAt: classIdentifier ifPresent: [ :id |
 			^ self objectWithId: id ifNone: [ self halt ]  ].
 	Error signal: 'cannot find class identifier ', classIdentifier asString.
 ]
 
 { #category : #public }
 SOTransaction >> classDescriptionFor: aClass [
-	| classDescription |
+	| classDescription id |
 	classDescriptions 
 		at: aClass soilClassIdentifier 
 		ifPresent: [ :description | ^ description ].
 	soil classRegistry 
-		atClass: aClass soilClassIdentifier 
-		ifPresent: [ :description | self halt.^ description ].
+		nameAt: aClass soilClassIdentifier 
+		ifPresent: [ :oid | | desc |
+			desc := (oid index = 2) 
+				ifTrue: [(SOClassDescription for: SOClassDescription) objectId: oid ]
+				ifFalse: [ (self objectWithId: oid ifNone: [Error signal ]) objectId: oid; yourself ].
+			^ desc ].
+	(aClass = SOClassDescription) ifTrue: [  self halt ].
 	classDescription := (SOClassDescription for: aClass).
 	self addClusterObject: classDescription.
-	^ classDescriptions
+	id := (objectMap at: classDescription) objectId. 
+	id initializeId: soil objectRepository.
+	classDescription objectId: id.
+	classDescriptions
 		at: aClass soilClassIdentifier 
-		put: classDescription
+		put: classDescription.
+	^ classDescription 
 	
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> classDescriptionWithId: aSOObjectId ifNone: aBlock [ 
+	(aSOObjectId index = 2) ifTrue: [ ^ SOClassDescription for: SOClassDescription ].
+	^ self objectWithId: aSOObjectId ifNone: aBlock
 ]
 
 { #category : #accessing }
@@ -222,8 +237,7 @@ SOTransaction >> rootObjectId [
 { #category : #accessing }
 SOTransaction >> serializer [
 	soil ifNil: [ self halt ].
-	^ SoilSerializer new
-		soil: soil;
+	^ soil newSerializer
 		transaction: self;
 		yourself
 

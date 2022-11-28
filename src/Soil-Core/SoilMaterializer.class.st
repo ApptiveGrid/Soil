@@ -19,6 +19,15 @@ SoilMaterializer class >> on: aReadStream [
 		stream: aReadStream 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilMaterializer class >> standalone [
+	| soil |
+	soil := Soil inMemory initializeFilesystem.
+	^ self new 
+		transaction: soil newTransaction;
+		yourself
+]
+
 { #category : #'reading - basic' }
 SoilMaterializer >> basicNextString [
 	| buf length |
@@ -34,16 +43,15 @@ SoilMaterializer >> materialize [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| objectClass classInfo classIdentifier versionIdentifier |
-	classIdentifier := self basicNextString.
-	versionIdentifier := self basicNextString .
-	classInfo := (classIdentifier = #SOClassDescription)
-		ifTrue: [ SOClassDescription for: SOClassDescription ]
-		ifFalse: [ transaction class: classIdentifier version: versionIdentifier transaction: transaction ].
+	| objectClass classInfo classIdentifier versionIdentifier objectIndex o |
+	objectIndex := self nextLengthEncodedInteger.
+	classInfo := "(objectIndex = 5) 
+		ifTrue: [  self halt . SOClassDescription for: SOClassDescription ]
+	 	ifFalse: [ "transaction classDescriptionWithId: (SOObjectId segment: 1 index: objectIndex) ifNone: [ self halt  ]"]".
 	objectClass := classInfo objectClass.
-	^ (objectClass soilVersionIdentifier = versionIdentifier)
-		ifTrue: [ objectClass classLayout soilBasicMaterialize: objectClass with: self ]
-		ifFalse: [ self halt ]
+	^" (objectClass soilVersionIdentifier = versionIdentifier)
+		ifTrue: [ "objectClass classLayout soilBasicMaterialize: objectClass with: self "]
+		ifFalse: [ self halt ]"
 ]
 
 { #category : #reading }

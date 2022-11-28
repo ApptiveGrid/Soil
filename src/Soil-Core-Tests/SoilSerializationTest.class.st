@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Tests'
 }
 
+{ #category : #'instance creation' }
+SoilSerializationTest >> newSerializer [ 
+	^ Soil inMemory newSerializer
+]
+
 { #category : #running }
 SoilSerializationTest >> setUp [
 	super setUp.
@@ -162,9 +167,9 @@ SoilSerializationTest >> testSerializationByteLayout [
 	object := #[127 0 0 1] asSocketAddress.
 	
 	self assert: object class classLayout class equals: ByteLayout.
-	serialized := SoilSerializer serializeToBytes: object.
+	serialized := self newSerializer serializeToBytes: object.
 
-	materialized := SoilMaterializer materializeFromBytes: serialized.
+	materialized := self newMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized class equals: SocketAddress.
 	self assert: materialized class classLayout class equals: ByteLayout.

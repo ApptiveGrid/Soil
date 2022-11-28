@@ -6,7 +6,7 @@ FixedLayout >> soilBasicMaterialize: objectClass with: serializer [
 	object := objectClass basicNew.
 	serializer registerObject: object.
 
-	instSize := object class instSize.
+	instSize := object class soilPersistentInstVars size.
 	1 to: instSize do: [:i | object instVarAt: i put: (serializer nextSoilObject) ].
 	object soilMaterialized: serializer.
 	^ object

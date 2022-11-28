@@ -22,6 +22,15 @@ SoilSerializer class >> serializeToBytes: anObject [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSerializer class >> standalone [
+	| soil |
+	soil := Soil inMemory initializeFilesystem.
+	^ self new 
+		transaction: soil newTransaction;
+		yourself
+]
+
 { #category : #'writing - basic' }
 SoilSerializer >> basicNextPutString: aString [ 
 	| buf |
@@ -378,6 +387,14 @@ SoilSerializer >> serialize: anObject [
 	clusterRoot soilSerialize: self.
 	stream flush.
 	^ stream contents
+]
+
+{ #category : #public }
+SoilSerializer >> serializeToBytes: anObject [ 
+
+	^ (self stream: ByteArray new writeStream) 
+		serialize: anObject
+
 ]
 
 { #category : #accessing }

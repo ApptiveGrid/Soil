@@ -110,6 +110,15 @@ SOObjectRecord >> objectId: aSOObjectId [
 	objectId := aSOObjectId 
 ]
 
+{ #category : #printing }
+SOObjectRecord >> printOn: aStream [ 
+	super printOn: aStream.
+	aStream << ' object: '.
+	object printOn: aStream.
+	aStream << ', id: '.
+	objectId printOn: aStream
+]
+
 { #category : #'instance creation' }
 SOObjectRecord >> readFrom: stream [ 
 	| numberOfReferences objectSize |
