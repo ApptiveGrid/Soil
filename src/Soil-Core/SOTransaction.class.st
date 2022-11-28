@@ -135,7 +135,7 @@ SOTransaction >> idOf: anObject [
 { #category : #initialization }
 SOTransaction >> initialize [ 
 	super initialize.
-	idMap := IdentityDictionary new.
+	idMap := Dictionary new.
 	objectMap := IdentityDictionary new.
 	classDescriptions := Dictionary new
 ]
@@ -206,6 +206,7 @@ SOTransaction >> objectRepository [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> objectWithId: objectId ifNone: aBlock [
+	idMap rehash.
 	idMap 
 	at: objectId 
 	ifPresent: [ :record | ^ record object ].

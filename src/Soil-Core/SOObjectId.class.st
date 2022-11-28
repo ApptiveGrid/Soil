@@ -23,7 +23,6 @@ SOObjectId class >> soilRawMaterialize: materializer [
 
 { #category : #comparing }
 SOObjectId >> = anObjectId [ 
-self halt.
 	(anObjectId class = self class) ifFalse: [ ^ false ].
 	^ segment = anObjectId segment and: [ 
 		index = anObjectId index ]

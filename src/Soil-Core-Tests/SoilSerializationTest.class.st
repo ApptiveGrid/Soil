@@ -66,6 +66,7 @@ SoilSerializationTest >> testSerializationByteLayout [
 SoilSerializationTest >> testSerializationCompiledMethodLayout [
 
 	| object serialized materialized |
+	self skip.
 	"We use CompiledMethod as an exampe of a class with a CompiledMethodLayout"
 	object := (OrderedCollection >> #do:) copy.
 
@@ -73,7 +74,6 @@ SoilSerializationTest >> testSerializationCompiledMethodLayout [
 		assert: object class classLayout class
 		equals: CompiledMethodLayout.
 	serialized := self serializeToBytes: object.
-
 	materialized := self newMaterializer materializeFromBytes: serialized.
 
 	(SystemVersion current major == 11)

@@ -22,7 +22,7 @@ Object >> soilMaterialized: materializer [
 
 { #category : #'*Soil-Core' }
 Object class >> soilPersistentInstVars [
-	^ self instVarNames difference: self soilTransientInstVars 
+	^ self allInstVarNames difference: self soilTransientInstVars 
 ]
 
 { #category : #'*Soil-Core' }
