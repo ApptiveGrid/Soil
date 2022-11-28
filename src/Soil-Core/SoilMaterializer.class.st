@@ -19,15 +19,6 @@ SoilMaterializer class >> on: aReadStream [
 		stream: aReadStream 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilMaterializer class >> standalone [
-	| soil |
-	soil := Soil inMemory initializeFilesystem.
-	^ self new 
-		transaction: soil newTransaction;
-		yourself
-]
-
 { #category : #'reading - basic' }
 SoilMaterializer >> basicNextString [
 	| buf length |
@@ -49,7 +40,7 @@ SoilMaterializer >> materializeFromBytes: aByteArray [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| objectClass classInfo classIdentifier versionIdentifier objectIndex o |
+	| objectClass classInfo objectIndex|
 	objectIndex := self nextLengthEncodedInteger.
 	classInfo := "(objectIndex = 5) 
 		ifTrue: [  self halt . SOClassDescription for: SOClassDescription ]

@@ -26,12 +26,6 @@ SOClassDescription >> classIdentifier [
 	^ classIdentifier 
 ]
 
-{ #category : #accessing }
-SOClassDescription >> classIdentifier: anObject [
-
-	classIdentifier := anObject
-]
-
 { #category : #initialization }
 SOClassDescription >> initializeFromClass: aClass [ 
 	"class := aClass."
@@ -52,12 +46,6 @@ SOClassDescription >> instVarIndexes [
 SOClassDescription >> instVarNames [
 
 	^ instVarNames
-]
-
-{ #category : #accessing }
-SOClassDescription >> instVarNames: anObject [
-
-	instVarNames := anObject
 ]
 
 { #category : #accessing }

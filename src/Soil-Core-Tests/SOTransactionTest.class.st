@@ -53,7 +53,8 @@ SOTransactionTest >> testTwoRootsWithAlwaysRoot [
 	side setting for being root. The second object is being made
 	root when serializing obj1 "
 	tx checkpoint.
-	self assert: tx records size equals: 2
+	"expect 4 records: 2 instances and 2 classes"
+	self assert: tx records size equals: 4
 ]
 
 { #category : #tests }

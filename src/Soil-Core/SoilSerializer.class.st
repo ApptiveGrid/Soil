@@ -22,15 +22,6 @@ SoilSerializer class >> serializeToBytes: anObject [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilSerializer class >> standalone [
-	| soil |
-	soil := Soil inMemory initializeFilesystem.
-	^ self new 
-		transaction: soil newTransaction;
-		yourself
-]
-
 { #category : #'writing - basic' }
 SoilSerializer >> basicNextPutString: aString [ 
 	| buf |

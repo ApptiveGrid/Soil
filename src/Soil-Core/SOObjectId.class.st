@@ -24,6 +24,9 @@ SOObjectId class >> soilRawMaterialize: materializer [
 { #category : #comparing }
 SOObjectId >> = anObjectId [ 
 	(anObjectId class = self class) ifFalse: [ ^ false ].
+	"object ids are generated with zero as index because the allocation of the 
+	real index needs to be done on commit time"
+	(index = 0) ifTrue: [ ^ self == anObjectId ].
 	^ segment = anObjectId segment and: [ 
 		index = anObjectId index ]
 ]

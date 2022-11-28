@@ -68,18 +68,6 @@ SOTransaction >> checkpoint [
 	
 ]
 
-{ #category : #'as yet unclassified' }
-SOTransaction >> class: classIdentifier version: versionIdentifier transaction: transaction [  
-self halt.
-	classDescriptions 
-		at: classIdentifier 
-		ifPresent: [ :description | ^ description ].
-	soil classRegistry 
-		nameAt: classIdentifier ifPresent: [ :id |
-			^ self objectWithId: id ifNone: [ self halt ]  ].
-	Error signal: 'cannot find class identifier ', classIdentifier asString.
-]
-
 { #category : #public }
 SOTransaction >> classDescriptionFor: aClass [
 	| classDescription id |

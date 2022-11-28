@@ -15,14 +15,6 @@ SoilClassRegistry >> addSpecialObjects [
 		put: (SOObjectId segment: 1 index: 2)
 ]
 
-{ #category : #'as yet unclassified' }
-SoilClassRegistry >> class: classIdentifier version: versionIdentifier transaction: transaction [ 
-	| objectId |
-	objectId := index at: classIdentifier.
-	^ transaction objectWithId: objectId ifNone: [ self halt ]. 
-			
-]
-
 { #category : #public }
 SoilClassRegistry >> classDescriptionFor: aClass [
 	|  classDescription |
