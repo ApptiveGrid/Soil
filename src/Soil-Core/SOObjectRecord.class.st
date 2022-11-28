@@ -24,6 +24,12 @@ SOObjectRecord >> addReference: reference [
 	references add: reference
 ]
 
+{ #category : #'as yet unclassified' }
+SOObjectRecord >> assignObjectIds: aSOObjectRepository [ 
+	references do: [ :reference |
+		reference initializeId: aSOObjectRepository ]
+]
+
 { #category : #accessing }
 SOObjectRecord >> bytes [
 	^ bytes
@@ -62,7 +68,7 @@ SOObjectRecord >> indexOf: anObject [
 		ifPresent: [ :s | 
 			"anObject is an external object. Allocate a new local index and 
 			return that"
-			references add: s.
+			references add: s objectId.
 			^ references size ].
 	^ 0
 ]
@@ -157,7 +163,7 @@ SOObjectRecord >> serialize [
 
 { #category : #serializing }
 SOObjectRecord >> serializeObject [
-	^ ByteArray streamContents: [ :s |
+	bytes := ByteArray streamContents: [ :s |
 		transaction newSerializer 
 			stream: s;
 			externalObjectRegistry: self;
@@ -166,15 +172,14 @@ SOObjectRecord >> serializeObject [
 
 { #category : #serializing }
 SOObjectRecord >> serializeOn: stream [
-	| objectBytes |
-	objectBytes := self serializeObject.
+	bytes ifNil: [ self serializeObject ].
 	stream nextPutAll: ((references size) asByteArrayOfSize: 2).
 	
 	references do: [ :ref |
-		stream nextPutAll: (ref objectId index asByteArrayOfSize: 8) ].
+		stream nextPutAll: (ref index asByteArrayOfSize: 8) ].
 	stream 
-		nextPutAll: (objectBytes size asByteArrayOfSize: 8);
-		nextPutAll: objectBytes .
+		nextPutAll: (bytes size asByteArrayOfSize: 8);
+		nextPutAll: bytes .
 ]
 
 { #category : #asserting }

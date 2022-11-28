@@ -5,7 +5,8 @@ Class {
 		'soil',
 		'idMap',
 		'objectMap',
-		'classDescriptions'
+		'classDescriptions',
+		'recordsToCommit'
 	],
 	#category : #'Soil-Core'
 }
@@ -38,34 +39,29 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 		objectId: objectId;
 		transaction: self.
 	idMap at: objectId put: record.
-	objectMap at: anObject put: record
+	objectMap at: anObject put: record.
+	recordsToCommit ifNotNil: [ recordsToCommit at: objectId put: record ]
 ]
 
 { #category : #accessing }
 SOTransaction >> checkpoint [
-	| bytes changed assoc objectId |
-	"iterate over all object ids to assign numbers before they get serialized"
-	"idMap keys do: [ :id  |
-		(id index = 0) ifTrue: [ id setIndex: (self objectRepository segmentAt: id segment) allocateNextIndex ] ]."
-	[ changed := (idMap associations select: [:each | each value shouldBeCommitted ]) asOrderedCollection. 
-	  changed isEmpty ] whileFalse: [  
-	idMap keys do: [ :id  |
-		(id index = 0) ifTrue: [ id initializeId: self objectRepository ] ].
-		assoc := changed removeFirst.
-		"assoc key initializeId: self objectRepository."
-		bytes := assoc value serialize. 
-		self objectRepository 
-			at: assoc key 
+	| bytes |
+	recordsToCommit := (idMap select: [:each | each value shouldBeCommitted ]) as: OrderedIdentityDictionary .
+	self serializeObjects.
+	recordsToCommit keysAndValuesDo: [ :objectId :record | 
+		record assignObjectIds: soil objectRepository.
+		bytes := record serialize.
+		soil objectRepository 
+			at: objectId 
 			put: bytes.
-		assoc value committed ].
-	classDescriptions do: [ :description |
+		record committed  ].
+	classDescriptions do: [ :description | | objectId |
 		objectId := description objectId.
 		objectId initializeId: self objectRepository.
 		soil classRegistry 
 			nameAt: description value classIdentifier 
 			put: objectId ].
-		
-	
+
 ]
 
 { #category : #public }
@@ -83,10 +79,10 @@ SOTransaction >> classDescriptionFor: aClass [
 			^ desc ].
 	(aClass = SOClassDescription) ifTrue: [  self halt ].
 	classDescription := (SOClassDescription for: aClass).
-	self addClusterObject: classDescription.
-	id := (objectMap at: classDescription) objectId. 
+	id := self newObjectId.
 	id initializeId: soil objectRepository.
 	classDescription objectId: id.
+	self atObjectId: id putObject: classDescription.
 	classDescriptions
 		at: aClass soilClassIdentifier 
 		put: classDescription.
@@ -123,7 +119,7 @@ SOTransaction >> idOf: anObject [
 { #category : #initialization }
 SOTransaction >> initialize [ 
 	super initialize.
-	idMap := Dictionary new.
+	idMap := IdentityDictionary new.
 	objectMap := IdentityDictionary new.
 	classDescriptions := Dictionary new
 ]
@@ -194,13 +190,11 @@ SOTransaction >> objectRepository [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> objectWithId: objectId ifNone: aBlock [
-	idMap rehash.
 	idMap 
-	at: objectId 
-	ifPresent: [ :record | ^ record object ].
-	
-	^ self materializationWithId: objectId ifNone: aBlock.
+		detect: [ :each | each objectId = objectId ]
+		ifFound: [ :record | ^ record object ].
 
+	^ self materializationWithId: objectId ifNone: aBlock.
 ]
 
 { #category : #accessing }
@@ -230,6 +224,16 @@ SOTransaction >> root: anObject [
 { #category : #accessing }
 SOTransaction >> rootObjectId [
 	^ SOObjectId segment: 1 index: 1
+]
+
+{ #category : #accessing }
+SOTransaction >> serializeObjects [
+	| index key |
+	index := 1.
+	[ index <= recordsToCommit size ] whileTrue: [ 
+		key := recordsToCommit keyAtIndex: index.
+		(recordsToCommit at: key) serializeObject.
+		index := index + 1 ]
 ]
 
 { #category : #accessing }
