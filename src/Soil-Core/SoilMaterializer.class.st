@@ -41,6 +41,12 @@ SoilMaterializer >> materialize [
 	^ self nextSoilObject
 ]
 
+{ #category : #'as yet unclassified' }
+SoilMaterializer >> materializeFromBytes: aByteArray [
+	^ (self stream: aByteArray readStream)
+		materialize
+]
+
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
 	| objectClass classInfo classIdentifier versionIdentifier objectIndex o |

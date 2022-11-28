@@ -5,7 +5,6 @@ Class {
 		'name',
 		'instVarNames',
 		'classIdentifier',
-		'versionIdentifier',
 		'objectId'
 	],
 	#category : #'Soil-Core'
@@ -42,7 +41,6 @@ SOClassDescription >> classIdentifier: anObject [
 SOClassDescription >> initializeFromClass: aClass [ 
 	"class := aClass."
 	classIdentifier := aClass soilClassIdentifier.
-	versionIdentifier := aClass soilVersionIdentifier.
 	
 	instVarNames := aClass instVarNames
 ]
@@ -92,15 +90,4 @@ SOClassDescription >> objectId [
 { #category : #accessing }
 SOClassDescription >> objectId: aSOObjectId [ 
 	objectId := aSOObjectId
-]
-
-{ #category : #'as yet unclassified' }
-SOClassDescription >> versionIdentifier [ 
-	^ versionIdentifier
-]
-
-{ #category : #accessing }
-SOClassDescription >> versionIdentifier: anObject [
-
-	versionIdentifier := anObject
 ]

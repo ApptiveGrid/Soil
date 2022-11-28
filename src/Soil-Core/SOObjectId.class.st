@@ -21,6 +21,19 @@ SOObjectId class >> soilRawMaterialize: materializer [
 		index: materializer nextLengthEncodedInteger 
 ]
 
+{ #category : #comparing }
+SOObjectId >> = anObjectId [ 
+self halt.
+	(anObjectId class = self class) ifFalse: [ ^ false ].
+	^ segment = anObjectId segment and: [ 
+		index = anObjectId index ]
+]
+
+{ #category : #comparing }
+SOObjectId >> hash [ 
+	^ segment hash bitXor: index hash
+]
+
 { #category : #accessing }
 SOObjectId >> index [
 	^ index

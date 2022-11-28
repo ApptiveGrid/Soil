@@ -186,6 +186,15 @@ SOTransaction >> newObjectId [
 ]
 
 { #category : #accessing }
+SOTransaction >> newSerializer [
+	soil ifNil: [ self halt ].
+	^ soil newSerializer
+		transaction: self;
+		yourself
+
+]
+
+{ #category : #accessing }
 SOTransaction >> objectIndex [
 	^ objectMap
 ]
@@ -232,15 +241,6 @@ SOTransaction >> root: anObject [
 { #category : #accessing }
 SOTransaction >> rootObjectId [
 	^ SOObjectId segment: 1 index: 1
-]
-
-{ #category : #accessing }
-SOTransaction >> serializer [
-	soil ifNil: [ self halt ].
-	^ soil newSerializer
-		transaction: self;
-		yourself
-
 ]
 
 { #category : #accessing }

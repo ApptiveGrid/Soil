@@ -21,7 +21,6 @@ SOObjectRecord class >> readFrom: aStream [
 
 { #category : #'instance creation' }
 SOObjectRecord >> addReference: reference [
-	(reference index = 0) ifTrue: [ Error signal ].
 	references add: reference
 ]
 
@@ -159,7 +158,7 @@ SOObjectRecord >> serialize [
 { #category : #serializing }
 SOObjectRecord >> serializeObject [
 	^ ByteArray streamContents: [ :s |
-		transaction serializer 
+		transaction newSerializer 
 			stream: s;
 			externalObjectRegistry: self;
 			serialize: object ].
