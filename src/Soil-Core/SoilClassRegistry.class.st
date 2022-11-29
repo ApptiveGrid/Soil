@@ -15,22 +15,6 @@ SoilClassRegistry >> addSpecialObjects [
 		put: (SOObjectId segment: 1 index: 2)
 ]
 
-{ #category : #public }
-SoilClassRegistry >> classDescriptionFor: aClass [
-	|  classDescription |
-	self halt.
-	index := self index.
-	index
-		at: aClass soilClassIdentifier
-		ifPresent: [ :pos | ^ pos ].
-	classDescription := SOClassDescription for: aClass.
-	self halt.
-	index 
-		at: aClass soilClassIdentifier 
-		put: classDescription.
-	^ classDescription
-]
-
 { #category : #accessing }
 SoilClassRegistry >> index [
 	^ index ifNil: [ 
@@ -44,6 +28,14 @@ SoilClassRegistry >> initializeFilesystem [
 		nextPutAll: #[ 0 ];
 		flush;
 		close
+]
+
+{ #category : #accessing }
+SoilClassRegistry >> nameAt: classIdentifier ifAbsent: aBlock [
+	^ self index 
+		at: classIdentifier 
+		ifAbsent: aBlock
+	
 ]
 
 { #category : #accessing }

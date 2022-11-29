@@ -16,6 +16,16 @@ SOClassDescription class >> for: aClass [
 		initializeFromClass: aClass
 ]
 
+{ #category : #'instance creation' }
+SOClassDescription class >> isSoilClusterRoot [ 
+	^ true
+]
+
+{ #category : #combining }
+SOClassDescription class >> meta [ 
+	^ self for: self
+]
+
 { #category : #'as yet unclassified' }
 SOClassDescription class >> soilTransientInstVars [ 
 	^ #( objectId ) 
@@ -46,6 +56,11 @@ SOClassDescription >> instVarIndexes [
 SOClassDescription >> instVarNames [
 
 	^ instVarNames
+]
+
+{ #category : #testing }
+SOClassDescription >> isMeta [ 
+	^ classIdentifier = self class name
 ]
 
 { #category : #accessing }

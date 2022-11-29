@@ -6,6 +6,7 @@ Class {
 		'object',
 		'transaction',
 		'objectId',
+		'objects',
 		'references',
 		'bytes',
 		'committed'
@@ -19,9 +20,27 @@ SOObjectRecord class >> readFrom: aStream [
 		readFrom: aStream
 ]
 
+{ #category : #adding }
+SOObjectRecord >> addObject: anObject reference: anObjectId [
+	objects addLast: anObject.
+	references addLast: anObjectId
+]
+
 { #category : #'instance creation' }
 SOObjectRecord >> addReference: reference [
-	references add: reference
+	references detect: [ :each | each = reference ] ifFound: [ self halt ].
+	references add: reference 
+]
+
+{ #category : #'as yet unclassified' }
+SOObjectRecord >> assignObjectIds: aSOObjectRepository [ 
+	references do: [ :reference |
+		reference initializeId: aSOObjectRepository ]
+]
+
+{ #category : #accessing }
+SOObjectRecord >> basicReferenceAt: anInteger [ 
+	^ references at: anInteger
 ]
 
 { #category : #accessing }
@@ -47,23 +66,29 @@ SOObjectRecord >> hasChanged [
 { #category : #accessing }
 SOObjectRecord >> indexOf: anObject [
 	| index |
-	index := references indexOf: anObject.
+	(anObject == object) ifTrue: [ ^ 0 ].
+	index := objects indexOf: anObject.
 	(index > 0) ifTrue: [ 
 		"anObject is an external object but has already been registered. Just
 		returning the index of the registered reference"
 		^ index ].
-	(anObject class isSoilClusterRoot) ifTrue: [ 
-		"anObject could be made cluster root per class side setting. In that 
-		case we add it as cluster root to the transaction so the following
-		will find it"
-		transaction addClusterObject: anObject ]. 
 	transaction objectIndex 
 		at: anObject
-		ifPresent: [ :s | 
+		ifPresent: [ :record | 
 			"anObject is an external object. Allocate a new local index and 
 			return that"
-			references add: s.
-			^ references size ].
+			self addObject: record object reference: record objectId.
+			^ references size ]
+		ifAbsent: [ | record |
+			(anObject class isSoilClusterRoot) ifTrue: [ 
+				"anObject could be made cluster root per class side setting. In that 
+				case we add it as cluster root to the transaction so the following
+				will find it"
+				transaction addClusterObject: anObject.
+				record := transaction objectIndex at: anObject.
+				self addObject: record object reference: record objectId. 
+				^ references size ]. 
+			].
 	^ 0
 ]
 
@@ -72,7 +97,8 @@ SOObjectRecord >> initialize [
 	super initialize.
 	changed := false.
 	committed := false.
-	references := OrderedCollection new
+	references := OrderedCollection new.
+	objects := OrderedCollection new.
 ]
 
 { #category : #'as yet unclassified' }
@@ -111,11 +137,11 @@ SOObjectRecord >> objectId: aSOObjectId [
 
 { #category : #printing }
 SOObjectRecord >> printOn: aStream [ 
-	super printOn: aStream.
-	aStream << ' object: '.
+	aStream << 'record: '.
+	objectId printOn: aStream.
+	aStream << ' '.
 	object printOn: aStream.
-	aStream << ', id: '.
-	objectId printOn: aStream
+	
 ]
 
 { #category : #'instance creation' }
@@ -143,11 +169,6 @@ SOObjectRecord >> references [
 	^ references
 ]
 
-{ #category : #accessing }
-SOObjectRecord >> references: aCollection [ 
-	references := aCollection
-]
-
 { #category : #serializing }
 SOObjectRecord >> serialize [
 	^ ByteArray streamContents: [ :stream |
@@ -157,7 +178,7 @@ SOObjectRecord >> serialize [
 
 { #category : #serializing }
 SOObjectRecord >> serializeObject [
-	^ ByteArray streamContents: [ :s |
+	bytes := ByteArray streamContents: [ :s |
 		transaction newSerializer 
 			stream: s;
 			externalObjectRegistry: self;
@@ -166,15 +187,14 @@ SOObjectRecord >> serializeObject [
 
 { #category : #serializing }
 SOObjectRecord >> serializeOn: stream [
-	| objectBytes |
-	objectBytes := self serializeObject.
+	bytes ifNil: [ self serializeObject ].
 	stream nextPutAll: ((references size) asByteArrayOfSize: 2).
 	
 	references do: [ :ref |
-		stream nextPutAll: (ref objectId index asByteArrayOfSize: 8) ].
+		stream nextPutAll: (ref index asByteArrayOfSize: 8) ].
 	stream 
-		nextPutAll: (objectBytes size asByteArrayOfSize: 8);
-		nextPutAll: objectBytes .
+		nextPutAll: (bytes size asByteArrayOfSize: 8);
+		nextPutAll: bytes .
 ]
 
 { #category : #asserting }

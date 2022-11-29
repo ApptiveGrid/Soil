@@ -30,6 +30,7 @@ SOObjectRepository >> at: objectid [
 { #category : #accessing }
 SOObjectRepository >> at: objectId put: bytes [ 
 	| segment |
+	(objectId index = 0) ifTrue: [ self halt ].
 	segment := self segmentAt: objectId segment.
 	segment at: objectId index putBytes: bytes	
 ]

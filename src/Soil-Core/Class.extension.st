@@ -32,8 +32,3 @@ Class >> soilSerialize: serializer [
 Class >> soilTransientInstVars [
 	^ #()
 ]
-
-{ #category : #'*Soil-Core' }
-Class >> soilVersionIdentifier [ 
-	^ self classLayout soilVersionIdentifier 
-]
