@@ -187,6 +187,15 @@ SOTransaction >> newSerializer [
 ]
 
 { #category : #accessing }
+SOTransaction >> newSerializer [
+	soil ifNil: [ self halt ].
+	^ soil newSerializer
+		transaction: self;
+		yourself
+
+]
+
+{ #category : #accessing }
 SOTransaction >> objectIndex [
 	^ objectMap
 ]
