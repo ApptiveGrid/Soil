@@ -49,6 +49,12 @@ SOObjectRecord >> bytes [
 ]
 
 { #category : #accessing }
+SOObjectRecord >> bytes: anObject [
+
+	bytes := anObject
+]
+
+{ #category : #accessing }
 SOObjectRecord >> changed: aBoolean [
 	changed := aBoolean 
 ]
@@ -183,6 +189,7 @@ SOObjectRecord >> serializeObject [
 			stream: s;
 			externalObjectRegistry: self;
 			serialize: object ].
+	^ bytes
 ]
 
 { #category : #serializing }

@@ -31,14 +31,6 @@ SoilClassRegistry >> initializeFilesystem [
 ]
 
 { #category : #accessing }
-SoilClassRegistry >> nameAt: classIdentifier ifAbsent: aBlock [
-	^ self index 
-		at: classIdentifier 
-		ifAbsent: aBlock
-	
-]
-
-{ #category : #accessing }
 SoilClassRegistry >> nameAt: classIdentifier ifPresent: aBlock [
 	^ self index 
 		at: classIdentifier 

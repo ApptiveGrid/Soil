@@ -170,6 +170,13 @@ SOTransaction >> newObjectId [
 	^ self objectRepository newObjectId
 ]
 
+{ #category : #'instance creation' }
+SOTransaction >> newObjectRecord [
+	^ SOObjectRecord new
+		changed: true; 
+		transaction: self.
+]
+
 { #category : #accessing }
 SOTransaction >> newSerializer [
 	soil ifNil: [ self halt ].
