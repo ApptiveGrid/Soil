@@ -40,7 +40,7 @@ SoilSerializer >> basicNextPutSymbol: aSymbol [
 
 { #category : #public }
 SoilSerializer >> classDescriptionFor: aClass [ 
-	^ transaction classDescriptionFor: aClass 
+	^ transaction classDescriptionFor: aClass
 ]
 
 { #category : #initialization }
@@ -348,9 +348,19 @@ SoilSerializer >> notSupportedError: anObject [
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSerializer >> referenceIndexOf: aSOClassDescription [ 
+	^ externalObjectRegistry indexOf: aSOClassDescription 
+]
+
 { #category : #registry }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 	| index externalIndex |
+	(anObject == clusterRoot) ifTrue: [ 
+		"later references could reference the cluster root so we put
+		it as first object to be able to have an internal reference to it"
+		objects add: anObject.
+		^ aBlock value ]. 
 	index := objects indexOf: anObject.
 	(index > 0) ifTrue: [ 
 		self nextPutInternalReference: index.

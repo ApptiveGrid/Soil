@@ -40,15 +40,16 @@ SoilMaterializer >> materializeFromBytes: aByteArray [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| objectClass classInfo objectIndex|
+	| objectClass description objectIndex|
 	objectIndex := self nextLengthEncodedInteger.
-	classInfo := "(objectIndex = 5) 
-		ifTrue: [  self halt . SOClassDescription for: SOClassDescription ]
-	 	ifFalse: [ "transaction classDescriptionWithId: (SOObjectId segment: 1 index: objectIndex) ifNone: [ self halt  ]"]".
-	objectClass := classInfo objectClass.
-	^" (objectClass soilVersionIdentifier = versionIdentifier)
-		ifTrue: [ "objectClass classLayout soilBasicMaterialize: objectClass with: self "]
-		ifFalse: [ self halt ]"
+	description := objectIndex isZero
+		ifTrue: [ SOClassDescription meta ]
+		ifFalse: [
+			transaction 
+				classDescriptionWithId: (externalObjectRegistry basicReferenceAt: objectIndex) 
+				ifNone: [ self halt  ] ].
+	objectClass := description objectClass.
+	^ objectClass classLayout soilBasicMaterialize: objectClass with: self
 ]
 
 { #category : #reading }

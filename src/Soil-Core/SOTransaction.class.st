@@ -13,6 +13,8 @@ Class {
 
 { #category : #aborting }
 SOTransaction >> abort [
+	recordsToCommit := nil.
+	classDescriptions := nil.
 	soil := nil.
 	idMap := nil.
 	objectMap := nil
@@ -31,8 +33,6 @@ SOTransaction >> addClusterObject: anObject [
 { #category : #accessing }
 SOTransaction >> atObjectId: objectId putObject: anObject [
 	| record |
-	(objectMap at: anObject ifAbsent: [nil]) ifNotNil: [ Error signal: 'object should not be added already' ].
-	(idMap at: objectId ifAbsent: [ nil ]) ifNotNil: [ Error signal: 'did not expect to be present' ].
 	record := SOObjectRecord new
 		changed: true; 
 		object: anObject;
@@ -49,6 +49,7 @@ SOTransaction >> checkpoint [
 	recordsToCommit := (idMap select: [:each | each value shouldBeCommitted ]) as: OrderedIdentityDictionary .
 	self serializeObjects.
 	recordsToCommit keysAndValuesDo: [ :objectId :record | 
+		objectId initializeId: self objectRepository.
 		record assignObjectIds: soil objectRepository.
 		bytes := record serialize.
 		soil objectRepository 
@@ -167,6 +168,13 @@ SOTransaction >> newMaterializer [
 { #category : #'instance creation' }
 SOTransaction >> newObjectId [ 
 	^ self objectRepository newObjectId
+]
+
+{ #category : #'instance creation' }
+SOTransaction >> newObjectRecord [
+	^ SOObjectRecord new
+		changed: true; 
+		transaction: self.
 ]
 
 { #category : #accessing }

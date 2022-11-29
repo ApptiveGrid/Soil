@@ -17,7 +17,9 @@ DoubleByteLayout >> soilBasicSerialize: anObject with: serializer [
 	description := serializer classDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
-		nextPutLengthEncodedInteger: description objectId index.
+		nextPutLengthEncodedInteger: (description isMeta 
+			ifTrue: [ 0 ]
+			ifFalse: [ serializer referenceIndexOf: description]).
 	
 	serializer nextPutLengthEncodedInteger: anObject basicSize.
 	1 to: anObject basicSize do: [:i |

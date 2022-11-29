@@ -49,7 +49,8 @@ SOObjectSegment >> at: anInteger putObject: anObject [
 	| record |
 	record := SOObjectRecord new 
 		object: anObject;
-		serializeObject
+		serializeObject;
+		yourself
 ]
 
 { #category : #accessing }
