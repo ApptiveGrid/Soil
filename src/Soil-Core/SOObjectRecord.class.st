@@ -43,6 +43,12 @@ SOObjectRecord >> basicReferenceAt: anInteger [
 	^ references at: anInteger
 ]
 
+{ #category : #'as yet unclassified' }
+SOObjectRecord >> assignObjectIds: aSOObjectRepository [ 
+	references do: [ :reference |
+		reference initializeId: aSOObjectRepository ]
+]
+
 { #category : #accessing }
 SOObjectRecord >> bytes [
 	^ bytes
