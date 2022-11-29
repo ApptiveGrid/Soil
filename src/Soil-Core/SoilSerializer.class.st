@@ -356,7 +356,11 @@ SoilSerializer >> referenceIndexOf: aSOClassDescription [
 { #category : #registry }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 	| index externalIndex |
-	(anObject == clusterRoot) ifTrue: [ ^ aBlock value ]. 
+	(anObject == clusterRoot) ifTrue: [ 
+		"later references could reference the cluster root so we put
+		it as first object to be able to have an internal reference to it"
+		objects add: anObject.
+		^ aBlock value ]. 
 	index := objects indexOf: anObject.
 	(index > 0) ifTrue: [ 
 		self nextPutInternalReference: index.
