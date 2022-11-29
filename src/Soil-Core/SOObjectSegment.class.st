@@ -100,7 +100,7 @@ SOObjectSegment >> initializeFilesystem [
 		initializeFilesystem.
 	SOObjectIndexFile new
 		segment: self;
-		initializeFilesystem 
+		initializeFilesystem
 ]
 
 { #category : #ids }

@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'externalObjectRegistry',
 		'stream',
-		'objects'
+		'objects',
+		'transaction'
 	],
 	#classVars : [
 		'CharacterEncoder'
@@ -45,4 +46,9 @@ SoilObjectCodec >> externalObjectRegistry: anObject [
 { #category : #accessing }
 SoilObjectCodec >> stream: aStream [ 
 	stream := aStream
+]
+
+{ #category : #accessing }
+SoilObjectCodec >> transaction: aSOTransaction [ 
+	transaction := aSOTransaction 
 ]

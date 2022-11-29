@@ -12,11 +12,11 @@ DoubleWordLayout >> soilBasicMaterialize: objectClass with: serializer [
 
 { #category : #'*Soil-Core' }
 DoubleWordLayout >> soilBasicSerialize: anObject with: serializer [
-	| classInfo instSize |
-	classInfo := serializer classDescriptionFor: anObject class.
+	| instSize description |
+	description := serializer classDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
-		basicNextPutString: classInfo name.
+		nextPutLengthEncodedInteger: description objectId index.
 
 	instSize := anObject basicSize.
 	serializer nextPutLengthEncodedInteger: instSize.

@@ -14,6 +14,28 @@ SOObjectId class >> segment: segmentId index: index [
 		segment: segmentId index: index
 ]
 
+{ #category : #'as yet unclassified' }
+SOObjectId class >> soilRawMaterialize: materializer [ 
+	^ self new 
+		segment: materializer nextLengthEncodedInteger
+		index: materializer nextLengthEncodedInteger 
+]
+
+{ #category : #comparing }
+SOObjectId >> = anObjectId [ 
+	(anObjectId class = self class) ifFalse: [ ^ false ].
+	"object ids are generated with zero as index because the allocation of the 
+	real index needs to be done on commit time"
+	(index = 0) ifTrue: [ ^ self == anObjectId ].
+	^ segment = anObjectId segment and: [ 
+		index = anObjectId index ]
+]
+
+{ #category : #comparing }
+SOObjectId >> hash [ 
+	^ segment hash bitXor: index hash
+]
+
 { #category : #accessing }
 SOObjectId >> index [
 	^ index
@@ -23,6 +45,12 @@ SOObjectId >> index [
 SOObjectId >> initialize [ 
 	super initialize.
 	segment := 1
+]
+
+{ #category : #initialization }
+SOObjectId >> initializeId: objectRepository [ 
+	(index = 0) ifFalse: [ ^ self ].
+	index := (objectRepository segmentAt: segment) allocateNextIndex 
 ]
 
 { #category : #printing }
@@ -46,4 +74,12 @@ SOObjectId >> segment: segmentNo index: segmentIndex [
 { #category : #accessing }
 SOObjectId >> setIndex: anInteger [ 
 	index := anInteger 
+]
+
+{ #category : #'as yet unclassified' }
+SOObjectId >> soilRawSerialize: serializer [ 
+	(index = 0) ifTrue: [ Error signal: 'object id not initialized' ].
+	serializer 
+		nextPutLengthEncodedInteger: segment;
+		nextPutLengthEncodedInteger: index
 ]

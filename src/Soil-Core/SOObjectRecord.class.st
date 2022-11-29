@@ -7,7 +7,8 @@ Class {
 		'transaction',
 		'objectId',
 		'references',
-		'bytes'
+		'bytes',
+		'committed'
 	],
 	#category : #'Soil-Core'
 }
@@ -16,6 +17,17 @@ Class {
 SOObjectRecord class >> readFrom: aStream [
 	^ self new 
 		readFrom: aStream
+]
+
+{ #category : #'instance creation' }
+SOObjectRecord >> addReference: reference [
+	references add: reference
+]
+
+{ #category : #'as yet unclassified' }
+SOObjectRecord >> assignObjectIds: aSOObjectRepository [ 
+	references do: [ :reference |
+		reference initializeId: aSOObjectRepository ]
 ]
 
 { #category : #accessing }
@@ -28,6 +40,11 @@ SOObjectRecord >> changed: aBoolean [
 	changed := aBoolean 
 ]
 
+{ #category : #asserting }
+SOObjectRecord >> committed [ 
+	committed := true
+]
+
 { #category : #testing }
 SOObjectRecord >> hasChanged [
 	^ changed 
@@ -37,11 +54,21 @@ SOObjectRecord >> hasChanged [
 SOObjectRecord >> indexOf: anObject [
 	| index |
 	index := references indexOf: anObject.
-	(index > 0) ifTrue: [ ^ index ].
+	(index > 0) ifTrue: [ 
+		"anObject is an external object but has already been registered. Just
+		returning the index of the registered reference"
+		^ index ].
+	(anObject class isSoilClusterRoot) ifTrue: [ 
+		"anObject could be made cluster root per class side setting. In that 
+		case we add it as cluster root to the transaction so the following
+		will find it"
+		transaction addClusterObject: anObject ]. 
 	transaction objectIndex 
 		at: anObject
 		ifPresent: [ :s | 
-			references add: s.
+			"anObject is an external object. Allocate a new local index and 
+			return that"
+			references add: s objectId.
 			^ references size ].
 	^ 0
 ]
@@ -50,15 +77,21 @@ SOObjectRecord >> indexOf: anObject [
 SOObjectRecord >> initialize [ 
 	super initialize.
 	changed := false.
+	committed := false.
 	references := OrderedCollection new
 ]
 
 { #category : #'as yet unclassified' }
 SOObjectRecord >> materializeObject [
-	object := SoilMaterializer new 
+	object := self newMaterializer 
 		stream: bytes readStream;
 		externalObjectRegistry: self;
 		materialize
+]
+
+{ #category : #'instance creation' }
+SOObjectRecord >> newMaterializer [ 
+	^ transaction newMaterializer
 ]
 
 { #category : #accessing }
@@ -82,12 +115,21 @@ SOObjectRecord >> objectId: aSOObjectId [
 	objectId := aSOObjectId 
 ]
 
+{ #category : #printing }
+SOObjectRecord >> printOn: aStream [ 
+	super printOn: aStream.
+	aStream << ' object: '.
+	object printOn: aStream.
+	aStream << ', id: '.
+	objectId printOn: aStream
+]
+
 { #category : #'instance creation' }
 SOObjectRecord >> readFrom: stream [ 
 	| numberOfReferences objectSize |
 	numberOfReferences := (stream next: 2) asInteger.
 	references := OrderedCollection new.
-	1 to: numberOfReferences do: [:n | references add: (SOObjectId segment: 1 index: (stream next: 8) asInteger)]. 
+	1 to: numberOfReferences do: [:n | self addReference: (SOObjectId segment: 1 index: (stream next: 8) asInteger)]. 
 	objectSize := (stream next: 8) asInteger.
 	bytes := stream next: objectSize.
 		
@@ -95,6 +137,7 @@ SOObjectRecord >> readFrom: stream [
 
 { #category : #accessing }
 SOObjectRecord >> referenceAt: anInteger [ 
+	(references at: anInteger) ifNil: [ self halt ]. 
 	^ SOProxy new 
 		objectId: (references at: anInteger);
 		transaction: transaction;
@@ -120,8 +163,8 @@ SOObjectRecord >> serialize [
 
 { #category : #serializing }
 SOObjectRecord >> serializeObject [
-	^ ByteArray streamContents: [ :s |
-		transaction serializer 
+	bytes := ByteArray streamContents: [ :s |
+		transaction newSerializer 
 			stream: s;
 			externalObjectRegistry: self;
 			serialize: object ].
@@ -129,15 +172,19 @@ SOObjectRecord >> serializeObject [
 
 { #category : #serializing }
 SOObjectRecord >> serializeOn: stream [
-	| objectBytes |
-	objectBytes := self serializeObject.
+	bytes ifNil: [ self serializeObject ].
 	stream nextPutAll: ((references size) asByteArrayOfSize: 2).
 	
 	references do: [ :ref |
-		stream nextPutAll: (ref objectId index asByteArrayOfSize: 8) ].
+		stream nextPutAll: (ref index asByteArrayOfSize: 8) ].
 	stream 
-		nextPutAll: (objectBytes size asByteArrayOfSize: 8);
-		nextPutAll: objectBytes .
+		nextPutAll: (bytes size asByteArrayOfSize: 8);
+		nextPutAll: bytes .
+]
+
+{ #category : #asserting }
+SOObjectRecord >> shouldBeCommitted [ 
+	^ changed & committed not
 ]
 
 { #category : #accessing }

@@ -1,6 +1,9 @@
 Class {
 	#name : #SoilMaterializer,
 	#superclass : #SoilObjectCodec,
+	#instVars : [
+		'soil'
+	],
 	#category : #'Soil-Core-Serialization'
 }
 
@@ -29,12 +32,23 @@ SoilMaterializer >> materialize [
 	^ self nextSoilObject
 ]
 
+{ #category : #'as yet unclassified' }
+SoilMaterializer >> materializeFromBytes: aByteArray [
+	^ (self stream: aByteArray readStream)
+		materialize
+]
+
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| name objectClass |
-	name := self basicNextString .
-	objectClass := Smalltalk at: name asSymbol.
-	^objectClass classLayout soilBasicMaterialize: objectClass with: self
+	| objectClass classInfo objectIndex|
+	objectIndex := self nextLengthEncodedInteger.
+	classInfo := "(objectIndex = 5) 
+		ifTrue: [  self halt . SOClassDescription for: SOClassDescription ]
+	 	ifFalse: [ "transaction classDescriptionWithId: (SOObjectId segment: 1 index: objectIndex) ifNone: [ self halt  ]"]".
+	objectClass := classInfo objectClass.
+	^" (objectClass soilVersionIdentifier = versionIdentifier)
+		ifTrue: [ "objectClass classLayout soilBasicMaterialize: objectClass with: self "]
+		ifFalse: [ self halt ]"
 ]
 
 { #category : #reading }
@@ -337,6 +351,18 @@ SoilMaterializer >> nextWideSymbol [
 SoilMaterializer >> registerObject: anObject [
 	objects ifNil: [ objects := OrderedCollection new ].
 	objects add: anObject 
+]
+
+{ #category : #accessing }
+SoilMaterializer >> soil [
+
+	^ soil
+]
+
+{ #category : #accessing }
+SoilMaterializer >> soil: anObject [
+
+	soil := anObject
 ]
 
 { #category : #accessing }
