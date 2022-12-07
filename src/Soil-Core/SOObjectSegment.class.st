@@ -10,7 +10,7 @@ Class {
 		'indexFile',
 		'objectFile'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Model'
 }
 
 { #category : #adding }

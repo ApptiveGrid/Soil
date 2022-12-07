@@ -1,15 +1,15 @@
 Class {
-	#name : #SOProxy,
+	#name : #SOObjectProxy,
 	#superclass : #Object,
 	#instVars : [
 		'transaction',
 		'objectId'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Model'
 }
 
 { #category : #'reflective operations' }
-SOProxy >> doesNotUnderstand: aMessage [ 
+SOObjectProxy >> doesNotUnderstand: aMessage [ 
 	| realObject |
 	realObject := transaction 
 		objectWithId: objectId 
@@ -18,23 +18,23 @@ SOProxy >> doesNotUnderstand: aMessage [
 ]
 
 { #category : #accessing }
-SOProxy >> objectId [
+SOObjectProxy >> objectId [
 
 	^ objectId
 ]
 
 { #category : #accessing }
-SOProxy >> objectId: anObject [
+SOObjectProxy >> objectId: anObject [
 
 	objectId := anObject
 ]
 
 { #category : #'as yet unclassified' }
-SOProxy >> soilLoadedIn: aTransaction [ 
+SOObjectProxy >> soilLoadedIn: aTransaction [ 
 	transaction := aTransaction  
 ]
 
 { #category : #accessing }
-SOProxy >> transaction: aTransaction [ 
+SOObjectProxy >> transaction: aTransaction [ 
 	transaction := aTransaction 
 ]
