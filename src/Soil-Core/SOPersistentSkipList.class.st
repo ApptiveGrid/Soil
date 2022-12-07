@@ -95,14 +95,6 @@ SOPersistentSkipList >> findPageForKey: aByteArray [
 	^ self pageAt: index
 ]
 
-{ #category : #'as yet unclassified' }
-SOPersistentSkipList >> findPageOfKey: key [ 
-	^ ((self pageAt: 1) 
-		at: (key asByteArray asByteArrayOfSize: 8)
-		ifAbsent: [ nil ])
-			ifNotNil: [ self pageAt: 1 ]
-]
-
 { #category : #accessing }
 SOPersistentSkipList >> firstPage [
 	^ self pageAt: 1

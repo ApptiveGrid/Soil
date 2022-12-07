@@ -25,11 +25,6 @@ SOSkipListSentinelNode >> key [
 ]
 
 { #category : #'as yet unclassified' }
-SOSkipListSentinelNode >> keyIsGreaterThan: aString [ 
-	^ lowerBound not
-]
-
-{ #category : #'as yet unclassified' }
 SOSkipListSentinelNode >> keyIsSmallerThan: aString [ 
 	^ lowerBound 
 ]
@@ -37,11 +32,6 @@ SOSkipListSentinelNode >> keyIsSmallerThan: aString [
 { #category : #printing }
 SOSkipListSentinelNode >> printOn: aStream [ 
 	aStream << (lowerBound ifTrue: [ 'lower bound' ] ifFalse: [ 'upper bound' ] )
-]
-
-{ #category : #'as yet unclassified' }
-SOSkipListSentinelNode >> realNodeIn: aPersistedSkipList [ 
-	^ self
 ]
 
 { #category : #accessing }

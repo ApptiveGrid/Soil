@@ -61,11 +61,6 @@ SOSkipListPage >> itemIndexOf: aSkipNode [
 	^ items indexOf: aSkipNode
 ]
 
-{ #category : #'as yet unclassified' }
-SOSkipListPage >> itemLength [
-	^ 8 + 8 + (16 * 8)
-]
-
 { #category : #accessing }
 SOSkipListPage >> items [
 	^ items
@@ -74,11 +69,6 @@ SOSkipListPage >> items [
 { #category : #accessing }
 SOSkipListPage >> items: aCollection [ 
 	items := aCollection
-]
-
-{ #category : #accessing }
-SOSkipListPage >> itemsStart [
-	^ (list positionOfPage: self) + 2
 ]
 
 { #category : #'as yet unclassified' }
