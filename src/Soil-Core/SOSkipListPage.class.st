@@ -71,11 +71,6 @@ SOSkipListPage >> items: aCollection [
 	items := aCollection
 ]
 
-{ #category : #'as yet unclassified' }
-SOSkipListPage >> keyFor: aString [ 
-	^ aString asByteArray asByteArrayOfSize: 8
-]
-
 { #category : #accessing }
 SOSkipListPage >> list: aPersistedSkipList [ 
 	list := aPersistedSkipList
