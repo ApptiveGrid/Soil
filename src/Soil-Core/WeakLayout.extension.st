@@ -16,12 +16,19 @@ WeakLayout >> soilBasicMaterialize: objectClass with: serializer [
 
 { #category : #'*Soil-Core' }
 WeakLayout >> soilBasicSerialize: anObject with: serializer [
-	| instSize |
-	super soilBasicSerialize: anObject with: serializer.
+	|  description basicSize|
 	
-	serializer nextPutLengthEncodedInteger: anObject basicSize.
-	"on variable sized objects size > instVars"
-	instSize := anObject class instSize.
-	instSize + 1 to: instSize + anObject basicSize do: [:i | 
-	(anObject basicAt: i) soilSerialize: serializer ]
+	description := serializer classDescriptionFor: anObject class.
+	serializer 
+		nextPutObjectType;
+		nextPutLengthEncodedInteger: (description isMeta 
+			ifTrue: [ 0 ]
+			ifFalse: [ serializer referenceIndexOf: description]).
+
+
+	basicSize := anObject basicSize.
+	serializer nextPutLengthEncodedInteger: basicSize.
+	
+	description instVarIndexes do: [:i | (anObject instVarAt: i) soilSerialize: serializer ].
+	1 to: basicSize do: [:i | (anObject basicAt: i) soilSerialize: serializer ]
 ]
