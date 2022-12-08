@@ -78,10 +78,7 @@ SoilSerializationTest >> testSerializationCompiledMethodLayout [
 	serialized := self serializeToBytes: object.
 	materialized := self materializeFromBytes: serialized.
 
-	(SystemVersion current major == 11)
-		ifTrue: [ self assert: materialized bytecodes equals: object bytecodes. ]
-		ifFalse: [ self assert: materialized bytecode equals: object bytecode. ].
-	
+	self assert: materialized bytecodes equals: object bytecodes.
 	self assert: materialized literals equals: object literals.
 	self assert: materialized equals: object.
 	self
@@ -101,9 +98,8 @@ SoilSerializationTest >> testSerializationCompiledMethodLayoutCompiledBlock [
  	materialized := self materializeFromBytes: serialized.
 
  	"for #= we need equal outercode to be the same, too"
- 	(SystemVersion current major == 11)
-		ifTrue: [ self assert: materialized bytecodes equals: object bytecodes. ]
-		ifFalse: [ self assert: materialized bytecode equals: object bytecode. ].
+ 	self assert: materialized bytecodes equals: object bytecodes.
+
  	self assert: materialized literals equals: object literals.
  	self assert: materialized class classLayout class equals: CompiledMethodLayout
 ]
