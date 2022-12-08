@@ -8,7 +8,7 @@ Class {
 		'classDescriptions',
 		'recordsToCommit'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Model'
 }
 
 { #category : #aborting }
