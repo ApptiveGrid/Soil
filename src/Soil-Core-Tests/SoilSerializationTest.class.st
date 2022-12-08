@@ -69,11 +69,13 @@ SoilSerializationTest >> testSerializationCleanBlockClosure [
 	<compilerOptions: #(+ optionCleanBlockClosure)>
 	| object serialized  materialized |
 	(SystemVersion current major == 11) ifFalse: [ self skip ].
-	object := [].
+	object := [1+2].
 	
 	serialized := self serializeToBytes: object.
 	materialized := self materializeFromBytes: serialized.
-	self assert: materialized class equals: CleanBlockClosure
+	self assert: materialized class equals: CleanBlockClosure.
+	"and we can execute it!"
+	self assert: object value equals: 3
 ]
 
 { #category : #'tests-layouts' }
