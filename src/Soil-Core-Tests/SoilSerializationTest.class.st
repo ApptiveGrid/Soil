@@ -116,6 +116,20 @@ SoilSerializationTest >> testSerializationCompiledMethodLayoutCompiledBlock [
  	self assert: materialized class classLayout class equals: CompiledMethodLayout
 ]
 
+{ #category : #'test-blocks' }
+SoilSerializationTest >> testSerializationConstantBlockClosure [
+	<compilerOptions: #(+ optionConstantBlockClosure)>
+	| object serialized  materialized |
+	(SystemVersion current major == 11) ifFalse: [ self skip ].
+	object := [1].
+	
+	serialized := self serializeToBytes: object.
+	materialized := self materializeFromBytes: serialized.
+	self assert: (materialized isKindOf: ConstantBlockClosure).
+	"and we can execute it!"
+	self assert: object value equals: 1
+]
+
 { #category : #'tests-layouts' }
 SoilSerializationTest >> testSerializationDoubleByteLayout [
 	| object serialized materialized |
