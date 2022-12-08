@@ -4,6 +4,18 @@
 
 Soil is a playground for exploring and learning OO database technology. It aims to be a fully transaction based database with plenty of indexing support. To read more please have a look at the [documentation](./docs/soil.md)
 
+## Loading
+
+First, load it in Pharo 10 or 11 with Metacello:
+
+```smalltalk
+Metacello new 
+	repository: 'github://ApptiveGrid/Soil:development/src';
+	baseline: 'Soil';
+	load.
+```
+
+
 Here is the plan that grows faster than we can finish things:
 
 - [ ] combining skiplist, object factory and serialization
