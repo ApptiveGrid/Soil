@@ -167,22 +167,11 @@ SoilMaterializer >> nextCompiledMethod: aClass [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextDate: aClass [
-	| startJdn startSeconds startNano offsetSeconds offsetNanos dateStart date |
-
-	startJdn := self nextLengthEncodedInteger.
-	startSeconds := self nextLengthEncodedInteger.
-	"startNano := self nextLengthEncodedInteger".
-	offsetSeconds := self nextLengthEncodedInteger.
-	"offsetNanos := self nextLengthEncodedInteger".
-	dateStart := DateAndTime basicNew
-		setJdn: startJdn
-		seconds: startSeconds
-		nano: "startNano" 0
-		offset: (Duration seconds: offsetSeconds - 86400 nanoSeconds: "offsetNanos" 0);
-		yourself.
-
-	date := aClass starting: dateStart.
+SoilMaterializer >> nextDate: aClass [ 
+	| date |
+	date := aClass 
+		julianDayNumber: 2415386 + self nextLengthEncodedInteger 
+		offset: (Duration minutes: self nextSoilObject).
 	self registerObject: date.
 	^ date
 ]

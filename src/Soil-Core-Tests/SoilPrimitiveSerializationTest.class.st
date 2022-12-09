@@ -12,6 +12,14 @@ SoilPrimitiveSerializationTest >> newSerializer [
 	^ Soil inMemory newSerializer
 ]
 
+{ #category : #helpers }
+SoilPrimitiveSerializationTest >> restoreLocalTimeZoneAfter: aBlock [
+
+	| realTimeZone |
+	realTimeZone := DateAndTime localTimeZone.
+	aBlock ensure: [ DateAndTime localTimeZone: realTimeZone ].
+]
+
 { #category : #running }
 SoilPrimitiveSerializationTest >> setUp [
 	super setUp.
@@ -200,9 +208,9 @@ SoilPrimitiveSerializationTest >> testSerializationClass [
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationDate [
 	| object serialized materialized |
-	object := Date newDay: 31 month: 10 year: 2022.
+	object := Date fromDays: 10.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[14 236 145 150 1 208 140 1 176 150 4].
+	self assert: serialized equals: #[14 10 3 0].
 	self assert: (serialized at: 1) equals: TypeCodeDate.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -210,31 +218,33 @@ SoilPrimitiveSerializationTest >> testSerializationDate [
 ]
 
 { #category : #tests }
-SoilPrimitiveSerializationTest >> testSerializationDateOffsetNegative [
-	| datetime object serialized materialized |
-	datetime := DateAndTime fromString: '2022-10-31T00:00:00-05:00'.
-	self assert: datetime offset asSeconds < 0.
-	object := Date starting: datetime.
-	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[14 236 145 150 1 208 140 1 176 150 4].
-	self assert: (serialized at: 1) equals: TypeCodeDate.
+SoilPrimitiveSerializationTest >> testSerializationDateWithLocalTimeZone [
+	| utc est bst object utc14plus utc545plus utc12minus utc330minus serialized materialized |
+	utc := TimeZone abbreviated: 'UTC'.
+	est := TimeZone abbreviated: 'EST'.
+	bst := TimeZone abbreviated: 'BST'.
+	utc12minus := TimeZone offset: -12 hours name: 'Baker Island Time' abbreviation: 'BIT'.
+	utc14plus := TimeZone offset: 14 hours name: 'Line Islands Time' abbreviation: 'LINT'.
+	utc330minus := TimeZone offset: (3 * 60 + 30) minutes negated name: 'Newfoundland Time' abbreviation: 'NT'.
+	utc545plus := TimeZone offset: (5 * 60 + 45) minutes name: 'Nepal Time' abbreviation: 'NPT'.
+	{
+		{ utc. utc }.
+		{ utc. est }. { est. utc }.
+		{ utc. bst }. { bst. utc }.
+		{ est. bst }. { bst. est }.
+		{ utc12minus. utc14plus }. { utc14plus. utc12minus }.
+		{ utc. utc330minus }. { utc330minus. utc }.
+		{ utc. utc545plus }. { utc545plus. utc }.
+	} do: [ :eachPair |
+		self useTimeZoneInstance: eachPair first during: [
+			object := Date year: 2022 month: 10 day: 31.
+			serialized := SoilSerializer serializeToBytes: object.
+			"self assert: serialized equals: eachCase value."
+			self assert: (serialized at: 1) equals: TypeCodeDate ].
 
-	materialized := SoilMaterializer materializeFromBytes: serialized.
-	self assert: materialized equals: object
-]
-
-{ #category : #tests }
-SoilPrimitiveSerializationTest >> testSerializationDateOffsetPositive [
-	| datetime object serialized materialized |
-	datetime := DateAndTime fromString: '2022-10-31T00:00:00+02:00'.
-	self assert: datetime offset asSeconds > 0.
-	object := Date starting: datetime.
-	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[14 235 145 150 1 224 234 4 160 219 5].
-	self assert: (serialized at: 1) equals: TypeCodeDate.
-
-	materialized := SoilMaterializer materializeFromBytes: serialized.
-	self assert: materialized equals: object
+		self useTimeZoneInstance: eachPair second during: [
+			materialized := SoilMaterializer materializeFromBytes: serialized.
+			self assert: materialized equals: object ] ]
 ]
 
 { #category : #tests }
@@ -837,4 +847,12 @@ SoilPrimitiveSerializationTest >> testSerializationWideSymbol [
 	
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: symbol
+]
+
+{ #category : #helpers }
+SoilPrimitiveSerializationTest >> useTimeZoneInstance: aTimeZone during: aBlock [
+
+  self restoreLocalTimeZoneAfter: [ 
+    DateAndTime localTimeZone: aTimeZone. 
+    aBlock cull: aTimeZone ].
 ]

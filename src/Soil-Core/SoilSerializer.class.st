@@ -146,34 +146,11 @@ SoilSerializer >> nextPutCompiledMethod: aCompiledMethod [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutDate: aDate [
-	"Save a Date representation.
-	In Pharo a Date is actually a TimeSpan of 24 hours from a starting DateAndTime.
-	The start of the Date is a DateAndTime, which will be stored as four integers:
-		julianDayNumber
-		seconds
-		nanos
-		offset 
-	The offset is a Duration, so store the seconds and nanos.
-	The offset can be negative, so normalize it to positive by adding 1 day asSeconds = 86400.
-	The TimeSpan duration of a day is always 24 hours, so no need to store it."
-
-	| dateStart |
-
-	dateStart := aDate start.
-
-	"self
-		nextPutByte: TypeCodeDate;
-		nextPutLengthEncodedInteger: dateStart julianDayNumberUTC;
-		nextPutLengthEncodedInteger: dateStart secondsSinceMidnightUTC;
-		nextPutLengthEncodedInteger: dateStart nanoSecond;
-		nextPutLengthEncodedInteger: dateStart offset asSeconds + 86400;
-		nextPutLengthEncodedInteger: dateStart offset nanoSeconds"
-	self
-		nextPutByte: TypeCodeDate;
-		nextPutLengthEncodedInteger: dateStart julianDayNumberUTC;
-		nextPutLengthEncodedInteger: dateStart secondsSinceMidnightUTC;
-		nextPutLengthEncodedInteger: dateStart offset asSeconds + 86400
+SoilSerializer >> nextPutDate: aDate [ 
+	self 
+		nextPutByte: TypeCodeDate; 
+		nextPutLengthEncodedInteger: aDate julianDayNumber - 2415386; 
+		nextPutInteger: ((aDate offset hours * 60) + aDate offset minutes)
 ]
 
 { #category : #writing }
