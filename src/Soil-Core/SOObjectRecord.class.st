@@ -11,7 +11,7 @@ Class {
 		'bytes',
 		'committed'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Model'
 }
 
 { #category : #'instance creation' }
@@ -164,7 +164,7 @@ SOObjectRecord >> readFrom: stream [
 { #category : #accessing }
 SOObjectRecord >> referenceAt: anInteger [ 
 	(references at: anInteger) ifNil: [ self halt ]. 
-	^ SOProxy new 
+	^ SOObjectProxy new 
 		objectId: (references at: anInteger);
 		transaction: transaction;
 		yourself 

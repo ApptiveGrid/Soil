@@ -16,12 +16,19 @@ VariableLayout >> soilBasicMaterialize: objectClass with: serializer [
 
 { #category : #'*Soil-Core' }
 VariableLayout >> soilBasicSerialize: anObject with: serializer [
-	| basicSize |
-	super soilBasicSerialize: anObject with: serializer.
+	|  description basicSize|
 	
+	description := serializer classDescriptionFor: anObject class.
+	serializer 
+		nextPutObjectType;
+		nextPutLengthEncodedInteger: (description isMeta 
+			ifTrue: [ 0 ]
+			ifFalse: [ serializer referenceIndexOf: description]).
+
+
 	basicSize := anObject basicSize.
-	
 	serializer nextPutLengthEncodedInteger: basicSize.
-	1 to: basicSize do: [:i | 
-		(anObject basicAt: i) soilSerialize: serializer ]
+	
+	description instVarIndexes do: [:i | (anObject instVarAt: i) soilSerialize: serializer ].
+	1 to: basicSize do: [:i | (anObject basicAt: i) soilSerialize: serializer ]
 ]

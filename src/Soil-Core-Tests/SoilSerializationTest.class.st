@@ -64,11 +64,24 @@ SoilSerializationTest >> testSerializationByteLayout [
 	self assert: materialized class classLayout class equals: ByteLayout.
 ]
 
+{ #category : #'test-blocks' }
+SoilSerializationTest >> testSerializationCleanBlockClosure [
+	<compilerOptions: #(+ optionCleanBlockClosure)>
+	| object serialized  materialized |
+	(SystemVersion current major == 11) ifFalse: [ self skip ].
+	object := [1+2].
+	
+	serialized := self serializeToBytes: object.
+	materialized := self materializeFromBytes: serialized.
+	self assert: materialized class equals: CleanBlockClosure.
+	"and we can execute it!"
+	self assert: object value equals: 3
+]
+
 { #category : #'tests-layouts' }
 SoilSerializationTest >> testSerializationCompiledMethodLayout [
 
 	| object serialized materialized |
-	self skip.
 	"We use CompiledMethod as an exampe of a class with a CompiledMethodLayout"
 	object := (OrderedCollection >> #do:) copy.
 
@@ -78,10 +91,7 @@ SoilSerializationTest >> testSerializationCompiledMethodLayout [
 	serialized := self serializeToBytes: object.
 	materialized := self materializeFromBytes: serialized.
 
-	(SystemVersion current major == 11)
-		ifTrue: [ self assert: materialized bytecodes equals: object bytecodes. ]
-		ifFalse: [ self assert: materialized bytecode equals: object bytecode. ].
-	
+	self assert: materialized bytecodes equals: object bytecodes.
 	self assert: materialized literals equals: object literals.
 	self assert: materialized equals: object.
 	self
@@ -101,11 +111,23 @@ SoilSerializationTest >> testSerializationCompiledMethodLayoutCompiledBlock [
  	materialized := self materializeFromBytes: serialized.
 
  	"for #= we need equal outercode to be the same, too"
- 	(SystemVersion current major == 11)
-		ifTrue: [ self assert: materialized bytecodes equals: object bytecodes. ]
-		ifFalse: [ self assert: materialized bytecode equals: object bytecode. ].
+	self assert: materialized bytecodes equals: object bytecodes.
  	self assert: materialized literals equals: object literals.
  	self assert: materialized class classLayout class equals: CompiledMethodLayout
+]
+
+{ #category : #'test-blocks' }
+SoilSerializationTest >> testSerializationConstantBlockClosure [
+	<compilerOptions: #(+ optionConstantBlockClosure)>
+	| object serialized  materialized |
+	(SystemVersion current major == 11) ifFalse: [ self skip ].
+	object := [1].
+	
+	serialized := self serializeToBytes: object.
+	materialized := self materializeFromBytes: serialized.
+	self assert: (materialized isKindOf: ConstantBlockClosure).
+	"and we can execute it!"
+	self assert: object value equals: 1
 ]
 
 { #category : #'tests-layouts' }
@@ -218,6 +240,25 @@ SoilSerializationTest >> testSerializationSortedCollection [
 
 	materialized := self materializeFromBytes: serialized.
 	self assert: materialized equals: object
+]
+
+{ #category : #tests }
+SoilSerializationTest >> testSerializationSortedCollectionWithSortBlock [
+	"SortedCollection ixs a subclass of OrderedCollection, make sure it works"
+	<compilerOptions: #(+ optionCleanBlockClosure)>
+
+	| object serialized materialized |
+	(SystemVersion current major == 11) ifFalse: [ self skip ].
+	object := SortedCollection new sortBlock: [ :a :b | a > b ].
+	serialized := self serializeToBytes: object.
+	
+	"this is NOT serialized using TypeCodeOrderedCollection"
+	self deny: (serialized at: 1) equals: TypeCodeOrderedCollection.
+
+	materialized := self materializeFromBytes: serialized.
+	self assert: materialized class equals: object class.
+	"not yet equal as the blocks have wrong outerCode, but ok for execution"
+	self assert: materialized sortBlock compiledBlock bytecodes equals: object sortBlock compiledBlock bytecodes.	
 ]
 
 { #category : #'tests-encoded-subclasses' }

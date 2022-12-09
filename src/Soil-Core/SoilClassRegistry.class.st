@@ -5,7 +5,7 @@ Class {
 		'soil',
 		'index'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Model'
 }
 
 { #category : #adding }

@@ -6,7 +6,7 @@ Class {
 		'objectRepository',
 		'classRegistry'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Model'
 }
 
 { #category : #accessing }
