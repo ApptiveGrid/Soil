@@ -150,7 +150,7 @@ SoilSerializer >> nextPutDate: aDate [
 	self 
 		nextPutByte: TypeCodeDate; 
 		nextPutLengthEncodedInteger: aDate julianDayNumber - 2415386; 
-		nextPutLengthEncodedInteger: aDate offset hours
+		nextPutInteger: aDate offset hours
 ]
 
 { #category : #writing }
