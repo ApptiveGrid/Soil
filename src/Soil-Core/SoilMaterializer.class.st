@@ -171,7 +171,7 @@ SoilMaterializer >> nextDate: aClass [
 	| date |
 	date := aClass 
 		julianDayNumber: 2415386 + self nextLengthEncodedInteger 
-		offset: (Duration hours: self nextLengthEncodedInteger).
+		offset: (Duration hours: self nextSoilObject).
 	self registerObject: date.
 	^ date
 ]
