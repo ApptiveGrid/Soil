@@ -24,11 +24,6 @@ SOSkipListSentinelNode >> initializeKeyOfSize: anInteger [
 		ifFalse: [ ((2 raisedTo: (anInteger * 8)) - 1) asByteArrayOfSize: anInteger  ]
 ]
 
-{ #category : #accessing }
-SOSkipListSentinelNode >> key [ 
-	^ key
-]
-
 { #category : #'as yet unclassified' }
 SOSkipListSentinelNode >> keyIsSmallerThan: aString [ 
 	^ lowerBound 

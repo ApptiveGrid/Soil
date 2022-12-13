@@ -17,8 +17,7 @@ SoilBehaviorRegistry >> addSpecialObjects [
 
 { #category : #accessing }
 SoilBehaviorRegistry >> index [
-	^ index ifNil: [ 
-		index := self readIndex ]
+	^ index 
 ]
 
 { #category : #initialization }
@@ -58,6 +57,7 @@ SoilBehaviorRegistry >> open [
 	index ifNotNil: [ index close ].
 	index :=  SOPersistentSkipList new 
 		maxLevel: 16;
+		keySize: 64;
 		path: self path
 ]
 
@@ -69,21 +69,4 @@ SoilBehaviorRegistry >> path [
 { #category : #accessing }
 SoilBehaviorRegistry >> soil: aSoil [ 
 	soil := aSoil
-]
-
-{ #category : #writing }
-SoilBehaviorRegistry >> writeIndex: dictionary [
-	| stream serializer |
-	stream := ByteArray new writeStream.
-	serializer := soil newSerializer 
-		stream: stream.
-	serializer nextPutLengthEncodedInteger: dictionary size.
-	dictionary keysAndValuesDo: [ :key :value |
-		serializer basicNextPutSymbol: key.
-		value soilRawSerialize: serializer ].  
-
-	((self path / #index) ensureDelete; binaryWriteStream)
-		nextPutAll: (stream flush; contents);
-		flush;
-		close
 ]

@@ -15,7 +15,7 @@ SOObjectProxy >> doesNotUnderstand: aMessage [
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectProxy >> inspectionReference [
+SOObjectProxy >> inspectionObject [
 	<inspectorPresentationOrder: 30 title: 'object'>
 	^ StRawInspection on: self object
 

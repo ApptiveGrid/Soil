@@ -5,7 +5,8 @@ Class {
 		'path',
 		'stream',
 		'pages',
-		'random'
+		'random',
+		'keySize'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -84,6 +85,11 @@ SOPersistentSkipList >> close [
 	stream ifNotNil: [  
 		stream close.
 		stream := nil ]
+]
+
+{ #category : #accessing }
+SOPersistentSkipList >> defaultKeySize [
+	^ 16
 ]
 
 { #category : #deleting }
@@ -175,7 +181,15 @@ SOPersistentSkipList >> insert: newNode intoLeft: leftNodes [
 
 { #category : #accessing }
 SOPersistentSkipList >> keySize [
-	^ 64
+
+	^ keySize ifNil: [ 
+		keySize := self defaultKeySize ]
+]
+
+{ #category : #accessing }
+SOPersistentSkipList >> keySize: anObject [
+
+	keySize := anObject
 ]
 
 { #category : #actions }

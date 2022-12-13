@@ -13,20 +13,6 @@ SOSkipList >> find: aString [
 		ifNotNil: [ :node | node value ]
 ]
 
-{ #category : #private }
-SOSkipList >> findNode: aString [ 
-	| current right |
-	current := self firstPage firstItem.
-	
-	maxLevel to: 1 by: -1 do: [ :level |
-		[ (current hasRightAt: level) and: [ (right := (current rightAt: level) realNodeIn: self) keyIsSmallerThan: aString ] ]
-			whileTrue: [ current := right ] .
-		(current key = aString) ifTrue: [ ^ current ]. 
-
-	].
-	^ nil
-]
-
 { #category : #initialization }
 SOSkipList >> initialize [ 
 	super initialize.
