@@ -32,6 +32,33 @@ SOPersistentSkipList >> addNode: aNode [
 		newPage addNode: lookingForPage.
 ]
 
+{ #category : #private }
+SOPersistentSkipList >> at: aByteArray [ 
+	^ self 
+		at: aByteArray 
+		ifAbsent: [ Error signal: 'no found' ]
+]
+
+{ #category : #private }
+SOPersistentSkipList >> at: aByteArray ifAbsent: aBlock [
+	| key |
+	key := (aByteArray class = ByteArray and: [ aByteArray size = self keySize ])
+		ifTrue: [ aByteArray ]
+		ifFalse: [ aByteArray asByteArray asByteArrayOfSize: self keySize ].
+	^ (self findNode: key) 
+		ifNotNil: [:node | node value ]
+		ifNil: aBlock 
+]
+
+{ #category : #accessing }
+SOPersistentSkipList >> at: aString ifPresent: aBlock [
+	| value |
+	value := self at: aString ifAbsent: [ nil ].
+	^ value 
+		ifNotNil: [ aBlock value: value ]
+		ifNil: [ nil ]
+]
+
 { #category : #accessing }
 SOPersistentSkipList >> at: aKeyObject put: anObject [
 	| levelNodes newNode key |
@@ -54,8 +81,9 @@ SOPersistentSkipList >> at: aKeyObject put: anObject [
 
 { #category : #'initialize-release' }
 SOPersistentSkipList >> close [ 
-	stream close.
-	stream := nil
+	stream ifNotNil: [  
+		stream close.
+		stream := nil ]
 ]
 
 { #category : #deleting }
@@ -84,6 +112,20 @@ SOPersistentSkipList >> findLeftNodesOf: key ifKeyPresent: aBlock [
 		leftNodes at: lvl put: current
 	].
 	^ leftNodes 
+]
+
+{ #category : #private }
+SOPersistentSkipList >> findNode: aString [ 
+	| current right |
+	current := self firstPage firstItem.
+	
+	maxLevel to: 1 by: -1 do: [ :level |
+		[ (current hasRightAt: level) and: [ (right := (current rightAt: level) realNodeIn: self) keyIsSmallerThan: aString ] ]
+			whileTrue: [ current := right ] .
+		(current key = aString) ifTrue: [ ^ current ]. 
+
+	].
+	^ nil
 ]
 
 { #category : #'as yet unclassified' }
@@ -133,7 +175,7 @@ SOPersistentSkipList >> insert: newNode intoLeft: leftNodes [
 
 { #category : #accessing }
 SOPersistentSkipList >> keySize [
-	^ 8
+	^ 64
 ]
 
 { #category : #actions }
@@ -152,7 +194,8 @@ SOPersistentSkipList >> lowerNode [
 { #category : #'instance creation' }
 SOPersistentSkipList >> newFilePage [ 	
 	^ SOSkipListPage new 
-		list: self
+		list: self;
+		keySize: self keySize
 ]
 
 { #category : #'instance creation' }
@@ -198,10 +241,11 @@ SOPersistentSkipList >> positionOfPage: aPage [
 { #category : #accessing }
 SOPersistentSkipList >> readPageAt: anInteger [
 	| page |
-	stream position: (self headerLength + ((anInteger - 1) * 4096)).
+	stream position: (self headerLength + ((anInteger - 1) * self pageSize)).
 	page := SOSkipListPage new 
 		list: self;
 		pageNumber: anInteger;
+		keySize: self keySize;
 		readFrom: stream.
 	(pages size > anInteger) ifFalse: [ 
 		 pages := pages grownBy: (anInteger - pages size)].
@@ -229,8 +273,12 @@ SOPersistentSkipList >> writeFirstPage [
 	page := self newFilePage  
 		pageNumber: 1.
 	pages add: page.
-	page addNode: self newSentinelNode beLower.
-	page addNode: self newSentinelNode beUpper.
+	page addNode: (self newSentinelNode
+		beLower;
+		initializeKeyOfSize: self keySize).
+	page addNode: (self newSentinelNode 
+		beUpper;
+		initializeKeyOfSize: self keySize).
 	page writeOn: stream.
 	stream flush.
 	^ page 

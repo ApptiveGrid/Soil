@@ -59,8 +59,8 @@ SOTransaction >> checkpoint [
 	classDescriptions do: [ :description | | objectId |
 		objectId := description objectId.
 		objectId initializeId: self objectRepository.
-		soil classRegistry 
-			nameAt: description value classIdentifier 
+		soil behaviorRegistry 
+			nameAt: description value behaviorIdentifier 
 			put: objectId ].
 
 ]
@@ -71,15 +71,15 @@ SOTransaction >> classDescriptionFor: aClass [
 	classDescriptions 
 		at: aClass soilClassIdentifier 
 		ifPresent: [ :description | ^ description ].
-	soil classRegistry 
+	soil behaviorRegistry 
 		nameAt: aClass soilClassIdentifier 
 		ifPresent: [ :oid | | desc |
 			desc := (oid index = 2) 
-				ifTrue: [(SOClassDescription for: SOClassDescription) objectId: oid ]
+				ifTrue: [(SOBehaviorDescription for: SOBehaviorDescription) objectId: oid ]
 				ifFalse: [ (self objectWithId: oid ifNone: [Error signal ]) objectId: oid; yourself ].
 			^ desc ].
-	(aClass = SOClassDescription) ifTrue: [  self halt ].
-	classDescription := (SOClassDescription for: aClass).
+	(aClass = SOBehaviorDescription) ifTrue: [  self halt ].
+	classDescription := (SOBehaviorDescription for: aClass).
 	id := self newObjectId.
 	id initializeId: soil objectRepository.
 	classDescription objectId: id.
@@ -93,7 +93,7 @@ SOTransaction >> classDescriptionFor: aClass [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> classDescriptionWithId: aSOObjectId ifNone: aBlock [ 
-	(aSOObjectId index = 2) ifTrue: [ ^ SOClassDescription for: SOClassDescription ].
+	(aSOObjectId index = 2) ifTrue: [ ^ SOBehaviorDescription for: SOBehaviorDescription ].
 	^ self objectWithId: aSOObjectId ifNone: aBlock
 ]
 

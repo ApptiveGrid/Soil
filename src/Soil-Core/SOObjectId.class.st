@@ -8,6 +8,12 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #examples }
+SOObjectId class >> example [
+	<example> 
+	^ self segment: 1 index: 3
+]
+
 { #category : #'instance creation' }
 SOObjectId class >> segment: segmentId index: index [
 	^ self new 
@@ -29,6 +35,11 @@ SOObjectId >> = anObjectId [
 	(index = 0) ifTrue: [ ^ self == anObjectId ].
 	^ segment = anObjectId segment and: [ 
 		index = anObjectId index ]
+]
+
+{ #category : #converting }
+SOObjectId >> asByteArray [
+	^ index asByteArrayOfSize: 8
 ]
 
 { #category : #comparing }

@@ -57,7 +57,7 @@ SoilTest >> testInitializeDatabaseFailsIfExisting [
 { #category : #tests }
 SoilTest >> testSerializingClassDescription [
 	| obj bytes obj2 stream transaction |
-	obj :=  { #C -> (SOClassDescription for: SOTestClusterAlwaysRoot ) } asDictionary.
+	obj :=  { #C -> (SOBehaviorDescription for: SOTestClusterAlwaysRoot ) } asDictionary.
 	stream := ByteArray new writeStream.
 	transaction := soil newTransaction.
 	SoilSerializer new
@@ -71,7 +71,7 @@ SoilTest >> testSerializingClassDescription [
 		transaction: transaction;
 		stream: bytes readStream;
 		materialize.
-	self assert: (obj2 at: #C) class equals: SOClassDescription   
+	self assert: (obj2 at: #C) class equals: SOBehaviorDescription   
 	
 ]
 

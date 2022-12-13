@@ -132,6 +132,11 @@ SOObjectSegment >> path [
 	^ objectRepository soil path / #segments / self id asString
 ]
 
+{ #category : #printing }
+SOObjectSegment >> printOn: aStream [ 
+	aStream << 'segment #' << id asString 
+]
+
 { #category : #accessing }
 SOObjectSegment >> soil: aSoil [ 
 	soil := aSoil
