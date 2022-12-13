@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'path',
 		'objectRepository',
-		'classRegistry'
+		'behaviorRegistry'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -27,8 +27,8 @@ Soil class >> path: aString [
 ]
 
 { #category : #accessing }
-Soil >> classRegistry [
-	^ classRegistry
+Soil >> behaviorRegistry [
+	^ behaviorRegistry
 ]
 
 { #category : #'initialize-release' }
@@ -53,7 +53,7 @@ Soil >> initializeFilesystem [
 		addNewSegment) 
 			initializeFilesystem;
 			allocateNextIndex.
-	classRegistry  
+	behaviorRegistry  
 		initializeFilesystem;
 		addSpecialObjects
 ]
@@ -87,8 +87,9 @@ Soil >> open [
 	objectRepository := SOObjectRepository new 
 		soil: self;
 		yourself.
-	classRegistry := SoilClassRegistry new
+	behaviorRegistry := SoilBehaviorRegistry new
 			soil: self;
+			open;
 			yourself
 	
 ]

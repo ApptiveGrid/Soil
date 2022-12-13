@@ -3,18 +3,30 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'transaction',
-		'objectId'
+		'objectId',
+		'object'
 	],
 	#category : #'Soil-Core-Model'
 }
 
 { #category : #'reflective operations' }
 SOObjectProxy >> doesNotUnderstand: aMessage [ 
-	| realObject |
-	realObject := transaction 
-		objectWithId: objectId 
-		ifNone: [ Error signal: 'cannot load' ].
-	^ aMessage sendTo: realObject
+	^ aMessage sendTo: self object
+]
+
+{ #category : #'as yet unclassified' }
+SOObjectProxy >> inspectionObject [
+	<inspectorPresentationOrder: 30 title: 'object'>
+	^ StRawInspection on: self object
+
+]
+
+{ #category : #'reflective operations' }
+SOObjectProxy >> object [
+	^ object ifNil: [  
+		object := transaction 
+			objectWithId: objectId 
+			ifNone: [ Error signal: 'cannot load' ] ]
 ]
 
 { #category : #accessing }

@@ -1,5 +1,5 @@
 Class {
-	#name : #SOClassDescription,
+	#name : #SOBehaviorDescription,
 	#superclass : #Object,
 	#instVars : [
 		'name',
@@ -11,33 +11,33 @@ Class {
 }
 
 { #category : #'instance creation' }
-SOClassDescription class >> for: aClass [ 
+SOBehaviorDescription class >> for: aClass [ 
 	^ self new 
-		initializeFromClass: aClass
+		initializeFromBehavior: aClass
 ]
 
 { #category : #'instance creation' }
-SOClassDescription class >> isSoilClusterRoot [ 
+SOBehaviorDescription class >> isSoilClusterRoot [ 
 	^ true
 ]
 
 { #category : #combining }
-SOClassDescription class >> meta [ 
+SOBehaviorDescription class >> meta [ 
 	^ self for: self
 ]
 
 { #category : #'as yet unclassified' }
-SOClassDescription class >> soilTransientInstVars [ 
+SOBehaviorDescription class >> soilTransientInstVars [ 
 	^ #( objectId ) 
 ]
 
 { #category : #'as yet unclassified' }
-SOClassDescription >> classIdentifier [ 
+SOBehaviorDescription >> behaviorIdentifier [ 
 	^ classIdentifier 
 ]
 
 { #category : #initialization }
-SOClassDescription >> initializeFromClass: aClass [ 
+SOBehaviorDescription >> initializeFromBehavior: aClass [ 
 	"class := aClass."
 	classIdentifier := aClass soilClassIdentifier.
 	
@@ -45,7 +45,7 @@ SOClassDescription >> initializeFromClass: aClass [
 ]
 
 { #category : #public }
-SOClassDescription >> instVarIndexes [
+SOBehaviorDescription >> instVarIndexes [
 	| class |
 	class := Smalltalk at: classIdentifier asSymbol. 
 	^ (class allInstVarNames difference: class soilTransientInstVars) 
@@ -53,39 +53,39 @@ SOClassDescription >> instVarIndexes [
 ]
 
 { #category : #accessing }
-SOClassDescription >> instVarNames [
+SOBehaviorDescription >> instVarNames [
 
 	^ instVarNames
 ]
 
 { #category : #testing }
-SOClassDescription >> isMeta [ 
+SOBehaviorDescription >> isMeta [ 
 	^ classIdentifier = self class name
 ]
 
 { #category : #accessing }
-SOClassDescription >> name [
+SOBehaviorDescription >> name [
 
 	^ name
 ]
 
 { #category : #accessing }
-SOClassDescription >> name: anObject [
+SOBehaviorDescription >> name: anObject [
 
 	name := anObject.
 ]
 
 { #category : #accessing }
-SOClassDescription >> objectClass [
+SOBehaviorDescription >> objectClass [
 	^ Smalltalk at: classIdentifier asSymbol
 ]
 
 { #category : #accessing }
-SOClassDescription >> objectId [
+SOBehaviorDescription >> objectId [
 	^ objectId
 ]
 
 { #category : #accessing }
-SOClassDescription >> objectId: aSOObjectId [ 
+SOBehaviorDescription >> objectId: aSOObjectId [ 
 	objectId := aSOObjectId
 ]

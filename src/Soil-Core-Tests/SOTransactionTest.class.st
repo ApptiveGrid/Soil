@@ -12,6 +12,7 @@ SOTransactionTest >> setUp [
 	super setUp.
 	soil := Soil new 
 		path: 'sunit-soil-tests';
+		destroy;
 		initializeFilesystem;
 		yourself.
 ]

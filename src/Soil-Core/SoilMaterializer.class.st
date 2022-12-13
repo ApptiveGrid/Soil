@@ -43,7 +43,7 @@ SoilMaterializer >> newObject [
 	| objectClass description objectIndex|
 	objectIndex := self nextLengthEncodedInteger.
 	description := objectIndex isZero
-		ifTrue: [ SOClassDescription meta ]
+		ifTrue: [ SOBehaviorDescription meta ]
 		ifFalse: [
 			transaction 
 				classDescriptionWithId: (externalObjectRegistry basicReferenceAt: objectIndex) 

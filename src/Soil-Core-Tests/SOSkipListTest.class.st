@@ -12,6 +12,7 @@ SOSkipListTest >> setUp [
 	super setUp.
 	skipList := SOPersistentSkipList new 
 		maxLevel: 4;
+		keySize: 8;
 		path: 'sunit-skiplist';
 		destroy;
 		initializeList

@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'list',
 		'items',
-		'pageNumber'
+		'pageNumber',
+		'keySize'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -72,6 +73,11 @@ SOSkipListPage >> items: aCollection [
 ]
 
 { #category : #accessing }
+SOSkipListPage >> keySize: anInteger [ 
+	keySize := anInteger
+]
+
+{ #category : #accessing }
 SOSkipListPage >> list: aPersistedSkipList [ 
 	list := aPersistedSkipList
 ]
@@ -133,7 +139,7 @@ SOSkipListPage >> readFrom: aStream [
 SOSkipListPage >> readNodeFrom: aStream [ 
 	| node value |
 	node := list newNode
-		key: (aStream next: 8);
+		key: (aStream next: keySize);
 		value: (aStream next: 8).
 	1 to: list maxLevel do: [ :n |
 		value := self nextLengthEncodedInteger: aStream.
@@ -161,7 +167,7 @@ SOSkipListPage >> writeOn: aStream [
 	aStream nextPutAll: (items size asByteArrayOfSize: 2).
 	items do: [ :item |
 		aStream 
-			nextPutAll: (item key asByteArrayOfSize: 8);
+			nextPutAll: (item key asByteArrayOfSize: keySize);
 			nextPutAll: (item value asByteArray asByteArrayOfSize: 8).
 		item levels do: [ :lvl | 
 			lvl

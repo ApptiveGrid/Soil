@@ -17,11 +17,11 @@ SOSkipListSentinelNode >> beUpper [
 	lowerBound := false
 ]
 
-{ #category : #accessing }
-SOSkipListSentinelNode >> key [ 
-	^ lowerBound 
-		ifTrue: [  0 asByteArrayOfSize: 8 ]
-		ifFalse: [ ((2 raisedTo: 64) - 1) asByteArrayOfSize: 8  ]
+{ #category : #initialization }
+SOSkipListSentinelNode >> initializeKeyOfSize: anInteger [ 
+	key := lowerBound 
+		ifTrue: [ 0 asByteArrayOfSize: anInteger ]
+		ifFalse: [ ((2 raisedTo: (anInteger * 8)) - 1) asByteArrayOfSize: anInteger  ]
 ]
 
 { #category : #'as yet unclassified' }
