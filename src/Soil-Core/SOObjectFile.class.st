@@ -9,18 +9,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SOObjectFile >> allRecords [ 
-	| records start record |
-	stream position: self headerSize.
-	records := OrderedCollection new.
-	[ stream atEnd ] whileFalse: [ 
-		start := stream position.
-		record := SOObjectRecord readFrom: stream.
-		records add: ({ start . stream position}  -> record )].
-	^ records 
-]
-
-{ #category : #'as yet unclassified' }
 SOObjectFile >> appendBytes: aCollection [ 
 	stream position: stream size.
 	stream nextPutAll: aCollection.
