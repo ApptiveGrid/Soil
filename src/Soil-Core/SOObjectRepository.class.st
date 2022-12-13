@@ -45,6 +45,11 @@ SOObjectRepository >> defaultSegment [
 	^ self segments first 
 ]
 
+{ #category : #accessing }
+SOObjectRepository >> firstSegment [
+	^ segments first
+]
+
 { #category : #initialization }
 SOObjectRepository >> initializeFilesystem [
 	(soil path / #segments) ensureCreateDirectory 
