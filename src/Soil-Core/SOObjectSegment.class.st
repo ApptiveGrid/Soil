@@ -5,8 +5,6 @@ Class {
 		'id',
 		'soil',
 		'objectRepository',
-		'index',
-		'objects',
 		'indexFile',
 		'objectFile'
 	],
@@ -109,7 +107,7 @@ SOObjectSegment >> newObjectId [
 	^ SOObjectId segment: id index: 0 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOObjectSegment >> objectFile [
 	^ objectFile ifNil: [ 
 		objectFile := SOObjectFile new
