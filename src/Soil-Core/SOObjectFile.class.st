@@ -2,7 +2,6 @@ Class {
 	#name : #SOObjectFile,
 	#superclass : #SOSegmentFile,
 	#instVars : [
-		'id',
 		'fuelVersion'
 	],
 	#category : #'Soil-Core-Files'
