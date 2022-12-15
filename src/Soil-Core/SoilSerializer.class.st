@@ -39,8 +39,8 @@ SoilSerializer >> basicNextPutSymbol: aSymbol [
 ]
 
 { #category : #public }
-SoilSerializer >> classDescriptionFor: aClass [ 
-	^ transaction classDescriptionFor: aClass
+SoilSerializer >> behaviorDescriptionFor: aClass [ 
+	^ transaction behaviorDescriptionFor: aClass
 ]
 
 { #category : #initialization }

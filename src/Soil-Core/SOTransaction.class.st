@@ -43,30 +43,8 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 	recordsToCommit ifNotNil: [ recordsToCommit at: objectId put: record ]
 ]
 
-{ #category : #accessing }
-SOTransaction >> checkpoint [
-	| bytes |
-	recordsToCommit := (idMap select: [:each | each value shouldBeCommitted ]) as: OrderedIdentityDictionary .
-	self serializeObjects.
-	recordsToCommit keysAndValuesDo: [ :objectId :record | 
-		objectId initializeId: self objectRepository.
-		record assignObjectIds: soil objectRepository.
-		bytes := record serialize.
-		soil objectRepository 
-			at: objectId 
-			put: bytes.
-		record committed  ].
-	classDescriptions do: [ :description | | objectId |
-		objectId := description objectId.
-		objectId initializeId: self objectRepository.
-		soil behaviorRegistry 
-			nameAt: description value behaviorIdentifier 
-			put: objectId ].
-
-]
-
 { #category : #public }
-SOTransaction >> classDescriptionFor: aClass [
+SOTransaction >> behaviorDescriptionFor: aClass [
 	| classDescription id |
 	classDescriptions 
 		at: aClass soilBehaviorIdentifier 
@@ -89,6 +67,28 @@ SOTransaction >> classDescriptionFor: aClass [
 		put: classDescription.
 	^ classDescription 
 	
+]
+
+{ #category : #accessing }
+SOTransaction >> checkpoint [
+	| bytes |
+	recordsToCommit := (idMap select: [:each | each value shouldBeCommitted ]) as: OrderedIdentityDictionary .
+	self serializeObjects.
+	recordsToCommit keysAndValuesDo: [ :objectId :record | 
+		objectId initializeId: self objectRepository.
+		record assignObjectIds: soil objectRepository.
+		bytes := record serialize.
+		soil objectRepository 
+			at: objectId 
+			put: bytes.
+		record committed  ].
+	classDescriptions do: [ :description | | objectId |
+		objectId := description objectId.
+		objectId initializeId: self objectRepository.
+		soil behaviorRegistry 
+			nameAt: description value behaviorIdentifier 
+			put: objectId ].
+
 ]
 
 { #category : #'as yet unclassified' }

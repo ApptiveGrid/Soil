@@ -14,7 +14,7 @@ ByteLayout >> soilBasicMaterialize: objectClass with: serializer [
 { #category : #'*Soil-Core' }
 ByteLayout >> soilBasicSerialize: anObject with: serializer [
 	| description |
-	description := serializer classDescriptionFor: anObject class.
+	description := serializer behaviorDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
 		nextPutLengthEncodedInteger: (description isMeta 
