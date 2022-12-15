@@ -3,7 +3,7 @@ Extension { #name : #PointerLayout }
 { #category : #'*Soil-Core' }
 PointerLayout >> soilBasicSerialize: anObject with: serializer [
 	|  description |
-	description := serializer classDescriptionFor: anObject class.
+	description := serializer behaviorDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
 		nextPutLengthEncodedInteger: (description isMeta 

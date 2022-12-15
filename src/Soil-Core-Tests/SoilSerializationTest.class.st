@@ -82,6 +82,7 @@ SoilSerializationTest >> testSerializationCleanBlockClosure [
 SoilSerializationTest >> testSerializationCompiledMethodLayout [
 
 	| object serialized materialized |
+	(SystemVersion current major == 11) ifFalse: [ self skip ].
 	"We use CompiledMethod as an exampe of a class with a CompiledMethodLayout"
 	object := (OrderedCollection >> #do:) copy.
 
@@ -102,6 +103,7 @@ SoilSerializationTest >> testSerializationCompiledMethodLayout [
 { #category : #'tests-layouts' }
 SoilSerializationTest >> testSerializationCompiledMethodLayoutCompiledBlock [
 	| object serialized materialized |
+	(SystemVersion current major == 11) ifFalse: [ self skip ].
  	"This tests CompiledBlock. we use a clean block for now"
  	object := [1+2 "clean block"] compiledBlock.
 
@@ -125,7 +127,7 @@ SoilSerializationTest >> testSerializationConstantBlockClosure [
 	
 	serialized := self serializeToBytes: object.
 	materialized := self materializeFromBytes: serialized.
-	self assert: (materialized isKindOf: ConstantBlockClosure).
+	self assert: (materialized isKindOf: (Smalltalk at: #ConstantBlockClosure)).
 	"and we can execute it!"
 	self assert: object value equals: 1
 ]

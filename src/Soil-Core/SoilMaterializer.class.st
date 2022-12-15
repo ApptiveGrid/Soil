@@ -46,7 +46,7 @@ SoilMaterializer >> newObject [
 		ifTrue: [ SOBehaviorDescription meta ]
 		ifFalse: [
 			transaction 
-				classDescriptionWithId: (externalObjectRegistry basicReferenceAt: objectIndex) 
+				behaviorDescriptionWithId: (externalObjectRegistry basicReferenceAt: objectIndex) 
 				ifNone: [ self halt  ] ].
 	objectClass := description objectClass.
 	^ objectClass classLayout soilBasicMaterialize: objectClass with: self
