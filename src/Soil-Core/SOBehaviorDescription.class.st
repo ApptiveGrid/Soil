@@ -40,7 +40,6 @@ SOBehaviorDescription >> behaviorIdentifier [
 SOBehaviorDescription >> initializeFromBehavior: aClass [ 
 	"class := aClass."
 	behaviorIdentifier := aClass soilBehaviorIdentifier.
-	
 	instVarNames := aClass instVarNames
 ]
 
