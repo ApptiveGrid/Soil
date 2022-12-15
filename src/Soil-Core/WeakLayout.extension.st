@@ -18,7 +18,7 @@ WeakLayout >> soilBasicMaterialize: objectClass with: serializer [
 WeakLayout >> soilBasicSerialize: anObject with: serializer [
 	|  description basicSize|
 	
-	description := serializer classDescriptionFor: anObject class.
+	description := serializer behaviorDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
 		nextPutLengthEncodedInteger: (description isMeta 

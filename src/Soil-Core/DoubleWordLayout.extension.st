@@ -13,7 +13,7 @@ DoubleWordLayout >> soilBasicMaterialize: objectClass with: serializer [
 { #category : #'*Soil-Core' }
 DoubleWordLayout >> soilBasicSerialize: anObject with: serializer [
 	| instSize description |
-	description := serializer classDescriptionFor: anObject class.
+	description := serializer behaviorDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
 		nextPutLengthEncodedInteger: (description isMeta 
