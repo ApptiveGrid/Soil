@@ -69,6 +69,12 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 	
 ]
 
+{ #category : #'as yet unclassified' }
+SOTransaction >> behaviorDescriptionWithId: aSOObjectId ifNone: aBlock [ 
+	(aSOObjectId index = 2) ifTrue: [ ^ SOBehaviorDescription for: SOBehaviorDescription ].
+	^ self objectWithId: aSOObjectId ifNone: aBlock
+]
+
 { #category : #accessing }
 SOTransaction >> checkpoint [
 	| bytes |
@@ -89,12 +95,6 @@ SOTransaction >> checkpoint [
 			nameAt: description value behaviorIdentifier 
 			put: objectId ].
 
-]
-
-{ #category : #'as yet unclassified' }
-SOTransaction >> classDescriptionWithId: aSOObjectId ifNone: aBlock [ 
-	(aSOObjectId index = 2) ifTrue: [ ^ SOBehaviorDescription for: SOBehaviorDescription ].
-	^ self objectWithId: aSOObjectId ifNone: aBlock
 ]
 
 { #category : #accessing }
