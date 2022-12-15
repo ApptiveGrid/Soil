@@ -69,10 +69,10 @@ SOTransaction >> checkpoint [
 SOTransaction >> classDescriptionFor: aClass [
 	| classDescription id |
 	classDescriptions 
-		at: aClass soilClassIdentifier 
+		at: aClass soilBehaviorIdentifier 
 		ifPresent: [ :description | ^ description ].
 	soil behaviorRegistry 
-		nameAt: aClass soilClassIdentifier 
+		nameAt: aClass soilBehaviorIdentifier 
 		ifPresent: [ :oid | | desc |
 			desc := (oid index = 2) 
 				ifTrue: [(SOBehaviorDescription for: SOBehaviorDescription) objectId: oid ]
@@ -85,7 +85,7 @@ SOTransaction >> classDescriptionFor: aClass [
 	classDescription objectId: id.
 	self atObjectId: id putObject: classDescription.
 	classDescriptions
-		at: aClass soilClassIdentifier 
+		at: aClass soilBehaviorIdentifier 
 		put: classDescription.
 	^ classDescription 
 	

@@ -4,8 +4,8 @@ Class {
 	#instVars : [
 		'name',
 		'instVarNames',
-		'classIdentifier',
-		'objectId'
+		'objectId',
+		'behaviorIdentifier'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -33,21 +33,21 @@ SOBehaviorDescription class >> soilTransientInstVars [
 
 { #category : #'as yet unclassified' }
 SOBehaviorDescription >> behaviorIdentifier [ 
-	^ classIdentifier 
+	^ behaviorIdentifier 
 ]
 
 { #category : #initialization }
-SOBehaviorDescription >> initializeFromBehavior: aClass [ 
+SOBehaviorDescription >> initializeFromBehavior: aBehavior [ 
 	"class := aClass."
-	classIdentifier := aClass soilClassIdentifier.
+	behaviorIdentifier := aBehavior soilBehaviorIdentifier.
 	
-	instVarNames := aClass instVarNames
+	instVarNames := aBehavior instVarNames
 ]
 
 { #category : #public }
 SOBehaviorDescription >> instVarIndexes [
 	| class |
-	class := Smalltalk at: classIdentifier asSymbol. 
+	class := Smalltalk at: behaviorIdentifier asSymbol. 
 	^ (class allInstVarNames difference: class soilTransientInstVars) 
 		collect: [ :n | class allInstVarNames indexOf: n ]
 ]
@@ -60,7 +60,7 @@ SOBehaviorDescription >> instVarNames [
 
 { #category : #testing }
 SOBehaviorDescription >> isMeta [ 
-	^ classIdentifier = self class name
+	^ behaviorIdentifier = self class name
 ]
 
 { #category : #accessing }
@@ -77,7 +77,7 @@ SOBehaviorDescription >> name: anObject [
 
 { #category : #accessing }
 SOBehaviorDescription >> objectClass [
-	^ Smalltalk at: classIdentifier asSymbol
+	^ Smalltalk at: behaviorIdentifier asSymbol
 ]
 
 { #category : #accessing }
