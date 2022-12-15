@@ -4,8 +4,8 @@ Class {
 	#instVars : [
 		'name',
 		'instVarNames',
-		'objectId',
-		'behaviorIdentifier'
+		'behaviorIdentifier',
+		'objectId'
 	],
 	#category : #'Soil-Core-Model'
 }
