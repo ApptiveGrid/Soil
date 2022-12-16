@@ -210,6 +210,17 @@ SoilSerializationTest >> testSerializationObjectTwice [
 	self assert: materialized first identicalTo: materialized second.
 ]
 
+{ #category : #tests }
+SoilSerializationTest >> testSerializationObjectWithTransient [
+	| object serialized materialized |
+	object := SOTestClassWithTransient new.
+	object one: 1; two: 2.
+	serialized := self serializeToBytes: object.
+	materialized := self materializeFromBytes: serialized.
+	self assert: materialized one equals: 1.
+	self assert: materialized two isNil
+]
+
 { #category : #'tests-hashed' }
 SoilSerializationTest >> testSerializationSet [
 	"Set uses the hash to find elements, this might be identity, which changes"
