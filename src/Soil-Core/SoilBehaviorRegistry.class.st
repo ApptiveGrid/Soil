@@ -15,6 +15,16 @@ SoilBehaviorRegistry >> addSpecialObjects [
 		put: (SOObjectId segment: 1 index: 2)
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription [ 
+	| objectId versions |
+	objectId := self 
+		nameAt: aSOBehaviorDescription behaviorIdentifier 
+		ifAbsent: [ self halt ].
+	^ versions := soil objectRepository 
+		allVersionsOf: objectId
+]
+
 { #category : #accessing }
 SoilBehaviorRegistry >> index [
 	^ index 

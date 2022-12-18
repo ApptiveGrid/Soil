@@ -76,6 +76,17 @@ SOTransaction >> behaviorDescriptionWithId: aSOObjectId ifNone: aBlock [
 ]
 
 { #category : #accessing }
+SOTransaction >> behaviorRegistry [
+	^ soil behaviorRegistry 
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [ 
+	^ self behaviorRegistry 
+		behaviorVersionsUpTo: aSOBehaviorDescription 
+]
+
+{ #category : #accessing }
 SOTransaction >> checkpoint [
 	| bytes |
 	recordsToCommit := (idMap select: [:each | each value shouldBeCommitted ]) as: OrderedIdentityDictionary .
@@ -149,7 +160,6 @@ SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 	| record |
 	record := (self objectRepository at: objectId)
 		transaction: self;
-		objectId: objectId;
 		materializeObject.
 	idMap at: objectId put: record.
 	objectMap at: record object put: record.

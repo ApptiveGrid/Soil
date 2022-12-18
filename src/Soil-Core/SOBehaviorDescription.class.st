@@ -37,11 +37,11 @@ SOBehaviorDescription >> behaviorIdentifier [
 ]
 
 { #category : #initialization }
-SOBehaviorDescription >> initializeFromBehavior: aBehavior [ 
+SOBehaviorDescription >> initializeFromBehavior: aClass [ 
 	"class := aClass."
-	behaviorIdentifier := aBehavior soilBehaviorIdentifier.
+	behaviorIdentifier := aClass soilBehaviorIdentifier.
 	
-	instVarNames := aBehavior instVarNames
+	instVarNames := aClass instVarNames
 ]
 
 { #category : #public }
@@ -59,8 +59,32 @@ SOBehaviorDescription >> instVarNames [
 ]
 
 { #category : #testing }
+SOBehaviorDescription >> isCurrent [
+	^ self isMeta 
+		ifTrue: [ 
+			self flag: #todo.
+			"this assumption is only valid until SOBehaviorDescription changes 
+			shape itselt. But this is unlikely to be handled automatically"
+			true ]
+		ifFalse: [ 
+			self matchesBehavior: (Smalltalk at: behaviorIdentifier) ]
+]
+
+{ #category : #testing }
 SOBehaviorDescription >> isMeta [ 
 	^ behaviorIdentifier = self class name
+]
+
+{ #category : #testing }
+SOBehaviorDescription >> matchesBehavior: aBehavior [
+	^ self matchesDescription: (SOBehaviorDescription for: aBehavior)
+]
+
+{ #category : #testing }
+SOBehaviorDescription >> matchesDescription: description [ 
+	(behaviorIdentifier = description behaviorIdentifier) ifFalse: [ ^ false ].
+	(instVarNames = description instVarNames) ifFalse: [ ^ false ].
+	^ true
 ]
 
 { #category : #accessing }

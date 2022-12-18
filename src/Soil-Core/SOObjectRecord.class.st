@@ -9,7 +9,9 @@ Class {
 		'objects',
 		'references',
 		'bytes',
-		'committed'
+		'committed',
+		'previousPosition',
+		'position'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -105,6 +107,9 @@ SOObjectRecord >> initialize [
 	committed := false.
 	references := OrderedCollection new.
 	objects := OrderedCollection new.
+	position := 0.
+	previousPosition := 0
+	
 ]
 
 { #category : #'as yet unclassified' }
@@ -141,6 +146,17 @@ SOObjectRecord >> objectId: aSOObjectId [
 	objectId := aSOObjectId 
 ]
 
+{ #category : #accessing }
+SOObjectRecord >> previousPosition [
+	^ previousPosition
+]
+
+{ #category : #accessing }
+SOObjectRecord >> previousPosition: anObject [
+
+	previousPosition := anObject
+]
+
 { #category : #printing }
 SOObjectRecord >> printOn: aStream [ 
 	aStream << 'record: '.
@@ -153,9 +169,13 @@ SOObjectRecord >> printOn: aStream [
 { #category : #'instance creation' }
 SOObjectRecord >> readFrom: stream [ 
 	| numberOfReferences objectSize |
+	position := stream position.
 	numberOfReferences := (stream next: 2) asInteger.
 	references := OrderedCollection new.
-	1 to: numberOfReferences do: [:n | self addReference: (SOObjectId segment: 1 index: (stream next: 8) asInteger)]. 
+	1 to: numberOfReferences do: [:n | 
+		self addReference: (SOObjectId 
+			segment: 1 
+			index: (stream next: 8) asInteger) ]. 
 	objectSize := (stream next: 8) asInteger.
 	bytes := stream next: objectSize.
 		
