@@ -67,6 +67,39 @@ SONewClusterVersion >> printOn: aStream [
 	
 ]
 
+{ #category : #serializing }
+SONewClusterVersion >> serialize [
+	^ ByteArray streamContents: [ :stream |
+		self serializeOn: stream ]
+				
+]
+
+{ #category : #serializing }
+SONewClusterVersion >> serializeObject [
+	bytes := ByteArray streamContents: [ :s |
+		transaction newSerializer 
+			stream: s;
+			externalObjectRegistry: self;
+			serialize: object ].
+	^ bytes
+]
+
+{ #category : #serializing }
+SONewClusterVersion >> serializeOn: stream [
+	bytes ifNil: [ self serializeObject ].
+	self flag: #todo.
+	"the following writes should be length encoded integers. Need to separate
+	serializers and/or move basic stream methods to system stream"
+	stream nextPutAll: (previousVersionPosition asByteArrayOfSize: 2).
+	stream nextPutAll: ((references size) asByteArrayOfSize: 2).
+	
+	references do: [ :ref |
+		stream nextPutAll: (ref index asByteArrayOfSize: 8) ].
+	stream 
+		nextPutAll: (bytes size asByteArrayOfSize: 8);
+		nextPutAll: bytes .
+]
+
 { #category : #testing }
 SONewClusterVersion >> shouldBeCommitted [
 	^ true

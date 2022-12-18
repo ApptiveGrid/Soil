@@ -144,6 +144,16 @@ SOTransaction >> makeRoot: anObject [
 	self addClusterObject: anObject
 ]
 
+{ #category : #public }
+SOTransaction >> markDirty: anObject [
+	| record |
+	record := objectMap 
+		at: anObject 
+		ifAbsent: [ Error signal: 'cannot mark dirty a non-existing root' ].
+	record beChanged. 
+	
+]
+
 { #category : #'as yet unclassified' }
 SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 	| record |

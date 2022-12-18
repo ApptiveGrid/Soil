@@ -7,7 +7,8 @@ Class {
 		'objectId',
 		'references',
 		'bytes',
-		'committed'
+		'committed',
+		'previousVersionPosition'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -56,20 +57,8 @@ SOClusterRecord >> initialize [
 	super initialize.
 	references := OrderedCollection new.
 	committed := false.
+	previousVersionPosition := 0.
 
-]
-
-{ #category : #'as yet unclassified' }
-SOClusterRecord >> materializeObject [
-	object := self newMaterializer 
-		stream: bytes readStream;
-		externalObjectRegistry: self;
-		materialize
-]
-
-{ #category : #'instance creation' }
-SOClusterRecord >> newMaterializer [ 
-	^ transaction newMaterializer
 ]
 
 { #category : #accessing }
@@ -93,24 +82,14 @@ SOClusterRecord >> objectId: aSOObjectId [
 	objectId := aSOObjectId 
 ]
 
-{ #category : #printing }
-SOClusterRecord >> printOn: aStream [ 
-	aStream << 'record: '.
-	objectId printOn: aStream.
-	aStream << ' '.
-	object printOn: aStream.
-	
+{ #category : #accessing }
+SOClusterRecord >> previousVersionPosition: anInteger [ 
+	previousVersionPosition := anInteger 
 ]
 
-{ #category : #'instance creation' }
-SOClusterRecord >> readFrom: stream [ 
-	| numberOfReferences objectSize |
-	numberOfReferences := (stream next: 2) asInteger.
-	references := OrderedCollection new.
-	1 to: numberOfReferences do: [:n | self addReference: (SOObjectId segment: 1 index: (stream next: 8) asInteger)]. 
-	objectSize := (stream next: 8) asInteger.
-	bytes := stream next: objectSize.
-		
+{ #category : #printing }
+SOClusterRecord >> printOn: aStream [ 
+	self subclassResponsibility 
 ]
 
 { #category : #accessing }
@@ -125,35 +104,6 @@ SOClusterRecord >> referenceAt: anInteger [
 { #category : #accessing }
 SOClusterRecord >> references [
 	^ references
-]
-
-{ #category : #serializing }
-SOClusterRecord >> serialize [
-	^ ByteArray streamContents: [ :stream |
-		self serializeOn: stream ]
-				
-]
-
-{ #category : #serializing }
-SOClusterRecord >> serializeObject [
-	bytes := ByteArray streamContents: [ :s |
-		transaction newSerializer 
-			stream: s;
-			externalObjectRegistry: self;
-			serialize: object ].
-	^ bytes
-]
-
-{ #category : #serializing }
-SOClusterRecord >> serializeOn: stream [
-	bytes ifNil: [ self serializeObject ].
-	stream nextPutAll: ((references size) asByteArrayOfSize: 2).
-	
-	references do: [ :ref |
-		stream nextPutAll: (ref index asByteArrayOfSize: 8) ].
-	stream 
-		nextPutAll: (bytes size asByteArrayOfSize: 8);
-		nextPutAll: bytes .
 ]
 
 { #category : #accessing }

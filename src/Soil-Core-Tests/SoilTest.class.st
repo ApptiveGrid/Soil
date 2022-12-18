@@ -101,3 +101,20 @@ SoilTest >> testSerializingRootTwoCluster [
 	self assert: materializedRoot nested reference nested label equals: 'nested under cluster'
 	
 ]
+
+{ #category : #tests }
+SoilTest >> testUpdatingPersistentObject [
+	| tx updateTx persistedRoot readTx root3 |
+	tx := soil newTransaction.
+	tx root: self simpleGraph.
+	tx commit.
+	updateTx := soil newTransaction.
+	persistedRoot := updateTx root.
+	persistedRoot nested reference nested label: 'update nested under cluster'.
+	updateTx markDirty: persistedRoot.
+	updateTx commit.
+	readTx := soil newTransaction.
+	root3 := readTx root.
+	self assert: root3 nested reference nested label equals: 'update nested under cluster'  
+	
+]
