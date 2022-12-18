@@ -17,7 +17,7 @@ SOObjectFile >> appendBytes: aCollection [
 { #category : #accessing }
 SOObjectFile >> atPosition: anInteger [ 
 	stream position: anInteger.
-	^ SOObjectRecord readFrom: stream
+	^ SOPersistentClusterVersion readFrom: stream
 ]
 
 { #category : #accessing }

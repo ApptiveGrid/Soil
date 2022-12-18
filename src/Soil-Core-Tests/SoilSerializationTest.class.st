@@ -13,7 +13,7 @@ Class {
 
 { #category : #'tests-layouts' }
 SoilSerializationTest >> materializeFromBytes: aByteArray [
-	^ (transaction newObjectRecord 
+	^ (transaction newPersistentClusterVersion 
 		readFrom: aByteArray readStream)
 		materializeObject  object
 ]
@@ -31,7 +31,7 @@ SoilSerializationTest >> newSerializer [
 { #category : #'tests-layouts' }
 SoilSerializationTest >> serializeToBytes: object [
 	| bytes |
-	bytes := transaction newObjectRecord 
+	bytes := transaction newClusterVersion 
 		object: object;
 		serialize.
 	transaction commit.
@@ -182,8 +182,8 @@ SoilSerializationTest >> testSerializationObject [
 	| object serialized materialized |
 	object := Object new.
 	serialized := self serializeToBytes: object.
-	self assert: serialized equals:  #[0 1 0 0 0 0 0 0 0 3 0 0 0 0 0 0 0 2 1 1].
-	self assert: (serialized at: 19) equals: TypeCodeObject.
+	self assert: serialized equals:  #[0 0 0 1 0 0 0 0 0 0 0 3 0 0 0 0 0 0 0 2 1 1].
+	self assert: (serialized at: 21) equals: TypeCodeObject.
 
 	materialized := self materializeFromBytes: serialized.
 	self assert: materialized class equals: Object
@@ -200,16 +200,27 @@ SoilSerializationTest >> testSerializationObjectTwice [
 	serialized := self serializeToBytes: array.
 	
 	"First the Array"
-	self assert: (serialized at: 19) equals: TypeCodeArray.
+	self assert: (serialized at: 21) equals: TypeCodeArray.
 	"array of size 2"
-	self assert: (serialized at: 20) equals: 2.
+	self assert: (serialized at: 22) equals: 2.
 	"here the object ist stored (not tested)"
 	"Then we get a reference to the second instance"
-	self assert: (serialized at: 23) equals: TypeCodeInternalReference.
+	self assert: (serialized at: 25) equals: TypeCodeInternalReference.
 	materialized := self materializeFromBytes: serialized.
 	self assert: array first identicalTo: array second.
 	"identity is preserved"
 	self assert: materialized first identicalTo: materialized second.
+]
+
+{ #category : #tests }
+SoilSerializationTest >> testSerializationObjectWithTransient [
+	| object serialized materialized |
+	object := SOTestClassWithTransient new.
+	object one: 1; two: 2.
+	serialized := self serializeToBytes: object.
+	materialized := self materializeFromBytes: serialized.
+	self assert: materialized one equals: 1.
+	self assert: materialized two isNil
 ]
 
 { #category : #'tests-hashed' }
@@ -293,7 +304,7 @@ SoilSerializationTest >> testSerializationUUID [
 	
 	self 
 		assert: serialized
-		equals:   #[0 1 0 0 0 0 0 0 0 3 0 0 0 0 0 0 0 19 1 1 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206].
+		equals:   #[0 0 0 1 0 0 0 0 0 0 0 3 0 0 0 0 0 0 0 19 1 1 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206].
 
 	materialized := self materializeFromBytes: serialized.
 	self assert: materialized equals: object
