@@ -9,7 +9,7 @@ Class {
 }
 
 { #category : #converting }
-SOPersistentClusterVersion >> asNewVersion [
+SOPersistentClusterVersion >> asNewClusterVersion [
 	^ SONewClusterVersion new 
 		object: object;
 		objectId: objectId;

@@ -14,7 +14,7 @@ SONewClusterVersion >> addObject: anObject reference: anObjectId [
 ]
 
 { #category : #converting }
-SONewClusterVersion >> asNewVersion [
+SONewClusterVersion >> asNewClusterVersion [
 	^ self
 ]
 

@@ -78,7 +78,7 @@ SOTransaction >> behaviorDescriptionWithId: aSOObjectId ifNone: aBlock [
 SOTransaction >> checkpoint [
 	| bytes |
 	recordsToCommit := ((idMap select: [:each | each value shouldBeCommitted ])
-		collect: #asNewVersion) as: OrderedIdentityDictionary .
+		collect: #asNewClusterVersion) as: OrderedIdentityDictionary .
 	self serializeObjects.
 	recordsToCommit keysAndValuesDo: [ :objectId :record | 
 		objectId initializeId: self objectRepository.
