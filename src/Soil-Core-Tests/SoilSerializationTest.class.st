@@ -13,7 +13,7 @@ Class {
 
 { #category : #'tests-layouts' }
 SoilSerializationTest >> materializeFromBytes: aByteArray [
-	^ (transaction newPersistentObjectRecord 
+	^ (transaction newPersistentClusterVersion 
 		readFrom: aByteArray readStream)
 		materializeObject  object
 ]
@@ -31,7 +31,7 @@ SoilSerializationTest >> newSerializer [
 { #category : #'tests-layouts' }
 SoilSerializationTest >> serializeToBytes: object [
 	| bytes |
-	bytes := transaction newObjectRecord 
+	bytes := transaction newClusterVersion 
 		object: object;
 		serialize.
 	transaction commit.

@@ -169,6 +169,13 @@ SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 ]
 
 { #category : #'instance creation' }
+SOTransaction >> newClusterVersion [
+	^ SONewClusterVersion new
+		changed: true; 
+		transaction: self.
+]
+
+{ #category : #'instance creation' }
 SOTransaction >> newMaterializer [
 	^ soil newMaterializer 
 		transaction: self;
@@ -181,14 +188,7 @@ SOTransaction >> newObjectId [
 ]
 
 { #category : #'instance creation' }
-SOTransaction >> newObjectRecord [
-	^ SONewClusterVersion new
-		changed: true; 
-		transaction: self.
-]
-
-{ #category : #'instance creation' }
-SOTransaction >> newPersistentObjectRecord [
+SOTransaction >> newPersistentClusterVersion [
 	^ SOPersistentClusterVersion new
 		transaction: self.
 ]
