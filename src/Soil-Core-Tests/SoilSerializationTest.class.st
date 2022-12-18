@@ -13,7 +13,7 @@ Class {
 
 { #category : #'tests-layouts' }
 SoilSerializationTest >> materializeFromBytes: aByteArray [
-	^ (transaction newObjectRecord 
+	^ (transaction newPersistentObjectRecord 
 		readFrom: aByteArray readStream)
 		materializeObject  object
 ]

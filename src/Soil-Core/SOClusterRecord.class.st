@@ -1,12 +1,10 @@
 Class {
-	#name : #SOObjectRecord,
+	#name : #SOClusterRecord,
 	#superclass : #Object,
 	#instVars : [
-		'changed',
 		'object',
 		'transaction',
 		'objectId',
-		'objects',
 		'references',
 		'bytes',
 		'committed'
@@ -15,100 +13,54 @@ Class {
 }
 
 { #category : #'instance creation' }
-SOObjectRecord class >> readFrom: aStream [
+SOClusterRecord class >> readFrom: aStream [
 	^ self new 
 		readFrom: aStream
 ]
 
-{ #category : #adding }
-SOObjectRecord >> addObject: anObject reference: anObjectId [
-	objects addLast: anObject.
-	references addLast: anObjectId
-]
-
 { #category : #'instance creation' }
-SOObjectRecord >> addReference: reference [
+SOClusterRecord >> addReference: reference [
 	references detect: [ :each | each = reference ] ifFound: [ self halt ].
 	references add: reference 
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectRecord >> assignObjectIds: aSOObjectRepository [ 
+SOClusterRecord >> assignObjectIds: aSOObjectRepository [ 
 	references do: [ :reference |
 		reference initializeId: aSOObjectRepository ]
 ]
 
 { #category : #accessing }
-SOObjectRecord >> basicReferenceAt: anInteger [ 
+SOClusterRecord >> basicReferenceAt: anInteger [ 
 	^ references at: anInteger
 ]
 
 { #category : #accessing }
-SOObjectRecord >> bytes [
+SOClusterRecord >> bytes [
 	^ bytes
 ]
 
 { #category : #accessing }
-SOObjectRecord >> bytes: anObject [
+SOClusterRecord >> bytes: anObject [
 
 	bytes := anObject
 ]
 
-{ #category : #accessing }
-SOObjectRecord >> changed: aBoolean [
-	changed := aBoolean 
-]
-
 { #category : #asserting }
-SOObjectRecord >> committed [ 
+SOClusterRecord >> committed [ 
 	committed := true
 ]
 
-{ #category : #testing }
-SOObjectRecord >> hasChanged [
-	^ changed 
-]
-
-{ #category : #accessing }
-SOObjectRecord >> indexOf: anObject [
-	| index |
-	(anObject == object) ifTrue: [ ^ 0 ].
-	index := objects indexOf: anObject.
-	(index > 0) ifTrue: [ 
-		"anObject is an external object but has already been registered. Just
-		returning the index of the registered reference"
-		^ index ].
-	transaction objectIndex 
-		at: anObject
-		ifPresent: [ :record | 
-			"anObject is an external object. Allocate a new local index and 
-			return that"
-			self addObject: record object reference: record objectId.
-			^ references size ]
-		ifAbsent: [ | record |
-			(anObject class isSoilClusterRoot) ifTrue: [ 
-				"anObject could be made cluster root per class side setting. In that 
-				case we add it as cluster root to the transaction so the following
-				will find it"
-				transaction addClusterObject: anObject.
-				record := transaction objectIndex at: anObject.
-				self addObject: record object reference: record objectId. 
-				^ references size ]. 
-			].
-	^ 0
-]
-
 { #category : #initialization }
-SOObjectRecord >> initialize [ 
+SOClusterRecord >> initialize [ 
 	super initialize.
-	changed := false.
-	committed := false.
 	references := OrderedCollection new.
-	objects := OrderedCollection new.
+	committed := false.
+
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectRecord >> materializeObject [
+SOClusterRecord >> materializeObject [
 	object := self newMaterializer 
 		stream: bytes readStream;
 		externalObjectRegistry: self;
@@ -116,33 +68,33 @@ SOObjectRecord >> materializeObject [
 ]
 
 { #category : #'instance creation' }
-SOObjectRecord >> newMaterializer [ 
+SOClusterRecord >> newMaterializer [ 
 	^ transaction newMaterializer
 ]
 
 { #category : #accessing }
-SOObjectRecord >> object [
+SOClusterRecord >> object [
 	^ object
 ]
 
 { #category : #accessing }
-SOObjectRecord >> object: anObject [
+SOClusterRecord >> object: anObject [
 	object := anObject
 ]
 
 { #category : #accessing }
-SOObjectRecord >> objectId [
+SOClusterRecord >> objectId [
 	^ objectId
 ]
 
 { #category : #accessing }
-SOObjectRecord >> objectId: aSOObjectId [ 
+SOClusterRecord >> objectId: aSOObjectId [ 
 	
 	objectId := aSOObjectId 
 ]
 
 { #category : #printing }
-SOObjectRecord >> printOn: aStream [ 
+SOClusterRecord >> printOn: aStream [ 
 	aStream << 'record: '.
 	objectId printOn: aStream.
 	aStream << ' '.
@@ -151,7 +103,7 @@ SOObjectRecord >> printOn: aStream [
 ]
 
 { #category : #'instance creation' }
-SOObjectRecord >> readFrom: stream [ 
+SOClusterRecord >> readFrom: stream [ 
 	| numberOfReferences objectSize |
 	numberOfReferences := (stream next: 2) asInteger.
 	references := OrderedCollection new.
@@ -162,7 +114,7 @@ SOObjectRecord >> readFrom: stream [
 ]
 
 { #category : #accessing }
-SOObjectRecord >> referenceAt: anInteger [ 
+SOClusterRecord >> referenceAt: anInteger [ 
 	(references at: anInteger) ifNil: [ self halt ]. 
 	^ SOObjectProxy new 
 		objectId: (references at: anInteger);
@@ -171,19 +123,19 @@ SOObjectRecord >> referenceAt: anInteger [
 ]
 
 { #category : #accessing }
-SOObjectRecord >> references [
+SOClusterRecord >> references [
 	^ references
 ]
 
 { #category : #serializing }
-SOObjectRecord >> serialize [
+SOClusterRecord >> serialize [
 	^ ByteArray streamContents: [ :stream |
 		self serializeOn: stream ]
 				
 ]
 
 { #category : #serializing }
-SOObjectRecord >> serializeObject [
+SOClusterRecord >> serializeObject [
 	bytes := ByteArray streamContents: [ :s |
 		transaction newSerializer 
 			stream: s;
@@ -193,7 +145,7 @@ SOObjectRecord >> serializeObject [
 ]
 
 { #category : #serializing }
-SOObjectRecord >> serializeOn: stream [
+SOClusterRecord >> serializeOn: stream [
 	bytes ifNil: [ self serializeObject ].
 	stream nextPutAll: ((references size) asByteArrayOfSize: 2).
 	
@@ -204,17 +156,12 @@ SOObjectRecord >> serializeOn: stream [
 		nextPutAll: bytes .
 ]
 
-{ #category : #asserting }
-SOObjectRecord >> shouldBeCommitted [ 
-	^ changed & committed not
-]
-
 { #category : #accessing }
-SOObjectRecord >> transaction [
+SOClusterRecord >> transaction [
 	^ transaction
 ]
 
 { #category : #accessing }
-SOObjectRecord >> transaction: aSOTransaction [ 
+SOClusterRecord >> transaction: aSOTransaction [ 
 	transaction := aSOTransaction 
 ]

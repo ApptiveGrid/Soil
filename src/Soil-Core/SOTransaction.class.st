@@ -33,8 +33,7 @@ SOTransaction >> addClusterObject: anObject [
 { #category : #accessing }
 SOTransaction >> atObjectId: objectId putObject: anObject [
 	| record |
-	record := SOObjectRecord new
-		changed: true; 
+	record := SONewClusterVersion new
 		object: anObject;
 		objectId: objectId;
 		transaction: self.
@@ -46,7 +45,8 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 { #category : #accessing }
 SOTransaction >> checkpoint [
 	| bytes |
-	recordsToCommit := (idMap select: [:each | each value shouldBeCommitted ]) as: OrderedIdentityDictionary .
+	recordsToCommit := ((idMap select: [:each | each value shouldBeCommitted ])
+		collect: #asNewVersion) as: OrderedIdentityDictionary .
 	self serializeObjects.
 	recordsToCommit keysAndValuesDo: [ :objectId :record | 
 		objectId initializeId: self objectRepository.
@@ -172,8 +172,14 @@ SOTransaction >> newObjectId [
 
 { #category : #'instance creation' }
 SOTransaction >> newObjectRecord [
-	^ SOObjectRecord new
+	^ SONewClusterVersion new
 		changed: true; 
+		transaction: self.
+]
+
+{ #category : #'instance creation' }
+SOTransaction >> newPersistentObjectRecord [
+	^ SOPersistentClusterVersion new
 		transaction: self.
 ]
 

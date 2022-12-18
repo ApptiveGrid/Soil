@@ -7,7 +7,7 @@ SOObjectFile >> allRecords [
 	records := OrderedCollection new.
 	[ stream atEnd ] whileFalse: [ 
 		start := stream position.
-		record := SOObjectRecord readFrom: stream.
+		record := SOClusterRecord readFrom: stream.
 		records add: ({ start . stream position}  -> record )].
 	^ records 
 ]
