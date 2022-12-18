@@ -39,8 +39,8 @@ SoilSerializer >> basicNextPutSymbol: aSymbol [
 ]
 
 { #category : #public }
-SoilSerializer >> classDescriptionFor: aClass [ 
-	^ transaction classDescriptionFor: aClass
+SoilSerializer >> behaviorDescriptionFor: aClass [ 
+	^ transaction behaviorDescriptionFor: aClass
 ]
 
 { #category : #initialization }
@@ -150,7 +150,7 @@ SoilSerializer >> nextPutDate: aDate [
 	self 
 		nextPutByte: TypeCodeDate; 
 		nextPutLengthEncodedInteger: aDate julianDayNumber - 2415386; 
-		nextPutInteger: aDate offset hours
+		nextPutInteger: ((aDate offset hours * 60) + aDate offset minutes)
 ]
 
 { #category : #writing }

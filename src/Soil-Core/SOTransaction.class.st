@@ -42,6 +42,38 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 	recordsToCommit ifNotNil: [ recordsToCommit at: objectId put: record ]
 ]
 
+{ #category : #public }
+SOTransaction >> behaviorDescriptionFor: aClass [
+	| classDescription id |
+	classDescriptions 
+		at: aClass soilBehaviorIdentifier 
+		ifPresent: [ :description | ^ description ].
+	soil behaviorRegistry 
+		nameAt: aClass soilBehaviorIdentifier 
+		ifPresent: [ :oid | | desc |
+			desc := (oid index = 2) 
+				ifTrue: [(SOBehaviorDescription for: SOBehaviorDescription) objectId: oid ]
+				ifFalse: [ (self objectWithId: oid ifNone: [Error signal ]) objectId: oid; yourself ].
+			^ desc ].
+	(aClass = SOBehaviorDescription) ifTrue: [  self halt ].
+	classDescription := (SOBehaviorDescription for: aClass).
+	id := self newObjectId.
+	id initializeId: soil objectRepository.
+	classDescription objectId: id.
+	self atObjectId: id putObject: classDescription.
+	classDescriptions
+		at: aClass soilBehaviorIdentifier 
+		put: classDescription.
+	^ classDescription 
+	
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> behaviorDescriptionWithId: aSOObjectId ifNone: aBlock [ 
+	(aSOObjectId index = 2) ifTrue: [ ^ SOBehaviorDescription for: SOBehaviorDescription ].
+	^ self objectWithId: aSOObjectId ifNone: aBlock
+]
+
 { #category : #accessing }
 SOTransaction >> checkpoint [
 	| bytes |
@@ -63,38 +95,6 @@ SOTransaction >> checkpoint [
 			nameAt: description value behaviorIdentifier 
 			put: objectId ].
 
-]
-
-{ #category : #public }
-SOTransaction >> classDescriptionFor: aClass [
-	| classDescription id |
-	classDescriptions 
-		at: aClass soilClassIdentifier 
-		ifPresent: [ :description | ^ description ].
-	soil behaviorRegistry 
-		nameAt: aClass soilClassIdentifier 
-		ifPresent: [ :oid | | desc |
-			desc := (oid index = 2) 
-				ifTrue: [(SOBehaviorDescription for: SOBehaviorDescription) objectId: oid ]
-				ifFalse: [ (self objectWithId: oid ifNone: [Error signal ]) objectId: oid; yourself ].
-			^ desc ].
-	(aClass = SOBehaviorDescription) ifTrue: [  self halt ].
-	classDescription := (SOBehaviorDescription for: aClass).
-	id := self newObjectId.
-	id initializeId: soil objectRepository.
-	classDescription objectId: id.
-	self atObjectId: id putObject: classDescription.
-	classDescriptions
-		at: aClass soilClassIdentifier 
-		put: classDescription.
-	^ classDescription 
-	
-]
-
-{ #category : #'as yet unclassified' }
-SOTransaction >> classDescriptionWithId: aSOObjectId ifNone: aBlock [ 
-	(aSOObjectId index = 2) ifTrue: [ ^ SOBehaviorDescription for: SOBehaviorDescription ].
-	^ self objectWithId: aSOObjectId ifNone: aBlock
 ]
 
 { #category : #accessing }

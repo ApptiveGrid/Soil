@@ -18,7 +18,7 @@ VariableLayout >> soilBasicMaterialize: objectClass with: serializer [
 VariableLayout >> soilBasicSerialize: anObject with: serializer [
 	|  description basicSize|
 	
-	description := serializer classDescriptionFor: anObject class.
+	description := serializer behaviorDescriptionFor: anObject class.
 	serializer 
 		nextPutObjectType;
 		nextPutLengthEncodedInteger: (description isMeta 

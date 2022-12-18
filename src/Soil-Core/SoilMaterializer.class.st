@@ -46,7 +46,7 @@ SoilMaterializer >> newObject [
 		ifTrue: [ SOBehaviorDescription meta ]
 		ifFalse: [
 			transaction 
-				classDescriptionWithId: (externalObjectRegistry basicReferenceAt: objectIndex) 
+				behaviorDescriptionWithId: (externalObjectRegistry basicReferenceAt: objectIndex) 
 				ifNone: [ self halt  ] ].
 	objectClass := description objectClass.
 	^ objectClass classLayout soilBasicMaterialize: objectClass with: self
@@ -171,7 +171,7 @@ SoilMaterializer >> nextDate: aClass [
 	| date |
 	date := aClass 
 		julianDayNumber: 2415386 + self nextLengthEncodedInteger 
-		offset: (Duration hours: self nextSoilObject).
+		offset: (Duration minutes: self nextSoilObject).
 	self registerObject: date.
 	^ date
 ]
