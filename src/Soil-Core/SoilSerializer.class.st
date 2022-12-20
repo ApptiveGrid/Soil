@@ -347,7 +347,7 @@ SoilSerializer >> notSupportedError: anObject [
 
 { #category : #'as yet unclassified' }
 SoilSerializer >> referenceIndexOf: aSOClassDescription [ 
-	^ externalObjectRegistry indexOf: aSOClassDescription 
+	^ externalObjectRegistry indexOfExternalReference: aSOClassDescription 
 ]
 
 { #category : #registry }
@@ -363,7 +363,7 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 		self nextPutInternalReference: index.
 		^ self ].
 	externalIndex := externalObjectRegistry
-		ifNotNil: [ externalObjectRegistry indexOf: anObject ]
+		ifNotNil: [ externalObjectRegistry indexOfExternalReference: anObject ]
 		ifNil: [
 			"if there is no external object repository we cannot
 			resolve external objects, hence we treat them as  

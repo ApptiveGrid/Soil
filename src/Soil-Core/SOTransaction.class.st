@@ -33,8 +33,7 @@ SOTransaction >> addClusterObject: anObject [
 { #category : #accessing }
 SOTransaction >> atObjectId: objectId putObject: anObject [
 	| record |
-	record := SOObjectRecord new
-		changed: true; 
+	record := SONewClusterVersion new
 		object: anObject;
 		objectId: objectId;
 		transaction: self.
@@ -78,7 +77,8 @@ SOTransaction >> behaviorDescriptionWithId: aSOObjectId ifNone: aBlock [
 { #category : #accessing }
 SOTransaction >> checkpoint [
 	| bytes |
-	recordsToCommit := (idMap select: [:each | each value shouldBeCommitted ]) as: OrderedIdentityDictionary .
+	recordsToCommit := ((idMap select: [:each | each value shouldBeCommitted ])
+		collect: #asNewClusterVersion) as: OrderedIdentityDictionary .
 	self serializeObjects.
 	recordsToCommit keysAndValuesDo: [ :objectId :record | 
 		objectId initializeId: self objectRepository.
@@ -144,6 +144,16 @@ SOTransaction >> makeRoot: anObject [
 	self addClusterObject: anObject
 ]
 
+{ #category : #public }
+SOTransaction >> markDirty: anObject [
+	| record |
+	record := objectMap 
+		at: anObject 
+		ifAbsent: [ Error signal: 'cannot mark dirty a non-existing root' ].
+	record beChanged. 
+	
+]
+
 { #category : #'as yet unclassified' }
 SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 	| record |
@@ -159,6 +169,13 @@ SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 ]
 
 { #category : #'instance creation' }
+SOTransaction >> newClusterVersion [
+	^ SONewClusterVersion new
+		changed: true; 
+		transaction: self.
+]
+
+{ #category : #'instance creation' }
 SOTransaction >> newMaterializer [
 	^ soil newMaterializer 
 		transaction: self;
@@ -171,9 +188,8 @@ SOTransaction >> newObjectId [
 ]
 
 { #category : #'instance creation' }
-SOTransaction >> newObjectRecord [
-	^ SOObjectRecord new
-		changed: true; 
+SOTransaction >> newPersistentClusterVersion [
+	^ SOPersistentClusterVersion new
 		transaction: self.
 ]
 

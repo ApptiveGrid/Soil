@@ -43,15 +43,6 @@ SOObjectSegment >> at: anInteger putBytes: bytes [
 ]
 
 { #category : #accessing }
-SOObjectSegment >> at: anInteger putObject: anObject [ 
-	| record |
-	record := SOObjectRecord new 
-		object: anObject;
-		serializeObject;
-		yourself
-]
-
-{ #category : #accessing }
 SOObjectSegment >> basicAt: anInteger length:  length [
 	| position |
 	position := self indexFile positionAt: anInteger.
