@@ -2,8 +2,7 @@ Class {
 	#name : #SoilSerializer,
 	#superclass : #SoilObjectCodec,
 	#instVars : [
-		'clusterRoot',
-		'soil'
+		'clusterRoot'
 	],
 	#category : #'Soil-Core-Serialization'
 }
@@ -393,9 +392,4 @@ SoilSerializer >> serializeToBytes: anObject [
 	^ (self stream: ByteArray new writeStream) 
 		serialize: anObject
 
-]
-
-{ #category : #accessing }
-SoilSerializer >> soil: aSoil [ 
-	soil := aSoil 
 ]
