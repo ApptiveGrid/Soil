@@ -5,7 +5,8 @@ Class {
 		'externalObjectRegistry',
 		'stream',
 		'objects',
-		'transaction'
+		'transaction',
+		'soil'
 	],
 	#classVars : [
 		'CharacterEncoder'
@@ -41,6 +42,18 @@ SoilObjectCodec class >> encodeString: aString [
 SoilObjectCodec >> externalObjectRegistry: anObject [
 
 	externalObjectRegistry := anObject
+]
+
+{ #category : #accessing }
+SoilObjectCodec >> soil [
+
+	^ soil
+]
+
+{ #category : #accessing }
+SoilObjectCodec >> soil: anObject [
+
+	soil := anObject
 ]
 
 { #category : #accessing }

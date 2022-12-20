@@ -48,7 +48,7 @@ SOPersistentSkipList >> at: aByteArray ifAbsent: aBlock [
 		ifFalse: [ aByteArray asByteArray asByteArrayOfSize: self keySize ].
 	^ (self findNode: key) 
 		ifNotNil: [:node | node value ]
-		ifNil: aBlock 
+		ifNil: [ aBlock value ] 
 ]
 
 { #category : #accessing }
@@ -307,7 +307,9 @@ SOPersistentSkipList >> writeHeader [
 ]
 
 { #category : #writing }
-SOPersistentSkipList >> writePages [ 
-	(pages reject: #isNil) do: [ :page | 
-		page writeOn: stream ]
+SOPersistentSkipList >> writePages [
+
+	pages
+		reject: [ :page | page isNil ]
+		thenDo: [ :page | page writeOn: stream ]
 ]

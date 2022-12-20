@@ -1,9 +1,6 @@
 Class {
 	#name : #SoilMaterializer,
 	#superclass : #SoilObjectCodec,
-	#instVars : [
-		'soil'
-	],
 	#category : #'Soil-Core-Serialization'
 }
 
@@ -352,18 +349,6 @@ SoilMaterializer >> nextWideSymbol [
 SoilMaterializer >> registerObject: anObject [
 	objects ifNil: [ objects := OrderedCollection new ].
 	objects add: anObject 
-]
-
-{ #category : #accessing }
-SoilMaterializer >> soil [
-
-	^ soil
-]
-
-{ #category : #accessing }
-SoilMaterializer >> soil: anObject [
-
-	soil := anObject
 ]
 
 { #category : #accessing }
