@@ -17,16 +17,6 @@ SoilBehaviorRegistry >> addSpecialObjects [
 ]
 
 { #category : #'as yet unclassified' }
-SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription [ 
-	| objectId versions |
-	objectId := self 
-		nameAt: aSOBehaviorDescription behaviorIdentifier 
-		ifAbsent: [ self halt ].
-	^ versions := soil objectRepository 
-		allVersionsOf: objectId
-]
-
-{ #category : #'as yet unclassified' }
 SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction: transaction [
 	| objectId records chain offset |
 	objectId := self 
