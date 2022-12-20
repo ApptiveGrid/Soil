@@ -21,11 +21,6 @@ SOObjectRepository >> addNewSegment [
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectRepository >> allVersions [
-	self shouldBeImplemented.
-]
-
-{ #category : #'as yet unclassified' }
 SOObjectRepository >> allVersionsOf: aSOObjectId [ 
 	| segment |
 	segment := self segmentAt: aSOObjectId segment.
