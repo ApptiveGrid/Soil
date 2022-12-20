@@ -27,7 +27,7 @@ SOObjectSegment >> allVersionsOf: aSOObjectId [
 	obj := self at: aSOObjectId index.
 	versions := OrderedCollection new.
 	versions add: obj.
-	[ obj previousPosition isNil ] whileFalse: [ 
+	[ obj previousVersionPosition isZero ] whileFalse: [ 
 		self halt ].
 	^ versions
 ]
