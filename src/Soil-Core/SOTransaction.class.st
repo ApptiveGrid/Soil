@@ -82,7 +82,9 @@ SOTransaction >> behaviorRegistry [
 { #category : #'as yet unclassified' }
 SOTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [ 
 	^ self behaviorRegistry 
-		behaviorVersionsUpTo: aSOBehaviorDescription 
+		behaviorVersionsUpTo: aSOBehaviorDescription
+		transaction: self .
+	
 ]
 
 { #category : #accessing }

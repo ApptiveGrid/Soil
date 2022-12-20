@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'soil',
-		'index'
+		'index',
+		'versions'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -25,9 +26,37 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription [
 		allVersionsOf: objectId
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction: transaction [
+	| objectId records chain offset |
+	objectId := self 
+		nameAt: aSOBehaviorDescription behaviorIdentifier 
+		ifAbsent: [ self halt ].
+	records := soil objectRepository 
+		allVersionsOf: objectId.
+	chain := records collect: [ :record |
+		record 
+			transaction: transaction;
+			materializeObject;
+			object  ].
+	chain first isCurrent ifFalse: [ 
+		chain addFirst: (SOBehaviorDescription for: aSOBehaviorDescription objectClass) ].
+	versions 
+		at: aSOBehaviorDescription behaviorIdentifier 
+		put: chain.
+	offset := chain detectIndex: [ :each | each matchesDescription: aSOBehaviorDescription ].
+	^ chain copyFrom: 1 to: offset
+]
+
 { #category : #accessing }
 SoilBehaviorRegistry >> index [
 	^ index 
+]
+
+{ #category : #initialization }
+SoilBehaviorRegistry >> initialize [ 
+	super initialize.
+	versions := Dictionary new
 ]
 
 { #category : #initialization }
