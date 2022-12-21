@@ -1,15 +1,14 @@
 Extension { #name : #EphemeronLayout }
 
 { #category : #'*Soil-Core' }
-EphemeronLayout >> soilBasicMaterialize: objectClass with: serializer [
-	| object basicSize instSize|
+EphemeronLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
+	| object basicSize |
 
-	object := objectClass basicNew: (basicSize := serializer nextLengthEncodedInteger).
+	object := aBehaviorDescription objectClass basicNew: (basicSize := materializer nextLengthEncodedInteger).
 	
-	serializer registerObject: object.
-	instSize := object class soilPersistentInstVars size.
-	1 to: instSize do: [:i | object instVarAt: i put: (serializer nextSoilObject) ].
-	1 to: basicSize do: [:i | object basicAt: i put: serializer nextSoilObject ].
-	object soilMaterialized: serializer.
-	^ object
+	materializer registerObject: object.
+	
+	self updateIvars: aBehaviorDescription with: materializer for: object.
+	1 to: basicSize do: [:i | object basicAt: i put: materializer nextSoilObject ].
+	^object soilMaterialized: materializer
 ]

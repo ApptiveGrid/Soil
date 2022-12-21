@@ -1,7 +1,7 @@
 Extension { #name : #AbstractLayout }
 
 { #category : #'*Soil-Core' }
-AbstractLayout >> soilBasicMaterialize: objectClass with: serializer [
+AbstractLayout >> soilBasicMaterialize: objectClass with: materializer [
 	self subclassResponsibility
 ]
 

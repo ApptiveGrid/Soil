@@ -1,13 +1,11 @@
 Extension { #name : #FixedLayout }
 
 { #category : #'*Soil-Core' }
-FixedLayout >> soilBasicMaterialize: objectClass with: serializer [
-	| object instSize|
-	object := objectClass basicNew.
-	serializer registerObject: object.
-
-	instSize := object class soilPersistentInstVars size.
-	1 to: instSize do: [:i | object instVarAt: i put: (serializer nextSoilObject) ].
-	object soilMaterialized: serializer.
-	^ object
+FixedLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
+	| object |
+	object := aBehaviorDescription objectClass basicNew.
+	materializer registerObject: object.
+	
+	self updateIvars: aBehaviorDescription with: materializer for: object.
+	^ object soilMaterialized: materializer
 ]

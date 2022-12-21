@@ -1,7 +1,7 @@
 Extension { #name : #ImmediateLayout }
 
 { #category : #'*Soil-Core' }
-ImmediateLayout >> soilBasicMaterialize: objectClass with: serializer [
+ImmediateLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	<ignoreForCoverage>
 	"Immediate Objects are all serialized with their own TypeCode"
 	self error: 'this should never be called'

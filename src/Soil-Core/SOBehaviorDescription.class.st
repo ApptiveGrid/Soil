@@ -48,7 +48,7 @@ SOBehaviorDescription >> initializeFromBehavior: aClass [
 SOBehaviorDescription >> instVarIndexes [
 	| class |
 	class := Smalltalk at: behaviorIdentifier asSymbol. 
-	^ (class allInstVarNames difference: class soilTransientInstVars) 
+	^ class soilPersistentInstVars
 		collect: [ :n | class allInstVarNames indexOf: n ]
 ]
 

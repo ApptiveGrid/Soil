@@ -24,12 +24,17 @@ SoilMaterializer >> basicNextString [
 	^ buf asString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #public }
+SoilMaterializer >> behaviorVersionsUpTo: aDescription [ 
+	^ transaction behaviorVersionsUpTo: aDescription 
+]
+
+{ #category : #public }
 SoilMaterializer >> materialize [
 	^ self nextSoilObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #public }
 SoilMaterializer >> materializeFromBytes: aByteArray [
 	^ (self stream: aByteArray readStream)
 		materialize
@@ -37,7 +42,7 @@ SoilMaterializer >> materializeFromBytes: aByteArray [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| objectClass description objectIndex versions obj |
+	| description objectIndex|
 	objectIndex := self nextLengthEncodedInteger.
 	description := objectIndex isZero
 		ifTrue: [ SOBehaviorDescription meta ]
@@ -45,20 +50,7 @@ SoilMaterializer >> newObject [
 			transaction 
 				behaviorDescriptionWithId: (externalObjectRegistry basicReferenceAt: objectIndex) 
 				ifNone: [ self halt  ] ].
-		objectClass := description objectClass.
-	^ description isCurrent 
-		ifTrue: [ 
-			objectClass classLayout soilBasicMaterialize: objectClass with: self ]
-		ifFalse: [ 
-			versions := transaction behaviorVersionsUpTo: description.
-			obj := objectClass basicNew.
-			self registerObject: obj.
-			versions last instVarNames do: [ :instVar | | value |
-				value := self nextSoilObject.
-				(versions allSatisfy: [ :version | version instVarNames includes: instVar ]) ifTrue: [ 
-					 obj instVarNamed: instVar put: value ] ].
-			obj ]
-	 
+	^ description objectClass classLayout soilBasicMaterialize: description with: self
 ]
 
 { #category : #reading }

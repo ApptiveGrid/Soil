@@ -1,7 +1,7 @@
 Extension { #name : #CompiledMethodLayout }
 
 { #category : #'*Soil-Core' }
-CompiledMethodLayout >> soilBasicMaterialize: objectClass with: serializer [
+CompiledMethodLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	<ignoreForCoverage>
 	"CompiledMethod Objects are all serialized with their own TypeCode"
 	self error: 'this should never be called'
