@@ -39,7 +39,6 @@ SoilMigrationTest >> tearDown [
 { #category : #tests }
 SoilMigrationTest >> testMaterializingObjectWithChangedShape [
 	| tx tx2 materializedRoot object |
-	self skip.
 	object := migrationClass new.
 	object 
 		instVarNamed: #one put: 1;
@@ -53,7 +52,6 @@ SoilMigrationTest >> testMaterializingObjectWithChangedShape [
 
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
-	self assert: materializedRoot nested reference class equals: SOObjectProxy.
-	self assert: materializedRoot nested reference nested label equals: 'nested under cluster'
-	
+	self assert: (materializedRoot instVarNamed: #one) equals: 1.
+	self assert: (materializedRoot instVarNamed: #three) equals: nil.	
 ]

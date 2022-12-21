@@ -127,7 +127,7 @@ SoilSerializationTest >> testSerializationConstantBlockClosure [
 	
 	serialized := self serializeToBytes: object.
 	materialized := self materializeFromBytes: serialized.
-	self assert: (materialized isKindOf: ConstantBlockClosure).
+	self assert: materialized class name equals: #ConstantBlockClosure.
 	"and we can execute it!"
 	self assert: object value equals: 1
 ]

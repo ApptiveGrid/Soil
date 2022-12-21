@@ -52,6 +52,11 @@ SOPersistentClusterVersion >> newMaterializer [
 	^ transaction newMaterializer
 ]
 
+{ #category : #accessing }
+SOPersistentClusterVersion >> previousVersionPosition [
+	^ previousVersionPosition 
+]
+
 { #category : #printing }
 SOPersistentClusterVersion >> printOn: aStream [ 
 	aStream << 'old record: '.
