@@ -28,6 +28,6 @@ VariableLayout >> soilBasicSerialize: anObject with: serializer [
 	basicSize := anObject basicSize.
 	serializer nextPutLengthEncodedInteger: basicSize.
 	
-	description instVarIndexes do: [:i | (anObject instVarAt: i) soilSerialize: serializer ].
+	description instVarNames do: [:ivarName | (anObject instVarNamed: ivarName) soilSerialize: serializer ].
 	1 to: basicSize do: [:i | (anObject basicAt: i) soilSerialize: serializer ]
 ]
