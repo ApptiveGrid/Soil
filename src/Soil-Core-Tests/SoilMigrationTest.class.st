@@ -8,14 +8,15 @@ Class {
 	#category : #'Soil-Core-Tests'
 }
 
-{ #category : #'as yet unclassified' }
-SoilMigrationTest >> createMigrationClass [
-	^ (SOBaseTestObject << #SOMigrationObject 
+{ #category : #helpers }
+SoilMigrationTest >> createMigrationClassFixedLayout [
+	^ (SOBaseTestObject << #SOMigrationObject
+		layout: FixedLayout;
 		slots: { #one . #two }; 
 		package: self class package name) install
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #helpers }
 SoilMigrationTest >> createMigrationClassVariableLayout [
 	^ (SOBaseTestObject << #SOMigrationObject
 		layout: VariableLayout;
@@ -35,7 +36,7 @@ SoilMigrationTest >> setUp [
 	soil 
 		destroy;
 		initializeFilesystem.
-	migrationClass := self createMigrationClass
+	migrationClass := self createMigrationClassFixedLayout
 ]
 
 { #category : #running }
