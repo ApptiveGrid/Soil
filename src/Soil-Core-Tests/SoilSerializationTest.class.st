@@ -75,7 +75,7 @@ SoilSerializationTest >> testSerializationCleanBlockClosure [
 	materialized := self materializeFromBytes: serialized.
 	self assert: materialized class equals: CleanBlockClosure.
 	"and we can execute it!"
-	self assert: object value equals: 3
+	self assert: materialized value equals: 3
 ]
 
 { #category : #'tests-layouts' }
@@ -129,7 +129,9 @@ SoilSerializationTest >> testSerializationConstantBlockClosure [
 	materialized := self materializeFromBytes: serialized.
 	self assert: materialized class name equals: #ConstantBlockClosure.
 	"and we can execute it!"
-	self assert: object value equals: 1
+	self assert: materialized value equals: 1.
+	"but otherCode is nil, we need to improve that somehow"
+	self assert: materialized outerCode isNil
 ]
 
 { #category : #'tests-layouts' }
