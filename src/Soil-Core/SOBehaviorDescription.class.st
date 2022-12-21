@@ -31,25 +31,16 @@ SOBehaviorDescription class >> soilTransientInstVars [
 	^ #( objectId ) 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOBehaviorDescription >> behaviorIdentifier [ 
 	^ behaviorIdentifier 
 ]
 
 { #category : #initialization }
 SOBehaviorDescription >> initializeFromBehavior: aClass [ 
-	"class := aClass."
 	behaviorIdentifier := aClass soilBehaviorIdentifier.
-	
-	instVarNames := aClass instVarNames
-]
-
-{ #category : #public }
-SOBehaviorDescription >> instVarIndexes [
-	| class |
-	class := Smalltalk at: behaviorIdentifier asSymbol. 
-	^ class soilPersistentInstVars
-		collect: [ :n | class allInstVarNames indexOf: n ]
+	"we record only the persistent ivar names, in order"
+	instVarNames := aClass soilPersistentInstVars
 ]
 
 { #category : #accessing }
