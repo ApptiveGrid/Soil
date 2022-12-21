@@ -114,11 +114,13 @@ SoilSerializer >> nextPutCompiledBlock: aCompiledMethod [
 		nextPutByte: TypeCodeCompiledBlock;
 		nextPutInteger: aCompiledMethod header;
 		nextPutLengthEncodedInteger: bytecodesPlusTrailerSize.
-	"literals"
-	"Here we have to take care about outer code: for now we will serialize it"
+	"literals
+	Here we have to take care about outer code: just skip it for now (we store clean blocks)
+	It is needed for debugging and printing, but not execution"
 
-	1 to: aCompiledMethod numLiterals do: [ :i | 
+	1 to: aCompiledMethod numLiterals -1  do: [ :i | 
 		(aCompiledMethod literalAt: i) soilSerialize: self ].
+	
 	"variable part"
 	self nextPutBytesFrom: aCompiledMethod bytecodes
 

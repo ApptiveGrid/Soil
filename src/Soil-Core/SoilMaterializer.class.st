@@ -130,9 +130,9 @@ SoilMaterializer >> nextCompiledBlock: aClass [
 	
 	self registerObject: compiledBlock.
 
- 	"first the literals"
- 	"note: we store the outer method here as a copy, more thinking needed"
- 	1 to: compiledBlock numLiterals do: [:i | 
+ 	"first the literals
+ 	note: we omit the outer code here as we store clean blocks"
+ 	1 to: compiledBlock numLiterals - 1 do: [:i | 
  				compiledBlock literalAt: i put: self nextSoilObject ].			
 
  	compiledBlock initialPC 
