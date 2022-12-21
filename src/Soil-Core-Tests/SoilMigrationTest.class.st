@@ -29,7 +29,7 @@ SoilMigrationTest >> path [
 	^ 'soil-tests'
 ]
 
-{ #category : #initialization }
+{ #category : #running }
 SoilMigrationTest >> setUp [ 
 	super setUp.
 	soil := Soil path: self path.
@@ -41,8 +41,8 @@ SoilMigrationTest >> setUp [
 
 { #category : #running }
 SoilMigrationTest >> tearDown [ 
-	super tearDown.
-	migrationClass removeFromSystem 
+	migrationClass removeFromSystem.
+	super tearDown
 ]
 
 { #category : #tests }
