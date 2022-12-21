@@ -1,7 +1,7 @@
 Extension { #name : #EmptyLayout }
 
 { #category : #'*Soil-Core' }
-EmptyLayout >> soilBasicMaterialize: objectClass with: serializer [
+EmptyLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	<ignoreForCoverage>
 	self error: 'this should never be called'
 ]

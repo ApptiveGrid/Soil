@@ -1,12 +1,12 @@
 Extension { #name : #ByteLayout }
 
 { #category : #'*Soil-Core' }
-ByteLayout >> soilBasicMaterialize: objectClass with: serializer [
+ByteLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object basicSize |
-	 object := objectClass basicNew: (basicSize := serializer nextLengthEncodedInteger).
-	serializer registerObject: object.
+	object := aBehaviorDescription objectClass basicNew: (basicSize := materializer nextLengthEncodedInteger).
+	materializer registerObject: object.
 	
-	serializer stream readInto: object startingAt: 1 count: basicSize.
+	materializer stream readInto: object startingAt: 1 count: basicSize.
 	^object
 
 ]

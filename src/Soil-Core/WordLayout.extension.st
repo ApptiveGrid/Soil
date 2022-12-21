@@ -1,12 +1,12 @@
 Extension { #name : #WordLayout }
 
 { #category : #'*Soil-Core' }
-WordLayout >> soilBasicMaterialize: objectClass with: serializer [
+WordLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object basicSize |
-	 object := objectClass basicNew: (basicSize := serializer nextLengthEncodedInteger).
-	serializer registerObject: object.
+	 object := aBehaviorDescription objectClass basicNew: (basicSize := materializer nextLengthEncodedInteger).
+	materializer registerObject: object.
 	
-	1 to: basicSize do: [:i | object basicAt: i put: serializer nextLengthEncodedInteger].
+	1 to: basicSize do: [:i | object basicAt: i put: materializer nextLengthEncodedInteger].
 	^object
 ]
 

@@ -1,16 +1,16 @@
 Extension { #name : #WeakLayout }
 
 { #category : #'*Soil-Core' }
-WeakLayout >> soilBasicMaterialize: objectClass with: serializer [
+WeakLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object basicSize instSize|
 
-	object := objectClass basicNew: (basicSize := serializer nextLengthEncodedInteger).
+	object := aBehaviorDescription objectClass basicNew: (basicSize := materializer nextLengthEncodedInteger).
 	
-	serializer registerObject: object.
+	materializer registerObject: object.
 	instSize := object class soilPersistentInstVars size.
-	1 to: instSize do: [:i | object instVarAt: i put: (serializer nextSoilObject) ].
-	1 to: basicSize do: [:i | object basicAt: i put: serializer nextSoilObject ].
-	object soilMaterialized: serializer.
+	1 to: instSize do: [:i | object instVarAt: i put: (materializer nextSoilObject) ].
+	1 to: basicSize do: [:i | object basicAt: i put: materializer nextSoilObject ].
+	object soilMaterialized: materializer.
 	^ object
 ]
 
