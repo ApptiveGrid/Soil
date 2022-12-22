@@ -191,7 +191,6 @@ SoilPrimitiveSerializationTest >> testSerializationCharacterTwice [
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: object first identicalTo: object second.
 	self assert: materialized equals: object.
-
 ]
 
 { #category : #tests }
@@ -441,7 +440,6 @@ SoilPrimitiveSerializationTest >> testSerializationLargeIntegerTwice [
 	self assert: materialized equals: object.
 	"identity is preserved"
 	self assert: materialized first identicalTo: materialized second.
-	
 ]
 
 { #category : #tests }

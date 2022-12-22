@@ -12,7 +12,7 @@ Class {
 
 { #category : #accessing }
 SOSkipListNode >> hasRightAt: anInteger [ 
-	^ (levels at: anInteger) notNil 
+	^ (levels at: anInteger) notNil
 ]
 
 { #category : #accessing }
@@ -32,7 +32,7 @@ SOSkipListNode >> keyIsSmallerThan: aString [
 
 { #category : #accessing }
 SOSkipListNode >> level: anInteger [
-	levels := Array new: anInteger 
+	levels := Array new: anInteger
 ]
 
 { #category : #accessing }
@@ -48,12 +48,12 @@ SOSkipListNode >> linearDo: aBlock [
 
 { #category : #accessing }
 SOSkipListNode >> page: aSkipFilePage [ 
-	page := aSkipFilePage 
+	page := aSkipFilePage
 ]
 
 { #category : #accessing }
 SOSkipListNode >> pageIndex [
-	^ page itemIndexOf: self 
+	^ page itemIndexOf: self
 ]
 
 { #category : #accessing }
@@ -63,7 +63,7 @@ SOSkipListNode >> pageNumber [
 
 { #category : #printing }
 SOSkipListNode >> printOn: aStream [ 
-	aStream << 'key: ' << key asString 
+	aStream << 'key: ' << key asString
 ]
 
 { #category : #'as yet unclassified' }
@@ -79,7 +79,7 @@ SOSkipListNode >> right: aSkipNode [
 
 { #category : #accessing }
 SOSkipListNode >> rightAt: anInteger [ 
-	^ levels at: anInteger 
+	^ levels at: anInteger
 ]
 
 { #category : #accessing }
@@ -89,7 +89,7 @@ SOSkipListNode >> rightAt: anInteger put: aSkipNode [
 
 { #category : #accessing }
 SOSkipListNode >> value [
-	^ value 
+	^ value
 ]
 
 { #category : #accessing }

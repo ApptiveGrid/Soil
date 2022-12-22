@@ -18,7 +18,7 @@ SOObjectSegment >> addNewRaw: aByteArray [
 	self 
 		at: objectIndex 
 		putBytes: aByteArray.
-	^ objectIndex 
+	^ objectIndex
 ]
 
 { #category : #'as yet unclassified' }
@@ -106,7 +106,7 @@ SOObjectSegment >> initializeFilesystem [
 
 { #category : #ids }
 SOObjectSegment >> newObjectId [
-	^ SOObjectId segment: id index: 0 
+	^ SOObjectId segment: id index: 0
 ]
 
 { #category : #accessing }
@@ -124,7 +124,7 @@ SOObjectSegment >> objectFile: aSOObjectFile [
 
 { #category : #accessing }
 SOObjectSegment >> objectRepository: aSOObjectRepository [ 
-	objectRepository := aSOObjectRepository 
+	objectRepository := aSOObjectRepository
 ]
 
 { #category : #accessing }
@@ -134,7 +134,7 @@ SOObjectSegment >> path [
 
 { #category : #printing }
 SOObjectSegment >> printOn: aStream [ 
-	aStream << 'segment #' << id asString 
+	aStream << 'segment #' << id asString
 ]
 
 { #category : #accessing }

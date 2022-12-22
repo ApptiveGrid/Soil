@@ -32,7 +32,7 @@ SOSkipListNodeProxy >> pageNumber: anObject [
 	pageNumber := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOSkipListNodeProxy >> realNodeIn: aSkipList [ 
-	^ (aSkipList pageAt: pageNumber) itemAt: pageIndex  
+	^ (aSkipList pageAt: pageNumber) itemAt: pageIndex
 ]

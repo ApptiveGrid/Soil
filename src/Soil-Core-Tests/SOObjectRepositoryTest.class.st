@@ -26,7 +26,6 @@ SOObjectRepositoryTest >> testSegmentCreation [
 	soil objectRepository addNewSegment.
 	self assert: ('soil-tests' asFileReference / #segments / '2') exists.
 	self assert: soil objectRepository segments size equals: 2.
-
 ]
 
 { #category : #tests }
@@ -36,5 +35,4 @@ SOObjectRepositoryTest >> testSegmentInitializationFromDisk [
 	('soil-tests' asFileReference / #segments / '2') ensureCreateDirectory.
 	('soil-tests' asFileReference / #segments / '3') ensureCreateDirectory.
 	self assert: soil objectRepository segments size equals: 3.
-
 ]

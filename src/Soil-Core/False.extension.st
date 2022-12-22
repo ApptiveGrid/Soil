@@ -7,5 +7,5 @@ False >> soilBasicSerialize: serializer [
 
 { #category : #'*Soil-Core' }
 False >> soilSerialize: serializer [
-	self soilBasicSerialize: serializer 
+	self soilBasicSerialize: serializer
 ]

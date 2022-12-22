@@ -25,7 +25,7 @@ SoilObjectCodec class >> characterEncoder [
 
 { #category : #accessing }
 SoilObjectCodec class >> characterEncoding: aString [
-	CharacterEncoder := aString asZnCharacterEncoder 
+	CharacterEncoder := aString asZnCharacterEncoder
 ]
 
 { #category : #convenience }
@@ -63,5 +63,5 @@ SoilObjectCodec >> stream: aStream [
 
 { #category : #accessing }
 SoilObjectCodec >> transaction: aSOTransaction [ 
-	transaction := aSOTransaction 
+	transaction := aSOTransaction
 ]

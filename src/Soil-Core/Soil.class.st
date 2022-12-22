@@ -68,7 +68,7 @@ Soil >> newMaterializer [
 { #category : #'instance creation' }
 Soil >> newSerializer [
 	^ SoilSerializer new 
-		soil: self 
+		soil: self
 ]
 
 { #category : #transactions }
@@ -91,7 +91,6 @@ Soil >> open [
 			soil: self;
 			open;
 			yourself
-	
 ]
 
 { #category : #accessing }

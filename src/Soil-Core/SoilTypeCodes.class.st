@@ -42,7 +42,7 @@ Class {
 { #category : #initialization }
 SoilTypeCodes class >> initialize [ 
 	self initializeTypeCodes.
-	self initializeTypeCodeMapping 
+	self initializeTypeCodeMapping
 ]
 
 { #category : #initialization }
@@ -120,6 +120,4 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeCharacter := 30.
 	TypeCodeCompiledBlock := 31.
 	TypeCodeCompiledMethod := 32
-
-
 ]

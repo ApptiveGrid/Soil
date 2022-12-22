@@ -16,7 +16,6 @@ SOSkipListTest >> setUp [
 		path: 'sunit-skiplist';
 		destroy;
 		initializeList
-		
 ]
 
 { #category : #tests }
@@ -59,7 +58,7 @@ SOSkipListTest >> testAddInBetweenOverflowing [
 	page := skipList pageAt: 2.
 	self assert: page numberOfItems equals: 1.
 	self assert: (page items first) key equals: #[ 255 255 255 255 255 255 255 255 ].
-	skipList writePages 
+	skipList writePages
 ]
 
 { #category : #tests }
@@ -74,7 +73,6 @@ SOSkipListTest >> testAddInBetweenOverflowingTwice [
 	page := skipList pageAt: 3.
 	self assert: page numberOfItems equals: 1.
 	self assert: (page items first) key equals: #[ 255 255 255 255 255 255 255 255 ].
-
 ]
 
 { #category : #tests }

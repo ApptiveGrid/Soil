@@ -273,7 +273,7 @@ SoilSerializationTest >> testSerializationSortedCollectionWithSortBlock [
 	materialized := self materializeFromBytes: serialized.
 	self assert: materialized class equals: object class.
 	"not yet equal as the blocks have wrong outerCode, but ok for execution"
-	self assert: materialized sortBlock compiledBlock bytecodes equals: object sortBlock compiledBlock bytecodes.	
+	self assert: materialized sortBlock compiledBlock bytecodes equals: object sortBlock compiledBlock bytecodes.
 ]
 
 { #category : #'tests-encoded-subclasses' }
@@ -290,7 +290,6 @@ SoilSerializationTest >> testSerializationTTLAssociation [
 	materialized := self materializeFromBytes: serialized.
 	self assert: materialized class equals: object class.
 	self assert: materialized equals: object
-
 ]
 
 { #category : #'tests-encoded-subclasses' }

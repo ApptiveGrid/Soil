@@ -63,7 +63,7 @@ SoilMigrationTest >> testMaterializingObjectVariableLayputWithChangedShape [
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.
-	self assert: (materializedRoot instVarNamed: #three) equals: nil.	
+	self assert: (materializedRoot instVarNamed: #three) equals: nil.
 ]
 
 { #category : #tests }
@@ -83,7 +83,7 @@ SoilMigrationTest >> testMaterializingObjectWithChangedShape [
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.
-	self assert: (materializedRoot instVarNamed: #three) equals: nil.	
+	self assert: (materializedRoot instVarNamed: #three) equals: nil.
 ]
 
 { #category : #tests }
@@ -110,5 +110,5 @@ SoilMigrationTest >> testMaterializingObjectWithReOrderedIvars [
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.
-	self assert: (materializedRoot instVarNamed: #two) equals: 2.	
+	self assert: (materializedRoot instVarNamed: #two) equals: 2.
 ]

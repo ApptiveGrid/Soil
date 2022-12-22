@@ -25,5 +25,5 @@ SOSegmentFile >> path [
 
 { #category : #accessing }
 SOSegmentFile >> segment: aSOObjectSegment [ 
-	segment := aSOObjectSegment 
+	segment := aSOObjectSegment
 ]

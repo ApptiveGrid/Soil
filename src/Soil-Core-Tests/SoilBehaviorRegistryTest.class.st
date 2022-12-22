@@ -13,7 +13,6 @@ SoilBehaviorRegistryTest >> setUp [
 	super setUp.
 	soil := (Soil path: 'sunit-soil') destroy; initializeFilesystem.
 	registry := soil behaviorRegistry
-	 
 ]
 
 { #category : #running }
@@ -27,5 +26,4 @@ SoilBehaviorRegistryTest >> tearDown [
 SoilBehaviorRegistryTest >> testRegisterNewClass [
 	registry nameAt: #Object put: SOObjectId example.
 	self assert: (registry nameAt: #Object ifAbsent: nil) equals: (SOObjectId example).
-
 ]

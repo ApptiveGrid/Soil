@@ -48,7 +48,7 @@ SOPersistentSkipList >> at: aByteArray ifAbsent: aBlock [
 		ifFalse: [ aByteArray asByteArray asByteArrayOfSize: self keySize ].
 	^ (self findNode: key) 
 		ifNotNil: [:node | node value ]
-		ifNil: [ aBlock value ] 
+		ifNil: [ aBlock value ]
 ]
 
 { #category : #accessing }
@@ -94,7 +94,7 @@ SOPersistentSkipList >> defaultKeySize [
 
 { #category : #deleting }
 SOPersistentSkipList >> destroy [
-	path ensureDelete 
+	path ensureDelete
 ]
 
 { #category : #'instance creation' }
@@ -117,7 +117,7 @@ SOPersistentSkipList >> findLeftNodesOf: key ifKeyPresent: aBlock [
 				whileTrue: [ current := right ] .
 		leftNodes at: lvl put: current
 	].
-	^ leftNodes 
+	^ leftNodes
 ]
 
 { #category : #private }
@@ -164,7 +164,6 @@ SOPersistentSkipList >> initialize [
 SOPersistentSkipList >> initializeList [ 
 	self writeHeader.
 	self writeFirstPage
-	 
 ]
 
 { #category : #'as yet unclassified' }
@@ -244,7 +243,7 @@ SOPersistentSkipList >> path [
 { #category : #accessing }
 SOPersistentSkipList >> path: aStringOrFileReference [
 
-	path := aStringOrFileReference asFileReference 
+	path := aStringOrFileReference asFileReference
 ]
 
 { #category : #'instance creation' }
@@ -267,11 +266,10 @@ SOPersistentSkipList >> readPageAt: anInteger [
 	^ page
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOPersistentSkipList >> rightOf: aNode atLevel: anInteger [ 
 	^ (aNode rightAt: anInteger)
 		ifNotNil: [ :proxy | (self pageAt: proxy pageNumber) itemAt: proxy pageIndex ]
-	
 ]
 
 { #category : #initialization }
@@ -295,7 +293,7 @@ SOPersistentSkipList >> writeFirstPage [
 		initializeKeyOfSize: self keySize).
 	page writeOn: stream.
 	stream flush.
-	^ page 
+	^ page
 ]
 
 { #category : #initialization }

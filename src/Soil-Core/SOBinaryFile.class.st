@@ -44,7 +44,6 @@ SOBinaryFile >> initializeFilesystem [
 	self stream 
 		flush; 
 		close
-	
 ]
 
 { #category : #initialization }
@@ -57,17 +56,17 @@ SOBinaryFile >> initializeHeader [
 
 { #category : #initialization }
 SOBinaryFile >> initializeStart [
-	self subclassResponsibility 
+	self subclassResponsibility
 ]
 
 { #category : #accessing }
 SOBinaryFile >> open [
-	stream := File openForWriteFileNamed:  self path pathString 
+	stream := File openForWriteFileNamed:  self path pathString
 ]
 
 { #category : #utilities }
 SOBinaryFile >> prefix [
-	self subclassResponsibility 
+	self subclassResponsibility
 ]
 
 { #category : #'private - decoding' }

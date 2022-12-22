@@ -8,7 +8,6 @@ ByteLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	
 	materializer stream readInto: object startingAt: 1 count: basicSize.
 	^object
-
 ]
 
 { #category : #'*Soil-Core' }

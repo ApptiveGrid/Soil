@@ -40,7 +40,7 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction
 
 { #category : #accessing }
 SoilBehaviorRegistry >> index [
-	^ index 
+	^ index
 ]
 
 { #category : #initialization }
@@ -60,7 +60,6 @@ SoilBehaviorRegistry >> nameAt: classIdentifier ifAbsent: aBlock [
 	^ self index 
 		at: classIdentifier 
 		ifAbsent: aBlock
-	
 ]
 
 { #category : #accessing }
@@ -68,7 +67,6 @@ SoilBehaviorRegistry >> nameAt: classIdentifier ifPresent: aBlock [
 	^ self index 
 		at: classIdentifier 
 		ifPresent: aBlock
-	
 ]
 
 { #category : #accessing }
@@ -78,7 +76,7 @@ SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 	dict := self index 
 		at: classIdentifier put: objectId;
 		yourself.
-	index writePages 
+	index writePages
 ]
 
 { #category : #'instance creation' }

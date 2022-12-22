@@ -24,19 +24,18 @@ SOPersistentClusterVersion >> beChanged [
 
 { #category : #accessing }
 SOPersistentClusterVersion >> changed: aBoolean [
-	changed := aBoolean 
+	changed := aBoolean
 ]
 
 { #category : #testing }
 SOPersistentClusterVersion >> hasChanged [
-	^ changed 
+	^ changed
 ]
 
 { #category : #initialization }
 SOPersistentClusterVersion >> initialize [ 
 	super initialize.
 	changed := false.
-
 ]
 
 { #category : #'as yet unclassified' }
@@ -54,7 +53,7 @@ SOPersistentClusterVersion >> newMaterializer [
 
 { #category : #accessing }
 SOPersistentClusterVersion >> previousVersionPosition [
-	^ previousVersionPosition 
+	^ previousVersionPosition
 ]
 
 { #category : #printing }
@@ -63,7 +62,6 @@ SOPersistentClusterVersion >> printOn: aStream [
 	objectId printOn: aStream.
 	aStream << ' '.
 	object printOn: aStream.
-
 ]
 
 { #category : #'instance creation' }
@@ -76,7 +74,6 @@ SOPersistentClusterVersion >> readFrom: stream [
 	1 to: numberOfReferences do: [:n | self addReference: (SOObjectId segment: 1 index: (stream next: 8) asInteger)]. 
 	objectSize := (stream next: 8) asInteger.
 	bytes := stream next: objectSize.
-		
 ]
 
 { #category : #asserting }

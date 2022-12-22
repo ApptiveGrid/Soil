@@ -22,7 +22,7 @@ SOClusterRecord class >> readFrom: aStream [
 { #category : #'instance creation' }
 SOClusterRecord >> addReference: reference [
 	references detect: [ :each | each = reference ] ifFound: [ self halt ].
-	references add: reference 
+	references add: reference
 ]
 
 { #category : #'as yet unclassified' }
@@ -58,7 +58,6 @@ SOClusterRecord >> initialize [
 	references := OrderedCollection new.
 	committed := false.
 	previousVersionPosition := 0.
-
 ]
 
 { #category : #accessing }
@@ -79,17 +78,17 @@ SOClusterRecord >> objectId [
 { #category : #accessing }
 SOClusterRecord >> objectId: aSOObjectId [ 
 	
-	objectId := aSOObjectId 
+	objectId := aSOObjectId
 ]
 
 { #category : #accessing }
 SOClusterRecord >> previousVersionPosition: anInteger [ 
-	previousVersionPosition := anInteger 
+	previousVersionPosition := anInteger
 ]
 
 { #category : #printing }
 SOClusterRecord >> printOn: aStream [ 
-	self subclassResponsibility 
+	self subclassResponsibility
 ]
 
 { #category : #accessing }
@@ -98,7 +97,7 @@ SOClusterRecord >> referenceAt: anInteger [
 	^ SOObjectProxy new 
 		objectId: (references at: anInteger);
 		transaction: transaction;
-		yourself 
+		yourself
 ]
 
 { #category : #accessing }
@@ -113,5 +112,5 @@ SOClusterRecord >> transaction [
 
 { #category : #accessing }
 SOClusterRecord >> transaction: aSOTransaction [ 
-	transaction := aSOTransaction 
+	transaction := aSOTransaction
 ]

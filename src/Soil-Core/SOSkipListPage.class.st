@@ -24,7 +24,7 @@ SOSkipListPage >> addNode: aSkipNode [
 			ifFalse: [ 
 				items add: aSkipNode before: item.
 				^ aSkipNode ] ].
-	items add: aSkipNode 
+	items add: aSkipNode
 ]
 
 { #category : #accessing }
@@ -32,13 +32,11 @@ SOSkipListPage >> firstItem [
 	^ items first
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOSkipListPage >> fitsKey: aByteArray [ 
 	"(items first key asInteger < bkey ) ifFalse: [ ^ false ]."
 	(items last key asInteger > aByteArray asInteger) ifFalse: [ ^ false ].
 	^ true
-
-	
 ]
 
 { #category : #testing }
@@ -54,7 +52,7 @@ SOSkipListPage >> initialize [
 
 { #category : #accessing }
 SOSkipListPage >> itemAt: anInteger [ 
-	^ items at: anInteger 
+	^ items at: anInteger
 ]
 
 { #category : #'as yet unclassified' }
@@ -113,7 +111,7 @@ SOSkipListPage >> pageNumber [
 
 { #category : #accessing }
 SOSkipListPage >> pageNumber: anInteger [ 
-	pageNumber := anInteger 
+	pageNumber := anInteger
 ]
 
 { #category : #accessing }
@@ -135,7 +133,7 @@ SOSkipListPage >> readFrom: aStream [
 		items add: node ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOSkipListPage >> readNodeFrom: aStream [ 
 	| node value |
 	node := list newNode
@@ -150,8 +148,6 @@ SOSkipListPage >> readNodeFrom: aStream [
 					pageNumber: value;
 					pageIndex: (self nextLengthEncodedInteger: aStream) ]) ].
 	^ node
-		
-		
 ]
 
 { #category : #removing }
@@ -176,5 +172,5 @@ SOSkipListPage >> writeOn: aStream [
 					self nextPutLengthEncodedInteger: lvl pageIndex on: aStream ]
 				ifNil: [ aStream nextPutAll: #[ 0 0 ] ] ] ].
 		aStream flush.
-	((aStream position - pagePosition) > self pageSize) ifTrue: [ self halt. ] 
+	((aStream position - pagePosition) > self pageSize) ifTrue: [ self halt. ]
 ]

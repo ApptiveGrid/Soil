@@ -71,8 +71,7 @@ SoilTest >> testSerializingClassDescription [
 		transaction: transaction;
 		stream: bytes readStream;
 		materialize.
-	self assert: (obj2 at: #C) class equals: SOBehaviorDescription   
-	
+	self assert: (obj2 at: #C) class equals: SOBehaviorDescription
 ]
 
 { #category : #tests }
@@ -83,8 +82,7 @@ SoilTest >> testSerializingRootOneCluster [
 	tx commit.
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
-	self assert: materializedRoot nested reference class equals: SOTestClusterRoot  
-	
+	self assert: materializedRoot nested reference class equals: SOTestClusterRoot
 ]
 
 { #category : #tests }
@@ -99,7 +97,6 @@ SoilTest >> testSerializingRootTwoCluster [
 	materializedRoot := tx2 root.
 	self assert: materializedRoot nested reference class equals: SOObjectProxy.
 	self assert: materializedRoot nested reference nested label equals: 'nested under cluster'
-	
 ]
 
 { #category : #tests }
@@ -115,6 +112,5 @@ SoilTest >> testUpdatingPersistentObject [
 	updateTx commit.
 	readTx := soil newTransaction.
 	root3 := readTx root.
-	self assert: root3 nested reference nested label equals: 'update nested under cluster'  
-	
+	self assert: root3 nested reference nested label equals: 'update nested under cluster'
 ]

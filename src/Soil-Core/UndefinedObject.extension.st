@@ -12,5 +12,5 @@ UndefinedObject class >> soilMaterialize: materializer [
 
 { #category : #'*Soil-Core' }
 UndefinedObject >> soilSerialize: serializer [ 
-	self soilBasicSerialize: serializer 
+	self soilBasicSerialize: serializer
 ]

@@ -27,7 +27,6 @@ SOTransaction >> addClusterObject: anObject [
 		atObjectId: self newObjectId 
 		putObject: anObject.
 	^ anObject
-
 ]
 
 { #category : #accessing }
@@ -64,8 +63,7 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 	classDescriptions
 		at: aClass soilBehaviorIdentifier 
 		put: classDescription.
-	^ classDescription 
-	
+	^ classDescription
 ]
 
 { #category : #'as yet unclassified' }
@@ -76,15 +74,14 @@ SOTransaction >> behaviorDescriptionWithId: aSOObjectId ifNone: aBlock [
 
 { #category : #accessing }
 SOTransaction >> behaviorRegistry [
-	^ soil behaviorRegistry 
+	^ soil behaviorRegistry
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [ 
 	^ self behaviorRegistry 
 		behaviorVersionsUpTo: aSOBehaviorDescription
 		transaction: self .
-	
 ]
 
 { #category : #accessing }
@@ -107,7 +104,6 @@ SOTransaction >> checkpoint [
 		soil behaviorRegistry 
 			nameAt: description value behaviorIdentifier 
 			put: objectId ].
-
 ]
 
 { #category : #accessing }
@@ -163,11 +159,10 @@ SOTransaction >> markDirty: anObject [
 	record := objectMap 
 		at: anObject 
 		ifAbsent: [ Error signal: 'cannot mark dirty a non-existing root' ].
-	record beChanged. 
-	
+	record beChanged.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 	| record |
 	record := (self objectRepository at: objectId)
@@ -175,9 +170,7 @@ SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 		materializeObject.
 	idMap at: objectId put: record.
 	objectMap at: record object put: record.
-	^ record object 
-
-	
+	^ record object
 ]
 
 { #category : #'instance creation' }
@@ -211,7 +204,6 @@ SOTransaction >> newSerializer [
 	^ soil newSerializer
 		transaction: self;
 		yourself
-
 ]
 
 { #category : #accessing }
