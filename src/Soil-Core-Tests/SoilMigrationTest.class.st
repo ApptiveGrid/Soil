@@ -85,3 +85,30 @@ SoilMigrationTest >> testMaterializingObjectWithChangedShape [
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.
 	self assert: (materializedRoot instVarNamed: #three) equals: nil.	
 ]
+
+{ #category : #tests }
+SoilMigrationTest >> testMaterializingObjectWithReOrderedIvars [
+	| tx tx2 materializedRoot object |
+	
+	"this test checks that we can read objects where the order of the ivars changed. This happens for 
+	example when moving ivars up or down in the hierarchy"
+	
+	object := migrationClass new.
+	object 
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2.
+	tx := soil newTransaction.
+	tx root: object. 
+	tx commit.
+	
+	migrationClass := (SOBaseTestObject << #SOMigrationObject
+		layout: FixedLayout;
+		slots: { #two .#one }; 
+		package: self class package name) install.
+	
+	
+	tx2 := soil newTransaction.
+	materializedRoot := tx2 root.
+	self assert: (materializedRoot instVarNamed: #one) equals: 1.
+	self assert: (materializedRoot instVarNamed: #two) equals: 2.	
+]
