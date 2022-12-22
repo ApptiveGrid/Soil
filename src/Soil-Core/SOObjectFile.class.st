@@ -51,7 +51,7 @@ SOObjectFile >> fuelVersionSize [
 { #category : #writing }
 SOObjectFile >> headerSize [ 
 	"this header adds the fuel version"
-	^ super headerSize + self fuelVersionSize 
+	^ super headerSize + self fuelVersionSize
 ]
 
 { #category : #initialization }
@@ -62,7 +62,6 @@ SOObjectFile >> initializeHeader [
 
 { #category : #initialization }
 SOObjectFile >> initializeStart [
-
 ]
 
 { #category : #accessing }

@@ -16,7 +16,6 @@ SOSkipList >> find: aString [
 { #category : #initialization }
 SOSkipList >> initialize [ 
 	super initialize.
-
 ]
 
 { #category : #accessing }
@@ -26,17 +25,17 @@ SOSkipList >> maxLevel [
 
 { #category : #accessing }
 SOSkipList >> maxLevel: anInteger [ 
-	maxLevel := anInteger 
+	maxLevel := anInteger
 ]
 
 { #category : #'instance creation' }
 SOSkipList >> newNode [ 
 	^ SOSkipListNode new 
-		level: self maxLevel 
+		level: self maxLevel
 ]
 
 { #category : #'instance creation' }
 SOSkipList >> newSentinelNode [ 
 	^ SOSkipListSentinelNode new 
-		level: self maxLevel 
+		level: self maxLevel
 ]

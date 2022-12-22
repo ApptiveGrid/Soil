@@ -26,14 +26,14 @@ SOBehaviorDescription class >> meta [
 	^ self for: self
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOBehaviorDescription class >> soilTransientInstVars [ 
-	^ #( objectId ) 
+	^ #( objectId )
 ]
 
 { #category : #accessing }
 SOBehaviorDescription >> behaviorIdentifier [ 
-	^ behaviorIdentifier 
+	^ behaviorIdentifier
 ]
 
 { #category : #initialization }

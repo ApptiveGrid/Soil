@@ -10,7 +10,7 @@ Class {
 { #category : #'instance creation' }
 SoilSerializer class >> on: aStream [ 
 	^ self new 
-		stream: aStream 
+		stream: aStream
 ]
 
 { #category : #public }
@@ -18,7 +18,6 @@ SoilSerializer class >> serializeToBytes: anObject [
 
 	^ (self on: ByteArray new writeStream) 
 		serialize: anObject
-
 ]
 
 { #category : #'writing - basic' }
@@ -80,8 +79,7 @@ SoilSerializer >> nextPutByteArray: aByteArray [
 
 { #category : #'writing - basic' }
 SoilSerializer >> nextPutBytesFrom: aByteArray [
-	stream nextPutAll: aByteArray 
-
+	stream nextPutAll: aByteArray
 ]
 
 { #category : #writing }
@@ -123,7 +121,6 @@ SoilSerializer >> nextPutCompiledBlock: aCompiledMethod [
 	
 	"variable part"
 	self nextPutBytesFrom: aCompiledMethod bytecodes
-
 ]
 
 { #category : #writing }
@@ -143,7 +140,6 @@ SoilSerializer >> nextPutCompiledMethod: aCompiledMethod [
 		(aCompiledMethod literalAt: i) soilSerialize: self ].
 	"variable part"
 	self nextPutBytesFrom: aCompiledMethod bytecodes
-	
 ]
 
 { #category : #writing }
@@ -168,12 +164,12 @@ SoilSerializer >> nextPutDictionary: aDictionary [
 SoilSerializer >> nextPutExternalReference: anInteger [
 	self 
 		nextPutByte: TypeCodeExternalReference; 
-		nextPutLengthEncodedInteger: anInteger 
+		nextPutLengthEncodedInteger: anInteger
 ]
 
 { #category : #writing }
 SoilSerializer >> nextPutFalse: aBoolean [ 
-	self nextPutByte: TypeCodeFalse 
+	self nextPutByte: TypeCodeFalse
 ]
 
 { #category : #writing }
@@ -214,7 +210,7 @@ SoilSerializer >> nextPutInteger: anInteger [
 SoilSerializer >> nextPutInternalReference: anInteger [ 
 	self 
 		nextPutByte: TypeCodeInternalReference; 
-		nextPutLengthEncodedInteger: anInteger 
+		nextPutLengthEncodedInteger: anInteger
 ]
 
 { #category : #writing }
@@ -259,12 +255,12 @@ SoilSerializer >> nextPutMessageSend: aMessageSend [
 
 { #category : #writing }
 SoilSerializer >> nextPutNil: anUndefinedObject [ 
-	self nextPutByte: TypeCodeUndefined 
+	self nextPutByte: TypeCodeUndefined
 ]
 
 { #category : #writing }
 SoilSerializer >> nextPutObjectType [
-	self nextPutByte: TypeCodeObject 
+	self nextPutByte: TypeCodeObject
 ]
 
 { #category : #writing }
@@ -277,7 +273,7 @@ SoilSerializer >> nextPutOrderedCollection: aCollection [
 
 { #category : #writing }
 SoilSerializer >> nextPutProcessorScheduler: aProcessorScheduler [ 
-	self nextPutByte: TypeCodeProcessScheduler 
+	self nextPutByte: TypeCodeProcessScheduler
 ]
 
 { #category : #writing }
@@ -287,7 +283,7 @@ SoilSerializer >> nextPutScaledDecimal: aNumber [
 		nextPutByte: TypeCodeScaledDecimal;
 		nextPutLengthEncodedInteger: aNumber numerator;
 		nextPutLengthEncodedInteger: aNumber denominator;
-		nextPutLengthEncodedInteger: aNumber scale 
+		nextPutLengthEncodedInteger: aNumber scale
 ]
 
 { #category : #writing }
@@ -306,7 +302,7 @@ SoilSerializer >> nextPutSymbol: aSymbol [
 
 { #category : #writing }
 SoilSerializer >> nextPutSystemDictionary: aCollection [ 
-	self nextPutByte: TypeCodeSystemDictionary 
+	self nextPutByte: TypeCodeSystemDictionary
 ]
 
 { #category : #writing }
@@ -318,7 +314,7 @@ SoilSerializer >> nextPutTime: aTime [
 
 { #category : #writing }
 SoilSerializer >> nextPutTrue: aBoolean [ 
-	self nextPutByte: TypeCodeTrue 
+	self nextPutByte: TypeCodeTrue
 ]
 
 { #category : #writing }
@@ -348,7 +344,7 @@ SoilSerializer >> notSupportedError: anObject [
 
 { #category : #public }
 SoilSerializer >> referenceIndexOf: aSOClassDescription [ 
-	^ externalObjectRegistry indexOfExternalReference: aSOClassDescription 
+	^ externalObjectRegistry indexOfExternalReference: aSOClassDescription
 ]
 
 { #category : #registry }
@@ -376,8 +372,7 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 			self nextPutExternalReference: externalIndex ]
 		ifFalse: [  
 			objects add: anObject.
-			aBlock value ] 
-
+			aBlock value ]
 ]
 
 { #category : #private }
@@ -393,5 +388,4 @@ SoilSerializer >> serializeToBytes: anObject [
 
 	^ (self stream: ByteArray new writeStream) 
 		serialize: anObject
-
 ]

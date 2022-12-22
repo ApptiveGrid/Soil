@@ -18,7 +18,7 @@ SOObjectIndexFile >> allocateNewIndex [
 { #category : #accessing }
 SOObjectIndexFile >> at: index [ 
 	stream position: (self indexPositionAt: index).
-	^ (stream next: 8) asInteger 
+	^ (stream next: 8) asInteger
 ]
 
 { #category : #accessing }
@@ -59,7 +59,7 @@ SOObjectIndexFile >> lastObjectIndex: anInteger [
 		position: self headerSize;
 		nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
 		flush.
-	lastObjectIndex := anInteger 
+	lastObjectIndex := anInteger
 ]
 
 { #category : #accessing }

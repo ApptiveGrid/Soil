@@ -17,7 +17,6 @@ SOObjectFileTest >> testInitializeOnStream [
 	self assert: fileVersion asInteger equals: 1.
 	fuelVersion := bytes copyFrom: index prefix size + index fileVersionSize + 1 to: (index prefix size + index fileVersionSize + index fuelVersionSize).
 	self assert: fuelVersion asInteger equals: 1
-	 
 ]
 
 { #category : #tests }

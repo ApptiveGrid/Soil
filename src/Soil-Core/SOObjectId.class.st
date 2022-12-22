@@ -20,11 +20,11 @@ SOObjectId class >> segment: segmentId index: index [
 		segment: segmentId index: index
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOObjectId class >> soilRawMaterialize: materializer [ 
 	^ self new 
 		segment: materializer nextLengthEncodedInteger
-		index: materializer nextLengthEncodedInteger 
+		index: materializer nextLengthEncodedInteger
 ]
 
 { #category : #comparing }
@@ -61,7 +61,7 @@ SOObjectId >> initialize [
 { #category : #initialization }
 SOObjectId >> initializeId: objectRepository [ 
 	(index = 0) ifFalse: [ ^ self ].
-	index := (objectRepository segmentAt: segment) allocateNextIndex 
+	index := (objectRepository segmentAt: segment) allocateNextIndex
 ]
 
 { #category : #printing }
@@ -79,12 +79,12 @@ SOObjectId >> segment [
 { #category : #accessing }
 SOObjectId >> segment: segmentNo index: segmentIndex [ 
 	segment := segmentNo.
-	index := segmentIndex 
+	index := segmentIndex
 ]
 
 { #category : #accessing }
 SOObjectId >> setIndex: anInteger [ 
-	index := anInteger 
+	index := anInteger
 ]
 
 { #category : #'as yet unclassified' }

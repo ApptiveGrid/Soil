@@ -64,14 +64,12 @@ SONewClusterVersion >> printOn: aStream [
 	objectId printOn: aStream.
 	aStream << ' '.
 	object printOn: aStream.
-	
 ]
 
 { #category : #serializing }
 SONewClusterVersion >> serialize [
 	^ ByteArray streamContents: [ :stream |
 		self serializeOn: stream ]
-				
 ]
 
 { #category : #serializing }

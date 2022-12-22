@@ -14,11 +14,10 @@ SOObjectProxy >> doesNotUnderstand: aMessage [
 	^ aMessage sendTo: self object
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOObjectProxy >> inspectionObject [
 	<inspectorPresentationOrder: 30 title: 'object'>
 	^ StRawInspection on: self object
-
 ]
 
 { #category : #'reflective operations' }
@@ -41,12 +40,12 @@ SOObjectProxy >> objectId: anObject [
 	objectId := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOObjectProxy >> soilLoadedIn: aTransaction [ 
-	transaction := aTransaction  
+	transaction := aTransaction
 ]
 
 { #category : #accessing }
 SOObjectProxy >> transaction: aTransaction [ 
-	transaction := aTransaction 
+	transaction := aTransaction
 ]

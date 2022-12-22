@@ -10,10 +10,10 @@ SoilMaterializer class >> materializeFromBytes: aByteArray [
 		materialize
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilMaterializer class >> on: aReadStream [
 	^ self new 
-		stream: aReadStream 
+		stream: aReadStream
 ]
 
 { #category : #'reading - basic' }
@@ -26,7 +26,7 @@ SoilMaterializer >> basicNextString [
 
 { #category : #public }
 SoilMaterializer >> behaviorVersionsUpTo: aDescription [ 
-	^ transaction behaviorVersionsUpTo: aDescription 
+	^ transaction behaviorVersionsUpTo: aDescription
 ]
 
 { #category : #public }
@@ -299,7 +299,7 @@ SoilMaterializer >> nextScaledDecimal: aClass [
 
 { #category : #reading }
 SoilMaterializer >> nextSoilObject [ 
-	^ (TypeCodeMapping at: self nextByte) soilMaterialize: self 
+	^ (TypeCodeMapping at: self nextByte) soilMaterialize: self
 ]
 
 { #category : #reading }
@@ -308,7 +308,6 @@ SoilMaterializer >> nextString [
 	string := self basicNextString.
 	self registerObject: string.
 	^ string
-
 ]
 
 { #category : #reading }
@@ -318,8 +317,6 @@ SoilMaterializer >> nextSymbol [
 	bytes := ByteArray new: length.
 	stream readInto: bytes startingAt: 1 count: length.
 	^ bytes asString asSymbol
-	
-
 ]
 
 { #category : #reading }
@@ -352,7 +349,7 @@ SoilMaterializer >> nextWideSymbol [
 { #category : #registry }
 SoilMaterializer >> registerObject: anObject [
 	objects ifNil: [ objects := OrderedCollection new ].
-	objects add: anObject 
+	objects add: anObject
 ]
 
 { #category : #accessing }

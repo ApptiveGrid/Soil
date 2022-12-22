@@ -17,14 +17,13 @@ SOObjectRepository >> addNewSegment [
 				initializeFilesystem .
 	segments := self segments copyWith: newSegment.
 	^ newSegment
-
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOObjectRepository >> allVersionsOf: aSOObjectId [ 
 	| segment |
 	segment := self segmentAt: aSOObjectId segment.
-	^ segment allVersionsOf: aSOObjectId  
+	^ segment allVersionsOf: aSOObjectId
 ]
 
 { #category : #accessing }
@@ -41,7 +40,7 @@ SOObjectRepository >> at: objectId put: bytes [
 	| segment |
 	(objectId index = 0) ifTrue: [ self halt ].
 	segment := self segmentAt: objectId segment.
-	segment at: objectId index putBytes: bytes	
+	segment at: objectId index putBytes: bytes
 ]
 
 { #category : #'initialize-release' }
@@ -51,7 +50,7 @@ SOObjectRepository >> close [
 
 { #category : #accessing }
 SOObjectRepository >> defaultSegment [
-	^ self segments first 
+	^ self segments first
 ]
 
 { #category : #accessing }
@@ -61,7 +60,7 @@ SOObjectRepository >> firstSegment [
 
 { #category : #initialization }
 SOObjectRepository >> initializeFilesystem [
-	(soil path / #segments) ensureCreateDirectory 
+	(soil path / #segments) ensureCreateDirectory
 ]
 
 { #category : #initialization }
@@ -73,7 +72,6 @@ SOObjectRepository >> loadSegments [
 		SOObjectSegment new 
 			id: directory basename asInteger;
 			objectRepository: self  ]
-	
 ]
 
 { #category : #accessing }
@@ -83,7 +81,7 @@ SOObjectRepository >> newObjectId [
 
 { #category : #accessing }
 SOObjectRepository >> segmentAt: anInteger [ 
-	^ self segments at: anInteger 
+	^ self segments at: anInteger
 ]
 
 { #category : #accessing }
@@ -99,5 +97,5 @@ SOObjectRepository >> soil [
 
 { #category : #accessing }
 SOObjectRepository >> soil: aSoil [ 
-	soil := aSoil 
+	soil := aSoil
 ]

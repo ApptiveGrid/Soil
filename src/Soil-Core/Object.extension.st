@@ -7,8 +7,7 @@ Object >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Core' }
-Object >> soilLoadedIn: aTransaction [ 
-
+Object >> soilLoadedIn: aTransaction [
 ]
 
 { #category : #'*Soil-Core' }
@@ -22,7 +21,7 @@ Object >> soilMaterialized: materializer [
 
 { #category : #'*Soil-Core' }
 Object class >> soilPersistentInstVars [
-	^ self allInstVarNames difference: self soilTransientInstVars 
+	^ self allInstVarNames difference: self soilTransientInstVars
 ]
 
 { #category : #'*Soil-Core' }
@@ -30,5 +29,4 @@ Object >> soilSerialize: aSoilSerializer [
 	aSoilSerializer 
 		registerObject: self 
 		ifAbsent: [ self soilBasicSerialize: aSoilSerializer ].
-	
 ]

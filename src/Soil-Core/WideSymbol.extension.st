@@ -9,7 +9,7 @@ WideSymbol >> soilBasicSerialize: serializer [
 { #category : #'*Soil-Core' }
 WideSymbol class >> soilMaterialize: materializer [
 
-	^ materializer nextWideSymbol 
+	^ materializer nextWideSymbol
 ]
 
 { #category : #'*Soil-Core' }

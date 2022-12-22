@@ -24,9 +24,9 @@ SOSkipListSentinelNode >> initializeKeyOfSize: anInteger [
 		ifFalse: [ ((2 raisedTo: (anInteger * 8)) - 1) asByteArrayOfSize: anInteger  ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOSkipListSentinelNode >> keyIsSmallerThan: aString [ 
-	^ lowerBound 
+	^ lowerBound
 ]
 
 { #category : #printing }
@@ -36,5 +36,5 @@ SOSkipListSentinelNode >> printOn: aStream [
 
 { #category : #accessing }
 SOSkipListSentinelNode >> value [ 
-	^ 0 
+	^ 0
 ]
