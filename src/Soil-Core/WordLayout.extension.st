@@ -7,7 +7,7 @@ WordLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	materializer registerObject: object.
 	
 	1 to: basicSize do: [:i | object basicAt: i put: materializer nextLengthEncodedInteger].
-	^object
+	^object soilMaterialized: materializer
 ]
 
 { #category : #'*Soil-Core' }
