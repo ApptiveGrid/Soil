@@ -30,6 +30,12 @@ SoilMigrationTest >> path [
 ]
 
 { #category : #running }
+SoilMigrationTest >> runCase [ 
+	SystemAnnouncer uniqueInstance 
+		suspendAllWhile: [ super runCase ]
+]
+
+{ #category : #running }
 SoilMigrationTest >> setUp [ 
 	super setUp.
 	soil := Soil path: self path.
