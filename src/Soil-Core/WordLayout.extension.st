@@ -12,15 +12,11 @@ WordLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 
 { #category : #'*Soil-Core' }
 WordLayout >> soilBasicSerialize: anObject with: serializer [
-	| instSize description |
-	description := serializer behaviorDescriptionFor: anObject class.
-	serializer 
-		nextPutObjectType;
-		nextPutLengthEncodedInteger: (description isMeta 
-			ifTrue: [ 0 ]
-			ifFalse: [ serializer referenceIndexOf: description]).
+	| description basicSize |
 	
-	instSize := anObject basicSize.
-	serializer nextPutLengthEncodedInteger: instSize.
-	1 to: instSize do: [:i | serializer nextPutLengthEncodedInteger: (anObject basicAt: i)]
+	description := self soilSerializeBehaviorDescription: anObject with: serializer.
+	basicSize := anObject basicSize.
+	
+	serializer nextPutLengthEncodedInteger: basicSize.
+	1 to: basicSize do: [:i | serializer nextPutLengthEncodedInteger: (anObject basicAt: i)]
 ]

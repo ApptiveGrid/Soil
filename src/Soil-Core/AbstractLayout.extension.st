@@ -9,3 +9,15 @@ AbstractLayout >> soilBasicMaterialize: objectClass with: materializer [
 AbstractLayout >> soilBasicSerialize: anObject with: serializer [
 	self subclassResponsibility
 ]
+
+{ #category : #'*Soil-Core' }
+AbstractLayout >> soilSerializeBehaviorDescription: anObject with: serializer [
+	| description |
+	description := serializer behaviorDescriptionFor: anObject class.
+	serializer 
+		nextPutObjectType;
+		nextPutLengthEncodedInteger: (description isMeta 
+			ifTrue: [ 0 ]
+			ifFalse: [ serializer referenceIndexOf: description]).
+	^ description
+]
