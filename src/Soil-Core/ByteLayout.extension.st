@@ -7,7 +7,7 @@ ByteLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	materializer registerObject: object.
 	
 	materializer stream readInto: object startingAt: 1 count: basicSize.
-	^object
+	^object soilMaterialized: materializer
 
 ]
 

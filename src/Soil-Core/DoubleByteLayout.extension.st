@@ -7,7 +7,7 @@ DoubleByteLayout >> soilBasicMaterialize: aBehaviorDescription with: materialize
 	materializer registerObject: object.
 	
 	materializer stream readInto: object startingAt: 1 count: basicSize.
-	^object
+	^object soilMaterialized: materializer
 
 ]
 
