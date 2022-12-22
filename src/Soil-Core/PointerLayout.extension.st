@@ -2,15 +2,10 @@ Extension { #name : #PointerLayout }
 
 { #category : #'*Soil-Core' }
 PointerLayout >> soilBasicSerialize: anObject with: serializer [
-	|  description |
-	description := serializer behaviorDescriptionFor: anObject class.
-	serializer 
-		nextPutObjectType;
-		nextPutLengthEncodedInteger: (description isMeta 
-			ifTrue: [ 0 ]
-			ifFalse: [ serializer referenceIndexOf: description]).
+	| description |
+	description := self soilSerializeBehaviorDescription: anObject with: serializer.
 	
-	description instVarNames do: [:ivarName | (anObject instVarNamed: ivarName) soilSerialize: serializer ].
+	description instVarNames do: [:ivarName | (anObject instVarNamed: ivarName) soilSerialize: serializer ]
 ]
 
 { #category : #'*Soil-Core' }

@@ -15,19 +15,12 @@ WeakLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 
 { #category : #'*Soil-Core' }
 WeakLayout >> soilBasicSerialize: anObject with: serializer [
-	|  description basicSize|
+	| description basicSize|
 	
-	description := serializer behaviorDescriptionFor: anObject class.
-	serializer 
-		nextPutObjectType;
-		nextPutLengthEncodedInteger: (description isMeta 
-			ifTrue: [ 0 ]
-			ifFalse: [ serializer referenceIndexOf: description]).
-
-
+	description := self soilSerializeBehaviorDescription: anObject with: serializer.
 	basicSize := anObject basicSize.
-	serializer nextPutLengthEncodedInteger: basicSize.
 	
+	serializer nextPutLengthEncodedInteger: basicSize.
 	description instVarNames do: [:ivarName | (anObject instVarNamed: ivarName) soilSerialize: serializer ].
 	1 to: basicSize do: [:i | (anObject basicAt: i) soilSerialize: serializer ]
 ]
