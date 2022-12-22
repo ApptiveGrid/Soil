@@ -19,6 +19,7 @@ PointerLayout >> updateIvars: aBehaviorDescription with: materializer for: objec
 			| versions |
 			versions := materializer behaviorVersionsUpTo: aBehaviorDescription.
 			versions last instVarNames do: [ :instVar | 
-				(versions allSatisfy: [ :version | version instVarNames includes: instVar ]) ifTrue: [ 
-					 object instVarNamed: instVar put: materializer nextSoilObject ] ] ]
+				(versions allSatisfy: [ :version | version instVarNames includes: instVar ]) 
+					ifTrue: [  object instVarNamed: instVar put: materializer nextSoilObject ]
+					ifFalse: [ materializer nextSoilObject "read but ignore"  ] ] ]
 ]
