@@ -37,7 +37,7 @@ SOBehaviorDescription >> behaviorIdentifier [
 ]
 
 { #category : #initialization }
-SOBehaviorDescription >> initializeFromBehavior: aClass [ 
+SOBehaviorDescription >> initializeFromBehavior: aClass [
 	behaviorIdentifier := aClass soilBehaviorIdentifier.
 	"we record only the persistent ivar names, in order"
 	instVarNames := aClass soilPersistentInstVars
@@ -51,28 +51,28 @@ SOBehaviorDescription >> instVarNames [
 
 { #category : #testing }
 SOBehaviorDescription >> isCurrent [
-	^ self isMeta 
-		ifTrue: [ 
+	^ self isMeta
+		ifTrue: [
 			self flag: #todo.
-			"this assumption is only valid until SOBehaviorDescription changes 
+			"this assumption is only valid until SOBehaviorDescription changes
 			shape itselt. But this is unlikely to be handled automatically"
 			true ]
-		ifFalse: [ 
+		ifFalse: [
 			self matchesBehavior: (Smalltalk at: behaviorIdentifier) ]
 ]
 
 { #category : #testing }
-SOBehaviorDescription >> isMeta [ 
+SOBehaviorDescription >> isMeta [
 	^ behaviorIdentifier = self class name
 ]
 
 { #category : #testing }
 SOBehaviorDescription >> matchesBehavior: aBehavior [
-	^ self matchesDescription: (SOBehaviorDescription for: aBehavior)
+	^ self matchesDescription: (self class for: aBehavior)
 ]
 
 { #category : #testing }
-SOBehaviorDescription >> matchesDescription: description [ 
+SOBehaviorDescription >> matchesDescription: description [
 	(behaviorIdentifier = description behaviorIdentifier) ifFalse: [ ^ false ].
 	(instVarNames = description instVarNames) ifFalse: [ ^ false ].
 	^ true
@@ -87,7 +87,7 @@ SOBehaviorDescription >> name [
 { #category : #accessing }
 SOBehaviorDescription >> name: anObject [
 
-	name := anObject.
+	name := anObject
 ]
 
 { #category : #accessing }
@@ -101,6 +101,14 @@ SOBehaviorDescription >> objectId [
 ]
 
 { #category : #accessing }
-SOBehaviorDescription >> objectId: aSOObjectId [ 
+SOBehaviorDescription >> objectId: aSOObjectId [
 	objectId := aSOObjectId
+]
+
+{ #category : #references }
+SOBehaviorDescription >> referenceIndexWithSerializer: aSerializer [
+
+	^ self isMeta
+		  ifTrue: [ 0 ]
+		  ifFalse: [ aSerializer referenceIndexOf: self ]
 ]

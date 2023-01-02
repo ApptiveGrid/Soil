@@ -14,10 +14,8 @@ AbstractLayout >> soilBasicSerialize: anObject with: serializer [
 AbstractLayout >> soilSerializeBehaviorDescription: anObject with: serializer [
 	| description |
 	description := serializer behaviorDescriptionFor: anObject class.
-	serializer 
+	serializer
 		nextPutObjectType;
-		nextPutLengthEncodedInteger: (description isMeta 
-			ifTrue: [ 0 ]
-			ifFalse: [ serializer referenceIndexOf: description]).
+		nextPutLengthEncodedInteger: (description referenceIndexWithSerializer: serializer).
 	^ description
 ]

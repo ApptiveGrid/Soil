@@ -4,7 +4,7 @@ Extension { #name : #PointerLayout }
 PointerLayout >> soilBasicSerialize: anObject with: serializer [
 	| description |
 	description := self soilSerializeBehaviorDescription: anObject with: serializer.
-	
+
 	description instVarNames do: [:ivarName | (anObject instVarNamed: ivarName) soilSerialize: serializer ]
 ]
 
