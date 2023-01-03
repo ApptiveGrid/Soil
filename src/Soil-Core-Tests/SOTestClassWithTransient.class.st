@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'one',
-		'two'
+		'two',
+		'three'
 	],
 	#category : #'Soil-Core-Tests'
 }
@@ -24,6 +25,18 @@ SOTestClassWithTransient >> one [
 SOTestClassWithTransient >> one: anObject [
 
 	one := anObject
+]
+
+{ #category : #accessing }
+SOTestClassWithTransient >> three [
+
+	^ three
+]
+
+{ #category : #accessing }
+SOTestClassWithTransient >> three: anObject [
+
+	three := anObject
 ]
 
 { #category : #accessing }
