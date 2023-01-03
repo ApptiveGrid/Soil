@@ -1,3 +1,6 @@
+"
+Example class where one ivar is tagged as transient, see class side method #soilTransientInstVars
+"
 Class {
 	#name : #SOTestClassWithTransient,
 	#superclass : #Object,
