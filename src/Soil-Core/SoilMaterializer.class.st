@@ -4,16 +4,9 @@ Class {
 	#category : #'Soil-Core-Serialization'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SoilMaterializer class >> materializeFromBytes: aByteArray [
-	^ (self on: aByteArray readStream)
-		materialize
-]
-
-{ #category : #'as yet unclassified' }
-SoilMaterializer class >> on: aReadStream [
-	^ self new 
-		stream: aReadStream 
+	^ self new materializeFromBytes: aByteArray
 ]
 
 { #category : #'reading - basic' }

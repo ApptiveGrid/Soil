@@ -7,18 +7,10 @@ Class {
 	#category : #'Soil-Core-Serialization'
 }
 
-{ #category : #'instance creation' }
-SoilSerializer class >> on: aStream [ 
-	^ self new 
-		stream: aStream 
-]
-
 { #category : #public }
-SoilSerializer class >> serializeToBytes: anObject [ 
+SoilSerializer class >> serializeToBytes: anObject [
 
-	^ (self on: ByteArray new writeStream) 
-		serialize: anObject
-
+	^ self new serializeToBytes: anObject
 ]
 
 { #category : #'writing - basic' }

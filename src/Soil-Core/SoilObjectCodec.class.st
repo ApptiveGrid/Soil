@@ -1,3 +1,6 @@
+"
+Abstract superclass for Serializer and Materializer
+"
 Class {
 	#name : #SoilObjectCodec,
 	#superclass : #Object,
@@ -36,6 +39,18 @@ SoilObjectCodec class >> decodeBytes: aByteArray [
 { #category : #convenience }
 SoilObjectCodec class >> encodeString: aString [ 
 	^ CharacterEncoder encodeString: aString
+]
+
+{ #category : #testing }
+SoilObjectCodec class >> isAbstract [
+
+	^ self == SoilObjectCodec
+]
+
+{ #category : #'instance creation' }
+SoilObjectCodec class >> on: aStream [
+	^ self new
+		stream: aStream
 ]
 
 { #category : #accessing }
