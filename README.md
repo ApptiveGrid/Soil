@@ -15,15 +15,11 @@ Metacello new
 	load.
 ```
 
+Soil is still in very early ramp up stage but we are working towards a milestone that can be used for very simple stuff. The up-to-date list of milestones you can find in [milstones](/milestones)
 
-Here is the plan that grows faster than we can finish things:
+A list of past milestones: 
 
-- [ ] combining skiplist, object factory and serialization
-- [ ] approach for manage class shape changes 
-- [ ] a skiplist implementation for a first indexing structure
-- [ ] storing classes/object factories in an index structure so they can be looked up by name
-- [ ] management of classes/object factories. We want not only classes to be able to create instances
-- [x] transparent proxies for inter-cluster connections (makes the whole graph traversable)
-- [x] Adressing a cluster per objectId
-- [x] Serialization of a cluster
-- [x] Basic support for splitting an arbitrary object graph into clusters
+- [ ] M2 manage behavior versions so that we can change classes between writing and reading the graph 
+- [ ] M1 basic support for splitting and storing an arbitrary object graph (not all object classes but including clean blocks)
+
+If you want to watch more closely what we are at have a look at the [project board](/projects/2)
