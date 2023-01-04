@@ -15,11 +15,11 @@ Metacello new
 	load.
 ```
 
-Soil is still in very early ramp up stage but we are working towards a milestone that can be used for very simple stuff. The up-to-date list of milestones you can find in [milstones](/milestones)
+Soil is still in very early ramp up stage but we are working towards a milestone that can be used for very simple stuff. The up-to-date list of milestones you can find in [milestones](https://github.com/ApptiveGrid/Soil/milestones)
 
 A list of past milestones: 
 
 - [ ] M2 manage behavior versions so that we can change classes between writing and reading the graph 
 - [ ] M1 basic support for splitting and storing an arbitrary object graph (not all object classes but including clean blocks)
 
-If you want to watch more closely what we are at have a look at the [project board](/projects/2)
+If you want to watch more closely what we are at have a look at the [project board](https://github.com/orgs/ApptiveGrid/projects/2)
