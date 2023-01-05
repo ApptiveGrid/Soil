@@ -15,8 +15,9 @@ Metacello new
 	load.
 ```
 
-Soil is still in very early ramp up stage but we are working towards a milestone that can be used for very simple stuff. The up-to-date list of milestones you can find in [milestones](https://github.com/ApptiveGrid/Soil/milestones)
+Soil is still in very early ramp up stage but we are working towards a milestone that can be used for very simple stuff. The up-to-date list of milestones you can find in [milestones](https://github.com/ApptiveGrid/Soil/milestones).
 
+*caution* Soil is a moving target and milestones are a way for us to focus. Nothing of this is considered stable, formats and structure will change. Do not expect to be able to load back data from an older version. If you need something reliable wait for a release
 A list of past milestones: 
 
 - [ ] M2 manage behavior versions so that we can change classes between writing and reading the graph 
