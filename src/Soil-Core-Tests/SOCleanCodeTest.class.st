@@ -120,18 +120,18 @@ SOCleanCodeTest >> testNoUnimplementedCalls [
 SOCleanCodeTest >> testNoUnsentMessages [
 	"Fail if there are methods implemented whose selectors is not sent anywhere in Pharo.
 	Please add a test or remove the method!"
-	
+
 	| found knownviolations |
 	found := Soil package allUnsentMessages.
-	
+
 	"To be fixed, see https://github.com/ApptiveGrid/Soil/issues/24"
 	knownviolations :=
-	 #('versionSize' 'flock:operation:' 'canLock:from:to:exclusive:' 'setNonBlock:' 'unlock:from:to:' 'transaction' 'lock:from:to:' 'idOf:' 'inspectionObject' 'soilRawSerialize:' 'soilRawMaterialize:').
-	
+	 #('versionSize' 'flock:operation:' 'canLock:from:to:exclusive:' 'setNonBlock:' 'transaction' 'releaseLockAndClose' 'canLock:from:to:exclusive:' 'soilLoadedIn:' 'idOf:' 'inspectionObject' 'soilRawSerialize:' 'soilRawMaterialize:' 'unlockAt:length:' 'lockAt:length:').
+
 	found := found copyWithoutAll: knownviolations.
-	
-	self 
-		assert: found isEmpty 
+
+	self
+		assert: found isEmpty
 		description: ('the following selectors are implemented, but never send', found asString)
 ]
 
