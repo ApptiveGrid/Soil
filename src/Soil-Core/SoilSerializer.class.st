@@ -347,8 +347,8 @@ SoilSerializer >> notSupportedError: anObject [
 ]
 
 { #category : #public }
-SoilSerializer >> referenceIndexOf: aSOClassDescription [ 
-	^ externalObjectRegistry indexOfExternalReference: aSOClassDescription 
+SoilSerializer >> referenceIndexOf: aSOClassDescription [
+	^ externalObjectRegistry indexOfExternalReference: aSOClassDescription
 ]
 
 { #category : #registry }

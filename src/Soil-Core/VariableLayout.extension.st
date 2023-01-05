@@ -16,10 +16,10 @@ VariableLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer 
 { #category : #'*Soil-Core' }
 VariableLayout >> soilBasicSerialize: anObject with: serializer [
 	| description basicSize|
-	
+
 	description := self soilSerializeBehaviorDescription: anObject with: serializer.
 	basicSize := anObject basicSize.
-	
+
 	serializer nextPutLengthEncodedInteger: basicSize.
 	description instVarNames do: [:ivarName | (anObject instVarNamed: ivarName) soilSerialize: serializer ].
 	1 to: basicSize do: [:i | (anObject basicAt: i) soilSerialize: serializer ]
