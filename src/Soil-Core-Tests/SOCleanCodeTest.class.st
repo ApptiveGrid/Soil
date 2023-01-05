@@ -142,8 +142,7 @@ SOCleanCodeTest >> testNoUnusedClasses [
 	| found  knownviolations |
 	found := Soil package definedClasses reject: [ :class | class isUsed]. 
 	
-	"To be fixed"
-	knownviolations := #(SOFLock SOBSDFLock).
+	knownviolations := #().
 	found := found reject: [:class | knownviolations includes: class name  ].
 	
 	self 

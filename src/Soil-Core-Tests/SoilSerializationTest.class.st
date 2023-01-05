@@ -218,11 +218,12 @@ SoilSerializationTest >> testSerializationObjectTwice [
 SoilSerializationTest >> testSerializationObjectWithTransient [
 	| object serialized materialized |
 	object := SOTestClassWithTransient new.
-	object one: 1; two: 2.
+	object one: 1; two: 2; three: 3.
 	serialized := self serializeToBytes: object.
 	materialized := self materializeFromBytes: serialized.
 	self assert: materialized one equals: 1.
-	self assert: materialized two isNil
+	self assert: materialized two isNil.
+	self assert: materialized three equals: 3
 ]
 
 { #category : #'tests-hashed' }
