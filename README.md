@@ -21,7 +21,7 @@ Soil is still in very early ramp up stage but we are working towards a milestone
 
 A list of past milestones: 
 
-- [ ] M2 manage behavior versions so that we can change classes between writing and reading the graph 
-- [x] M1 basic support for splitting and storing an arbitrary object graph (not all object classes but including clean blocks)
+- [ ] manage behavior versions so that we can change classes between writing and reading the graph 
+- [x] basic support for splitting and storing an arbitrary object graph (not all object classes but including clean blocks)
 
 If you want to watch more closely what we are at have a look at the [project board](https://github.com/orgs/ApptiveGrid/projects/2)
