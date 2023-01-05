@@ -7,6 +7,11 @@ Object >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Core' }
+Object >> soilLoadedIn: aTransaction [ 
+
+]
+
+{ #category : #'*Soil-Core' }
 Object >> soilMaterialize: materializer [
 	^ self
 ]
