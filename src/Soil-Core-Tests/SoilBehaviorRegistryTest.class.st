@@ -29,3 +29,9 @@ SoilBehaviorRegistryTest >> testRegisterNewClass [
 	self assert: (registry nameAt: #Object ifAbsent: nil) equals: (SOObjectId example).
 
 ]
+
+{ #category : #tests }
+SoilBehaviorRegistryTest >> testSOBehaviorDescription [
+	"SOBehaviorDescription (the class) itself is always there with index 2"
+	self assert: (registry nameAt: #SOBehaviorDescription ifAbsent: nil) index equals: 2
+]
