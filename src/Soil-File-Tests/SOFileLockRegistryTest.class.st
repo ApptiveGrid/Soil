@@ -128,3 +128,45 @@ SOFileLockRegistryTest >> testTwoRegistries [
 	registry2 := SOFileLockRegistry forPath: '/tmp/bar'.
 	self deny: registry == registry2
 ]
+
+{ #category : #tests }
+SOFileLockRegistryTest >> testUnlockDifferentContext [
+	| registry pOne pTwo |
+	pOne := Object new.
+	pTwo := Object new.
+	registry := SOFileLockRegistry forPath: '/tmp/foo'.
+	registry lockFrom: 100 to: 1000 for: pOne.
+	self assert: registry numberOfLocks equals: 1.
+	"locking from the same context should always work"
+	self 
+		should: [ registry unlockFrom: 100 to: 1001 for: pTwo ]
+		raise: SOLockNotFound.
+
+]
+
+{ #category : #tests }
+SOFileLockRegistryTest >> testUnlockInvalidRange [
+	| registry pOne |
+	pOne := Object new.
+	registry := SOFileLockRegistry forPath: '/tmp/foo'.
+	registry lockFrom: 100 to: 1000 for: pOne.
+	self assert: registry numberOfLocks equals: 1.
+	"locking from the same context should always work"
+	self 
+		should: [ registry unlockFrom: 100 to: 1001 for: pOne ]
+		raise: SOLockNotFound.
+
+]
+
+{ #category : #tests }
+SOFileLockRegistryTest >> testUnlockRangeSameContext [
+	| registry pOne |
+	pOne := Object new.
+	registry := SOFileLockRegistry forPath: '/tmp/foo'.
+	registry lockFrom: 100 to: 1000 for: pOne.
+	self assert: registry numberOfLocks equals: 1.
+	"locking from the same context should always work"
+	registry unlockFrom: 100 to: 1000 for: pOne.
+	self assert: registry numberOfLocks equals: 0.
+
+]

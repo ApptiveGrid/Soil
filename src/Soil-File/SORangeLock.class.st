@@ -48,6 +48,11 @@ SORangeLock >> intersectsFrom: otherFrom to: otherTo [
 	^ true
 ]
 
+{ #category : #testing }
+SORangeLock >> isFrom: aFrom to: aTo for: contextObject [ 
+	^ (from = aFrom)& (to = aTo) & (context = contextObject)
+]
+
 { #category : #printing }
 SORangeLock >> printOn: aStream [ 
 	aStream << 'lock range ' << from asString << ' - ' << to asString << ' by '.

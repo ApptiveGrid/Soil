@@ -2,7 +2,8 @@ Class {
 	#name : #SOFileLockRegistry,
 	#superclass : #Object,
 	#instVars : [
-		'locks'
+		'locks',
+		'semaphore'
 	],
 	#classInstVars : [
 		'registries',
@@ -38,22 +39,34 @@ SOFileLockRegistry class >> reset [
 { #category : #initialization }
 SOFileLockRegistry >> initialize [ 
 	super initialize.
-	locks := OrderedCollection new
+	locks := OrderedCollection new.
+	semaphore := Semaphore forMutualExclusion
 ]
 
 { #category : #accessing }
 SOFileLockRegistry >> lockFrom: from to: to for: currentLockingObject [ 
-	locks 
-		detect: [:lock | lock conflictsFrom: from to: to context: currentLockingObject ]
-		ifFound: [:lock | SOAlreadyLocked signal: 'already locked: ', lock asString  ].
-	^ locks 
-		add: (SORangeLock new 
-			from: from;
-			to: to;
-			context: currentLockingObject)
+	^ semaphore critical: [  
+		locks 
+			detect: [:lock | lock conflictsFrom: from to: to context: currentLockingObject ]
+			ifFound: [:lock | SOAlreadyLocked signal: 'already locked: ', lock asString  ].
+		locks 
+			add: (SORangeLock new 
+				from: from;
+				to: to;
+				context: currentLockingObject) ]
 ]
 
 { #category : #accessing }
 SOFileLockRegistry >> numberOfLocks [
 	^ locks size
+]
+
+{ #category : #'as yet unclassified' }
+SOFileLockRegistry >> unlockFrom: from to: to for: contextObject [ 
+	| lock |
+	^ semaphore critical: [  
+		lock := locks 
+			detect: [ :each | each isFrom: from to: to for: contextObject ]
+			ifNone: [ SOLockNotFound signal: 'cannot find lock from ', from asString, ' to ', to asString , ' for ', contextObject asString ].
+		locks remove: lock ]
 ]
