@@ -1,5 +1,5 @@
 Class {
-	#name : #SOFLock,
+	#name : #SOUnixFileLock,
 	#superclass : #FFIStructure,
 	#classVars : [
 		'F_GETFL',
@@ -26,7 +26,7 @@ Class {
 }
 
 { #category : #testing }
-SOFLock class >> canLock: fileHandle from: start to: length exclusive: exclusive [
+SOUnixFileLock class >> canLock: fileHandle from: start to: length exclusive: exclusive [
 	| lock result |
 	
 	lock := self newLockExclusive: exclusive start: start length: length.
@@ -40,7 +40,7 @@ SOFLock class >> canLock: fileHandle from: start to: length exclusive: exclusive
 ]
 
 { #category : #private }
-SOFLock class >> fcntl: fd command: cmd struct: struct [
+SOUnixFileLock class >> fcntl: fd command: cmd struct: struct [
 
 	^ self 
 		ffiCall: #(int fcntl(int fd, int cmd, FLock *struct))
@@ -49,7 +49,7 @@ SOFLock class >> fcntl: fd command: cmd struct: struct [
 ]
 
 { #category : #private }
-SOFLock class >> fcntl: fd command: cmd value: value [
+SOUnixFileLock class >> fcntl: fd command: cmd value: value [
 
 	^ self 
 		ffiCall: #(int fcntl(int fd, int cmd, int value))
@@ -58,7 +58,7 @@ SOFLock class >> fcntl: fd command: cmd value: value [
 ]
 
 { #category : #'field definition' }
-SOFLock class >> fieldsDesc [
+SOUnixFileLock class >> fieldsDesc [
 	"self rebuildFieldAccessors"
 
 	^ #(
@@ -71,7 +71,7 @@ SOFLock class >> fieldsDesc [
 ]
 
 { #category : #private }
-SOFLock class >> fileno: stream [
+SOUnixFileLock class >> fileno: stream [
 
 	^ self 
 		ffiCall: #(int fileno("FILE *"void *stream))
@@ -79,7 +79,7 @@ SOFLock class >> fileno: stream [
 ]
 
 { #category : #private }
-SOFLock class >> flock: fd operation: operation [
+SOUnixFileLock class >> flock: fd operation: operation [
 
 	^ self 
 		ffiCall: #(int flock(int fd, int operation))
@@ -87,13 +87,13 @@ SOFLock class >> flock: fd operation: operation [
 ]
 
 { #category : #private }
-SOFLock class >> getpid [
+SOUnixFileLock class >> getpid [
 
 	^ self ffiCall: #(__pid_t getpid()) module: LibC
 ]
 
 { #category : #'class initialization' }
-SOFLock class >> initialize [
+SOUnixFileLock class >> initialize [
 
 	__off64_t := FFIUInt64.
 	__pid_t := FFIUInt32.
@@ -117,7 +117,7 @@ SOFLock class >> initialize [
 ]
 
 { #category : #'accessing locking' }
-SOFLock class >> lock: fileHandle from: start to: length [
+SOUnixFileLock class >> lock: fileHandle from: start to: length [
 	
 	^ self 
 		lock: fileHandle 
@@ -127,7 +127,7 @@ SOFLock class >> lock: fileHandle from: start to: length [
 ]
 
 { #category : #'accessing locking' }
-SOFLock class >> lock: fileHandle from: start to: length exclusive: exclusive [
+SOUnixFileLock class >> lock: fileHandle from: start to: length exclusive: exclusive [
 	| lock result |
 	
 	lock := self newLockExclusive: exclusive start: start length: length.
@@ -140,7 +140,7 @@ SOFLock class >> lock: fileHandle from: start to: length exclusive: exclusive [
 ]
 
 { #category : #'instance creation' }
-SOFLock class >> newLockExclusive: exclusive start: start length: length [
+SOUnixFileLock class >> newLockExclusive: exclusive start: start length: length [
 	
 	^ self 
 		newType: (exclusive ifTrue: [ F_WRLCK ] ifFalse: [ F_RDLCK ])
@@ -149,7 +149,7 @@ SOFLock class >> newLockExclusive: exclusive start: start length: length [
 ]
 
 { #category : #'instance creation' }
-SOFLock class >> newType: type start: start length: length [
+SOUnixFileLock class >> newType: type start: start length: length [
 	
 	^ self new 
 		l_type: type;
@@ -161,7 +161,7 @@ SOFLock class >> newType: type start: start length: length [
 ]
 
 { #category : #'instance creation' }
-SOFLock class >> newUnlockStart: start length: length [
+SOUnixFileLock class >> newUnlockStart: start length: length [
 	
 	^ self 
 		newType: F_UNLCK
@@ -170,7 +170,7 @@ SOFLock class >> newUnlockStart: start length: length [
 ]
 
 { #category : #accessing }
-SOFLock class >> setNonBlock: fileHandle [
+SOUnixFileLock class >> setNonBlock: fileHandle [
 	| fd flags |
 	
 	fd := self fileno: fileHandle.
@@ -180,7 +180,7 @@ SOFLock class >> setNonBlock: fileHandle [
 ]
 
 { #category : #'accessing locking' }
-SOFLock class >> unlock: fileHandle from: start to: length [
+SOUnixFileLock class >> unlock: fileHandle from: start to: length [
 	| lock result |
 	
 	lock := self newUnlockStart: start length: length.
@@ -193,67 +193,67 @@ SOFLock class >> unlock: fileHandle from: start to: length [
 ]
 
 { #category : #'accessing structure variables' }
-SOFLock >> l_len [
+SOUnixFileLock >> l_len [
 	"This method was automatically generated"
 	^handle unsignedLongLongAt: OFFSET_L_LEN
 ]
 
 { #category : #'accessing structure variables' }
-SOFLock >> l_len: anObject [
+SOUnixFileLock >> l_len: anObject [
 	"This method was automatically generated"
 	handle unsignedLongLongAt: OFFSET_L_LEN put: anObject
 ]
 
 { #category : #'accessing structure variables' }
-SOFLock >> l_pid [
+SOUnixFileLock >> l_pid [
 	"This method was automatically generated"
 	^handle unsignedLongAt: OFFSET_L_PID
 ]
 
 { #category : #'accessing structure variables' }
-SOFLock >> l_pid: anObject [
+SOUnixFileLock >> l_pid: anObject [
 	"This method was automatically generated"
 	handle unsignedLongAt: OFFSET_L_PID put: anObject
 ]
 
 { #category : #'accessing structure variables' }
-SOFLock >> l_start [
+SOUnixFileLock >> l_start [
 	"This method was automatically generated"
 	^handle unsignedLongLongAt: OFFSET_L_START
 ]
 
 { #category : #'accessing structure variables' }
-SOFLock >> l_start: anObject [
+SOUnixFileLock >> l_start: anObject [
 	"This method was automatically generated"
 	handle unsignedLongLongAt: OFFSET_L_START put: anObject
 ]
 
 { #category : #'accessing structure variables' }
-SOFLock >> l_type [
+SOUnixFileLock >> l_type [
 	"This method was automatically generated"
 	^handle signedShortAt: OFFSET_L_TYPE
 ]
 
 { #category : #'accessing structure variables' }
-SOFLock >> l_type: anObject [
+SOUnixFileLock >> l_type: anObject [
 	"This method was automatically generated"
 	handle signedShortAt: OFFSET_L_TYPE put: anObject
 ]
 
 { #category : #'accessing structure variables' }
-SOFLock >> l_whence [
+SOUnixFileLock >> l_whence [
 	"This method was automatically generated"
 	^handle signedShortAt: OFFSET_L_WHENCE
 ]
 
 { #category : #'accessing structure variables' }
-SOFLock >> l_whence: anObject [
+SOUnixFileLock >> l_whence: anObject [
 	"This method was automatically generated"
 	handle signedShortAt: OFFSET_L_WHENCE put: anObject
 ]
 
 { #category : #printing }
-SOFLock >> printOn: aStream [ 
+SOUnixFileLock >> printOn: aStream [ 
 	"Append to the argument, aStream, the names and values of all the record's variables."
 
 	aStream nextPutAll: self class name; nextPutAll: ' ( '; cr.
