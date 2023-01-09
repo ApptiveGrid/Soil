@@ -44,9 +44,7 @@ SOFileLockRegistry >> initialize [
 { #category : #accessing }
 SOFileLockRegistry >> lockFrom: from to: to for: currentLockingObject [ 
 	locks 
-		detect: [:each | 
-			(each intersectsFrom: from to: to) and: [ 
-				(each context == currentLockingObject) not ] ]
+		detect: [:lock | lock conflictsFrom: from to: to context: currentLockingObject ]
 		ifFound: [:lock | SOAlreadyLocked signal: 'already locked: ', lock asString  ].
 	^ locks 
 		add: (SORangeLock new 

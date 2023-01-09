@@ -9,6 +9,12 @@ Class {
 	#category : #'Soil-File'
 }
 
+{ #category : #'as yet unclassified' }
+SORangeLock >> conflictsFrom: aFrom to: aTo context: contextObject [ 
+	"conflicts if ranges overlap but only for different contexts"
+	^ (self intersectsFrom: from to: to) &  (context ~~ contextObject)
+]
+
 { #category : #accessing }
 SORangeLock >> context [
 
