@@ -1,17 +1,17 @@
 Extension { #name : #BinaryFileStream }
 
-{ #category : #'*Soil-Core' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> fileHandle [
 
 	^ handle pointerAt: 9
 ]
 
-{ #category : #'*Soil-Core' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> flockClass [
 	^ OSPlatform current flockClass
 ]
 
-{ #category : #'*Soil-Core' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> lockAt: position length: length [
 	^ self flockClass
 		lock: self fileHandle
@@ -19,7 +19,7 @@ BinaryFileStream >> lockAt: position length: length [
 		to: position + length - 1
 ]
 
-{ #category : #'*Soil-Core' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> releaseLockAndClose [
 	"Close file associatied with receiver."
 
@@ -28,7 +28,7 @@ BinaryFileStream >> releaseLockAndClose [
 		ifFalse: [ self close ]
 ]
 
-{ #category : #'*Soil-Core' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> unlock [
 	^ self flockClass
 		unlock: self fileHandle
@@ -36,7 +36,7 @@ BinaryFileStream >> unlock [
 		to: self size
 ]
 
-{ #category : #'*Soil-Core' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> unlockAt: position length: length [
 
 	^ self flockClass

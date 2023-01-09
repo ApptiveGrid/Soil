@@ -1,6 +1,6 @@
 Extension { #name : #UnixPlatform }
 
-{ #category : #'*Soil-Core' }
+{ #category : #'*Soil-File' }
 UnixPlatform >> flockClass [
 	^ SOFLock
 ]

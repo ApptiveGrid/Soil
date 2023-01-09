@@ -22,7 +22,7 @@ Class {
 		'__off64_t',
 		'__pid_t'
 	],
-	#category : #'Soil-Core-File Locking'
+	#category : #'Soil-File'
 }
 
 { #category : #testing }
