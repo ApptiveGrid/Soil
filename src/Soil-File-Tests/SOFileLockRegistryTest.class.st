@@ -32,18 +32,18 @@ SOFileLockRegistryTest >> testAcquireRegistry [
 
 { #category : #tests }
 SOFileLockRegistryTest >> testCanonicalizePaths [
-	| registry |
+	| registry registry2 |
 	registry := SOFileLockRegistry forPath: '/tmp/foo'.
-	registry := SOFileLockRegistry forPath: '/tmp/../tmp/foo'.
-	self assert: registry == registry
+	registry2 := SOFileLockRegistry forPath: '/tmp/../tmp/foo'.
+	self assert: registry == registry2
 ]
 
 { #category : #tests }
 SOFileLockRegistryTest >> testCanonicalizePathsTrailingSlash [
-	| registry |
+	| registry registry2 |
 	registry := SOFileLockRegistry forPath: '/tmp/foo'.
-	registry := SOFileLockRegistry forPath: '/tmp/foo/'.
-	self assert: registry == registry
+	registry2 := SOFileLockRegistry forPath: '/tmp/foo/'.
+	self assert: registry == registry2
 ]
 
 { #category : #tests }
@@ -119,4 +119,12 @@ SOFileLockRegistryTest >> testLockSameRangeTwoProcesses [
 	self deny: pOneFailed.
 	self assert: pTwoFailed.
 	
+]
+
+{ #category : #tests }
+SOFileLockRegistryTest >> testTwoRegistries [
+	| registry registry2 |
+	registry := SOFileLockRegistry forPath: '/tmp/foo'.
+	registry2 := SOFileLockRegistry forPath: '/tmp/bar'.
+	self deny: registry == registry2
 ]
