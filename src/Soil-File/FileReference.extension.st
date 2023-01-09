@@ -1,6 +1,6 @@
 Extension { #name : #FileReference }
 
-{ #category : #'*Soil-Core' }
+{ #category : #'*Soil-File' }
 FileReference >> binaryReadWriteStream [
 	"Answer a buffered binary write stream on the receiver"
 

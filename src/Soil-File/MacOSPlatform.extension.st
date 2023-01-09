@@ -1,6 +1,6 @@
 Extension { #name : #MacOSPlatform }
 
-{ #category : #'*Soil-Core' }
+{ #category : #'*Soil-File' }
 MacOSPlatform >> flockClass [
-	^ SOBSDFLock
+	^ SOMacOsFileLock
 ]
