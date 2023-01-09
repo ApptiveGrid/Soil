@@ -26,6 +26,12 @@ SOBehaviorDescription class >> meta [
 	^ self for: self
 ]
 
+{ #category : #combining }
+SOBehaviorDescription class >> metaId [
+	"the id of the class is alway 2 and pre-initialized to break recursion"
+	^ SOObjectId segment: 1 index: 2
+]
+
 { #category : #'as yet unclassified' }
 SOBehaviorDescription class >> soilTransientInstVars [ 
 	^ #( objectId ) 

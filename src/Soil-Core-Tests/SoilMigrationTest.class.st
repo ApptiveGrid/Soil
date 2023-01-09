@@ -134,6 +134,31 @@ SoilMigrationTest >> testMaterializingObjectWithIvarRemoved2 [
 ]
 
 { #category : #tests }
+SoilMigrationTest >> testMaterializingObjectWithIvarRemovedThenCommit [
+	"We can load an object that was saved with two ivars even if the current class has just one"
+	| tx tx2 materializedRoot object |
+	object := migrationClass new.
+	object
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2.
+	tx := soil newTransaction.
+	tx root: object.
+	tx commit.
+	migrationClass
+		removeSlot: (migrationClass slotNamed: #two).
+
+	"lets try to commit with the class changed"
+	tx := soil newTransaction.
+	tx root: object.
+	tx commit.
+
+	tx2 := soil newTransaction.
+	materializedRoot := tx2 root.
+	self assert: materializedRoot class instVarNames size equals: 1.
+	self assert: (materializedRoot instVarNamed: #one) equals: 1
+]
+
+{ #category : #tests }
 SoilMigrationTest >> testMaterializingObjectWithReOrderedIvars [
 	| tx tx2 materializedRoot object |
 	

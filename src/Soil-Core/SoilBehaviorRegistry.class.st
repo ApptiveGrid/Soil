@@ -11,9 +11,9 @@ Class {
 
 { #category : #adding }
 SoilBehaviorRegistry >> addSpecialObjects [
-	self 
-		nameAt: SOBehaviorDescription name 
-		put: (SOObjectId segment: 1 index: 2)
+	self
+		nameAt: #SOBehaviorDescription
+		put: SOBehaviorDescription metaId
 ]
 
 { #category : #'as yet unclassified' }

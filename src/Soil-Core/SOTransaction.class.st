@@ -45,32 +45,34 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 { #category : #public }
 SOTransaction >> behaviorDescriptionFor: aClass [
 	| classDescription id |
-	classDescriptions 
-		at: aClass soilBehaviorIdentifier 
+	classDescriptions
+		at: aClass soilBehaviorIdentifier
 		ifPresent: [ :description | ^ description ].
-	soil behaviorRegistry 
-		nameAt: aClass soilBehaviorIdentifier 
+	soil behaviorRegistry
+		nameAt: aClass soilBehaviorIdentifier
 		ifPresent: [ :oid | | desc |
-			desc := (oid index = 2) 
-				ifTrue: [(SOBehaviorDescription for: SOBehaviorDescription) objectId: oid ]
-				ifFalse: [ (self objectWithId: oid ifNone: [Error signal ]) objectId: oid; yourself ].
+			desc := (oid index = 2)
+				ifTrue: [SOBehaviorDescription meta objectId: oid ]
+				ifFalse: [ | foundDesc |
+					 "the description in the database might not be current, if not, we create a new one with the same ID"
+					 foundDesc := (self objectWithId: oid ifNone: [Error signal ]) objectId: oid; yourself.
+					 foundDesc isCurrent ifFalse: [ (SOBehaviorDescription for: aClass) objectId: oid ] ifTrue: [foundDesc]].
 			^ desc ].
-	(aClass = SOBehaviorDescription) ifTrue: [  self halt ].
-	classDescription := (SOBehaviorDescription for: aClass).
+
+	classDescription := SOBehaviorDescription for: aClass.
 	id := self newObjectId.
 	id initializeId: soil objectRepository.
 	classDescription objectId: id.
 	self atObjectId: id putObject: classDescription.
 	classDescriptions
-		at: aClass soilBehaviorIdentifier 
+		at: aClass soilBehaviorIdentifier
 		put: classDescription.
-	^ classDescription 
-	
+	^ classDescription
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> behaviorDescriptionWithId: aSOObjectId ifNone: aBlock [ 
-	(aSOObjectId index = 2) ifTrue: [ ^ SOBehaviorDescription for: SOBehaviorDescription ].
+SOTransaction >> behaviorDescriptionWithId: aSOObjectId ifNone: aBlock [
+	(aSOObjectId index = 2) ifTrue: [ ^ SOBehaviorDescription meta ].
 	^ self objectWithId: aSOObjectId ifNone: aBlock
 ]
 
