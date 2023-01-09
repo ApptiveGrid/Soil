@@ -31,6 +31,22 @@ SOFileLockRegistryTest >> testAcquireRegistry [
 ]
 
 { #category : #tests }
+SOFileLockRegistryTest >> testCanonicalizePaths [
+	| registry |
+	registry := SOFileLockRegistry forPath: '/tmp/foo'.
+	registry := SOFileLockRegistry forPath: '/tmp/../tmp/foo'.
+	self assert: registry == registry
+]
+
+{ #category : #tests }
+SOFileLockRegistryTest >> testCanonicalizePathsTrailingSlash [
+	| registry |
+	registry := SOFileLockRegistry forPath: '/tmp/foo'.
+	registry := SOFileLockRegistry forPath: '/tmp/foo/'.
+	self assert: registry == registry
+]
+
+{ #category : #tests }
 SOFileLockRegistryTest >> testLockBorderOverlapLowerBound [
 	| registry pOne pTwo |
 	pOne := Object new.

@@ -15,7 +15,7 @@ Class {
 SOFileLockRegistry class >> forPath: aString [ 
 	^ accessSemaphore critical: [ 
 		registries 
-			at: aString 
+			at: aString asPath canonicalize
 			ifAbsentPut: [ self new ] ]
 ]
 
