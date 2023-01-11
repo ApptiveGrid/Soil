@@ -66,6 +66,11 @@ SOLockableStream >> next: anInteger [
 ]
 
 { #category : #writing }
+SOLockableStream >> nextPut: anInteger [ 
+	fileStream nextPut: anInteger
+]
+
+{ #category : #writing }
 SOLockableStream >> nextPutAll: aString [ 
 	fileStream nextPutAll: aString 
 ]
