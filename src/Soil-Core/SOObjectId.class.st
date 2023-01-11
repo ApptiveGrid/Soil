@@ -59,7 +59,7 @@ SOObjectId >> initialize [
 ]
 
 { #category : #initialization }
-SOObjectId >> initializeId: objectRepository [ 
+SOObjectId >> initializeIndex: objectRepository [ 
 	(index = 0) ifFalse: [ ^ self ].
 	index := (objectRepository segmentAt: segment) allocateNextIndex 
 ]

@@ -28,7 +28,7 @@ SOClusterRecord >> addReference: reference [
 { #category : #'as yet unclassified' }
 SOClusterRecord >> assignObjectIds: aSOObjectRepository [ 
 	references do: [ :reference |
-		reference initializeId: aSOObjectRepository ]
+		reference initializeIndex: aSOObjectRepository ]
 ]
 
 { #category : #accessing }
