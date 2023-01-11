@@ -76,6 +76,11 @@ SOLockableStream >> nextPutAll: aString [
 ]
 
 { #category : #positioning }
+SOLockableStream >> position [
+	^ fileStream position
+]
+
+{ #category : #positioning }
 SOLockableStream >> position: anInteger [ 
 	fileStream position: anInteger 
 ]
