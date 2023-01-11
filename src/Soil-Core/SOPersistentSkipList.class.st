@@ -277,7 +277,7 @@ SOPersistentSkipList >> rightOf: aNode atLevel: anInteger [
 { #category : #initialization }
 SOPersistentSkipList >> stream [ 
 	^ stream ifNil: [
-		stream := path binaryReadWriteStream ]
+		stream := SOLockableStream path: path ]
 ]
 
 { #category : #writing }
