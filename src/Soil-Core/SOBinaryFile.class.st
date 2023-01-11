@@ -62,7 +62,7 @@ SOBinaryFile >> initializeStart [
 
 { #category : #accessing }
 SOBinaryFile >> open [
-	stream := File openForWriteFileNamed:  self path pathString 
+	stream := SOLockableStream path: self path
 ]
 
 { #category : #utilities }
@@ -83,11 +83,10 @@ SOBinaryFile >> readHeader [
 { #category : #accessing }
 SOBinaryFile >> stream [
 	^ stream ifNil: [ 
-		stream := self path binaryWriteStream ]
+		stream := SOLockableStream path: self path ]
 ]
 
 { #category : #accessing }
 SOBinaryFile >> stream: anObject [
-
 	stream := anObject
 ]

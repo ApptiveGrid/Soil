@@ -16,6 +16,12 @@ SOLockableStream class >> path: aStringOrFileReference [
 		yourself
 ]
 
+{ #category : #'initialize-release' }
+SOLockableStream >> close [
+	fileStream close.
+	self releaseAllLocks 
+]
+
 { #category : #finalization }
 SOLockableStream >> finalize [ 
 	self releaseAllLocks
@@ -54,9 +60,19 @@ SOLockableStream >> memoryUnlockFrom: from to: to for: contextObject [
 	locks remove: (lockRegistry unlockFrom: from to: to for: contextObject)
 ]
 
+{ #category : #reading }
+SOLockableStream >> next: anInteger [ 
+	^ fileStream next: anInteger 
+]
+
 { #category : #writing }
 SOLockableStream >> nextPutAll: aString [ 
 	fileStream nextPutAll: aString 
+]
+
+{ #category : #positioning }
+SOLockableStream >> position: anInteger [ 
+	fileStream position: anInteger 
 ]
 
 { #category : #finalization }
@@ -65,4 +81,9 @@ SOLockableStream >> releaseAllLocks [
 		locks do: [ :lock | 
 			lockRegistry removeLock: lock ].
 		locks := nil ].
+]
+
+{ #category : #accessing }
+SOLockableStream >> size [ 
+	^ fileStream size
 ]
