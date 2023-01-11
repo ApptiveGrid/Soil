@@ -30,6 +30,11 @@ SOFileLockRegistry class >> numberOfRegistries [
 	^ registries size
 ]
 
+{ #category : #accessing }
+SOFileLockRegistry class >> registries [ 
+	^ registries 
+]
+
 { #category : #initialization }
 SOFileLockRegistry class >> reset [ 
 	accessSemaphore := Semaphore forMutualExclusion.
@@ -59,6 +64,11 @@ SOFileLockRegistry >> lockFrom: from to: to for: currentLockingObject [
 { #category : #accessing }
 SOFileLockRegistry >> numberOfLocks [
 	^ locks size
+]
+
+{ #category : #removing }
+SOFileLockRegistry >> removeLock: aSORangeLock [ 
+	locks remove: aSORangeLock 
 ]
 
 { #category : #'as yet unclassified' }
