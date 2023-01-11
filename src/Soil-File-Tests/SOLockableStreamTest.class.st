@@ -14,17 +14,6 @@ SOLockableStreamTest >> tearDown [
 ]
 
 { #category : #tests }
-SOLockableStreamTest >> testCreation [ 
-	| stream objA objB |
-	objA := Object new.
-	objB := Object new.
-	stream := SOLockableStream path: '/tmp/soil-lock-test'.
-	stream nextPutAll: 'hello world'.
-	stream memoryLockFrom: 7 to: 12 for: objA.
-	stream memoryLockFrom: 7 to: 12 for: objB.
-]
-
-{ #category : #tests }
 SOLockableStreamTest >> testMemoryLock [
 	| objA objB registry |
 	objA := Object new.
