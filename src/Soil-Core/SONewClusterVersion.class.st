@@ -94,6 +94,9 @@ SONewClusterVersion >> serializeOn: stream [
 	stream nextPutAll: ((references size) asByteArrayOfSize: 2).
 	
 	references do: [ :ref |
+		"do not write zero index, try to allocate a new index before"
+		(ref index = 0) ifTrue: [ 
+			transaction allocateObjectId: ref ].
 		stream nextPutAll: (ref index asByteArrayOfSize: 8) ].
 	stream 
 		nextPutAll: (bytes size asByteArrayOfSize: 8);

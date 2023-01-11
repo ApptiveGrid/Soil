@@ -30,6 +30,11 @@ SOTransaction >> addClusterObject: anObject [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SOTransaction >> allocateObjectId: aSOObjectId [ 
+	aSOObjectId initializeIndex: self objectRepository 
+]
+
 { #category : #accessing }
 SOTransaction >> atObjectId: objectId putObject: anObject [
 	| record |
@@ -44,7 +49,7 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 
 { #category : #public }
 SOTransaction >> behaviorDescriptionFor: aClass [
-	| classDescription id |
+	| classDescription objectId |
 	classDescriptions
 		at: aClass soilBehaviorIdentifier
 		ifPresent: [ :description | ^ description ].
@@ -60,10 +65,9 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 			^ desc ].
 
 	classDescription := SOBehaviorDescription for: aClass.
-	id := self newObjectId.
-	id initializeId: soil objectRepository.
-	classDescription objectId: id.
-	self atObjectId: id putObject: classDescription.
+	objectId := self newObjectId.
+	classDescription objectId: objectId.
+	self atObjectId: objectId putObject: classDescription.
 	classDescriptions
 		at: aClass soilBehaviorIdentifier
 		put: classDescription.
@@ -96,19 +100,17 @@ SOTransaction >> checkpoint [
 		collect: #asNewClusterVersion) as: OrderedIdentityDictionary .
 	self serializeObjects.
 	recordsToCommit keysAndValuesDo: [ :objectId :record | 
-		objectId initializeId: self objectRepository.
+		objectId initializeIndex: self objectRepository.
 		record assignObjectIds: soil objectRepository.
 		bytes := record serialize.
 		soil objectRepository 
 			at: objectId 
 			put: bytes.
 		record committed  ].
-	classDescriptions do: [ :description | | objectId |
-		objectId := description objectId.
-		objectId initializeId: self objectRepository.
+	classDescriptions do: [ :description |
 		soil behaviorRegistry 
 			nameAt: description value behaviorIdentifier 
-			put: objectId ].
+			put: description objectId ].
 
 ]
 
