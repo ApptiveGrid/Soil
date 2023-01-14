@@ -54,6 +54,11 @@ SOObjectId >> index [
 	^ index
 ]
 
+{ #category : #accessing }
+SOObjectId >> index: anInteger [
+	index := anInteger 
+]
+
 { #category : #initialization }
 SOObjectId >> initialize [ 
 	super initialize.
