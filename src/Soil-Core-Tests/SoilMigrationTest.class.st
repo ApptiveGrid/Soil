@@ -63,13 +63,10 @@ SoilMigrationTest >> testMaterializingObjectFixedLayputFromVariableLayout [
 	tx root: object.
 	tx commit.
 
-	"now we change the class to be a variable class with the same ivars"
+	"now we change the class to be a fixed class with the same ivars"
 	migrationClass := self createMigrationClassFixedLayout.
 	tx2 := soil newTransaction.
-	"
-	Problem: we read as Variable, which would store the length...
 
-	"
 	materializedRoot := tx2 root.
 	self deny: materializedRoot class isVariable.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.
@@ -91,10 +88,7 @@ SoilMigrationTest >> testMaterializingObjectVariableLayputFromFixedLayout [
 	"now we change the class to be a variable class with the same ivars"
 	migrationClass := self createMigrationClassVariableLayout.
 	tx2 := soil newTransaction.
-	"
-	Problem: we read as Variable, which would store the length...
 
-	"
 	materializedRoot := tx2 root.
 	self assert: materializedRoot class isVariable.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.
