@@ -79,6 +79,12 @@ SOObjectId >> segment [
 ]
 
 { #category : #accessing }
+SOObjectId >> segment: anInteger [ 
+	segment := anInteger  
+	
+]
+
+{ #category : #accessing }
 SOObjectId >> segment: segmentNo index: segmentIndex [ 
 	segment := segmentNo.
 	index := segmentIndex 
