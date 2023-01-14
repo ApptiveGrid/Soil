@@ -51,6 +51,56 @@ SoilMigrationTest >> tearDown [
 	super tearDown
 ]
 
+{ #category : #'tests - change classlayout' }
+SoilMigrationTest >> testMaterializingObjectFixedLayputFromVariableLayout [
+	| tx tx2 materializedRoot object |
+	object := self createMigrationClassVariableLayout new.
+	self assert: object class isVariable.
+	object
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2.
+	tx := soil newTransaction.
+	tx root: object.
+	tx commit.
+
+	"now we change the class to be a variable class with the same ivars"
+	migrationClass := self createMigrationClassFixedLayout.
+	tx2 := soil newTransaction.
+	"
+	Problem: we read as Variable, which would store the length...
+
+	"
+	materializedRoot := tx2 root.
+	self deny: materializedRoot class isVariable.
+	self assert: (materializedRoot instVarNamed: #one) equals: 1.
+	self assert: (materializedRoot instVarNamed: #two) equals: 2
+]
+
+{ #category : #'tests - change classlayout' }
+SoilMigrationTest >> testMaterializingObjectVariableLayputFromFixedLayout [
+	| tx tx2 materializedRoot object |
+	object := self createMigrationClassFixedLayout new.
+	self deny: object class isVariable.
+	object
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2.
+	tx := soil newTransaction.
+	tx root: object.
+	tx commit.
+
+	"now we change the class to be a variable class with the same ivars"
+	migrationClass := self createMigrationClassVariableLayout.
+	tx2 := soil newTransaction.
+	"
+	Problem: we read as Variable, which would store the length...
+
+	"
+	materializedRoot := tx2 root.
+	self assert: materializedRoot class isVariable.
+	self assert: (materializedRoot instVarNamed: #one) equals: 1.
+	self assert: (materializedRoot instVarNamed: #two) equals: 2
+]
+
 { #category : #tests }
 SoilMigrationTest >> testMaterializingObjectVariableLayputWithChangedShape [
 	| tx tx2 materializedRoot object |

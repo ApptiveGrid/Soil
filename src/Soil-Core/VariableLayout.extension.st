@@ -4,10 +4,14 @@ Extension { #name : #VariableLayout }
 VariableLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object basicSize |
 
-	object := aBehaviorDescription objectClass basicNew: (basicSize := materializer nextLengthEncodedInteger).
-	
+	"if we read an object that was stored with a fixed layout, there is no size written"
+	basicSize := aBehaviorDescription isFixedLayout
+		ifTrue: [ 0 ]
+		ifFalse: [ materializer nextLengthEncodedInteger ].
+	object := aBehaviorDescription objectClass basicNew: basicSize.
+
 	materializer registerObject: object.
-	
+
 	self updateIvars: aBehaviorDescription with: materializer for: object.
 	1 to: basicSize do: [:i | object basicAt: i put: materializer nextSoilObject ].
 	^object soilMaterialized: materializer
