@@ -15,16 +15,18 @@ SOObjectId class >> example [
 ]
 
 { #category : #'instance creation' }
+SOObjectId class >> readFrom: stream [ 
+	"for now fix the segment id to be the 16 upper bits and the index 
+	be 48 lower bits"
+	^ self new 
+		segment: (stream next: 2) asInteger;
+		index: (stream next: 6) asInteger
+]
+
+{ #category : #'instance creation' }
 SOObjectId class >> segment: segmentId index: index [
 	^ self new 
 		segment: segmentId index: index
-]
-
-{ #category : #'as yet unclassified' }
-SOObjectId class >> soilRawMaterialize: materializer [ 
-	^ self new 
-		segment: materializer nextLengthEncodedInteger
-		index: materializer nextLengthEncodedInteger 
 ]
 
 { #category : #comparing }
@@ -88,9 +90,10 @@ SOObjectId >> setIndex: anInteger [
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectId >> soilRawSerialize: serializer [ 
-	(index = 0) ifTrue: [ Error signal: 'object id not initialized' ].
-	serializer 
-		nextPutLengthEncodedInteger: segment;
-		nextPutLengthEncodedInteger: index
+SOObjectId >> writeOn: aStream [ 
+	"for now fix the segment id to be the 16 upper bits and the index 
+	be 48 lower bits"
+	aStream 
+		nextPutAll: (segment asByteArrayOfSize: 2);
+		nextPutAll: (index asByteArrayOfSize: 6)
 ]

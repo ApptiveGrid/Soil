@@ -3,21 +3,45 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'soil',
+		'metaSegment',
 		'segments'
 	],
 	#category : #'Soil-Core-Model'
 }
 
 { #category : #adding }
-SOObjectRepository >> addNewSegment [
-	| newSegment |
-	newSegment := (SOObjectSegment new 
-			id: self segments size + 1;
-			objectRepository: self) 
-				initializeFilesystem .
-	segments := self segments copyWith: newSegment.
-	^ newSegment
+SOObjectRepository >> addFirstSegment [
+	| segment |
+	segment := SOObjectSegment new id: 1.
+	self addNewSegment: segment.
+	"skip using index 1 because that is the root object"
+	segment allocateNextIndex 
+]
 
+{ #category : #adding }
+SOObjectRepository >> addMetaSegment [
+	^ metaSegment := (SOObjectSegment new id: 0) 
+		objectRepository: self;
+		initializeFilesystem;
+		"skip first index as this is the meta behavior description"
+		allocateNextIndex;
+		yourself
+]
+
+{ #category : #adding }
+SOObjectRepository >> addNewSegment [
+	^ self addNewSegment: (SOObjectSegment new 
+			id: self segments size + 1;
+			objectRepository: self)
+]
+
+{ #category : #adding }
+SOObjectRepository >> addNewSegment: aSegment [
+	aSegment 
+		objectRepository: self;
+		initializeFilesystem.
+	segments add: aSegment.
+	^ aSegment 
 ]
 
 { #category : #'as yet unclassified' }
@@ -50,40 +74,57 @@ SOObjectRepository >> close [
 ]
 
 { #category : #accessing }
-SOObjectRepository >> defaultSegment [
-	^ self segments first 
-]
-
-{ #category : #accessing }
 SOObjectRepository >> firstSegment [
 	^ segments first
 ]
 
 { #category : #initialization }
 SOObjectRepository >> initializeFilesystem [
-	(soil path / #segments) ensureCreateDirectory 
+	(soil path / #segments) ensureCreateDirectory.
+	segments := OrderedCollection new.
+	self addMetaSegment.
+	self addFirstSegment
 ]
 
 { #category : #initialization }
 SOObjectRepository >> loadSegments [
-	| path |
+	| path directories |
 	path := soil path / #segments.
 	path exists ifFalse: [ SOSoilNotInitialized signal: 'soil instance on ', path pathString, ' has not been initialized' ].
-	^ path directories collect: [ :directory |
-		SOObjectSegment new 
-			id: directory basename asInteger;
-			objectRepository: self  ]
+	directories := path directories.
+	segments := Array new: directories size - 1.
+	directories do: [ :directory | | segmentId segment |
+		segmentId := directory basename asInteger.
+		segment := SOObjectSegment new 
+			id: segmentId;
+			objectRepository: self.
+		segmentId isZero 
+			ifTrue: [ metaSegment := segment ]
+			ifFalse: [ segments at: segmentId put: segment ] ].
+	^ segments
 	
 ]
 
 { #category : #accessing }
+SOObjectRepository >> metaSegment [
+	^ metaSegment 
+]
+
+{ #category : #accessing }
+SOObjectRepository >> newMetaObjectId [
+	^ self metaSegment newObjectId
+]
+
+{ #category : #accessing }
 SOObjectRepository >> newObjectId [
-	^ self defaultSegment newObjectId
+	^ self firstSegment newObjectId
 ]
 
 { #category : #accessing }
 SOObjectRepository >> segmentAt: anInteger [ 
-	^ self segments at: anInteger 
+	^ anInteger isZero 
+		ifTrue: [ metaSegment ]
+		ifFalse: [ self segments at: anInteger ]
 ]
 
 { #category : #accessing }

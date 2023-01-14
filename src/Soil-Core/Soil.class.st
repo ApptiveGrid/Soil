@@ -48,14 +48,8 @@ Soil >> destroy [
 Soil >> initializeFilesystem [
 	(path exists and: [ path hasChildren ]) 
 		ifTrue: [ SODatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
-	(objectRepository 
-		initializeFilesystem;
-		addNewSegment) 
-			initializeFilesystem;
-			allocateNextIndex.
-	behaviorRegistry  
-		initializeFilesystem;
-		addSpecialObjects
+	objectRepository initializeFilesystem.
+	behaviorRegistry initializeFilesystem
 ]
 
 { #category : #'instance creation' }
