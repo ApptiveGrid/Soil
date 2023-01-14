@@ -5,7 +5,8 @@ Class {
 		'name',
 		'instVarNames',
 		'behaviorIdentifier',
-		'objectId'
+		'objectId',
+		'classLayout'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -42,11 +43,18 @@ SOBehaviorDescription >> behaviorIdentifier [
 	^ behaviorIdentifier 
 ]
 
+{ #category : #accessing }
+SOBehaviorDescription >> classLayout [
+	^ classLayout
+]
+
 { #category : #initialization }
 SOBehaviorDescription >> initializeFromBehavior: aClass [
 	behaviorIdentifier := aClass soilBehaviorIdentifier.
 	"we record only the persistent ivar names, in order"
-	instVarNames := aClass soilPersistentInstVars
+	instVarNames := aClass soilPersistentInstVars.
+	"we record the Layout to be able to detect if the layout changed"
+	classLayout := aClass classLayout class name
 ]
 
 { #category : #accessing }
@@ -63,13 +71,24 @@ SOBehaviorDescription >> isCurrent [
 			"this assumption is only valid until SOBehaviorDescription changes
 			shape itselt. But this is unlikely to be handled automatically"
 			true ]
-		ifFalse: [
-			self matchesBehavior: (Smalltalk at: behaviorIdentifier) ]
+		ifFalse: [ | currentClass |
+			currentClass := Smalltalk globals at: behaviorIdentifier.
+			classLayout == currentClass classLayout class name and: [ self matchesBehavior: currentClass ] ]
+]
+
+{ #category : #testing }
+SOBehaviorDescription >> isFixedLayout [
+	^ classLayout == #FixedLayout
 ]
 
 { #category : #testing }
 SOBehaviorDescription >> isMeta [
 	^ behaviorIdentifier = self class name
+]
+
+{ #category : #testing }
+SOBehaviorDescription >> isVariableLayout [
+	^ classLayout == #VariableLayout
 ]
 
 { #category : #testing }
