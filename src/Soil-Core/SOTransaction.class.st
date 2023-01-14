@@ -66,6 +66,7 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 
 	classDescription := SOBehaviorDescription for: aClass.
 	objectId := self newMetaObjectId.
+	objectId initializeIndex: self objectRepository.
 	classDescription objectId: objectId.
 	self atObjectId: objectId putObject: classDescription.
 	classDescriptions
@@ -75,9 +76,9 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> behaviorDescriptionWithId: aSOObjectId ifNone: aBlock [
-	(aSOObjectId index = 2) ifTrue: [ ^ SOBehaviorDescription meta ].
-	^ self objectWithId: aSOObjectId ifNone: aBlock
+SOTransaction >> behaviorDescriptionWithIndex: index ifNone: aBlock [
+	(index = 2) ifTrue: [ ^ SOBehaviorDescription meta ].
+	^ self objectWithId: (SOObjectId segment: 0 index: index) ifNone: aBlock
 ]
 
 { #category : #accessing }

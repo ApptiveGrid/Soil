@@ -129,11 +129,3 @@ SOBehaviorDescription >> objectId [
 SOBehaviorDescription >> objectId: aSOObjectId [
 	objectId := aSOObjectId
 ]
-
-{ #category : #references }
-SOBehaviorDescription >> referenceIndexWithSerializer: aSerializer [
-
-	^ self isMeta
-		  ifTrue: [ 0 ]
-		  ifFalse: [ aSerializer referenceIndexOf: self ]
-]

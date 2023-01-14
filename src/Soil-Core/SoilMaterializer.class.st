@@ -42,13 +42,13 @@ SoilMaterializer >> materializeFromBytes: aByteArray [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| description objectIndex|
-	objectIndex := self nextLengthEncodedInteger.
-	description := objectIndex isZero
+	| description behaviorIndex|
+	behaviorIndex := self nextLengthEncodedInteger.
+	description := behaviorIndex isZero
 		ifTrue: [ SOBehaviorDescription meta ]
 		ifFalse: [
 			transaction 
-				behaviorDescriptionWithId: (externalObjectRegistry basicReferenceAt: objectIndex) 
+				behaviorDescriptionWithIndex: behaviorIndex
 				ifNone: [ self halt  ] ].
 	^ description objectClass classLayout soilBasicMaterialize: description with: self
 ]

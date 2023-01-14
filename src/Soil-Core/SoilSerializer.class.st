@@ -346,11 +346,6 @@ SoilSerializer >> notSupportedError: anObject [
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]
 
-{ #category : #public }
-SoilSerializer >> referenceIndexOf: aSOClassDescription [
-	^ externalObjectRegistry indexOfExternalReference: aSOClassDescription
-]
-
 { #category : #registry }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 	| index externalIndex |
