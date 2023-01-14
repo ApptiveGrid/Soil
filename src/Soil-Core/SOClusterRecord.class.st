@@ -8,7 +8,8 @@ Class {
 		'references',
 		'bytes',
 		'committed',
-		'previousVersionPosition'
+		'previousVersionPosition',
+		'version'
 	],
 	#category : #'Soil-Core-Model'
 }
