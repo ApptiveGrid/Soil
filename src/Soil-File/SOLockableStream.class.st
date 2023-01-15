@@ -61,6 +61,11 @@ SOLockableStream >> memoryUnlockFrom: from to: to for: contextObject [
 ]
 
 { #category : #reading }
+SOLockableStream >> next [
+	^ fileStream next 
+]
+
+{ #category : #reading }
 SOLockableStream >> next: anInteger [ 
 	^ fileStream next: anInteger 
 ]

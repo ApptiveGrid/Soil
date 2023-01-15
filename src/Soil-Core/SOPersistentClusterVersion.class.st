@@ -68,13 +68,14 @@ SOPersistentClusterVersion >> printOn: aStream [
 
 { #category : #'instance creation' }
 SOPersistentClusterVersion >> readFrom: stream [ 
-	| numberOfReferences objectSize |
+	| numberOfReferences objectSize materializer |
+	materializer := SoilBasicMaterializer new stream: stream.
 	position := stream position.
-	previousVersionPosition := (stream next: 2) asInteger.
-	numberOfReferences := (stream next: 2) asInteger.
+	previousVersionPosition := materializer nextLengthEncodedInteger.
+	numberOfReferences := materializer nextLengthEncodedInteger.
 	references := OrderedCollection new.
 	1 to: numberOfReferences do: [:n | self addReference: (SOObjectId readFrom: stream)]. 
-	objectSize := (stream next: 8) asInteger.
+	objectSize := materializer nextLengthEncodedInteger.
 	bytes := stream next: objectSize.
 		
 ]
