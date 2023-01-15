@@ -52,7 +52,8 @@ SoilBehaviorRegistry >> initialize [
 { #category : #initialization }
 SoilBehaviorRegistry >> initializeFilesystem [
 	self open.
-	index initializeList
+	index initializeList.
+	self addSpecialObjects
 ]
 
 { #category : #accessing }

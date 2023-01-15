@@ -57,7 +57,7 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 		nameAt: aClass soilBehaviorIdentifier
 		ifPresent: [ :oid | | desc |
 			desc := (oid index = 2)
-				ifTrue: [SOBehaviorDescription meta objectId: oid ]
+				ifTrue: [ SOBehaviorDescription meta objectId: oid ]
 				ifFalse: [ | foundDesc |
 					 "the description in the database might not be current, if not, we create a new one with the same ID"
 					 foundDesc := (self objectWithId: oid ifNone: [Error signal ]) objectId: oid; yourself.
@@ -65,7 +65,7 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 			^ desc ].
 
 	classDescription := SOBehaviorDescription for: aClass.
-	objectId := self newObjectId.
+	objectId := self newMetaObjectId.
 	classDescription objectId: objectId.
 	self atObjectId: objectId putObject: classDescription.
 	classDescriptions
@@ -196,6 +196,11 @@ SOTransaction >> newMaterializer [
 	^ soil newMaterializer 
 		transaction: self;
 		yourself
+]
+
+{ #category : #'instance creation' }
+SOTransaction >> newMetaObjectId [
+	^ self objectRepository newMetaObjectId
 ]
 
 { #category : #'instance creation' }

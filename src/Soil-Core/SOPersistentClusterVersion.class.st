@@ -73,7 +73,7 @@ SOPersistentClusterVersion >> readFrom: stream [
 	previousVersionPosition := (stream next: 2) asInteger.
 	numberOfReferences := (stream next: 2) asInteger.
 	references := OrderedCollection new.
-	1 to: numberOfReferences do: [:n | self addReference: (SOObjectId segment: 1 index: (stream next: 8) asInteger)]. 
+	1 to: numberOfReferences do: [:n | self addReference: (SOObjectId readFrom: stream)]. 
 	objectSize := (stream next: 8) asInteger.
 	bytes := stream next: objectSize.
 		
