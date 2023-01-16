@@ -184,8 +184,9 @@ SoilSerializationTest >> testSerializationObject [
 	| object serialized materialized |
 	object := Object new.
 	serialized := self serializeToBytes: object.
-	self assert: serialized equals:  #[0 0 0 0 0 0 0 0 0 0 0 2 1 3].
-	self assert: (serialized at: 13) equals: TypeCodeObject.
+	self assert: serialized equals:  #[0 0 2 1 3].
+	self assert: (serialized at: 4) equals: TypeCodeObject.
+
 	materialized := self materializeFromBytes: serialized.
 	self assert: materialized class equals: Object
 ]
@@ -201,12 +202,12 @@ SoilSerializationTest >> testSerializationObjectTwice [
 	serialized := self serializeToBytes: array.
 	
 	"First the Array"
-	self assert: (serialized at: 13) equals: TypeCodeArray.
+	self assert: (serialized at: 4) equals: TypeCodeArray.
 	"array of size 2"
-	self assert: (serialized at: 14) equals: 2.
+	self assert: (serialized at: 5) equals: 2.
 	"here the object ist stored (not tested)"
 	"Then we get a reference to the second instance"
-	self assert: (serialized at: 17) equals: TypeCodeInternalReference.
+	self assert: (serialized at: 8) equals: TypeCodeInternalReference.
 	materialized := self materializeFromBytes: serialized.
 	self assert: array first identicalTo: array second.
 	"identity is preserved"
@@ -306,7 +307,7 @@ SoilSerializationTest >> testSerializationUUID [
 	
 	self 
 		assert: serialized
-		equals:    #[0 0 0 0 0 0 0 0 0 0 0 19 1 3 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206].
+		equals:    #[0 0 19 1 3 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206].
 
 
 	materialized := self materializeFromBytes: serialized.
