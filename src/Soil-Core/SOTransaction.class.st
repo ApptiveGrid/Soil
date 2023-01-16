@@ -53,16 +53,17 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 	classDescriptions
 		at: aClass soilBehaviorIdentifier
 		ifPresent: [ :description | ^ description ].
+	classDescriptions
+		at: aClass soilBehaviorIdentifier
+		ifPresent: [ :description | ^ description ].
 	soil behaviorRegistry
 		nameAt: aClass soilBehaviorIdentifier
 		ifPresent: [ :oid | | desc |
 			desc := (oid index = 2)
-				ifTrue: [ SOBehaviorDescription meta objectId: oid ]
-				ifFalse: [ | foundDesc |
-					 "the description in the database might not be current, if not, we create a new one with the same ID"
-					 foundDesc := (self objectWithId: oid ifNone: [Error signal ]) objectId: oid; yourself.
-					 foundDesc isCurrent ifFalse: [ (SOBehaviorDescription for: aClass) objectId: oid ] ifTrue: [foundDesc]].
-			^ desc ].
+				ifTrue: [SOBehaviorDescription meta ]
+				ifFalse: [ (self objectWithId: oid ifNone: [Error signal ]) objectId: oid].
+	"the description in the database might not be current, if not, we create a new one with the same ID"
+				desc isCurrent ifTrue: [ ^ desc ]].
 
 	classDescription := SOBehaviorDescription for: aClass.
 	objectId := self newMetaObjectId.

@@ -23,8 +23,8 @@ SOBehaviorDescription class >> isSoilClusterRoot [
 ]
 
 { #category : #combining }
-SOBehaviorDescription class >> meta [ 
-	^ self for: self
+SOBehaviorDescription class >> meta [
+	^ (self for: self) objectId: self metaId
 ]
 
 { #category : #combining }
