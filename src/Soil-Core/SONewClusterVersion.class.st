@@ -86,21 +86,21 @@ SONewClusterVersion >> serializeObject [
 
 { #category : #serializing }
 SONewClusterVersion >> serializeOn: stream [
+	| serializer |
 	bytes ifNil: [ self serializeObject ].
 	self flag: #todo.
-	"the following writes should be length encoded integers. Need to separate
-	serializers and/or move basic stream methods to system stream"
-	stream nextPutAll: (previousVersionPosition asByteArrayOfSize: 2).
-	stream nextPutAll: ((references size) asByteArrayOfSize: 2).
+	serializer := SoilBasicSerializer new stream: stream.
+
+	(serializer nextPutLengthEncodedInteger: previousVersionPosition).
+	(serializer nextPutLengthEncodedInteger: references size).
 	
 	references do: [ :ref |
 		"do not write zero index, try to allocate a new index before"
 		(ref index = 0) ifTrue: [ 
 			transaction allocateObjectId: ref ].
 		ref writeOn: stream ].
-	stream 
-		nextPutAll: (bytes size asByteArrayOfSize: 8);
-		nextPutAll: bytes .
+	serializer nextPutLengthEncodedInteger: bytes size.
+	stream nextPutAll: bytes .
 ]
 
 { #category : #testing }

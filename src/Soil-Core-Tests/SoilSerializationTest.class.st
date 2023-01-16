@@ -186,7 +186,6 @@ SoilSerializationTest >> testSerializationObject [
 	serialized := self serializeToBytes: object.
 	self assert: serialized equals:  #[0 0 0 0 0 0 0 0 0 0 0 2 1 3].
 	self assert: (serialized at: 13) equals: TypeCodeObject.
-
 	materialized := self materializeFromBytes: serialized.
 	self assert: materialized class equals: Object
 ]
@@ -308,6 +307,7 @@ SoilSerializationTest >> testSerializationUUID [
 	self 
 		assert: serialized
 		equals:    #[0 0 0 0 0 0 0 0 0 0 0 19 1 3 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206].
+
 
 	materialized := self materializeFromBytes: serialized.
 	self assert: materialized equals: object
