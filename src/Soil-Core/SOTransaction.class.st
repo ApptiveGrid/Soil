@@ -62,8 +62,8 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 			desc := (oid index = 2)
 				ifTrue: [SOBehaviorDescription meta ]
 				ifFalse: [ (self objectWithId: oid ifNone: [Error signal ]) objectId: oid].
-	"the description in the database might not be current, if not, we create a new one with the same ID"
-				desc isCurrent ifTrue: [ ^ desc ]].
+			"the description in the database might not be current, if not, we create a new one later"
+			desc isCurrent ifTrue: [ ^ desc ]].
 
 	classDescription := SOBehaviorDescription for: aClass.
 	objectId := self newMetaObjectId.
