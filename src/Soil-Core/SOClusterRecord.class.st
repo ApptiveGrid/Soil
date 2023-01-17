@@ -32,11 +32,6 @@ SOClusterRecord >> assignObjectIds: aSOObjectRepository [
 ]
 
 { #category : #accessing }
-SOClusterRecord >> basicReferenceAt: anInteger [ 
-	^ references at: anInteger
-]
-
-{ #category : #accessing }
 SOClusterRecord >> bytes [
 	^ bytes
 ]

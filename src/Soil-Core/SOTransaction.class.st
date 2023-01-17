@@ -53,19 +53,21 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 	classDescriptions
 		at: aClass soilBehaviorIdentifier
 		ifPresent: [ :description | ^ description ].
+	classDescriptions
+		at: aClass soilBehaviorIdentifier
+		ifPresent: [ :description | ^ description ].
 	soil behaviorRegistry
 		nameAt: aClass soilBehaviorIdentifier
 		ifPresent: [ :oid | | desc |
 			desc := (oid index = 2)
-				ifTrue: [ SOBehaviorDescription meta objectId: oid ]
-				ifFalse: [ | foundDesc |
-					 "the description in the database might not be current, if not, we create a new one with the same ID"
-					 foundDesc := (self objectWithId: oid ifNone: [Error signal ]) objectId: oid; yourself.
-					 foundDesc isCurrent ifFalse: [ (SOBehaviorDescription for: aClass) objectId: oid ] ifTrue: [foundDesc]].
-			^ desc ].
+				ifTrue: [SOBehaviorDescription meta ]
+				ifFalse: [ (self objectWithId: oid ifNone: [Error signal ]) objectId: oid].
+			"the description in the database might not be current, if not, we create a new one later"
+			desc isCurrent ifTrue: [ ^ desc ]].
 
 	classDescription := SOBehaviorDescription for: aClass.
 	objectId := self newMetaObjectId.
+	objectId initializeIndex: self objectRepository.
 	classDescription objectId: objectId.
 	self atObjectId: objectId putObject: classDescription.
 	classDescriptions
@@ -75,9 +77,9 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> behaviorDescriptionWithId: aSOObjectId ifNone: aBlock [
-	(aSOObjectId index = 2) ifTrue: [ ^ SOBehaviorDescription meta ].
-	^ self objectWithId: aSOObjectId ifNone: aBlock
+SOTransaction >> behaviorDescriptionWithIndex: index ifNone: aBlock [
+	(index = 2) ifTrue: [ ^ SOBehaviorDescription meta ].
+	^ self objectWithId: (SOObjectId segment: 0 index: index) ifNone: aBlock
 ]
 
 { #category : #accessing }
