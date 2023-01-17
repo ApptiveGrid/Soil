@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilSerializer,
-	#superclass : #SoilObjectCodec,
+	#superclass : #SoilBasicSerializer,
 	#instVars : [
 		'clusterRoot'
 	],
@@ -19,22 +19,6 @@ SoilSerializer class >> serializeToBytes: anObject [
 	^ (self on: ByteArray new writeStream) 
 		serialize: anObject
 
-]
-
-{ #category : #'writing - basic' }
-SoilSerializer >> basicNextPutString: aString [ 
-	| buf |
-	buf := aString asByteArray.
-	self
-		nextPutLengthEncodedInteger: buf size;
-		nextPutBytesFrom: buf
-]
-
-{ #category : #writing }
-SoilSerializer >> basicNextPutSymbol: aSymbol [ 
-	self
-		nextPutLengthEncodedInteger: aSymbol size;
-		nextPutBytesFrom: aSymbol asByteArray
 ]
 
 { #category : #public }
@@ -62,37 +46,6 @@ SoilSerializer >> nextPutAssociation: anAssociation [
 	self nextPutByte: TypeCodeAssociation.
 	anAssociation key soilSerialize: self.
 	anAssociation value soilSerialize: self.
-]
-
-{ #category : #'writing - basic' }
-SoilSerializer >> nextPutByte: anInteger [ 
-	stream nextPut: anInteger
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutByteArray: aByteArray [
-	self 
-		nextPutByte: TypeCodeByteArray; 
-		nextPutLengthEncodedInteger: aByteArray size.
-	1 to: aByteArray size do: [:i |
-		self nextPutByte: (aByteArray at: i)].
-]
-
-{ #category : #'writing - basic' }
-SoilSerializer >> nextPutBytesFrom: aByteArray [
-	stream nextPutAll: aByteArray 
-
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutCharacter: aCharacter [
-	"we store 8bit characters with TypeCodeByteCharacter to save some space"
-	| charAsInteger |
-	charAsInteger := aCharacter asInteger.
-	self nextPutByte: (charAsInteger > 255
-			 ifTrue: [ TypeCodeCharacter ]
-			 ifFalse: [ TypeCodeByteCharacter ]).
-	self nextPutLengthEncodedInteger: charAsInteger
 ]
 
 { #category : #writing }
@@ -147,14 +100,6 @@ SoilSerializer >> nextPutCompiledMethod: aCompiledMethod [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutDate: aDate [ 
-	self 
-		nextPutByte: TypeCodeDate; 
-		nextPutLengthEncodedInteger: aDate julianDayNumber - 2415386; 
-		nextPutInteger: ((aDate offset hours * 60) + aDate offset minutes)
-]
-
-{ #category : #writing }
 SoilSerializer >> nextPutDictionary: aDictionary [ 
 	self 
 		nextPutByte: TypeCodeDictionary;
@@ -172,28 +117,6 @@ SoilSerializer >> nextPutExternalReference: anInteger [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutFalse: aBoolean [ 
-	self nextPutByte: TypeCodeFalse 
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutFloat: aFloat [ 
-	self
-		nextPutByte: TypeCodeFloat;
-		nextPutLengthEncodedInteger: (aFloat at: 1);
-		nextPutLengthEncodedInteger: (aFloat at: 2)
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutFraction: aNumber [
-	"we know that numerator and denominator are SmallIntegers"
-	self
-		nextPutByte: TypeCodeFraction;
-		nextPutLengthEncodedInteger: aNumber numerator;
-		nextPutLengthEncodedInteger: aNumber denominator
-]
-
-{ #category : #writing }
 SoilSerializer >> nextPutIdentityDictionary: anIdentityDictionary [ 
 	self 
 		nextPutByte: TypeCodeIdentityDictionary;
@@ -204,42 +127,10 @@ SoilSerializer >> nextPutIdentityDictionary: anIdentityDictionary [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutInteger: anInteger [ 
-	(anInteger < 0)
-		ifTrue: [ self nextPutLargeNegativeInteger: anInteger ] 
-		ifFalse: [ self nextPutLargePositiveInteger: anInteger ]
-]
-
-{ #category : #writing }
 SoilSerializer >> nextPutInternalReference: anInteger [ 
 	self 
 		nextPutByte: TypeCodeInternalReference; 
 		nextPutLengthEncodedInteger: anInteger 
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutLargeNegativeInteger: anInteger [ 
-	self 
-		nextPutByte: TypeCodeLargeNegativeInteger;
-		nextPutLengthEncodedInteger: 0 - anInteger
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutLargePositiveInteger: anInteger [ 
-	self 
-		nextPutByte: TypeCodeLargePositiveInteger;
-		nextPutLengthEncodedInteger: anInteger
-]
-
-{ #category : #'writing - basic' }
-SoilSerializer >> nextPutLengthEncodedInteger: anInteger [ 
-	"store length of integer encoded in a way that the presence of a
-	most significant bit indicates that the next byte is part of
-	the value"
-	anInteger < 128 ifTrue: [ ^ self nextPutByte: anInteger ].
-	self
-		nextPutByte: ((anInteger bitAnd: 127) bitOr: 128);
-		nextPutLengthEncodedInteger: (anInteger bitShift: -7)
 ]
 
 { #category : #writing }
@@ -255,11 +146,6 @@ SoilSerializer >> nextPutMessageSend: aMessageSend [
 	aMessageSend receiver soilSerialize: self.
 	aMessageSend selector soilSerialize: self.
 	aMessageSend arguments soilSerialize: self
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutNil: anUndefinedObject [ 
-	self nextPutByte: TypeCodeUndefined 
 ]
 
 { #category : #writing }
@@ -281,74 +167,13 @@ SoilSerializer >> nextPutProcessorScheduler: aProcessorScheduler [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutScaledDecimal: aNumber [
-	"we know that numerator, denominator and scale are SmallIntegers"
-	self
-		nextPutByte: TypeCodeScaledDecimal;
-		nextPutLengthEncodedInteger: aNumber numerator;
-		nextPutLengthEncodedInteger: aNumber denominator;
-		nextPutLengthEncodedInteger: aNumber scale 
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutString: aString [ 
-	self
-		nextPutByte: TypeCodeString;
-		basicNextPutString: aString
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutSymbol: aSymbol [ 
-	self
-		nextPutByte: TypeCodeSymbol;
-		basicNextPutSymbol: aSymbol
-]
-
-{ #category : #writing }
 SoilSerializer >> nextPutSystemDictionary: aCollection [ 
 	self nextPutByte: TypeCodeSystemDictionary 
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutTime: aTime [ 
-	self
-		nextPutByte: TypeCodeTime;
-		nextPutLengthEncodedInteger: aTime asSeconds
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutTrue: aBoolean [ 
-	self nextPutByte: TypeCodeTrue 
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutWideString: aWideString [ 
-	| buf |
-	buf := self class encodeString: aWideString.
-	self
-		nextPutByte: TypeCodeWideString;
-		nextPutLengthEncodedInteger: buf size;
-		nextPutBytesFrom: buf
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutWideSymbol: aSymbol [
-	| buf |
-	buf := aSymbol asString utf8Encoded.
-	self
-		nextPutByte: TypeCodeWideSymbol;
-		nextPutLengthEncodedInteger:  buf size;
-		nextPutBytesFrom: buf
-]
-
-{ #category : #writing }
 SoilSerializer >> notSupportedError: anObject [ 
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
-]
-
-{ #category : #public }
-SoilSerializer >> referenceIndexOf: aSOClassDescription [
-	^ externalObjectRegistry indexOfExternalReference: aSOClassDescription
 ]
 
 { #category : #registry }

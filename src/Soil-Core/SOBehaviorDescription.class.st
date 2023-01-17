@@ -23,8 +23,8 @@ SOBehaviorDescription class >> isSoilClusterRoot [
 ]
 
 { #category : #combining }
-SOBehaviorDescription class >> meta [ 
-	^ self for: self
+SOBehaviorDescription class >> meta [
+	^ (self for: self) objectId: self metaId
 ]
 
 { #category : #combining }
@@ -128,12 +128,4 @@ SOBehaviorDescription >> objectId [
 { #category : #accessing }
 SOBehaviorDescription >> objectId: aSOObjectId [
 	objectId := aSOObjectId
-]
-
-{ #category : #references }
-SOBehaviorDescription >> referenceIndexWithSerializer: aSerializer [
-
-	^ self isMeta
-		  ifTrue: [ 0 ]
-		  ifFalse: [ aSerializer referenceIndexOf: self ]
 ]
