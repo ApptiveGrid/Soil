@@ -14,11 +14,6 @@ SOSegmentFile class >> isAbstract [
 ]
 
 { #category : #accessing }
-SOSegmentFile >> close [
-	^ self subclassResponsibility
-]
-
-{ #category : #accessing }
 SOSegmentFile >> path [
 	^ self subclassResponsibility
 ]

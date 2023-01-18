@@ -91,8 +91,10 @@ SONewClusterVersion >> serializeOn: stream [
 	self flag: #todo.
 	serializer := SoilBasicSerializer new stream: stream.
 
-	(serializer nextPutLengthEncodedInteger: previousVersionPosition).
-	(serializer nextPutLengthEncodedInteger: references size).
+	serializer 
+		nextPutLengthEncodedInteger: version;
+		nextPutLengthEncodedInteger: previousVersionPosition;
+		nextPutLengthEncodedInteger: references size.
 	
 	references do: [ :ref |
 		"do not write zero index, try to allocate a new index before"
@@ -106,4 +108,9 @@ SONewClusterVersion >> serializeOn: stream [
 { #category : #testing }
 SONewClusterVersion >> shouldBeCommitted [
 	^ true
+]
+
+{ #category : #accessing }
+SONewClusterVersion >> version: anInteger [ 
+	version := anInteger 
 ]

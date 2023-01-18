@@ -71,6 +71,7 @@ SOPersistentClusterVersion >> readFrom: stream [
 	| numberOfReferences objectSize materializer |
 	materializer := SoilBasicMaterializer new stream: stream.
 	position := stream position.
+	version := materializer nextLengthEncodedInteger.
 	previousVersionPosition := materializer nextLengthEncodedInteger.
 	numberOfReferences := materializer nextLengthEncodedInteger.
 	references := OrderedCollection new.

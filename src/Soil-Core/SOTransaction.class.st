@@ -5,8 +5,10 @@ Class {
 		'soil',
 		'idMap',
 		'objectMap',
-		'classDescriptions',
-		'recordsToCommit'
+		'recordsToCommit',
+		'readVersion',
+		'writeVersion',
+		'behaviorDescriptions'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -14,7 +16,7 @@ Class {
 { #category : #aborting }
 SOTransaction >> abort [
 	recordsToCommit := nil.
-	classDescriptions := nil.
+	behaviorDescriptions := nil.
 	soil := nil.
 	idMap := nil.
 	objectMap := nil
@@ -52,7 +54,7 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 	| behaviorDescription objectId |
 	"locally created behavior descriptions are always current and can
 	be returned immediately"
-	classDescriptions
+	behaviorDescriptions
 		at: aClass soilBehaviorIdentifier
 		ifPresent: [ :description | ^ description ].
 	"if we find the behaviorIdentifier in the registry and it is 
@@ -86,7 +88,7 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 			behaviorDescription objectId initializeIndex: self objectRepository.
 			self atObjectId: behaviorDescription objectId putObject: behaviorDescription. ].
 	
-	classDescriptions
+	behaviorDescriptions
 		at: aClass soilBehaviorIdentifier
 		put: behaviorDescription.
 	^ behaviorDescription
@@ -152,21 +154,23 @@ SOTransaction >> behaviorWithIndex: objectId ifNone: aBlock [
 { #category : #accessing }
 SOTransaction >> checkpoint [
 	| bytes |
-	recordsToCommit := ((idMap select: [:each | each value shouldBeCommitted ])
-		collect: #asNewClusterVersion) as: OrderedIdentityDictionary .
+	writeVersion := self writeVersion.
+	recordsToCommit := self recordsToCommit.
 	self serializeObjects.
 	recordsToCommit keysAndValuesDo: [ :objectId :record | 
 		objectId initializeIndex: self objectRepository.
 		record assignObjectIds: soil objectRepository.
+		record version: writeVersion.
 		bytes := record serialize.
 		soil objectRepository 
 			at: objectId 
 			put: bytes.
 		record committed  ].
-	classDescriptions do: [ :description |
+	behaviorDescriptions do: [ :description |
 		soil behaviorRegistry 
 			nameAt: description value behaviorIdentifier 
 			put: description objectId ].
+	soil databaseVersion: writeVersion
 
 ]
 
@@ -195,7 +199,7 @@ SOTransaction >> initialize [
 	super initialize.
 	idMap := IdentityDictionary new.
 	objectMap := IdentityDictionary new.
-	classDescriptions := Dictionary new
+	behaviorDescriptions := Dictionary new
 ]
 
 { #category : #testing }
@@ -308,8 +312,20 @@ SOTransaction >> objectWithId: objectId ifNone: aBlock [
 ]
 
 { #category : #accessing }
+SOTransaction >> readVersion: anInteger [ 
+	readVersion := anInteger
+]
+
+{ #category : #accessing }
 SOTransaction >> records [
 	^ idMap values
+]
+
+{ #category : #accessing }
+SOTransaction >> recordsToCommit [
+	^ ((idMap select: [:each | each value shouldBeCommitted ])
+		collect: [:each | each asNewClusterVersion version: writeVersion]) 
+		as: OrderedIdentityDictionary 
 ]
 
 { #category : #accessing }
@@ -349,4 +365,9 @@ SOTransaction >> serializeObjects [
 { #category : #accessing }
 SOTransaction >> soil: aSoil [ 
 	soil := aSoil
+]
+
+{ #category : #accessing }
+SOTransaction >> writeVersion [
+	^ soil databaseVersion + 1 
 ]
