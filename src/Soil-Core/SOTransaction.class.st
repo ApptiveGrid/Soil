@@ -97,7 +97,7 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 SOTransaction >> behaviorDescriptionWithIndex: index andVersion: version [
 	| description |
 	(index = 2) ifTrue: [ ^ SOBehaviorDescription meta ].
-	description := self objectWithId: (SOObjectId segment: 0 index: index) ifNone: [ 
+	description := self behaviorWithId: index ifNone: [ 
 		(SOObjectNotFound segment: 0 index: index) signal ].
 	(description version = version)
 		ifTrue: [ ^ description ].
@@ -135,6 +135,19 @@ SOTransaction >> behaviorWithId: objectId andVersion: version ifNone: aBlock [
 			materializeObject.
 		(rec object version = version) ifTrue: [ ^ rec object ]  ].
 	Error signal.
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> behaviorWithId: objectId ifNone: aBlock [
+	idMap 
+		detect: [ :each | each objectId = objectId ]
+		ifFound: [ :record | 
+			^ record object ].
+
+	^ (self metaSegment at: objectId)
+		transaction: self;
+		materializeObject;
+		object
 ]
 
 { #category : #accessing }
