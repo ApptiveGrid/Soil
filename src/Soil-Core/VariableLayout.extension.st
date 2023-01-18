@@ -9,6 +9,7 @@ VariableLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer 
 		ifTrue: [ 0 ]
 		ifFalse: [ materializer nextLengthEncodedInteger ].
 	object := aBehaviorDescription objectClass basicNew: basicSize.
+	aBehaviorDescription compatibilityCheck: object class classLayout.
 
 	materializer registerObject: object.
 

@@ -4,11 +4,12 @@ Extension { #name : #ByteLayout }
 ByteLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object basicSize |
 	object := aBehaviorDescription objectClass basicNew: (basicSize := materializer nextLengthEncodedInteger).
+	aBehaviorDescription compatibilityCheck: object class classLayout.
+
 	materializer registerObject: object.
-	
+
 	materializer stream readInto: object startingAt: 1 count: basicSize.
 	^object soilMaterialized: materializer
-
 ]
 
 { #category : #'*Soil-Core' }
