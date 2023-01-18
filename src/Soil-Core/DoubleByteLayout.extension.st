@@ -5,10 +5,9 @@ DoubleByteLayout >> soilBasicMaterialize: aBehaviorDescription with: materialize
 	| object basicSize |
 	object := aBehaviorDescription objectClass basicNew: (basicSize := materializer nextLengthEncodedInteger).
 	materializer registerObject: object.
-	
+
 	materializer stream readInto: object startingAt: 1 count: basicSize.
 	^object soilMaterialized: materializer
-
 ]
 
 { #category : #'*Soil-Core' }

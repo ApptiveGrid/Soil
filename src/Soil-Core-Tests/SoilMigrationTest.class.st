@@ -9,6 +9,13 @@ Class {
 }
 
 { #category : #helpers }
+SoilMigrationTest >> createMigrationClassByteLayout [
+	^ (SOBaseTestObject << #SOMigrationObject
+		layout: ByteLayout;
+		package: self class package name) install
+]
+
+{ #category : #helpers }
 SoilMigrationTest >> createMigrationClassFixedLayout [
 	^ (SOBaseTestObject << #SOMigrationObject
 		layout: FixedLayout;
@@ -49,6 +56,45 @@ SoilMigrationTest >> setUp [
 SoilMigrationTest >> tearDown [ 
 	migrationClass removeFromSystem.
 	super tearDown
+]
+
+{ #category : #'tests - change classlayout' }
+SoilMigrationTest >> testMaterializingObjectByteLayputFromFixedLayout [
+	| tx tx2 materializedRoot object |
+	object := self createMigrationClassFixedLayout new.
+	self deny: object class isVariable.
+	object
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2.
+	tx := soil newTransaction.
+	tx root: object.
+	tx commit.
+
+	"now we change the class to be a variable class with the same ivars"
+	migrationClass := self createMigrationClassByteLayout.
+	tx2 := soil newTransaction.
+
+	self should: [materializedRoot := tx2 root] raise: SOLayoutMigrationError
+
+]
+
+{ #category : #'tests - change classlayout' }
+SoilMigrationTest >> testMaterializingObjectFixedLayputFromByteLayout [
+	| tx tx2 materializedRoot object |
+
+	"We can load Variable Byte object as a Fixed object, we raise an error"
+
+	object := self createMigrationClassByteLayout new: 10.
+	self assert: object class isVariable.
+	tx := soil newTransaction.
+	tx root: object.
+	tx commit.
+
+	"now we change the class to be a fixed class with the same ivars"
+	migrationClass := self createMigrationClassFixedLayout.
+	tx2 := soil newTransaction.
+
+	self should: [materializedRoot := tx2 root] raise: SOLayoutMigrationError
 ]
 
 { #category : #'tests - change classlayout' }
