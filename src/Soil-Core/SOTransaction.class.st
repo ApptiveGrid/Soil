@@ -6,7 +6,9 @@ Class {
 		'idMap',
 		'objectMap',
 		'classDescriptions',
-		'recordsToCommit'
+		'recordsToCommit',
+		'readVersion',
+		'writeVersion'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -153,8 +155,8 @@ SOTransaction >> behaviorWithIndex: objectId ifNone: aBlock [
 { #category : #accessing }
 SOTransaction >> checkpoint [
 	| bytes |
-	recordsToCommit := ((idMap select: [:each | each value shouldBeCommitted ])
-		collect: #asNewClusterVersion) as: OrderedIdentityDictionary .
+	writeVersion := self writeVersion.
+	recordsToCommit := self recordsToCommit.
 	self serializeObjects.
 	recordsToCommit keysAndValuesDo: [ :objectId :record | 
 		objectId initializeIndex: self objectRepository.
@@ -314,6 +316,13 @@ SOTransaction >> records [
 ]
 
 { #category : #accessing }
+SOTransaction >> recordsToCommit [
+	((idMap select: [:each | each value shouldBeCommitted ])
+		collect: [:each | each asNewClusterVersion version: writeVersion]) 
+		as: OrderedIdentityDictionary 
+]
+
+{ #category : #accessing }
 SOTransaction >> root [
 	idMap associations
 		detect: [ :assoc | (assoc key segment = 1) & (assoc key index = 1) ]
@@ -350,4 +359,9 @@ SOTransaction >> serializeObjects [
 { #category : #accessing }
 SOTransaction >> soil: aSoil [ 
 	soil := aSoil
+]
+
+{ #category : #accessing }
+SOTransaction >> writeVersion [
+	^ soil lastDatabaseVersion + 1 
 ]
