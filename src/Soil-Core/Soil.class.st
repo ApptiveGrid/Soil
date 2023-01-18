@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'path',
 		'objectRepository',
-		'behaviorRegistry'
+		'behaviorRegistry',
+		'parameters'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -37,6 +38,16 @@ Soil >> close [
 		objectRepository close ]
 ]
 
+{ #category : #accessing }
+Soil >> databaseVersion [
+	^ parameters databaseVersion 
+]
+
+{ #category : #accessing }
+Soil >> databaseVersion: anInteger [ 
+	parameters databaseVersion: anInteger 
+]
+
 { #category : #'as yet unclassified' }
 Soil >> destroy [
 	path exists ifFalse: [ ^ self ].
@@ -48,6 +59,8 @@ Soil >> destroy [
 Soil >> initializeFilesystem [
 	(path exists and: [ path hasChildren ]) 
 		ifTrue: [ SODatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
+	self path ensureCreateDirectory.
+	parameters initializeFilesystem.
 	objectRepository initializeFilesystem.
 	behaviorRegistry initializeFilesystem
 ]
@@ -68,7 +81,9 @@ Soil >> newSerializer [
 { #category : #transactions }
 Soil >> newTransaction [
 	^ SOTransaction new 
-		soil: self
+		soil: self;
+		readVersion: self databaseVersion;
+		yourself
 ]
 
 { #category : #accessing }
@@ -78,6 +93,8 @@ Soil >> objectRepository [
 
 { #category : #'instance creation' }
 Soil >> open [
+	parameters := SoilParameterFile new
+		soil: self.
 	objectRepository := SOObjectRepository new 
 		soil: self;
 		yourself.

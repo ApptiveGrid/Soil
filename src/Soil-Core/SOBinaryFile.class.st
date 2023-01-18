@@ -14,6 +14,12 @@ SOBinaryFile class >> isAbstract [
 	^ self == SOBinaryFile
 ]
 
+{ #category : #'initialize-release' }
+SOBinaryFile >> close [
+	stream ifNotNil: [ 
+		stream close ]
+]
+
 { #category : #accessing }
 SOBinaryFile >> fileVersion [
 	^ fileVersion
@@ -42,9 +48,7 @@ SOBinaryFile >> initializeFilesystem [
 	self initializeHeader.
 	self initializeStart.
 	self stream 
-		flush; 
-		close
-	
+		flush
 ]
 
 { #category : #initialization }
@@ -63,6 +67,11 @@ SOBinaryFile >> initializeStart [
 { #category : #accessing }
 SOBinaryFile >> open [
 	stream := SOLockableStream path: self path
+]
+
+{ #category : #accessing }
+SOBinaryFile >> path [
+	self subclassResponsibility 
 ]
 
 { #category : #utilities }

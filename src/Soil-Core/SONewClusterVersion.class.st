@@ -109,3 +109,8 @@ SONewClusterVersion >> serializeOn: stream [
 SONewClusterVersion >> shouldBeCommitted [
 	^ true
 ]
+
+{ #category : #accessing }
+SONewClusterVersion >> version: anInteger [ 
+	version := anInteger 
+]

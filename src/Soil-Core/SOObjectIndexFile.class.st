@@ -28,12 +28,6 @@ SOObjectIndexFile >> at: index putPosition: position [
 	stream flush
 ]
 
-{ #category : #'initialize-release' }
-SOObjectIndexFile >> close [
-	stream ifNotNil: [ 
-		stream close ]
-]
-
 { #category : #accessing }
 SOObjectIndexFile >> indexPositionAt: anInteger [ 
 	^ self headerSize + self objectIndexSize + (anInteger - 1 * self objectIndexSize)

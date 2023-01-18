@@ -93,7 +93,7 @@ SoilBehaviorRegistry >> open [
 
 { #category : #accessing }
 SoilBehaviorRegistry >> path [
-	^ soil path / #'behavior.registry'
+	^ soil path / #'behaviors'
 ]
 
 { #category : #accessing }

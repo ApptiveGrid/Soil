@@ -99,10 +99,12 @@ SOObjectSegment >> initializeFilesystem [
 	self path ensureCreateDirectory.
 	SOObjectFile new
 		segment: self;
-		initializeFilesystem.
+		initializeFilesystem;
+		close.
 	SOObjectIndexFile new
 		segment: self;
-		initializeFilesystem
+		initializeFilesystem;
+		close
 ]
 
 { #category : #ids }
