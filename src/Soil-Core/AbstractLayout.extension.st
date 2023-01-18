@@ -16,6 +16,7 @@ AbstractLayout >> soilSerializeBehaviorDescription: anObject with: serializer [
 	description := serializer behaviorDescriptionFor: anObject class.
 	serializer
 		nextPutObjectType;
-		nextPutLengthEncodedInteger: (description objectId index).
+		nextPutLengthEncodedInteger: (description objectId index);
+		nextPutLengthEncodedInteger: (description version).
 	^ description
 ]

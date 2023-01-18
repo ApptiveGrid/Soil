@@ -6,7 +6,8 @@ Class {
 		'instVarNames',
 		'behaviorIdentifier',
 		'objectId',
-		'classLayout'
+		'classLayout',
+		'version'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -24,7 +25,9 @@ SOBehaviorDescription class >> isSoilClusterRoot [
 
 { #category : #combining }
 SOBehaviorDescription class >> meta [
-	^ (self for: self) objectId: self metaId
+	^ (self for: self) 
+		beFirstVersion;
+		objectId: self metaId
 ]
 
 { #category : #combining }
@@ -36,6 +39,11 @@ SOBehaviorDescription class >> metaId [
 { #category : #'as yet unclassified' }
 SOBehaviorDescription class >> soilTransientInstVars [ 
 	^ #( objectId ) 
+]
+
+{ #category : #accessing }
+SOBehaviorDescription >> beFirstVersion [
+	version := 1
 ]
 
 { #category : #accessing }
@@ -58,6 +66,11 @@ SOBehaviorDescription >> compatibilityCheck: aClassLayout [
 	(aClassLayout isVariable and: [ aClassLayout isBits not and: [self isFixedLayout]]) ifTrue: [ ^true ].
 	"for now we raise errors for the others. We could instead create and empty object and log a warning"
 	SOLayoutMigrationError signal: 'Incompatible layout detected: trying to read a ', classLayout , ' current code uses ', aClassLayout class name asString
+]
+
+{ #category : #'as yet unclassified' }
+SOBehaviorDescription >> incrementVersion [ 
+	version := version + 1
 ]
 
 { #category : #initialization }
@@ -143,4 +156,15 @@ SOBehaviorDescription >> objectId [
 { #category : #accessing }
 SOBehaviorDescription >> objectId: aSOObjectId [
 	objectId := aSOObjectId
+]
+
+{ #category : #accessing }
+SOBehaviorDescription >> version [
+	^ version
+]
+
+{ #category : #accessing }
+SOBehaviorDescription >> version: anObject [
+
+	version := anObject
 ]
