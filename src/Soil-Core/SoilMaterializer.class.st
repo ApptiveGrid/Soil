@@ -45,14 +45,15 @@ SoilMaterializer >> materializeFromBytes: aByteArray [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| description behaviorIndex|
+	| description behaviorIndex behaviorVersion |
 	behaviorIndex := self nextLengthEncodedInteger.
+	behaviorVersion := self nextLengthEncodedInteger.
 	description := behaviorIndex isZero
 		ifTrue: [ SOBehaviorDescription meta ]
 		ifFalse: [
 			transaction 
 				behaviorDescriptionWithIndex: behaviorIndex
-				ifNone: [ self halt  ] ].
+				andVersion: behaviorVersion ].
 	^ description objectClass classLayout soilBasicMaterialize: description with: self
 ]
 

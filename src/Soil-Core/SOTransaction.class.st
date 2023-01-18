@@ -49,13 +49,14 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 
 { #category : #public }
 SOTransaction >> behaviorDescriptionFor: aClass [
-	| classDescription objectId |
+	| behaviorDescription |
+	"locally created behavior descriptions are always current and can
+	be returned immediately"
 	classDescriptions
 		at: aClass soilBehaviorIdentifier
 		ifPresent: [ :description | ^ description ].
-	classDescriptions
-		at: aClass soilBehaviorIdentifier
-		ifPresent: [ :description | ^ description ].
+	"if we find the behaviorIdentifier in the registry and it is 
+	current we can return it"
 	soil behaviorRegistry
 		nameAt: aClass soilBehaviorIdentifier
 		ifPresent: [ :oid | | desc |
@@ -63,23 +64,44 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 				ifTrue: [SOBehaviorDescription meta ]
 				ifFalse: [ (self objectWithId: oid ifNone: [Error signal ]) objectId: oid].
 			"the description in the database might not be current, if not, we create a new one later"
-			desc isCurrent ifTrue: [ ^ desc ]].
-
-	classDescription := SOBehaviorDescription for: aClass.
-	objectId := self newMetaObjectId.
-	objectId initializeIndex: self objectRepository.
-	classDescription objectId: objectId.
-	self atObjectId: objectId putObject: classDescription.
+			desc isCurrent 
+				ifTrue: [ ^ desc ]
+				ifFalse: [ 
+					"set the behaviorDescription so we can derive a new version from it"
+					behaviorDescription := desc ] ].
+			
+	"behaviorDescription is only set if we've found an old version"
+	behaviorDescription 
+		ifNotNil: [ 
+			"modify existing description and increment version"
+			behaviorDescription 
+				initializeFromBehavior: aClass;
+				incrementVersion.
+			"add a new version record to keep the previous position"
+			self makeNewVersion: behaviorDescription  ]
+		ifNil: [  
+			"this is a new description with version 1"
+			behaviorDescription := (SOBehaviorDescription for: aClass)
+				beFirstVersion;
+				objectId: self newMetaObjectId.
+			behaviorDescription objectId initializeIndex: self objectRepository.
+			self atObjectId: behaviorDescription objectId putObject: behaviorDescription. ].
+	
 	classDescriptions
 		at: aClass soilBehaviorIdentifier
-		put: classDescription.
-	^ classDescription
+		put: behaviorDescription.
+	^ behaviorDescription
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> behaviorDescriptionWithIndex: index ifNone: aBlock [
+SOTransaction >> behaviorDescriptionWithIndex: index andVersion: version [
+	| description |
 	(index = 2) ifTrue: [ ^ SOBehaviorDescription meta ].
-	^ self objectWithId: (SOObjectId segment: 0 index: index) ifNone: aBlock
+	description := self behaviorWithIndex: index ifNone: [ 
+		(SOObjectNotFound segment: 0 index: index) signal ].
+	(description version = version)
+		ifTrue: [ ^ description ].
+	^ self behaviorWithIndex: index andVersion: version ifNone: [ self halt ]
 ]
 
 { #category : #accessing }
@@ -93,6 +115,39 @@ SOTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 		behaviorVersionsUpTo: aSOBehaviorDescription
 		transaction: self .
 	
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> behaviorWithIndex: objectId andVersion: version ifNone: aBlock [
+	| list |
+	idMap 
+		detect: [ :each | each objectId = objectId ]
+		ifFound: [ :record | 
+			(record object version = version)
+				ifTrue: [ ^ record object ] ].
+
+	self flag: #todo.
+	"this is slow because it fetches always all versions"
+	list := self objectRepository allVersionsOf: (SOObjectId segment: 0 index: objectId).
+	list do: [ :rec |
+		rec
+			transaction: self;
+			materializeObject.
+		(rec object version = version) ifTrue: [ ^ rec object ]  ].
+	Error signal.
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> behaviorWithIndex: objectId ifNone: aBlock [
+	idMap 
+		detect: [ :each | each objectId = objectId ]
+		ifFound: [ :record | 
+			^ record object ].
+
+	^ (self objectRepository metaAt: objectId)
+		transaction: self;
+		materializeObject;
+		object
 ]
 
 { #category : #accessing }
@@ -156,6 +211,15 @@ SOTransaction >> isRoot: anObject [
 	^ (objectMap 
 		at: anObject 
 		ifAbsent: [ nil ]) notNil
+]
+
+{ #category : #public }
+SOTransaction >> makeNewVersion: classDescription [
+	| record |
+	record := objectMap at: classDescription.
+	recordsToCommit 
+		at: record objectId 
+		put: record asNewClusterVersion
 ]
 
 { #category : #'as yet unclassified' }

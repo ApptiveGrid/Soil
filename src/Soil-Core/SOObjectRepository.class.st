@@ -20,7 +20,7 @@ SOObjectRepository >> addFirstSegment [
 
 { #category : #adding }
 SOObjectRepository >> addMetaSegment [
-	^ metaSegment := (SOObjectSegment new id: 0) 
+	^ metaSegment := (SOMetaSegment new id: 0) 
 		objectRepository: self;
 		initializeFilesystem;
 		"skip first index as this is the meta behavior description"
@@ -99,10 +99,20 @@ SOObjectRepository >> loadSegments [
 			id: segmentId;
 			objectRepository: self.
 		segmentId isZero 
-			ifTrue: [ metaSegment := segment ]
-			ifFalse: [ segments at: segmentId put: segment ] ].
+			ifTrue: [ 
+				metaSegment := self newMetaSegment ]
+			ifFalse: [ 
+				segments 
+					at: segmentId 
+					put: (self newSegment 
+						id: segmentId) ] ].
 	^ segments
 	
+]
+
+{ #category : #accessing }
+SOObjectRepository >> metaAt: index [ 
+	^ self metaSegment at: index
 ]
 
 { #category : #accessing }
@@ -115,9 +125,24 @@ SOObjectRepository >> newMetaObjectId [
 	^ self metaSegment newObjectId
 ]
 
+{ #category : #'instance creation' }
+SOObjectRepository >> newMetaSegment [ 
+	^ SOMetaSegment new 
+		objectRepository: self;
+		id: 0;
+		yourself
+]
+
 { #category : #accessing }
 SOObjectRepository >> newObjectId [
 	^ self firstSegment newObjectId
+]
+
+{ #category : #'instance creation' }
+SOObjectRepository >> newSegment [ 
+	^ SOObjectSegment new 
+		objectRepository: self;
+		yourself
 ]
 
 { #category : #accessing }
