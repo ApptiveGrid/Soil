@@ -97,11 +97,11 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 SOTransaction >> behaviorDescriptionWithIndex: index andVersion: version [
 	| description |
 	(index = 2) ifTrue: [ ^ SOBehaviorDescription meta ].
-	description := self behaviorWithId: index ifNone: [ 
+	description := self behaviorWithIndex: index ifNone: [ 
 		(SOObjectNotFound segment: 0 index: index) signal ].
 	(description version = version)
 		ifTrue: [ ^ description ].
-	^ self behaviorWithId: index andVersion: version ifNone: [ self halt ]
+	^ self behaviorWithIndex: index andVersion: version ifNone: [ self halt ]
 ]
 
 { #category : #accessing }
@@ -118,7 +118,7 @@ SOTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> behaviorWithId: objectId andVersion: version ifNone: aBlock [
+SOTransaction >> behaviorWithIndex: objectId andVersion: version ifNone: aBlock [
 	| list |
 	idMap 
 		detect: [ :each | each objectId = objectId ]
@@ -138,13 +138,13 @@ SOTransaction >> behaviorWithId: objectId andVersion: version ifNone: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> behaviorWithId: objectId ifNone: aBlock [
+SOTransaction >> behaviorWithIndex: objectId ifNone: aBlock [
 	idMap 
 		detect: [ :each | each objectId = objectId ]
 		ifFound: [ :record | 
 			^ record object ].
 
-	^ (self metaSegment at: objectId)
+	^ (self objectRepository metaAt: objectId)
 		transaction: self;
 		materializeObject;
 		object

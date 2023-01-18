@@ -111,6 +111,11 @@ SOObjectRepository >> loadSegments [
 ]
 
 { #category : #accessing }
+SOObjectRepository >> metaAt: index [ 
+	^ self metaSegment at: index
+]
+
+{ #category : #accessing }
 SOObjectRepository >> metaSegment [
 	^ metaSegment 
 ]
