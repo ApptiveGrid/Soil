@@ -49,7 +49,7 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 
 { #category : #public }
 SOTransaction >> behaviorDescriptionFor: aClass [
-	| behaviorDescription |
+	| behaviorDescription objectId |
 	"locally created behavior descriptions are always current and can
 	be returned immediately"
 	classDescriptions
@@ -57,18 +57,17 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 		ifPresent: [ :description | ^ description ].
 	"if we find the behaviorIdentifier in the registry and it is 
 	current we can return it"
-	soil behaviorRegistry
+	objectId := soil behaviorRegistry
 		nameAt: aClass soilBehaviorIdentifier
-		ifPresent: [ :oid | | desc |
-			desc := (oid index = 2)
-				ifTrue: [SOBehaviorDescription meta ]
-				ifFalse: [ (self objectWithId: oid ifNone: [Error signal ]) objectId: oid].
-			"the description in the database might not be current, if not, we create a new one later"
-			desc isCurrent 
-				ifTrue: [ ^ desc ]
-				ifFalse: [ 
-					"set the behaviorDescription so we can derive a new version from it"
-					behaviorDescription := desc ] ].
+		ifAbsent: [ nil ].
+		
+	objectId ifNotNil: [ 
+		behaviorDescription := (objectId index = 2)
+			ifTrue: [ ^ SOBehaviorDescription meta ]
+			ifFalse: [ (self objectWithId: objectId ifNone: [Error signal ]) objectId: objectId].
+		"the description in the database might not be current, if not, we create a new one later"
+		behaviorDescription isCurrent 
+			ifTrue: [ ^ behaviorDescription ] ].
 			
 	"behaviorDescription is only set if we've found an old version"
 	behaviorDescription 

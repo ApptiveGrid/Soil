@@ -65,14 +65,6 @@ SoilBehaviorRegistry >> nameAt: classIdentifier ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
-SoilBehaviorRegistry >> nameAt: classIdentifier ifPresent: aBlock [
-	^ self index 
-		at: classIdentifier 
-		ifPresent: aBlock
-	
-]
-
-{ #category : #accessing }
 SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 	| dict |
 	(objectId index = 0) ifTrue: [ Error signal: 'cannot add non-initialized object id' ].
