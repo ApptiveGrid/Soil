@@ -55,6 +55,16 @@ SOObjectSegment >> at: anInteger putBytes: bytes [
 ]
 
 { #category : #accessing }
+SOObjectSegment >> at: index version: version [ 
+	| record |
+	record := self at: index.
+	[ record version <= version ] whileFalse: [ 
+		record hasPreviousVersion ifFalse: [ ^ nil ].
+		record := self objectFile atPosition: record previousVersionPosition ].
+	^ record
+]
+
+{ #category : #accessing }
 SOObjectSegment >> basicAt: anInteger length:  length [
 	| position |
 	position := self indexFile positionAt: anInteger.

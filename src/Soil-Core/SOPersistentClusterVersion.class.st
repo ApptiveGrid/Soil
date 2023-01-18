@@ -59,10 +59,17 @@ SOPersistentClusterVersion >> previousVersionPosition [
 
 { #category : #printing }
 SOPersistentClusterVersion >> printOn: aStream [ 
-	aStream << 'old record: '.
-	objectId printOn: aStream.
-	aStream << ' '.
-	object printOn: aStream.
+	aStream << 'persistent record: '.
+	objectId ifNotNil: [  
+		aStream << 'oid='.
+		objectId printOn: aStream ].
+	object ifNotNil: [  
+		aStream << ' '.
+		object printOn: aStream ].
+	aStream 
+		<< 'version=' << version asString 
+		<< ',previous=' << previousVersionPosition asString.
+	
 
 ]
 
