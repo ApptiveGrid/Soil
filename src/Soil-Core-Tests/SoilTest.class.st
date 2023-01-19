@@ -103,6 +103,37 @@ SoilTest >> testSerializingRootTwoCluster [
 ]
 
 { #category : #tests }
+SoilTest >> testSerializingToSavedRoot [
+	| tx theRoot modelMap modelName theModel tx2 soil2 tx3 soil3 materializedRoot materializedModelMap |
+	tx := soil newTransaction.
+	theRoot := Dictionary new.
+	tx root: theRoot.
+	tx commit.
+	soil2 := (Soil path: soil path) open.
+	tx2 := soil2 newTransaction.
+	theRoot := tx2 root.
+	"theRoot := Dictionary new.
+	tx2 root: theRoot."
+	theModel := self simpleGraph.
+	modelName := theModel class name.
+	modelMap := Dictionary new.
+	theRoot at: modelName put: modelMap.
+	tx2 markDirty: theRoot.
+	tx2 makeRoot: modelMap.
+	modelMap at: 'foo' put: theModel.
+	tx2 commit.
+
+	soil3 := (Soil path: soil path) open.
+	tx3 := soil3 newTransaction.
+	materializedRoot := tx3 root.
+	materializedModelMap := materializedRoot at: modelName.
+	self assert: materializedModelMap class equals: SOObjectProxy.
+	self assert: materializedModelMap object class equals: Dictionary.
+	self assert: (materializedModelMap object at: 'foo') class equals: SOTestGraphRoot.
+	self assert: (materializedModelMap object at: 'foo') nested reference nested label equals: 'nested under cluster'
+]
+
+{ #category : #tests }
 SoilTest >> testUpdatingPersistentObject [
 	| tx updateTx persistedRoot readTx root3 |
 	tx := soil newTransaction.

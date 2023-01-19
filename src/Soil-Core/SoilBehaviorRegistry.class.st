@@ -58,9 +58,10 @@ SoilBehaviorRegistry >> initializeFilesystem [
 
 { #category : #accessing }
 SoilBehaviorRegistry >> nameAt: classIdentifier ifAbsent: aBlock [
-	^ self index 
+	^ (self index 
 		at: classIdentifier 
-		ifAbsent: aBlock
+		ifAbsent: aBlock)
+			ifNotNil: [ :bytes | SOObjectId readFrom: bytes readStream ]
 	
 ]
 
@@ -80,7 +81,8 @@ SoilBehaviorRegistry >> open [
 	index :=  SOPersistentSkipList new 
 		maxLevel: 16;
 		keySize: 64;
-		path: self path
+		path: self path;
+		open
 ]
 
 { #category : #accessing }
