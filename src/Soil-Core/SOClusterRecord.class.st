@@ -48,6 +48,11 @@ SOClusterRecord >> committed [
 	committed := true
 ]
 
+{ #category : #testing }
+SOClusterRecord >> hasPreviousVersion [
+	^ previousVersionPosition > 0
+]
+
 { #category : #initialization }
 SOClusterRecord >> initialize [ 
 	super initialize.
@@ -110,4 +115,15 @@ SOClusterRecord >> transaction [
 { #category : #accessing }
 SOClusterRecord >> transaction: aSOTransaction [ 
 	transaction := aSOTransaction 
+]
+
+{ #category : #accessing }
+SOClusterRecord >> version [
+
+	^ version
+]
+
+{ #category : #accessing }
+SOClusterRecord >> version: anInteger [ 
+	version := anInteger 
 ]

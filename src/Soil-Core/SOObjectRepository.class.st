@@ -68,6 +68,15 @@ SOObjectRepository >> at: objectId put: bytes [
 	segment at: objectId index putBytes: bytes	
 ]
 
+{ #category : #accessing }
+SOObjectRepository >> at: objectid version: version [ 
+	| segment |
+	segment := self segmentAt: objectid segment.
+	^ (segment at: objectid index version: version)
+		objectId: objectid;
+		yourself
+]
+
 { #category : #'initialize-release' }
 SOObjectRepository >> close [
 	segments do: #close

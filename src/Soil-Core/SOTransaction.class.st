@@ -243,9 +243,9 @@ SOTransaction >> markDirty: anObject [
 { #category : #'as yet unclassified' }
 SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 	| record |
-	record := (self objectRepository at: objectId)
+	record := (self objectRepository at: objectId version: readVersion)
 		transaction: self;
-		materializeObject.
+		materializeObject. 
 	idMap at: objectId put: record.
 	objectMap at: record object put: record.
 	^ record object 
