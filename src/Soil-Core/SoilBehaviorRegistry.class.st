@@ -70,7 +70,7 @@ SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 	| dict |
 	(objectId index = 0) ifTrue: [ Error signal: 'cannot add non-initialized object id' ].
 	dict := self index 
-		at: classIdentifier put: objectId;
+		at: classIdentifier put: objectId asByteArray;
 		yourself.
 	index writePages 
 ]
