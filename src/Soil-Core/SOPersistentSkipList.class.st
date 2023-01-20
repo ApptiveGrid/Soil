@@ -162,6 +162,7 @@ SOPersistentSkipList >> initialize [
 
 { #category : #initialization }
 SOPersistentSkipList >> initializeList [ 
+	self open.
 	self writeHeader.
 	self writeFirstPage
 	 
