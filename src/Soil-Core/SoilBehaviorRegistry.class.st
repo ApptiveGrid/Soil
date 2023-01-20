@@ -58,9 +58,10 @@ SoilBehaviorRegistry >> initializeFilesystem [
 
 { #category : #accessing }
 SoilBehaviorRegistry >> nameAt: classIdentifier ifAbsent: aBlock [
-	^ self index 
+	^ (self index 
 		at: classIdentifier 
-		ifAbsent: aBlock
+		ifAbsent: aBlock)
+			ifNotNil: [ :bytes | SOObjectId readFrom: bytes readStream ]
 	
 ]
 
@@ -69,7 +70,7 @@ SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 	| dict |
 	(objectId index = 0) ifTrue: [ Error signal: 'cannot add non-initialized object id' ].
 	dict := self index 
-		at: classIdentifier put: objectId;
+		at: classIdentifier put: objectId asByteArray;
 		yourself.
 	index writePages 
 ]
@@ -80,7 +81,8 @@ SoilBehaviorRegistry >> open [
 	index :=  SOPersistentSkipList new 
 		maxLevel: 16;
 		keySize: 64;
-		path: self path
+		path: self path;
+		open
 ]
 
 { #category : #accessing }

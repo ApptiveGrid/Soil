@@ -60,9 +60,18 @@ Soil >> initializeFilesystem [
 	(path exists and: [ path hasChildren ]) 
 		ifTrue: [ SODatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
 	self path ensureCreateDirectory.
-	parameters initializeFilesystem.
-	objectRepository initializeFilesystem.
-	behaviorRegistry initializeFilesystem
+	parameters := SoilParameterFile new
+		soil: self;
+		initializeFilesystem;
+		yourself.
+	objectRepository := SOObjectRepository new 
+		soil: self;
+		initializeFilesystem;
+		yourself.
+	behaviorRegistry := SoilBehaviorRegistry new
+			soil: self;
+			initializeFilesystem;
+			yourself
 ]
 
 { #category : #'instance creation' }
@@ -94,9 +103,11 @@ Soil >> objectRepository [
 { #category : #'instance creation' }
 Soil >> open [
 	parameters := SoilParameterFile new
-		soil: self.
+		soil: self;
+		open.
 	objectRepository := SOObjectRepository new 
 		soil: self;
+		loadSegments;
 		yourself.
 	behaviorRegistry := SoilBehaviorRegistry new
 			soil: self;
@@ -112,6 +123,5 @@ Soil >> path [
 
 { #category : #accessing }
 Soil >> path: aString [ 
-	path := aString asFileReference.
-	self open
+	path := aString asFileReference
 ]

@@ -162,6 +162,7 @@ SOPersistentSkipList >> initialize [
 
 { #category : #initialization }
 SOPersistentSkipList >> initializeList [ 
+	self open.
 	self writeHeader.
 	self writeFirstPage
 	 
@@ -222,6 +223,11 @@ SOPersistentSkipList >> newPage [
 	^ page
 ]
 
+{ #category : #'instance creation' }
+SOPersistentSkipList >> open [ 
+	stream := SOLockableStream path: path
+]
+
 { #category : #accessing }
 SOPersistentSkipList >> pageAt: anInteger [
 	(anInteger > pages size) ifTrue: [ 
@@ -255,7 +261,7 @@ SOPersistentSkipList >> positionOfPage: aPage [
 { #category : #accessing }
 SOPersistentSkipList >> readPageAt: anInteger [
 	| page |
-	stream position: (self headerLength + ((anInteger - 1) * self pageSize)).
+	stream position: (self headerLength + ((anInteger - 1) * self filePageSize)).
 	page := SOSkipListPage new 
 		list: self;
 		pageNumber: anInteger;
@@ -276,8 +282,7 @@ SOPersistentSkipList >> rightOf: aNode atLevel: anInteger [
 
 { #category : #initialization }
 SOPersistentSkipList >> stream [ 
-	^ stream ifNil: [
-		stream := SOLockableStream path: path ]
+	^ stream
 ]
 
 { #category : #writing }

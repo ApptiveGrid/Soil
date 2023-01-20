@@ -41,7 +41,7 @@ SOObjectId >> = anObjectId [
 
 { #category : #converting }
 SOObjectId >> asByteArray [
-	^ index asByteArrayOfSize: 8
+	^ (segment asByteArrayOfSize: 2), (index asByteArrayOfSize: 6)
 ]
 
 { #category : #comparing }
