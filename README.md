@@ -21,6 +21,7 @@ Soil is still in very early ramp up stage but we are working towards a milestone
 
 A list of past milestones: 
 
+- [x] MVCC: supported multi version concurrency control with writing records versioned and support versioned snapshot isolation on read
 - [x] segment zero: move all behaviors to a special segment that has several performance and storage benefits
 - [x] basic support for splitting and storing an arbitrary object graph (not all object classes but including clean blocks)
 
