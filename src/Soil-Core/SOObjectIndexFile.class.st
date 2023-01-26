@@ -56,6 +56,14 @@ SOObjectIndexFile >> lastObjectIndex: anInteger [
 	lastObjectIndex := anInteger 
 ]
 
+{ #category : #'as yet unclassified' }
+SOObjectIndexFile >> lockObjectId: aSOObjectId for: lockContext [
+	^ stream 
+		lockFrom: (self indexPositionAt: aSOObjectId index) 
+		length: self objectIndexSize  
+		for: lockContext
+]
+
 { #category : #accessing }
 SOObjectIndexFile >> nextIndex [
 	^ self lastObjectIndex + 1

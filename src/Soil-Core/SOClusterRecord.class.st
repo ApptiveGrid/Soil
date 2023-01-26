@@ -84,6 +84,12 @@ SOClusterRecord >> objectId: aSOObjectId [
 ]
 
 { #category : #accessing }
+SOClusterRecord >> previousVersionPosition [
+
+	^ previousVersionPosition
+]
+
+{ #category : #accessing }
 SOClusterRecord >> previousVersionPosition: anInteger [ 
 	previousVersionPosition := anInteger 
 ]

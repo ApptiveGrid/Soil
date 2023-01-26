@@ -45,14 +45,34 @@ SOLockableStream >> initializePath: aStringOrFileReference [
 	lockRegistry := SOFileLockRegistry forPath: aStringOrFileReference asFileReference 
 ]
 
+{ #category : #locking }
+SOLockableStream >> lockFrom: from length: length for: lockContext [ 
+	^ self memoryLockFrom: from to: from + length for: lockContext
+]
+
+{ #category : #locking }
+SOLockableStream >> lockFrom: from to: to for: lockContext [ 
+	self memoryLockFrom: from to: to for: lockContext
+]
+
 { #category : #accessing }
 SOLockableStream >> locks [
 	^ locks
 ]
 
 { #category : #locking }
+SOLockableStream >> memoryLockFrom: from length: length for: contextObject [ 
+	^ self memoryLockFrom: from to: from + length for: contextObject  
+]
+
+{ #category : #locking }
 SOLockableStream >> memoryLockFrom: from to: to for: contextObject [ 
-	locks add: (lockRegistry lockFrom: from to: to for: contextObject)
+	^ locks add: (lockRegistry lockFrom: from to: to for: contextObject)
+]
+
+{ #category : #locking }
+SOLockableStream >> memoryUnlockFrom: from length: length for: contextObject [ 
+	^ self memoryUnlockFrom: from to: from + length for: contextObject  
 ]
 
 { #category : #locking }

@@ -4,10 +4,28 @@ Class {
 	#instVars : [
 		'from',
 		'to',
-		'context'
+		'context',
+		'registry',
+		'stream'
 	],
 	#category : #'Soil-File'
 }
+
+{ #category : #'instance creation' }
+SORangeLock class >> from: from length: length context: lockContext [ 
+	^ self new 
+		from: from;
+		to: from + length;
+		for: lockContext 
+]
+
+{ #category : #'instance creation' }
+SORangeLock class >> from: from to: to context: lockContext [ 
+	^ self new 
+		from: from;
+		to: to;
+		context: lockContext 
+]
 
 { #category : #'as yet unclassified' }
 SORangeLock >> conflictsFrom: aFrom to: aTo context: contextObject [ 
@@ -55,8 +73,42 @@ SORangeLock >> isFrom: aFrom to: aTo for: contextObject [
 
 { #category : #printing }
 SORangeLock >> printOn: aStream [ 
-	aStream << 'lock range ' << from asString << ' - ' << to asString << ' by '.
+	aStream << 'range lock  ' 
+		<< from asString << ' - ' << to asString 
+		<< ' on ' << registry path asString << ' by '.
 	context printOn: aStream
+]
+
+{ #category : #accessing }
+SORangeLock >> registry [
+
+	^ registry
+]
+
+{ #category : #accessing }
+SORangeLock >> registry: anObject [
+
+	registry := anObject
+]
+
+{ #category : #initialization }
+SORangeLock >> release [ 
+	stream ifNotNil: [ 
+		stream unlockFrom: from to: to for: context ].
+	registry ifNotNil: [ 
+		registry removeLock: self ]
+]
+
+{ #category : #accessing }
+SORangeLock >> stream [
+
+	^ stream
+]
+
+{ #category : #accessing }
+SORangeLock >> stream: anObject [
+
+	stream := anObject
 ]
 
 { #category : #accessing }

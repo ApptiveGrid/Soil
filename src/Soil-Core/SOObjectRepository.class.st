@@ -119,6 +119,12 @@ SOObjectRepository >> loadSegments [
 	
 ]
 
+{ #category : #'as yet unclassified' }
+SOObjectRepository >> lockObjectId: aSOObjectId for: lockContext [
+	^ (self segmentAt: aSOObjectId segment)
+		lockObjectId: aSOObjectId for: lockContext
+]
+
 { #category : #accessing }
 SOObjectRepository >> metaAt: index [ 
 	^ self metaSegment at: index
@@ -152,6 +158,12 @@ SOObjectRepository >> newSegment [
 	^ SOObjectSegment new 
 		objectRepository: self;
 		yourself
+]
+
+{ #category : #'as yet unclassified' }
+SOObjectRepository >> positionOf: anObjectId [ 
+	^ (self segmentAt: anObjectId segment)
+		indexFile positionAt: anObjectId index  
 ]
 
 { #category : #accessing }

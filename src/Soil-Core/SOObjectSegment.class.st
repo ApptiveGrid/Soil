@@ -117,6 +117,11 @@ SOObjectSegment >> initializeFilesystem [
 		close
 ]
 
+{ #category : #'as yet unclassified' }
+SOObjectSegment >> lockObjectId: aSOObjectId for: lockContext [ 
+	^ self indexFile lockObjectId: aSOObjectId for: lockContext 
+]
+
 { #category : #ids }
 SOObjectSegment >> newObjectId [
 	^ SOObjectId segment: id index: 0 

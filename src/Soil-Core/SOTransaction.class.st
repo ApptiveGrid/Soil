@@ -8,7 +8,8 @@ Class {
 		'recordsToCommit',
 		'readVersion',
 		'writeVersion',
-		'behaviorDescriptions'
+		'behaviorDescriptions',
+		'locks'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -46,7 +47,7 @@ SOTransaction >> atObjectId: objectId putObject: anObject [
 		transaction: self.
 	idMap at: objectId put: record.
 	objectMap at: anObject put: record.
-	recordsToCommit ifNotNil: [ recordsToCommit at: objectId put: record ]
+	recordsToCommit ifNotNil: [ recordsToCommit add: record ]
 ]
 
 { #category : #public }
@@ -152,25 +153,41 @@ SOTransaction >> behaviorWithIndex: objectId ifNone: aBlock [
 ]
 
 { #category : #accessing }
+SOTransaction >> buildWriteVersion [
+	^ soil databaseVersion + 1 
+]
+
+{ #category : #accessing }
 SOTransaction >> checkpoint [
 	| bytes |
-	writeVersion := self writeVersion.
-	recordsToCommit := self recordsToCommit.
-	self serializeObjects.
-	recordsToCommit keysAndValuesDo: [ :objectId :record | 
-		objectId initializeIndex: self objectRepository.
-		record assignObjectIds: soil objectRepository.
+	"serialize objects and collect all to be written records. This can be done without 
+	resources that need locking. This reduces time needed for locking"
+	self prepareRecordsForCommit.
+	"lock global database version which locks the database for the execution
+	of this transaction"
+	[ locks add: (soil lockDatabaseVersionFor: self).
+	writeVersion := self buildWriteVersion.
+	recordsToCommit do: [ :record |
+		"check if the version we've read is still actual. Another transaction could have
+		committed since we last read. Checking for the position in the index is sufficient
+		as each version relates to a unique position"
+		locks add: record lockIndex.
+		record validateReadVersion ].
+	recordsToCommit do: [ :record | 
+		"record objectId initializeIndex: self objectRepository.
+		record assignObjectIds: soil objectRepository."
 		record version: writeVersion.
 		bytes := record serialize.
-		soil objectRepository 
-			at: objectId 
+		soil objectRepository  
+			at: record objectId 
 			put: bytes.
-		record committed  ].
+		record committed  ] .
 	behaviorDescriptions do: [ :description |
 		soil behaviorRegistry 
 			nameAt: description value behaviorIdentifier 
 			put: description objectId ].
-	soil databaseVersion: writeVersion
+	soil databaseVersion: writeVersion ]
+			ensure: [self releaseLocks ]
 
 ]
 
@@ -199,7 +216,8 @@ SOTransaction >> initialize [
 	super initialize.
 	idMap := IdentityDictionary new.
 	objectMap := IdentityDictionary new.
-	behaviorDescriptions := Dictionary new
+	behaviorDescriptions := Dictionary new.
+	locks := OrderedCollection new
 ]
 
 { #category : #testing }
@@ -214,6 +232,11 @@ SOTransaction >> isRoot: anObject [
 	^ (objectMap 
 		at: anObject 
 		ifAbsent: [ nil ]) notNil
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> lockObjectId: aSOObjectId [ 
+	^ self objectRepository lockObjectId: aSOObjectId for: self
 ]
 
 { #category : #public }
@@ -312,6 +335,25 @@ SOTransaction >> objectWithId: objectId ifNone: aBlock [
 ]
 
 { #category : #accessing }
+SOTransaction >> prepareRecordsForCommit [.
+	"select all dirty/new records and convert them to new version records"
+	recordsToCommit := idMap values asOrderedCollection 
+		select: [:each | each value shouldBeCommitted ]
+			thenCollect: [:each | each asNewClusterVersion ].
+	"serialize initial records. While serializing there can be new records 
+	popping up (an object not registered yet in the transaction but is a
+	cluster root"
+	self serializeObjects.
+	"now the list of records to write is complete"
+
+]
+
+{ #category : #printing }
+SOTransaction >> printOn: aStream [ 
+	aStream << 'transaction read: ' << readVersion asString << ', write: ' << writeVersion asString
+]
+
+{ #category : #accessing }
 SOTransaction >> readVersion: anInteger [ 
 	readVersion := anInteger
 ]
@@ -321,11 +363,9 @@ SOTransaction >> records [
 	^ idMap values
 ]
 
-{ #category : #accessing }
-SOTransaction >> recordsToCommit [
-	^ ((idMap select: [:each | each value shouldBeCommitted ])
-		collect: [:each | each asNewClusterVersion version: writeVersion]) 
-		as: OrderedIdentityDictionary 
+{ #category : #'as yet unclassified' }
+SOTransaction >> releaseLocks [
+	locks do: [ :lock | lock release ]
 ]
 
 { #category : #accessing }
@@ -356,18 +396,14 @@ SOTransaction >> rootObjectId [
 SOTransaction >> serializeObjects [
 	| index key |
 	index := 1.
+	"process the loop in a way new records that appear while serializing
+	are taken into account"
 	[ index <= recordsToCommit size ] whileTrue: [ 
-		key := recordsToCommit keyAtIndex: index.
-		(recordsToCommit at: key) serializeObject.
+		(recordsToCommit at: index) serializeObject.
 		index := index + 1 ]
 ]
 
 { #category : #accessing }
 SOTransaction >> soil: aSoil [ 
 	soil := aSoil
-]
-
-{ #category : #accessing }
-SOTransaction >> writeVersion [
-	^ soil databaseVersion + 1 
 ]

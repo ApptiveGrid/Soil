@@ -58,6 +58,11 @@ SONewClusterVersion >> initialize [
 	externalObjects := OrderedCollection new.
 ]
 
+{ #category : #'public/accessing' }
+SONewClusterVersion >> lockIndex [
+	^ transaction lockObjectId: objectId
+]
+
 { #category : #printing }
 SONewClusterVersion >> printOn: aStream [ 
 	aStream << 'new record: '.
@@ -108,4 +113,10 @@ SONewClusterVersion >> serializeOn: stream [
 { #category : #testing }
 SONewClusterVersion >> shouldBeCommitted [
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SONewClusterVersion >> validateReadVersion [
+	(previousVersionPosition = (transaction objectRepository positionOf: objectId)) ifFalse: [ 
+		Error signal ]
 ]
