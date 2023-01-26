@@ -118,5 +118,5 @@ SONewClusterVersion >> shouldBeCommitted [
 { #category : #'as yet unclassified' }
 SONewClusterVersion >> validateReadVersion [
 	(previousVersionPosition = (transaction objectRepository positionOf: objectId)) ifFalse: [ 
-		Error signal ]
+		SOObjectHasConcurrentChange signal: 'object id: ', objectId asString, ' has been changed by another transaction']
 ]
