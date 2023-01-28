@@ -8,7 +8,7 @@ Class {
 		'classLayout',
 		'version'
 	],
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Serializer'
 }
 
 { #category : #'instance creation' }
@@ -27,12 +27,6 @@ SOBehaviorDescription class >> meta [
 	^ (self for: self) 
 		beFirstVersion;
 		objectId: self metaId
-]
-
-{ #category : #combining }
-SOBehaviorDescription class >> metaId [
-	"the id of the class is alway 2 and pre-initialized to break recursion"
-	^ SOObjectId segment: 0 index: 2
 ]
 
 { #category : #'as yet unclassified' }

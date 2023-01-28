@@ -3,6 +3,6 @@ class was re-defined and the layout was changed to a layout that we can not migr
 "
 Class {
 	#name : #SOLayoutMigrationError,
-	#superclass : #SOError,
-	#category : #'Soil-Core-Error'
+	#superclass : #SOSerializerError,
+	#category : #'Soil-Serializer-Error'
 }
