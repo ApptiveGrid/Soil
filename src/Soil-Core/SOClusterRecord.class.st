@@ -44,7 +44,7 @@ SOClusterRecord >> committed [
 
 { #category : #testing }
 SOClusterRecord >> hasPreviousVersion [
-	^ previousVersionPosition > 0
+	^ previousVersionPosition > 0 
 ]
 
 { #category : #initialization }

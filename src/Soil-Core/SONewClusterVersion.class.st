@@ -2,7 +2,8 @@ Class {
 	#name : #SONewClusterVersion,
 	#superclass : #SOClusterRecord,
 	#instVars : [
-		'externalObjects'
+		'externalObjects',
+		'previousVersionRecord'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -11,6 +12,21 @@ Class {
 SONewClusterVersion >> addObject: anObject reference: anObjectId [
 	externalObjects addLast: anObject.
 	references addLast: anObjectId
+]
+
+{ #category : #converting }
+SONewClusterVersion >> asJournalEntry [
+	| entry |
+	entry := self hasPreviousVersion 
+		ifTrue: [ 
+			SONewObjectVersionEntry new
+				oldBytes: previousVersionRecord bytes ]
+		ifFalse: [ SONewObjectEntry new ].
+	entry 
+		objectId: objectId;
+		bytes: self serialize.
+
+	^ entry
 ]
 
 { #category : #converting }
@@ -68,6 +84,12 @@ SONewClusterVersion >> initializeObjectIdsIn: aSOTransaction [
 { #category : #'public/accessing' }
 SONewClusterVersion >> lockIndex [
 	^ transaction lockObjectId: objectId
+]
+
+{ #category : #accessing }
+SONewClusterVersion >> previousVersionRecord: anObject [
+
+	previousVersionRecord := anObject
 ]
 
 { #category : #printing }

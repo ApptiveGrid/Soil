@@ -10,7 +10,8 @@ Class {
 		'writeVersion',
 		'behaviorDescriptions',
 		'locks',
-		'lastObjectIndexes'
+		'lastObjectIndexes',
+		'journal'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -22,6 +23,20 @@ SOTransaction >> abort [
 	soil := nil.
 	idMap := nil.
 	objectMap := nil
+]
+
+{ #category : #accessing }
+SOTransaction >> acquireLocksAndDetectWriteSkew [
+	lastObjectIndexes := Dictionary new.
+	"first iterate over all records to acquire locks and check for concurrent 
+	writes. Might be changed later to rely on the journal in case of accident"
+	recordsToCommit do: [ :record |
+		record initializeObjectIdsIn: self.
+		"check if the version we've read is still actual. Another transaction could have
+		committed since we last read. Checking for the position in the index is sufficient
+		as each version relates to a unique position"
+		locks add: record lockIndex.
+		record validateReadVersion ]
 ]
 
 { #category : #adding }
@@ -154,41 +169,44 @@ SOTransaction >> behaviorWithIndex: objectId ifNone: aBlock [
 ]
 
 { #category : #accessing }
+SOTransaction >> buildJournal [
+	journal := SOJournal new
+		transaction: self;
+		create.
+	recordsToCommit do: [ :record | 
+		record version: writeVersion.
+		journal addEntry: record asJournalEntry.
+		record committed  ].
+	^ journal
+]
+
+{ #category : #accessing }
 SOTransaction >> buildWriteVersion [
 	^ soil databaseVersion + 1 
 ]
 
 { #category : #accessing }
 SOTransaction >> checkpoint [
-	| bytes |
 	"serialize objects and collect all to be written records. This can be done without 
 	resources that need locking. This reduces time needed for locking"
 	self prepareRecordsForCommit.
-	"lock global database version which locks the database for the execution
-	of this transaction"
+	"enter lock phase. Acquire lock on global databaseVersion which centrally locks
+	the database for commiting until this checkpoint is done. The ensure block is needed
+	to be sure to release all locks at the end."
 	[ locks add: (soil lockDatabaseVersionFor: self).
+	"Now the version is locked. We can read it again to have the real version and
+	increment"
 	writeVersion := self buildWriteVersion.
-	lastObjectIndexes := Dictionary new.
-	"first iterate over all records to acquire locks and check for concurrent 
-	writes. As we do not yet have a journal that allows us to rollback we check
-	all read versions before modifying the database"
-	recordsToCommit do: [ :record |
-		record initializeObjectIdsIn: self.
-		"check if the version we've read is still actual. Another transaction could have
-		committed since we last read. Checking for the position in the index is sufficient
-		as each version relates to a unique position"
-		locks add: record lockIndex.
-		record validateReadVersion ].
-	recordsToCommit do: [ :record | 
-		record version: writeVersion.
-		bytes := record serialize.
-		soil objectRepository  
-			at: record objectId 
-			put: bytes.
-		record committed  ].
+	"lock all records in the segment and check indexes for out of date versions"
+	self acquireLocksAndDetectWriteSkew.
+	"convert the records into journal entries, write the journal to disk and then
+	execute the journal on the database"
+	self buildJournal
+		write;
+		commit.
 	"write back the accumulated new indexes for alll segments"
-	lastObjectIndexes keysAndValuesDo: [ :segment :lastIndex |
-		segment lastObjectIndex: lastIndex ].
+	lastObjectIndexes keysAndValuesDo: [ :segment :indexes |
+		segment lastObjectIndex: indexes value ].
 	behaviorDescriptions do: [ :description |
 		soil behaviorRegistry 
 			nameAt: description value behaviorIdentifier 
@@ -229,17 +247,19 @@ SOTransaction >> initialize [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> initializeObjectId: anObjectId [
-	| segment currentId |
+	| segment assoc |
 	anObjectId isInitialized ifTrue: [ SOObjectIdAlreadyInitialized signal: 'object id is already initialized: ', anObjectId asString ].
 	segment := self objectRepository segmentAt: anObjectId segment.
-	currentId := lastObjectIndexes 
+	"maintain last object indexes per segment"
+	assoc := lastObjectIndexes 
 		at: segment 
 		ifAbsentPut: [ 
 			locks add: (segment lockLastObjectIndexFor: self).
-			segment lastObjectIndex ].
-	anObjectId index: (lastObjectIndexes 
-		at: segment 
-		put: currentId + 1)
+			segment lastObjectIndex -> segment lastObjectIndex ].
+	"we use an association here to keep the version read from database
+	as well as the new version"
+	assoc value: assoc value + 1.
+	anObjectId index: assoc value
 ]
 
 { #category : #testing }
@@ -425,6 +445,16 @@ SOTransaction >> serializeObjects [
 ]
 
 { #category : #accessing }
+SOTransaction >> soil [
+	^ soil
+]
+
+{ #category : #accessing }
 SOTransaction >> soil: aSoil [ 
 	soil := aSoil
+]
+
+{ #category : #accessing }
+SOTransaction >> writeVersion [
+	^ writeVersion
 ]

@@ -14,7 +14,8 @@ SOPersistentClusterVersion >> asNewClusterVersion [
 		object: object;
 		objectId: objectId;
 		transaction: transaction;
-		previousVersionPosition: position
+		previousVersionPosition: position;
+		previousVersionRecord: self
 ]
 
 { #category : #'as yet unclassified' }
