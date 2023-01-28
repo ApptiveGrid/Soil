@@ -42,7 +42,7 @@ SOLockableStream >> initialize [
 	locks := OrderedCollection new.
 	self class finalizationRegistry add: self.
 	imageLocked := true.
-	fileLocked := false.
+	fileLocked := true.
 ]
 
 { #category : #initialization }
