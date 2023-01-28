@@ -5,8 +5,8 @@ Class {
 		'from',
 		'to',
 		'context',
-		'registry',
-		'stream'
+		'stream',
+		'registry'
 	],
 	#category : #'Soil-File'
 }
@@ -31,6 +31,11 @@ SORangeLock class >> from: from to: to context: lockContext [
 SORangeLock >> conflictsFrom: aFrom to: aTo context: contextObject [ 
 	"conflicts if ranges overlap but only for different contexts"
 	^ (self intersectsFrom: from to: to) &  (context ~~ contextObject)
+]
+
+{ #category : #'as yet unclassified' }
+SORangeLock >> conflictsWith: aSORangeLock [ 
+	^ aSORangeLock conflictsFrom: from to: to context: context
 ]
 
 { #category : #accessing }
@@ -71,11 +76,27 @@ SORangeLock >> isFrom: aFrom to: aTo for: contextObject [
 	^ (from = aFrom)& (to = aTo) & (context = contextObject)
 ]
 
+{ #category : #'as yet unclassified' }
+SORangeLock >> lockInMemory: aLockRegistry [ 
+	aLockRegistry addLock: self 
+	 
+]
+
+{ #category : #'as yet unclassified' }
+SORangeLock >> lockOn: aStream [ 
+	stream := aStream wrappedStream.
+	stream lockAt: from length: to - from 
+]
+
 { #category : #printing }
 SORangeLock >> printOn: aStream [ 
 	aStream << 'range lock  ' 
-		<< from asString << ' - ' << to asString 
-		<< ' on ' << registry path asString << ' by '.
+		<< from asString << ' - ' << to asString.
+	registry ifNotNil: [  
+		aStream << ' mem ' << registry path asString ].
+	stream ifNotNil: [  
+		aStream << ' file ' << stream name asString ].
+	aStream << ' '.
 	context printOn: aStream
 ]
 
@@ -94,9 +115,11 @@ SORangeLock >> registry: anObject [
 { #category : #initialization }
 SORangeLock >> release [ 
 	stream ifNotNil: [ 
-		stream unlockFrom: from to: to for: context ].
+		stream unlockAt: from length: to - from.
+		stream := nil ].
 	registry ifNotNil: [ 
-		registry removeLock: self ]
+		registry removeLock: self.
+		registry := nil ]
 ]
 
 { #category : #accessing }
