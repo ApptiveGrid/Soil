@@ -16,7 +16,6 @@ SOJournal >> addEntry: aJournalEntry [
 
 { #category : #accessing }
 SOJournal >> commit [
-	self write.
 	entries do: [ :each | each commitIn: transaction ]
 ]
 
