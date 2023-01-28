@@ -10,7 +10,8 @@ Class {
 		'writeVersion',
 		'behaviorDescriptions',
 		'locks',
-		'lastObjectIndexes'
+		'lastObjectIndexes',
+		'journal'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -160,7 +161,6 @@ SOTransaction >> buildWriteVersion [
 
 { #category : #accessing }
 SOTransaction >> checkpoint [
-	| bytes |
 	"serialize objects and collect all to be written records. This can be done without 
 	resources that need locking. This reduces time needed for locking"
 	self prepareRecordsForCommit.
@@ -179,13 +179,14 @@ SOTransaction >> checkpoint [
 		as each version relates to a unique position"
 		locks add: record lockIndex.
 		record validateReadVersion ].
+	journal := SOJournal new
+		transaction: self;
+		create.
 	recordsToCommit do: [ :record | 
 		record version: writeVersion.
-		bytes := record serialize.
-		soil objectRepository  
-			at: record objectId 
-			put: bytes.
+		journal addEntry: record asJournalEntry.
 		record committed  ].
+	journal commit.
 	"write back the accumulated new indexes for alll segments"
 	lastObjectIndexes keysAndValuesDo: [ :segment :lastIndex |
 		segment lastObjectIndex: lastIndex ].
@@ -425,6 +426,16 @@ SOTransaction >> serializeObjects [
 ]
 
 { #category : #accessing }
+SOTransaction >> soil [
+	^ soil
+]
+
+{ #category : #accessing }
 SOTransaction >> soil: aSoil [ 
 	soil := aSoil
+]
+
+{ #category : #accessing }
+SOTransaction >> writeVersion [
+	^ writeVersion
 ]
