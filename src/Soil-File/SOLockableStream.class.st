@@ -26,11 +26,6 @@ SOLockableStream >> close [
 
 ]
 
-{ #category : #locking }
-SOLockableStream >> fileLockFrom: from length: length for: lockContext [
-	^ fileStream lockAt: from length: length
-]
-
 { #category : #finalization }
 SOLockableStream >> finalize [ 
 	self close
@@ -78,8 +73,14 @@ SOLockableStream >> lockFrom: from to: to for: lockContext [
 	fileLocked ifTrue: [ 
 		lock lockOn: fileStream  ].
 	
-	^ lock
+	^ locks add: lock
 	
+]
+
+{ #category : #'as yet unclassified' }
+SOLockableStream >> lockOnlyInImage [
+	imageLocked := true.
+	fileLocked := false.
 ]
 
 { #category : #accessing }
@@ -88,18 +89,8 @@ SOLockableStream >> locks [
 ]
 
 { #category : #locking }
-SOLockableStream >> memoryLockFrom: from length: length for: contextObject [ 
-	^ self memoryLockFrom: from to: from + length for: contextObject  
-]
-
-{ #category : #locking }
 SOLockableStream >> memoryLockFrom: from to: to for: contextObject [ 
 	^ locks add: (lockRegistry lockFrom: from to: to for: contextObject)
-]
-
-{ #category : #locking }
-SOLockableStream >> memoryUnlockFrom: from length: length for: contextObject [ 
-	^ self memoryUnlockFrom: from to: from + length for: contextObject  
 ]
 
 { #category : #locking }

@@ -10,7 +10,7 @@ Class {
 { #category : #running }
 SOLockableStreamTest >> tearDown [ 
 	super tearDown.
-	stream releaseAllLocks.
+	stream close.
 	stream := nil
 ]
 
@@ -19,9 +19,9 @@ SOLockableStreamTest >> testMemoryLock [
 	| objA objB registry |
 	objA := Object new.
 	objB := Object new.
-	stream := SOLockableStream path: '/tmp/soil-lock-test'.
+	stream := (SOLockableStream path: '/tmp/soil-lock-test') lockOnlyInImage.
 	stream nextPutAll: 'hello world'.
-	stream memoryLockFrom: 7 to: 12 for: objA.
+	stream lockFrom: 7 to: 12 for: objA.
 	self assert: stream locks size equals: 1.
 	registry := SOFileLockRegistry forPath: '/tmp/soil-lock-test'.
 	self assert: registry numberOfLocks equals: 1
@@ -32,7 +32,7 @@ SOLockableStreamTest >> testMemoryLockConflict [
 	| objA objB |
 	objA := Object new.
 	objB := Object new.
-	stream := SOLockableStream path: '/tmp/soil-lock-test'.
+	stream := (SOLockableStream path: '/tmp/soil-lock-test') lockOnlyInImage.
 	stream 
 		nextPutAll: 'hello world';
 		flush.
@@ -48,7 +48,7 @@ SOLockableStreamTest >> testMemoryUnlock [
 	| objA objB |
 	objA := Object new.
 	objB := Object new.
-	stream := SOLockableStream path: '/tmp/soil-lock-test'.
+	stream := (SOLockableStream path: '/tmp/soil-lock-test') lockOnlyInImage.
 	stream 
 		nextPutAll: 'hello world';
 		flush.
