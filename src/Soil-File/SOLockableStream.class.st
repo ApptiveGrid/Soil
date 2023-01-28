@@ -120,7 +120,9 @@ SOLockableStream >> position: anInteger [
 
 { #category : #finalization }
 SOLockableStream >> releaseAllLocks [
-	locks do: [ :lock | lock release ].
+	locks copy do: [ :lock | 
+		locks remove: lock.
+		lock release ].
 	locks := OrderedCollection new
 ]
 
