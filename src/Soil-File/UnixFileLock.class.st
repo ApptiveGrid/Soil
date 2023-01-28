@@ -1,5 +1,5 @@
 Class {
-	#name : #SOMacOsFileLock,
+	#name : #UnixFileLock,
 	#superclass : #FFIStructure,
 	#classVars : [
 		'F_GETFL',
@@ -26,7 +26,7 @@ Class {
 }
 
 { #category : #testing }
-SOMacOsFileLock class >> canLock: fileHandle from: start to: length exclusive: exclusive [
+UnixFileLock class >> canLock: fileHandle from: start length: length exclusive: exclusive [
 	| lock result |
 	
 	lock := self newLockExclusive: exclusive start: start length: length.
@@ -40,37 +40,38 @@ SOMacOsFileLock class >> canLock: fileHandle from: start to: length exclusive: e
 ]
 
 { #category : #private }
-SOMacOsFileLock class >> fcntl: fd command: cmd struct: struct [
+UnixFileLock class >> fcntl: fd command: cmd struct: struct [
+
 	^ self 
-		ffiCall: #(int fcntl(int fd, int cmd, FLock *struct)) 
+		ffiCall: #(int fcntl(int fd, int cmd, UnixFileLock *struct))
 		library: LibC
 		fixedArgumentCount: 2
 ]
 
 { #category : #private }
-SOMacOsFileLock class >> fcntl: fd command: cmd value: value [
+UnixFileLock class >> fcntl: fd command: cmd value: value [
 
 	^ self 
-		ffiCall: #(int fcntl(int fd, int cmd, ulong value))
+		ffiCall: #(int fcntl(int fd, int cmd, int value))
 		library: LibC
 		fixedArgumentCount: 2
 ]
 
 { #category : #'field definition' }
-SOMacOsFileLock class >> fieldsDesc [
+UnixFileLock class >> fieldsDesc [
 	"self rebuildFieldAccessors"
 
 	^ #(
+	short l_type;
+	short l_whence;
 	__off64_t l_start;
 	__off64_t l_len;
 	__pid_t l_pid;	
-	int l_type;
-	int l_whence;
 	)
 ]
 
 { #category : #private }
-SOMacOsFileLock class >> fileno: stream [
+UnixFileLock class >> fileno: stream [
 
 	^ self 
 		ffiCall: #(int fileno("FILE *"void *stream))
@@ -78,7 +79,7 @@ SOMacOsFileLock class >> fileno: stream [
 ]
 
 { #category : #private }
-SOMacOsFileLock class >> flock: fd operation: operation [
+UnixFileLock class >> flock: fd operation: operation [
 
 	^ self 
 		ffiCall: #(int flock(int fd, int operation))
@@ -86,28 +87,28 @@ SOMacOsFileLock class >> flock: fd operation: operation [
 ]
 
 { #category : #private }
-SOMacOsFileLock class >> getpid [
+UnixFileLock class >> getpid [
 
 	^ self ffiCall: #(__pid_t getpid()) module: LibC
 ]
 
 { #category : #'class initialization' }
-SOMacOsFileLock class >> initialize [
+UnixFileLock class >> initialize [
 
 	__off64_t := FFIUInt64.
 	__pid_t := FFIUInt32.
 	
-	F_RDLCK := 1.
+	F_RDLCK := 0.
+	F_WRLCK := 1.
 	F_UNLCK := 2.
-	F_WRLCK := 3.
 	
 	SEEK_SET := 0.
 	SEEK_CUR := 1.
 	SEEK_END := 2.
 	
-	F_GETLK := 7. "12?"
-	F_SETLK := 8. "13?"
-	F_SETLKW := 9. "14?"
+	F_GETLK := 5. "12?"
+	F_SETLK := 6. "13?"
+	F_SETLKW := 7. "14?"
 	
 	F_GETFL := 3.
 	F_SETFL := 4.
@@ -116,7 +117,7 @@ SOMacOsFileLock class >> initialize [
 ]
 
 { #category : #'accessing locking' }
-SOMacOsFileLock class >> lock: fileHandle from: start length: length [
+UnixFileLock class >> lock: fileHandle from: start length: length [
 	
 	^ self 
 		lock: fileHandle 
@@ -126,20 +127,7 @@ SOMacOsFileLock class >> lock: fileHandle from: start length: length [
 ]
 
 { #category : #'accessing locking' }
-SOMacOsFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
-	| lock result |
-	
-	lock := self newLockExclusive: exclusive start: start length: length.
-	result := self 
-		fcntl: (self fileno: fileHandle) 
-		command: F_SETLK 
-		struct: lock.
-		
-	^ result ~= -1
-]
-
-{ #category : #'accessing locking' }
-SOMacOsFileLock class >> lock: fileHandle from: start to: length exclusive: exclusive [
+UnixFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
 	| lock result |
 	
 	lock := self newLockExclusive: exclusive start: start length: length.
@@ -152,7 +140,7 @@ SOMacOsFileLock class >> lock: fileHandle from: start to: length exclusive: excl
 ]
 
 { #category : #'instance creation' }
-SOMacOsFileLock class >> newLockExclusive: exclusive start: start length: length [
+UnixFileLock class >> newLockExclusive: exclusive start: start length: length [
 	
 	^ self 
 		newType: (exclusive ifTrue: [ F_WRLCK ] ifFalse: [ F_RDLCK ])
@@ -161,7 +149,7 @@ SOMacOsFileLock class >> newLockExclusive: exclusive start: start length: length
 ]
 
 { #category : #'instance creation' }
-SOMacOsFileLock class >> newType: type start: start length: length [
+UnixFileLock class >> newType: type start: start length: length [
 	
 	^ self new 
 		l_type: type;
@@ -173,7 +161,7 @@ SOMacOsFileLock class >> newType: type start: start length: length [
 ]
 
 { #category : #'instance creation' }
-SOMacOsFileLock class >> newUnlockStart: start length: length [
+UnixFileLock class >> newUnlockStart: start length: length [
 	
 	^ self 
 		newType: F_UNLCK
@@ -182,7 +170,7 @@ SOMacOsFileLock class >> newUnlockStart: start length: length [
 ]
 
 { #category : #accessing }
-SOMacOsFileLock class >> setNonBlock: fileHandle [
+UnixFileLock class >> setNonBlock: fileHandle [
 	| fd flags |
 	
 	fd := self fileno: fileHandle.
@@ -192,7 +180,7 @@ SOMacOsFileLock class >> setNonBlock: fileHandle [
 ]
 
 { #category : #'accessing locking' }
-SOMacOsFileLock class >> unlock: fileHandle from: start length: length [
+UnixFileLock class >> unlock: fileHandle from: start length: length [
 	| lock result |
 	
 	lock := self newUnlockStart: start length: length.
@@ -204,68 +192,68 @@ SOMacOsFileLock class >> unlock: fileHandle from: start length: length [
 	^ result ~= -1
 ]
 
-{ #category : #'accessing - structure variables' }
-SOMacOsFileLock >> l_len [
+{ #category : #'accessing structure variables' }
+UnixFileLock >> l_len [
 	"This method was automatically generated"
 	^handle unsignedLongLongAt: OFFSET_L_LEN
 ]
 
-{ #category : #'accessing - structure variables' }
-SOMacOsFileLock >> l_len: anObject [
+{ #category : #'accessing structure variables' }
+UnixFileLock >> l_len: anObject [
 	"This method was automatically generated"
 	handle unsignedLongLongAt: OFFSET_L_LEN put: anObject
 ]
 
-{ #category : #'accessing - structure variables' }
-SOMacOsFileLock >> l_pid [
+{ #category : #'accessing structure variables' }
+UnixFileLock >> l_pid [
 	"This method was automatically generated"
 	^handle unsignedLongAt: OFFSET_L_PID
 ]
 
-{ #category : #'accessing - structure variables' }
-SOMacOsFileLock >> l_pid: anObject [
+{ #category : #'accessing structure variables' }
+UnixFileLock >> l_pid: anObject [
 	"This method was automatically generated"
 	handle unsignedLongAt: OFFSET_L_PID put: anObject
 ]
 
-{ #category : #'accessing - structure variables' }
-SOMacOsFileLock >> l_start [
+{ #category : #'accessing structure variables' }
+UnixFileLock >> l_start [
 	"This method was automatically generated"
 	^handle unsignedLongLongAt: OFFSET_L_START
 ]
 
-{ #category : #'accessing - structure variables' }
-SOMacOsFileLock >> l_start: anObject [
+{ #category : #'accessing structure variables' }
+UnixFileLock >> l_start: anObject [
 	"This method was automatically generated"
 	handle unsignedLongLongAt: OFFSET_L_START put: anObject
 ]
 
-{ #category : #'accessing - structure variables' }
-SOMacOsFileLock >> l_type [
+{ #category : #'accessing structure variables' }
+UnixFileLock >> l_type [
 	"This method was automatically generated"
-	^handle signedLongAt: OFFSET_L_TYPE
+	^handle signedShortAt: OFFSET_L_TYPE
 ]
 
-{ #category : #'accessing - structure variables' }
-SOMacOsFileLock >> l_type: anObject [
+{ #category : #'accessing structure variables' }
+UnixFileLock >> l_type: anObject [
 	"This method was automatically generated"
-	handle signedLongAt: OFFSET_L_TYPE put: anObject
+	handle signedShortAt: OFFSET_L_TYPE put: anObject
 ]
 
-{ #category : #'accessing - structure variables' }
-SOMacOsFileLock >> l_whence [
+{ #category : #'accessing structure variables' }
+UnixFileLock >> l_whence [
 	"This method was automatically generated"
-	^handle signedLongAt: OFFSET_L_WHENCE
+	^handle signedShortAt: OFFSET_L_WHENCE
 ]
 
-{ #category : #'accessing - structure variables' }
-SOMacOsFileLock >> l_whence: anObject [
+{ #category : #'accessing structure variables' }
+UnixFileLock >> l_whence: anObject [
 	"This method was automatically generated"
-	handle signedLongAt: OFFSET_L_WHENCE put: anObject
+	handle signedShortAt: OFFSET_L_WHENCE put: anObject
 ]
 
 { #category : #printing }
-SOMacOsFileLock >> printOn: aStream [ 
+UnixFileLock >> printOn: aStream [ 
 	"Append to the argument, aStream, the names and values of all the record's variables."
 
 	aStream nextPutAll: self class name; nextPutAll: ' ( '; cr.
