@@ -192,7 +192,7 @@ SOMacOsFileLock class >> setNonBlock: fileHandle [
 ]
 
 { #category : #'accessing locking' }
-SOMacOsFileLock class >> unlock: fileHandle from: start to: length [
+SOMacOsFileLock class >> unlock: fileHandle from: start length: length [
 	| lock result |
 	
 	lock := self newUnlockStart: start length: length.
