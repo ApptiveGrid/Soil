@@ -2,6 +2,8 @@ Class {
 	#name : #SOLockableStream,
 	#superclass : #Object,
 	#instVars : [
+		'imageLocked',
+		'fileLocked',
 		'fileStream',
 		'lockRegistry',
 		'locks'
@@ -18,13 +20,20 @@ SOLockableStream class >> path: aStringOrFileReference [
 
 { #category : #'initialize-release' }
 SOLockableStream >> close [
-	fileStream close.
-	self releaseAllLocks 
+	self releaseAllLocks.
+	fileStream ifNotNil: [  
+		fileStream close ].
+
+]
+
+{ #category : #locking }
+SOLockableStream >> fileLockFrom: from length: length for: lockContext [
+	^ fileStream lockAt: from length: length
 ]
 
 { #category : #finalization }
 SOLockableStream >> finalize [ 
-	self releaseAllLocks
+	self close
 ]
 
 { #category : #writing }
@@ -36,7 +45,9 @@ SOLockableStream >> flush [
 SOLockableStream >> initialize [ 
 	super initialize.
 	locks := OrderedCollection new.
-	self class finalizationRegistry add: self
+	self class finalizationRegistry add: self.
+	imageLocked := true.
+	fileLocked := true.
 ]
 
 { #category : #initialization }
@@ -46,13 +57,29 @@ SOLockableStream >> initializePath: aStringOrFileReference [
 ]
 
 { #category : #locking }
+SOLockableStream >> lockClass [
+	^ SORangeLock 
+]
+
+{ #category : #locking }
 SOLockableStream >> lockFrom: from length: length for: lockContext [ 
-	^ self memoryLockFrom: from to: from + length for: lockContext
+	^ self lockFrom: from to: from + length for: lockContext
 ]
 
 { #category : #locking }
 SOLockableStream >> lockFrom: from to: to for: lockContext [ 
-	self memoryLockFrom: from to: to for: lockContext
+	
+	| lock |
+	lock := self lockClass from: from to: to context: lockContext.
+
+	imageLocked ifTrue: [ 
+		lock lockInMemory: lockRegistry ].
+	
+	fileLocked ifTrue: [ 
+		lock lockOn: fileStream  ].
+	
+	^ lock
+	
 ]
 
 { #category : #accessing }
@@ -112,10 +139,8 @@ SOLockableStream >> position: anInteger [
 
 { #category : #finalization }
 SOLockableStream >> releaseAllLocks [
-	(lockRegistry notNil & locks notNil) ifTrue: [  
-		locks do: [ :lock | 
-			lockRegistry removeLock: lock ].
-		locks := nil ].
+	locks do: [ :lock | lock release ].
+	locks := OrderedCollection new
 ]
 
 { #category : #accessing }

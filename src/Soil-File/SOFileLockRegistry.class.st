@@ -43,6 +43,17 @@ SOFileLockRegistry class >> reset [
 	registries := WeakValueDictionary new
 ]
 
+{ #category : #adding }
+SOFileLockRegistry >> addLock: aLock [
+	aLock registry: self.
+	^ semaphore critical: [  
+		locks 
+			detect: [:lock | lock conflictsWith: aLock ]
+			ifFound: [:lock | SOAlreadyLocked signal: 'already locked: ', lock asString  ].
+		locks add: aLock ]
+	
+]
+
 { #category : #initialization }
 SOFileLockRegistry >> initialize [ 
 	super initialize.
@@ -52,12 +63,7 @@ SOFileLockRegistry >> initialize [
 
 { #category : #accessing }
 SOFileLockRegistry >> lockFrom: from to: to for: currentLockingObject [ 
-	^ semaphore critical: [  
-		locks 
-			detect: [:lock | lock conflictsFrom: from to: to context: currentLockingObject ]
-			ifFound: [:lock | SOAlreadyLocked signal: 'already locked: ', lock asString  ].
-		locks 
-			add: ((SORangeLock from: from to: to context: currentLockingObject) registry: self) ]
+	^ self addLock: (SORangeLock from: from to: to context: currentLockingObject)
 ]
 
 { #category : #accessing }
