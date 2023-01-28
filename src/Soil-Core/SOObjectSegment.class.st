@@ -122,6 +122,11 @@ SOObjectSegment >> lastObjectIndex [
 	^ self indexFile lastObjectIndex
 ]
 
+{ #category : #accessing }
+SOObjectSegment >> lockLastObjectIndexFor: lockContext [ 
+	^ indexFile lockLastObjectIndexFor: lockContext 
+]
+
 { #category : #'as yet unclassified' }
 SOObjectSegment >> lockObjectId: aSOObjectId for: lockContext [ 
 	^ self indexFile lockObjectId: aSOObjectId for: lockContext 

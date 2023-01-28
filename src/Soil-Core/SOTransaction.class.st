@@ -231,7 +231,9 @@ SOTransaction >> initializeObjectId: anObjectId [
 	segment := self objectRepository segmentAt: anObjectId segment.
 	currentId := lastObjectIndexes 
 		at: segment 
-		ifAbsentPut: [ segment lastObjectIndex ].
+		ifAbsentPut: [ 
+			locks add: (segment lockLastObjectIndexFor: self).
+			segment lastObjectIndex ].
 	anObjectId index: (lastObjectIndexes 
 		at: segment 
 		put: currentId + 1)
