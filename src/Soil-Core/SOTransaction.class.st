@@ -169,6 +169,9 @@ SOTransaction >> checkpoint [
 	[ locks add: (soil lockDatabaseVersionFor: self).
 	writeVersion := self buildWriteVersion.
 	lastObjectIndexes := Dictionary new.
+	"first iterate over all records to acquire locks and check for concurrent 
+	writes. As we do not yet have a journal that allows us to rollback we check
+	all read versions before modifying the database"
 	recordsToCommit do: [ :record |
 		record initializeObjectIdsIn: self.
 		"check if the version we've read is still actual. Another transaction could have
@@ -177,8 +180,6 @@ SOTransaction >> checkpoint [
 		locks add: record lockIndex.
 		record validateReadVersion ].
 	recordsToCommit do: [ :record | 
-		"record objectId initializeIndex: self objectRepository.
-		record assignObjectIds: soil objectRepository."
 		record version: writeVersion.
 		bytes := record serialize.
 		soil objectRepository  
