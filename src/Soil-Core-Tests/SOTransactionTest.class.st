@@ -24,12 +24,38 @@ SOTransactionTest >> tearDown [
 ]
 
 { #category : #tests }
-SOTransactionTest >> testAddSameIdTwice [
+SOTransactionTest >> testAddSameObjectIdTwice [
 	| tx |
 	tx := SOTransaction new.
 	tx atObjectId: (SOObjectId segment: 1 index: 0) putObject: Object new. 
 	tx atObjectId: (SOObjectId segment: 1 index: 0) putObject: Object new. 
 	self assert: tx dirtyObjects size equals: 2
+]
+
+{ #category : #tests }
+SOTransactionTest >> testConflictingReadVersion [
+	| obj tx1 tx2 tx3 |
+	obj := SOTestGraphRoot new 
+		nested: (SOTestNestedObject new label: 'first').
+	"make object to test to be in database"
+	tx1 := soil newTransaction.
+	tx1 root: obj.
+	tx1 commit.
+	"open a transaction, modify but do not commit"
+	tx2 := soil newTransaction.
+	tx2 root nested label: 'second'.
+	tx2 markDirty: tx2 root.
+	"open concurrent transaction, make concurrent modification
+	and commit"
+	tx3 := soil newTransaction.
+	tx3 root nested label: 'third'.
+	tx3 markDirty: tx3 root.
+	tx3 commit.
+	"when trying to commit the second transaction the concurrent
+	modification should throw an exception"
+	self 
+		should: [ tx2 commit ]
+		raise: SOObjectHasConcurrentChange 
 ]
 
 { #category : #tests }

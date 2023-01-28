@@ -9,7 +9,8 @@ Class {
 		'readVersion',
 		'writeVersion',
 		'behaviorDescriptions',
-		'locks'
+		'locks',
+		'lastObjectIndexes'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -167,7 +168,9 @@ SOTransaction >> checkpoint [
 	of this transaction"
 	[ locks add: (soil lockDatabaseVersionFor: self).
 	writeVersion := self buildWriteVersion.
+	lastObjectIndexes := Dictionary new.
 	recordsToCommit do: [ :record |
+		record initializeObjectIdsIn: self.
 		"check if the version we've read is still actual. Another transaction could have
 		committed since we last read. Checking for the position in the index is sufficient
 		as each version relates to a unique position"
@@ -220,6 +223,19 @@ SOTransaction >> initialize [
 	locks := OrderedCollection new
 ]
 
+{ #category : #'as yet unclassified' }
+SOTransaction >> initializeObjectId: anObjectId [
+	| segment currentId |
+	anObjectId isInitialized ifTrue: [ SOObjectIdAlreadyInitialized signal: 'object id is already initialized: ', anObjectId asString ].
+	segment := self objectRepository segmentAt: anObjectId segment.
+	currentId := lastObjectIndexes 
+		at: segment 
+		ifAbsentPut: [ segment lastObjectIndex ].
+	anObjectId index: (lastObjectIndexes 
+		at: segment 
+		put: currentId + 1)
+]
+
 { #category : #testing }
 SOTransaction >> isAborted [
 	^ soil isNil & idMap isNil & objectMap isNil
@@ -244,8 +260,7 @@ SOTransaction >> makeNewVersion: classDescription [
 	| record |
 	record := objectMap at: classDescription.
 	recordsToCommit 
-		at: record objectId 
-		put: record asNewClusterVersion
+		add: record asNewClusterVersion
 ]
 
 { #category : #'as yet unclassified' }
@@ -394,7 +409,7 @@ SOTransaction >> rootObjectId [
 
 { #category : #accessing }
 SOTransaction >> serializeObjects [
-	| index key |
+	| index |
 	index := 1.
 	"process the loop in a way new records that appear while serializing
 	are taken into account"

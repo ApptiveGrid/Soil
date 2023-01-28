@@ -30,6 +30,7 @@ SOObjectIndexFile >> at: index putPosition: position [
 
 { #category : #accessing }
 SOObjectIndexFile >> indexPositionAt: anInteger [ 
+	(anInteger > 0) ifFalse: [ SOIndexOutOfRange signal: 'object index needs to be larger than zero' ].
 	^ self headerSize + self objectIndexSize + (anInteger - 1 * self objectIndexSize)
 ]
 

@@ -117,6 +117,11 @@ SOObjectSegment >> initializeFilesystem [
 		close
 ]
 
+{ #category : #accessing }
+SOObjectSegment >> lastObjectIndex [ 
+	^ self indexFile lastObjectIndex
+]
+
 { #category : #'as yet unclassified' }
 SOObjectSegment >> lockObjectId: aSOObjectId for: lockContext [ 
 	^ self indexFile lockObjectId: aSOObjectId for: lockContext 
