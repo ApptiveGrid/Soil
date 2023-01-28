@@ -58,6 +58,18 @@ SONewClusterVersion >> initialize [
 	externalObjects := OrderedCollection new.
 ]
 
+{ #category : #'as yet unclassified' }
+SONewClusterVersion >> initializeObjectIdsIn: aSOTransaction [ 
+	"assign indexes to all not yet initialized object records"
+	((references copyWithFirst: objectId) reject: #isInitialized) do: [ :oid |
+		aSOTransaction initializeObjectId: oid ]
+]
+
+{ #category : #'public/accessing' }
+SONewClusterVersion >> lockIndex [
+	^ transaction lockObjectId: objectId
+]
+
 { #category : #printing }
 SONewClusterVersion >> printOn: aStream [ 
 	aStream << 'new record: '.
@@ -108,4 +120,12 @@ SONewClusterVersion >> serializeOn: stream [
 { #category : #testing }
 SONewClusterVersion >> shouldBeCommitted [
 	^ true
+]
+
+{ #category : #'as yet unclassified' }
+SONewClusterVersion >> validateReadVersion [
+	"a new object record cannot conflict as the record is not on disk"
+	(previousVersionPosition = 0) ifTrue: [ ^ self ].
+	(previousVersionPosition = (transaction objectRepository positionOf: objectId)) ifFalse: [ 
+		SOObjectHasConcurrentChange signal: 'object id: ', objectId asString, ' has been changed by another transaction']
 ]

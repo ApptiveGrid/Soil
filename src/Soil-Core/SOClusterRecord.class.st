@@ -26,12 +26,6 @@ SOClusterRecord >> addReference: reference [
 	references add: reference 
 ]
 
-{ #category : #'as yet unclassified' }
-SOClusterRecord >> assignObjectIds: aSOObjectRepository [ 
-	references do: [ :reference |
-		reference initializeIndex: aSOObjectRepository ]
-]
-
 { #category : #accessing }
 SOClusterRecord >> bytes [
 	^ bytes
@@ -81,6 +75,12 @@ SOClusterRecord >> objectId [
 SOClusterRecord >> objectId: aSOObjectId [ 
 	
 	objectId := aSOObjectId 
+]
+
+{ #category : #accessing }
+SOClusterRecord >> previousVersionPosition [
+
+	^ previousVersionPosition
 ]
 
 { #category : #accessing }

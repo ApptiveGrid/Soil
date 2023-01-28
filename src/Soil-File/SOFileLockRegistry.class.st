@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'locks',
-		'semaphore'
+		'semaphore',
+		'path'
 	],
 	#classInstVars : [
 		'registries',
@@ -17,7 +18,8 @@ SOFileLockRegistry class >> forPath: aString [
 	^ accessSemaphore critical: [ 
 		registries 
 			at: aString asPath canonicalize
-			ifAbsentPut: [ self new ] ]
+			ifAbsentPut: [ self new
+				path: aString ] ]
 ]
 
 { #category : #initialization }
@@ -55,10 +57,7 @@ SOFileLockRegistry >> lockFrom: from to: to for: currentLockingObject [
 			detect: [:lock | lock conflictsFrom: from to: to context: currentLockingObject ]
 			ifFound: [:lock | SOAlreadyLocked signal: 'already locked: ', lock asString  ].
 		locks 
-			add: (SORangeLock new 
-				from: from;
-				to: to;
-				context: currentLockingObject) ]
+			add: ((SORangeLock from: from to: to context: currentLockingObject) registry: self) ]
 ]
 
 { #category : #accessing }
@@ -66,9 +65,28 @@ SOFileLockRegistry >> numberOfLocks [
 	^ locks size
 ]
 
+{ #category : #accessing }
+SOFileLockRegistry >> path [
+
+	^ path
+]
+
+{ #category : #accessing }
+SOFileLockRegistry >> path: anObject [
+
+	path := anObject
+]
+
+{ #category : #printing }
+SOFileLockRegistry >> printOn: aStream [ 
+	super printOn: aStream.
+	aStream << ' locks=' << locks size asString << ',path: ' << path asString 
+]
+
 { #category : #removing }
 SOFileLockRegistry >> removeLock: aSORangeLock [ 
-	locks remove: aSORangeLock 
+	semaphore critical: [ 
+		locks remove: aSORangeLock ]
 ]
 
 { #category : #'as yet unclassified' }

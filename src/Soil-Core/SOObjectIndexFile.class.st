@@ -30,6 +30,7 @@ SOObjectIndexFile >> at: index putPosition: position [
 
 { #category : #accessing }
 SOObjectIndexFile >> indexPositionAt: anInteger [ 
+	(anInteger > 0) ifFalse: [ SOIndexOutOfRange signal: 'object index needs to be larger than zero' ].
 	^ self headerSize + self objectIndexSize + (anInteger - 1 * self objectIndexSize)
 ]
 
@@ -54,6 +55,22 @@ SOObjectIndexFile >> lastObjectIndex: anInteger [
 		nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
 		flush.
 	lastObjectIndex := anInteger 
+]
+
+{ #category : #lockgin }
+SOObjectIndexFile >> lockLastObjectIndexFor: lockContext [ 
+	^ stream 
+		lockFrom: self headerSize 
+		length: self objectIndexSize
+		for: lockContext
+]
+
+{ #category : #'as yet unclassified' }
+SOObjectIndexFile >> lockObjectId: aSOObjectId for: lockContext [
+	^ stream 
+		lockFrom: (self indexPositionAt: aSOObjectId index) 
+		length: self objectIndexSize  
+		for: lockContext
 ]
 
 { #category : #accessing }

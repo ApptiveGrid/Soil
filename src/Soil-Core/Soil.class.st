@@ -74,6 +74,11 @@ Soil >> initializeFilesystem [
 			yourself
 ]
 
+{ #category : #'as yet unclassified' }
+Soil >> lockDatabaseVersionFor: lockContext [ 
+	^ parameters lockDatabaseVersionFor: lockContext 
+]
+
 { #category : #'instance creation' }
 Soil >> newMaterializer [
 	^ SoilMaterializer new 

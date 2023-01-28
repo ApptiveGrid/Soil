@@ -34,6 +34,14 @@ SoilParameterFile >> initializeStart [
 	self databaseVersion: 1.
 ]
 
+{ #category : #'as yet unclassified' }
+SoilParameterFile >> lockDatabaseVersionFor: lockContext [
+	^ stream 
+		lockFrom: self headerSize
+		length: self databaseVersionSize
+		for: lockContext 
+]
+
 { #category : #accessing }
 SoilParameterFile >> path [
 	^ soil path / #settings

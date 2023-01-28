@@ -71,6 +71,11 @@ SOObjectId >> initializeIndex: objectRepository [
 	index := (objectRepository segmentAt: segment) allocateNextIndex 
 ]
 
+{ #category : #testing }
+SOObjectId >> isInitialized [
+	^ index > 0
+]
+
 { #category : #printing }
 SOObjectId >> printOn: aStream [ 
 	aStream << 'ObjectId(' << segment asString << ':' << index asString << ')'

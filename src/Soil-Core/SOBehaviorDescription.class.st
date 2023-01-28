@@ -2,7 +2,6 @@ Class {
 	#name : #SOBehaviorDescription,
 	#superclass : #Object,
 	#instVars : [
-		'name',
 		'instVarNames',
 		'behaviorIdentifier',
 		'objectId',
@@ -132,18 +131,6 @@ SOBehaviorDescription >> matchesDescription: description [
 ]
 
 { #category : #accessing }
-SOBehaviorDescription >> name [
-
-	^ name
-]
-
-{ #category : #accessing }
-SOBehaviorDescription >> name: anObject [
-
-	name := anObject
-]
-
-{ #category : #accessing }
 SOBehaviorDescription >> objectClass [
 	^ Smalltalk at: behaviorIdentifier asSymbol
 ]
@@ -156,6 +143,11 @@ SOBehaviorDescription >> objectId [
 { #category : #accessing }
 SOBehaviorDescription >> objectId: aSOObjectId [
 	objectId := aSOObjectId
+]
+
+{ #category : #printing }
+SOBehaviorDescription >> printOn: aStream [ 
+	aStream << 'behavior: ' << behaviorIdentifier asString
 ]
 
 { #category : #accessing }
