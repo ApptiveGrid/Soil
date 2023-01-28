@@ -123,6 +123,11 @@ SOObjectSegment >> lastObjectIndex [
 ]
 
 { #category : #accessing }
+SOObjectSegment >> lastObjectIndex: anInteger [ 
+	^ indexFile lastObjectIndex: anInteger 
+]
+
+{ #category : #accessing }
 SOObjectSegment >> lockLastObjectIndexFor: lockContext [ 
 	^ indexFile lockLastObjectIndexFor: lockContext 
 ]

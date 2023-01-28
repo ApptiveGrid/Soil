@@ -185,7 +185,10 @@ SOTransaction >> checkpoint [
 		soil objectRepository  
 			at: record objectId 
 			put: bytes.
-		record committed  ] .
+		record committed  ].
+	"write back the accumulated new indexes for alll segments"
+	lastObjectIndexes keysAndValuesDo: [ :segment :lastIndex |
+		segment lastObjectIndex: lastIndex ].
 	behaviorDescriptions do: [ :description |
 		soil behaviorRegistry 
 			nameAt: description value behaviorIdentifier 
