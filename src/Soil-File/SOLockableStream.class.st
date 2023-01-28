@@ -88,16 +88,6 @@ SOLockableStream >> locks [
 	^ locks
 ]
 
-{ #category : #locking }
-SOLockableStream >> memoryLockFrom: from to: to for: contextObject [ 
-	^ locks add: (lockRegistry lockFrom: from to: to for: contextObject)
-]
-
-{ #category : #locking }
-SOLockableStream >> memoryUnlockFrom: from to: to for: contextObject [ 
-	locks remove: (lockRegistry unlockFrom: from to: to for: contextObject)
-]
-
 { #category : #reading }
 SOLockableStream >> next [
 	^ fileStream next 

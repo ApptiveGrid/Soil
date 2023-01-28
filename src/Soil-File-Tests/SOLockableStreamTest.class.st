@@ -36,9 +36,9 @@ SOLockableStreamTest >> testMemoryLockConflict [
 	stream 
 		nextPutAll: 'hello world';
 		flush.
-	[ stream memoryLockFrom: 7 to: 12 for: objA.
+	[ stream lockFrom: 7 to: 12 for: objA.
 	self 
-		should: [ stream memoryLockFrom: 7 to: 12 for: objB ]
+		should: [ stream lockFrom: 7 to: 12 for: objB ]
 		raise: SOAlreadyLocked ]
 		ensure: [ stream releaseAllLocks ] .
 ]
@@ -53,8 +53,8 @@ SOLockableStreamTest >> testMemoryUnlock [
 		nextPutAll: 'hello world';
 		flush.
 	[ 
-		stream memoryLockFrom: 7 to: 12 for: objA.
-		stream memoryUnlockFrom: 7 to: 12 for: objA.
+		stream lockFrom: 7 to: 12 for: objA.
+		stream unlockFrom: 7 to: 12 for: objA.
 		self assert: stream locks isEmpty ]
 		ensure: [ stream releaseAllLocks ] .
 ]
