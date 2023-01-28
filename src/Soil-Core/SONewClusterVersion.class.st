@@ -87,12 +87,6 @@ SONewClusterVersion >> lockIndex [
 ]
 
 { #category : #accessing }
-SONewClusterVersion >> previousVersionRecord [
-
-	^ previousVersionRecord
-]
-
-{ #category : #accessing }
 SONewClusterVersion >> previousVersionRecord: anObject [
 
 	previousVersionRecord := anObject

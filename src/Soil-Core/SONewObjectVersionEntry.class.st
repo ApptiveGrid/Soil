@@ -9,7 +9,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SONewObjectVersionEntry class >> journalTypeCode [
-	^ 1
+	^ 2
 ]
 
 { #category : #accessing }
