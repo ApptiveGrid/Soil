@@ -79,6 +79,16 @@ Soil >> lockDatabaseVersionFor: lockContext [
 	^ parameters lockDatabaseVersionFor: lockContext 
 ]
 
+{ #category : #'as yet unclassified' }
+Soil >> lockableStream [
+	^ self lockableStreamClass new
+]
+
+{ #category : #accessing }
+Soil >> lockableStreamClass [
+	^ SOLockableStream 
+]
+
 { #category : #'instance creation' }
 Soil >> newMaterializer [
 	^ SoilMaterializer new 
