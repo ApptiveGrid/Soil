@@ -115,9 +115,11 @@ SORangeLock >> registry: anObject [
 { #category : #initialization }
 SORangeLock >> release [ 
 	stream ifNotNil: [ 
-		stream wrappedStream unlockAt: from length: to - from ].
+		stream wrappedStream unlockAt: from length: to - from.
+		stream := nil ].
 	registry ifNotNil: [ 
-		registry removeLock: self ]
+		registry removeLock: self.
+		registry := nil ]
 ]
 
 { #category : #accessing }

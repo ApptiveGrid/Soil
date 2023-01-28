@@ -10,7 +10,8 @@ Class {
 { #category : #running }
 SOLockableStreamTest >> tearDown [ 
 	super tearDown.
-	stream releaseAllLocks
+	stream releaseAllLocks.
+	stream := nil
 ]
 
 { #category : #tests }
