@@ -26,7 +26,7 @@ Class {
 }
 
 { #category : #testing }
-SOUnixFileLock class >> canLock: fileHandle from: start to: length exclusive: exclusive [
+SOUnixFileLock class >> canLock: fileHandle from: start length: length exclusive: exclusive [
 	| lock result |
 	
 	lock := self newLockExclusive: exclusive start: start length: length.
@@ -117,17 +117,17 @@ SOUnixFileLock class >> initialize [
 ]
 
 { #category : #'accessing locking' }
-SOUnixFileLock class >> lock: fileHandle from: start to: length [
+SOUnixFileLock class >> lock: fileHandle from: start length: length [
 	
 	^ self 
 		lock: fileHandle 
 		from: start 
-		to: length
+		length: length
 		exclusive: true
 ]
 
 { #category : #'accessing locking' }
-SOUnixFileLock class >> lock: fileHandle from: start to: length exclusive: exclusive [
+SOUnixFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
 	| lock result |
 	
 	lock := self newLockExclusive: exclusive start: start length: length.
@@ -180,7 +180,7 @@ SOUnixFileLock class >> setNonBlock: fileHandle [
 ]
 
 { #category : #'accessing locking' }
-SOUnixFileLock class >> unlock: fileHandle from: start to: length [
+SOUnixFileLock class >> unlock: fileHandle from: start length: length [
 	| lock result |
 	
 	lock := self newUnlockStart: start length: length.

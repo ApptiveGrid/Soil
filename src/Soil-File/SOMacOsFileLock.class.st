@@ -116,13 +116,26 @@ SOMacOsFileLock class >> initialize [
 ]
 
 { #category : #'accessing locking' }
-SOMacOsFileLock class >> lock: fileHandle from: start to: length [
+SOMacOsFileLock class >> lock: fileHandle from: start length: length [
 	
 	^ self 
 		lock: fileHandle 
 		from: start 
-		to: length
+		length: length
 		exclusive: true
+]
+
+{ #category : #'accessing locking' }
+SOMacOsFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
+	| lock result |
+	
+	lock := self newLockExclusive: exclusive start: start length: length.
+	result := self 
+		fcntl: (self fileno: fileHandle) 
+		command: F_SETLK 
+		struct: lock.
+		
+	^ result ~= -1
 ]
 
 { #category : #'accessing locking' }

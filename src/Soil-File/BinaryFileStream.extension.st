@@ -16,7 +16,7 @@ BinaryFileStream >> lockAt: position length: length [
 	^ self flockClass
 		lock: self fileHandle
 		from: position
-		to: position + length - 1
+		length: length
 ]
 
 { #category : #'*Soil-File' }
@@ -33,7 +33,7 @@ BinaryFileStream >> unlock [
 	^ self flockClass
 		unlock: self fileHandle
 		from: 0
-		to: self size
+		length: self size
 ]
 
 { #category : #'*Soil-File' }
@@ -42,5 +42,5 @@ BinaryFileStream >> unlockAt: position length: length [
 	^ self flockClass
 		unlock: self fileHandle
 		from: position
-		to: position + length - 1
+		length: length
 ]
