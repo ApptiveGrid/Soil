@@ -84,8 +84,8 @@ SORangeLock >> lockInMemory: aLockRegistry [
 
 { #category : #'as yet unclassified' }
 SORangeLock >> lockOn: aStream [ 
-	stream := aStream.
-	stream wrappedStream lockAt: from length: to - from 
+	stream := aStream wrappedStream.
+	stream lockAt: from length: to - from 
 ]
 
 { #category : #printing }
@@ -95,7 +95,7 @@ SORangeLock >> printOn: aStream [
 	registry ifNotNil: [  
 		aStream << ' mem ' << registry path asString ].
 	stream ifNotNil: [  
-		aStream << ' file ' << stream wrappedStream name asString ].
+		aStream << ' file ' << stream name asString ].
 	aStream << ' '.
 	context printOn: aStream
 ]
@@ -115,7 +115,7 @@ SORangeLock >> registry: anObject [
 { #category : #initialization }
 SORangeLock >> release [ 
 	stream ifNotNil: [ 
-		stream wrappedStream unlockAt: from length: to - from.
+		stream unlockAt: from length: to - from.
 		stream := nil ].
 	registry ifNotNil: [ 
 		registry removeLock: self.
