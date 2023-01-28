@@ -22,3 +22,8 @@ SOSegmentFile >> path [
 SOSegmentFile >> segment: aSOObjectSegment [ 
 	segment := aSOObjectSegment 
 ]
+
+{ #category : #accessing }
+SOSegmentFile >> soil [
+	^ segment soil
+]

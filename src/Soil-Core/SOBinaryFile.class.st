@@ -66,7 +66,7 @@ SOBinaryFile >> initializeStart [
 
 { #category : #accessing }
 SOBinaryFile >> open [
-	stream := SOLockableStream path: self path
+	stream := self soil lockableStream initializePath: self path
 ]
 
 { #category : #accessing }

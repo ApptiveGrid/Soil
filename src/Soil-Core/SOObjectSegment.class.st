@@ -171,6 +171,11 @@ SOObjectSegment >> printOn: aStream [
 ]
 
 { #category : #accessing }
+SOObjectSegment >> soil [
+	^ objectRepository soil
+]
+
+{ #category : #accessing }
 SOObjectSegment >> soil: aSoil [ 
 	soil := aSoil
 ]
