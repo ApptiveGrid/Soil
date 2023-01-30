@@ -10,7 +10,7 @@ Class {
 
 { #category : #converting }
 SOPersistentClusterVersion >> asNewClusterVersion [
-	^ SONewClusterVersion new 
+	^ SONewClusterVersion new
 		object: object;
 		objectId: objectId;
 		transaction: transaction;
@@ -25,52 +25,49 @@ SOPersistentClusterVersion >> beChanged [
 
 { #category : #accessing }
 SOPersistentClusterVersion >> changed: aBoolean [
-	changed := aBoolean 
+	changed := aBoolean
 ]
 
 { #category : #testing }
 SOPersistentClusterVersion >> hasChanged [
-	^ changed 
+	^ changed
 ]
 
 { #category : #initialization }
-SOPersistentClusterVersion >> initialize [ 
+SOPersistentClusterVersion >> initialize [
 	super initialize.
-	changed := false.
-
+	changed := false
 ]
 
 { #category : #'as yet unclassified' }
 SOPersistentClusterVersion >> materializeObject [
-	object := self newMaterializer 
+	object := self newMaterializer
 		stream: bytes readStream;
 		externalObjectRegistry: self;
 		materialize
 ]
 
 { #category : #'instance creation' }
-SOPersistentClusterVersion >> newMaterializer [ 
+SOPersistentClusterVersion >> newMaterializer [
 	^ transaction newMaterializer
 ]
 
 { #category : #printing }
-SOPersistentClusterVersion >> printOn: aStream [ 
+SOPersistentClusterVersion >> printOn: aStream [
 	aStream << 'persistent record: '.
-	objectId ifNotNil: [  
+	objectId ifNotNil: [
 		aStream << 'oid='.
 		objectId printOn: aStream ].
-	object ifNotNil: [  
+	object ifNotNil: [
 		aStream << ' '.
 		object printOn: aStream ].
-	aStream 
-		<< 'version=' << version asString 
-		<< ',previous=' << previousVersionPosition asString.
-	
-
+	aStream
+		<< 'version=' << version asString
+		<< ',previous=' << previousVersionPosition asString
 ]
 
 { #category : #'instance creation' }
-SOPersistentClusterVersion >> readFrom: stream [ 
+SOPersistentClusterVersion >> readFrom: stream [
 	| numberOfReferences objectSize materializer |
 	materializer := SoilBasicMaterializer new stream: stream.
 	position := stream position.
@@ -78,13 +75,12 @@ SOPersistentClusterVersion >> readFrom: stream [
 	previousVersionPosition := materializer nextLengthEncodedInteger.
 	numberOfReferences := materializer nextLengthEncodedInteger.
 	references := OrderedCollection new.
-	1 to: numberOfReferences do: [:n | self addReference: (SOObjectId readFrom: stream)]. 
+	1 to: numberOfReferences do: [:n | self addReference: (SOObjectId readFrom: stream)].
 	objectSize := materializer nextLengthEncodedInteger.
-	bytes := stream next: objectSize.
-		
+	bytes := stream next: objectSize
 ]
 
 { #category : #asserting }
-SOPersistentClusterVersion >> shouldBeCommitted [ 
+SOPersistentClusterVersion >> shouldBeCommitted [
 	^ changed & committed not
 ]

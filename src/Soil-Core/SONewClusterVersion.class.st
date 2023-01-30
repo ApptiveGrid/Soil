@@ -17,12 +17,12 @@ SONewClusterVersion >> addObject: anObject reference: anObjectId [
 { #category : #converting }
 SONewClusterVersion >> asJournalEntry [
 	| entry |
-	entry := self hasPreviousVersion 
-		ifTrue: [ 
+	entry := self hasPreviousVersion
+		ifTrue: [
 			SONewObjectVersionEntry new
 				oldBytes: previousVersionRecord bytes ]
 		ifFalse: [ SONewObjectEntry new ].
-	entry 
+	entry
 		objectId: objectId;
 		bytes: self serialize.
 
@@ -44,38 +44,38 @@ SONewClusterVersion >> indexOfExternalReference: anObject [
 	| index |
 	(anObject == object) ifTrue: [ ^ 0 ].
 	index := externalObjects indexOf: anObject.
-	(index > 0) ifTrue: [ 
+	(index > 0) ifTrue: [
 		"anObject is an external object but has already been registered. Just
 		returning the index of the registered reference"
 		^ index ].
-	transaction objectIndex 
+	transaction objectIndex
 		at: anObject
-		ifPresent: [ :record | 
-			"anObject is an external object. Allocate a new local index and 
+		ifPresent: [ :record |
+			"anObject is an external object. Allocate a new local index and
 			return that"
 			self addObject: record object reference: record objectId.
 			^ references size ]
 		ifAbsent: [ | record |
-			(anObject class isSoilClusterRoot) ifTrue: [ 
-				"anObject could be made cluster root per class side setting. In that 
+			(anObject class isSoilClusterRoot) ifTrue: [
+				"anObject could be made cluster root per class side setting. In that
 				case we add it as cluster root to the transaction so the following
 				will find it"
 				transaction addClusterObject: anObject.
 				record := transaction objectIndex at: anObject.
-				self addObject: record object reference: record objectId. 
-				^ references size ]. 
+				self addObject: record object reference: record objectId.
+				^ references size ].
 			].
 	^ 0
 ]
 
 { #category : #initialization }
-SONewClusterVersion >> initialize [ 
+SONewClusterVersion >> initialize [
 	super initialize.
-	externalObjects := OrderedCollection new.
+	externalObjects := OrderedCollection new
 ]
 
 { #category : #'as yet unclassified' }
-SONewClusterVersion >> initializeObjectIdsIn: aSOTransaction [ 
+SONewClusterVersion >> initializeObjectIdsIn: aSOTransaction [
 	"assign indexes to all not yet initialized object records"
 	((references copyWithFirst: objectId) reject: #isInitialized) do: [ :oid |
 		aSOTransaction initializeObjectId: oid ]
@@ -93,25 +93,23 @@ SONewClusterVersion >> previousVersionRecord: anObject [
 ]
 
 { #category : #printing }
-SONewClusterVersion >> printOn: aStream [ 
+SONewClusterVersion >> printOn: aStream [
 	aStream << 'new record: '.
 	objectId printOn: aStream.
 	aStream << ' '.
-	object printOn: aStream.
-	
+	object printOn: aStream
 ]
 
 { #category : #serializing }
 SONewClusterVersion >> serialize [
 	^ ByteArray streamContents: [ :stream |
 		self serializeOn: stream ]
-				
 ]
 
 { #category : #serializing }
 SONewClusterVersion >> serializeObject [
 	bytes := ByteArray streamContents: [ :s |
-		transaction newSerializer 
+		transaction newSerializer
 			stream: s;
 			externalObjectRegistry: self;
 			serialize: object ].
@@ -125,18 +123,18 @@ SONewClusterVersion >> serializeOn: stream [
 	self flag: #todo.
 	serializer := SoilBasicSerializer new stream: stream.
 
-	serializer 
+	serializer
 		nextPutLengthEncodedInteger: version;
 		nextPutLengthEncodedInteger: previousVersionPosition;
 		nextPutLengthEncodedInteger: references size.
-	
+
 	references do: [ :ref |
 		"do not write zero index, try to allocate a new index before"
-		(ref index = 0) ifTrue: [ 
+		(ref index = 0) ifTrue: [
 			transaction allocateObjectId: ref ].
 		ref writeOn: stream ].
 	serializer nextPutLengthEncodedInteger: bytes size.
-	stream nextPutAll: bytes .
+	stream nextPutAll: bytes
 ]
 
 { #category : #testing }
@@ -148,6 +146,6 @@ SONewClusterVersion >> shouldBeCommitted [
 SONewClusterVersion >> validateReadVersion [
 	"a new object record cannot conflict as the record is not on disk"
 	(previousVersionPosition = 0) ifTrue: [ ^ self ].
-	(previousVersionPosition = (transaction objectRepository positionOf: objectId)) ifFalse: [ 
+	(previousVersionPosition = (transaction objectRepository positionOf: objectId)) ifFalse: [
 		SOObjectHasConcurrentChange signal: 'object id: ', objectId asString, ' has been changed by another transaction']
 ]

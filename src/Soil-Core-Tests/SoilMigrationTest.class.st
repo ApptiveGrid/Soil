@@ -19,7 +19,7 @@ SoilMigrationTest >> createMigrationClassByteLayout [
 SoilMigrationTest >> createMigrationClassFixedLayout [
 	^ (SOBaseTestObject << #SOMigrationObject
 		layout: FixedLayout;
-		slots: { #one . #two }; 
+		slots: { #one . #two };
 		package: self class package name) install
 ]
 
@@ -27,33 +27,33 @@ SoilMigrationTest >> createMigrationClassFixedLayout [
 SoilMigrationTest >> createMigrationClassVariableLayout [
 	^ (SOBaseTestObject << #SOMigrationObject
 		layout: VariableLayout;
-		slots: { #one . #two }; 
+		slots: { #one . #two };
 		package: self class package name) install
 ]
 
 { #category : #accessing }
-SoilMigrationTest >> path [ 
+SoilMigrationTest >> path [
 	^ 'soil-tests'
 ]
 
 { #category : #running }
-SoilMigrationTest >> runCase [ 
-	SystemAnnouncer uniqueInstance 
+SoilMigrationTest >> runCase [
+	SystemAnnouncer uniqueInstance
 		suspendAllWhile: [ super runCase ]
 ]
 
 { #category : #running }
-SoilMigrationTest >> setUp [ 
+SoilMigrationTest >> setUp [
 	super setUp.
 	soil := Soil path: self path.
-	soil 
+	soil
 		destroy;
 		initializeFilesystem.
 	migrationClass := self createMigrationClassFixedLayout
 ]
 
 { #category : #running }
-SoilMigrationTest >> tearDown [ 
+SoilMigrationTest >> tearDown [
 	migrationClass removeFromSystem.
 	super tearDown
 ]
@@ -75,7 +75,6 @@ SoilMigrationTest >> testMaterializingObjectByteLayputFromFixedLayout [
 	tx2 := soil newTransaction.
 
 	self should: [materializedRoot := tx2 root] raise: SOLayoutMigrationError
-
 ]
 
 { #category : #'tests - change classlayout' }
@@ -146,40 +145,40 @@ SoilMigrationTest >> testMaterializingObjectVariableLayputWithChangedShape [
 	| tx tx2 materializedRoot object |
 	object := self createMigrationClassVariableLayout new.
 	self assert: object class isVariable.
-	object 
+	object
 		instVarNamed: #one put: 1;
 		instVarNamed: #two put: 2.
 	tx := soil newTransaction.
-	tx root: object. 
+	tx root: object.
 	tx commit.
-	migrationClass 
+	migrationClass
 		removeSlot: (migrationClass slotNamed: #two);
 		addSlot: #three asSlot.
 
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.
-	self assert: (materializedRoot instVarNamed: #three) equals: nil.	
+	self assert: (materializedRoot instVarNamed: #three) equals: nil.
 ]
 
 { #category : #tests }
 SoilMigrationTest >> testMaterializingObjectWithChangedShape [
 	| tx tx2 materializedRoot object |
 	object := migrationClass new.
-	object 
+	object
 		instVarNamed: #one put: 1;
 		instVarNamed: #two put: 2.
 	tx := soil newTransaction.
-	tx root: object. 
+	tx root: object.
 	tx commit.
-	migrationClass 
+	migrationClass
 		removeSlot: (migrationClass slotNamed: #two);
 		addSlot: #three asSlot.
 
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.
-	self assert: (materializedRoot instVarNamed: #three) equals: nil.	
+	self assert: (materializedRoot instVarNamed: #three) equals: nil.
 ]
 
 { #category : #tests }
@@ -187,20 +186,19 @@ SoilMigrationTest >> testMaterializingObjectWithIvarRemoved [
 	"We can load an object that was saved with two ivars even if the current class has just one"
 	| tx tx2 materializedRoot object |
 	object := migrationClass new.
-	object 
+	object
 		instVarNamed: #one put: 1;
 		instVarNamed: #two put: 2.
 	tx := soil newTransaction.
-	tx root: object. 
+	tx root: object.
 	tx commit.
-	migrationClass 
+	migrationClass
 		removeSlot: (migrationClass slotNamed: #two).
 
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: materializedRoot class instVarNames size equals: 1.
-	self assert: (materializedRoot instVarNamed: #one) equals: 1.
-	
+	self assert: (materializedRoot instVarNamed: #one) equals: 1
 ]
 
 { #category : #tests }
@@ -208,19 +206,19 @@ SoilMigrationTest >> testMaterializingObjectWithIvarRemoved2 [
 	"We can load an object that was saved with two ivars even if the current class has just one"
 	| tx tx2 materializedRoot object |
 	object := migrationClass new.
-	object 
+	object
 		instVarNamed: #one put: 1;
 		instVarNamed: #two put: 2.
 	tx := soil newTransaction.
-	tx root: object. 
+	tx root: object.
 	tx commit.
-	migrationClass 
+	migrationClass
 		removeSlot: (migrationClass slotNamed: #one).
 
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: materializedRoot class instVarNames size equals: 1.
-	self assert: (materializedRoot instVarNamed: #two) equals: 2.
+	self assert: (materializedRoot instVarNamed: #two) equals: 2
 ]
 
 { #category : #tests }
@@ -251,24 +249,24 @@ SoilMigrationTest >> testMaterializingObjectWithIvarRemovedThenCommit [
 { #category : #tests }
 SoilMigrationTest >> testMaterializingObjectWithReOrderedIvars [
 	| tx tx2 materializedRoot object |
-	
-	"this test checks that we can read objects where the order of the ivars changed. This happens for 
+
+	"this test checks that we can read objects where the order of the ivars changed. This happens for
 	example when moving ivars up or down in the hierarchy"
-	
+
 	object := migrationClass new.
-	object 
+	object
 		instVarNamed: #one put: 1;
 		instVarNamed: #two put: 2.
 	tx := soil newTransaction.
-	tx root: object. 
+	tx root: object.
 	tx commit.
-	
+
 	migrationClass := (SOBaseTestObject << #SOMigrationObject
 		layout: FixedLayout;
-		slots: { #two .#one }; 
+		slots: { #two .#one };
 		package: self class package name) install.
-	
-	
+
+
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.
@@ -279,19 +277,19 @@ SoilMigrationTest >> testMaterializingObjectWithReOrderedIvars [
 SoilMigrationTest >> testSerializingObjectWithChangedShape [
 	| tx tx2 materializedRoot object tx3 description topDescription obj |
 	object := migrationClass new.
-	object 
+	object
 		instVarNamed: #one put: 1;
 		instVarNamed: #two put: 2.
 	tx := soil newTransaction.
-	tx root: object. 
+	tx root: object.
 	tx commit.
 	tx2 := soil newTransaction.
-	migrationClass 
+	migrationClass
 		removeSlot: (migrationClass slotNamed: #two);
 		addSlot: #three asSlot.
 	tx2 markDirty: tx2 root.
 	tx2 commit.
-	
+
 	tx3 := soil newTransaction.
 	materializedRoot := tx3 root.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.

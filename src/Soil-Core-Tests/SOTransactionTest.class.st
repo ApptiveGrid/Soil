@@ -8,17 +8,17 @@ Class {
 }
 
 { #category : #initialization }
-SOTransactionTest >> setUp [ 
+SOTransactionTest >> setUp [
 	super setUp.
-	soil := Soil new 
+	soil := Soil new
 		path: 'sunit-soil-tests';
 		destroy;
 		initializeFilesystem;
-		yourself.
+		yourself
 ]
 
 { #category : #running }
-SOTransactionTest >> tearDown [ 
+SOTransactionTest >> tearDown [
 	super tearDown.
 	soil destroy
 ]
@@ -27,15 +27,15 @@ SOTransactionTest >> tearDown [
 SOTransactionTest >> testAddSameObjectIdTwice [
 	| tx |
 	tx := SOTransaction new.
-	tx atObjectId: (SOObjectId segment: 1 index: 0) putObject: Object new. 
-	tx atObjectId: (SOObjectId segment: 1 index: 0) putObject: Object new. 
+	tx atObjectId: (SOObjectId segment: 1 index: 0) putObject: Object new.
+	tx atObjectId: (SOObjectId segment: 1 index: 0) putObject: Object new.
 	self assert: tx dirtyObjects size equals: 2
 ]
 
 { #category : #tests }
 SOTransactionTest >> testConflictingReadVersion [
 	| obj tx1 tx2 tx3 |
-	obj := SOTestGraphRoot new 
+	obj := SOTestGraphRoot new
 		nested: (SOTestNestedObject new label: 'first').
 	"make object to test to be in database"
 	tx1 := soil newTransaction.
@@ -53,9 +53,9 @@ SOTransactionTest >> testConflictingReadVersion [
 	tx3 commit.
 	"when trying to commit the second transaction the concurrent
 	modification should throw an exception"
-	self 
+	self
 		should: [ tx2 commit ]
-		raise: SOObjectHasConcurrentChange 
+		raise: SOObjectHasConcurrentChange
 ]
 
 { #category : #tests }

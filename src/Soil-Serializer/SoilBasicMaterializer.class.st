@@ -18,13 +18,13 @@ SoilBasicMaterializer >> nextByte [
 ]
 
 { #category : #reading }
-SoilBasicMaterializer >> nextByteArray: aClass [ 
+SoilBasicMaterializer >> nextByteArray: aClass [
 	| byteArray |
 	byteArray := aClass new: self nextLengthEncodedInteger.
 	self registerObject: byteArray.
-	1 to: byteArray size do: [:i | 
-		byteArray 
-			at: i 
+	1 to: byteArray size do: [:i |
+		byteArray
+			at: i
 			put: self nextByte ].
 	^byteArray
 ]
@@ -42,17 +42,17 @@ SoilBasicMaterializer >> nextCharacter [
 ]
 
 { #category : #reading }
-SoilBasicMaterializer >> nextDate: aClass [ 
+SoilBasicMaterializer >> nextDate: aClass [
 	| date |
-	date := aClass 
-		julianDayNumber: 2415386 + self nextLengthEncodedInteger 
+	date := aClass
+		julianDayNumber: 2415386 + self nextLengthEncodedInteger
 		offset: (Duration minutes: self nextSoilObject).
 	self registerObject: date.
 	^ date
 ]
 
 { #category : #reading }
-SoilBasicMaterializer >> nextFloat: aClass [ 
+SoilBasicMaterializer >> nextFloat: aClass [
 	"We multiply the Boxedfloat by 1, this way we create a SmallFloat if possible"
 	| float |
 	float :=  BoxedFloat64 basicNew
@@ -117,7 +117,6 @@ SoilBasicMaterializer >> nextString [
 	string := self basicNextString.
 	self registerObject: string.
 	^ string
-
 ]
 
 { #category : #reading }
@@ -127,8 +126,6 @@ SoilBasicMaterializer >> nextSymbol [
 	bytes := ByteArray new: length.
 	stream readInto: bytes startingAt: 1 count: length.
 	^ bytes asString asSymbol
-	
-
 ]
 
 { #category : #reading }
@@ -145,8 +142,8 @@ SoilBasicMaterializer >> nextWideString [
 	length := self nextLengthEncodedInteger.
 	buf := ByteArray new: length.
 	stream readInto: buf startingAt: 1 count: length.
-	wideString := self class decodeBytes: buf. 
-	self registerObject: wideString. 
+	wideString := self class decodeBytes: buf.
+	self registerObject: wideString.
 	^ wideString
 ]
 

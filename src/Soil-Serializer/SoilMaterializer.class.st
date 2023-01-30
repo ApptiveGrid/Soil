@@ -23,13 +23,13 @@ SoilMaterializer class >> nextLengthEncodedInteger [
 
 { #category : #'as yet unclassified' }
 SoilMaterializer class >> on: aReadStream [
-	^ self new 
-		stream: aReadStream 
+	^ self new
+		stream: aReadStream
 ]
 
 { #category : #public }
-SoilMaterializer >> behaviorVersionsUpTo: aDescription [ 
-	^ transaction behaviorVersionsUpTo: aDescription 
+SoilMaterializer >> behaviorVersionsUpTo: aDescription [
+	^ transaction behaviorVersionsUpTo: aDescription
 ]
 
 { #category : #public }
@@ -51,14 +51,14 @@ SoilMaterializer >> newObject [
 	description := behaviorIndex isZero
 		ifTrue: [ SOBehaviorDescription meta ]
 		ifFalse: [
-			transaction 
+			transaction
 				behaviorDescriptionWithIndex: behaviorIndex
 				andVersion: behaviorVersion ].
 	^ description objectClass classLayout soilBasicMaterialize: description with: self
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextArray: aClass [ 
+SoilMaterializer >> nextArray: aClass [
 	| array |
 	array := aClass new: self nextLengthEncodedInteger.
 	self registerObject: array.
@@ -67,7 +67,7 @@ SoilMaterializer >> nextArray: aClass [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextAssociation: aClass [ 
+SoilMaterializer >> nextAssociation: aClass [
 	| association |
 	association := aClass new.
 	self registerObject: association.
@@ -78,8 +78,8 @@ SoilMaterializer >> nextAssociation: aClass [
 
 { #category : #reading }
 SoilMaterializer >> nextClass [
-	^ Smalltalk 
-		at: self nextString asSymbol 
+	^ Smalltalk
+		at: self nextString asSymbol
 		ifAbsent: nil
 ]
 
@@ -90,19 +90,19 @@ SoilMaterializer >> nextCompiledBlock: aClass [
 
  	header := self nextSoilObject.
  	bytecodesSize := self nextLengthEncodedInteger.
-	
+
  	compiledBlock := aClass
  		newMethod: bytecodesSize
  		header: header.
-	
+
 	self registerObject: compiledBlock.
 
  	"first the literals
  	note: we omit the outer code here as we store clean blocks"
- 	1 to: compiledBlock numLiterals - 1 do: [:i | 
- 				compiledBlock literalAt: i put: self nextSoilObject ].			
+ 	1 to: compiledBlock numLiterals - 1 do: [:i |
+ 				compiledBlock literalAt: i put: self nextSoilObject ].
 
- 	compiledBlock initialPC 
+ 	compiledBlock initialPC
  		to: compiledBlock size
  		do: [ :index |
  			compiledBlock
@@ -126,24 +126,24 @@ SoilMaterializer >> nextCompiledMethod: aClass [
 
 	self registerObject: compiledMethod.
 
- 	"first the literals"	
- 	"for now we do store the class pointer in the last literal"	
- 	1 to: compiledMethod numLiterals do: [:i | 
- 				compiledMethod literalAt: i  put: self nextSoilObject ].			
+ 	"first the literals"
+ 	"for now we do store the class pointer in the last literal"
+ 	1 to: compiledMethod numLiterals do: [:i |
+ 				compiledMethod literalAt: i  put: self nextSoilObject ].
 
  	"then the bytecodes, we ignore the trailer for now"
- 	compiledMethod initialPC 
+ 	compiledMethod initialPC
  		to: compiledMethod size - compiledMethod trailer size
  		do: [ :index |
  			compiledMethod
  				at: index
  				put: self nextByte ].
-	
+
  	^compiledMethod
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextDictionary: aClass [ 
+SoilMaterializer >> nextDictionary: aClass [
 	| size dict key |
 	size := self nextLengthEncodedInteger.
 	dict := aClass new: size.
@@ -170,7 +170,7 @@ SoilMaterializer >> nextInternalReference [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextMessage: aClass [ 
+SoilMaterializer >> nextMessage: aClass [
 	| message |
 	message := aClass new.
 	self registerObject: message.
@@ -193,7 +193,7 @@ SoilMaterializer >> nextMessageSend: aClass [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextOrderedCollection: aClass [ 
+SoilMaterializer >> nextOrderedCollection: aClass [
 		| size collection |
 	size := self  nextLengthEncodedInteger.
 	collection := aClass new: size.
@@ -203,14 +203,14 @@ SoilMaterializer >> nextOrderedCollection: aClass [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextSoilObject [ 
-	^ (TypeCodeMapping at: self nextByte) soilMaterialize: self 
+SoilMaterializer >> nextSoilObject [
+	^ (TypeCodeMapping at: self nextByte) soilMaterialize: self
 ]
 
 { #category : #registry }
 SoilMaterializer >> registerObject: anObject [
 	objects ifNil: [ objects := OrderedCollection new ].
-	objects add: anObject 
+	objects add: anObject
 ]
 
 { #category : #accessing }

@@ -7,6 +7,6 @@ Date >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Serializer' }
-Date class >> soilMaterialize: materializer [ 
+Date class >> soilMaterialize: materializer [
 	^ materializer nextDate: self
 ]

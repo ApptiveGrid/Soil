@@ -8,7 +8,7 @@ Class >> soilBasicSerialize: serializer [
 
 { #category : #'*Soil-Serializer' }
 Class >> soilBehaviorIdentifier [
-	^ name 
+	^ name
 ]
 
 { #category : #'*Soil-Serializer' }

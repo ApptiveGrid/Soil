@@ -11,20 +11,20 @@ Class {
 }
 
 { #category : #'instance creation' }
-SOSkipListPage class >> readFrom: aStream [ 
-	^ self new 
+SOSkipListPage class >> readFrom: aStream [
+	^ self new
 		readFrom: aStream
 ]
 
 { #category : #adding }
-SOSkipListPage >> addNode: aSkipNode [ 
+SOSkipListPage >> addNode: aSkipNode [
 	aSkipNode page: self.
 	items do: [ :item |
 		(item keyIsSmallerThan: aSkipNode key)
-			ifFalse: [ 
+			ifFalse: [
 				items add: aSkipNode before: item.
 				^ aSkipNode ] ].
-	items add: aSkipNode 
+	items add: aSkipNode
 ]
 
 { #category : #accessing }
@@ -33,12 +33,10 @@ SOSkipListPage >> firstItem [
 ]
 
 { #category : #'as yet unclassified' }
-SOSkipListPage >> fitsKey: aByteArray [ 
+SOSkipListPage >> fitsKey: aByteArray [
 	"(items first key asInteger < bkey ) ifFalse: [ ^ false ]."
 	(items last key asInteger > aByteArray asInteger) ifFalse: [ ^ false ].
 	^ true
-
-	
 ]
 
 { #category : #testing }
@@ -47,18 +45,18 @@ SOSkipListPage >> hasRoom [
 ]
 
 { #category : #initialization }
-SOSkipListPage >> initialize [ 
+SOSkipListPage >> initialize [
 	super initialize.
 	items := OrderedCollection new
 ]
 
 { #category : #accessing }
-SOSkipListPage >> itemAt: anInteger [ 
-	^ items at: anInteger 
+SOSkipListPage >> itemAt: anInteger [
+	^ items at: anInteger
 ]
 
 { #category : #'as yet unclassified' }
-SOSkipListPage >> itemIndexOf: aSkipNode [ 
+SOSkipListPage >> itemIndexOf: aSkipNode [
 	^ items indexOf: aSkipNode
 ]
 
@@ -68,17 +66,17 @@ SOSkipListPage >> items [
 ]
 
 { #category : #accessing }
-SOSkipListPage >> items: aCollection [ 
+SOSkipListPage >> items: aCollection [
 	items := aCollection
 ]
 
 { #category : #accessing }
-SOSkipListPage >> keySize: anInteger [ 
+SOSkipListPage >> keySize: anInteger [
 	keySize := anInteger
 ]
 
 { #category : #accessing }
-SOSkipListPage >> list: aPersistedSkipList [ 
+SOSkipListPage >> list: aPersistedSkipList [
 	list := aPersistedSkipList
 ]
 
@@ -112,8 +110,8 @@ SOSkipListPage >> pageNumber [
 ]
 
 { #category : #accessing }
-SOSkipListPage >> pageNumber: anInteger [ 
-	pageNumber := anInteger 
+SOSkipListPage >> pageNumber: anInteger [
+	pageNumber := anInteger
 ]
 
 { #category : #accessing }
@@ -122,12 +120,12 @@ SOSkipListPage >> pageSize [
 ]
 
 { #category : #printing }
-SOSkipListPage >> printOn: aStream [ 
+SOSkipListPage >> printOn: aStream [
 	aStream << 'page : #' << pageNumber asString
 ]
 
 { #category : #'instance creation' }
-SOSkipListPage >> readFrom: aStream [ 
+SOSkipListPage >> readFrom: aStream [
 	| numberOfItems node |
 	numberOfItems := (aStream next: 2) asInteger.
 	1 to: numberOfItems do: [ :n |
@@ -136,22 +134,20 @@ SOSkipListPage >> readFrom: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-SOSkipListPage >> readNodeFrom: aStream [ 
+SOSkipListPage >> readNodeFrom: aStream [
 	| node value |
 	node := list newNode
 		key: (aStream next: keySize);
 		value: (aStream next: 8).
 	1 to: list maxLevel do: [ :n |
 		value := self nextLengthEncodedInteger: aStream.
-		node rightAt: n put: ((value = 0) 
+		node rightAt: n put: ((value = 0)
 			ifTrue: [ aStream next. nil ]
-			ifFalse: [ 
+			ifFalse: [
 				SOSkipListNodeProxy new
 					pageNumber: value;
 					pageIndex: (self nextLengthEncodedInteger: aStream) ]) ].
 	^ node
-		
-		
 ]
 
 { #category : #removing }
@@ -160,21 +156,21 @@ SOSkipListPage >> removeLastNode [
 ]
 
 { #category : #writing }
-SOSkipListPage >> writeOn: aStream [ 
+SOSkipListPage >> writeOn: aStream [
 	| pagePosition |
-	pagePosition := list positionOfPage: self.  
+	pagePosition := list positionOfPage: self.
 	aStream position: pagePosition.
 	aStream nextPutAll: (items size asByteArrayOfSize: 2).
 	items do: [ :item |
-		aStream 
+		aStream
 			nextPutAll: (item key asByteArrayOfSize: keySize);
 			nextPutAll: (item value asByteArray asByteArrayOfSize: 8).
-		item levels do: [ :lvl | 
+		item levels do: [ :lvl |
 			lvl
-				ifNotNil: [ 
+				ifNotNil: [
 					self nextPutLengthEncodedInteger: lvl pageNumber on: aStream.
 					self nextPutLengthEncodedInteger: lvl pageIndex on: aStream ]
 				ifNil: [ aStream nextPutAll: #[ 0 0 ] ] ] ].
 		aStream flush.
-	((aStream position - pagePosition) > self pageSize) ifTrue: [ self halt. ] 
+	((aStream position - pagePosition) > self pageSize) ifTrue: [ self halt. ]
 ]

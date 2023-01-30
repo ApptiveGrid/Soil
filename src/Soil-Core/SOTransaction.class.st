@@ -28,7 +28,7 @@ SOTransaction >> abort [
 { #category : #accessing }
 SOTransaction >> acquireLocksAndDetectWriteSkew [
 	lastObjectIndexes := Dictionary new.
-	"first iterate over all records to acquire locks and check for concurrent 
+	"first iterate over all records to acquire locks and check for concurrent
 	writes. Might be changed later to rely on the journal in case of accident"
 	recordsToCommit do: [ :record |
 		record initializeObjectIdsIn: self.
@@ -40,18 +40,17 @@ SOTransaction >> acquireLocksAndDetectWriteSkew [
 ]
 
 { #category : #adding }
-SOTransaction >> addClusterObject: anObject [ 
+SOTransaction >> addClusterObject: anObject [
 	objectMap at: anObject ifPresent: [ ^ self ].
-	self 
-		atObjectId: self newObjectId 
+	self
+		atObjectId: self newObjectId
 		putObject: anObject.
 	^ anObject
-
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> allocateObjectId: aSOObjectId [ 
-	aSOObjectId initializeIndex: self objectRepository 
+SOTransaction >> allocateObjectId: aSOObjectId [
+	aSOObjectId initializeIndex: self objectRepository
 ]
 
 { #category : #accessing }
@@ -74,37 +73,37 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 	behaviorDescriptions
 		at: aClass soilBehaviorIdentifier
 		ifPresent: [ :description | ^ description ].
-	"if we find the behaviorIdentifier in the registry and it is 
+	"if we find the behaviorIdentifier in the registry and it is
 	current we can return it"
 	objectId := soil behaviorRegistry
 		nameAt: aClass soilBehaviorIdentifier
 		ifAbsent: [ nil ].
-		
-	objectId ifNotNil: [ 
+
+	objectId ifNotNil: [
 		behaviorDescription := (objectId index = 2)
 			ifTrue: [ ^ SOBehaviorDescription meta ]
 			ifFalse: [ (self objectWithId: objectId ifNone: [Error signal ]) objectId: objectId].
 		"the description in the database might not be current, if not, we create a new one later"
-		behaviorDescription isCurrent 
+		behaviorDescription isCurrent
 			ifTrue: [ ^ behaviorDescription ] ].
-			
+
 	"behaviorDescription is only set if we've found an old version"
-	behaviorDescription 
-		ifNotNil: [ 
+	behaviorDescription
+		ifNotNil: [
 			"modify existing description and increment version"
-			behaviorDescription 
+			behaviorDescription
 				initializeFromBehavior: aClass;
 				incrementVersion.
 			"add a new version record to keep the previous position"
 			self makeNewVersion: behaviorDescription  ]
-		ifNil: [  
+		ifNil: [
 			"this is a new description with version 1"
 			behaviorDescription := (SOBehaviorDescription for: aClass)
 				beFirstVersion;
 				objectId: self newMetaObjectId.
 			behaviorDescription objectId initializeIndex: self objectRepository.
 			self atObjectId: behaviorDescription objectId putObject: behaviorDescription. ].
-	
+
 	behaviorDescriptions
 		at: aClass soilBehaviorIdentifier
 		put: behaviorDescription.
@@ -115,7 +114,7 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 SOTransaction >> behaviorDescriptionWithIndex: index andVersion: version [
 	| description |
 	(index = 2) ifTrue: [ ^ SOBehaviorDescription meta ].
-	description := self behaviorWithIndex: index ifNone: [ 
+	description := self behaviorWithIndex: index ifNone: [
 		(SOObjectNotFound segment: 0 index: index) signal ].
 	(description version = version)
 		ifTrue: [ ^ description ].
@@ -124,23 +123,22 @@ SOTransaction >> behaviorDescriptionWithIndex: index andVersion: version [
 
 { #category : #accessing }
 SOTransaction >> behaviorRegistry [
-	^ soil behaviorRegistry 
+	^ soil behaviorRegistry
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [ 
-	^ self behaviorRegistry 
+SOTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
+	^ self behaviorRegistry
 		behaviorVersionsUpTo: aSOBehaviorDescription
-		transaction: self .
-	
+		transaction: self
 ]
 
 { #category : #'as yet unclassified' }
 SOTransaction >> behaviorWithIndex: objectId andVersion: version ifNone: aBlock [
 	| list |
-	idMap 
+	idMap
 		detect: [ :each | each objectId = objectId ]
-		ifFound: [ :record | 
+		ifFound: [ :record |
 			(record object version = version)
 				ifTrue: [ ^ record object ] ].
 
@@ -152,14 +150,14 @@ SOTransaction >> behaviorWithIndex: objectId andVersion: version ifNone: aBlock 
 			transaction: self;
 			materializeObject.
 		(rec object version = version) ifTrue: [ ^ rec object ]  ].
-	Error signal.
+	Error signal
 ]
 
 { #category : #'as yet unclassified' }
 SOTransaction >> behaviorWithIndex: objectId ifNone: aBlock [
-	idMap 
+	idMap
 		detect: [ :each | each objectId = objectId ]
-		ifFound: [ :record | 
+		ifFound: [ :record |
 			^ record object ].
 
 	^ (self objectRepository metaAt: objectId)
@@ -173,7 +171,7 @@ SOTransaction >> buildJournal [
 	journal := SOJournal new
 		transaction: self;
 		create.
-	recordsToCommit do: [ :record | 
+	recordsToCommit do: [ :record |
 		record version: writeVersion.
 		journal addEntry: record asJournalEntry.
 		record committed  ].
@@ -182,12 +180,12 @@ SOTransaction >> buildJournal [
 
 { #category : #accessing }
 SOTransaction >> buildWriteVersion [
-	^ soil databaseVersion + 1 
+	^ soil databaseVersion + 1
 ]
 
 { #category : #accessing }
 SOTransaction >> checkpoint [
-	"serialize objects and collect all to be written records. This can be done without 
+	"serialize objects and collect all to be written records. This can be done without
 	resources that need locking. This reduces time needed for locking"
 	self prepareRecordsForCommit.
 	"enter lock phase. Acquire lock on global databaseVersion which centrally locks
@@ -208,17 +206,16 @@ SOTransaction >> checkpoint [
 	lastObjectIndexes keysAndValuesDo: [ :segment :indexes |
 		segment lastObjectIndex: indexes value ].
 	behaviorDescriptions do: [ :description |
-		soil behaviorRegistry 
-			nameAt: description value behaviorIdentifier 
+		soil behaviorRegistry
+			nameAt: description value behaviorIdentifier
 			put: description objectId ].
 	soil databaseVersion: writeVersion ]
 			ensure: [self releaseLocks ]
-
 ]
 
 { #category : #accessing }
 SOTransaction >> commit [
-	self 
+	self
 		checkpoint;
 		abort
 ]
@@ -229,7 +226,7 @@ SOTransaction >> dirtyObjects [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> idOf: anObject [ 
+SOTransaction >> idOf: anObject [
 	| id |
 	id := objectMap at: anObject.
 	(id index = 0) ifTrue: [ Error signal: 'index of object id is not initialized' ].
@@ -237,7 +234,7 @@ SOTransaction >> idOf: anObject [
 ]
 
 { #category : #initialization }
-SOTransaction >> initialize [ 
+SOTransaction >> initialize [
 	super initialize.
 	idMap := IdentityDictionary new.
 	objectMap := IdentityDictionary new.
@@ -251,9 +248,9 @@ SOTransaction >> initializeObjectId: anObjectId [
 	anObjectId isInitialized ifTrue: [ SOObjectIdAlreadyInitialized signal: 'object id is already initialized: ', anObjectId asString ].
 	segment := self objectRepository segmentAt: anObjectId segment.
 	"maintain last object indexes per segment"
-	assoc := lastObjectIndexes 
-		at: segment 
-		ifAbsentPut: [ 
+	assoc := lastObjectIndexes
+		at: segment
+		ifAbsentPut: [
 			locks add: (segment lockLastObjectIndexFor: self).
 			segment lastObjectIndex -> segment lastObjectIndex ].
 	"we use an association here to keep the version read from database
@@ -271,13 +268,13 @@ SOTransaction >> isAborted [
 SOTransaction >> isRoot: anObject [
 	self flag: #todo.
 	"this is surely not true but a shortcut for now"
-	^ (objectMap 
-		at: anObject 
+	^ (objectMap
+		at: anObject
 		ifAbsent: [ nil ]) notNil
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> lockObjectId: aSOObjectId [ 
+SOTransaction >> lockObjectId: aSOObjectId [
 	^ self objectRepository lockObjectId: aSOObjectId for: self
 ]
 
@@ -285,23 +282,22 @@ SOTransaction >> lockObjectId: aSOObjectId [
 SOTransaction >> makeNewVersion: classDescription [
 	| record |
 	record := objectMap at: classDescription.
-	recordsToCommit 
+	recordsToCommit
 		add: record asNewClusterVersion
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> makeRoot: anObject [ 
+SOTransaction >> makeRoot: anObject [
 	self addClusterObject: anObject
 ]
 
 { #category : #public }
 SOTransaction >> markDirty: anObject [
 	| record |
-	record := objectMap 
-		at: anObject 
+	record := objectMap
+		at: anObject
 		ifAbsent: [ Error signal: 'cannot mark dirty a non-existing root' ].
-	record beChanged. 
-	
+	record beChanged.
 ]
 
 { #category : #'as yet unclassified' }
@@ -309,24 +305,22 @@ SOTransaction >> materializationWithId: objectId ifNone: aBlock [
 	| record |
 	record := (self objectRepository at: objectId version: readVersion)
 		transaction: self;
-		materializeObject. 
+		materializeObject.
 	idMap at: objectId put: record.
 	objectMap at: record object put: record.
-	^ record object 
-
-	
+	^ record object
 ]
 
 { #category : #'instance creation' }
 SOTransaction >> newClusterVersion [
 	^ SONewClusterVersion new
-		changed: true; 
-		transaction: self.
+		changed: true;
+		transaction: self
 ]
 
 { #category : #'instance creation' }
 SOTransaction >> newMaterializer [
-	^ soil newMaterializer 
+	^ soil newMaterializer
 		transaction: self;
 		yourself
 ]
@@ -337,14 +331,14 @@ SOTransaction >> newMetaObjectId [
 ]
 
 { #category : #'instance creation' }
-SOTransaction >> newObjectId [ 
+SOTransaction >> newObjectId [
 	^ self objectRepository newObjectId
 ]
 
 { #category : #'instance creation' }
 SOTransaction >> newPersistentClusterVersion [
 	^ SOPersistentClusterVersion new
-		transaction: self.
+		transaction: self
 ]
 
 { #category : #accessing }
@@ -353,7 +347,6 @@ SOTransaction >> newSerializer [
 	^ soil newSerializer
 		transaction: self;
 		yourself
-
 ]
 
 { #category : #accessing }
@@ -362,40 +355,39 @@ SOTransaction >> objectIndex [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> objectRepository [ 
+SOTransaction >> objectRepository [
 	^ soil objectRepository
 ]
 
 { #category : #'as yet unclassified' }
 SOTransaction >> objectWithId: objectId ifNone: aBlock [
-	idMap 
+	idMap
 		detect: [ :each | each objectId = objectId ]
 		ifFound: [ :record | ^ record object ].
 
-	^ self materializationWithId: objectId ifNone: aBlock.
+	^ self materializationWithId: objectId ifNone: aBlock
 ]
 
 { #category : #accessing }
 SOTransaction >> prepareRecordsForCommit [.
 	"select all dirty/new records and convert them to new version records"
-	recordsToCommit := idMap values asOrderedCollection 
+	recordsToCommit := idMap values asOrderedCollection
 		select: [:each | each value shouldBeCommitted ]
 			thenCollect: [:each | each asNewClusterVersion ].
-	"serialize initial records. While serializing there can be new records 
+	"serialize initial records. While serializing there can be new records
 	popping up (an object not registered yet in the transaction but is a
 	cluster root"
 	self serializeObjects.
 	"now the list of records to write is complete"
-
 ]
 
 { #category : #printing }
-SOTransaction >> printOn: aStream [ 
+SOTransaction >> printOn: aStream [
 	aStream << 'transaction read: ' << readVersion asString << ', write: ' << writeVersion asString
 ]
 
 { #category : #accessing }
-SOTransaction >> readVersion: anInteger [ 
+SOTransaction >> readVersion: anInteger [
 	readVersion := anInteger
 ]
 
@@ -414,17 +406,17 @@ SOTransaction >> root [
 	idMap associations
 		detect: [ :assoc | (assoc key segment = 1) & (assoc key index = 1) ]
 		ifFound: [ :assoc | ^ assoc value object ].
-	
-	^ self 
-		materializationWithId: self rootObjectId  
-		ifNone: [ nil ].
+
+	^ self
+		materializationWithId: self rootObjectId
+		ifNone: [ nil ]
 ]
 
 { #category : #accessing }
 SOTransaction >> root: anObject [
 
-	self 
-		atObjectId: self rootObjectId  
+	self
+		atObjectId: self rootObjectId
 		putObject: anObject
 ]
 
@@ -439,7 +431,7 @@ SOTransaction >> serializeObjects [
 	index := 1.
 	"process the loop in a way new records that appear while serializing
 	are taken into account"
-	[ index <= recordsToCommit size ] whileTrue: [ 
+	[ index <= recordsToCommit size ] whileTrue: [
 		(recordsToCommit at: index) serializeObject.
 		index := index + 1 ]
 ]
@@ -450,7 +442,7 @@ SOTransaction >> soil [
 ]
 
 { #category : #accessing }
-SOTransaction >> soil: aSoil [ 
+SOTransaction >> soil: aSoil [
 	soil := aSoil
 ]
 

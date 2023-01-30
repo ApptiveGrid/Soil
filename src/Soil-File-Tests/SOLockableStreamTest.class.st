@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #running }
-SOLockableStreamTest >> tearDown [ 
+SOLockableStreamTest >> tearDown [
 	super tearDown.
 	stream close.
 	stream := nil
@@ -33,14 +33,14 @@ SOLockableStreamTest >> testMemoryLockConflict [
 	objA := Object new.
 	objB := Object new.
 	stream := (SOLockableStream path: '/tmp/soil-lock-test') lockOnlyInImage.
-	stream 
+	stream
 		nextPutAll: 'hello world';
 		flush.
 	[ stream lockFrom: 7 to: 12 for: objA.
-	self 
+	self
 		should: [ stream lockFrom: 7 to: 12 for: objB ]
 		raise: SOAlreadyLocked ]
-		ensure: [ stream releaseAllLocks ] .
+		ensure: [ stream releaseAllLocks ]
 ]
 
 { #category : #tests }
@@ -49,10 +49,10 @@ SOLockableStreamTest >> testMemoryUnlock [
 	objA := Object new.
 	objB := Object new.
 	stream := (SOLockableStream path: '/tmp/soil-lock-test') lockOnlyInImage.
-	stream 
+	stream
 		nextPutAll: 'hello world';
 		flush.
 	stream lockFrom: 7 to: 12 for: objA.
 	stream unlockFrom: 7 to: 12 for: objA.
-	self assert: stream locks isEmpty .
+	self assert: stream locks isEmpty
 ]

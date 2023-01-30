@@ -16,20 +16,20 @@ SOObjectIndexFile >> allocateNewIndex [
 ]
 
 { #category : #accessing }
-SOObjectIndexFile >> at: index [ 
+SOObjectIndexFile >> at: index [
 	stream position: (self indexPositionAt: index).
-	^ (stream next: 8) asInteger 
+	^ (stream next: 8) asInteger
 ]
 
 { #category : #accessing }
-SOObjectIndexFile >> at: index putPosition: position [ 
+SOObjectIndexFile >> at: index putPosition: position [
 	stream position: (self indexPositionAt: index).
 	stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize).
 	stream flush
 ]
 
 { #category : #accessing }
-SOObjectIndexFile >> indexPositionAt: anInteger [ 
+SOObjectIndexFile >> indexPositionAt: anInteger [
 	(anInteger > 0) ifFalse: [ SOIndexOutOfRange signal: 'object index needs to be larger than zero' ].
 	^ self headerSize + self objectIndexSize + (anInteger - 1 * self objectIndexSize)
 ]
@@ -38,38 +38,38 @@ SOObjectIndexFile >> indexPositionAt: anInteger [
 SOObjectIndexFile >> initializeStart [
 	self lastObjectIndex: 1.
 	"intialize the slot for the root object"
-	self at: 1 putPosition: 0.
+	self at: 1 putPosition: 0
 ]
 
 { #category : #accessing }
 SOObjectIndexFile >> lastObjectIndex [
-	^ lastObjectIndex ifNil: [ 
+	^ lastObjectIndex ifNil: [
 		stream position: self headerSize.
 		lastObjectIndex := (stream next: self objectIndexSize) asInteger ]
 ]
 
 { #category : #accessing }
-SOObjectIndexFile >> lastObjectIndex: anInteger [ 
-	self stream 
+SOObjectIndexFile >> lastObjectIndex: anInteger [
+	self stream
 		position: self headerSize;
 		nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
 		flush.
-	lastObjectIndex := anInteger 
+	lastObjectIndex := anInteger
 ]
 
 { #category : #lockgin }
-SOObjectIndexFile >> lockLastObjectIndexFor: lockContext [ 
-	^ stream 
-		lockFrom: self headerSize 
+SOObjectIndexFile >> lockLastObjectIndexFor: lockContext [
+	^ stream
+		lockFrom: self headerSize
 		length: self objectIndexSize
 		for: lockContext
 ]
 
 { #category : #'as yet unclassified' }
 SOObjectIndexFile >> lockObjectId: aSOObjectId for: lockContext [
-	^ stream 
-		lockFrom: (self indexPositionAt: aSOObjectId index) 
-		length: self objectIndexSize  
+	^ stream
+		lockFrom: (self indexPositionAt: aSOObjectId index)
+		length: self objectIndexSize
 		for: lockContext
 ]
 
@@ -89,12 +89,12 @@ SOObjectIndexFile >> path [
 ]
 
 { #category : #accessing }
-SOObjectIndexFile >> positionAt: anInteger [ 
+SOObjectIndexFile >> positionAt: anInteger [
 	stream position: (self indexPositionAt: anInteger).
 	^ (stream next: self objectIndexSize) asInteger
 ]
 
 { #category : #accessing }
-SOObjectIndexFile >> prefix [ 
+SOObjectIndexFile >> prefix [
 	^ 'SOIL|OBJECT INDEX' asByteArray
 ]

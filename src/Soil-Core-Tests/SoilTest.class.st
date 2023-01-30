@@ -19,25 +19,25 @@ SoilTest class >> packageNamesUnderTest [
 ]
 
 { #category : #accessing }
-SoilTest >> path [ 
+SoilTest >> path [
 	^ 'soil-tests'
 ]
 
 { #category : #initialization }
-SoilTest >> setUp [ 
+SoilTest >> setUp [
 	super setUp.
 	soil := Soil path: self path.
-	soil 
+	soil
 		destroy;
-		initializeFilesystem 
+		initializeFilesystem
 ]
 
 { #category : #tests }
 SoilTest >> simpleGraph [
-	^ SOTestGraphRoot new 
-		nested: (SOTestNestedObject new 
+	^ SOTestGraphRoot new
+		nested: (SOTestNestedObject new
 			label: 'nested under root';
-			reference: (SOTestClusterRoot new 
+			reference: (SOTestClusterRoot new
 				nested: (SOTestNestedObject new
 					label: 'nested under cluster')))
 ]
@@ -49,7 +49,7 @@ SoilTest >> testInitializeDatabase [
 
 { #category : #tests }
 SoilTest >> testInitializeDatabaseFailsIfExisting [
-	self 
+	self
 		should: [ soil initializeFilesystem ]
 		raise: Error
 ]
@@ -63,16 +63,15 @@ SoilTest >> testSerializingClassDescription [
 	SoilSerializer new
 		soil: soil;
 		transaction: transaction;
-		stream: stream; 
+		stream: stream;
 		serialize: obj.
 	bytes := stream contents.
-	obj2 := SoilMaterializer new 
+	obj2 := SoilMaterializer new
 		soil: soil;
 		transaction: transaction;
 		stream: bytes readStream;
 		materialize.
-	self assert: (obj2 at: #C) class equals: SOBehaviorDescription   
-	
+	self assert: (obj2 at: #C) class equals: SOBehaviorDescription
 ]
 
 { #category : #tests }
@@ -83,8 +82,7 @@ SoilTest >> testSerializingRootOneCluster [
 	tx commit.
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
-	self assert: materializedRoot nested reference class equals: SOTestClusterRoot  
-	
+	self assert: materializedRoot nested reference class equals: SOTestClusterRoot
 ]
 
 { #category : #tests }
@@ -92,14 +90,13 @@ SoilTest >> testSerializingRootTwoCluster [
 	| tx tx2 materializedRoot graph |
 	tx := soil newTransaction.
 	graph := self simpleGraph.
-	tx makeRoot: graph nested reference. 
-	tx root: graph. 
+	tx makeRoot: graph nested reference.
+	tx root: graph.
 	tx checkpoint.
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: materializedRoot nested reference class equals: SOObjectProxy.
 	self assert: materializedRoot nested reference nested label equals: 'nested under cluster'
-	
 ]
 
 { #category : #tests }
@@ -146,6 +143,5 @@ SoilTest >> testUpdatingPersistentObject [
 	updateTx commit.
 	readTx := soil newTransaction.
 	root3 := readTx root.
-	self assert: root3 nested reference nested label equals: 'update nested under cluster'  
-	
+	self assert: root3 nested reference nested label equals: 'update nested under cluster'
 ]

@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #running }
-SOFileLockRegistryTest >> tearDown [ 
+SOFileLockRegistryTest >> tearDown [
 	super tearDown.
 	SOFileLockRegistry reset
 ]
@@ -19,11 +19,11 @@ SOFileLockRegistryTest >> testAcquireAndGarbageCollect [
 	registry := nil.
 	3 timesRepeat: [ Smalltalk garbageCollect ].
 	"The registry should have been vanished"
-	self assert: SOFileLockRegistry numberOfRegistries equals: 0.
+	self assert: SOFileLockRegistry numberOfRegistries equals: 0
 ]
 
 { #category : #tests }
-SOFileLockRegistryTest >> testAcquireRegistry [ 
+SOFileLockRegistryTest >> testAcquireRegistry [
 	| registry |
 	registry := SOFileLockRegistry forPath: '/tmp/foo'.
 	self assert: registry numberOfLocks equals: 0.
@@ -57,7 +57,7 @@ SOFileLockRegistryTest >> testLockBorderOverlapLowerBound [
 	"locking from the same context should always work"
 	self
 		should: [ registry lockFrom: 1 to: 100 for: pTwo ]
-		raise: SOAlreadyLocked 
+		raise: SOAlreadyLocked
 ]
 
 { #category : #tests }
@@ -71,7 +71,7 @@ SOFileLockRegistryTest >> testLockBorderOverlapUpperBound [
 	"locking from the same context should always work"
 	self
 		should: [ registry lockFrom: 1000 to: 2000 for: pTwo ]
-		raise: SOAlreadyLocked 
+		raise: SOAlreadyLocked
 ]
 
 { #category : #tests }
@@ -97,8 +97,7 @@ SOFileLockRegistryTest >> testLockSameRangeSameContext [
 	self assert: registry numberOfLocks equals: 1.
 	"locking from the same context should always work"
 	registry lockFrom: 100 to: 1000 for: pOne.
-	self assert: registry numberOfLocks equals: 2.
-
+	self assert: registry numberOfLocks equals: 2
 ]
 
 { #category : #tests }
@@ -107,18 +106,17 @@ SOFileLockRegistryTest >> testLockSameRangeTwoProcesses [
 	registry := SOFileLockRegistry forPath: '/tmp/foo'.
 	pOneFailed := false.
 	pTwoFailed := false.
-	[ 
-		[ registry lockFrom: 100 to: 1000 for: Processor activeProcess ] 
+	[
+		[ registry lockFrom: 100 to: 1000 for: Processor activeProcess ]
 			on: Error do: [ :err| Transcript show: err messageText; cr. pOneFailed := true ] ] fork.
-	[ 
+	[
 		50 milliSeconds wait.
-	   [ registry lockFrom: 100 to: 1000 for: Processor activeProcess ] 
+	   [ registry lockFrom: 100 to: 1000 for: Processor activeProcess ]
 			on: Error do: [ :err| pTwoFailed := true ]  ] fork.
 	100 milliSeconds wait.
 	self assert: registry numberOfLocks equals: 1.
 	self deny: pOneFailed.
-	self assert: pTwoFailed.
-	
+	self assert: pTwoFailed
 ]
 
 { #category : #tests }
@@ -138,10 +136,9 @@ SOFileLockRegistryTest >> testUnlockDifferentContext [
 	registry lockFrom: 100 to: 1000 for: pOne.
 	self assert: registry numberOfLocks equals: 1.
 	"locking from the same context should always work"
-	self 
+	self
 		should: [ registry unlockFrom: 100 to: 1001 for: pTwo ]
-		raise: SOLockNotFound.
-
+		raise: SOLockNotFound
 ]
 
 { #category : #tests }
@@ -152,10 +149,9 @@ SOFileLockRegistryTest >> testUnlockInvalidRange [
 	registry lockFrom: 100 to: 1000 for: pOne.
 	self assert: registry numberOfLocks equals: 1.
 	"locking from the same context should always work"
-	self 
+	self
 		should: [ registry unlockFrom: 100 to: 1001 for: pOne ]
-		raise: SOLockNotFound.
-
+		raise: SOLockNotFound
 ]
 
 { #category : #tests }
@@ -167,6 +163,5 @@ SOFileLockRegistryTest >> testUnlockRangeSameContext [
 	self assert: registry numberOfLocks equals: 1.
 	"locking from the same context should always work"
 	registry unlockFrom: 100 to: 1000 for: pOne.
-	self assert: registry numberOfLocks equals: 0.
-
+	self assert: registry numberOfLocks equals: 0
 ]

@@ -14,16 +14,16 @@ Class {
 }
 
 { #category : #registry }
-SOFileLockRegistry class >> forPath: aString [ 
-	^ accessSemaphore critical: [ 
-		registries 
+SOFileLockRegistry class >> forPath: aString [
+	^ accessSemaphore critical: [
+		registries
 			at: aString asPath canonicalize
 			ifAbsentPut: [ self new
 				path: aString ] ]
 ]
 
 { #category : #initialization }
-SOFileLockRegistry class >> initialize [ 
+SOFileLockRegistry class >> initialize [
 	self reset
 ]
 
@@ -33,12 +33,12 @@ SOFileLockRegistry class >> numberOfRegistries [
 ]
 
 { #category : #accessing }
-SOFileLockRegistry class >> registries [ 
-	^ registries 
+SOFileLockRegistry class >> registries [
+	^ registries
 ]
 
 { #category : #initialization }
-SOFileLockRegistry class >> reset [ 
+SOFileLockRegistry class >> reset [
 	accessSemaphore := Semaphore forMutualExclusion.
 	registries := WeakValueDictionary new
 ]
@@ -46,23 +46,22 @@ SOFileLockRegistry class >> reset [
 { #category : #adding }
 SOFileLockRegistry >> addLock: aLock [
 	aLock registry: self.
-	^ semaphore critical: [  
-		locks 
+	^ semaphore critical: [
+		locks
 			detect: [:lock | lock conflictsWith: aLock ]
 			ifFound: [:lock | SOAlreadyLocked signal: 'already locked: ', lock asString  ].
 		locks add: aLock ]
-	
 ]
 
 { #category : #initialization }
-SOFileLockRegistry >> initialize [ 
+SOFileLockRegistry >> initialize [
 	super initialize.
 	locks := OrderedCollection new.
 	semaphore := Semaphore forMutualExclusion
 ]
 
 { #category : #accessing }
-SOFileLockRegistry >> lockFrom: from to: to for: currentLockingObject [ 
+SOFileLockRegistry >> lockFrom: from to: to for: currentLockingObject [
 	^ self addLock: (SORangeLock from: from to: to context: currentLockingObject)
 ]
 
@@ -84,22 +83,22 @@ SOFileLockRegistry >> path: anObject [
 ]
 
 { #category : #printing }
-SOFileLockRegistry >> printOn: aStream [ 
+SOFileLockRegistry >> printOn: aStream [
 	super printOn: aStream.
-	aStream << ' locks=' << locks size asString << ',path: ' << path asString 
+	aStream << ' locks=' << locks size asString << ',path: ' << path asString
 ]
 
 { #category : #removing }
-SOFileLockRegistry >> removeLock: aSORangeLock [ 
-	semaphore critical: [ 
+SOFileLockRegistry >> removeLock: aSORangeLock [
+	semaphore critical: [
 		locks remove: aSORangeLock ]
 ]
 
 { #category : #'as yet unclassified' }
-SOFileLockRegistry >> unlockFrom: from to: to for: contextObject [ 
+SOFileLockRegistry >> unlockFrom: from to: to for: contextObject [
 	| lock |
-	^ semaphore critical: [  
-		lock := locks 
+	^ semaphore critical: [
+		lock := locks
 			detect: [ :each | each isFrom: from to: to for: contextObject ]
 			ifNone: [ SOLockNotFound signal: 'cannot find lock from ', from asString, ' to ', to asString , ' for ', contextObject asString ].
 		locks remove: lock ]

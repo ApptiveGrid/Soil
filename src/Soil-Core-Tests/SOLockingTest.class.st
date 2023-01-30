@@ -8,17 +8,17 @@ Class {
 }
 
 { #category : #accessing }
-SOLockingTest >> path [ 
+SOLockingTest >> path [
 	^ 'soil-tests'
 ]
 
 { #category : #initialization }
-SOLockingTest >> setUp [ 
+SOLockingTest >> setUp [
 	super setUp.
 	soil := Soil path: self path.
-	soil 
+	soil
 		destroy;
-		initializeFilesystem 
+		initializeFilesystem
 ]
 
 { #category : #tests }
@@ -27,5 +27,5 @@ SOLockingTest >> testObjectLocks [
 	tx := soil newTransaction.
 	obj := Object new.
 	tx root: obj.
-	tx commit.
+	tx commit
 ]

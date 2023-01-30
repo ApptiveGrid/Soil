@@ -1,7 +1,7 @@
 Extension { #name : #UndefinedObject }
 
 { #category : #'*Soil-Serializer' }
-UndefinedObject >> soilBasicSerialize: serializer [ 
+UndefinedObject >> soilBasicSerialize: serializer [
 	serializer nextPutNil: self
 ]
 
@@ -11,6 +11,6 @@ UndefinedObject class >> soilMaterialize: materializer [
 ]
 
 { #category : #'*Soil-Serializer' }
-UndefinedObject >> soilSerialize: serializer [ 
-	self soilBasicSerialize: serializer 
+UndefinedObject >> soilSerialize: serializer [
+	self soilBasicSerialize: serializer
 ]

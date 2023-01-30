@@ -28,13 +28,13 @@ Class {
 { #category : #testing }
 UnixFileLock class >> canLock: fileHandle from: start length: length exclusive: exclusive [
 	| lock result |
-	
+
 	lock := self newLockExclusive: exclusive start: start length: length.
-	result := self 
-		fcntl: (self fileno: fileHandle) 
-		command: F_GETLK 
+	result := self
+		fcntl: (self fileno: fileHandle)
+		command: F_GETLK
 		struct: lock.
-		
+
 	 result = -1 ifTrue: [ ^ false ].
 	^ lock l_type = F_UNLCK
 ]
@@ -42,7 +42,7 @@ UnixFileLock class >> canLock: fileHandle from: start length: length exclusive: 
 { #category : #private }
 UnixFileLock class >> fcntl: fd command: cmd struct: struct [
 
-	^ self 
+	^ self
 		ffiCall: #(int fcntl(int fd, int cmd, UnixFileLock *struct))
 		library: LibC
 		fixedArgumentCount: 2
@@ -51,7 +51,7 @@ UnixFileLock class >> fcntl: fd command: cmd struct: struct [
 { #category : #private }
 UnixFileLock class >> fcntl: fd command: cmd value: value [
 
-	^ self 
+	^ self
 		ffiCall: #(int fcntl(int fd, int cmd, int value))
 		library: LibC
 		fixedArgumentCount: 2
@@ -66,14 +66,14 @@ UnixFileLock class >> fieldsDesc [
 	short l_whence;
 	__off64_t l_start;
 	__off64_t l_len;
-	__pid_t l_pid;	
+	__pid_t l_pid;
 	)
 ]
 
 { #category : #private }
 UnixFileLock class >> fileno: stream [
 
-	^ self 
+	^ self
 		ffiCall: #(int fileno("FILE *"void *stream))
 		module: LibC
 ]
@@ -81,7 +81,7 @@ UnixFileLock class >> fileno: stream [
 { #category : #private }
 UnixFileLock class >> flock: fd operation: operation [
 
-	^ self 
+	^ self
 		ffiCall: #(int flock(int fd, int operation))
 		module: LibC
 ]
@@ -97,31 +97,31 @@ UnixFileLock class >> initialize [
 
 	__off64_t := FFIUInt64.
 	__pid_t := FFIUInt32.
-	
+
 	F_RDLCK := 0.
 	F_WRLCK := 1.
 	F_UNLCK := 2.
-	
+
 	SEEK_SET := 0.
 	SEEK_CUR := 1.
 	SEEK_END := 2.
-	
+
 	F_GETLK := 5. "12?"
 	F_SETLK := 6. "13?"
 	F_SETLKW := 7. "14?"
-	
+
 	F_GETFL := 3.
 	F_SETFL := 4.
-	
+
 	O_NONBLOCK := 8r4000
 ]
 
 { #category : #'accessing locking' }
 UnixFileLock class >> lock: fileHandle from: start length: length [
-	
-	^ self 
-		lock: fileHandle 
-		from: start 
+
+	^ self
+		lock: fileHandle
+		from: start
 		length: length
 		exclusive: true
 ]
@@ -129,20 +129,20 @@ UnixFileLock class >> lock: fileHandle from: start length: length [
 { #category : #'accessing locking' }
 UnixFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
 	| lock result |
-	
+
 	lock := self newLockExclusive: exclusive start: start length: length.
-	result := self 
-		fcntl: (self fileno: fileHandle) 
-		command: F_SETLK 
+	result := self
+		fcntl: (self fileno: fileHandle)
+		command: F_SETLK
 		struct: lock.
-		
+
 	^ result ~= -1
 ]
 
 { #category : #'instance creation' }
 UnixFileLock class >> newLockExclusive: exclusive start: start length: length [
-	
-	^ self 
+
+	^ self
 		newType: (exclusive ifTrue: [ F_WRLCK ] ifFalse: [ F_RDLCK ])
 		start: start
 		length: length
@@ -150,8 +150,8 @@ UnixFileLock class >> newLockExclusive: exclusive start: start length: length [
 
 { #category : #'instance creation' }
 UnixFileLock class >> newType: type start: start length: length [
-	
-	^ self new 
+
+	^ self new
 		l_type: type;
 		l_whence: SEEK_SET;
 		l_start: start;
@@ -162,8 +162,8 @@ UnixFileLock class >> newType: type start: start length: length [
 
 { #category : #'instance creation' }
 UnixFileLock class >> newUnlockStart: start length: length [
-	
-	^ self 
+
+	^ self
 		newType: F_UNLCK
 		start: start
 		length: length
@@ -172,9 +172,9 @@ UnixFileLock class >> newUnlockStart: start length: length [
 { #category : #accessing }
 UnixFileLock class >> setNonBlock: fileHandle [
 	| fd flags |
-	
+
 	fd := self fileno: fileHandle.
-	
+
 	flags := self fcntl: fd command: F_GETFL value: 0.
 	flags := self fcntl: fd command: F_SETFL value: flags | O_NONBLOCK
 ]
@@ -182,13 +182,13 @@ UnixFileLock class >> setNonBlock: fileHandle [
 { #category : #'accessing locking' }
 UnixFileLock class >> unlock: fileHandle from: start length: length [
 	| lock result |
-	
+
 	lock := self newUnlockStart: start length: length.
-	result := self 
-		fcntl: (self fileno: fileHandle) 
-		command: F_SETLK 
+	result := self
+		fcntl: (self fileno: fileHandle)
+		command: F_SETLK
 		struct: lock.
-		
+
 	^ result ~= -1
 ]
 
@@ -253,7 +253,7 @@ UnixFileLock >> l_whence: anObject [
 ]
 
 { #category : #printing }
-UnixFileLock >> printOn: aStream [ 
+UnixFileLock >> printOn: aStream [
 	"Append to the argument, aStream, the names and values of all the record's variables."
 
 	aStream nextPutAll: self class name; nextPutAll: ' ( '; cr.

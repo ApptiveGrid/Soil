@@ -8,15 +8,14 @@ Class {
 }
 
 { #category : #private }
-SOSkipList >> find: aString [ 
+SOSkipList >> find: aString [
 	^ (self findNode: aString)
 		ifNotNil: [ :node | node value ]
 ]
 
 { #category : #initialization }
-SOSkipList >> initialize [ 
-	super initialize.
-
+SOSkipList >> initialize [
+	super initialize
 ]
 
 { #category : #accessing }
@@ -25,18 +24,18 @@ SOSkipList >> maxLevel [
 ]
 
 { #category : #accessing }
-SOSkipList >> maxLevel: anInteger [ 
-	maxLevel := anInteger 
+SOSkipList >> maxLevel: anInteger [
+	maxLevel := anInteger
 ]
 
 { #category : #'instance creation' }
-SOSkipList >> newNode [ 
-	^ SOSkipListNode new 
-		level: self maxLevel 
+SOSkipList >> newNode [
+	^ SOSkipListNode new
+		level: self maxLevel
 ]
 
 { #category : #'instance creation' }
-SOSkipList >> newSentinelNode [ 
-	^ SOSkipListSentinelNode new 
-		level: self maxLevel 
+SOSkipList >> newSentinelNode [
+	^ SOSkipListSentinelNode new
+		level: self maxLevel
 ]

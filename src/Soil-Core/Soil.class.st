@@ -11,18 +11,18 @@ Class {
 }
 
 { #category : #accessing }
-Soil class >> characterEncoding: aString [ 
+Soil class >> characterEncoding: aString [
 	SoilObjectCodec characterEncoding: aString
 ]
 
 { #category : #'as yet unclassified' }
-Soil class >> inMemory [ 
-	^ self new 
+Soil class >> inMemory [
+	^ self new
 		path: FileSystem memory root
 ]
 
 { #category : #'instance creation' }
-Soil class >> path: aString [ 
+Soil class >> path: aString [
 	^ self new
 		path: aString
 ]
@@ -34,18 +34,18 @@ Soil >> behaviorRegistry [
 
 { #category : #'initialize-release' }
 Soil >> close [
-	objectRepository ifNotNil: [ 
+	objectRepository ifNotNil: [
 		objectRepository close ]
 ]
 
 { #category : #accessing }
 Soil >> databaseVersion [
-	^ parameters databaseVersion 
+	^ parameters databaseVersion
 ]
 
 { #category : #accessing }
-Soil >> databaseVersion: anInteger [ 
-	parameters databaseVersion: anInteger 
+Soil >> databaseVersion: anInteger [
+	parameters databaseVersion: anInteger
 ]
 
 { #category : #'as yet unclassified' }
@@ -57,14 +57,14 @@ Soil >> destroy [
 
 { #category : #initialization }
 Soil >> initializeFilesystem [
-	(path exists and: [ path hasChildren ]) 
+	(path exists and: [ path hasChildren ])
 		ifTrue: [ SODatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
 	self path ensureCreateDirectory.
 	parameters := SoilParameterFile new
 		soil: self;
 		initializeFilesystem;
 		yourself.
-	objectRepository := SOObjectRepository new 
+	objectRepository := SOObjectRepository new
 		soil: self;
 		initializeFilesystem;
 		yourself.
@@ -75,8 +75,8 @@ Soil >> initializeFilesystem [
 ]
 
 { #category : #'as yet unclassified' }
-Soil >> lockDatabaseVersionFor: lockContext [ 
-	^ parameters lockDatabaseVersionFor: lockContext 
+Soil >> lockDatabaseVersionFor: lockContext [
+	^ parameters lockDatabaseVersionFor: lockContext
 ]
 
 { #category : #'as yet unclassified' }
@@ -86,25 +86,25 @@ Soil >> lockableStream [
 
 { #category : #accessing }
 Soil >> lockableStreamClass [
-	^ SOLockableStream 
+	^ SOLockableStream
 ]
 
 { #category : #'instance creation' }
 Soil >> newMaterializer [
-	^ SoilMaterializer new 
+	^ SoilMaterializer new
 		soil: self;
 		yourself
 ]
 
 { #category : #'instance creation' }
 Soil >> newSerializer [
-	^ SoilSerializer new 
-		soil: self 
+	^ SoilSerializer new
+		soil: self
 ]
 
 { #category : #transactions }
 Soil >> newTransaction [
-	^ SOTransaction new 
+	^ SOTransaction new
 		soil: self;
 		readVersion: self databaseVersion;
 		yourself
@@ -120,7 +120,7 @@ Soil >> open [
 	parameters := SoilParameterFile new
 		soil: self;
 		open.
-	objectRepository := SOObjectRepository new 
+	objectRepository := SOObjectRepository new
 		soil: self;
 		loadSegments;
 		yourself.
@@ -128,7 +128,6 @@ Soil >> open [
 			soil: self;
 			open;
 			yourself
-	
 ]
 
 { #category : #accessing }
@@ -137,6 +136,6 @@ Soil >> path [
 ]
 
 { #category : #accessing }
-Soil >> path: aString [ 
+Soil >> path: aString [
 	path := aString asFileReference
 ]

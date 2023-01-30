@@ -28,21 +28,21 @@ Class {
 { #category : #testing }
 MacOSFileLock class >> canLock: fileHandle from: start to: length exclusive: exclusive [
 	| lock result |
-	
+
 	lock := self newLockExclusive: exclusive start: start length: length.
-	result := self 
-		fcntl: (self fileno: fileHandle) 
-		command: F_GETLK 
+	result := self
+		fcntl: (self fileno: fileHandle)
+		command: F_GETLK
 		struct: lock.
-		
+
 	 result = -1 ifTrue: [ ^ false ].
 	^ lock l_type = F_UNLCK
 ]
 
 { #category : #private }
 MacOSFileLock class >> fcntl: fd command: cmd struct: struct [
-	^ self 
-		ffiCall: #(int fcntl(int fd, int cmd, MacOSFileLock *struct)) 
+	^ self
+		ffiCall: #(int fcntl(int fd, int cmd, MacOSFileLock *struct))
 		library: LibC
 		fixedArgumentCount: 2
 ]
@@ -50,7 +50,7 @@ MacOSFileLock class >> fcntl: fd command: cmd struct: struct [
 { #category : #private }
 MacOSFileLock class >> fcntl: fd command: cmd value: value [
 
-	^ self 
+	^ self
 		ffiCall: #(int fcntl(int fd, int cmd, ulong value))
 		library: LibC
 		fixedArgumentCount: 2
@@ -63,7 +63,7 @@ MacOSFileLock class >> fieldsDesc [
 	^ #(
 	__off64_t l_start;
 	__off64_t l_len;
-	__pid_t l_pid;	
+	__pid_t l_pid;
 	int l_type;
 	int l_whence;
 	)
@@ -72,7 +72,7 @@ MacOSFileLock class >> fieldsDesc [
 { #category : #private }
 MacOSFileLock class >> fileno: stream [
 
-	^ self 
+	^ self
 		ffiCall: #(int fileno("FILE *"void *stream))
 		module: LibC
 ]
@@ -80,7 +80,7 @@ MacOSFileLock class >> fileno: stream [
 { #category : #private }
 MacOSFileLock class >> flock: fd operation: operation [
 
-	^ self 
+	^ self
 		ffiCall: #(int flock(int fd, int operation))
 		module: LibC
 ]
@@ -96,31 +96,31 @@ MacOSFileLock class >> initialize [
 
 	__off64_t := FFIUInt64.
 	__pid_t := FFIUInt32.
-	
+
 	F_RDLCK := 1.
 	F_UNLCK := 2.
 	F_WRLCK := 3.
-	
+
 	SEEK_SET := 0.
 	SEEK_CUR := 1.
 	SEEK_END := 2.
-	
+
 	F_GETLK := 7. "12?"
 	F_SETLK := 8. "13?"
 	F_SETLKW := 9. "14?"
-	
+
 	F_GETFL := 3.
 	F_SETFL := 4.
-	
+
 	O_NONBLOCK := 8r4000
 ]
 
 { #category : #'accessing locking' }
 MacOSFileLock class >> lock: fileHandle from: start length: length [
-	
-	^ self 
-		lock: fileHandle 
-		from: start 
+
+	^ self
+		lock: fileHandle
+		from: start
 		length: length
 		exclusive: true
 ]
@@ -128,33 +128,33 @@ MacOSFileLock class >> lock: fileHandle from: start length: length [
 { #category : #'accessing locking' }
 MacOSFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
 	| lock result |
-	
+
 	lock := self newLockExclusive: exclusive start: start length: length.
-	result := self 
-		fcntl: (self fileno: fileHandle) 
-		command: F_SETLK 
+	result := self
+		fcntl: (self fileno: fileHandle)
+		command: F_SETLK
 		struct: lock.
-		
+
 	^ result ~= -1
 ]
 
 { #category : #'accessing locking' }
 MacOSFileLock class >> lock: fileHandle from: start to: length exclusive: exclusive [
 	| lock result |
-	
+
 	lock := self newLockExclusive: exclusive start: start length: length.
-	result := self 
-		fcntl: (self fileno: fileHandle) 
-		command: F_SETLK 
+	result := self
+		fcntl: (self fileno: fileHandle)
+		command: F_SETLK
 		struct: lock.
-		
+
 	^ result ~= -1
 ]
 
 { #category : #'instance creation' }
 MacOSFileLock class >> newLockExclusive: exclusive start: start length: length [
-	
-	^ self 
+
+	^ self
 		newType: (exclusive ifTrue: [ F_WRLCK ] ifFalse: [ F_RDLCK ])
 		start: start
 		length: length
@@ -162,8 +162,8 @@ MacOSFileLock class >> newLockExclusive: exclusive start: start length: length [
 
 { #category : #'instance creation' }
 MacOSFileLock class >> newType: type start: start length: length [
-	
-	^ self new 
+
+	^ self new
 		l_type: type;
 		l_whence: SEEK_SET;
 		l_start: start;
@@ -174,8 +174,8 @@ MacOSFileLock class >> newType: type start: start length: length [
 
 { #category : #'instance creation' }
 MacOSFileLock class >> newUnlockStart: start length: length [
-	
-	^ self 
+
+	^ self
 		newType: F_UNLCK
 		start: start
 		length: length
@@ -184,9 +184,9 @@ MacOSFileLock class >> newUnlockStart: start length: length [
 { #category : #accessing }
 MacOSFileLock class >> setNonBlock: fileHandle [
 	| fd flags |
-	
+
 	fd := self fileno: fileHandle.
-	
+
 	flags := self fcntl: fd command: F_GETFL value: 0.
 	flags := self fcntl: fd command: F_SETFL value: flags | O_NONBLOCK
 ]
@@ -194,13 +194,13 @@ MacOSFileLock class >> setNonBlock: fileHandle [
 { #category : #'accessing locking' }
 MacOSFileLock class >> unlock: fileHandle from: start length: length [
 	| lock result |
-	
+
 	lock := self newUnlockStart: start length: length.
-	result := self 
-		fcntl: (self fileno: fileHandle) 
-		command: F_SETLK 
+	result := self
+		fcntl: (self fileno: fileHandle)
+		command: F_SETLK
 		struct: lock.
-		
+
 	^ result ~= -1
 ]
 
@@ -265,7 +265,7 @@ MacOSFileLock >> l_whence: anObject [
 ]
 
 { #category : #printing }
-MacOSFileLock >> printOn: aStream [ 
+MacOSFileLock >> printOn: aStream [
 	"Append to the argument, aStream, the names and values of all the record's variables."
 
 	aStream nextPutAll: self class name; nextPutAll: ' ( '; cr.

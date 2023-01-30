@@ -8,22 +8,21 @@ Class {
 }
 
 { #category : #initialization }
-SOSkipListTest >> setUp [ 
+SOSkipListTest >> setUp [
 	super setUp.
-	skipList := SOPersistentSkipList new 
+	skipList := SOPersistentSkipList new
 		maxLevel: 4;
 		keySize: 8;
 		path: 'sunit-skiplist';
 		destroy;
 		initializeList
-		
 ]
 
 { #category : #tests }
 SOSkipListTest >> testAddFirstOverflow [
-	
+
 	| page |
-	1 to: 62 do: [ :n | 
+	1 to: 62 do: [ :n |
 		skipList at: (n asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: skipList pages size equals: 1.
 	skipList at: (63 asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ].
@@ -35,9 +34,9 @@ SOSkipListTest >> testAddFirstOverflow [
 
 { #category : #tests }
 SOSkipListTest >> testAddInBetween [
-	
+
 	| page |
-	1 to: 62 by: 2 do: [ :n | 
+	1 to: 62 by: 2 do: [ :n |
 		skipList at: (n asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: skipList pages size equals: 1.
 	skipList at: (32 asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ].
@@ -49,9 +48,9 @@ SOSkipListTest >> testAddInBetween [
 
 { #category : #tests }
 SOSkipListTest >> testAddInBetweenOverflowing [
-	
+
 	| page |
-	1 to: 124 by: 2 do: [ :n | 
+	1 to: 124 by: 2 do: [ :n |
 		skipList at: (n asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: skipList pages size equals: 1.
 	skipList at: (32 asString asSkipListKeyOfSize: 8) put: #[ 8 7 6 5 4 3 2 1 ].
@@ -59,29 +58,28 @@ SOSkipListTest >> testAddInBetweenOverflowing [
 	page := skipList pageAt: 2.
 	self assert: page numberOfItems equals: 1.
 	self assert: (page items first) key equals: #[ 255 255 255 255 255 255 255 255 ].
-	skipList writePages 
+	skipList writePages
 ]
 
 { #category : #tests }
 SOSkipListTest >> testAddInBetweenOverflowingTwice [
-	
+
 	| page |
-	2 to: 253 by: 2 do: [ :n | 
+	2 to: 253 by: 2 do: [ :n |
 		skipList at: (n asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: skipList pages size equals: 2.
 	skipList at: (1 asString asSkipListKeyOfSize: 8) put: #[ 8 7 6 5 4 3 2 1 ].
 	self assert: skipList pages size equals: 3.
 	page := skipList pageAt: 3.
 	self assert: page numberOfItems equals: 1.
-	self assert: (page items first) key equals: #[ 255 255 255 255 255 255 255 255 ].
-
+	self assert: (page items first) key equals: #[ 255 255 255 255 255 255 255 255 ]
 ]
 
 { #category : #tests }
 SOSkipListTest >> testAddInBetweenOverwriting [
-	
+
 	| page |
-	1 to: 62 by: 2 do: [ :n | 
+	1 to: 62 by: 2 do: [ :n |
 		skipList at: (n asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: skipList pages size equals: 1.
 	skipList at: (31 asString asSkipListKeyOfSize: 8) put: #[ 8 7 6 5 4 3 2 1 ].
@@ -93,9 +91,9 @@ SOSkipListTest >> testAddInBetweenOverwriting [
 
 { #category : #tests }
 SOSkipListTest >> testAddLastFitting [
-	
+
 	| page |
-	1 to: 61 do: [ :n | 
+	1 to: 61 do: [ :n |
 		skipList at: (n asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: skipList pages size equals: 1.
 	skipList at: (63 asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ].
@@ -120,7 +118,7 @@ SOSkipListTest >> testMorePages [
 
 { #category : #tests }
 SOSkipListTest >> testPageAddFirst [
-	
+
 	| page |
 	skipList at: #foo put: #[ 1 2 3 4 5 6 7 8 ].
 	skipList writePages.

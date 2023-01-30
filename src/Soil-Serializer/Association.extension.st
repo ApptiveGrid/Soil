@@ -7,6 +7,6 @@ Association >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Serializer' }
-Association class >> soilMaterialize: materializer [ 
+Association class >> soilMaterialize: materializer [
 	^ materializer nextAssociation: self
 ]

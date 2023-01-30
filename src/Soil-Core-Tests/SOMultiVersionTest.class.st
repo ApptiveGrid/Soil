@@ -8,15 +8,15 @@ Class {
 }
 
 { #category : #accessing }
-SOMultiVersionTest >> path [ 
+SOMultiVersionTest >> path [
 	^ 'soil-tests'
 ]
 
 { #category : #initialization }
-SOMultiVersionTest >> setUp [ 
+SOMultiVersionTest >> setUp [
 	super setUp.
 	soil := Soil path: self path.
-	soil 
+	soil
 		destroy;
 		initializeFilesystem
 ]
@@ -28,13 +28,13 @@ SOMultiVersionTest >> testReadIsolation [
 	tx1 := soil newTransaction.
 	tx1 root: object.
 	tx1 commit.
-	
+
 	tx2 := soil newTransaction.
 	tx3 := soil newTransaction.
-	
+
 	tx2 root nested: 'second'.
 	tx2 markDirty: tx2 root.
 	tx2 commit.
-	
-	self assert: tx3 root nested equals: 'first' 
+
+	self assert: tx3 root nested equals: 'first'
 ]

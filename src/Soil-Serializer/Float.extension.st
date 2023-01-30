@@ -1,12 +1,12 @@
 Extension { #name : #Float }
 
 { #category : #'*Soil-Serializer' }
-Float >> soilBasicSerialize: serializer [ 
+Float >> soilBasicSerialize: serializer [
 	serializer nextPutFloat: self
 ]
 
 { #category : #'*Soil-Serializer' }
-Float class >> soilMaterialize: materializer [ 
+Float class >> soilMaterialize: materializer [
 	^ materializer nextFloat: self
 ]
 

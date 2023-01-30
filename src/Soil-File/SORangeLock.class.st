@@ -12,29 +12,29 @@ Class {
 }
 
 { #category : #'instance creation' }
-SORangeLock class >> from: from length: length context: lockContext [ 
-	^ self new 
+SORangeLock class >> from: from length: length context: lockContext [
+	^ self new
 		from: from;
 		to: from + length;
-		for: lockContext 
+		for: lockContext
 ]
 
 { #category : #'instance creation' }
-SORangeLock class >> from: from to: to context: lockContext [ 
-	^ self new 
+SORangeLock class >> from: from to: to context: lockContext [
+	^ self new
 		from: from;
 		to: to;
-		context: lockContext 
+		context: lockContext
 ]
 
 { #category : #'as yet unclassified' }
-SORangeLock >> conflictsFrom: aFrom to: aTo context: contextObject [ 
+SORangeLock >> conflictsFrom: aFrom to: aTo context: contextObject [
 	"conflicts if ranges overlap but only for different contexts"
 	^ (self intersectsFrom: from to: to) &  (context ~~ contextObject)
 ]
 
 { #category : #'as yet unclassified' }
-SORangeLock >> conflictsWith: aSORangeLock [ 
+SORangeLock >> conflictsWith: aSORangeLock [
 	^ aSORangeLock conflictsFrom: from to: to context: context
 ]
 
@@ -63,7 +63,7 @@ SORangeLock >> from: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SORangeLock >> intersectsFrom: otherFrom to: otherTo [ 
+SORangeLock >> intersectsFrom: otherFrom to: otherTo [
 	"other range is before"
 	(otherTo < from) ifTrue: [ ^ false ].
 	"other range is after"
@@ -72,29 +72,28 @@ SORangeLock >> intersectsFrom: otherFrom to: otherTo [
 ]
 
 { #category : #testing }
-SORangeLock >> isFrom: aFrom to: aTo for: contextObject [ 
+SORangeLock >> isFrom: aFrom to: aTo for: contextObject [
 	^ (from = aFrom)& (to = aTo) & (context = contextObject)
 ]
 
 { #category : #'as yet unclassified' }
-SORangeLock >> lockInMemory: aLockRegistry [ 
-	aLockRegistry addLock: self 
-	 
+SORangeLock >> lockInMemory: aLockRegistry [
+	aLockRegistry addLock: self
 ]
 
 { #category : #'as yet unclassified' }
-SORangeLock >> lockOn: aStream [ 
+SORangeLock >> lockOn: aStream [
 	stream := aStream wrappedStream.
-	stream lockAt: from length: to - from 
+	stream lockAt: from length: to - from
 ]
 
 { #category : #printing }
-SORangeLock >> printOn: aStream [ 
-	aStream << 'range lock  ' 
+SORangeLock >> printOn: aStream [
+	aStream << 'range lock  '
 		<< from asString << ' - ' << to asString.
-	registry ifNotNil: [  
+	registry ifNotNil: [
 		aStream << ' mem ' << registry path asString ].
-	stream ifNotNil: [  
+	stream ifNotNil: [
 		aStream << ' file ' << stream name asString ].
 	aStream << ' '.
 	context printOn: aStream
@@ -113,11 +112,11 @@ SORangeLock >> registry: anObject [
 ]
 
 { #category : #initialization }
-SORangeLock >> release [ 
-	stream ifNotNil: [ 
+SORangeLock >> release [
+	stream ifNotNil: [
 		stream unlockAt: from length: to - from.
 		stream := nil ].
-	registry ifNotNil: [ 
+	registry ifNotNil: [
 		registry removeLock: self.
 		registry := nil ]
 ]

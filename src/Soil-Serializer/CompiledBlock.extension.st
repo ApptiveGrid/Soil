@@ -6,6 +6,6 @@ CompiledBlock >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Serializer' }
-CompiledBlock class >> soilMaterialize: materializer [ 
+CompiledBlock class >> soilMaterialize: materializer [
 	^ materializer nextCompiledBlock: self
 ]

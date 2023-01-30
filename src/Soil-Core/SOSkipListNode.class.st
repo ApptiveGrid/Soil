@@ -11,8 +11,8 @@ Class {
 }
 
 { #category : #accessing }
-SOSkipListNode >> hasRightAt: anInteger [ 
-	^ (levels at: anInteger) notNil 
+SOSkipListNode >> hasRightAt: anInteger [
+	^ (levels at: anInteger) notNil
 ]
 
 { #category : #accessing }
@@ -21,18 +21,18 @@ SOSkipListNode >> key [
 ]
 
 { #category : #accessing }
-SOSkipListNode >> key: aString [ 
+SOSkipListNode >> key: aString [
 	key := aString
 ]
 
 { #category : #'as yet unclassified' }
-SOSkipListNode >> keyIsSmallerThan: aString [ 
+SOSkipListNode >> keyIsSmallerThan: aString [
 	^ key asInteger <= aString asInteger
 ]
 
 { #category : #accessing }
 SOSkipListNode >> level: anInteger [
-	levels := Array new: anInteger 
+	levels := Array new: anInteger
 ]
 
 { #category : #accessing }
@@ -41,19 +41,19 @@ SOSkipListNode >> levels [
 ]
 
 { #category : #enumerating }
-SOSkipListNode >> linearDo: aBlock [ 
+SOSkipListNode >> linearDo: aBlock [
 	aBlock value: self.
 	(self rightAt: 1) ifNotNil: [:node | node linearDo: aBlock ]
 ]
 
 { #category : #accessing }
-SOSkipListNode >> page: aSkipFilePage [ 
-	page := aSkipFilePage 
+SOSkipListNode >> page: aSkipFilePage [
+	page := aSkipFilePage
 ]
 
 { #category : #accessing }
 SOSkipListNode >> pageIndex [
-	^ page itemIndexOf: self 
+	^ page itemIndexOf: self
 ]
 
 { #category : #accessing }
@@ -62,45 +62,45 @@ SOSkipListNode >> pageNumber [
 ]
 
 { #category : #printing }
-SOSkipListNode >> printOn: aStream [ 
-	aStream << 'key: ' << key asString 
+SOSkipListNode >> printOn: aStream [
+	aStream << 'key: ' << key asString
 ]
 
 { #category : #'as yet unclassified' }
-SOSkipListNode >> realNodeIn: aPersistedSkipList [ 
+SOSkipListNode >> realNodeIn: aPersistedSkipList [
 	^ self
 ]
 
 { #category : #accessing }
-SOSkipListNode >> right: aSkipNode [ 
+SOSkipListNode >> right: aSkipNode [
 	1 to: levels size do: [ :n |
 		levels at: n put: aSkipNode  ]
 ]
 
 { #category : #accessing }
-SOSkipListNode >> rightAt: anInteger [ 
-	^ levels at: anInteger 
+SOSkipListNode >> rightAt: anInteger [
+	^ levels at: anInteger
 ]
 
 { #category : #accessing }
-SOSkipListNode >> rightAt: anInteger put: aSkipNode [ 
+SOSkipListNode >> rightAt: anInteger put: aSkipNode [
 	levels at: anInteger put: aSkipNode
 ]
 
 { #category : #accessing }
 SOSkipListNode >> value [
-	^ value 
+	^ value
 ]
 
 { #category : #accessing }
-SOSkipListNode >> value: aString [ 
+SOSkipListNode >> value: aString [
 	value := aString
 ]
 
 { #category : #writing }
-SOSkipListNode >> writeOn: aStream [ 
+SOSkipListNode >> writeOn: aStream [
 self halt.
-	aStream  
+	aStream
 		nextPutAll: (key asByteArrayOfSize: 8);
 		nextPutAll: (value asByteArrayOfSize: 8).
 	levels do: [ :level |

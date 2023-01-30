@@ -13,13 +13,12 @@ SONewObjectVersionEntry class >> journalTypeCode [
 ]
 
 { #category : #accessing }
-SONewObjectVersionEntry >> oldBytes: aCollection [ 
+SONewObjectVersionEntry >> oldBytes: aCollection [
 	oldBytes := aCollection
 ]
 
 { #category : #writing }
-SONewObjectVersionEntry >> writeOn: aStream [ 
+SONewObjectVersionEntry >> writeOn: aStream [
 	super writeOn: aStream.
-	aStream nextPutAll: oldBytes.
-	
+	aStream nextPutAll: oldBytes
 ]

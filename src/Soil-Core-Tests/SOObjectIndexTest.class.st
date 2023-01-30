@@ -23,7 +23,7 @@ SOObjectIndexTest >> testInitializedFileVersion [
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectIndexFile new stream: stream.
 		index initializeFilesystem ].
-	newIndex := SOObjectIndexFile new 
+	newIndex := SOObjectIndexFile new
 		stream: bytes readStream;
 		readHeader.
 	self assert: newIndex fileVersion equals: 1
@@ -35,12 +35,12 @@ SOObjectIndexTest >> testWriteAndReadFirstObject [
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectIndexFile new stream: stream.
 		index initializeFilesystem ].
-	newIndex := SOObjectIndexFile new 
+	newIndex := SOObjectIndexFile new
 		stream: (ReadWriteStream with: bytes);
 		readHeader.
 	newIndex lastObjectIndex: 1.
 	newIndex at: 1 putPosition: 1000.
-	n2 := SOObjectIndexFile new 
+	n2 := SOObjectIndexFile new
 		stream: (ReadWriteStream with: newIndex stream contents);
 		readHeader.
 	self assert: n2 lastObjectIndex equals: 1

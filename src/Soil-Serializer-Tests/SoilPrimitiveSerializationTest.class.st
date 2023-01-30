@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'instance creation' }
-SoilPrimitiveSerializationTest >> newSerializer [ 
+SoilPrimitiveSerializationTest >> newSerializer [
 	^ Soil inMemory newSerializer
 ]
 
@@ -17,7 +17,7 @@ SoilPrimitiveSerializationTest >> restoreLocalTimeZoneAfter: aBlock [
 
 	| realTimeZone |
 	realTimeZone := DateAndTime localTimeZone.
-	aBlock ensure: [ DateAndTime localTimeZone: realTimeZone ].
+	aBlock ensure: [ DateAndTime localTimeZone: realTimeZone ]
 ]
 
 { #category : #running }
@@ -34,7 +34,7 @@ SoilPrimitiveSerializationTest >> testSerializationArray [
 	self assert: serialized equals: #[5 4 3 1 3 2 3 3 3 5].
 	self assert: (serialized at: 1) equals: TypeCodeArray.
 
-	materialized := SoilMaterializer materializeFromBytes: serialized. 
+	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object
 ]
 
@@ -64,11 +64,11 @@ SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64 [
 	float := 2.45227231256843e-45.
 	self assert: float class equals: BoxedFloat64.
 	serialized := SoilSerializer serializeToBytes: float.
-	self 
+	self
 		assert: serialized
 		equals: #[9 128 128 176 181 3 0].
 	self assert: (serialized at: 1) equals: TypeCodeFloat.
-	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: BoxedFloat64.
 	self assert: materialized equals: 2.45227231256843e-45
@@ -80,23 +80,23 @@ SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Infinity [
 	float := Float infinity.
 	self assert: float class equals: BoxedFloat64.
 	serialized := SoilSerializer serializeToBytes: float.
-	self 
+	self
 		assert: serialized
 		equals: #[9 128 128 192 255 7 0].
 	self assert: (serialized at: 1) equals: TypeCodeFloat.
-	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: BoxedFloat64.
 	self assert: materialized equals: float.
-	
+
 	float := Float negativeInfinity.
 	self assert: float class equals: BoxedFloat64.
 	serialized := SoilSerializer serializeToBytes: float.
-	self 
+	self
 		assert: serialized
 		equals: #[9 128 128 192 255 15 0].
 	self assert: (serialized at: 1) equals: TypeCodeFloat.
-	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: BoxedFloat64.
 	self assert: materialized equals: float
@@ -105,11 +105,11 @@ SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Infinity [
 { #category : #'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Twice [
 	| float object serialized materialized |
-	
+
 	"try to serialize an object that references twice the boxed floats"
 	float := 2.45227231256843e-45.
 	object := {float . float}.
-	
+
 	self deny: float isImmediateObject.
 
 	serialized := SoilSerializer serializeToBytes: object.
@@ -121,7 +121,7 @@ SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Twice [
 	"Second Float: as this is a real object, we see reference to it"
 	self assert: (serialized at: 10) equals: TypeCodeInternalReference.
 	self assert: object first identicalTo: object second.
-	self assert: materialized equals: object.
+	self assert: materialized equals: object
 ]
 
 { #category : #tests }
@@ -145,7 +145,7 @@ SoilPrimitiveSerializationTest >> testSerializationByteCharacter [
 	self assert: (serialized at: 1) equals: TypeCodeByteCharacter.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
-	self assert: materialized equals: object.
+	self assert: materialized equals: object
 ]
 
 { #category : #'tests-twice' }
@@ -155,7 +155,7 @@ SoilPrimitiveSerializationTest >> testSerializationByteCharacterTwice [
 	object := {character. character}.
 
 	serialized := SoilSerializer  serializeToBytes: object.
-	
+
 	"First the Array"
 	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First Character"
@@ -163,9 +163,9 @@ SoilPrimitiveSerializationTest >> testSerializationByteCharacterTwice [
 	"Second Character, they are immediate objects, so we do store them directly"
 	self assert: (serialized at: 5) equals: TypeCodeByteCharacter.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
-	
+
 	self assert: object first identicalTo: object second.
-	self assert: materialized equals: object.
+	self assert: materialized equals: object
 ]
 
 { #category : #tests }
@@ -177,7 +177,7 @@ SoilPrimitiveSerializationTest >> testSerializationCharacter [
 	self assert: (serialized at: 1) equals: TypeCodeCharacter.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
-	self assert: materialized equals: object.
+	self assert: materialized equals: object
 ]
 
 { #category : #'tests-twice' }
@@ -190,8 +190,7 @@ SoilPrimitiveSerializationTest >> testSerializationCharacterTwice [
 	serialized := SoilSerializer serializeToBytes: object.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: object first identicalTo: object second.
-	self assert: materialized equals: object.
-
+	self assert: materialized equals: object
 ]
 
 { #category : #tests }
@@ -202,7 +201,7 @@ SoilPrimitiveSerializationTest >> testSerializationClass [
 	self assert: serialized equals: #[12 5 80 111 105 110 116].
 	self assert: (serialized at: 1) equals: TypeCodeClass.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
-	self assert: materialized  equals: Point.
+	self assert: materialized  equals: Point
 ]
 
 { #category : #tests }
@@ -297,7 +296,7 @@ SoilPrimitiveSerializationTest >> testSerializationFraction [
 	serialized := SoilSerializer serializeToBytes: object.
 	self assert: serialized equals: #[16 1 2].
 	self assert: (serialized at: 1) equals: TypeCodeFraction.
-	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object
 ]
@@ -309,7 +308,7 @@ SoilPrimitiveSerializationTest >> testSerializationFractionTwice [
 	object := {fraction . fraction}.
 
 	serialized := SoilSerializer serializeToBytes: object.
-	
+
 	"First the Array"
 	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First Fraction"
@@ -317,7 +316,7 @@ SoilPrimitiveSerializationTest >> testSerializationFractionTwice [
 	"Second Fraction, reference to the first"
 	self assert: (serialized at: 6) equals: TypeCodeInternalReference.
 	materialized := SoilMaterializer materializeFromBytes: serialized.
-	
+
 	"identity is preserved"
 	self assert: materialized first identicalTo: materialized second.
 	self assert: materialized equals: object
@@ -328,15 +327,15 @@ SoilPrimitiveSerializationTest >> testSerializationIdentityDictionary [
 	| object serialized materialized |
 	object := IdentityDictionary newFrom: { #test->2 . #now->4 }.
 	serialized := SoilSerializer serializeToBytes: object.
-	
+
 	 self assert: (
- 			serialized = 
+ 			serialized =
  			"the order of association in the dict is different between Pharo10 and Pharo11"
  			#[19 2 27 4 116 101 115 116 3 2 27 3 110 111 119 3 4]
- 		or: [ 
- 			serialized = 
+ 		or: [
+ 			serialized =
  			#[19 2 27 3 110 111 119 3 4 27 4 116 101 115 116 3 2] ]).
-		
+
 	self assert: (serialized at: 1) equals: TypeCodeIdentityDictionary.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -349,23 +348,23 @@ SoilPrimitiveSerializationTest >> testSerializationImmediateLayout [
 	| object serialized materialized |
 	"All Immediate classes are specially encoded, to have a test for every layout, use Character here"
 	object := $a.
-	
+
 	self assert: object class classLayout class equals: ImmediateLayout.
 	serialized := SoilSerializer serializeToBytes: object.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized class equals: Character.
-	self assert: materialized class classLayout class equals: ImmediateLayout.
+	self assert: materialized class classLayout class equals: ImmediateLayout
 ]
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationLargeInteger [
 	| object serialized materialized |
-	
+
 	"Integers are small if they are in between -3 and 16"
 	"The test in addition tests LargeIntegers, but for the databse, they are just the same"
-	
+
 	object := 17.
 	serialized := SoilSerializer serializeToBytes: object.
 	self assert: serialized equals: #[3 17].
@@ -373,7 +372,7 @@ SoilPrimitiveSerializationTest >> testSerializationLargeInteger [
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
-	
+
 	object := -4.
 	serialized := SoilSerializer serializeToBytes: object.
 	self assert: serialized equals: #[4 4].
@@ -381,8 +380,8 @@ SoilPrimitiveSerializationTest >> testSerializationLargeInteger [
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
-	
-	
+
+
 	object := SmallInteger maxVal + 1.
 	serialized := SoilSerializer  serializeToBytes: object.
 	self assert: serialized equals: #[3 128 128 128 128 128 128 128 128 16].
@@ -390,7 +389,7 @@ SoilPrimitiveSerializationTest >> testSerializationLargeInteger [
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
-	
+
 	"Negative"
 	object := SmallInteger minVal - 1.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -405,9 +404,9 @@ SoilPrimitiveSerializationTest >> testSerializationLargeInteger [
 SoilPrimitiveSerializationTest >> testSerializationLargeIntegerTwice [
 
 	| object integer serialized materialized |
-	
+
 	"LargeInteger"
-	
+
 	integer := SmallInteger maxVal + 1.
 	object := {integer. integer}.
 
@@ -418,30 +417,29 @@ SoilPrimitiveSerializationTest >> testSerializationLargeIntegerTwice [
 	self assert: (serialized at: 3) equals: TypeCodeLargePositiveInteger.
 	"Second LargeInteger, reference to the first"
 	self assert: (serialized at: 13) equals: TypeCodeInternalReference.
-	
+
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: object first identicalTo: object second.
 	self assert: materialized equals: object.
-	
+
 	"LargeNegativeInteger"
-	
+
 	integer := SmallInteger minVal - 1.
 	object := {integer. integer}.
 
 	serialized := SoilSerializer serializeToBytes: object.
-	
+
 	"First the Array"
 	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First LargeInteger"
 	self assert: (serialized at: 3) equals: TypeCodeLargeNegativeInteger.
-	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: object first identicalTo: object second.
 	self assert: materialized equals: object.
 	"identity is preserved"
-	self assert: materialized first identicalTo: materialized second.
-	
+	self assert: materialized first identicalTo: materialized second
 ]
 
 { #category : #tests }
@@ -455,7 +453,7 @@ SoilPrimitiveSerializationTest >> testSerializationMessage [
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized selector equals: object selector.
 	self assert: materialized arguments equals: object arguments.
-	self assert: materialized lookupClass equals: object lookupClass.
+	self assert: materialized lookupClass equals: object lookupClass
 ]
 
 { #category : #tests }
@@ -469,15 +467,15 @@ SoilPrimitiveSerializationTest >> testSerializationMessageSend [
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized selector equals: object selector.
 	self assert: materialized arguments equals: object arguments.
-	self assert: materialized receiver equals: object receiver.
+	self assert: materialized receiver equals: object receiver
 ]
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationODBPersistentDictionary [
 	| object serialized materialized |
-	self flag: #todo. 
+	self flag: #todo.
 	"come up with a special class for this"
-	
+
 	"object :=  ODBPersistentDictionary new.
 	object at: #key put: 1.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -527,7 +525,7 @@ SoilPrimitiveSerializationTest >> testSerializationScaledDecimal [
 	| object serialized materialized |
 	object := 10s2.
 	serialized := SoilSerializer serializeToBytes: object.
-	
+
 	self assert: (serialized at: 1) equals: TypeCodeScaledDecimal.
 	self assert: serialized equals: #[21 10 1 2].
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -538,19 +536,19 @@ SoilPrimitiveSerializationTest >> testSerializationScaledDecimal [
 { #category : #'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationScaledDecimalTwice [
 	| scaledDecimal object serialized materialized |
-	
+
 	"try to serialize an object that references twice the boxed floats"
 	scaledDecimal := 10s2.
 	object := {scaledDecimal . scaledDecimal}.
 
 	serialized := SoilSerializer serializeToBytes: object.
-	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
-	
+
 	self assert: object first identicalTo: object second.
 	"identity is preserved"
 	self assert: materialized first identicalTo: materialized second.
-	self assert: materialized equals: object.
+	self assert: materialized equals: object
 ]
 
 { #category : #tests }
@@ -569,12 +567,12 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64 [
 { #category : #'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationSmallFloat64Twice [
 	| object serialized materialized |
-	
+
 	"try to serialize an object that references twice the same small floats"
 	object := {1.11 . 1.11}.
 
 	serialized := SoilSerializer serializeToBytes: object.
-	
+
 	"First the Array"
 	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First Float"
@@ -584,13 +582,13 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64Twice [
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
 	self assert: materialized first identicalTo: object first.
-	self assert: materialized second identicalTo: object second.
+	self assert: materialized second identicalTo: object second
 ]
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	| float serialized materialized |
-	
+
 	float := 0.0.
 	self assert: float class equals: SmallFloat64.
 	serialized := SoilSerializer serializeToBytes: float.
@@ -600,7 +598,7 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	self assert: materialized class equals: SmallFloat64.
 	self assert: materialized identicalTo: float.
 	self assert: materialized identicalTo: Float zero.
-	
+
 	float := 1.0.
 	self assert: float class equals: SmallFloat64.
 	serialized := SoilSerializer serializeToBytes: float.
@@ -610,7 +608,7 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	self assert: materialized class equals: SmallFloat64.
 	self assert: materialized identicalTo: float.
 	self assert: materialized identicalTo: Float one.
-	
+
 	float := -0.0.
 	self assert: float class equals: SmallFloat64.
 	serialized := SoilSerializer serializeToBytes: float.
@@ -619,15 +617,15 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: SmallFloat64.
 	self assert: materialized identicalTo: float.
-	self assert: materialized identicalTo: Float negativeZero.
+	self assert: materialized identicalTo: Float negativeZero
 ]
 
 { #category : #tests }
-SoilPrimitiveSerializationTest >> testSerializationString [ 
+SoilPrimitiveSerializationTest >> testSerializationString [
 	| string serialized materialized |
-	
+
 	"empty String"
-	
+
 	string := ''.
 	serialized := SoilSerializer serializeToBytes: string.
 	self assert: serialized equals: #[13 0].
@@ -635,7 +633,7 @@ SoilPrimitiveSerializationTest >> testSerializationString [
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: ''.
-	
+
 	"Small String"
 	string := 'a'.
 	serialized := SoilSerializer serializeToBytes: string.
@@ -644,12 +642,12 @@ SoilPrimitiveSerializationTest >> testSerializationString [
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: 'a'.
-	
+
 	"Larger (all other) Strings"
-	
+
 	string := 'helloWithMoreCharacters'.
 	serialized := SoilSerializer serializeToBytes: string.
-	self 
+	self
 		assert: serialized
 		equals: #[13 23 104 101 108 108 111 87 105 116 104 77 111 114 101 67 104 97 114 97 99 116 101 114 115].
 	self assert: (serialized at: 1) equals: TypeCodeString.
@@ -659,55 +657,55 @@ SoilPrimitiveSerializationTest >> testSerializationString [
 
 { #category : #'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationStringTwice [
-	
+
 	| object serialized materialized |
-	
+
 	"try to serialize an object that references twice the string"
 	object := {'h' . 'h'}.
 
 	serialized := SoilSerializer serializeToBytes: object.
-	
+
 	"First the Array"
 	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First String"
 	self assert: (serialized at: 3) equals: TypeCodeString.
 	"Second String is stored as an internal reference"
 	self assert: (serialized at: 6) equals: TypeCodeInternalReference.
-	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
-	
+
 
 	object := {'hello' . 'hello'}.
 
 	serialized := SoilSerializer serializeToBytes: object.
-	
+
 	"First the Array"
 	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First String"
 	self assert: (serialized at: 3) equals: TypeCodeString.
 	"Second String is stored as an internal reference"
 	self assert: (serialized at: 10) equals: TypeCodeInternalReference.
-	
 
-	
+
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object.
-	
+
 
 	object := {'helloWithMoreCharacters' . 'helloWithMoreCharacters'}.
 
 	serialized := SoilSerializer serializeToBytes: object.
-	
+
 	"First the Array"
 	self assert: (serialized at: 1) equals: TypeCodeArray.
 	"First String"
 	self assert: (serialized at: 3) equals: TypeCodeString.
 	"Second String is stored as an internal reference"
 	self assert: (serialized at: 28) equals: TypeCodeInternalReference.
-	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
-	self assert: materialized equals: object.
+	self assert: materialized equals: object
 ]
 
 { #category : #tests }
@@ -717,7 +715,7 @@ SoilPrimitiveSerializationTest >> testSerializationSymbol [
 	serialized := SoilSerializer serializeToBytes: object.
 	self assert: serialized equals: #[27 12 115 111 109 101 83 101 108 101 99 116 111 114].
 	self assert: (serialized at: 1) equals: TypeCodeSymbol.
-	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: #someSelector
 ]
@@ -756,7 +754,7 @@ SoilPrimitiveSerializationTest >> testSerializationTrue [
 	self assert: (serialized at: 1) equals: TypeCodeTrue.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
-	self assert: materialized.
+	self assert: materialized
 ]
 
 { #category : #tests }
@@ -788,7 +786,7 @@ SoilPrimitiveSerializationTest >> testSerializationWideStringUTF16 [
 	self assert: (serialized at: 1) equals: TypeCodeWideString.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
-	self assert: materialized equals: string.
+	self assert: materialized equals: string
 ]
 
 { #category : #tests }
@@ -802,13 +800,13 @@ SoilPrimitiveSerializationTest >> testSerializationWideStringUTF32 [
 		with: 16r0111 asCharacter.
 	self assert: string isWideString.
 	Soil characterEncoding: #utf32.
-		
+
 	serialized := SoilSerializer serializeToBytes: string.
 	self assert: serialized equals: #[29 16 0 0 246 0 0 0 246 3 0 0 1 85 0 0 1 17].
 	self assert: (serialized at: 1) equals: TypeCodeWideString.
-	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
-	self assert: materialized equals: string.
+	self assert: materialized equals: string
 ]
 
 { #category : #tests }
@@ -821,13 +819,13 @@ SoilPrimitiveSerializationTest >> testSerializationWideStringUTF8 [
 		with: 16r0111 asCharacter.
 	self assert: string isWideString.
 	Soil characterEncoding: #utf8.
-	
+
 	serialized := SoilSerializer serializeToBytes: string.
 	self assert: serialized equals: #[29 10 239 152 128 239 152 131 197 149 196 145].
 	self assert: (serialized at: 1) equals: TypeCodeWideString.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
-	self assert: materialized equals: string.
+	self assert: materialized equals: string
 ]
 
 { #category : #tests }
@@ -840,11 +838,11 @@ SoilPrimitiveSerializationTest >> testSerializationWideSymbol [
 		with: 16r0111 asCharacter.
 	symbol := symbol asSymbol.
 	self assert: symbol isWideString.
-	
+
 	serialized := SoilSerializer serializeToBytes: symbol.
 	self assert: serialized equals: #[23 10 239 152 128 239 152 131 197 149 196 145].
 	self assert: (serialized at: 1) equals: TypeCodeWideSymbol.
-	
+
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: symbol
 ]
@@ -852,7 +850,7 @@ SoilPrimitiveSerializationTest >> testSerializationWideSymbol [
 { #category : #helpers }
 SoilPrimitiveSerializationTest >> useTimeZoneInstance: aTimeZone during: aBlock [
 
-  self restoreLocalTimeZoneAfter: [ 
-    DateAndTime localTimeZone: aTimeZone. 
-    aBlock cull: aTimeZone ].
+  self restoreLocalTimeZoneAfter: [
+    DateAndTime localTimeZone: aTimeZone.
+    aBlock cull: aTimeZone ]
 ]

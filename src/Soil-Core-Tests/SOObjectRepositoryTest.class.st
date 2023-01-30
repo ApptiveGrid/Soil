@@ -8,33 +8,31 @@ Class {
 }
 
 { #category : #initialization }
-SOObjectRepositoryTest >> setUp [ 
+SOObjectRepositoryTest >> setUp [
 	super setUp.
 	soil := (Soil new path: 'soil-tests')
-		destroy; 
+		destroy;
 		initializeFilesystem;
-		yourself.
+		yourself
 ]
 
 { #category : #tests }
-SOObjectRepositoryTest >> testFirstSegment [ 
+SOObjectRepositoryTest >> testFirstSegment [
 	self assert: soil objectRepository firstSegment id equals: 1
 ]
 
 { #category : #tests }
-SOObjectRepositoryTest >> testSegmentCreation [	
+SOObjectRepositoryTest >> testSegmentCreation [
 	soil objectRepository addNewSegment.
 	self assert: ('soil-tests' asFileReference / #segments / '2') exists.
-	self assert: soil objectRepository segments size equals: 2.
-
+	self assert: soil objectRepository segments size equals: 2
 ]
 
 { #category : #tests }
-SOObjectRepositoryTest >> testSegmentInitializationFromDisk [ 
+SOObjectRepositoryTest >> testSegmentInitializationFromDisk [
 	soil objectRepository instVarNamed: #segments put: nil.
 	('soil-tests' asFileReference / #segments / '1') ensureCreateDirectory.
 	('soil-tests' asFileReference / #segments / '2') ensureCreateDirectory.
 	('soil-tests' asFileReference / #segments / '3') ensureCreateDirectory.
-	self assert: soil objectRepository segments size equals: 3.
-
+	self assert: soil objectRepository segments size equals: 3
 ]

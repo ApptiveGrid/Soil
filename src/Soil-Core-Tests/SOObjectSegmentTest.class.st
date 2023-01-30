@@ -12,11 +12,11 @@ Class {
 SOObjectSegmentTest >> newMemorySegment [
 	| segment |
 	segment := SOObjectSegment new.
-	segment indexFile: (SOObjectIndexFile new 
+	segment indexFile: (SOObjectIndexFile new
 		stream: (ReadWriteStream with: ByteArray new);
 		initializeFilesystem;
 		yourself).
-	segment objectFile: (SOObjectFile new 
+	segment objectFile: (SOObjectFile new
 		stream: (ReadWriteStream with: ByteArray new);
 		initializeFilesystem;
 		yourself).
@@ -24,7 +24,7 @@ SOObjectSegmentTest >> newMemorySegment [
 ]
 
 { #category : #tests }
-SOObjectSegmentTest >> testStoreObject [ 
+SOObjectSegmentTest >> testStoreObject [
 	| segment id obj |
 	segment := self newMemorySegment.
 	id := segment addNewRaw: #[ 1 2 3 ].

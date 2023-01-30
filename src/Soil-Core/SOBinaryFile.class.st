@@ -16,7 +16,7 @@ SOBinaryFile class >> isAbstract [
 
 { #category : #'initialize-release' }
 SOBinaryFile >> close [
-	stream ifNotNil: [ 
+	stream ifNotNil: [
 		stream close ]
 ]
 
@@ -26,7 +26,7 @@ SOBinaryFile >> fileVersion [
 ]
 
 { #category : #accessing }
-SOBinaryFile >> fileVersion: anInteger [ 
+SOBinaryFile >> fileVersion: anInteger [
 	self stream position: self prefix size.
 	stream nextPutAll: (anInteger asByteArrayOfSize: self fileVersionSize)
 ]
@@ -37,8 +37,8 @@ SOBinaryFile >> fileVersionSize [
 ]
 
 { #category : #utilities }
-SOBinaryFile >> headerSize [ 
-	"the file header stores a prefix and the version for the file format and 
+SOBinaryFile >> headerSize [
+	"the file header stores a prefix and the version for the file format and
 	the version of fuel being used"
 	^ self prefix size + self fileVersionSize
 ]
@@ -47,13 +47,13 @@ SOBinaryFile >> headerSize [
 SOBinaryFile >> initializeFilesystem [
 	self initializeHeader.
 	self initializeStart.
-	self stream 
+	self stream
 		flush
 ]
 
 { #category : #initialization }
 SOBinaryFile >> initializeHeader [
-	self stream 
+	self stream
 		position: 0;
 		nextPutAll: self prefix asByteArray.
 	self fileVersion: 1
@@ -61,7 +61,7 @@ SOBinaryFile >> initializeHeader [
 
 { #category : #initialization }
 SOBinaryFile >> initializeStart [
-	self subclassResponsibility 
+	self subclassResponsibility
 ]
 
 { #category : #accessing }
@@ -71,12 +71,12 @@ SOBinaryFile >> open [
 
 { #category : #accessing }
 SOBinaryFile >> path [
-	self subclassResponsibility 
+	self subclassResponsibility
 ]
 
 { #category : #utilities }
 SOBinaryFile >> prefix [
-	self subclassResponsibility 
+	self subclassResponsibility
 ]
 
 { #category : #'private - decoding' }
@@ -84,14 +84,14 @@ SOBinaryFile >> readHeader [
 	| prefix |
 	stream position: 0.
 	prefix := stream next: self prefix size.
-	(prefix = self prefix asByteArray) ifFalse: [ 
+	(prefix = self prefix asByteArray) ifFalse: [
 		Error signal: 'read incorrect prefix: ', prefix asString ].
 	fileVersion := (stream next: self fileVersionSize) asInteger
 ]
 
 { #category : #accessing }
 SOBinaryFile >> stream [
-	^ stream ifNil: [ 
+	^ stream ifNil: [
 		stream := SOLockableStream path: self path ]
 ]
 

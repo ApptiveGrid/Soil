@@ -33,6 +33,6 @@ SOSkipListNodeProxy >> pageNumber: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SOSkipListNodeProxy >> realNodeIn: aSkipList [ 
-	^ (aSkipList pageAt: pageNumber) itemAt: pageIndex  
+SOSkipListNodeProxy >> realNodeIn: aSkipList [
+	^ (aSkipList pageAt: pageNumber) itemAt: pageIndex
 ]

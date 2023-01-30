@@ -2,7 +2,7 @@ Extension { #name : #WideString }
 
 { #category : #'*Soil-Serializer' }
 WideString >> soilBasicSerialize: serializer [
-	
+
 	serializer nextPutWideString: self
 ]
 

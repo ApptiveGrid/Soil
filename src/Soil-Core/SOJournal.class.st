@@ -11,7 +11,7 @@ Class {
 
 { #category : #adding }
 SOJournal >> addEntry: aJournalEntry [
-	entries add: aJournalEntry 
+	entries add: aJournalEntry
 ]
 
 { #category : #accessing }
@@ -21,14 +21,14 @@ SOJournal >> commit [
 
 { #category : #'instance creation' }
 SOJournal >> create [
-	stream := self path 
-		deleteIfAbsent: []; 
+	stream := self path
+		deleteIfAbsent: [];
 		ensureCreateFile;
-		binaryWriteStream 
+		binaryWriteStream
 ]
 
 { #category : #initialization }
-SOJournal >> initialize [ 
+SOJournal >> initialize [
 	super initialize.
 	entries := OrderedCollection new
 ]
@@ -44,13 +44,13 @@ SOJournal >> soil [
 ]
 
 { #category : #accessing }
-SOJournal >> transaction: aSOTransaction [ 
-	transaction := aSOTransaction 
+SOJournal >> transaction: aSOTransaction [
+	transaction := aSOTransaction
 ]
 
 { #category : #writing }
-SOJournal >> write [ 
+SOJournal >> write [
 	entries do: [ :each | each writeOn: stream ].
-	stream 
+	stream
 		flush
 ]

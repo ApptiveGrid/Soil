@@ -12,26 +12,26 @@ Class {
 }
 
 { #category : #'instance creation' }
-SOBehaviorDescription class >> for: aClass [ 
-	^ self new 
+SOBehaviorDescription class >> for: aClass [
+	^ self new
 		initializeFromBehavior: aClass
 ]
 
 { #category : #'instance creation' }
-SOBehaviorDescription class >> isSoilClusterRoot [ 
+SOBehaviorDescription class >> isSoilClusterRoot [
 	^ true
 ]
 
 { #category : #combining }
 SOBehaviorDescription class >> meta [
-	^ (self for: self) 
+	^ (self for: self)
 		beFirstVersion;
 		objectId: self metaId
 ]
 
 { #category : #'as yet unclassified' }
-SOBehaviorDescription class >> soilTransientInstVars [ 
-	^ #( objectId ) 
+SOBehaviorDescription class >> soilTransientInstVars [
+	^ #( objectId )
 ]
 
 { #category : #accessing }
@@ -40,8 +40,8 @@ SOBehaviorDescription >> beFirstVersion [
 ]
 
 { #category : #accessing }
-SOBehaviorDescription >> behaviorIdentifier [ 
-	^ behaviorIdentifier 
+SOBehaviorDescription >> behaviorIdentifier [
+	^ behaviorIdentifier
 ]
 
 { #category : #accessing }
@@ -62,7 +62,7 @@ SOBehaviorDescription >> compatibilityCheck: aClassLayout [
 ]
 
 { #category : #'as yet unclassified' }
-SOBehaviorDescription >> incrementVersion [ 
+SOBehaviorDescription >> incrementVersion [
 	version := version + 1
 ]
 
@@ -140,7 +140,7 @@ SOBehaviorDescription >> objectId: aSOObjectId [
 ]
 
 { #category : #printing }
-SOBehaviorDescription >> printOn: aStream [ 
+SOBehaviorDescription >> printOn: aStream [
 	aStream << 'behavior: ' << behaviorIdentifier asString
 ]
 

@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SOSkipListSentinelNode >> beLower [ 
+SOSkipListSentinelNode >> beLower [
 	lowerBound := true
 ]
 
@@ -18,23 +18,23 @@ SOSkipListSentinelNode >> beUpper [
 ]
 
 { #category : #initialization }
-SOSkipListSentinelNode >> initializeKeyOfSize: anInteger [ 
-	key := lowerBound 
+SOSkipListSentinelNode >> initializeKeyOfSize: anInteger [
+	key := lowerBound
 		ifTrue: [ 0 asByteArrayOfSize: anInteger ]
 		ifFalse: [ ((2 raisedTo: (anInteger * 8)) - 1) asByteArrayOfSize: anInteger  ]
 ]
 
 { #category : #'as yet unclassified' }
-SOSkipListSentinelNode >> keyIsSmallerThan: aString [ 
-	^ lowerBound 
+SOSkipListSentinelNode >> keyIsSmallerThan: aString [
+	^ lowerBound
 ]
 
 { #category : #printing }
-SOSkipListSentinelNode >> printOn: aStream [ 
+SOSkipListSentinelNode >> printOn: aStream [
 	aStream << (lowerBound ifTrue: [ 'lower bound' ] ifFalse: [ 'upper bound' ] )
 ]
 
 { #category : #accessing }
-SOSkipListSentinelNode >> value [ 
-	^ 0 
+SOSkipListSentinelNode >> value [
+	^ 0
 ]

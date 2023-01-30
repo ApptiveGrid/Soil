@@ -14,7 +14,7 @@ SOTestNestedObject >> label [
 ]
 
 { #category : #accessing }
-SOTestNestedObject >> label: aString [ 
+SOTestNestedObject >> label: aString [
 	label := aString
 ]
 

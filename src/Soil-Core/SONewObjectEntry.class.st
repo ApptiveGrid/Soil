@@ -14,34 +14,33 @@ SONewObjectEntry class >> journalTypeCode [
 ]
 
 { #category : #accessing }
-SONewObjectEntry >> bytes: aCollection [ 
+SONewObjectEntry >> bytes: aCollection [
 	bytes := aCollection
 ]
 
 { #category : #accessing }
 SONewObjectEntry >> commit [
-	self objectRepository  
-		at: objectId 
+	self objectRepository
+		at: objectId
 		put: bytes
 ]
 
 { #category : #'as yet unclassified' }
-SONewObjectEntry >> commitIn: transaction [ 
-	transaction objectRepository  
-		at: objectId 
+SONewObjectEntry >> commitIn: transaction [
+	transaction objectRepository
+		at: objectId
 		put: bytes
 ]
 
 { #category : #accessing }
-SONewObjectEntry >> objectId: aSOObjectId [ 
+SONewObjectEntry >> objectId: aSOObjectId [
 	objectId := aSOObjectId
 ]
 
 { #category : #writing }
-SONewObjectEntry >> writeOn: aStream [ 
+SONewObjectEntry >> writeOn: aStream [
 	aStream nextPut: self class journalTypeCode.
 	objectId writeOn: aStream.
-	aStream 
+	aStream
 		nextPutAll: bytes
-	
 ]

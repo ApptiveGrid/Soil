@@ -1,6 +1,6 @@
 Extension { #name : #ByteArray }
 
 { #category : #'*Soil-Core' }
-ByteArray >> asSkipListKeyOfSize: anInteger [ 
-	^ self asByteArrayOfSize: anInteger 
+ByteArray >> asSkipListKeyOfSize: anInteger [
+	^ self asByteArrayOfSize: anInteger
 ]

@@ -15,12 +15,12 @@ SOObjectRepository >> addFirstSegment [
 	segment := SOObjectSegment new id: 1.
 	self addNewSegment: segment.
 	"skip using index 1 because that is the root object"
-	segment allocateNextIndex 
+	segment allocateNextIndex
 ]
 
 { #category : #adding }
 SOObjectRepository >> addMetaSegment [
-	^ metaSegment := (SOMetaSegment new id: 0) 
+	^ metaSegment := (SOMetaSegment new id: 0)
 		objectRepository: self;
 		initializeFilesystem;
 		"skip first index as this is the meta behavior description"
@@ -30,29 +30,29 @@ SOObjectRepository >> addMetaSegment [
 
 { #category : #adding }
 SOObjectRepository >> addNewSegment [
-	^ self addNewSegment: (SOObjectSegment new 
+	^ self addNewSegment: (SOObjectSegment new
 			id: self segments size + 1;
 			objectRepository: self)
 ]
 
 { #category : #adding }
 SOObjectRepository >> addNewSegment: aSegment [
-	aSegment 
+	aSegment
 		objectRepository: self;
 		initializeFilesystem.
 	segments add: aSegment.
-	^ aSegment 
+	^ aSegment
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectRepository >> allVersionsOf: aSOObjectId [ 
+SOObjectRepository >> allVersionsOf: aSOObjectId [
 	| segment |
 	segment := self segmentAt: aSOObjectId segment.
-	^ segment allVersionsOf: aSOObjectId  
+	^ segment allVersionsOf: aSOObjectId
 ]
 
 { #category : #accessing }
-SOObjectRepository >> at: objectid [ 
+SOObjectRepository >> at: objectid [
 	| segment |
 	segment := self segmentAt: objectid segment.
 	^ (segment at: objectid index)
@@ -61,15 +61,15 @@ SOObjectRepository >> at: objectid [
 ]
 
 { #category : #accessing }
-SOObjectRepository >> at: objectId put: bytes [ 
+SOObjectRepository >> at: objectId put: bytes [
 	| segment |
 	(objectId index = 0) ifTrue: [ self halt ].
 	segment := self segmentAt: objectId segment.
-	segment at: objectId index putBytes: bytes	
+	segment at: objectId index putBytes: bytes
 ]
 
 { #category : #accessing }
-SOObjectRepository >> at: objectid version: version [ 
+SOObjectRepository >> at: objectid version: version [
 	| segment |
 	segment := self segmentAt: objectid segment.
 	^ (segment at: objectid index version: version)
@@ -104,19 +104,18 @@ SOObjectRepository >> loadSegments [
 	segments := Array new: directories size - 1.
 	directories do: [ :directory | | segmentId segment |
 		segmentId := directory basename asInteger.
-		segment := SOObjectSegment new 
+		segment := SOObjectSegment new
 			id: segmentId;
 			objectRepository: self.
-		segmentId isZero 
-			ifTrue: [ 
+		segmentId isZero
+			ifTrue: [
 				metaSegment := self newMetaSegment ]
-			ifFalse: [ 
-				segments 
-					at: segmentId 
-					put: (self newSegment 
+			ifFalse: [
+				segments
+					at: segmentId
+					put: (self newSegment
 						id: segmentId) ] ].
 	^ segments
-	
 ]
 
 { #category : #'as yet unclassified' }
@@ -126,13 +125,13 @@ SOObjectRepository >> lockObjectId: aSOObjectId for: lockContext [
 ]
 
 { #category : #accessing }
-SOObjectRepository >> metaAt: index [ 
+SOObjectRepository >> metaAt: index [
 	^ self metaSegment at: index
 ]
 
 { #category : #accessing }
 SOObjectRepository >> metaSegment [
-	^ metaSegment 
+	^ metaSegment
 ]
 
 { #category : #accessing }
@@ -141,8 +140,8 @@ SOObjectRepository >> newMetaObjectId [
 ]
 
 { #category : #'instance creation' }
-SOObjectRepository >> newMetaSegment [ 
-	^ SOMetaSegment new 
+SOObjectRepository >> newMetaSegment [
+	^ SOMetaSegment new
 		objectRepository: self;
 		id: 0;
 		yourself
@@ -154,28 +153,28 @@ SOObjectRepository >> newObjectId [
 ]
 
 { #category : #'instance creation' }
-SOObjectRepository >> newSegment [ 
-	^ SOObjectSegment new 
+SOObjectRepository >> newSegment [
+	^ SOObjectSegment new
 		objectRepository: self;
 		yourself
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectRepository >> positionOf: anObjectId [ 
+SOObjectRepository >> positionOf: anObjectId [
 	^ (self segmentAt: anObjectId segment)
-		indexFile positionAt: anObjectId index  
+		indexFile positionAt: anObjectId index
 ]
 
 { #category : #accessing }
-SOObjectRepository >> segmentAt: anInteger [ 
-	^ anInteger isZero 
+SOObjectRepository >> segmentAt: anInteger [
+	^ anInteger isZero
 		ifTrue: [ metaSegment ]
 		ifFalse: [ self segments at: anInteger ]
 ]
 
 { #category : #accessing }
-SOObjectRepository >> segments [ 
-	^ segments ifNil: [ 
+SOObjectRepository >> segments [
+	^ segments ifNil: [
 		segments := self loadSegments ]
 ]
 
@@ -185,6 +184,6 @@ SOObjectRepository >> soil [
 ]
 
 { #category : #accessing }
-SOObjectRepository >> soil: aSoil [ 
-	soil := aSoil 
+SOObjectRepository >> soil: aSoil [
+	soil := aSoil
 ]

@@ -17,7 +17,6 @@ SOObjectFileTest >> testInitializeOnStream [
 	self assert: fileVersion asInteger equals: 1.
 	fuelVersion := bytes copyFrom: index prefix size + index fileVersionSize + 1 to: (index prefix size + index fileVersionSize + index fuelVersionSize).
 	self assert: fuelVersion asInteger equals: 1
-	 
 ]
 
 { #category : #tests }
@@ -26,7 +25,7 @@ SOObjectFileTest >> testInitializedFileVersion [
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectIndexFile new stream: stream.
 		index initializeFilesystem ].
-	newIndex := SOObjectIndexFile new 
+	newIndex := SOObjectIndexFile new
 		stream: bytes readStream;
 		readHeader.
 	self assert: newIndex fileVersion equals: 1
@@ -38,7 +37,7 @@ SOObjectFileTest >> testInitializedFuelVersion [
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectFile new stream: stream.
 		index initializeFilesystem ].
-	newIndex := SOObjectFile new 
+	newIndex := SOObjectFile new
 		stream: bytes readStream;
 		readHeader.
 	self assert: newIndex fuelVersion equals: 1
@@ -50,12 +49,12 @@ SOObjectFileTest >> testWriteAndReadFirstObject [
 	bytes := ByteArray streamContents: [ :stream |
 		index := SOObjectIndexFile new stream: stream.
 		index initializeFilesystem ].
-	newIndex := SOObjectIndexFile new 
+	newIndex := SOObjectIndexFile new
 		stream: (ReadWriteStream with: bytes);
 		readHeader.
 	newIndex lastObjectIndex: 1.
 	newIndex at: 1 putPosition: 1000.
-	n2 := SOObjectIndexFile new 
+	n2 := SOObjectIndexFile new
 		stream: (ReadWriteStream with: bytes);
 		readHeader.
 	self assert: n2 lastObjectIndex equals: 1

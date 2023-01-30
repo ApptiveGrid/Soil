@@ -10,7 +10,7 @@ Class {
 }
 
 { #category : #'reflective operations' }
-SOObjectProxy >> doesNotUnderstand: aMessage [ 
+SOObjectProxy >> doesNotUnderstand: aMessage [
 	^ aMessage sendTo: self object
 ]
 
@@ -18,14 +18,13 @@ SOObjectProxy >> doesNotUnderstand: aMessage [
 SOObjectProxy >> inspectionObject [
 	<inspectorPresentationOrder: 30 title: 'object'>
 	^ StRawInspection on: self object
-
 ]
 
 { #category : #'reflective operations' }
 SOObjectProxy >> object [
-	^ object ifNil: [  
-		object := transaction 
-			objectWithId: objectId 
+	^ object ifNil: [
+		object := transaction
+			objectWithId: objectId
 			ifNone: [ Error signal: 'cannot load' ] ]
 ]
 
@@ -42,11 +41,11 @@ SOObjectProxy >> objectId: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectProxy >> soilLoadedIn: aTransaction [ 
-	transaction := aTransaction  
+SOObjectProxy >> soilLoadedIn: aTransaction [
+	transaction := aTransaction
 ]
 
 { #category : #accessing }
-SOObjectProxy >> transaction: aTransaction [ 
-	transaction := aTransaction 
+SOObjectProxy >> transaction: aTransaction [
+	transaction := aTransaction
 ]

@@ -10,32 +10,32 @@ Class {
 
 { #category : #examples }
 SOObjectId class >> example [
-	<example> 
+	<example>
 	^ self segment: 1 index: 3
 ]
 
 { #category : #'instance creation' }
-SOObjectId class >> readFrom: stream [ 
-	"for now fix the segment id to be the 16 upper bits and the index 
+SOObjectId class >> readFrom: stream [
+	"for now fix the segment id to be the 16 upper bits and the index
 	be 48 lower bits"
-	^ self new 
+	^ self new
 		segment: (stream next: 2) asInteger;
 		index: (stream next: 6) asInteger
 ]
 
 { #category : #'instance creation' }
 SOObjectId class >> segment: segmentId index: index [
-	^ self new 
+	^ self new
 		segment: segmentId index: index
 ]
 
 { #category : #comparing }
-SOObjectId >> = anObjectId [ 
+SOObjectId >> = anObjectId [
 	(anObjectId class = self class) ifFalse: [ ^ false ].
-	"object ids are generated with zero as index because the allocation of the 
+	"object ids are generated with zero as index because the allocation of the
 	real index needs to be done on commit time"
 	(index = 0) ifTrue: [ ^ self == anObjectId ].
-	^ segment = anObjectId segment and: [ 
+	^ segment = anObjectId segment and: [
 		index = anObjectId index ]
 ]
 
@@ -45,7 +45,7 @@ SOObjectId >> asByteArray [
 ]
 
 { #category : #comparing }
-SOObjectId >> hash [ 
+SOObjectId >> hash [
 	^ segment hash bitXor: index hash
 ]
 
@@ -56,19 +56,19 @@ SOObjectId >> index [
 
 { #category : #accessing }
 SOObjectId >> index: anInteger [
-	index := anInteger 
+	index := anInteger
 ]
 
 { #category : #initialization }
-SOObjectId >> initialize [ 
+SOObjectId >> initialize [
 	super initialize.
 	segment := 1
 ]
 
 { #category : #initialization }
-SOObjectId >> initializeIndex: objectRepository [ 
+SOObjectId >> initializeIndex: objectRepository [
 	(index = 0) ifFalse: [ ^ self ].
-	index := (objectRepository segmentAt: segment) allocateNextIndex 
+	index := (objectRepository segmentAt: segment) allocateNextIndex
 ]
 
 { #category : #testing }
@@ -77,7 +77,7 @@ SOObjectId >> isInitialized [
 ]
 
 { #category : #printing }
-SOObjectId >> printOn: aStream [ 
+SOObjectId >> printOn: aStream [
 	aStream << 'ObjectId(' << segment asString << ':' << index asString << ')'
 ]
 
@@ -89,27 +89,26 @@ SOObjectId >> segment [
 ]
 
 { #category : #accessing }
-SOObjectId >> segment: anInteger [ 
-	segment := anInteger  
-	
+SOObjectId >> segment: anInteger [
+	segment := anInteger
 ]
 
 { #category : #accessing }
-SOObjectId >> segment: segmentNo index: segmentIndex [ 
+SOObjectId >> segment: segmentNo index: segmentIndex [
 	segment := segmentNo.
-	index := segmentIndex 
+	index := segmentIndex
 ]
 
 { #category : #accessing }
-SOObjectId >> setIndex: anInteger [ 
-	index := anInteger 
+SOObjectId >> setIndex: anInteger [
+	index := anInteger
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectId >> writeOn: aStream [ 
-	"for now fix the segment id to be the 16 upper bits and the index 
+SOObjectId >> writeOn: aStream [
+	"for now fix the segment id to be the 16 upper bits and the index
 	be 48 lower bits"
-	aStream 
+	aStream
 		nextPutAll: (segment asByteArrayOfSize: 2);
 		nextPutAll: (index asByteArrayOfSize: 6)
 ]

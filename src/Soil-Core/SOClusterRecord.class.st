@@ -16,14 +16,14 @@ Class {
 
 { #category : #'instance creation' }
 SOClusterRecord class >> readFrom: aStream [
-	^ self new 
+	^ self new
 		readFrom: aStream
 ]
 
 { #category : #'instance creation' }
 SOClusterRecord >> addReference: reference [
 	references detect: [ :each | each = reference ] ifFound: [ self halt ].
-	references add: reference 
+	references add: reference
 ]
 
 { #category : #accessing }
@@ -38,22 +38,21 @@ SOClusterRecord >> bytes: anObject [
 ]
 
 { #category : #asserting }
-SOClusterRecord >> committed [ 
+SOClusterRecord >> committed [
 	committed := true
 ]
 
 { #category : #testing }
 SOClusterRecord >> hasPreviousVersion [
-	^ previousVersionPosition > 0 
+	^ previousVersionPosition > 0
 ]
 
 { #category : #initialization }
-SOClusterRecord >> initialize [ 
+SOClusterRecord >> initialize [
 	super initialize.
 	references := OrderedCollection new.
 	committed := false.
-	previousVersionPosition := 0.
-
+	previousVersionPosition := 0
 ]
 
 { #category : #accessing }
@@ -72,9 +71,9 @@ SOClusterRecord >> objectId [
 ]
 
 { #category : #accessing }
-SOClusterRecord >> objectId: aSOObjectId [ 
-	
-	objectId := aSOObjectId 
+SOClusterRecord >> objectId: aSOObjectId [
+
+	objectId := aSOObjectId
 ]
 
 { #category : #accessing }
@@ -84,22 +83,22 @@ SOClusterRecord >> previousVersionPosition [
 ]
 
 { #category : #accessing }
-SOClusterRecord >> previousVersionPosition: anInteger [ 
-	previousVersionPosition := anInteger 
+SOClusterRecord >> previousVersionPosition: anInteger [
+	previousVersionPosition := anInteger
 ]
 
 { #category : #printing }
-SOClusterRecord >> printOn: aStream [ 
-	self subclassResponsibility 
+SOClusterRecord >> printOn: aStream [
+	self subclassResponsibility
 ]
 
 { #category : #accessing }
-SOClusterRecord >> referenceAt: anInteger [ 
-	(references at: anInteger) ifNil: [ self halt ]. 
-	^ SOObjectProxy new 
+SOClusterRecord >> referenceAt: anInteger [
+	(references at: anInteger) ifNil: [ self halt ].
+	^ SOObjectProxy new
 		objectId: (references at: anInteger);
 		transaction: transaction;
-		yourself 
+		yourself
 ]
 
 { #category : #accessing }
@@ -113,8 +112,8 @@ SOClusterRecord >> transaction [
 ]
 
 { #category : #accessing }
-SOClusterRecord >> transaction: aSOTransaction [ 
-	transaction := aSOTransaction 
+SOClusterRecord >> transaction: aSOTransaction [
+	transaction := aSOTransaction
 ]
 
 { #category : #accessing }
@@ -124,6 +123,6 @@ SOClusterRecord >> version [
 ]
 
 { #category : #accessing }
-SOClusterRecord >> version: anInteger [ 
-	version := anInteger 
+SOClusterRecord >> version: anInteger [
+	version := anInteger
 ]

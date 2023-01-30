@@ -12,8 +12,8 @@ Class {
 }
 
 { #category : #'instance creation' }
-SOLockableStream class >> path: aStringOrFileReference [ 
-	^ self new 
+SOLockableStream class >> path: aStringOrFileReference [
+	^ self new
 		initializePath: aStringOrFileReference;
 		yourself
 ]
@@ -21,13 +21,12 @@ SOLockableStream class >> path: aStringOrFileReference [
 { #category : #'initialize-release' }
 SOLockableStream >> close [
 	self releaseAllLocks.
-	fileStream ifNotNil: [  
-		fileStream close ].
-
+	fileStream ifNotNil: [
+		fileStream close ]
 ]
 
 { #category : #finalization }
-SOLockableStream >> finalize [ 
+SOLockableStream >> finalize [
 	self close
 ]
 
@@ -37,50 +36,49 @@ SOLockableStream >> flush [
 ]
 
 { #category : #initialization }
-SOLockableStream >> initialize [ 
+SOLockableStream >> initialize [
 	super initialize.
 	locks := OrderedCollection new.
 	self class finalizationRegistry add: self.
 	imageLocked := true.
-	fileLocked := true.
+	fileLocked := true
 ]
 
 { #category : #initialization }
-SOLockableStream >> initializePath: aStringOrFileReference [ 
+SOLockableStream >> initializePath: aStringOrFileReference [
 	fileStream := aStringOrFileReference asFileReference binaryReadWriteStream.
-	lockRegistry := SOFileLockRegistry forPath: aStringOrFileReference asFileReference 
+	lockRegistry := SOFileLockRegistry forPath: aStringOrFileReference asFileReference
 ]
 
 { #category : #locking }
 SOLockableStream >> lockClass [
-	^ SORangeLock 
+	^ SORangeLock
 ]
 
 { #category : #locking }
-SOLockableStream >> lockFrom: from length: length for: lockContext [ 
+SOLockableStream >> lockFrom: from length: length for: lockContext [
 	^ self lockFrom: from to: from + length for: lockContext
 ]
 
 { #category : #locking }
-SOLockableStream >> lockFrom: from to: to for: lockContext [ 
-	
+SOLockableStream >> lockFrom: from to: to for: lockContext [
+
 	| lock |
 	lock := self lockClass from: from to: to context: lockContext.
 
-	imageLocked ifTrue: [ 
+	imageLocked ifTrue: [
 		lock lockInMemory: lockRegistry ].
-	
-	fileLocked ifTrue: [ 
+
+	fileLocked ifTrue: [
 		lock lockOn: fileStream  ].
-	
+
 	^ locks add: lock
-	
 ]
 
 { #category : #'as yet unclassified' }
 SOLockableStream >> lockOnlyInImage [
 	imageLocked := true.
-	fileLocked := false.
+	fileLocked := false
 ]
 
 { #category : #accessing }
@@ -90,22 +88,22 @@ SOLockableStream >> locks [
 
 { #category : #reading }
 SOLockableStream >> next [
-	^ fileStream next 
+	^ fileStream next
 ]
 
 { #category : #reading }
-SOLockableStream >> next: anInteger [ 
-	^ fileStream next: anInteger 
+SOLockableStream >> next: anInteger [
+	^ fileStream next: anInteger
 ]
 
 { #category : #writing }
-SOLockableStream >> nextPut: anInteger [ 
+SOLockableStream >> nextPut: anInteger [
 	fileStream nextPut: anInteger
 ]
 
 { #category : #writing }
-SOLockableStream >> nextPutAll: aString [ 
-	fileStream nextPutAll: aString 
+SOLockableStream >> nextPutAll: aString [
+	fileStream nextPutAll: aString
 ]
 
 { #category : #positioning }
@@ -114,32 +112,31 @@ SOLockableStream >> position [
 ]
 
 { #category : #positioning }
-SOLockableStream >> position: anInteger [ 
-	fileStream position: anInteger 
+SOLockableStream >> position: anInteger [
+	fileStream position: anInteger
 ]
 
 { #category : #finalization }
 SOLockableStream >> releaseAllLocks [
-	locks copy do: [ :lock | 
+	locks copy do: [ :lock |
 		locks remove: lock.
 		lock release ].
 	locks := OrderedCollection new
 ]
 
 { #category : #accessing }
-SOLockableStream >> size [ 
+SOLockableStream >> size [
 	^ fileStream size
 ]
 
 { #category : #locking }
-SOLockableStream >> unlockFrom: from to: to for: lockContext [ 
-	
+SOLockableStream >> unlockFrom: from to: to for: lockContext [
+
 	| lock |
-	lock := locks 
-		detect: [ :each | 
+	lock := locks
+		detect: [ :each |
 			(each from = from) & (each to = to) & (each context = lockContext) ]
 		ifNone: [ NotFound signal: 'cannot find lock' ].
 	lock release.
 	locks remove: lock
-	
 ]

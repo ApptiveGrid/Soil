@@ -14,6 +14,6 @@ SOTestClusterRoot >> nested [
 ]
 
 { #category : #accessing }
-SOTestClusterRoot >> nested: aSONestedObject [ 
-	nested := aSONestedObject 
+SOTestClusterRoot >> nested: aSONestedObject [
+	nested := aSONestedObject
 ]

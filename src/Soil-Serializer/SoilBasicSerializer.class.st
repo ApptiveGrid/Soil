@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #'writing - basic' }
-SoilBasicSerializer >> basicNextPutString: aString [ 
+SoilBasicSerializer >> basicNextPutString: aString [
 	| buf |
 	buf := aString asByteArray.
 	self
@@ -14,30 +14,29 @@ SoilBasicSerializer >> basicNextPutString: aString [
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> basicNextPutSymbol: aSymbol [ 
+SoilBasicSerializer >> basicNextPutSymbol: aSymbol [
 	self
 		nextPutLengthEncodedInteger: aSymbol size;
 		nextPutBytesFrom: aSymbol asByteArray
 ]
 
 { #category : #'writing - basic' }
-SoilBasicSerializer >> nextPutByte: anInteger [ 
+SoilBasicSerializer >> nextPutByte: anInteger [
 	stream nextPut: anInteger
 ]
 
 { #category : #writing }
 SoilBasicSerializer >> nextPutByteArray: aByteArray [
-	self 
-		nextPutByte: TypeCodeByteArray; 
+	self
+		nextPutByte: TypeCodeByteArray;
 		nextPutLengthEncodedInteger: aByteArray size.
 	1 to: aByteArray size do: [:i |
-		self nextPutByte: (aByteArray at: i)].
+		self nextPutByte: (aByteArray at: i)]
 ]
 
 { #category : #'writing - basic' }
 SoilBasicSerializer >> nextPutBytesFrom: aByteArray [
-	stream nextPutAll: aByteArray 
-
+	stream nextPutAll: aByteArray
 ]
 
 { #category : #writing }
@@ -52,20 +51,20 @@ SoilBasicSerializer >> nextPutCharacter: aCharacter [
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutDate: aDate [ 
-	self 
-		nextPutByte: TypeCodeDate; 
-		nextPutLengthEncodedInteger: aDate julianDayNumber - 2415386; 
+SoilBasicSerializer >> nextPutDate: aDate [
+	self
+		nextPutByte: TypeCodeDate;
+		nextPutLengthEncodedInteger: aDate julianDayNumber - 2415386;
 		nextPutInteger: ((aDate offset hours * 60) + aDate offset minutes)
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutFalse: aBoolean [ 
-	self nextPutByte: TypeCodeFalse 
+SoilBasicSerializer >> nextPutFalse: aBoolean [
+	self nextPutByte: TypeCodeFalse
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutFloat: aFloat [ 
+SoilBasicSerializer >> nextPutFloat: aFloat [
 	self
 		nextPutByte: TypeCodeFloat;
 		nextPutLengthEncodedInteger: (aFloat at: 1);
@@ -82,28 +81,28 @@ SoilBasicSerializer >> nextPutFraction: aNumber [
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutInteger: anInteger [ 
+SoilBasicSerializer >> nextPutInteger: anInteger [
 	(anInteger < 0)
-		ifTrue: [ self nextPutLargeNegativeInteger: anInteger ] 
+		ifTrue: [ self nextPutLargeNegativeInteger: anInteger ]
 		ifFalse: [ self nextPutLargePositiveInteger: anInteger ]
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutLargeNegativeInteger: anInteger [ 
-	self 
+SoilBasicSerializer >> nextPutLargeNegativeInteger: anInteger [
+	self
 		nextPutByte: TypeCodeLargeNegativeInteger;
 		nextPutLengthEncodedInteger: 0 - anInteger
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutLargePositiveInteger: anInteger [ 
-	self 
+SoilBasicSerializer >> nextPutLargePositiveInteger: anInteger [
+	self
 		nextPutByte: TypeCodeLargePositiveInteger;
 		nextPutLengthEncodedInteger: anInteger
 ]
 
 { #category : #'writing - basic' }
-SoilBasicSerializer >> nextPutLengthEncodedInteger: anInteger [ 
+SoilBasicSerializer >> nextPutLengthEncodedInteger: anInteger [
 	"store length of integer encoded in a way that the presence of a
 	most significant bit indicates that the next byte is part of
 	the value"
@@ -114,8 +113,8 @@ SoilBasicSerializer >> nextPutLengthEncodedInteger: anInteger [
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutNil: anUndefinedObject [ 
-	self nextPutByte: TypeCodeUndefined 
+SoilBasicSerializer >> nextPutNil: anUndefinedObject [
+	self nextPutByte: TypeCodeUndefined
 ]
 
 { #category : #writing }
@@ -125,37 +124,37 @@ SoilBasicSerializer >> nextPutScaledDecimal: aNumber [
 		nextPutByte: TypeCodeScaledDecimal;
 		nextPutLengthEncodedInteger: aNumber numerator;
 		nextPutLengthEncodedInteger: aNumber denominator;
-		nextPutLengthEncodedInteger: aNumber scale 
+		nextPutLengthEncodedInteger: aNumber scale
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutString: aString [ 
+SoilBasicSerializer >> nextPutString: aString [
 	self
 		nextPutByte: TypeCodeString;
 		basicNextPutString: aString
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutSymbol: aSymbol [ 
+SoilBasicSerializer >> nextPutSymbol: aSymbol [
 	self
 		nextPutByte: TypeCodeSymbol;
 		basicNextPutSymbol: aSymbol
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutTime: aTime [ 
+SoilBasicSerializer >> nextPutTime: aTime [
 	self
 		nextPutByte: TypeCodeTime;
 		nextPutLengthEncodedInteger: aTime asSeconds
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutTrue: aBoolean [ 
-	self nextPutByte: TypeCodeTrue 
+SoilBasicSerializer >> nextPutTrue: aBoolean [
+	self nextPutByte: TypeCodeTrue
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutWideString: aWideString [ 
+SoilBasicSerializer >> nextPutWideString: aWideString [
 	| buf |
 	buf := self class encodeString: aWideString.
 	self

@@ -8,14 +8,14 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SOObjectFile >> appendBytes: aCollection [ 
+SOObjectFile >> appendBytes: aCollection [
 	stream position: stream size.
 	stream nextPutAll: aCollection.
 	stream flush
 ]
 
 { #category : #accessing }
-SOObjectFile >> atPosition: anInteger [ 
+SOObjectFile >> atPosition: anInteger [
 	stream position: anInteger.
 	^ SOPersistentClusterVersion readFrom: stream
 ]
@@ -32,7 +32,7 @@ SOObjectFile >> fuelVersion [
 ]
 
 { #category : #accessing }
-SOObjectFile >> fuelVersion: anInteger [ 
+SOObjectFile >> fuelVersion: anInteger [
 	stream position: self prefix size + self fileVersionSize.
 	stream nextPutAll: (anInteger asByteArrayOfSize: self fuelVersionSize)
 ]
@@ -43,9 +43,9 @@ SOObjectFile >> fuelVersionSize [
 ]
 
 { #category : #writing }
-SOObjectFile >> headerSize [ 
+SOObjectFile >> headerSize [
 	"this header adds the fuel version"
-	^ super headerSize + self fuelVersionSize 
+	^ super headerSize + self fuelVersionSize
 ]
 
 { #category : #initialization }
@@ -56,7 +56,6 @@ SOObjectFile >> initializeHeader [
 
 { #category : #initialization }
 SOObjectFile >> initializeStart [
-
 ]
 
 { #category : #accessing }
@@ -65,7 +64,7 @@ SOObjectFile >> path [
 ]
 
 { #category : #writing }
-SOObjectFile >> prefix [ 
+SOObjectFile >> prefix [
 	^ 'SOIL|OBJECT ' asByteArray
 ]
 
@@ -76,7 +75,7 @@ SOObjectFile >> readHeader [
 ]
 
 { #category : #accessing }
-SOObjectFile >> size [ 
+SOObjectFile >> size [
 	^ stream size
 ]
 

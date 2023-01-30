@@ -1,6 +1,6 @@
 Extension { #name : #BlockClosure }
 
 { #category : #'*Soil-Serializer' }
-BlockClosure >> soilMaterialize: materializer [ 
+BlockClosure >> soilMaterialize: materializer [
 	^ self value: materializer
 ]

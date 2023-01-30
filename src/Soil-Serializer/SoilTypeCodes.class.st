@@ -40,9 +40,9 @@ Class {
 }
 
 { #category : #initialization }
-SoilTypeCodes class >> initialize [ 
+SoilTypeCodes class >> initialize [
 	self initializeTypeCodes.
-	self initializeTypeCodeMapping 
+	self initializeTypeCodeMapping
 ]
 
 { #category : #initialization }
@@ -82,11 +82,11 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeWideString 				put: WideString;
 		at: TypeCodeCharacter 				put: Character;
 		at: TypeCodeCompiledBlock  			put: CompiledBlock;
-		at: TypeCodeCompiledMethod 			put: CompiledMethod.
+		at: TypeCodeCompiledMethod 			put: CompiledMethod
 ]
 
 { #category : #initialization }
-SoilTypeCodes class >> initializeTypeCodes [ 
+SoilTypeCodes class >> initializeTypeCodes [
 	<script>
 	TypeCodeObject := 1.
 	TypeCodeUndefined := 2.
@@ -120,6 +120,4 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeCharacter := 30.
 	TypeCodeCompiledBlock := 31.
 	TypeCodeCompiledMethod := 32
-
-
 ]

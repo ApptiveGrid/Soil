@@ -25,16 +25,16 @@ SoilObjectCodec class >> characterEncoder [
 
 { #category : #accessing }
 SoilObjectCodec class >> characterEncoding: aString [
-	CharacterEncoder := aString asZnCharacterEncoder 
+	CharacterEncoder := aString asZnCharacterEncoder
 ]
 
 { #category : #convenience }
-SoilObjectCodec class >> decodeBytes: aByteArray [ 
+SoilObjectCodec class >> decodeBytes: aByteArray [
 	^ CharacterEncoder decodeBytes: aByteArray
 ]
 
 { #category : #convenience }
-SoilObjectCodec class >> encodeString: aString [ 
+SoilObjectCodec class >> encodeString: aString [
 	^ CharacterEncoder encodeString: aString
 ]
 
@@ -57,11 +57,11 @@ SoilObjectCodec >> soil: anObject [
 ]
 
 { #category : #accessing }
-SoilObjectCodec >> stream: aStream [ 
+SoilObjectCodec >> stream: aStream [
 	stream := aStream
 ]
 
 { #category : #accessing }
-SoilObjectCodec >> transaction: aSOTransaction [ 
-	transaction := aSOTransaction 
+SoilObjectCodec >> transaction: aSOTransaction [
+	transaction := aSOTransaction
 ]
