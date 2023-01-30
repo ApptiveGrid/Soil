@@ -193,6 +193,30 @@ SoilSerializationTest >> testSerializationObject [
 ]
 
 { #category : #'tests-twice' }
+SoilSerializationTest >> testSerializationObjectEqualTwice [
+	| object array serialized materialized |
+
+	"try to serialize an object that references two objects that are equal"
+	object := 'test'.
+	array := {object. object copy}.
+
+	serialized := self serializeToBytes: array.
+
+	"First the Array"
+	self assert: (serialized at: 5) equals: TypeCodeArray.
+	"array of size 2"
+	self assert: (serialized at: 6) equals: 2.
+	materialized := self materializeFromBytes: serialized.
+	self deny: array first identicalTo: array second.
+	self assert:  array first equals: array second.
+	"we do store the two strings correctly"
+	self assert:  materialized first equals: object.
+	self assert:  materialized first equals: materialized second.
+	"non-identity is preserved"
+	self deny: materialized first identicalTo: materialized second
+]
+
+{ #category : #'tests-twice' }
 SoilSerializationTest >> testSerializationObjectTwice [
 	| object array serialized materialized |
 	

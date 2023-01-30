@@ -179,30 +179,29 @@ SoilSerializer >> notSupportedError: anObject [
 { #category : #registry }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 	| index externalIndex |
-	(anObject == clusterRoot) ifTrue: [ 
+	(anObject == clusterRoot) ifTrue: [
 		"later references could reference the cluster root so we put
 		it as first object to be able to have an internal reference to it"
 		objects add: anObject.
-		^ aBlock value ]. 
-	index := objects indexOf: anObject.
-	(index > 0) ifTrue: [ 
+		^ aBlock value ].
+	index := objects identityIndexOf: anObject.
+	(index > 0) ifTrue: [
 		self nextPutInternalReference: index.
 		^ self ].
 	externalIndex := externalObjectRegistry
 		ifNotNil: [ externalObjectRegistry indexOfExternalReference: anObject ]
 		ifNil: [
 			"if there is no external object repository we cannot
-			resolve external objects, hence we treat them as  
+			resolve external objects, hence we treat them as
 			internal. This might be too dangerous later and might
-			be removed" 
+			be removed"
 			0 ].
-	((anObject == clusterRoot) not and: [ externalIndex > 0 ])
-		ifTrue: [ 
+	(anObject ~= clusterRoot and: [ externalIndex > 0 ])
+		ifTrue: [
 			self nextPutExternalReference: externalIndex ]
-		ifFalse: [  
+		ifFalse: [
 			objects add: anObject.
-			aBlock value ] 
-
+			aBlock value ]
 ]
 
 { #category : #private }
