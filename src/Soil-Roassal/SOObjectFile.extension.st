@@ -2,6 +2,7 @@ Extension { #name : #SOObjectFile }
 
 { #category : #'*Soil-Roassal' }
 SOObjectFile >> allRecords [
+
 	| records start record |
 	stream position: self headerSize.
 	records := OrderedCollection new.

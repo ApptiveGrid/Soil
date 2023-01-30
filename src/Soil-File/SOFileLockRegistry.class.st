@@ -22,12 +22,13 @@ SOFileLockRegistry class >> forPath: aString [
 				path: aString ] ]
 ]
 
-{ #category : #initialization }
+{ #category : #'class initialization' }
 SOFileLockRegistry class >> initialize [
+
 	self reset
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SOFileLockRegistry class >> numberOfRegistries [
 	^ registries size
 ]
@@ -37,7 +38,7 @@ SOFileLockRegistry class >> registries [
 	^ registries
 ]
 
-{ #category : #initialization }
+{ #category : #'class initialization' }
 SOFileLockRegistry class >> reset [
 	accessSemaphore := Semaphore forMutualExclusion.
 	registries := WeakValueDictionary new

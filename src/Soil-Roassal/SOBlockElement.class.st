@@ -9,9 +9,10 @@ Class {
 
 { #category : #'instance creation' }
 SOBlockElement class >> on: aString [
+
 	^ self new
-		name: aString;
-		yourself
+		  name: aString;
+		  yourself
 ]
 
 { #category : #converting }

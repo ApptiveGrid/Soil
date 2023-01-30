@@ -9,6 +9,7 @@ Class {
 
 { #category : #'instance creation' }
 SoilPrimitiveSerializationTest >> newSerializer [
+
 	^ Soil inMemory newSerializer
 ]
 
@@ -22,15 +23,18 @@ SoilPrimitiveSerializationTest >> restoreLocalTimeZoneAfter: aBlock [
 
 { #category : #running }
 SoilPrimitiveSerializationTest >> setUp [
+
 	super setUp.
 	SoilTypeCodes initialize
 ]
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationArray [
+
 	| object serialized materialized |
 	object := #(1 2 3 5).
 	serialized := SoilSerializer serializeToBytes: object.
+
 	self assert: serialized equals: #[5 4 3 1 3 2 3 3 3 5].
 	self assert: (serialized at: 1) equals: TypeCodeArray.
 
@@ -40,9 +44,11 @@ SoilPrimitiveSerializationTest >> testSerializationArray [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationAssociation [
+
 	| object serialized materialized |
 	object := 1 -> 2.
 	serialized := SoilSerializer serializeToBytes: object.
+
 	self assert: serialized equals: #[6 3 1 3 2].
 	self assert: (serialized at: 1) equals: TypeCodeAssociation.
 
@@ -52,14 +58,16 @@ SoilPrimitiveSerializationTest >> testSerializationAssociation [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationBlockClosure [
+
 	| object serialized  |
 	object := [].
-	"we do not uet support serializing closures"
+	"we do not yet support serializing closures"
 	self should: [serialized := SoilSerializer serializeToBytes: object] raise: TestResult error
 ]
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64 [
+
 	| float serialized materialized |
 	float := 2.45227231256843e-45.
 	self assert: float class equals: BoxedFloat64.
@@ -76,6 +84,7 @@ SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64 [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Infinity [
+
 	| float serialized materialized |
 	float := Float infinity.
 	self assert: float class equals: BoxedFloat64.
@@ -104,6 +113,7 @@ SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Infinity [
 
 { #category : #'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Twice [
+
 	| float object serialized materialized |
 
 	"try to serialize an object that references twice the boxed floats"
@@ -126,6 +136,7 @@ SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Twice [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationByteArray [
+
 	| object serialized materialized |
 	object := #[1 2 3 5].
 	serialized := SoilSerializer serializeToBytes: object.
@@ -138,6 +149,7 @@ SoilPrimitiveSerializationTest >> testSerializationByteArray [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationByteCharacter [
+
 	| object serialized materialized |
 	object := $a.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -150,6 +162,7 @@ SoilPrimitiveSerializationTest >> testSerializationByteCharacter [
 
 { #category : #'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationByteCharacterTwice [
+
 	| object character serialized materialized |
 	character := $a.
 	object := {character. character}.
@@ -170,6 +183,7 @@ SoilPrimitiveSerializationTest >> testSerializationByteCharacterTwice [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationCharacter [
+
 	| object serialized materialized |
 	object := 16rF600 asCharacter.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -182,6 +196,7 @@ SoilPrimitiveSerializationTest >> testSerializationCharacter [
 
 { #category : #'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationCharacterTwice [
+
 	| object character serialized materialized |
 
 	character := 16rF600 asCharacter.
@@ -195,6 +210,7 @@ SoilPrimitiveSerializationTest >> testSerializationCharacterTwice [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationClass [
+
 	| object serialized materialized |
 	object := Point.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -206,6 +222,7 @@ SoilPrimitiveSerializationTest >> testSerializationClass [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationDate [
+
 	| object serialized materialized |
 	object := Date fromDays: 10.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -218,6 +235,7 @@ SoilPrimitiveSerializationTest >> testSerializationDate [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationDateWithLocalTimeZone [
+
 	| utc est bst object utc14plus utc545plus utc12minus utc330minus serialized materialized |
 	utc := TimeZone abbreviated: 'UTC'.
 	est := TimeZone abbreviated: 'EST'.
@@ -248,6 +266,7 @@ SoilPrimitiveSerializationTest >> testSerializationDateWithLocalTimeZone [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationDateWithNegativeOffset [
+
 	| object serialized materialized |
 	object := (Date fromDays: 10) offset: -5 hours.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -260,6 +279,7 @@ SoilPrimitiveSerializationTest >> testSerializationDateWithNegativeOffset [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationDictionary [
+
 	| object serialized materialized |
 	object := { 1->2 . 3->4 } asDictionary.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -273,11 +293,13 @@ SoilPrimitiveSerializationTest >> testSerializationDictionary [
 { #category : #'tests-layouts' }
 SoilPrimitiveSerializationTest >> testSerializationEphemeronLayout [
 	"Emphemeron classes are not yet used (no example in Pharo11), thus we do not support them yet"
+	
 	self flag: #TODO
 ]
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationFalse [
+
 	| object serialized materialized |
 	"Check false"
 	object := false.
@@ -290,6 +312,7 @@ SoilPrimitiveSerializationTest >> testSerializationFalse [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationFraction [
+
 	| object serialized materialized |
 	object := 1/2.
 	self assert: object class equals: Fraction.
@@ -303,6 +326,7 @@ SoilPrimitiveSerializationTest >> testSerializationFraction [
 
 { #category : #'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationFractionTwice [
+
 	| fraction object serialized materialized |
 	fraction := 1/2.
 	object := {fraction . fraction}.
@@ -324,6 +348,7 @@ SoilPrimitiveSerializationTest >> testSerializationFractionTwice [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationIdentityDictionary [
+
 	| object serialized materialized |
 	object := IdentityDictionary newFrom: { #test->2 . #now->4 }.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -345,6 +370,7 @@ SoilPrimitiveSerializationTest >> testSerializationIdentityDictionary [
 
 { #category : #'tests-layouts' }
 SoilPrimitiveSerializationTest >> testSerializationImmediateLayout [
+
 	| object serialized materialized |
 	"All Immediate classes are specially encoded, to have a test for every layout, use Character here"
 	object := $a.
@@ -360,6 +386,7 @@ SoilPrimitiveSerializationTest >> testSerializationImmediateLayout [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationLargeInteger [
+
 	| object serialized materialized |
 
 	"Integers are small if they are in between -3 and 16"
@@ -444,6 +471,7 @@ SoilPrimitiveSerializationTest >> testSerializationLargeIntegerTwice [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationMessage [
+
 	| object serialized materialized |
 	object := Message selector: #+ argument: 2.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -458,6 +486,7 @@ SoilPrimitiveSerializationTest >> testSerializationMessage [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationMessageSend [
+
 	| object serialized materialized |
 	object := MessageSend receiver: 1 selector: #+ argument: 2.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -472,6 +501,7 @@ SoilPrimitiveSerializationTest >> testSerializationMessageSend [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationODBPersistentDictionary [
+
 	| object serialized materialized |
 	self flag: #todo.
 	"come up with a special class for this"
@@ -488,6 +518,7 @@ SoilPrimitiveSerializationTest >> testSerializationODBPersistentDictionary [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationOrderedCollection [
+
 	| object serialized materialized |
 	object := #(1 2 3 5) asOrderedCollection.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -500,6 +531,7 @@ SoilPrimitiveSerializationTest >> testSerializationOrderedCollection [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationProcess [
+
 	| object serialized |
 	object := Processor activeProcess.
 	"we do not uet support serializing Processes"
@@ -508,6 +540,7 @@ SoilPrimitiveSerializationTest >> testSerializationProcess [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationProcessSchedulerCode [
+
 	| object serialized materialized |
 	object := Processor.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -520,6 +553,7 @@ SoilPrimitiveSerializationTest >> testSerializationProcessSchedulerCode [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationScaledDecimal [
+
 	"ScaledDecimal is a subclass of Fraction, make sure it works"
 
 	| object serialized materialized |
@@ -535,6 +569,7 @@ SoilPrimitiveSerializationTest >> testSerializationScaledDecimal [
 
 { #category : #'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationScaledDecimalTwice [
+
 	| scaledDecimal object serialized materialized |
 
 	"try to serialize an object that references twice the boxed floats"
@@ -553,6 +588,7 @@ SoilPrimitiveSerializationTest >> testSerializationScaledDecimalTwice [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationSmallFloat64 [
+
 	| float serialized materialized |
 	float := 1.11.
 	self assert: float class equals: SmallFloat64.
@@ -566,6 +602,7 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64 [
 
 { #category : #'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationSmallFloat64Twice [
+
 	| object serialized materialized |
 
 	"try to serialize an object that references twice the same small floats"
@@ -587,6 +624,7 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64Twice [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
+
 	| float serialized materialized |
 
 	float := 0.0.
@@ -622,6 +660,7 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationString [
+
 	| string serialized materialized |
 
 	"empty String"
@@ -710,6 +749,7 @@ SoilPrimitiveSerializationTest >> testSerializationStringTwice [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationSymbol [
+
 	| object serialized materialized |
 	object := #someSelector.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -722,6 +762,7 @@ SoilPrimitiveSerializationTest >> testSerializationSymbol [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationSystemDictionary [
+
 	| object serialized materialized |
 	object := Smalltalk globals.
 	object at: #Object put: Object.
@@ -735,6 +776,7 @@ SoilPrimitiveSerializationTest >> testSerializationSystemDictionary [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationTime [
+
 	| object serialized materialized |
 	object := Time midnight.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -747,6 +789,7 @@ SoilPrimitiveSerializationTest >> testSerializationTime [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationTrue [
+
 	| object serialized materialized |
 	object := true.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -759,6 +802,7 @@ SoilPrimitiveSerializationTest >> testSerializationTrue [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationUndefindedObject [
+
 	| object serialized materialized |
 	object := nil.
 	serialized := SoilSerializer serializeToBytes: object.
@@ -811,6 +855,7 @@ SoilPrimitiveSerializationTest >> testSerializationWideStringUTF32 [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationWideStringUTF8 [
+
 	| string serialized materialized |
 	string := String
 		with: 16rF600 asCharacter
@@ -830,6 +875,7 @@ SoilPrimitiveSerializationTest >> testSerializationWideStringUTF8 [
 
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationWideSymbol [
+
 	| symbol serialized materialized |
 	symbol := String
 		with: 16rF600 asCharacter
