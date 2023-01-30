@@ -8,7 +8,7 @@ Class {
 	#pools : [
 		'SoilTypeCodes'
 	],
-	#category : #'Soil-Serializer-Tests'
+	#category : #'Soil-Serializer-Tests-Base'
 }
 
 { #category : #'tests-layouts' }
