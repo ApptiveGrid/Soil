@@ -33,7 +33,7 @@ SOIndexColumn >> asShape [
 	label := self label.
 	shape add: label.
 	label position: 0@ (shape height / -2 - label height).
-	^ shape.
+	^ shape
 ]
 
 { #category : #initialization }
@@ -46,5 +46,5 @@ SOIndexColumn >> initialize [
 SOIndexColumn >> normalizeWidth: shapes [
 	| maxWidth |
 	maxWidth := shapes inject: 0 into: [ :max :each | max max: each width ].
-	shapes do: [ :each | each width: maxWidth ].
+	shapes do: [ :each | each width: maxWidth ]
 ]

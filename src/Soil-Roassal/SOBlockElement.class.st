@@ -11,7 +11,7 @@ Class {
 SOBlockElement class >> on: aString [
 	^ self new
 		name: aString;
-		yourself 
+		yourself
 ]
 
 { #category : #converting }
@@ -21,7 +21,6 @@ SOBlockElement >> asShape [
 		padding: 5;
 		model: self;
 		yourself
-		
 ]
 
 { #category : #accessing }

@@ -297,7 +297,7 @@ SOTransaction >> markDirty: anObject [
 	record := objectMap
 		at: anObject
 		ifAbsent: [ Error signal: 'cannot mark dirty a non-existing root' ].
-	record beChanged.
+	record beChanged
 ]
 
 { #category : #'as yet unclassified' }

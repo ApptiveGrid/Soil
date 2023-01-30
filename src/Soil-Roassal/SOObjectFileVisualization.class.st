@@ -20,7 +20,7 @@ SOObjectFileVisualization class >> example01 [
 	self halt.
 	builder objects: self someObjects.
 	builder links: { 'root'-> 'extent index' }.
-	builder asPresenter open.
+	builder asPresenter open
 ]
 
 { #category : #accessing }
@@ -36,8 +36,8 @@ SOObjectFileVisualization class >> first [
 ]
 
 { #category : #'instance creation' }
-SOObjectFileVisualization class >> on: aSoil [ 
-	^ self new 
+SOObjectFileVisualization class >> on: aSoil [
+	^ self new
 		soil: aSoil
 ]
 
@@ -68,25 +68,24 @@ SOObjectFileVisualization >> attachPoint [
 ]
 
 { #category : #accessing }
-SOObjectFileVisualization >> canvas [ 
+SOObjectFileVisualization >> canvas [
 	canvas := RSCanvas new.
 	self renderIn: canvas.
-	^ canvas 
+	^ canvas
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectFileVisualization >> createLineFrom: shapeFrom to: shapeTo [ 
+SOObjectFileVisualization >> createLineFrom: shapeFrom to: shapeTo [
 	| arrow |
 	arrow := RSShapeFactory arrow.
 	arrow size: 10.
 	^ RSLine new
 		markerEnd: arrow;
 		color: Color black;
-		attachPoint: self attachPoint; 
+		attachPoint: self attachPoint;
 		from: shapeFrom;
 		to: shapeTo;
-		yourself 
-	
+		yourself
 ]
 
 { #category : #'accessing - defaults' }
@@ -99,9 +98,9 @@ SOObjectFileVisualization >> defaultContainer [
 
 { #category : #'as yet unclassified' }
 SOObjectFileVisualization >> generateObjects [
-	objects := { 
+	objects := {
 		self indexColumn.
-		self heapColumn }			
+		self heapColumn }
 ]
 
 { #category : #'as yet unclassified' }
@@ -109,7 +108,7 @@ SOObjectFileVisualization >> heapColumn [
 	| column records |
 	column := SOIndexColumn on: 'segment'.
 	records := soil objectRepository firstSegment objectFile allRecords.
-	records size to: 1 by: -1 do: [ :n | 
+	records size to: 1 by: -1 do: [ :n |
 		column add: (SOSimpleBox on: 'object-', (records at: n) key first asString) ].
 	^ column
 ]
@@ -124,7 +123,7 @@ SOObjectFileVisualization >> indexColumn [
 	lastId to: 1 by: -1 do: [ :n | | position |
 		position := indexFile positionAt: n.
 		column add: (SOSimpleBox on: 'index-', n asString).
-		(position = 0) ifFalse: [  
+		(position = 0) ifFalse: [
 			links add: ( ('index-', n asString) -> ('object-', position asString) ) ] ].
 	^ column
 ]
@@ -132,13 +131,13 @@ SOObjectFileVisualization >> indexColumn [
 { #category : #'as yet unclassified' }
 SOObjectFileVisualization >> inspectionSoil [
 	<inspectorPresentationOrder: 0 title: 'soil'>
-	^ SpRoassal3InspectorPresenter  new 
+	^ SpRoassal3InspectorPresenter  new
 		canvas: self canvas;
 		yourself
 ]
 
 { #category : #accessing }
-SOObjectFileVisualization >> links: aCollection [ 
+SOObjectFileVisualization >> links: aCollection [
 	links := aCollection
 ]
 
@@ -152,12 +151,11 @@ SOObjectFileVisualization >> renderIn: aCanvas [
 	"render columns"
 	aCanvas addAll: (objects collect: [ :each | each  asShape]).
 	self renderLinksOn: aCanvas.
-	RSHorizontalLineLayout on: aCanvas nodes.
-	
+	RSHorizontalLineLayout on: aCanvas nodes
 ]
 
 { #category : #rendering }
-SOObjectFileVisualization >> renderLinksOn: aRSCanvas [ 
+SOObjectFileVisualization >> renderLinksOn: aRSCanvas [
 	| allShapes |
 	allShapes := aRSCanvas allChildren select: [:each | each model notNil ].
 	aRSCanvas addAll: (links collect: [ :assoc | | from to |
@@ -168,11 +166,11 @@ SOObjectFileVisualization >> renderLinksOn: aRSCanvas [
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectFileVisualization >> shapeNamed: aString in: aCollection [ 
+SOObjectFileVisualization >> shapeNamed: aString in: aCollection [
 	^ aCollection detect: [ :each | each model name = aString ]
 ]
 
 { #category : #accessing }
-SOObjectFileVisualization >> soil: aSoil [ 
+SOObjectFileVisualization >> soil: aSoil [
 	soil := aSoil
 ]
