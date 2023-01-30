@@ -7,8 +7,9 @@ Class {
 	#category : #'Soil-Core'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'accessing - defaults' }
 SONewObjectVersionEntry class >> journalTypeCode [
+
 	^ 2
 ]
 

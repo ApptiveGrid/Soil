@@ -10,7 +10,8 @@ Class {
 
 { #category : #examples }
 SOObjectId class >> example [
-	<example>
+	<sampleInstance>
+
 	^ self segment: 1 index: 3
 ]
 
