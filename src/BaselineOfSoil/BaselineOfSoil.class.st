@@ -1,3 +1,6 @@
+"
+Baseline for Soil OO database [https://github.com/ApptiveGrid/Soil](https://github.com/ApptiveGrid/Soil)
+"
 Class {
 	#name : #BaselineOfSoil,
 	#superclass : #BaselineOf,
@@ -9,22 +12,30 @@ BaselineOfSoil >> baseline: spec [
 	<baseline>
 
 	spec for: #'common' do: [
-		spec package: #'Soil-File' with: [  ].
-		spec package: #'Soil-File-Tests' with: [ spec requires: #('Soil-File') ].
-		spec package: #'Soil-Serializer' with: [  ].		
-		spec package: #'Soil-Serializer-Tests' with: [ spec requires: #('Soil-Serializer') ].
-		spec package: #'Soil-Core' with: [ spec requires: #('Soil-Serializer' 'Soil-File')  ].
-		spec package: #'Soil-Core-Tests' with: [ spec requires: #('Soil-Core') ] ].
+		"Packages"
+		spec
+			package: #'Soil-File';
+			package: #'Soil-File-Tests' with: [ spec requires: #('Soil-File') ];
 
-	spec 
-		group: 'tests' with: #('Soil-Core-Tests' 'Soil-File-Tests' 'Soil-Serializer-Tests' );
-		group: 'default' with: #( 'Soil-Core' 'tests' ) 
+			package: #'Soil-Serializer';
+			package: #'Soil-Serializer-Tests' with: [ spec requires: #('Soil-Serializer') ];
+
+			package: #'Soil-Core' with: [ spec requires: #('Soil-Serializer' 'Soil-File') ];
+			package: #'Soil-Core-Tests' with: [ spec requires: #('Soil-Core') ].
+
+		"Groups"
+		spec
+			group: 'Core' with: #('Soil-Core');
+			group: 'Tests' with: #('Soil-Core-Tests' 'Soil-File-Tests' 'Soil-Serializer-Tests' );
+			group: 'CI' with: #('Tests');
+			group: 'all' with: #( 'Core' 'Tests' );
+			group: 'default' with: #( 'all' ) ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #other }
 BaselineOfSoil >> fuel: spec [
-	
-	spec baseline: 'Fuel' with: [ 
-		spec 
+
+	spec baseline: 'Fuel' with: [
+		spec
 			repository: 'github://ApptiveGrid/Fuel:development/repository']
 ]
