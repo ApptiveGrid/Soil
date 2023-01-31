@@ -16,18 +16,21 @@ Class {
 
 { #category : #'instance creation' }
 SOClusterRecord class >> readFrom: aStream [
+
 	^ self new
 		readFrom: aStream
 ]
 
 { #category : #'instance creation' }
 SOClusterRecord >> addReference: reference [
+
 	references detect: [ :each | each = reference ] ifFound: [ self halt ].
 	references add: reference
 ]
 
 { #category : #accessing }
 SOClusterRecord >> bytes [
+
 	^ bytes
 ]
 
@@ -39,16 +42,19 @@ SOClusterRecord >> bytes: anObject [
 
 { #category : #asserting }
 SOClusterRecord >> committed [
+
 	committed := true
 ]
 
 { #category : #testing }
 SOClusterRecord >> hasPreviousVersion [
+
 	^ previousVersionPosition > 0
 ]
 
 { #category : #initialization }
 SOClusterRecord >> initialize [
+
 	super initialize.
 	references := OrderedCollection new.
 	committed := false.
@@ -57,16 +63,19 @@ SOClusterRecord >> initialize [
 
 { #category : #accessing }
 SOClusterRecord >> object [
+
 	^ object
 ]
 
 { #category : #accessing }
 SOClusterRecord >> object: anObject [
+
 	object := anObject
 ]
 
 { #category : #accessing }
 SOClusterRecord >> objectId [
+
 	^ objectId
 ]
 
@@ -84,16 +93,19 @@ SOClusterRecord >> previousVersionPosition [
 
 { #category : #accessing }
 SOClusterRecord >> previousVersionPosition: anInteger [
+
 	previousVersionPosition := anInteger
 ]
 
 { #category : #printing }
 SOClusterRecord >> printOn: aStream [
+
 	self subclassResponsibility
 ]
 
 { #category : #accessing }
 SOClusterRecord >> referenceAt: anInteger [
+
 	(references at: anInteger) ifNil: [ self halt ].
 	^ SOObjectProxy new
 		objectId: (references at: anInteger);
@@ -103,16 +115,19 @@ SOClusterRecord >> referenceAt: anInteger [
 
 { #category : #accessing }
 SOClusterRecord >> references [
+
 	^ references
 ]
 
 { #category : #accessing }
 SOClusterRecord >> transaction [
+
 	^ transaction
 ]
 
 { #category : #accessing }
 SOClusterRecord >> transaction: aSOTransaction [
+
 	transaction := aSOTransaction
 ]
 
@@ -124,5 +139,6 @@ SOClusterRecord >> version [
 
 { #category : #accessing }
 SOClusterRecord >> version: anInteger [
+
 	version := anInteger
 ]

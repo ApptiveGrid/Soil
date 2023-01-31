@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilMaterializer,
 	#superclass : #SoilBasicMaterializer,
-	#category : #'Soil-Serializer'
+	#category : #'Soil-Serializer-Base'
 }
 
 { #category : #'as yet unclassified' }

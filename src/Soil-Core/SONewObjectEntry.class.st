@@ -5,7 +5,7 @@ Class {
 		'objectId',
 		'bytes'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Base'
 }
 
 { #category : #'accessing - defaults' }

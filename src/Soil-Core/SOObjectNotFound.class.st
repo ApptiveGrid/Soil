@@ -1,3 +1,6 @@
+"
+Signal that an object is not found.
+"
 Class {
 	#name : #SOObjectNotFound,
 	#superclass : #SOError,

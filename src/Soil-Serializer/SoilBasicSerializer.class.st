@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilBasicSerializer,
 	#superclass : #SoilObjectCodec,
-	#category : #'Soil-Serializer'
+	#category : #'Soil-Serializer-Base'
 }
 
 { #category : #'writing - basic' }

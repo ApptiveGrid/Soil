@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'clusterRoot'
 	],
-	#category : #'Soil-Serializer'
+	#category : #'Soil-Serializer-Base'
 }
 
 { #category : #'instance creation' }

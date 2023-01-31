@@ -8,7 +8,7 @@ Class {
 		'classLayout',
 		'version'
 	],
-	#category : #'Soil-Serializer'
+	#category : #'Soil-Serializer-Base'
 }
 
 { #category : #'instance creation' }

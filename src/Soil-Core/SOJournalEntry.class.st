@@ -1,5 +1,5 @@
 Class {
 	#name : #SOJournalEntry,
 	#superclass : #Object,
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Base'
 }

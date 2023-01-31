@@ -1,3 +1,6 @@
+"
+Common superclass for all Soil errors
+"
 Class {
 	#name : #SOError,
 	#superclass : #Error,
