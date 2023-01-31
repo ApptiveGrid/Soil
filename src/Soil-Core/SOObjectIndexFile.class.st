@@ -9,6 +9,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SOObjectIndexFile >> allocateNewIndex [
+
 	| lastIndex |
 	lastIndex := self lastObjectIndex + 1.
 	self lastObjectIndex: lastIndex.
@@ -17,25 +18,31 @@ SOObjectIndexFile >> allocateNewIndex [
 
 { #category : #accessing }
 SOObjectIndexFile >> at: index [
+
 	stream position: (self indexPositionAt: index).
 	^ (stream next: 8) asInteger
 ]
 
 { #category : #accessing }
 SOObjectIndexFile >> at: index putPosition: position [
-	stream position: (self indexPositionAt: index).
-	stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize).
-	stream flush
+
+	stream
+		position: (self indexPositionAt: index);
+		nextPutAll: (position asByteArrayOfSize: self objectIndexSize);
+		flush
 ]
 
 { #category : #accessing }
 SOObjectIndexFile >> indexPositionAt: anInteger [
+
 	(anInteger > 0) ifFalse: [ SOIndexOutOfRange signal: 'object index needs to be larger than zero' ].
+
 	^ self headerSize + self objectIndexSize + (anInteger - 1 * self objectIndexSize)
 ]
 
 { #category : #initialization }
 SOObjectIndexFile >> initializeStart [
+
 	self lastObjectIndex: 1.
 	"intialize the slot for the root object"
 	self at: 1 putPosition: 0
@@ -43,6 +50,7 @@ SOObjectIndexFile >> initializeStart [
 
 { #category : #accessing }
 SOObjectIndexFile >> lastObjectIndex [
+
 	^ lastObjectIndex ifNil: [
 		stream position: self headerSize.
 		lastObjectIndex := (stream next: self objectIndexSize) asInteger ]
@@ -50,6 +58,7 @@ SOObjectIndexFile >> lastObjectIndex [
 
 { #category : #accessing }
 SOObjectIndexFile >> lastObjectIndex: anInteger [
+
 	self stream
 		position: self headerSize;
 		nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
@@ -57,8 +66,9 @@ SOObjectIndexFile >> lastObjectIndex: anInteger [
 	lastObjectIndex := anInteger
 ]
 
-{ #category : #lockgin }
+{ #category : #locking }
 SOObjectIndexFile >> lockLastObjectIndexFor: lockContext [
+
 	^ stream
 		lockFrom: self headerSize
 		length: self objectIndexSize
@@ -67,6 +77,7 @@ SOObjectIndexFile >> lockLastObjectIndexFor: lockContext [
 
 { #category : #'as yet unclassified' }
 SOObjectIndexFile >> lockObjectId: aSOObjectId for: lockContext [
+
 	^ stream
 		lockFrom: (self indexPositionAt: aSOObjectId index)
 		length: self objectIndexSize
@@ -75,26 +86,31 @@ SOObjectIndexFile >> lockObjectId: aSOObjectId for: lockContext [
 
 { #category : #accessing }
 SOObjectIndexFile >> nextIndex [
+
 	^ self lastObjectIndex + 1
 ]
 
 { #category : #accessing }
 SOObjectIndexFile >> objectIndexSize [
+
 	^ 8
 ]
 
 { #category : #accessing }
 SOObjectIndexFile >> path [
+
 	^ segment path / #index
 ]
 
 { #category : #accessing }
 SOObjectIndexFile >> positionAt: anInteger [
+
 	stream position: (self indexPositionAt: anInteger).
 	^ (stream next: self objectIndexSize) asInteger
 ]
 
 { #category : #accessing }
 SOObjectIndexFile >> prefix [
+
 	^ 'SOIL|OBJECT INDEX' asByteArray
 ]

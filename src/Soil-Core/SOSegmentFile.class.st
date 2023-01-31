@@ -15,15 +15,18 @@ SOSegmentFile class >> isAbstract [
 
 { #category : #accessing }
 SOSegmentFile >> path [
+
 	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
-SOSegmentFile >> segment: aSOObjectSegment [
-	segment := aSOObjectSegment
+SOSegmentFile >> segment: anSOObjectSegment [
+
+	segment := anSOObjectSegment
 ]
 
 { #category : #accessing }
 SOSegmentFile >> soil [
+
 	^ segment soil
 ]

@@ -14,7 +14,7 @@ SOBinaryFile class >> isAbstract [
 	^ self == SOBinaryFile
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'initialize - release' }
 SOBinaryFile >> close [
 	stream ifNotNil: [
 		stream close ]
@@ -33,34 +33,41 @@ SOBinaryFile >> fileVersion: anInteger [
 
 { #category : #utilities }
 SOBinaryFile >> fileVersionSize [
+
 	^ 2
 ]
 
 { #category : #utilities }
 SOBinaryFile >> headerSize [
-	"the file header stores a prefix and the version for the file format and
+	"The file header stores a prefix and the version for the file format and
 	the version of fuel being used"
+
 	^ self prefix size + self fileVersionSize
 ]
 
 { #category : #initialization }
 SOBinaryFile >> initializeFilesystem [
-	self initializeHeader.
-	self initializeStart.
-	self stream
-		flush
+
+	self
+		initializeHeader;
+		initializeStart.
+
+	self stream flush
 ]
 
 { #category : #initialization }
 SOBinaryFile >> initializeHeader [
+
 	self stream
 		position: 0;
 		nextPutAll: self prefix asByteArray.
+
 	self fileVersion: 1
 ]
 
 { #category : #initialization }
 SOBinaryFile >> initializeStart [
+
 	self subclassResponsibility
 ]
 
@@ -76,11 +83,13 @@ SOBinaryFile >> path [
 
 { #category : #utilities }
 SOBinaryFile >> prefix [
+
 	self subclassResponsibility
 ]
 
 { #category : #'private - decoding' }
 SOBinaryFile >> readHeader [
+
 	| prefix |
 	stream position: 0.
 	prefix := stream next: self prefix size.
