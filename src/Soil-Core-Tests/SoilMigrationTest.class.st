@@ -24,6 +24,14 @@ SoilMigrationTest >> createMigrationClassFixedLayout [
 ]
 
 { #category : #helpers }
+SoilMigrationTest >> createMigrationClassFixedLayout2 [
+	^ (SOBaseTestObject << #SOMigrationObject2
+		layout: FixedLayout;
+		slots: { #one . #two }; 
+		package: self class package name) install
+]
+
+{ #category : #helpers }
 SoilMigrationTest >> createMigrationClassVariableLayout [
 	^ (SOBaseTestObject << #SOMigrationObject
 		layout: VariableLayout;
@@ -117,6 +125,27 @@ SoilMigrationTest >> testMaterializingObjectFixedLayputFromVariableLayout [
 	self deny: materializedRoot class isVariable.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.
 	self assert: (materializedRoot instVarNamed: #two) equals: 2
+]
+
+{ #category : #tests }
+SoilMigrationTest >> testMaterializingObjectRenamedClass [
+		| tx tx2 materializedRoot object |
+
+	object := self createMigrationClassFixedLayout new.
+	self deny: object class isVariable.
+	tx := soil newTransaction.
+	tx root: object.
+	tx commit.
+	"now we remove the class and create a new one with a different name"
+	migrationClass removeFromSystem.
+	migrationClass := self createMigrationClassFixedLayout2.
+
+	"We have to tell soil that the class was renamed"
+	soil renameClassNamed: #SOMigrationObject to: #SOMigrationObject2.
+
+	tx2 := soil newTransaction.
+	materializedRoot := tx2 root.
+	self assert: materializedRoot class name equals: 'SOMigrationObject2'
 ]
 
 { #category : #'tests - change classlayout' }
