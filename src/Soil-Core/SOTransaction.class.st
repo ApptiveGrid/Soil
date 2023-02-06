@@ -147,11 +147,12 @@ SOTransaction >> behaviorWithIndex: objectId andVersion: version ifNone: aBlock 
 	self flag: #todo.
 	"this is slow because it fetches always all versions"
 	list := self objectRepository allVersionsOf: (SOObjectId segment: 0 index: objectId).
+	"we search until we find a newer version or the exact version requested"
 	list do: [ :rec |
 		rec
 			transaction: self;
 			materializeObject.
-		(rec object version = version) ifTrue: [ ^ rec object ]  ].
+		(rec object version >= version) ifTrue: [ ^ rec object ]  ].
 	Error signal.
 ]
 

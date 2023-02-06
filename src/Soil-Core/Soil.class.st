@@ -140,3 +140,30 @@ Soil >> path [
 Soil >> path: aString [ 
 	path := aString asFileReference
 ]
+
+{ #category : #refactorings }
+Soil >> renameClassNamed: oldName to: newName [
+	| transaction behaviorDescription objectId |
+
+	"we load the behaviorDescription of the oldName, change the name and commit"
+
+	transaction := self newTransaction.
+
+	objectId := self behaviorRegistry
+		nameAt: oldName
+		ifAbsent: [ self error: 'name not found in behavior registry' ].
+
+	behaviorDescription := (transaction objectWithId: objectId ifNone: [Error signal ]) objectId: objectId.
+	"the description in the database might not be current, if not, we create a new one later"
+
+	"modify existing description and increment version"
+	behaviorDescription initializeFromBehavior: (Smalltalk at: newName).
+	behaviorDescription incrementVersion.
+
+	self behaviorRegistry
+		nameAt: newName
+		put: objectId.
+
+	transaction markDirty: behaviorDescription.
+	transaction commit
+]
