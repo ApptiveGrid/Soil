@@ -45,15 +45,8 @@ SoilMaterializer >> materializeFromBytes: aByteArray [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| description behaviorIndex behaviorVersion |
-	behaviorIndex := self nextLengthEncodedInteger.
-	behaviorVersion := self nextLengthEncodedInteger.
-	description := behaviorIndex isZero
-		ifTrue: [ SOBehaviorDescription meta ]
-		ifFalse: [
-			transaction 
-				behaviorDescriptionWithIndex: behaviorIndex
-				andVersion: behaviorVersion ].
+	| description |
+	description := self nextBehaviorDescription.
 	^ description objectClass classLayout soilBasicMaterialize: description with: self
 ]
 
@@ -74,6 +67,19 @@ SoilMaterializer >> nextAssociation: aClass [
 	^ association
 		key: self nextSoilObject;
 		value: self nextSoilObject
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextBehaviorDescription [
+	| behaviorIndex behaviorVersion |
+	behaviorIndex := self nextLengthEncodedInteger.
+	behaviorVersion := self nextLengthEncodedInteger.
+	^ behaviorIndex isZero
+		ifTrue: [ SOBehaviorDescription meta ]
+		ifFalse: [
+			transaction
+				behaviorDescriptionWithIndex: behaviorIndex
+				andVersion: behaviorVersion ]
 ]
 
 { #category : #reading }
