@@ -3,7 +3,7 @@ Extension { #name : #PointerLayout }
 { #category : #'*Soil-Serializer' }
 PointerLayout >> soilBasicSerialize: anObject with: serializer [
 	| description |
-	description := self soilSerializeBehaviorDescription: anObject with: serializer.
+	description := serializer serializeBehaviorDescriptionFor: anObject.
 
 	description instVarNames do: [:ivarName | (anObject instVarNamed: ivarName) soilSerialize: serializer ]
 ]

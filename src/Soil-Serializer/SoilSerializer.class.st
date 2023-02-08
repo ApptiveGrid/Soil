@@ -21,11 +21,6 @@ SoilSerializer class >> serializeToBytes: anObject [
 
 ]
 
-{ #category : #public }
-SoilSerializer >> behaviorDescriptionFor: aClass [ 
-	^ transaction behaviorDescriptionFor: aClass
-]
-
 { #category : #initialization }
 SoilSerializer >> initialize [ 
 	super initialize.
@@ -46,6 +41,14 @@ SoilSerializer >> nextPutAssociation: anAssociation [
 	self nextPutByte: TypeCodeAssociation.
 	anAssociation key soilSerialize: self.
 	anAssociation value soilSerialize: self.
+]
+
+{ #category : #writing }
+SoilSerializer >> nextPutBehaviorDescription: description [
+	self
+		nextPutObjectType;
+		nextPutLengthEncodedInteger: (description objectId index);
+		nextPutLengthEncodedInteger: (description version)
 ]
 
 { #category : #writing }
@@ -210,6 +213,14 @@ SoilSerializer >> serialize: anObject [
 	clusterRoot soilSerialize: self.
 	stream flush.
 	^ stream contents
+]
+
+{ #category : #public }
+SoilSerializer >> serializeBehaviorDescriptionFor: anObject [
+	| description |
+	description := transaction behaviorDescriptionFor: anObject class.
+	self nextPutBehaviorDescription: description.
+	^ description
 ]
 
 { #category : #public }

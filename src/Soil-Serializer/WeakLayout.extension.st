@@ -17,7 +17,7 @@ WeakLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 WeakLayout >> soilBasicSerialize: anObject with: serializer [
 	| description basicSize|
 
-	description := self soilSerializeBehaviorDescription: anObject with: serializer.
+	description := serializer serializeBehaviorDescriptionFor: anObject.
 	basicSize := anObject basicSize.
 
 	serializer nextPutLengthEncodedInteger: basicSize.
