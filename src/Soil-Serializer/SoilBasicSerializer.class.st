@@ -20,6 +20,12 @@ SoilBasicSerializer >> basicNextPutSymbol: aSymbol [
 		nextPutBytesFrom: aSymbol asByteArray
 ]
 
+{ #category : #initialization }
+SoilBasicSerializer >> initialize [ 
+	super initialize.
+	objects := SoilObjectTable new
+]
+
 { #category : #'writing - basic' }
 SoilBasicSerializer >> nextPutByte: anInteger [ 
 	stream nextPut: anInteger

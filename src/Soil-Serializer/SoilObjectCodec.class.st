@@ -44,12 +44,6 @@ SoilObjectCodec >> externalObjectRegistry: anObject [
 	externalObjectRegistry := anObject
 ]
 
-{ #category : #initialization }
-SoilObjectCodec >> initialize [ 
-	super initialize.
-	objects := OrderedCollection new
-]
-
 { #category : #accessing }
 SoilObjectCodec >> soil [
 

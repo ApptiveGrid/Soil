@@ -12,6 +12,12 @@ SoilBasicMaterializer >> basicNextString [
 	^ buf asString
 ]
 
+{ #category : #initialization }
+SoilBasicMaterializer >> initialize [ 
+	super initialize.
+	objects := OrderedCollection new
+]
+
 { #category : #'reading - basic' }
 SoilBasicMaterializer >> nextByte [
 	^ stream next
