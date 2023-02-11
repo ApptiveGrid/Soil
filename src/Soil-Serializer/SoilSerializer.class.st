@@ -21,12 +21,6 @@ SoilSerializer class >> serializeToBytes: anObject [
 
 ]
 
-{ #category : #initialization }
-SoilSerializer >> initialize [ 
-	super initialize.
-	objects := OrderedCollection new
-]
-
 { #category : #writing }
 SoilSerializer >> nextPutArray: anArray [ 
 	self 
