@@ -21,12 +21,6 @@ SoilObjectTable >> identityIndexOf: anObject [
 ]
 
 { #category : #initialization }
-SoilObjectTable >> indexOf: anObject [
-
-	^ index at: anObject ifAbsent: [ 0 ]
-]
-
-{ #category : #initialization }
 SoilObjectTable >> initialize [
 	lastIndex := 0.
 	index := IdentityDictionary new
