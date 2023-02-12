@@ -2,25 +2,22 @@ Class {
 	#name : #SoilObjectTable,
 	#superclass : #Object,
 	#instVars : [
-		'objects',
+		'lastIndex',
 		'index'
 	],
 	#category : #'Soil-Serializer'
 }
 
-{ #category : #'collection-compat' }
+{ #category : #api }
 SoilObjectTable >> add: anObject [
-	^self registerObject: anObject
+	index
+		at: anObject
+		ifAbsentPut: [ lastIndex := lastIndex + 1 ]
 ]
 
-{ #category : #accessing }
-SoilObjectTable >> at: anInteger [
-	^ objects at: anInteger
-]
-
-{ #category : #'collection-compat' }
+{ #category : #api }
 SoilObjectTable >> identityIndexOf: anObject [
-	^self indexOf: anObject
+	 ^ index at: anObject ifAbsent: [ 0 ]
 ]
 
 { #category : #initialization }
@@ -31,19 +28,11 @@ SoilObjectTable >> indexOf: anObject [
 
 { #category : #initialization }
 SoilObjectTable >> initialize [
-	objects := OrderedCollection new.
+	lastIndex := 0.
 	index := IdentityDictionary new
-]
-
-{ #category : #initialization }
-SoilObjectTable >> registerObject: anObject [
-
-	index
-		at: anObject
-		ifAbsentPut: [ objects addLastAndReturnIndex: anObject ]
 ]
 
 { #category : #accessing }
 SoilObjectTable >> size [
-	^ objects size
+	^ lastIndex
 ]

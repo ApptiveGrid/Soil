@@ -8,37 +8,25 @@ Class {
 }
 
 { #category : #tests }
-SoilObjectTableTest >> testAt [
+SoilObjectTableTest >> testAdd [
 	| table |
 	table := SoilObjectTable new.
-	table registerObject: 'Hello'.
-	table registerObject: #hello.
-	table registerObject: #hello.
-	table registerObject: 'Hello'.
-	self assert: (table at: 2) equals: #hello.
-	self assert: (table at: 1) equals: 'Hello'
-]
-
-{ #category : #tests }
-SoilObjectTableTest >> testIndexOf [
-	| table |
-	table := SoilObjectTable new.
-	table registerObject: 'Hello'.
-	table registerObject: #hello.
-	table registerObject: #hello.
-	table registerObject: 'Hello'.
-	self assert: (table indexOf: #hello) equals: 2.
-	self assert: (table indexOf: 'Hello') equals: 1.
-	self assert: (table indexOf: '2') equals: 0.
-]
-
-{ #category : #tests }
-SoilObjectTableTest >> testRegisterObject [
-	| table |
-	table := SoilObjectTable new.
-	table registerObject: 'Hello'.
-	table registerObject: #hello.
-	table registerObject: #hello.
-	table registerObject: 'Hello'.
+	table add: 'Hello'.
+	table add: #hello.
+	table add: #hello.
+	table add: 'Hello'.
 	self assert: table size equals: 2
+]
+
+{ #category : #tests }
+SoilObjectTableTest >> testIdenityIndexOf [
+	| table |
+	table := SoilObjectTable new.
+	table add: 'Hello'.
+	table add: #hello.
+	table add: #hello.
+	table add: 'Hello'.
+	self assert: (table identityIndexOf: #hello) equals: 2.
+	self assert: (table identityIndexOf: 'Hello') equals: 1.
+	self assert: (table identityIndexOf: '2') equals: 0.
 ]
