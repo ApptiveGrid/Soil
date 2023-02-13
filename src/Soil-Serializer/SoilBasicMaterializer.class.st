@@ -6,10 +6,10 @@ Class {
 
 { #category : #'reading - basic' }
 SoilBasicMaterializer >> basicNextString [
-	| buf length |
-	buf := ByteArray new: (length := self nextLengthEncodedInteger).
-	stream readInto: buf startingAt: 1 count: length.
-	^ buf asString
+	| string length |
+	string := String new: (length := self nextLengthEncodedInteger).
+	stream readInto: string startingAt: 1 count: length.
+	^ string
 ]
 
 { #category : #'reading - basic' }
