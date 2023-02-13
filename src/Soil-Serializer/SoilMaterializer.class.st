@@ -215,7 +215,6 @@ SoilMaterializer >> nextSoilObject [
 
 { #category : #registry }
 SoilMaterializer >> registerObject: anObject [
-	objects ifNil: [ objects := OrderedCollection new ].
 	objects add: anObject 
 ]
 
