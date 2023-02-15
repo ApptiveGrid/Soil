@@ -126,11 +126,6 @@ SOObjectRepository >> lockObjectId: aSOObjectId for: lockContext [
 ]
 
 { #category : #accessing }
-SOObjectRepository >> metaAt: index [ 
-	^ self metaSegment at: index
-]
-
-{ #category : #accessing }
 SOObjectRepository >> metaSegment [
 	^ metaSegment 
 ]

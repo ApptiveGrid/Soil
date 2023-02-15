@@ -17,23 +17,28 @@ SoilBehaviorRegistry >> addSpecialObjects [
 ]
 
 { #category : #'as yet unclassified' }
+SoilBehaviorRegistry >> behaviorDescriptionWithIndex: behaviorIndex andVersion: version transaction: transaction [
+	| versionsOfBehavior |
+
+	self loadHistoryForBehaviorWithId: (SOObjectId segment: 0 index: behaviorIndex) transaction: transaction.
+
+	versionsOfBehavior := versions at: behaviorIndex ifAbsent: [self halt].
+
+	^versionsOfBehavior
+		detect: [ :behav | behav version >= version ]
+		ifNone: [(SOObjectNotFound new segment: 0; index: behaviorIndex) signal]
+]
+
+{ #category : #'as yet unclassified' }
 SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction: transaction [
-	| objectId records chain offset |
+	| objectId chain offset |
 	objectId := self 
 		nameAt: aSOBehaviorDescription behaviorIdentifier 
 		ifAbsent: [ self halt ].
-	records := soil objectRepository 
-		allVersionsOf: objectId.
-	chain := records collect: [ :record |
-		record 
-			transaction: transaction;
-			materializeObject;
-			object  ].
+	self loadHistoryForBehaviorWithId: objectId transaction: transaction.
+	chain := versions at: objectId index.
 	chain first isCurrent ifFalse: [ 
-		chain addFirst: (SOBehaviorDescription for: aSOBehaviorDescription objectClass) ].
-	versions 
-		at: aSOBehaviorDescription behaviorIdentifier 
-		put: chain.
+		chain addFirst: ((SOBehaviorDescription for: aSOBehaviorDescription objectClass) version: (aSOBehaviorDescription version + 1))].
 	offset := chain detectIndex: [ :each | each matchesDescription: aSOBehaviorDescription ].
 	^ chain copyFrom: 1 to: offset
 ]
@@ -44,9 +49,12 @@ SoilBehaviorRegistry >> index [
 ]
 
 { #category : #initialization }
-SoilBehaviorRegistry >> initialize [ 
+SoilBehaviorRegistry >> initialize [
+
 	super initialize.
 	versions := Dictionary new
+		            at: 2
+		            put: (OrderedCollection with: SOBehaviorDescription meta); yourself
 ]
 
 { #category : #initialization }
@@ -54,6 +62,25 @@ SoilBehaviorRegistry >> initializeFilesystem [
 	self open.
 	index initializeList.
 	self addSpecialObjects
+]
+
+{ #category : #'as yet unclassified' }
+SoilBehaviorRegistry >> loadHistoryForBehaviorWithId: objectId transaction: transaction [
+	|  records chain |
+
+	"check if we loaded the history already"
+	(versions includesKey: objectId index ) ifTrue: [ ^ self ].
+
+	records := transaction objectRepository allVersionsOf: objectId.
+	chain := records collect: [ :record |
+		record
+			transaction: transaction;
+			materializeObject;
+			object  ].
+
+	versions
+		at: objectId index
+		put: chain
 ]
 
 { #category : #accessing }

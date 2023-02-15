@@ -112,14 +112,15 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> behaviorDescriptionWithIndex: index andVersion: version [
-	| description |
-	(index = 2) ifTrue: [ ^ SOBehaviorDescription meta ].
-	description := self behaviorWithIndex: index ifNone: [ 
-		(SOObjectNotFound segment: 0 index: index) signal ].
-	(description version = version)
-		ifTrue: [ ^ description ].
-	^ self behaviorWithIndex: index andVersion: version ifNone: [ self halt ]
+SOTransaction >> behaviorDescriptionWithIndex: index andVersion: version [ 
+	
+	idMap 
+		detect: [ :each | each objectId = index ]
+		ifFound: [ :record | 
+			(record object version = version)
+				ifTrue: [ ^ record object ] ].
+
+	^ self behaviorRegistry behaviorDescriptionWithIndex: index andVersion: version transaction: self
 ]
 
 { #category : #accessing }
@@ -133,40 +134,6 @@ SOTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 		behaviorVersionsUpTo: aSOBehaviorDescription
 		transaction: self .
 	
-]
-
-{ #category : #'as yet unclassified' }
-SOTransaction >> behaviorWithIndex: objectId andVersion: version ifNone: aBlock [
-	| list |
-	idMap 
-		detect: [ :each | each objectId = objectId ]
-		ifFound: [ :record | 
-			(record object version = version)
-				ifTrue: [ ^ record object ] ].
-
-	self flag: #todo.
-	"this is slow because it fetches always all versions"
-	list := self objectRepository allVersionsOf: (SOObjectId segment: 0 index: objectId).
-	"we search until we find a newer version or the exact version requested"
-	list do: [ :rec |
-		rec
-			transaction: self;
-			materializeObject.
-		(rec object version >= version) ifTrue: [ ^ rec object ]  ].
-	Error signal.
-]
-
-{ #category : #'as yet unclassified' }
-SOTransaction >> behaviorWithIndex: objectId ifNone: aBlock [
-	idMap 
-		detect: [ :each | each objectId = objectId ]
-		ifFound: [ :record | 
-			^ record object ].
-
-	^ (self objectRepository metaAt: objectId)
-		transaction: self;
-		materializeObject;
-		object
 ]
 
 { #category : #accessing }
