@@ -193,7 +193,7 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 			internal. This might be too dangerous later and might
 			be removed"
 			0 ].
-	(anObject ~= clusterRoot and: [ externalIndex > 0 ])
+	(anObject ~~ clusterRoot and: [ externalIndex > 0 ])
 		ifTrue: [
 			self nextPutExternalReference: externalIndex ]
 		ifFalse: [
