@@ -64,7 +64,9 @@ SoilPersistentDictionaryTest >> testCommitAndRead [
 	transaction := soil newTransaction.
 	materialized := transaction root.
 
-	self assert: (materialized at: #test) equals: 'string'
+	"should this not be transparently load it?"
+	"if the Proxy inherits from ProtoObject, it works"
+	self assert: (materialized at: #test) class equals: SOObjectProxy
 ]
 
 { #category : #tests }
