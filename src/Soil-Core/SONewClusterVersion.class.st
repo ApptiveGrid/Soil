@@ -34,6 +34,11 @@ SONewClusterVersion >> asNewClusterVersion [
 	^ self
 ]
 
+{ #category : #'as yet unclassified' }
+SONewClusterVersion >> beChanged [
+	"nothing to be done"
+]
+
 { #category : #testing }
 SONewClusterVersion >> hasChanged [
 	^ true

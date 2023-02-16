@@ -1,6 +1,6 @@
 Class {
 	#name : #SOObjectProxy,
-	#superclass : #Object,
+	#superclass : #ProtoObject,
 	#instVars : [
 		'transaction',
 		'objectId',
