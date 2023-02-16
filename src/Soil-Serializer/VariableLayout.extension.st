@@ -8,9 +8,7 @@ VariableLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer 
 	basicSize := aBehaviorDescription isFixedLayout
 		ifTrue: [ 0 ]
 		ifFalse: [ materializer nextLengthEncodedInteger ].
-	object := aBehaviorDescription objectClass basicNew: basicSize.
-	aBehaviorDescription compatibilityCheck: object class classLayout.
-
+	object := aBehaviorDescription basicNew: basicSize.
 	materializer registerObject: object.
 
 	self updateIvars: aBehaviorDescription with: materializer for: object.

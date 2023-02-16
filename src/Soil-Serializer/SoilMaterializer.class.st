@@ -45,9 +45,8 @@ SoilMaterializer >> materializeFromBytes: aByteArray [
 
 { #category : #'instance creation' }
 SoilMaterializer >> newObject [
-	| description |
-	description := self nextBehaviorDescription.
-	^ description objectClass classLayout soilBasicMaterialize: description with: self
+
+	^ self nextBehaviorDescription newObjectWith: self
 ]
 
 { #category : #reading }

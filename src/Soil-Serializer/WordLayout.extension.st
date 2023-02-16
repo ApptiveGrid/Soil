@@ -3,8 +3,7 @@ Extension { #name : #WordLayout }
 { #category : #'*Soil-Serializer' }
 WordLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object basicSize |
-	object := aBehaviorDescription objectClass basicNew: (basicSize := materializer nextLengthEncodedInteger).
-	aBehaviorDescription compatibilityCheck: object class classLayout.
+	object := aBehaviorDescription basicNew: (basicSize := materializer nextLengthEncodedInteger).
 	materializer registerObject: object.
 
 	1 to: basicSize do: [:i | object basicAt: i put: materializer nextLengthEncodedInteger].
