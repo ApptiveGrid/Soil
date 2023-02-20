@@ -159,6 +159,16 @@ SoilSerializer >> nextPutOrderedCollection: aCollection [
 ]
 
 { #category : #writing }
+SoilSerializer >> nextPutPersistentDictionary: aPersistentDictionary [ 
+	self 
+		nextPutByte: TypeCodePersistentDictionary;
+		nextPutLengthEncodedInteger: aPersistentDictionary size.
+	aPersistentDictionary keysAndValuesDo: [:key :value |
+		key soilSerialize: self.
+		value soilSerialize: self ]
+]
+
+{ #category : #writing }
 SoilSerializer >> nextPutProcessorScheduler: aProcessorScheduler [ 
 	self nextPutByte: TypeCodeProcessScheduler 
 ]
