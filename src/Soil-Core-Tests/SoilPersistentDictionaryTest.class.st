@@ -55,6 +55,9 @@ SoilPersistentDictionaryTest >> testAtPut [
 SoilPersistentDictionaryTest >> testCommitAndRead [
 
 	| dict transaction materialized |
+	
+	"to remove"
+	SoilTypeCodes initialize.
 	transaction := soil newTransaction.
 	dict := SoilPersistentDictionary new soilMakePersistentIn: transaction.
 	dict add: (#test -> 'string').
