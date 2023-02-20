@@ -8,6 +8,16 @@ Class {
 	#category : #'Soil-Core-Collections'
 }
 
+{ #category : #'instance creation' }
+SoilPersistentDictionary class >> new: size [
+	^self new
+]
+
+{ #category : #materializing }
+SoilPersistentDictionary class >> soilMaterialize: materializer [
+	^ materializer nextPersistentDictionary: self
+]
+
 { #category : #accessing }
 SoilPersistentDictionary class >> soilTransientInstVars [
 	^#(transaction)
@@ -30,9 +40,9 @@ SoilPersistentDictionary >> at: key [
 { #category : #forwarded }
 SoilPersistentDictionary >> at: key put: value [
 	| return |
-	transaction makeRoot:  value.
+	transaction ifNotNil: [:tr | tr makeRoot:  value].
 	return := dict at: key put: value.
-	transaction markDirty: dict.
+	transaction ifNotNil: [:tr | tr markDirty: dict].
 	^return
 
 ]
@@ -48,11 +58,27 @@ SoilPersistentDictionary >> initialize [
 ]
 
 { #category : #forwarded }
+SoilPersistentDictionary >> keysAndValuesDo: aBlock [
+	^ dict keysAndValuesDo: aBlock
+]
+
+{ #category : #forwarded }
 SoilPersistentDictionary >> removeKey: anObject [
 	| return |
 	return := dict removeKey: anObject.
 	transaction markDirty: dict.
 	^return
+]
+
+{ #category : #forwarded }
+SoilPersistentDictionary >> size [
+	^ dict size
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDictionary >> soilBasicSerialize: serializer [
+	self class == SoilPersistentDictionary ifFalse: [ ^ super soilBasicSerialize: serializer ].
+	serializer nextPutPersistentDictionary: self
 ]
 
 { #category : #initialization }

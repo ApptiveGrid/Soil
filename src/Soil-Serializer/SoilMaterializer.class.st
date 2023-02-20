@@ -209,6 +209,19 @@ SoilMaterializer >> nextOrderedCollection: aClass [
 ]
 
 { #category : #reading }
+SoilMaterializer >> nextPersistentDictionary: aClass [ 
+	| size dict key |
+	size := self nextLengthEncodedInteger.
+	dict := aClass new: size.
+	self registerObject: dict.
+	size timesRepeat: [
+		key := self nextSoilObject.
+		dict at: key put: self nextSoilObject.
+	].
+	^dict
+]
+
+{ #category : #reading }
 SoilMaterializer >> nextSoilObject [ 
 	^ (TypeCodeMapping at: self nextByte) soilMaterialize: self 
 ]

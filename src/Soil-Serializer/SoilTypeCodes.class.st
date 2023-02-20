@@ -25,6 +25,7 @@ Class {
 		'TypeCodeMessageSend',
 		'TypeCodeObject',
 		'TypeCodeOrderedCollection',
+		'TypeCodePersistentDictionary',
 		'TypeCodeProcessScheduler',
 		'TypeCodeScaledDecimal',
 		'TypeCodeString',
@@ -82,7 +83,9 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeWideString 				put: WideString;
 		at: TypeCodeCharacter 				put: Character;
 		at: TypeCodeCompiledBlock  			put: CompiledBlock;
-		at: TypeCodeCompiledMethod 			put: CompiledMethod.
+		at: TypeCodeCompiledMethod 			put: CompiledMethod;
+		at: TypeCodePersistentDictionary  put: SoilPersistentDictionary
+					
 ]
 
 { #category : #initialization }
@@ -119,7 +122,8 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeWideString := 29.
 	TypeCodeCharacter := 30.
 	TypeCodeCompiledBlock := 31.
-	TypeCodeCompiledMethod := 32
+	TypeCodeCompiledMethod := 32.
+	TypeCodePersistentDictionary := 33
 
 
 ]
