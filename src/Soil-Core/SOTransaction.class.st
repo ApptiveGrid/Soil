@@ -291,6 +291,11 @@ SOTransaction >> makeNewVersion: classDescription [
 ]
 
 { #category : #'as yet unclassified' }
+SOTransaction >> makePersistent: anObject [ 
+	self makeRoot: anObject 
+]
+
+{ #category : #'as yet unclassified' }
 SOTransaction >> makeRoot: anObject [ 
 	self addClusterObject: anObject
 ]
