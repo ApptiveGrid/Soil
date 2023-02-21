@@ -48,7 +48,7 @@ SOObjectRepository >> addNewSegment: aSegment [
 SOObjectRepository >> allVersionsOf: aSOObjectId [ 
 	| segment |
 	segment := self segmentAt: aSOObjectId segment.
-	^ segment allVersionsOf: aSOObjectId  
+	^ segment allVersionsAt: aSOObjectId index
 ]
 
 { #category : #accessing }

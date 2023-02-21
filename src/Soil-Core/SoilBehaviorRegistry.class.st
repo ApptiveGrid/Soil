@@ -20,7 +20,7 @@ SoilBehaviorRegistry >> addSpecialObjects [
 SoilBehaviorRegistry >> behaviorDescriptionWithIndex: behaviorIndex andVersion: version transaction: transaction [
 	| versionsOfBehavior |
 
-	self loadHistoryForBehaviorWithId: (SOObjectId segment: 0 index: behaviorIndex) transaction: transaction.
+	self loadHistoryForBehaviorWithIndex: behaviorIndex transaction: transaction.
 
 	versionsOfBehavior := versions at: behaviorIndex ifAbsent: [self halt].
 
@@ -35,7 +35,7 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction
 	objectId := self 
 		nameAt: aSOBehaviorDescription behaviorIdentifier 
 		ifAbsent: [ self halt ].
-	self loadHistoryForBehaviorWithId: objectId transaction: transaction.
+	self loadHistoryForBehaviorWithIndex: objectId index transaction: transaction.
 	chain := versions at: objectId index.
 	chain first isCurrent ifFalse: [ 
 		chain addFirst: ((SOBehaviorDescription for: aSOBehaviorDescription objectClass) version: (aSOBehaviorDescription version + 1))].
@@ -65,13 +65,13 @@ SoilBehaviorRegistry >> initializeFilesystem [
 ]
 
 { #category : #'as yet unclassified' }
-SoilBehaviorRegistry >> loadHistoryForBehaviorWithId: objectId transaction: transaction [
+SoilBehaviorRegistry >> loadHistoryForBehaviorWithIndex: objectIndex transaction: transaction [
 	|  records chain |
 
 	"check if we loaded the history already"
-	(versions includesKey: objectId index ) ifTrue: [ ^ self ].
+	(versions includesKey: objectIndex ) ifTrue: [ ^ self ].
 
-	records := transaction objectRepository allVersionsOf: objectId.
+	records := transaction objectRepository metaSegment allVersionsAt: objectIndex.
 	chain := records collect: [ :record |
 		record
 			transaction: transaction;
@@ -79,7 +79,7 @@ SoilBehaviorRegistry >> loadHistoryForBehaviorWithId: objectId transaction: tran
 			object  ].
 
 	versions
-		at: objectId index
+		at: objectIndex
 		put: chain
 ]
 
