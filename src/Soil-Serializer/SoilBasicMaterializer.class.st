@@ -25,14 +25,11 @@ SoilBasicMaterializer >> nextByte [
 
 { #category : #reading }
 SoilBasicMaterializer >> nextByteArray: aClass [ 
-	| byteArray |
-	byteArray := aClass new: self nextLengthEncodedInteger.
+	| byteArray size |
+	byteArray := aClass new: (size := self nextLengthEncodedInteger).
 	self registerObject: byteArray.
-	1 to: byteArray size do: [:i | 
-		byteArray 
-			at: i 
-			put: self nextByte ].
-	^byteArray
+	stream readInto: byteArray startingAt: 1 count: size.
+	^ byteArray
 ]
 
 { #category : #reading }
