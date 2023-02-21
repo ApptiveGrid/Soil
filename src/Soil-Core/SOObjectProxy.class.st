@@ -29,9 +29,7 @@ SOObjectProxy >> inspectionObject [
 { #category : #'reflective operations' }
 SOObjectProxy >> object [
 	^ object ifNil: [  
-		object := transaction 
-			objectWithId: objectId 
-			ifNone: [ Error signal: 'cannot load' ] ]
+		object := transaction objectWithId: objectId ]
 ]
 
 { #category : #accessing }
