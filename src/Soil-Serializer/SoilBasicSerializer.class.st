@@ -35,9 +35,8 @@ SoilBasicSerializer >> nextPutByte: anInteger [
 SoilBasicSerializer >> nextPutByteArray: aByteArray [
 	self 
 		nextPutByte: TypeCodeByteArray; 
-		nextPutLengthEncodedInteger: aByteArray size.
-	1 to: aByteArray size do: [:i |
-		self nextPutByte: (aByteArray at: i)].
+		nextPutLengthEncodedInteger: aByteArray size;
+		nextPutBytesFrom: aByteArray
 ]
 
 { #category : #'writing - basic' }
