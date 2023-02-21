@@ -38,6 +38,11 @@ SoilObjectCodec class >> encodeString: aString [
 	^ CharacterEncoder encodeString: aString
 ]
 
+{ #category : #'class initialization' }
+SoilObjectCodec class >> initialize [
+	CharacterEncoder := #utf8 asZnCharacterEncoder
+]
+
 { #category : #accessing }
 SoilObjectCodec >> externalObjectRegistry: anObject [
 
