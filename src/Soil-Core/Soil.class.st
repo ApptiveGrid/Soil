@@ -153,7 +153,7 @@ Soil >> renameClassNamed: oldName to: newName [
 		nameAt: oldName
 		ifAbsent: [ self error: 'name not found in behavior registry' ].
 
-	behaviorDescription := (transaction objectWithId: objectId ifNone: [Error signal ]) objectId: objectId.
+	behaviorDescription := (transaction objectWithId: objectId) objectId: objectId.
 	"the description in the database might not be current, if not, we create a new one later"
 
 	"modify existing description and increment version"

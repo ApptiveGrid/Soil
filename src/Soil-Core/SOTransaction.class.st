@@ -83,7 +83,7 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 	objectId ifNotNil: [ 
 		behaviorDescription := (objectId index = 2)
 			ifTrue: [ ^ SOBehaviorDescription meta ]
-			ifFalse: [ (self objectWithId: objectId ifNone: [Error signal ]) objectId: objectId].
+			ifFalse: [ (self objectWithId: objectId) objectId: objectId].
 		"the description in the database might not be current, if not, we create a new one later"
 		behaviorDescription isCurrent 
 			ifTrue: [ ^ behaviorDescription ] ].
@@ -273,16 +273,14 @@ SOTransaction >> markDirty: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> materializationWithId: objectId ifNone: aBlock [
+SOTransaction >> materializationWithId: objectId [
 	| record |
 	record := (self objectRepository at: objectId version: readVersion)
 		transaction: self;
 		materializeObject. 
 	idMap at: objectId put: record.
 	objectMap at: record object put: record.
-	^ record object 
-
-	
+	^ record object
 ]
 
 { #category : #'instance creation' }
@@ -335,12 +333,12 @@ SOTransaction >> objectRepository [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> objectWithId: objectId ifNone: aBlock [
+SOTransaction >> objectWithId: objectId [
 	idMap 
 		detect: [ :each | each objectId = objectId ]
 		ifFound: [ :record | ^ record object ].
 
-	^ self materializationWithId: objectId ifNone: aBlock.
+	^ self materializationWithId: objectId
 ]
 
 { #category : #accessing }
@@ -383,9 +381,7 @@ SOTransaction >> root [
 		detect: [ :assoc | (assoc key segment = 1) & (assoc key index = 1) ]
 		ifFound: [ :assoc | ^ assoc value object ].
 	
-	^ self 
-		materializationWithId: self rootObjectId  
-		ifNone: [ nil ].
+	^ self materializationWithId: self rootObjectId
 ]
 
 { #category : #accessing }
