@@ -48,7 +48,7 @@ SOObjectRepository >> addNewSegment: aSegment [
 SOObjectRepository >> allVersionsOf: aSOObjectId [ 
 	| segment |
 	segment := self segmentAt: aSOObjectId segment.
-	^ segment allVersionsOf: aSOObjectId  
+	^ segment allVersionsAt: aSOObjectId index
 ]
 
 { #category : #accessing }
@@ -123,11 +123,6 @@ SOObjectRepository >> loadSegments [
 SOObjectRepository >> lockObjectId: aSOObjectId for: lockContext [
 	^ (self segmentAt: aSOObjectId segment)
 		lockObjectId: aSOObjectId for: lockContext
-]
-
-{ #category : #accessing }
-SOObjectRepository >> metaAt: index [ 
-	^ self metaSegment at: index
 ]
 
 { #category : #accessing }

@@ -265,12 +265,19 @@ SoilMigrationTest >> testMaterializingObjectWithIvarRemovedThenCommit [
 	tx commit.
 	migrationClass
 		removeSlot: (migrationClass slotNamed: #two).
+	
+	"load it"	
+	tx2 := soil newTransaction.
+	materializedRoot := tx2 root.
+	self assert: materializedRoot class instVarNames size equals: 1.
+	self assert: (materializedRoot instVarNamed: #one) equals: 1.
 
 	"lets try to commit with the class changed"
 	tx := soil newTransaction.
-	tx root: object.
+	tx root: materializedRoot.
 	tx commit.
 
+	"load again"
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: materializedRoot class instVarNames size equals: 1.

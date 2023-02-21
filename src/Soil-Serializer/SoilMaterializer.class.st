@@ -73,12 +73,9 @@ SoilMaterializer >> nextBehaviorDescription [
 	| behaviorIndex behaviorVersion |
 	behaviorIndex := self nextLengthEncodedInteger.
 	behaviorVersion := self nextLengthEncodedInteger.
-	^ behaviorIndex isZero
-		ifTrue: [ SOBehaviorDescription meta ]
-		ifFalse: [
-			transaction
+	^ transaction
 				behaviorDescriptionWithIndex: behaviorIndex
-				andVersion: behaviorVersion ]
+				andVersion: behaviorVersion
 ]
 
 { #category : #reading }

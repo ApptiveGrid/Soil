@@ -22,9 +22,9 @@ SOObjectSegment >> addNewRaw: aByteArray [
 ]
 
 { #category : #'as yet unclassified' }
-SOObjectSegment >> allVersionsOf: aSOObjectId [ 
+SOObjectSegment >> allVersionsAt: index [ 
 	| obj versions |
-	obj := self at: aSOObjectId index.
+	obj := self at: index.
 	versions := OrderedCollection new.
 	versions add: obj.
 	[ obj previousVersionPosition isZero ] whileFalse: [ 
