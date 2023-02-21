@@ -34,6 +34,16 @@ SOBehaviorDescription class >> soilTransientInstVars [
 	^ #( objectId ) 
 ]
 
+{ #category : #'object creation' }
+SOBehaviorDescription >> basicNew [
+	^ self compatibilityCheckObject: self objectClass basicNew
+]
+
+{ #category : #'object creation' }
+SOBehaviorDescription >> basicNew: size [
+	^ self compatibilityCheckObject: (self objectClass basicNew: size)
+]
+
 { #category : #accessing }
 SOBehaviorDescription >> beFirstVersion [
 	version := 1
@@ -59,6 +69,13 @@ SOBehaviorDescription >> compatibilityCheck: aClassLayout [
 	(aClassLayout isVariable and: [ aClassLayout isBits not and: [self isFixedLayout]]) ifTrue: [ ^true ].
 	"for now we raise errors for the others. We could instead create and empty object and log a warning"
 	SOLayoutMigrationError signal: 'Incompatible layout detected: trying to read a ', classLayout , ' current code uses ', aClassLayout class name asString
+]
+
+{ #category : #testing }
+SOBehaviorDescription >> compatibilityCheckObject: anObject [
+
+	self compatibilityCheck: anObject class classLayout.
+	^anObject
 ]
 
 { #category : #'as yet unclassified' }
@@ -122,6 +139,11 @@ SOBehaviorDescription >> matchesDescription: description [
 	(behaviorIdentifier = description behaviorIdentifier) ifFalse: [ ^ false ].
 	(instVarNames = description instVarNames) ifFalse: [ ^ false ].
 	^ true
+]
+
+{ #category : #'object creation' }
+SOBehaviorDescription >> newObjectWith: aSerializer [
+	^ self objectClass classLayout soilBasicMaterialize: self with: aSerializer
 ]
 
 { #category : #accessing }

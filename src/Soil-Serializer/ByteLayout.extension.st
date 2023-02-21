@@ -3,9 +3,7 @@ Extension { #name : #ByteLayout }
 { #category : #'*Soil-Serializer' }
 ByteLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object basicSize |
-	object := aBehaviorDescription objectClass basicNew: (basicSize := materializer nextLengthEncodedInteger).
-	aBehaviorDescription compatibilityCheck: object class classLayout.
-
+	object := aBehaviorDescription basicNew: (basicSize := materializer nextLengthEncodedInteger).
 	materializer registerObject: object.
 
 	materializer stream readInto: object startingAt: 1 count: basicSize.

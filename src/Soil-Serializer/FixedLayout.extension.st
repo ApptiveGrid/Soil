@@ -3,8 +3,7 @@ Extension { #name : #FixedLayout }
 { #category : #'*Soil-Serializer' }
 FixedLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object |
-	object := aBehaviorDescription objectClass basicNew.
-	aBehaviorDescription compatibilityCheck: object class classLayout.
+	object := aBehaviorDescription basicNew.
 	materializer registerObject: object.
 
 	self updateIvars: aBehaviorDescription with: materializer for: object.
