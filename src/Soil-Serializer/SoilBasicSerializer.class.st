@@ -175,9 +175,9 @@ SoilBasicSerializer >> nextPutWideString: aWideString [
 { #category : #writing }
 SoilBasicSerializer >> nextPutWideSymbol: aSymbol [
 	| buf |
-	buf := aSymbol asString utf8Encoded.
+	buf := self class encodeString: aSymbol.
 	self
 		nextPutByte: TypeCodeWideSymbol;
-		nextPutLengthEncodedInteger:  buf size;
+		nextPutLengthEncodedInteger: buf size;
 		nextPutBytesFrom: buf
 ]
