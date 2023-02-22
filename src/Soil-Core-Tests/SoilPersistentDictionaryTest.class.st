@@ -56,8 +56,6 @@ SoilPersistentDictionaryTest >> testCommitAndRead [
 
 	| dict transaction materialized |
 	
-	"to remove"
-	SoilTypeCodes initialize.
 	transaction := soil newTransaction.
 	dict := SoilPersistentDictionary new soilMakePersistentIn: transaction.
 	dict add: (#test -> 'string').
@@ -67,9 +65,7 @@ SoilPersistentDictionaryTest >> testCommitAndRead [
 	transaction := soil newTransaction.
 	materialized := transaction root.
 
-	"should this not be transparently load it?"
-	"if the Proxy inherits from ProtoObject, it works"
-	self assert: (materialized at: #test) class equals: SOObjectProxy
+	self assert: (materialized at: #test) equals: 'string'
 ]
 
 { #category : #tests }

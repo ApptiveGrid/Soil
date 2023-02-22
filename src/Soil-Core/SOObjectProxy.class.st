@@ -1,6 +1,6 @@
 Class {
 	#name : #SOObjectProxy,
-	#superclass : #Object,
+	#superclass : #ProtoObject,
 	#instVars : [
 		'transaction',
 		'objectId',
@@ -8,11 +8,6 @@ Class {
 	],
 	#category : #'Soil-Core-Model'
 }
-
-{ #category : #accessing }
-SOObjectProxy >> at: anObject [
-	^self object at: anObject
-]
 
 { #category : #'reflective operations' }
 SOObjectProxy >> doesNotUnderstand: aMessage [ 
