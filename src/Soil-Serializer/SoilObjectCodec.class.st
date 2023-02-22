@@ -4,7 +4,6 @@ Class {
 	#instVars : [
 		'externalObjectRegistry',
 		'stream',
-		'objects',
 		'transaction',
 		'soil'
 	],

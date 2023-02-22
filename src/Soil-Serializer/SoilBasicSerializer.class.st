@@ -1,6 +1,9 @@
 Class {
 	#name : #SoilBasicSerializer,
 	#superclass : #SoilObjectCodec,
+	#instVars : [
+		'objectIdTable'
+	],
 	#category : #'Soil-Serializer'
 }
 
@@ -23,7 +26,7 @@ SoilBasicSerializer >> basicNextPutSymbol: aSymbol [
 { #category : #initialization }
 SoilBasicSerializer >> initialize [ 
 	super initialize.
-	objects := SoilObjectTable new
+	objectIdTable := SoilObjectTable new
 ]
 
 { #category : #'writing - basic' }
