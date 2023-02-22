@@ -2,31 +2,29 @@ Class {
 	#name : #SoilObjectTable,
 	#superclass : #Object,
 	#instVars : [
-		'lastIndex',
-		'index'
+		'table'
 	],
 	#category : #'Soil-Serializer'
 }
 
 { #category : #api }
 SoilObjectTable >> add: anObject [
-	index
+	table
 		at: anObject
-		ifAbsentPut: [ lastIndex := lastIndex + 1 ]
+		ifAbsentPut: [ table size + 1 ]
 ]
 
 { #category : #api }
 SoilObjectTable >> identityIndexOf: anObject [
-	 ^ index at: anObject ifAbsent: [ 0 ]
+	 ^ table at: anObject ifAbsent: [ 0 ]
 ]
 
 { #category : #initialization }
 SoilObjectTable >> initialize [
-	lastIndex := 0.
-	index := IdentityDictionary new
+	table := IdentityDictionary new
 ]
 
 { #category : #accessing }
 SoilObjectTable >> size [
-	^ lastIndex
+	^ table size
 ]
