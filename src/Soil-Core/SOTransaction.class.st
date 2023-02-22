@@ -232,7 +232,7 @@ SOTransaction >> initializeObjectId: anObjectId [
 
 { #category : #testing }
 SOTransaction >> isAborted [
-	^ soil isNil & idMap isNil & objectMap isNil
+	^ soil isNil and:[ idMap isNil and: [objectMap isNil]]
 ]
 
 { #category : #testing }
@@ -382,11 +382,8 @@ SOTransaction >> releaseLocks [
 
 { #category : #accessing }
 SOTransaction >> root [
-	idMap associations
-		detect: [ :assoc | (assoc key segment = 1) & (assoc key index = 1) ]
-		ifFound: [ :assoc | ^ assoc value object ].
-	
-	^ self materializationWithId: self rootObjectId
+
+	^ self objectWithId: self rootObjectId
 ]
 
 { #category : #accessing }
