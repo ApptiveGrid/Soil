@@ -145,8 +145,7 @@ SoilBasicMaterializer >> nextTime [
 { #category : #reading }
 SoilBasicMaterializer >> nextWideString [
 	| buf length wideString |
-	length := self nextLengthEncodedInteger.
-	buf := ByteArray new: length.
+	buf := ByteArray new: (length := self nextLengthEncodedInteger).
 	stream readInto: buf startingAt: 1 count: length.
 	wideString := self class decodeBytes: buf. 
 	self registerObject: wideString. 
@@ -158,5 +157,5 @@ SoilBasicMaterializer >> nextWideSymbol [
 	| buf len |
 	buf := ByteArray new: (len := self nextLengthEncodedInteger).
 	stream readInto: buf startingAt: 1 count: len.
-	^ buf utf8Decoded asSymbol
+	^ (self class decodeBytes: buf) asSymbol
 ]
