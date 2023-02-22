@@ -10,7 +10,7 @@ Class {
 
 { #category : #adding }
 SONewClusterVersion >> addObject: anObject reference: anObjectId [
-	externalObjects addLast: anObject.
+	externalObjects add: anObject.
 	references addLast: anObjectId
 ]
 
@@ -74,9 +74,9 @@ SONewClusterVersion >> indexOfExternalReference: anObject [
 ]
 
 { #category : #initialization }
-SONewClusterVersion >> initialize [ 
+SONewClusterVersion >> initialize [
 	super initialize.
-	externalObjects := OrderedCollection new.
+	externalObjects := SoilObjectTable new
 ]
 
 { #category : #'as yet unclassified' }
