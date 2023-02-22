@@ -5,6 +5,9 @@ Class {
 		'segment',
 		'index'
 	],
+	#classVars : [
+		'RootObjectId'
+	],
 	#category : #'Soil-Core-Model'
 }
 
@@ -22,6 +25,11 @@ SOObjectId class >> readFrom: stream [
 	^ self new 
 		segment: (stream next: 2) asInteger;
 		index: (stream next: 6) asInteger
+]
+
+{ #category : #'instance creation' }
+SOObjectId class >> root [
+	^ RootObjectId ifNil: [ RootObjectId := self segment: 1 index: 1 ]
 ]
 
 { #category : #'instance creation' }

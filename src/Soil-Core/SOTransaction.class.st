@@ -383,20 +383,15 @@ SOTransaction >> releaseLocks [
 { #category : #accessing }
 SOTransaction >> root [
 
-	^ self objectWithId: self rootObjectId
+	^ self objectWithId: SOObjectId root
 ]
 
 { #category : #accessing }
 SOTransaction >> root: anObject [
 
 	self 
-		atObjectId: self rootObjectId  
+		atObjectId: SOObjectId root 
 		putObject: anObject
-]
-
-{ #category : #accessing }
-SOTransaction >> rootObjectId [
-	^ SOObjectId segment: 1 index: 1
 ]
 
 { #category : #accessing }
