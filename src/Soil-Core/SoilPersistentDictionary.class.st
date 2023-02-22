@@ -38,6 +38,18 @@ SoilPersistentDictionary >> at: key [
 ]
 
 { #category : #forwarded }
+SoilPersistentDictionary >> at: key ifAbsent: aBlock [ 
+	^ dict at: key ifAbsent: aBlock
+]
+
+{ #category : #forwarded }
+SoilPersistentDictionary >> at: key ifAbsentPut: aBlock [
+	^ dict 
+		at: key 
+		ifAbsent: [ self at: key put: aBlock value ]
+]
+
+{ #category : #forwarded }
 SoilPersistentDictionary >> at: key put: value [
 	| return |
 	transaction ifNotNil: [:tr | tr makeRoot:  value].
@@ -45,6 +57,11 @@ SoilPersistentDictionary >> at: key put: value [
 	transaction ifNotNil: [:tr | tr markDirty: dict].
 	^return
 
+]
+
+{ #category : #forwarded }
+SoilPersistentDictionary >> collect: aBlock [ 
+	^ dict collect: aBlock
 ]
 
 { #category : #forwarded }
