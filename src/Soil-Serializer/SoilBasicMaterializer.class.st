@@ -1,6 +1,9 @@
 Class {
 	#name : #SoilBasicMaterializer,
 	#superclass : #SoilObjectCodec,
+	#instVars : [
+		'objects'
+	],
 	#category : #'Soil-Serializer'
 }
 
