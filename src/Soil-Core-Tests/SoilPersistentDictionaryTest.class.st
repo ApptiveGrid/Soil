@@ -55,7 +55,7 @@ SoilPersistentDictionaryTest >> testAtPut [
 SoilPersistentDictionaryTest >> testCommitAndRead [
 
 	| dict transaction materialized |
-	
+	SoilTypeCodes initialize.
 	transaction := soil newTransaction.
 	dict := SoilPersistentDictionary new soilMakePersistentIn: transaction.
 	dict add: (#test -> 'string').
@@ -64,7 +64,6 @@ SoilPersistentDictionaryTest >> testCommitAndRead [
 
 	transaction := soil newTransaction.
 	materialized := transaction root.
-
 	self assert: (materialized at: #test) equals: 'string'
 ]
 

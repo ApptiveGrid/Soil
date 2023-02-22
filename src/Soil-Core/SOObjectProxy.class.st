@@ -9,11 +9,6 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
-{ #category : #forwarded }
-SOObjectProxy >> at: anObject [
- 	^self object at: anObject
-]
-
 { #category : #'reflective operations' }
 SOObjectProxy >> doesNotUnderstand: aMessage [ 
 	^ aMessage sendTo: self object
