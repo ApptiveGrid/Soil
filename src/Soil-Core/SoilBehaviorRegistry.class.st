@@ -22,8 +22,7 @@ SoilBehaviorRegistry >> behaviorDescriptionWithIndex: behaviorIndex andVersion: 
 
 	self loadHistoryForBehaviorWithIndex: behaviorIndex transaction: transaction.
 
-	versionsOfBehavior := versions at: behaviorIndex ifAbsent: [self halt].
-
+	versionsOfBehavior := versions at: behaviorIndex.
 	^versionsOfBehavior
 		detect: [ :behav | behav version >= version ]
 		ifNone: [(SOObjectNotFound new segment: 0; index: behaviorIndex) signal]

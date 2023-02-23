@@ -112,13 +112,7 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> behaviorDescriptionWithIndex: index andVersion: version [ 
-	
-	idMap 
-		detect: [ :each | each objectId = index ]
-		ifFound: [ :record | 
-			(record object version = version)
-				ifTrue: [ ^ record object ] ].
+SOTransaction >> behaviorDescriptionWithIndex: index andVersion: version [
 
 	^ self behaviorRegistry behaviorDescriptionWithIndex: index andVersion: version transaction: self
 ]
@@ -320,11 +314,9 @@ SOTransaction >> newPersistentClusterVersion [
 
 { #category : #accessing }
 SOTransaction >> newSerializer [
-	soil ifNil: [ self halt ].
 	^ soil newSerializer
 		transaction: self;
 		yourself
-
 ]
 
 { #category : #accessing }
@@ -340,8 +332,8 @@ SOTransaction >> objectRepository [
 { #category : #'as yet unclassified' }
 SOTransaction >> objectWithId: objectId [
 	idMap 
-		detect: [ :each | each objectId = objectId ]
-		ifFound: [ :record | ^ record object ].
+		at: objectId
+		ifPresent: [ :record | ^ record object ].
 
 	^ self materializationWithId: objectId
 ]
