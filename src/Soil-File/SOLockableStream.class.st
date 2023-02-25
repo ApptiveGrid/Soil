@@ -52,29 +52,28 @@ SOLockableStream >> initializePath: aStringOrFileReference [
 ]
 
 { #category : #locking }
+SOLockableStream >> lockAppendingFor: lockContext [
+	^ self registerLock: (self lockClass from: 0 to: 0 context: lockContext)
+
+]
+
+{ #category : #locking }
 SOLockableStream >> lockClass [
 	^ SORangeLock 
 ]
 
 { #category : #locking }
 SOLockableStream >> lockFrom: from length: length for: lockContext [ 
-	^ self lockFrom: from to: from + length for: lockContext
+	
+	^ self registerLock: (self lockClass from: from length: length context: lockContext)
+
 ]
 
 { #category : #locking }
 SOLockableStream >> lockFrom: from to: to for: lockContext [ 
-	
-	| lock |
-	lock := self lockClass from: from to: to context: lockContext.
 
-	imageLocked ifTrue: [ 
-		lock lockInMemory: lockRegistry ].
-	
-	fileLocked ifTrue: [ 
-		lock lockOn: fileStream  ].
-	
-	^ locks add: lock
-	
+	^ self registerLock: (self lockClass from: from to: to context: lockContext)
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -116,6 +115,19 @@ SOLockableStream >> position [
 { #category : #positioning }
 SOLockableStream >> position: anInteger [ 
 	fileStream position: anInteger 
+]
+
+{ #category : #locking }
+SOLockableStream >> registerLock: lock [
+	
+	imageLocked ifTrue: [ 
+		lock lockInMemory: lockRegistry ].
+	
+	fileLocked ifTrue: [ 
+		lock lockOn: fileStream  ].
+	
+	^ locks add: lock
+	
 ]
 
 { #category : #finalization }

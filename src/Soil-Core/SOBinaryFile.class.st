@@ -64,6 +64,11 @@ SOBinaryFile >> initializeStart [
 	self subclassResponsibility 
 ]
 
+{ #category : #locking }
+SOBinaryFile >> lockAppendingFor: lockContext [
+	^ stream lockAppendingFor: lockContext 
+]
+
 { #category : #accessing }
 SOBinaryFile >> open [
 	stream := self soil lockableStream initializePath: self path
