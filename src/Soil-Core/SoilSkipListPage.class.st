@@ -147,8 +147,7 @@ SoilSkipListPage >> split [
 	| newPage middle |
 	newPage := self class new.
 	newPage 
-		registry: registry;
-		initializeLevel.
+		registry: registry.
 	middle := (items size / 2) ceiling.
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.

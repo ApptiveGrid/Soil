@@ -4,7 +4,6 @@ Class {
 	#instVars : [
 		'maxLevel',
 		'stream',
-		'pages',
 		'path',
 		'random',
 		'keySize',
@@ -12,28 +11,6 @@ Class {
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
-
-{ #category : #adding }
-SoilSkipList >> addNode: aNode [
-	| page newPage pageNumber lookingForPage nextPage |
-	page := self findPageForKey: aNode key.
-	pageNumber := page pageNumber.
-	lookingForPage := aNode.
-	[ pageNumber <= pages size ] whileTrue: [
-		nextPage := pages at: pageNumber.
-		nextPage hasRoom 
-			ifTrue: [ 
-				nextPage addNode: lookingForPage.
-				^ aNode ]
-			ifFalse: [ | node |
-				node := nextPage removeLastNode.
-				nextPage addNode: lookingForPage.
-				lookingForPage := node ].
-			pageNumber := pageNumber + 1 ].
-			  
-		newPage := self newPage.
-		newPage addNode: lookingForPage.
-]
 
 { #category : #private }
 SoilSkipList >> at: aByteArray [ 
@@ -73,13 +50,6 @@ SoilSkipList >> at: aKeyObject put: anObject [
 		ifFalse: [ 
 			self pageRegistry splitPage: iterator ].
 	^ anObject
-]
-
-{ #category : #'initialize-release' }
-SoilSkipList >> close [ 
-	stream ifNotNil: [  
-		stream close.
-		stream := nil ]
 ]
 
 { #category : #accessing }
@@ -170,7 +140,6 @@ SoilSkipList >> headerPage [
 { #category : #initialization }
 SoilSkipList >> initialize [ 
 	super initialize.
-	pages := OrderedCollection new.
 	random := Random seed: Time microsecondClockValue.
 ]
 
@@ -181,9 +150,6 @@ SoilSkipList >> initializeHeaderPage [
 
 { #category : #initialization }
 SoilSkipList >> initializeList [ 
-	self open.
-	"self writeHeader.
-	self writeFirstPage"
 	self pageRegistry 
 		initializeHeaderPage;
 		initializeFirstPage
@@ -257,16 +223,16 @@ SoilSkipList >> newSentinelNode [
 		level: self maxLevel 
 ]
 
-{ #category : #'instance creation' }
-SoilSkipList >> open [ 
-	"stream := SOLockableStream path: path"
-]
-
 { #category : #accessing }
 SoilSkipList >> pageRegistry [
 	^ pageRegistry ifNil: [ 
 		pageRegistry := SoilPageRegistry new
 			skipList: self ]
+]
+
+{ #category : #accessing }
+SoilSkipList >> pages [
+	^ self pageRegistry pages
 ]
 
 { #category : #accessing }
@@ -296,11 +262,6 @@ SoilSkipList >> rightOf: aNode atLevel: anInteger [
 { #category : #'as yet unclassified' }
 SoilSkipList >> startPage [
 	^ self pageRegistry startPage
-]
-
-{ #category : #initialization }
-SoilSkipList >> stream [ 
-	^ stream
 ]
 
 { #category : #initialization }

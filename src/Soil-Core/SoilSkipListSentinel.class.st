@@ -24,6 +24,16 @@ SoilSkipListSentinel >> < anObject [
 	^ lower
 ]
 
+{ #category : #comparing }
+SoilSkipListSentinel >> > anInteger [ 
+	^ lower not
+]
+
+{ #category : #arithmetic }
+SoilSkipListSentinel >> adaptToNumber: anInteger andSend: aString [ 
+	^ anInteger perform: aString asSymbol with: self numericValue
+]
+
 { #category : #converting }
 SoilSkipListSentinel >> asByteArrayOfSize: anInteger [ 
 	^ lower
@@ -39,4 +49,11 @@ SoilSkipListSentinel >> beLower [
 { #category : #'as yet unclassified' }
 SoilSkipListSentinel >> beUpper [
 	lower := false
+]
+
+{ #category : #converting }
+SoilSkipListSentinel >> numericValue [ 
+	^ lower
+		ifTrue: [ 0 ]
+		ifFalse: [ ((2 raisedTo: (8 * 8)) - 1) ]
 ]

@@ -11,6 +11,13 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #'initialize-release' }
+SoilPageRegistry >> close [ 
+	stream ifNotNil: [  
+		stream close.
+		stream := nil ]
+]
+
 { #category : #'instance creation' }
 SoilPageRegistry >> filePageSize [
 	"most OSses use a file page size of 4k today"
@@ -39,10 +46,14 @@ SoilPageRegistry >> initialize [
 
 { #category : #initialization }
 SoilPageRegistry >> initializeFirstPage [
-	self writePage: (SoilSkipListPage new 
-		level: 16;
+	| page |
+	page := (SoilSkipListPage new 
+		registry: self;
+		level: skipList maxLevel;
 		beFirstPage;
-		yourself)
+		yourself).
+	pages at: page pageIndex put: page.
+	self writePage: page
 		
 ]
 
@@ -116,6 +127,7 @@ SoilPageRegistry >> splitPage: aIterator [
 	page := aIterator page.
 	newPage := page split.
 	newPage pageIndex: pages size + 1.
+	newPage initializeLevel.
 	newPage level to: 1 by: -1  do: [ :level |
 		(level > page level)
 			ifTrue: [ 
