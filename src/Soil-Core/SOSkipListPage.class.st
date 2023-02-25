@@ -167,7 +167,7 @@ SOSkipListPage >> writeOn: aStream [
 	aStream nextPutAll: (items size asByteArrayOfSize: 2).
 	items do: [ :item |
 		aStream 
-			nextPutAll: (item key asByteArrayOfSize: keySize);
+			nextPutAll: (item key);
 			nextPutAll: (item value asByteArray asByteArrayOfSize: 8).
 		item levels do: [ :lvl | 
 			lvl

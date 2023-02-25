@@ -1,18 +1,20 @@
 Class {
-	#name : #SOPersistentSkipList,
-	#superclass : #SOSkipList,
+	#name : #SoilSkipList,
+	#superclass : #Object,
 	#instVars : [
-		'path',
+		'maxLevel',
 		'stream',
 		'pages',
+		'path',
 		'random',
-		'keySize'
+		'keySize',
+		'pageRegistry'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
 { #category : #adding }
-SOPersistentSkipList >> addNode: aNode [
+SoilSkipList >> addNode: aNode [
 	| page newPage pageNumber lookingForPage nextPage |
 	page := self findPageForKey: aNode key.
 	pageNumber := page pageNumber.
@@ -34,14 +36,14 @@ SOPersistentSkipList >> addNode: aNode [
 ]
 
 { #category : #private }
-SOPersistentSkipList >> at: aByteArray [ 
+SoilSkipList >> at: aByteArray [ 
 	^ self 
 		at: aByteArray 
 		ifAbsent: [ Error signal: 'no found' ]
 ]
 
 { #category : #private }
-SOPersistentSkipList >> at: aByteArray ifAbsent: aBlock [
+SoilSkipList >> at: aByteArray ifAbsent: aBlock [
 	| key |
 	key := (aByteArray class = ByteArray and: [ aByteArray size = self keySize ])
 		ifTrue: [ aByteArray ]
@@ -52,7 +54,7 @@ SOPersistentSkipList >> at: aByteArray ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
-SOPersistentSkipList >> at: aString ifPresent: aBlock [
+SoilSkipList >> at: aString ifPresent: aBlock [
 	| value |
 	value := self at: aString ifAbsent: [ nil ].
 	^ value 
@@ -61,52 +63,49 @@ SOPersistentSkipList >> at: aString ifPresent: aBlock [
 ]
 
 { #category : #accessing }
-SOPersistentSkipList >> at: aKeyObject put: anObject [
-	| levelNodes newNode key |
-	key := aKeyObject asSkipListKeyOfSize: self keySize.
-	levelNodes := self 
-		findLeftNodesOf: key
-		ifKeyPresent: [ :node | 
-			"if the key is present we just need to overwrite its value 
-			as all other references are key dependent and stay untouched"
-			node value: anObject. 
-			^ anObject ]. 
-	newNode := self newNode.
-	newNode 
-		key: key;
-		value: anObject.
-	self insert: newNode intoLeft: levelNodes.
-	self addNode: newNode.
-	 ^ nil
+SoilSkipList >> at: aKeyObject put: anObject [
+	| key iterator |
+	key := "aKeyObject asSkipListKeyOfSize: self keySize."
+	key := aKeyObject asByteArray asInteger.
+	iterator := self findPageCandidateFor: key.
+	iterator page hasRoom 
+		ifTrue: [ iterator page addItem: (key -> anObject) ]
+		ifFalse: [ 
+			self pageRegistry splitPage: iterator ].
+	^ anObject
 ]
 
 { #category : #'initialize-release' }
-SOPersistentSkipList >> close [ 
+SoilSkipList >> close [ 
 	stream ifNotNil: [  
 		stream close.
 		stream := nil ]
 ]
 
 { #category : #accessing }
-SOPersistentSkipList >> defaultKeySize [
+SoilSkipList >> defaultKeySize [
 	^ 16
 ]
 
 { #category : #deleting }
-SOPersistentSkipList >> destroy [
+SoilSkipList >> destroy [
 	path ensureDelete 
 ]
 
-{ #category : #'instance creation' }
-SOPersistentSkipList >> filePageSize [
-	"most OSses use a file page size of 4k today"
-	^ 4096
+{ #category : #private }
+SoilSkipList >> find: aString [ 
+	^ (self findNode: aString)
+		ifNotNil: [ :node | node value ]
 ]
 
 { #category : #accessing }
-SOPersistentSkipList >> findLeftNodesOf: key ifKeyPresent: aBlock [
-	| leftNodes current |
+SoilSkipList >> findLeftNodesOf: key ifKeyPresent: aBlock [
+	| leftNodes current page |
 	leftNodes := Array new: maxLevel.
+	
+	page := self findPageCandidateFor: key.
+	self halt.
+	
 	current := self lowerNode.
 	
 	maxLevel to: 1 by: -1 do: [ :lvl | | right |
@@ -121,7 +120,7 @@ SOPersistentSkipList >> findLeftNodesOf: key ifKeyPresent: aBlock [
 ]
 
 { #category : #private }
-SOPersistentSkipList >> findNode: aString [ 
+SoilSkipList >> findNode: aString [ 
 	| current right key |
 	key := aString asSkipListKeyOfSize: self keySize.
 	current := self firstPage firstItem.
@@ -136,41 +135,63 @@ SOPersistentSkipList >> findNode: aString [
 ]
 
 { #category : #'as yet unclassified' }
-SOPersistentSkipList >> findPageForKey: aByteArray [ 
-	| index |
-	index := 1.
-	[ index <= pages size and: [ (self pageAt: index) fitsKey: aByteArray ] ]
-		whileFalse: [ index := index + 1 ].
-	^ self pageAt: index
+SoilSkipList >> findPageCandidateFor: key [
+	| currentPage iterator |
+	currentPage := self startPage.
+	iterator := SoilSkipListIterator new maxLevel: maxLevel.
+	maxLevel to: 1 by: -1 do: [ :level |
+		iterator at: level put: currentPage.
+		(currentPage biggestKey > key) ifTrue: [
+			iterator page: currentPage.
+			^ iterator ]. 
+		(currentPage rightAt: level) ifNotNil: [ :right |
+			currentPage := self pageRegistry pageAt: right ] ].
+	iterator page: currentPage.
+	^ iterator 
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipList >> findPageForKey: aByteArray [ 
+	| current |
+	current := self pageRegistry pageAt: self headerPage startPageIndex.
+	self halt.
 ]
 
 { #category : #accessing }
-SOPersistentSkipList >> firstPage [
-	^ self pageAt: 1
+SoilSkipList >> firstPage [
+	^ self pageRegistry pageAt: 1
 ]
 
-{ #category : #private }
-SOPersistentSkipList >> headerLength [
-	^ 1
+{ #category : #'as yet unclassified' }
+SoilSkipList >> headerPage [
+	^ self pageRegistry headerPage
 ]
 
 { #category : #initialization }
-SOPersistentSkipList >> initialize [ 
+SoilSkipList >> initialize [ 
 	super initialize.
 	pages := OrderedCollection new.
 	random := Random seed: Time microsecondClockValue.
 ]
 
+{ #category : #writing }
+SoilSkipList >> initializeHeaderPage [
+	self pageRegistry initializeHeaderPage
+]
+
 { #category : #initialization }
-SOPersistentSkipList >> initializeList [ 
+SoilSkipList >> initializeList [ 
 	self open.
-	self writeHeader.
-	self writeFirstPage
+	"self writeHeader.
+	self writeFirstPage"
+	self pageRegistry 
+		initializeHeaderPage;
+		initializeFirstPage
 	 
 ]
 
 { #category : #'as yet unclassified' }
-SOPersistentSkipList >> insert: newNode intoLeft: leftNodes [
+SoilSkipList >> insert: newNode intoLeft: leftNodes [
 	| promote level |
 	promote := true.
 	level := 1.
@@ -182,20 +203,20 @@ SOPersistentSkipList >> insert: newNode intoLeft: leftNodes [
 ]
 
 { #category : #accessing }
-SOPersistentSkipList >> keySize [
+SoilSkipList >> keySize [
 
 	^ keySize ifNil: [ 
 		keySize := self defaultKeySize ]
 ]
 
 { #category : #accessing }
-SOPersistentSkipList >> keySize: anObject [
+SoilSkipList >> keySize: anObject [
 
 	keySize := anObject
 ]
 
 { #category : #actions }
-SOPersistentSkipList >> load [
+SoilSkipList >> load [
 	maxLevel := self stream 
 		position: 0;
 		next.
@@ -203,109 +224,87 @@ SOPersistentSkipList >> load [
 ]
 
 { #category : #'as yet unclassified' }
-SOPersistentSkipList >> lowerNode [
+SoilSkipList >> lowerNode [
 	^ self firstPage firstItem
 ]
 
+{ #category : #accessing }
+SoilSkipList >> maxLevel [
+	^ maxLevel
+]
+
+{ #category : #accessing }
+SoilSkipList >> maxLevel: anInteger [ 
+	maxLevel := anInteger 
+]
+
 { #category : #'instance creation' }
-SOPersistentSkipList >> newFilePage [ 	
+SoilSkipList >> newFilePage [ 	
 	^ SOSkipListPage new 
 		list: self;
 		keySize: self keySize
 ]
 
 { #category : #'instance creation' }
-SOPersistentSkipList >> newPage [
-	| page |
-	page := self newFilePage.
-	pages add: page.
-	page 
-		pageNumber: pages size.
-	^ page
+SoilSkipList >> newNode [ 
+	^ SoilSkipListPage new 
+		level: self maxLevel 
 ]
 
 { #category : #'instance creation' }
-SOPersistentSkipList >> open [ 
-	stream := SOLockableStream path: path
+SoilSkipList >> newSentinelNode [ 
+	^ SOSkipListSentinelNode new 
+		level: self maxLevel 
+]
+
+{ #category : #'instance creation' }
+SoilSkipList >> open [ 
+	"stream := SOLockableStream path: path"
 ]
 
 { #category : #accessing }
-SOPersistentSkipList >> pageAt: anInteger [
-	(anInteger > pages size) ifTrue: [ 
-		self readPageAt: anInteger ].  
-	^ (pages at: anInteger) ifNil: [ 
-		self readPageAt: anInteger ]
+SoilSkipList >> pageRegistry [
+	^ pageRegistry ifNil: [ 
+		pageRegistry := SoilPageRegistry new
+			skipList: self ]
 ]
 
 { #category : #accessing }
-SOPersistentSkipList >> pages [
-	^ pages
-]
-
-{ #category : #accessing }
-SOPersistentSkipList >> path [
+SoilSkipList >> path [
 
 	^ path
 ]
 
 { #category : #accessing }
-SOPersistentSkipList >> path: aStringOrFileReference [
+SoilSkipList >> path: aStringOrFileReference [
 
 	path := aStringOrFileReference asFileReference 
 ]
 
 { #category : #'instance creation' }
-SOPersistentSkipList >> positionOfPage: aPage [ 
+SoilSkipList >> positionOfPage: aPage [ 
 	^ self headerLength + ((aPage pageNumber - 1) * self filePageSize)
 ]
 
-{ #category : #accessing }
-SOPersistentSkipList >> readPageAt: anInteger [
-	| page |
-	stream position: (self headerLength + ((anInteger - 1) * self filePageSize)).
-	page := SOSkipListPage new 
-		list: self;
-		pageNumber: anInteger;
-		keySize: self keySize;
-		readFrom: stream.
-	(pages size > anInteger) ifFalse: [ 
-		 pages := pages grownBy: (anInteger - pages size)].
-	pages at: anInteger put: page.
-	^ page
-]
-
 { #category : #'as yet unclassified' }
-SOPersistentSkipList >> rightOf: aNode atLevel: anInteger [ 
+SoilSkipList >> rightOf: aNode atLevel: anInteger [ 
 	^ (aNode rightAt: anInteger)
 		ifNotNil: [ :proxy | (self pageAt: proxy pageNumber) itemAt: proxy pageIndex ]
 	
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipList >> startPage [
+	^ self pageRegistry startPage
+]
+
 { #category : #initialization }
-SOPersistentSkipList >> stream [ 
+SoilSkipList >> stream [ 
 	^ stream
 ]
 
-{ #category : #writing }
-SOPersistentSkipList >> writeFirstPage [
-	| page |
-	stream position: self headerLength.
-	page := self newFilePage  
-		pageNumber: 1.
-	pages add: page.
-	page addNode: (self newSentinelNode
-		beLower;
-		initializeKeyOfSize: self keySize).
-	page addNode: (self newSentinelNode 
-		beUpper;
-		initializeKeyOfSize: self keySize).
-	page writeOn: stream.
-	stream flush.
-	^ page 
-]
-
 { #category : #initialization }
-SOPersistentSkipList >> writeHeader [ 
+SoilSkipList >> writeHeader [ 
 	self stream 
 		position: 0;
 		nextPut: maxLevel;
@@ -313,9 +312,11 @@ SOPersistentSkipList >> writeHeader [
 ]
 
 { #category : #writing }
-SOPersistentSkipList >> writePages [
-self halt.
-	pages
-		reject: [ :page | page isNil ]
-		thenDo: [ :page | page writeOn: stream ]
+SoilSkipList >> writeHeaderPage [
+	self pageRegistry writeHeaderPage
+]
+
+{ #category : #writing }
+SoilSkipList >> writePages [
+	self pageRegistry flushPages
 ]

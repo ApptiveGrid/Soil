@@ -73,6 +73,7 @@ SOSkipListNode >> realNodeIn: aPersistedSkipList [
 
 { #category : #accessing }
 SOSkipListNode >> right: aSkipNode [ 
+self halt.
 	1 to: levels size do: [ :n |
 		levels at: n put: aSkipNode  ]
 ]
@@ -84,6 +85,7 @@ SOSkipListNode >> rightAt: anInteger [
 
 { #category : #accessing }
 SOSkipListNode >> rightAt: anInteger put: aSkipNode [ 
+	(aSkipNode isKindOf: SOSkipListNodeProxy) ifTrue: [ self halt ].
 	levels at: anInteger put: aSkipNode
 ]
 
