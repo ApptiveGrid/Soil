@@ -44,7 +44,7 @@ SoilSkipList >> at: aKeyObject put: anObject [
 	| key iterator |
 	key := "aKeyObject asSkipListKeyOfSize: self keySize."
 	key := aKeyObject asByteArray asInteger.
-	iterator := self findPageCandidateFor: key.
+	iterator := self iteratorForKey: key.
 	iterator page hasRoom 
 		ifTrue: [ iterator page addItem: (key -> anObject) ]
 		ifFalse: [ 
@@ -64,29 +64,9 @@ SoilSkipList >> destroy [
 
 { #category : #private }
 SoilSkipList >> find: aString [ 
-	^ (self findNode: aString)
-		ifNotNil: [ :node | node value ]
-]
-
-{ #category : #accessing }
-SoilSkipList >> findLeftNodesOf: key ifKeyPresent: aBlock [
-	| leftNodes current page |
-	leftNodes := Array new: maxLevel.
-	
-	page := self findPageCandidateFor: key.
-	self halt.
-	
-	current := self lowerNode.
-	
-	maxLevel to: 1 by: -1 do: [ :lvl | | right |
-		[ (current key = key) ifTrue: [ 
-			aBlock value: current ]. 
-		right := self rightOf: current atLevel: lvl.
-		 	right notNil and: [ right keyIsSmallerThan: key ] ]
-				whileTrue: [ current := right ] .
-		leftNodes at: lvl put: current
-	].
-	^ leftNodes 
+	| page |
+	page := self findPageCandidateFor: aString.
+	^ (page valueAt: aString ) value
 ]
 
 { #category : #private }
@@ -106,18 +86,7 @@ SoilSkipList >> findNode: aString [
 
 { #category : #'as yet unclassified' }
 SoilSkipList >> findPageCandidateFor: key [
-	| currentPage iterator |
-	currentPage := self startPage.
-	iterator := SoilSkipListIterator new maxLevel: maxLevel.
-	maxLevel to: 1 by: -1 do: [ :level |
-		iterator at: level put: currentPage.
-		(currentPage biggestKey > key) ifTrue: [
-			iterator page: currentPage.
-			^ iterator ]. 
-		(currentPage rightAt: level) ifNotNil: [ :right |
-			currentPage := self pageRegistry pageAt: right ] ].
-	iterator page: currentPage.
-	^ iterator 
+	^ (self iteratorForKey: key) page
 ]
 
 { #category : #'as yet unclassified' }
@@ -166,6 +135,37 @@ SoilSkipList >> insert: newNode intoLeft: leftNodes [
 		(leftNodes at: level) rightAt: level put: newNode.
 		level := level + 1.
 		promote := random next > 0.5 ].
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipList >> iteratorForKey: key [
+	| currentPage iterator right |
+	currentPage := self startPage.
+	iterator := SoilSkipListIterator new maxLevel: maxLevel.
+	maxLevel to: 1 by: -1 do: [ :level |
+		[ 
+			right := currentPage rightAt: level.
+			right notNil and: [ (self pageRegistry pageAt: right) smallestKey < key ] ]
+			whileTrue: [ currentPage := self pageRegistry pageAt: right  ].
+			iterator at: level put: currentPage. ].
+	iterator page: currentPage.
+	^ iterator 
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipList >> iteratorForKeyY: key [
+	| currentPage iterator |
+	currentPage := self startPage.
+	iterator := SoilSkipListIterator new maxLevel: maxLevel.
+	maxLevel to: 1 by: -1 do: [ :level |
+		iterator at: level put: currentPage.
+		(currentPage biggestKey > key) ifTrue: [
+			iterator page: currentPage.
+			^ iterator ]. 
+		(currentPage rightAt: level) ifNotNil: [ :right |
+			currentPage := self pageRegistry pageAt: right ] ].
+	iterator page: currentPage.
+	^ iterator 
 ]
 
 { #category : #accessing }
@@ -255,7 +255,7 @@ SoilSkipList >> positionOfPage: aPage [
 { #category : #'as yet unclassified' }
 SoilSkipList >> rightOf: aNode atLevel: anInteger [ 
 	^ (aNode rightAt: anInteger)
-		ifNotNil: [ :proxy | (self pageAt: proxy pageNumber) itemAt: proxy pageIndex ]
+		ifNotNil: [ :proxy | (self pageAt: proxy pageNumber) itemAt: proxy index ]
 	
 ]
 

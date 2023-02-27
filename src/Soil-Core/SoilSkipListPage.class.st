@@ -2,12 +2,12 @@ Class {
 	#name : #SoilSkipListPage,
 	#superclass : #Object,
 	#instVars : [
-		'pageIndex',
 		'items',
 		'registry',
 		'dirty',
 		'right',
-		'level'
+		'level',
+		'index'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -20,7 +20,7 @@ SoilSkipListPage >> addItem: anAssociation [
 
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> beFirstPage [
-	pageIndex := 1.
+	index := 1.
 	right := Array new: 16.
 	items 
 		add: (SoilSkipListSentinel lower -> 0);
@@ -37,11 +37,21 @@ SoilSkipListPage >> hasRoom [
 	^ items size * 72 <= (4096 - 72)
 ]
 
+{ #category : #accessing }
+SoilSkipListPage >> index [
+	^ index
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> index: anInteger [ 
+	index := anInteger
+]
+
 { #category : #initialization }
 SoilSkipListPage >> initialize [ 
 	super initialize.
 	items := SortedCollection new.
-	dirty := false.
+	dirty := true.
 
 ]
 
@@ -57,7 +67,7 @@ SoilSkipListPage >> initializeLevel [
 
 { #category : #initialization }
 SoilSkipListPage >> initializePageIndex [
-	pageIndex := registry nextPageIndex
+	index := registry nextPageIndex
 ]
 
 { #category : #testing }
@@ -85,25 +95,16 @@ SoilSkipListPage >> numberOfItems [
 	^ items size 
 ]
 
-{ #category : #accessing }
-SoilSkipListPage >> pageIndex [
-	^ pageIndex
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> pageIndex: anInteger [ 
-	pageIndex := anInteger
-]
-
 { #category : #printing }
 SoilSkipListPage >> printOn: aStream [ 
-	aStream << 'page : #' << pageIndex asString
+	aStream << 'page : #' << index asString
 ]
 
 { #category : #writing }
 SoilSkipListPage >> readFrom: aStream [ 
 	| size |
-	pageIndex := (aStream next: 2) asInteger.
+	dirty := false.
+	index := (aStream next: 2) asInteger.
 	level := aStream next asInteger.
 	size := (aStream next: 2) asInteger.
 	items := SortedCollection new: size.
@@ -129,6 +130,10 @@ SoilSkipListPage >> rightAt: anInteger [
 
 { #category : #accessing }
 SoilSkipListPage >> rightAt: anInteger put: anObject [ 
+	('page ', index asString,' level ', anInteger asString ,' put ', anObject asString) apptiveEmit.
+	"(anObject isKindOf: Number) 
+		ifTrue: [ (anObject > pageIndex) ifFalse: [ self halt ] ]
+		ifFalse: [ anObject notNil ifTrue: [ self halt ] ]. "
 	self right at: anInteger put: anObject
 ]
 
@@ -155,14 +160,22 @@ SoilSkipListPage >> split [
 	
 ]
 
+{ #category : #accessing }
+SoilSkipListPage >> valueAt: anInteger [ 
+	^ items 
+		detect: [:each | each key = anInteger ] 
+		ifNone: [ nil ]
+]
+
 { #category : #writing }
 SoilSkipListPage >> writeOn: aStream [ 
 	aStream 
-		nextPutAll: (pageIndex asByteArrayOfSize: 2);
+		nextPutAll: (index asByteArrayOfSize: 2);
 		nextPut: level;
 		nextPutAll: (items size asByteArrayOfSize: 2).
 	items do: [ :assoc |
 		aStream 
 			nextPutAll: (assoc key asByteArrayOfSize: 8);
-			nextPutAll: (assoc value asByteArrayOfSize: 8)]
+			nextPutAll: (assoc value asByteArrayOfSize: 8)].
+	dirty := false
 ]

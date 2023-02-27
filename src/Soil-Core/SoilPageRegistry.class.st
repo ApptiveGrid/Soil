@@ -52,7 +52,7 @@ SoilPageRegistry >> initializeFirstPage [
 		level: skipList maxLevel;
 		beFirstPage;
 		yourself).
-	pages at: page pageIndex put: page.
+	pages at: page index put: page.
 	self writePage: page
 		
 ]
@@ -94,7 +94,7 @@ SoilPageRegistry >> pagesStart [
 
 { #category : #'instance creation' }
 SoilPageRegistry >> positionOfPage: aPage [ 
-	^ self pagesStart + ((aPage pageIndex - 1) * self filePageSize)
+	^ self pagesStart + ((aPage index - 1) * self filePageSize)
 ]
 
 { #category : #accessing }
@@ -126,22 +126,18 @@ SoilPageRegistry >> splitPage: aIterator [
 	| newPage page |
 	page := aIterator page.
 	newPage := page split.
-	newPage pageIndex: pages size + 1.
+	newPage index: pages size + 1.
 	newPage initializeLevel.
 	newPage level to: 1 by: -1  do: [ :level |
 		(level > page level)
 			ifTrue: [ 
-				newPage rightAt: level put: (aIterator levelAt: level) pageIndex.
-				(aIterator levelAt: level) rightAt: level put: newPage pageIndex ]
+				newPage rightAt: level put: ((aIterator levelAt: level) rightAt: level).
+				(aIterator levelAt: level) rightAt: level put: newPage index ]
 			ifFalse: [ 
-				newPage rightAt: level put: (page rightAt: level).
-				page rightAt: level put: newPage pageIndex ]
-		"newRight := (aIterator page right at: lvl)
-			ifNotNil: [ :right | right ]
-			ifNil: [ aIterator levelAt: lvl ].
-		newPage rightAt: lvl put: (aIterator page right at: lvl).
-		aIterator page right at: lvl put: newPage pageIndex "].
-	pages at: newPage pageIndex put: newPage
+				(page rightAt: level) ifNotNil: [ :r | 
+					newPage rightAt: level put: r ].
+				page rightAt: level put: newPage index ]].
+	pages at: newPage index put: newPage
 ]
 
 { #category : #'as yet unclassified' }

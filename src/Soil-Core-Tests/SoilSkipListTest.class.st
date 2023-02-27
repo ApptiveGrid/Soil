@@ -111,6 +111,27 @@ SoilSkipListTest >> testCreation [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testFindKey [
+	| value |
+	1 to: 200 do: [ :n |
+		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	"skipList writePages."
+	value := skipList find: 133. 
+	self assert: value equals: #[ 1 2 3 4 5 6 7 8 ]
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testFindKeyReverse [
+	| value |
+	200 to: 1 by: -1 do: [ :n |
+		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	"skipList writePages."
+	self halt.
+	value := skipList find: 133. 
+	self assert: value equals: #[ 1 2 3 4 5 6 7 8 ]
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testMorePages [
 	1 to: 200 do: [ :n |
 		skipList at: (n asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ] ].
