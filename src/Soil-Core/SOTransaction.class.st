@@ -169,12 +169,17 @@ SOTransaction >> checkpoint [
 	self acquireLocksAndDetectWriteSkew.
 	"convert the records into journal entries, write the journal to disk and then
 	execute the journal on the database"
+	"lastObjectIndex contains all version number updates, so these are the segments
+	that will be written so we lock all of the segments heap files for appending"
+	lastObjectIndexes keys do: [ :segment |
+		locks add: (segment lockAppendingFor: self) ].
 	self buildJournal
 		write;
 		commit.
 	"write back the accumulated new indexes for alll segments"
 	lastObjectIndexes keysAndValuesDo: [ :segment :indexes |
 		segment lastObjectIndex: indexes value ].
+	
 	behaviorDescriptions do: [ :description |
 		soil behaviorRegistry 
 			nameAt: description value behaviorIdentifier 

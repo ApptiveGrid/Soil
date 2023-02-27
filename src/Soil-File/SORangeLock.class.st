@@ -16,7 +16,7 @@ SORangeLock class >> from: from length: length context: lockContext [
 	^ self new 
 		from: from;
 		to: from + length;
-		for: lockContext 
+		context: lockContext 
 ]
 
 { #category : #'instance creation' }

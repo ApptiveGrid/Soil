@@ -127,6 +127,11 @@ SOObjectSegment >> lastObjectIndex: anInteger [
 	^ indexFile lastObjectIndex: anInteger 
 ]
 
+{ #category : #locking }
+SOObjectSegment >> lockAppendingFor: lockContext [
+	^ self objectFile lockAppendingFor: lockContext
+]
+
 { #category : #accessing }
 SOObjectSegment >> lockLastObjectIndexFor: lockContext [ 
 	^ indexFile lockLastObjectIndexFor: lockContext 
