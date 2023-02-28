@@ -105,7 +105,7 @@ SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 { #category : #'instance creation' }
 SoilBehaviorRegistry >> open [ 
 	index ifNotNil: [ index close ].
-	index :=  SOPersistentSkipList new 
+	index :=  SoilSkipList new 
 		maxLevel: 16;
 		keySize: 64;
 		path: self path;

@@ -205,21 +205,8 @@ SoilSkipList >> maxLevel: anInteger [
 ]
 
 { #category : #'instance creation' }
-SoilSkipList >> newFilePage [ 	
-	^ SOSkipListPage new 
-		list: self;
-		keySize: self keySize
-]
-
-{ #category : #'instance creation' }
 SoilSkipList >> newNode [ 
 	^ SoilSkipListPage new 
-		level: self maxLevel 
-]
-
-{ #category : #'instance creation' }
-SoilSkipList >> newSentinelNode [ 
-	^ SOSkipListSentinelNode new 
 		level: self maxLevel 
 ]
 

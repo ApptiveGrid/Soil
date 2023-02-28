@@ -10,7 +10,7 @@ Class {
 { #category : #initialization }
 SOSkipListTest >> setUp [ 
 	super setUp.
-	skipList := SOPersistentSkipList new 
+	skipList := SoilSkipList new 
 		maxLevel: 4;
 		keySize: 8;
 		path: 'sunit-skiplist';
