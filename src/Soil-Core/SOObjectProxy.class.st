@@ -1,6 +1,6 @@
 Class {
 	#name : #SOObjectProxy,
-	#superclass : #Object,
+	#superclass : #ProtoObject,
 	#instVars : [
 		'transaction',
 		'objectId',
@@ -9,9 +9,12 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
-{ #category : #accessing }
-SOObjectProxy >> at: anObject [
-	^self object at: anObject
+{ #category : #'as yet unclassified' }
+SOObjectProxy class >> forId: objectId transaction: transaction [
+	^ self new
+		objectId: objectId;
+		transaction: transaction
+		"do not call #yourself as this would return the proxied object"
 ]
 
 { #category : #'reflective operations' }

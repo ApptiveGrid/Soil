@@ -94,12 +94,11 @@ SOClusterRecord >> printOn: aStream [
 ]
 
 { #category : #accessing }
-SOClusterRecord >> referenceAt: anInteger [ 
-	(references at: anInteger) ifNil: [ self halt ]. 
-	^ SOObjectProxy new 
-		objectId: (references at: anInteger);
-		transaction: transaction;
-		yourself 
+SOClusterRecord >> referenceAt: anInteger [
+	(references at: anInteger) ifNil: [ self halt ].
+	^ SOObjectProxy 
+		forId: (references at: anInteger) 
+		transaction: transaction
 ]
 
 { #category : #accessing }
