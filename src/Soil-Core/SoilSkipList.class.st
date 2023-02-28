@@ -7,7 +7,8 @@ Class {
 		'path',
 		'random',
 		'keySize',
-		'pageRegistry'
+		'pageRegistry',
+		'valueSize'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -25,21 +26,29 @@ SoilSkipList >> at: aByteArray ifAbsent: aBlock [
 	key := (aByteArray class = ByteArray and: [ aByteArray size = self keySize ])
 		ifTrue: [ aByteArray ]
 		ifFalse: [ aByteArray asByteArray asByteArrayOfSize: self keySize ].
-	^ (self findNode: key) 
+	^ (self find: key) 
 		ifNotNil: [:node | node value ]
 		ifNil: [ aBlock value ] 
 ]
 
 { #category : #accessing }
 SoilSkipList >> at: aKeyObject put: anObject [
-	| key iterator |
-	key := "aKeyObject asSkipListKeyOfSize: self keySize."
+	| key iterator page index newPage |
 	key := aKeyObject asByteArray asInteger.
 	iterator := self iteratorForKey: key.
-	iterator page hasRoom 
-		ifTrue: [ iterator page addItem: (key -> anObject) ]
+	page := iterator page.
+	index := page indexOfKey: key.
+	(index > 0)
+		ifTrue: [ page itemAt: index put: anObject ] 
 		ifFalse: [ 
-			self pageRegistry splitPage: iterator ].
+			page hasRoom 
+				ifTrue: [ iterator page addItem: (key -> anObject) ]
+				ifFalse: [ 
+					newPage := self pageRegistry splitPage: iterator.
+					((page biggestKey < key)
+						ifTrue: [ newPage ]
+						ifFalse: [ page ])
+							addItem: (key -> anObject) ] ].
 	^ anObject
 ]
 
@@ -64,7 +73,7 @@ SoilSkipList >> find: aString [
 SoilSkipList >> findNode: aString [ 
 	| current right key |
 	key := aString asSkipListKeyOfSize: self keySize.
-	current := self firstPage firstItem.
+	current := self firstPage firstItem key.
 	
 	maxLevel to: 1 by: -1 do: [ :level |
 		[ (current hasRightAt: level) and: [ (right := (current rightAt: level) realNodeIn: self) keyIsSmallerThan: key ] ]
@@ -196,9 +205,27 @@ SoilSkipList >> maxLevel: anInteger [
 ]
 
 { #category : #'instance creation' }
-SoilSkipList >> newNode [ 
+SoilSkipList >> newPage [
 	^ SoilSkipListPage new 
-		level: self maxLevel 
+		keySize: self keySize;
+		valueSize: self valueSize;
+		size: self pageSize;
+		yourself
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipList >> numberOfItemsPerPage [ 
+	(self pageSize - self headerSize) / (self keySize + self valueSize)
+]
+
+{ #category : #opening }
+SoilSkipList >> open [
+	self pageRegistry open
+]
+
+{ #category : #accessing }
+SoilSkipList >> pageAt: anInteger [ 
+	^ self pageRegistry pageAt: anInteger 
 ]
 
 { #category : #accessing }
@@ -206,6 +233,11 @@ SoilSkipList >> pageRegistry [
 	^ pageRegistry ifNil: [ 
 		pageRegistry := SoilPageRegistry new
 			skipList: self ]
+]
+
+{ #category : #accessing }
+SoilSkipList >> pageSize [
+	^ 4 * 1024
 ]
 
 { #category : #accessing }
@@ -228,6 +260,16 @@ SoilSkipList >> path: aStringOrFileReference [
 { #category : #'as yet unclassified' }
 SoilSkipList >> startPage [
 	^ self pageRegistry startPage
+]
+
+{ #category : #accessing }
+SoilSkipList >> valueSize [
+	^ 8
+]
+
+{ #category : #accessing }
+SoilSkipList >> valueSize: anInteger [ 
+	valueSize := anInteger
 ]
 
 { #category : #writing }

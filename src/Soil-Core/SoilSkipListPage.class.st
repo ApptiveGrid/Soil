@@ -2,12 +2,15 @@ Class {
 	#name : #SoilSkipListPage,
 	#superclass : #Object,
 	#instVars : [
+		'index',
 		'items',
 		'registry',
 		'dirty',
 		'right',
 		'level',
-		'index'
+		'keySize',
+		'valueSize',
+		'size'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -21,10 +24,10 @@ SoilSkipListPage >> addItem: anAssociation [
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> beFirstPage [
 	index := 1.
-	right := Array new: 16.
+	right := Array new: level.
 	items 
-		add: (SoilSkipListSentinel lower -> 0);
-		add: (SoilSkipListSentinel upper -> 0)
+		add: (SoilSkipListSentinel lower numericValue -> 0);
+		add: (SoilSkipListSentinel upper numericValue -> 0)
 ]
 
 { #category : #'as yet unclassified' }
@@ -32,9 +35,19 @@ SoilSkipListPage >> biggestKey [
 	^ items last key
 ]
 
+{ #category : #accessing }
+SoilSkipListPage >> firstItem [
+	^ items first
+]
+
 { #category : #testing }
 SoilSkipListPage >> hasRoom [
-	^ items size * 72 <= (4096 - 72)
+	^ self headerSize + ((items size + 1) * (keySize + valueSize)) <= self pageSize
+]
+
+{ #category : #utilities }
+SoilSkipListPage >> headerSize [
+	^ self indexSize + 1 "level" + (level * self indexSize)
 ]
 
 { #category : #accessing }
@@ -45,6 +58,20 @@ SoilSkipListPage >> index [
 { #category : #accessing }
 SoilSkipListPage >> index: anInteger [ 
 	index := anInteger
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> indexOfKey: anInteger [ 
+	items withIndexDo: [ :each :idx |
+		(each key = anInteger) ifTrue: [ ^ idx ] ].
+	^ 0
+	
+		
+]
+
+{ #category : #writing }
+SoilSkipListPage >> indexSize [
+	^ 2
 ]
 
 { #category : #initialization }
@@ -63,6 +90,7 @@ SoilSkipListPage >> initializeLevel [
 	[ (level < registry maxLevel) & (promote = true) ] whileTrue: [ 
 		level := level + 1.
 		promote := registry random next > 0.5 ].
+	right := Array new: level
 ]
 
 { #category : #initialization }
@@ -76,8 +104,37 @@ SoilSkipListPage >> isDirty [
 ]
 
 { #category : #accessing }
+SoilSkipListPage >> itemAt: anInteger put: anObject [ 
+	items 
+		findBinaryIndex: [ :each |  anInteger - each key ] 
+		do: [:ind | items removeAt: ind ]
+		ifNone: [ 0 ].
+	items add: (anInteger -> anObject)
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListPage >> itemCapacity [
+	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
+]
+
+{ #category : #accessing }
 SoilSkipListPage >> items [
 	^ items
+]
+
+{ #category : #writing }
+SoilSkipListPage >> itemsSizeSize [
+	^ 2
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> keySize [ 
+	^ keySize
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> keySize: anInteger [ 
+	keySize := anInteger 
 ]
 
 { #category : #accessing }
@@ -95,6 +152,11 @@ SoilSkipListPage >> numberOfItems [
 	^ items size 
 ]
 
+{ #category : #accessing }
+SoilSkipListPage >> pageSize [
+	^ size
+]
+
 { #category : #printing }
 SoilSkipListPage >> printOn: aStream [ 
 	aStream << 'page : #' << index asString
@@ -104,12 +166,12 @@ SoilSkipListPage >> printOn: aStream [
 SoilSkipListPage >> readFrom: aStream [ 
 	| size |
 	dirty := false.
-	index := (aStream next: 2) asInteger.
+	index := (aStream next: self indexSize) asInteger.
 	level := aStream next asInteger.
-	size := (aStream next: 2) asInteger.
+	size := (aStream next: self itemsSizeSize) asInteger.
 	items := SortedCollection new: size.
 	size timesRepeat: [ 
-		items add: ((aStream next: 8) asInteger -> (aStream next: 8)) ]
+		items add: ((aStream next: self keySize) asInteger -> (aStream next: self valueSize)) ]
 ]
 
 { #category : #accessing }
@@ -119,8 +181,7 @@ SoilSkipListPage >> registry: aSoilPageRegistry [
 
 { #category : #accessing }
 SoilSkipListPage >> right [
-	^ right ifNil: [ 
-		right := Array new: level ]
+	^ right
 ]
 
 { #category : #accessing }
@@ -142,6 +203,16 @@ SoilSkipListPage >> setItems: aCollection [
 	items := aCollection
 ]
 
+{ #category : #accessing }
+SoilSkipListPage >> size: anInteger [ 
+	size := anInteger 
+]
+
+{ #category : #accessin }
+SoilSkipListPage >> skipList [
+	^ registry skipList
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> smallestKey [
 	^ items first key
@@ -150,7 +221,7 @@ SoilSkipListPage >> smallestKey [
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> split [
 	| newPage middle |
-	newPage := self class new.
+	newPage := self skipList newPage.
 	newPage 
 		registry: registry.
 	middle := (items size / 2) ceiling.
@@ -167,15 +238,25 @@ SoilSkipListPage >> valueAt: anInteger [
 		ifNone: [ nil ]
 ]
 
+{ #category : #accessing }
+SoilSkipListPage >> valueSize [ 
+	^ valueSize
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> valueSize: anInteger [ 
+	valueSize := anInteger 
+]
+
 { #category : #writing }
 SoilSkipListPage >> writeOn: aStream [ 
 	aStream 
-		nextPutAll: (index asByteArrayOfSize: 2);
+		nextPutAll: (index asByteArrayOfSize: self indexSize);
 		nextPut: level;
-		nextPutAll: (items size asByteArrayOfSize: 2).
+		nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
 	items do: [ :assoc |
 		aStream 
-			nextPutAll: (assoc key asByteArrayOfSize: 8);
-			nextPutAll: (assoc value asByteArrayOfSize: 8)].
+			nextPutAll: (assoc key asByteArrayOfSize: self keySize);
+			nextPutAll: (assoc value asByteArrayOfSize: self valueSize)].
 	dirty := false
 ]

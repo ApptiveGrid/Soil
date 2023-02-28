@@ -47,11 +47,11 @@ SoilPageRegistry >> initialize [
 { #category : #initialization }
 SoilPageRegistry >> initializeFirstPage [
 	| page |
-	page := (SoilSkipListPage new 
+	page := skipList newPage
 		registry: self;
 		level: skipList maxLevel;
 		beFirstPage;
-		yourself).
+		yourself.
 	pages at: page index put: page.
 	self writePage: page
 		
@@ -73,6 +73,11 @@ SoilPageRegistry >> maxLevel [
 { #category : #accessing }
 SoilPageRegistry >> nextPageIndex [
 	^ pages size + 1
+]
+
+{ #category : #opening }
+SoilPageRegistry >> open [
+	stream := SOLockableStream path: skipList path
 ]
 
 { #category : #accessing }
@@ -107,13 +112,18 @@ SoilPageRegistry >> random [
 SoilPageRegistry >> readPageAt: anInteger [
 	| page |
 	stream position: (self pagesStart + ((anInteger - 1) * self filePageSize)).
-	page := SoilSkipListPage new 
+	page := skipList newPage 
 		registry: self;
 		readFrom: stream.
 	"(pages size > anInteger) ifFalse: [ 
 		 pages := pages grownBy: (anInteger - pages size)]."
 	pages at: anInteger put: page.
 	^ page
+]
+
+{ #category : #accessing }
+SoilPageRegistry >> skipList [
+	^ skipList
 ]
 
 { #category : #accessing }
@@ -137,7 +147,8 @@ SoilPageRegistry >> splitPage: aIterator [
 				(page rightAt: level) ifNotNil: [ :r | 
 					newPage rightAt: level put: r ].
 				page rightAt: level put: newPage index ]].
-	pages at: newPage index put: newPage
+	pages at: newPage index put: newPage.
+	^ newPage 
 ]
 
 { #category : #'as yet unclassified' }
@@ -147,8 +158,7 @@ SoilPageRegistry >> startPage [
 
 { #category : #accessing }
 SoilPageRegistry >> stream [
-	^ stream ifNil: [ 
-		stream := SOLockableStream path: skipList path ]
+	^ stream 
 ]
 
 { #category : #writing }

@@ -34,3 +34,8 @@ SoilSkipListIterator >> page [
 SoilSkipListIterator >> page: aSoilSkipListPage [ 
 	page := aSoilSkipListPage 
 ]
+
+{ #category : #printing }
+SoilSkipListIterator >> printOn: aStream [ 
+	aStream << 'path: ' << levels asString
+]

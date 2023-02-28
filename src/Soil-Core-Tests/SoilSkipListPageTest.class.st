@@ -9,7 +9,10 @@ SoilSkipListPageTest >> testCreation [
 	| page |
 	page := SoilSkipListPage new 
 		index: 1;
-		level: 8.
+		level: 8;
+		size: 4096;
+		keySize: 16;
+		valueSize: 8.
 	self assert: page hasRoom
 		
 ]
