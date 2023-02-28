@@ -5,8 +5,7 @@ Class {
 		'skipList',
 		'headerPage',
 		'stream',
-		'pages',
-		'random'
+		'pages'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -22,6 +21,11 @@ SoilPageRegistry >> close [
 SoilPageRegistry >> filePageSize [
 	"most OSses use a file page size of 4k today"
 	^ 4096
+]
+
+{ #category : #accessing }
+SoilPageRegistry >> flush [
+	self flushPages 
 ]
 
 { #category : #'as yet unclassified' }
@@ -41,7 +45,7 @@ SoilPageRegistry >> headerPage [
 SoilPageRegistry >> initialize [ 
 	super initialize.
 	pages := Dictionary new.
-	random := Random seed: Time millisecondClockValue 
+
 ]
 
 { #category : #initialization }
@@ -96,12 +100,6 @@ SoilPageRegistry >> positionOfPage: aPage [
 	^ self pagesStart + ((aPage index - 1) * self filePageSize)
 ]
 
-{ #category : #accessing }
-SoilPageRegistry >> random [
-
-	^ random
-]
-
 { #category : #'as yet unclassified' }
 SoilPageRegistry >> readHeaderPage [
 	stream position: 0.
@@ -137,7 +135,6 @@ SoilPageRegistry >> splitPage: aIterator [
 	page := aIterator page.
 	newPage := page split.
 	newPage index: pages size + 1.
-	newPage initializeLevel.
 	newPage level to: 1 by: -1  do: [ :level |
 		(level > page level)
 			ifTrue: [ 

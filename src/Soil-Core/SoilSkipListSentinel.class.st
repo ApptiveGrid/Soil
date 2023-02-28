@@ -2,7 +2,8 @@ Class {
 	#name : #SoilSkipListSentinel,
 	#superclass : #Object,
 	#instVars : [
-		'lower'
+		'lower',
+		'keySize'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -51,9 +52,15 @@ SoilSkipListSentinel >> beUpper [
 	lower := false
 ]
 
+{ #category : #accessing }
+SoilSkipListSentinel >> keySize: anObject [
+
+	keySize := anObject
+]
+
 { #category : #converting }
 SoilSkipListSentinel >> numericValue [ 
 	^ lower
 		ifTrue: [ 0 ]
-		ifFalse: [ ((2 raisedTo: (8 * 8)) - 1) ]
+		ifFalse: [ ((2 raisedTo: (keySize * 8)) - 1) ]
 ]

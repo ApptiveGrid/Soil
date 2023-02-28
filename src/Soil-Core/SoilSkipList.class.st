@@ -3,9 +3,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'maxLevel',
-		'stream',
 		'path',
-		'random',
 		'keySize',
 		'pageRegistry',
 		'valueSize'
@@ -39,7 +37,7 @@ SoilSkipList >> at: aKeyObject put: anObject [
 	page := iterator page.
 	index := page indexOfKey: key.
 	(index > 0)
-		ifTrue: [ page itemAt: index put: anObject ] 
+		ifTrue: [ page itemAt: aKeyObject put: anObject ] 
 		ifFalse: [ 
 			page hasRoom 
 				ifTrue: [ iterator page addItem: (key -> anObject) ]
@@ -50,6 +48,11 @@ SoilSkipList >> at: aKeyObject put: anObject [
 						ifFalse: [ page ])
 							addItem: (key -> anObject) ] ].
 	^ anObject
+]
+
+{ #category : #'initialize-release' }
+SoilSkipList >> close [
+	self pageRegistry close
 ]
 
 { #category : #accessing }
@@ -94,15 +97,14 @@ SoilSkipList >> firstPage [
 	^ self pageRegistry pageAt: 1
 ]
 
+{ #category : #accessing }
+SoilSkipList >> flush [
+	self pageRegistry flush
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipList >> headerPage [
 	^ self pageRegistry headerPage
-]
-
-{ #category : #initialization }
-SoilSkipList >> initialize [ 
-	super initialize.
-	random := Random seed: Time microsecondClockValue.
 ]
 
 { #category : #writing }

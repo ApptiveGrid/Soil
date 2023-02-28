@@ -33,10 +33,11 @@ SoilSkipListPage >> addItem: anAssociation [
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> beFirstPage [
 	index := 1.
+	level := self skipList maxLevel.
 	right := Array new: level.
 	items 
-		add: (SoilSkipListSentinel lower numericValue -> 0);
-		add: (SoilSkipListSentinel upper numericValue -> 0)
+		add: ((SoilSkipListSentinel lower keySize: self skipList keySize) numericValue -> 0);
+		add: ((SoilSkipListSentinel upper keySize: self skipList keySize) numericValue -> 0)
 ]
 
 { #category : #'as yet unclassified' }
@@ -147,12 +148,6 @@ SoilSkipListPage >> level [
 ]
 
 { #category : #accessing }
-SoilSkipListPage >> level: anInteger [ 
-self halt.
-	level := anInteger
-]
-
-{ #category : #accessing }
 SoilSkipListPage >> numberOfItems [
 	^ items size 
 ]
@@ -201,6 +196,7 @@ SoilSkipListPage >> rightAt: anInteger put: anObject [
 	"(anObject isKindOf: Number) 
 		ifTrue: [ (anObject > pageIndex) ifFalse: [ self halt ] ]
 		ifFalse: [ anObject notNil ifTrue: [ self halt ] ]. "
+	(anInteger > level) ifTrue: [ self halt ].
 	self right at: anInteger put: anObject
 ]
 
