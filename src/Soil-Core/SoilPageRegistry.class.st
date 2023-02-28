@@ -49,7 +49,6 @@ SoilPageRegistry >> initializeFirstPage [
 	| page |
 	page := skipList newPage
 		registry: self;
-		level: skipList maxLevel;
 		beFirstPage;
 		yourself.
 	pages at: page index put: page.
@@ -68,11 +67,6 @@ SoilPageRegistry >> initializeHeaderPage [
 { #category : #accessing }
 SoilPageRegistry >> maxLevel [
 	^ skipList maxLevel
-]
-
-{ #category : #accessing }
-SoilPageRegistry >> nextPageIndex [
-	^ pages size + 1
 ]
 
 { #category : #opening }
@@ -94,7 +88,7 @@ SoilPageRegistry >> pages [
 
 { #category : #'as yet unclassified' }
 SoilPageRegistry >> pagesStart [
-	^ 10
+	^ 4096
 ]
 
 { #category : #'instance creation' }
@@ -106,6 +100,12 @@ SoilPageRegistry >> positionOfPage: aPage [
 SoilPageRegistry >> random [
 
 	^ random
+]
+
+{ #category : #'as yet unclassified' }
+SoilPageRegistry >> readHeaderPage [
+	stream position: 0.
+	^ SoilSkipListHeaderPage new readFrom: stream
 ]
 
 { #category : #accessing }

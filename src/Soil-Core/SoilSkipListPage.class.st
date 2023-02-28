@@ -12,8 +12,17 @@ Class {
 		'valueSize',
 		'size'
 	],
+	#classInstVars : [
+		'random'
+	],
 	#category : #'Soil-Core-Index-SkipList'
 }
+
+{ #category : #accessing }
+SoilSkipListPage class >> random [
+	^ random ifNil: [ 
+		random := Random seed: Time microsecondClockValue. ]
+]
 
 { #category : #adding }
 SoilSkipListPage >> addItem: anAssociation [ 
@@ -83,19 +92,14 @@ SoilSkipListPage >> initialize [
 ]
 
 { #category : #initialization }
-SoilSkipListPage >> initializeLevel [
+SoilSkipListPage >> initializeLevel: maxLevel [
 	| promote |
 	level := 1.
 	promote := true.
-	[ (level < registry maxLevel) & (promote = true) ] whileTrue: [ 
+	[ (level < maxLevel) & (promote = true) ] whileTrue: [ 
 		level := level + 1.
-		promote := registry random next > 0.5 ].
+		promote := self class random next > 0.5 ].
 	right := Array new: level
-]
-
-{ #category : #initialization }
-SoilSkipListPage >> initializePageIndex [
-	index := registry nextPageIndex
 ]
 
 { #category : #testing }
@@ -144,6 +148,7 @@ SoilSkipListPage >> level [
 
 { #category : #accessing }
 SoilSkipListPage >> level: anInteger [ 
+self halt.
 	level := anInteger
 ]
 
@@ -186,6 +191,7 @@ SoilSkipListPage >> right [
 
 { #category : #accessing }
 SoilSkipListPage >> rightAt: anInteger [ 
+	(anInteger > level) ifTrue: [ ^ nil ]. 
 	^ self right at: anInteger 
 ]
 

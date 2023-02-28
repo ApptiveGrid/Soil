@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #'instance creation' }
+SoilSkipListHeaderPage >> readFrom: aStream [ 
+	startPageIndex := (aStream next: 8) asInteger
+]
+
 { #category : #accessing }
 SoilSkipListHeaderPage >> startPageIndex [
 	^ startPageIndex
