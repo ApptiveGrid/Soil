@@ -31,15 +31,6 @@ SoilSkipList >> at: aByteArray ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
-SoilSkipList >> at: aString ifPresent: aBlock [
-	| value |
-	value := self at: aString ifAbsent: [ nil ].
-	^ value 
-		ifNotNil: [ aBlock value: value ]
-		ifNil: [ nil ]
-]
-
-{ #category : #accessing }
 SoilSkipList >> at: aKeyObject put: anObject [
 	| key iterator |
 	key := "aKeyObject asSkipListKeyOfSize: self keySize."
@@ -234,29 +225,9 @@ SoilSkipList >> path: aStringOrFileReference [
 	path := aStringOrFileReference asFileReference 
 ]
 
-{ #category : #'instance creation' }
-SoilSkipList >> positionOfPage: aPage [ 
-	^ self headerLength + ((aPage pageNumber - 1) * self filePageSize)
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipList >> rightOf: aNode atLevel: anInteger [ 
-	^ (aNode rightAt: anInteger)
-		ifNotNil: [ :proxy | (self pageAt: proxy pageNumber) itemAt: proxy index ]
-	
-]
-
 { #category : #'as yet unclassified' }
 SoilSkipList >> startPage [
 	^ self pageRegistry startPage
-]
-
-{ #category : #initialization }
-SoilSkipList >> writeHeader [ 
-	self stream 
-		position: 0;
-		nextPut: maxLevel;
-		flush
 ]
 
 { #category : #writing }
