@@ -183,5 +183,6 @@ SoilPageRegistry >> writePage: aPage [
 	| pagePosition |
 	pagePosition := self positionOfPage: aPage.  
 	stream position: pagePosition.
-	aPage writeOn: stream
+	aPage writeOn: stream.
+	stream flush
 ]

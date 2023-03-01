@@ -279,5 +279,5 @@ SoilSkipListPage >> writeOn: aStream [
 		aStream 
 			nextPutAll: (assoc key asByteArrayOfSize: self keySize);
 			nextPutAll: (assoc value asByteArrayOfSize: self valueSize)].
-	dirty := false
+	dirty := false.
 ]

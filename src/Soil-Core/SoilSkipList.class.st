@@ -19,12 +19,10 @@ SoilSkipList >> at: aByteArray [
 ]
 
 { #category : #private }
-SoilSkipList >> at: aByteArray ifAbsent: aBlock [
+SoilSkipList >> at: anObject ifAbsent: aBlock [
 	| key |
-	key := (aByteArray class = ByteArray and: [ aByteArray size = self keySize ])
-		ifTrue: [ aByteArray ]
-		ifFalse: [ aByteArray asByteArray asByteArrayOfSize: self keySize ].
-	^ (self find: key asInteger) 
+	key := (anObject asSkipListKeyOfSize: self keySize) asInteger.
+	^ (self find: key) 
 		ifNotNil: [:node | node value ]
 		ifNil: [ aBlock value ] 
 ]
@@ -32,7 +30,7 @@ SoilSkipList >> at: aByteArray ifAbsent: aBlock [
 { #category : #accessing }
 SoilSkipList >> at: aKeyObject put: anObject [
 	| key iterator page index newPage |
-	key := aKeyObject asByteArray asInteger.
+	key := (aKeyObject asSkipListKeyOfSize: self keySize) asInteger.
 	iterator := self iteratorForKey: key.
 	page := iterator page.
 	index := page indexOfKey: key.

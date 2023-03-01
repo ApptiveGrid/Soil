@@ -65,7 +65,8 @@ SoilBehaviorRegistry >> initializeFilesystem [
 		valueSize: 8;
 		path: self path;
 		initializeList.
-	self addSpecialObjects
+	self addSpecialObjects.
+	index writePages
 ]
 
 { #category : #'as yet unclassified' }
