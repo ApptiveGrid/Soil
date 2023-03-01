@@ -80,7 +80,7 @@ SoilSkipListTest >> testAddInBetweenOverwriting [
 	self assert: skipList pages size equals: 1.
 	page := skipList pageAt: 1.
 	self assert: page numberOfItems equals: 255.
-	self assert: (page items at: 10) value equals: #[ 8 7 6 5 4 3 2 1 ]
+	self assert: (page items at: 17) value equals: #[ 8 7 6 5 4 3 2 1 ]
 ]
 
 { #category : #tests }
@@ -107,7 +107,6 @@ SoilSkipListTest >> testFindKey [
 	| value |
 	1 to: 200 do: [ :n |
 		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	"skipList writePages."
 	value := skipList find: 133. 
 	self assert: value equals: #[ 1 2 3 4 5 6 7 8 ]
 ]

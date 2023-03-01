@@ -148,6 +148,12 @@ SoilSkipListPage >> level [
 ]
 
 { #category : #accessing }
+SoilSkipListPage >> level: anObject [
+
+	level := anObject
+]
+
+{ #category : #accessing }
 SoilSkipListPage >> numberOfItems [
 	^ items size 
 ]
@@ -164,13 +170,16 @@ SoilSkipListPage >> printOn: aStream [
 
 { #category : #writing }
 SoilSkipListPage >> readFrom: aStream [ 
-	| size |
+	| numberOfItems |
 	dirty := false.
 	index := (aStream next: self indexSize) asInteger.
 	level := aStream next asInteger.
-	size := (aStream next: self itemsSizeSize) asInteger.
-	items := SortedCollection new: size.
-	size timesRepeat: [ 
+	right := Array new: level.
+	1 to: level do: [ :n |
+		right at: n put: (aStream next: self rightSize) asInteger ].
+	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
+	items := SortedCollection new: numberOfItems.
+	numberOfItems timesRepeat: [ 
 		items add: ((aStream next: self keySize) asInteger -> (aStream next: self valueSize)) ]
 ]
 
@@ -193,16 +202,23 @@ SoilSkipListPage >> rightAt: anInteger [
 { #category : #accessing }
 SoilSkipListPage >> rightAt: anInteger put: anObject [ 
 	('page ', index asString,' level ', anInteger asString ,' put ', anObject asString) apptiveEmit.
-	"(anObject isKindOf: Number) 
-		ifTrue: [ (anObject > pageIndex) ifFalse: [ self halt ] ]
-		ifFalse: [ anObject notNil ifTrue: [ self halt ] ]. "
 	(anInteger > level) ifTrue: [ self halt ].
 	self right at: anInteger put: anObject
+]
+
+{ #category : #writing }
+SoilSkipListPage >> rightSize [
+	^ 4
 ]
 
 { #category : #accessing }
 SoilSkipListPage >> setItems: aCollection [ 
 	items := aCollection
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> setRight: aCollection [ 
+	right := aCollection 
 ]
 
 { #category : #accessing }
@@ -254,7 +270,10 @@ SoilSkipListPage >> valueSize: anInteger [
 SoilSkipListPage >> writeOn: aStream [ 
 	aStream 
 		nextPutAll: (index asByteArrayOfSize: self indexSize);
-		nextPut: level;
+		nextPut: level.
+	1 to: level do: [ :n |
+		aStream nextPutAll: ((right at: n) asByteArrayOfSize: self rightSize) ].
+	aStream
 		nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
 	items do: [ :assoc |
 		aStream 

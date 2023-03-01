@@ -68,8 +68,8 @@ SoilSkipList >> destroy [
 { #category : #private }
 SoilSkipList >> find: aString [ 
 	| page |
-	page := self findPageCandidateFor: aString.
-	^ (page valueAt: aString ) value
+	page := self findPageCandidateFor: aString asByteArray asInteger.
+	^ (page valueAt: aString  asByteArray asInteger) value
 ]
 
 { #category : #private }
