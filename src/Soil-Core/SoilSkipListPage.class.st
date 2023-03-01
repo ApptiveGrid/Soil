@@ -195,7 +195,7 @@ SoilSkipListPage >> right [
 
 { #category : #accessing }
 SoilSkipListPage >> rightAt: anInteger [ 
-	(anInteger > level) ifTrue: [ ^ nil ]. 
+	(anInteger > level) ifTrue: [ ^ 0 ]. 
 	^ self right at: anInteger 
 ]
 

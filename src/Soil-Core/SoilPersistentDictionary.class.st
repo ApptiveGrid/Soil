@@ -52,9 +52,9 @@ SoilPersistentDictionary >> at: key ifAbsentPut: aBlock [
 { #category : #forwarded }
 SoilPersistentDictionary >> at: key put: value [
 	| return |
-	transaction ifNotNil: [:tr | tr makeRoot:  value].
+	transaction ifNotNil: [:tr | tr makeRoot: value].
 	return := dict at: key put: value.
-	transaction ifNotNil: [:tr | tr markDirty: dict].
+	transaction ifNotNil: [:tr | tr markDirty: self].
 	^return
 
 ]
@@ -96,6 +96,16 @@ SoilPersistentDictionary >> size [
 SoilPersistentDictionary >> soilBasicSerialize: serializer [
 	self class == SoilPersistentDictionary ifFalse: [ ^ super soilBasicSerialize: serializer ].
 	serializer nextPutPersistentDictionary: self
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDictionary >> soilClusterRootIn: aSOTransaction [ 
+	transaction := aSOTransaction 
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDictionary >> soilLoadedIn: aSOTransaction [
+	transaction := aSOTransaction 
 ]
 
 { #category : #initialization }

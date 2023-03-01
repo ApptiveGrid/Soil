@@ -264,7 +264,8 @@ SOTransaction >> makePersistent: anObject [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> makeRoot: anObject [ 
-	self addClusterObject: anObject
+	self addClusterObject: anObject.
+	anObject soilClusterRootIn: self
 ]
 
 { #category : #public }
@@ -343,7 +344,9 @@ SOTransaction >> objectWithId: objectId [
 		detect: [ :each | each objectId = objectId ]
 		ifFound: [ :record | ^ record object ].
 
-	^ self materializationWithId: objectId
+	^ (self materializationWithId: objectId)
+		soilLoadedIn: self;
+		yourself
 ]
 
 { #category : #accessing }
@@ -388,10 +391,10 @@ SOTransaction >> root [
 
 { #category : #accessing }
 SOTransaction >> root: anObject [
-
 	self 
 		atObjectId: SOObjectId root 
-		putObject: anObject
+		putObject: anObject.
+	anObject soilClusterRootIn: self
 ]
 
 { #category : #accessing }
