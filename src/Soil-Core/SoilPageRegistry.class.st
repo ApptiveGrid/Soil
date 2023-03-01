@@ -49,6 +49,14 @@ SoilPageRegistry >> initialize [
 ]
 
 { #category : #initialization }
+SoilPageRegistry >> initializeFilesystem [
+	self 
+		openStream;
+		initializeHeaderPage;
+		initializeFirstPage
+]
+
+{ #category : #initialization }
 SoilPageRegistry >> initializeFirstPage [
 	| page |
 	page := skipList newPage
@@ -75,7 +83,13 @@ SoilPageRegistry >> maxLevel [
 
 { #category : #opening }
 SoilPageRegistry >> open [
-	stream := SOLockableStream path: skipList path
+	self openStream.
+	headerPage := self readHeaderPage
+]
+
+{ #category : #opening }
+SoilPageRegistry >> openStream [
+	stream := SOLockableStream path: skipList path.
 ]
 
 { #category : #accessing }

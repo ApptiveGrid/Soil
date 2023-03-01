@@ -59,8 +59,12 @@ SoilBehaviorRegistry >> initialize [
 
 { #category : #initialization }
 SoilBehaviorRegistry >> initializeFilesystem [
-	self open.
-	index initializeList.
+	index := SoilSkipList new 
+		maxLevel: 8;
+		keySize: 64;
+		valueSize: 8;
+		path: self path;
+		initializeList.
 	self addSpecialObjects
 ]
 
@@ -108,6 +112,7 @@ SoilBehaviorRegistry >> open [
 	index :=  SoilSkipList new 
 		maxLevel: 16;
 		keySize: 64;
+		valueSize: 8;
 		path: self path;
 		open
 ]

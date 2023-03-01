@@ -115,9 +115,7 @@ SoilSkipList >> initializeHeaderPage [
 { #category : #initialization }
 SoilSkipList >> initializeList [ 
 	self pageRegistry 
-		initializeHeaderPage;
-		initializeFirstPage
-	 
+		initializeFilesystem
 ]
 
 { #category : #'as yet unclassified' }
@@ -128,7 +126,7 @@ SoilSkipList >> iteratorForKey: key [
 	maxLevel to: 1 by: -1 do: [ :level |
 		[ 
 			right := currentPage rightAt: level.
-			right notNil and: [ (self pageRegistry pageAt: right) smallestKey < key ] ]
+			right > 0 and: [ (self pageRegistry pageAt: right) smallestKey < key ] ]
 			whileTrue: [ currentPage := self pageRegistry pageAt: right  ].
 			iterator at: level put: currentPage. ].
 	iterator page: currentPage.
