@@ -79,7 +79,6 @@ SOTransaction >> behaviorDescriptionFor: aClass [
 	objectId := soil behaviorRegistry
 		nameAt: aClass soilBehaviorIdentifier
 		ifAbsent: [ nil ].
-	(objectId isNil and: [aClass = SOBehaviorDescription]) ifTrue: [ self halt ].
 		
 	objectId ifNotNil: [ 
 		behaviorDescription := (objectId index = 2)

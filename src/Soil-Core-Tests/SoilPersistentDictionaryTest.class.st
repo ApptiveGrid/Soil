@@ -26,7 +26,9 @@ SoilPersistentDictionaryTest >> testAt [
 
 	| dict transaction |
 	transaction := soil newTransaction.
-	dict := SoilPersistentDictionary new soilMakePersistentIn: transaction.
+	dict := SoilPersistentDictionary new "soilMakePersistentIn: transaction".
+	transaction makeRoot: dict.
+	
 	dict add: (#test -> 'string').
 	transaction commit.
 		
@@ -41,7 +43,8 @@ SoilPersistentDictionaryTest >> testAtPut [
 
 	| dict transaction |
 	transaction := soil newTransaction.
-	dict := SoilPersistentDictionary new soilMakePersistentIn: transaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
 	dict at: #test put: 'string'.
 	transaction commit.
 		
@@ -59,7 +62,8 @@ SoilPersistentDictionaryTest >> testCommitAndRead [
 	"to remove"
 	SoilTypeCodes initialize.
 	transaction := soil newTransaction.
-	dict := SoilPersistentDictionary new soilMakePersistentIn: transaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
 	dict add: (#test -> 'string').
 	transaction root: dict.
 	transaction commit.
@@ -76,8 +80,8 @@ SoilPersistentDictionaryTest >> testCommitAndRead [
 SoilPersistentDictionaryTest >> testNewPersistentDictionary [
 
 	| dict |
-	dict := SoilPersistentDictionary new soilMakePersistentIn:
-		        soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	soil newTransaction makeRoot: dict.
 	self assert: dict class identicalTo: SoilPersistentDictionary
 ]
 
@@ -86,7 +90,8 @@ SoilPersistentDictionaryTest >> testRemoveKey [
 
 	| dict transaction |
 	transaction := soil newTransaction.
-	dict := SoilPersistentDictionary new soilMakePersistentIn: transaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
 	dict at: #test put: 'string'.
 	dict at: #test2 put: 'string2'.
 	dict removeKey: #test.

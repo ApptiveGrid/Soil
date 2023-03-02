@@ -98,20 +98,16 @@ SoilPersistentDictionary >> soilBasicSerialize: serializer [
 	serializer nextPutPersistentDictionary: self
 ]
 
-{ #category : #'as yet unclassified' }
-SoilPersistentDictionary >> soilClusterRootIn: aSOTransaction [ 
-	transaction := aSOTransaction 
+{ #category : #initialization }
+SoilPersistentDictionary >> soilClusterRootIn: aTransaction [
+	(transaction isNil or: [ transaction == aTransaction ])
+		ifFalse: [self error: 'Object is already persistent in another transaction'].
+	transaction := aTransaction.
+	dict do: [:each | each isImmediateObject ifFalse: [transaction makeRoot: each]].
+
 ]
 
 { #category : #'as yet unclassified' }
 SoilPersistentDictionary >> soilLoadedIn: aSOTransaction [
 	transaction := aSOTransaction 
-]
-
-{ #category : #initialization }
-SoilPersistentDictionary >> soilMakePersistentIn: aTransaction [
-	transaction ifNotNil: [self error: 'Object is already persistent in another transaction'].
-	transaction := aTransaction.
-	dict do: [:each | each isImmediateObject ifFalse: [transaction makeRoot: each]].
-	transaction makeRoot: self
 ]
