@@ -59,9 +59,14 @@ SoilBehaviorRegistry >> initialize [
 
 { #category : #initialization }
 SoilBehaviorRegistry >> initializeFilesystem [
-	self open.
-	index initializeList.
-	self addSpecialObjects
+	index := SoilSkipList new 
+		maxLevel: 8;
+		keySize: 64;
+		valueSize: 8;
+		path: self path;
+		initializeList.
+	self addSpecialObjects.
+	index writePages
 ]
 
 { #category : #'as yet unclassified' }
@@ -105,9 +110,10 @@ SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 { #category : #'instance creation' }
 SoilBehaviorRegistry >> open [ 
 	index ifNotNil: [ index close ].
-	index :=  SOPersistentSkipList new 
+	index :=  SoilSkipList new 
 		maxLevel: 16;
 		keySize: 64;
+		valueSize: 8;
 		path: self path;
 		open
 ]

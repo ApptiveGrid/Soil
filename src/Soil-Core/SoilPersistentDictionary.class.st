@@ -28,7 +28,7 @@ SoilPersistentDictionary >> add: anAssociation [
 	| return |
 	transaction makeRoot: anAssociation value.
 	return := dict add: anAssociation.
-	transaction markDirty: dict.
+	transaction markDirty: self.
 	^return
 ]
 
@@ -52,9 +52,9 @@ SoilPersistentDictionary >> at: key ifAbsentPut: aBlock [
 { #category : #forwarded }
 SoilPersistentDictionary >> at: key put: value [
 	| return |
-	transaction ifNotNil: [:tr | tr makeRoot:  value].
+	transaction ifNotNil: [:tr | tr makeRoot: value].
 	return := dict at: key put: value.
-	transaction ifNotNil: [:tr | tr markDirty: dict].
+	transaction ifNotNil: [:tr | tr markDirty: self].
 	^return
 
 ]
@@ -83,7 +83,7 @@ SoilPersistentDictionary >> keysAndValuesDo: aBlock [
 SoilPersistentDictionary >> removeKey: anObject [
 	| return |
 	return := dict removeKey: anObject.
-	transaction markDirty: dict.
+	transaction markDirty: self.
 	^return
 ]
 
@@ -99,9 +99,15 @@ SoilPersistentDictionary >> soilBasicSerialize: serializer [
 ]
 
 { #category : #initialization }
-SoilPersistentDictionary >> soilMakePersistentIn: aTransaction [
-	transaction ifNotNil: [self error: 'Object is already persistent in another transaction'].
+SoilPersistentDictionary >> soilClusterRootIn: aTransaction [
+	(transaction isNil or: [ transaction == aTransaction ])
+		ifFalse: [self error: 'Object is already persistent in another transaction'].
 	transaction := aTransaction.
 	dict do: [:each | each isImmediateObject ifFalse: [transaction makeRoot: each]].
-	transaction makeRoot: dict
+
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDictionary >> soilLoadedIn: aSOTransaction [
+	transaction := aSOTransaction 
 ]
