@@ -207,8 +207,6 @@ SoilSkipListPage >> rightAt: anInteger [
 
 { #category : #accessing }
 SoilSkipListPage >> rightAt: anInteger put: anObject [ 
-	('page ', index asString,' level ', anInteger asString ,' put ', anObject asString) apptiveEmit.
-	(anInteger > level) ifTrue: [ self halt ].
 	self right at: anInteger put: anObject
 ]
 

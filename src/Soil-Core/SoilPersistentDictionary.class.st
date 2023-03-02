@@ -28,7 +28,7 @@ SoilPersistentDictionary >> add: anAssociation [
 	| return |
 	transaction makeRoot: anAssociation value.
 	return := dict add: anAssociation.
-	transaction markDirty: dict.
+	transaction markDirty: self.
 	^return
 ]
 
