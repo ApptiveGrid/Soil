@@ -45,11 +45,6 @@ SoilSkipListPage >> biggestKey [
 	^ items last key
 ]
 
-{ #category : #accessing }
-SoilSkipListPage >> firstItem [
-	^ items first
-]
-
 { #category : #testing }
 SoilSkipListPage >> hasRoom [
 	^ self headerSize + ((items size + 1) * (keySize + valueSize)) <= self pageSize
