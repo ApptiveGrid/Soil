@@ -70,21 +70,6 @@ SoilSkipList >> find: aString [
 	^ (page valueAt: aString  asByteArray asInteger) value
 ]
 
-{ #category : #private }
-SoilSkipList >> findNode: aString [ 
-	| current right key |
-	key := aString asSkipListKeyOfSize: self keySize.
-	current := self firstPage firstItem key.
-	
-	maxLevel to: 1 by: -1 do: [ :level |
-		[ (current hasRightAt: level) and: [ (right := (current rightAt: level) realNodeIn: self) keyIsSmallerThan: key ] ]
-			whileTrue: [ current := right ] .
-		(current key = key) ifTrue: [ ^ current ]. 
-
-	].
-	^ nil
-]
-
 { #category : #'as yet unclassified' }
 SoilSkipList >> findPageCandidateFor: key [
 	^ (self iteratorForKey: key) page
