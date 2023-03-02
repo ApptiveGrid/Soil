@@ -34,7 +34,7 @@ SoilSkipListPage >> addItem: anAssociation [
 SoilSkipListPage >> beFirstPage [
 	index := 1.
 	level := self skipList maxLevel.
-	right := Array new: level withAll: 0.
+	self initializeRight.
 	items 
 		add: ((SoilSkipListSentinel lower keySize: self skipList keySize) numericValue -> 0);
 		add: ((SoilSkipListSentinel upper keySize: self skipList keySize) numericValue -> 0)
@@ -100,7 +100,12 @@ SoilSkipListPage >> initializeLevel: maxLevel [
 	[ (level < maxLevel) & (promote = true) ] whileTrue: [ 
 		level := level + 1.
 		promote := self class random next > 0.5 ].
-	right := Array new: level withAll: 0
+	self initializeRight 
+]
+
+{ #category : #initialization }
+SoilSkipListPage >> initializeRight [ 
+	right := Array new: level withAll: 0.
 ]
 
 { #category : #testing }
@@ -150,7 +155,8 @@ SoilSkipListPage >> level [
 { #category : #accessing }
 SoilSkipListPage >> level: anObject [
 
-	level := anObject
+	level := anObject.
+	self initializeRight 
 ]
 
 { #category : #accessing }

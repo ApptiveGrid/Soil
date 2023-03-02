@@ -83,7 +83,7 @@ SoilPersistentDictionary >> keysAndValuesDo: aBlock [
 SoilPersistentDictionary >> removeKey: anObject [
 	| return |
 	return := dict removeKey: anObject.
-	transaction markDirty: dict.
+	transaction markDirty: self.
 	^return
 ]
 
@@ -113,5 +113,5 @@ SoilPersistentDictionary >> soilMakePersistentIn: aTransaction [
 	transaction ifNotNil: [self error: 'Object is already persistent in another transaction'].
 	transaction := aTransaction.
 	dict do: [:each | each isImmediateObject ifFalse: [transaction makeRoot: each]].
-	transaction makeRoot: dict
+	transaction makeRoot: self
 ]
