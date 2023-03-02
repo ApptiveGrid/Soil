@@ -20,9 +20,7 @@ SoilSkipList >> at: aByteArray [
 
 { #category : #private }
 SoilSkipList >> at: anObject ifAbsent: aBlock [
-	| key |
-	key := (anObject asSkipListKeyOfSize: self keySize) asInteger.
-	^ (self find: key) 
+	^ (self find: anObject) 
 		ifNotNil: [:node | node value ]
 		ifNil: [ aBlock value ] 
 ]
@@ -65,9 +63,10 @@ SoilSkipList >> destroy [
 
 { #category : #private }
 SoilSkipList >> find: aString [ 
-	| page |
-	page := self findPageCandidateFor: aString asByteArray asInteger.
-	^ (page valueAt: aString  asByteArray asInteger) value
+	| page key |
+	key := (aString asSkipListKeyOfSize: self keySize) asInteger.
+	page := self findPageCandidateFor: key.
+	^ (page valueAt: key) value
 ]
 
 { #category : #'as yet unclassified' }
