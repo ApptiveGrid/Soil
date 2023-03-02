@@ -110,8 +110,8 @@ SoilPageRegistry >> pagesStart [
 ]
 
 { #category : #'instance creation' }
-SoilPageRegistry >> positionOfPage: aPage [ 
-	^ self pagesStart + ((aPage index - 1) * self filePageSize)
+SoilPageRegistry >> positionOfPageIndex: anInteger [
+	^ self pagesStart + ((anInteger - 1) * self filePageSize)
 ]
 
 { #category : #'as yet unclassified' }
@@ -123,7 +123,7 @@ SoilPageRegistry >> readHeaderPage [
 { #category : #accessing }
 SoilPageRegistry >> readPageAt: anInteger [
 	| page |
-	stream position: (self pagesStart + ((anInteger - 1) * self filePageSize)).
+	stream position: (self positionOfPageIndex: anInteger).
 	page := skipList newPage 
 		registry: self;
 		readFrom: stream.
@@ -182,7 +182,7 @@ SoilPageRegistry >> writeHeaderPage [
 { #category : #writing }
 SoilPageRegistry >> writePage: aPage [ 
 	| pagePosition |
-	pagePosition := self positionOfPage: aPage.  
+	pagePosition := self positionOfPageIndex: aPage index.  
 	stream position: pagePosition.
 	aPage writeOn: stream.
 	stream flush

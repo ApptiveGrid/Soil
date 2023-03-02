@@ -65,9 +65,10 @@ SoilSkipList >> destroy [
 
 { #category : #private }
 SoilSkipList >> find: aString [ 
-	| page |
-	page := self findPageCandidateFor: aString asByteArray asInteger.
-	^ (page valueAt: aString  asByteArray asInteger) value
+	| page key |
+	key := aString asSkipListKeyOfSize: self keySize.
+	page := self findPageCandidateFor: key.
+	^ (page valueAt: key) value
 ]
 
 { #category : #'as yet unclassified' }
