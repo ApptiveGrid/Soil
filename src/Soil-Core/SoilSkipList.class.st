@@ -35,7 +35,7 @@ SoilSkipList >> at: aKeyObject put: anObject [
 	page := iterator page.
 	index := page indexOfKey: key.
 	(index > 0)
-		ifTrue: [ page itemAt: aKeyObject put: anObject ] 
+		ifTrue: [ page itemAt: key put: anObject ] 
 		ifFalse: [ 
 			page hasRoom 
 				ifTrue: [ iterator page addItem: (key -> anObject) ]
