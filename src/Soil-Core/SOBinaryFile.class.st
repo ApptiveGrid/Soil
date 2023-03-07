@@ -31,6 +31,11 @@ SOBinaryFile >> fileVersion: anInteger [
 	stream nextPutAll: (anInteger asByteArrayOfSize: self fileVersionSize)
 ]
 
+{ #category : #accessing }
+SOBinaryFile >> soil [ 
+	self subclassResponsibility
+]
+
 { #category : #utilities }
 SOBinaryFile >> fileVersionSize [
 	^ 2
