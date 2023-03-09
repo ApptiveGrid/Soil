@@ -6,7 +6,8 @@ Class {
 		'soil',
 		'objectRepository',
 		'indexFile',
-		'objectFile'
+		'objectFile',
+		'indexManager'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -79,6 +80,11 @@ SOObjectSegment >> close [
 		objectFile close ]
 ]
 
+{ #category : #'as yet unclassified' }
+SOObjectSegment >> createSkipListIndex: aSoilSkipListDictionary [ 
+	^ self indexManager createSkipListIndex: aSoilSkipListDictionary 
+]
+
 { #category : #accessing }
 SOObjectSegment >> id [
 
@@ -89,6 +95,11 @@ SOObjectSegment >> id [
 SOObjectSegment >> id: anObject [
 
 	id := anObject
+]
+
+{ #category : #accessing }
+SOObjectSegment >> indexAt: anIndexedObject [ 
+	^ anIndexedObject loadFrom: self path / anIndexedObject id , #index
 ]
 
 { #category : #accessing }
@@ -104,6 +115,15 @@ SOObjectSegment >> indexFile: aSOObjectIndexFile [
 	indexFile := aSOObjectIndexFile
 ]
 
+{ #category : #accessing }
+SOObjectSegment >> indexManager [ 
+	^ indexManager ifNil: [ 
+		indexManager := SoilIndexManager new 
+			segment: self;
+			open;
+			yourself ]
+]
+
 { #category : #initialization }
 SOObjectSegment >> initializeFilesystem [
 	self path ensureCreateDirectory.
@@ -112,6 +132,10 @@ SOObjectSegment >> initializeFilesystem [
 		initializeFilesystem;
 		close.
 	SOObjectIndexFile new
+		segment: self;
+		initializeFilesystem;
+		close.
+	SoilIndexManager new 
 		segment: self;
 		initializeFilesystem;
 		close

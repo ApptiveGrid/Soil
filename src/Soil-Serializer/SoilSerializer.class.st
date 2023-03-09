@@ -21,6 +21,11 @@ SoilSerializer class >> serializeToBytes: anObject [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSerializer >> createSkipListIndex: anObject [ 
+	^ transaction createSkipListIndex: anObject 
+]
+
 { #category : #writing }
 SoilSerializer >> nextPutArray: anArray [ 
 	self 

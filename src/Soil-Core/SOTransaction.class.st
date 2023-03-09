@@ -41,11 +41,13 @@ SOTransaction >> acquireLocksAndDetectWriteSkew [
 
 { #category : #adding }
 SOTransaction >> addClusterObject: anObject [ 
-	objectMap at: anObject ifPresent: [ ^ self ].
+	| objectId |
+	objectMap at: anObject ifPresent: [ :record |  ^ record objectId ].
+	objectId := self newObjectId .
 	self 
-		atObjectId: self newObjectId 
+		atObjectId: objectId
 		putObject: anObject.
-	^ anObject
+	^ objectId
 
 ]
 
@@ -196,6 +198,14 @@ SOTransaction >> commit [
 		abort
 ]
 
+{ #category : #'as yet unclassified' }
+SOTransaction >> createSkipListIndex: anObject [ 
+	| objectId segment |
+	objectId := (objectMap at: anObject) objectId.
+	segment := self objectRepository segmentAt: objectId segment.
+	^ segment createSkipListIndex: anObject
+]
+
 { #category : #aborting }
 SOTransaction >> dirtyObjects [
 	^ (idMap select: [ :each | each hasChanged ]) collect: #object
@@ -254,6 +264,14 @@ SOTransaction >> lockObjectId: aSOObjectId [
 	^ self objectRepository lockObjectId: aSOObjectId for: self
 ]
 
+{ #category : #'as yet unclassified' }
+SOTransaction >> lookupIndex: anObject [ 
+	| objectId segment |
+	objectId := (objectMap at: anObject) objectId.
+	segment := self objectRepository segmentAt: objectId segment.
+	^ segment indexAt: anObject
+]
+
 { #category : #public }
 SOTransaction >> makeNewVersion: classDescription [
 	| record |
@@ -269,8 +287,9 @@ SOTransaction >> makePersistent: anObject [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> makeRoot: anObject [ 
-	self addClusterObject: anObject.
-	anObject soilClusterRootIn: self
+	anObject soilClusterRootIn: self.
+	^ self addClusterObject: anObject.
+
 ]
 
 { #category : #public }

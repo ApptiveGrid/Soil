@@ -31,11 +31,6 @@ SOBinaryFile >> fileVersion: anInteger [
 	stream nextPutAll: (anInteger asByteArrayOfSize: self fileVersionSize)
 ]
 
-{ #category : #accessing }
-SOBinaryFile >> soil [ 
-	self subclassResponsibility
-]
-
 { #category : #utilities }
 SOBinaryFile >> fileVersionSize [
 	^ 2
@@ -97,6 +92,11 @@ SOBinaryFile >> readHeader [
 	(prefix = self prefix asByteArray) ifFalse: [ 
 		Error signal: 'read incorrect prefix: ', prefix asString ].
 	fileVersion := (stream next: self fileVersionSize) asInteger
+]
+
+{ #category : #accessing }
+SOBinaryFile >> soil [ 
+	self subclassResponsibility
 ]
 
 { #category : #accessing }

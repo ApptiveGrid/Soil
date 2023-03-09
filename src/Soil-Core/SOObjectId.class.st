@@ -53,6 +53,12 @@ SOObjectId >> asByteArray [
 	^ (segment asByteArrayOfSize: 2), (index asByteArrayOfSize: 6)
 ]
 
+{ #category : #converting }
+SOObjectId >> asByteArrayOfSize: anInteger [ 
+	(anInteger = 8) ifFalse: [ self halt ].
+	^ self asByteArray 
+]
+
 { #category : #comparing }
 SOObjectId >> hash [ 
 	^ segment hash bitXor: index hash

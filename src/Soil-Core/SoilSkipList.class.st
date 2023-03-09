@@ -2,11 +2,8 @@ Class {
 	#name : #SoilSkipList,
 	#superclass : #Object,
 	#instVars : [
-		'maxLevel',
 		'path',
-		'keySize',
-		'pageRegistry',
-		'valueSize'
+		'pageRegistry'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -104,8 +101,8 @@ SoilSkipList >> initializeList [
 SoilSkipList >> iteratorForKey: key [
 	| currentPage iterator right |
 	currentPage := self startPage.
-	iterator := SoilSkipListIterator new maxLevel: maxLevel.
-	maxLevel to: 1 by: -1 do: [ :level |
+	iterator := SoilSkipListIterator new maxLevel: self maxLevel.
+	self maxLevel to: 1 by: -1 do: [ :level |
 		[ 
 			right := currentPage rightAt: level.
 			right > 0 and: [ (self pageRegistry pageAt: right) smallestKey < key ] ]
@@ -118,32 +115,33 @@ SoilSkipList >> iteratorForKey: key [
 { #category : #accessing }
 SoilSkipList >> keySize [
 
-	^ keySize ifNil: [ 
-		keySize := self defaultKeySize ]
+	"^ keySize ifNil: [ 
+		keySize := self defaultKeySize ]"
+	^ self headerPage keySize
 ]
 
 { #category : #accessing }
 SoilSkipList >> keySize: anObject [
 
-	keySize := anObject
+	"keySize := anObject"
+	self headerPage keySize: anObject
 ]
 
 { #category : #actions }
 SoilSkipList >> load [
-	maxLevel := self stream 
-		position: 0;
-		next.
 	self readPageAt: 1
 ]
 
 { #category : #accessing }
 SoilSkipList >> maxLevel [
-	^ maxLevel
+	"^ maxLevel"
+	^ self headerPage maxLevel
 ]
 
 { #category : #accessing }
 SoilSkipList >> maxLevel: anInteger [ 
-	maxLevel := anInteger 
+	"maxLevel := anInteger "
+	self headerPage maxLevel: anInteger 
 ]
 
 { #category : #'instance creation' }
@@ -202,12 +200,14 @@ SoilSkipList >> startPage [
 
 { #category : #accessing }
 SoilSkipList >> valueSize [
-	^ 8
+	"^ 8"
+	^ self headerPage valueSize
 ]
 
 { #category : #accessing }
 SoilSkipList >> valueSize: anInteger [ 
-	valueSize := anInteger
+	"valueSize := anInteger"
+	self headerPage valueSize: anInteger 
 ]
 
 { #category : #writing }

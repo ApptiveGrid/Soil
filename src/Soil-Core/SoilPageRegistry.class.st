@@ -10,6 +10,14 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #initialization }
+SoilPageRegistry >> buildHeaderPage [
+	^ SoilSkipListHeaderPage new 
+		startPageIndex: 1;
+		yourself.
+
+]
+
 { #category : #'initialize-release' }
 SoilPageRegistry >> close [ 
 	stream ifNotNil: [  
@@ -38,7 +46,7 @@ SoilPageRegistry >> flushPages [
 { #category : #'as yet unclassified' }
 SoilPageRegistry >> headerPage [
 	^ headerPage ifNil: [ 
-		headerPage := self readHeaderPage ]
+		headerPage := self buildHeaderPage ]
 ]
 
 { #category : #initialization }
@@ -70,9 +78,6 @@ SoilPageRegistry >> initializeFirstPage [
 
 { #category : #initialization }
 SoilPageRegistry >> initializeHeaderPage [
-	headerPage := SoilSkipListHeaderPage new 
-		startPageIndex: 1;
-		yourself.
 	self writeHeaderPage 
 ]
 
