@@ -10,6 +10,11 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #queries }
+SoilPageRegistry >> allItems [
+	^ (self readPageAt: 1) items
+]
+
 { #category : #initialization }
 SoilPageRegistry >> buildHeaderPage [
 	^ SoilSkipListHeaderPage new 

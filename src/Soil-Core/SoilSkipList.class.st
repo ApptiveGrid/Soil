@@ -72,6 +72,11 @@ SoilSkipList >> findPageCandidateFor: key [
 ]
 
 { #category : #accessing }
+SoilSkipList >> first: anInteger [ 
+	^ ((self pageAt: 1) items allButFirst allButLast first: 3) collect: #key
+]
+
+{ #category : #accessing }
 SoilSkipList >> firstPage [
 	^ self pageRegistry pageAt: 1
 ]
@@ -191,6 +196,11 @@ SoilSkipList >> path [
 SoilSkipList >> path: aStringOrFileReference [
 
 	path := aStringOrFileReference asFileReference 
+]
+
+{ #category : #accessing }
+SoilSkipList >> size [ 
+	^ self pageRegistry allItems size - 2
 ]
 
 { #category : #'as yet unclassified' }

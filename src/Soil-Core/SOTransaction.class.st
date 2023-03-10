@@ -251,6 +251,11 @@ SOTransaction >> isAborted [
 ]
 
 { #category : #testing }
+SOTransaction >> isChanged [
+	^ self dirtyObjects notEmpty
+]
+
+{ #category : #testing }
 SOTransaction >> isRoot: anObject [
 	self flag: #todo.
 	"this is surely not true but a shortcut for now"
