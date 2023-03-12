@@ -15,6 +15,13 @@ SoilIndexTest >> setUp [
 		initializeFilesystem
 ]
 
+{ #category : #running }
+SoilIndexTest >> tearDown [ 
+	super tearDown.
+	soil ifNotNil: [ 
+		soil close ]
+]
+
 { #category : #tests }
 SoilIndexTest >> testIndexCreation [ 
 	| tx dict obj1 obj2 |

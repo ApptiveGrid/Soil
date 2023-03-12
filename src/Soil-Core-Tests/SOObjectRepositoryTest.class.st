@@ -16,6 +16,13 @@ SOObjectRepositoryTest >> setUp [
 		yourself.
 ]
 
+{ #category : #running }
+SOObjectRepositoryTest >> tearDown [ 
+	super tearDown.
+	soil ifNotNil: [ 
+		soil close ]
+]
+
 { #category : #tests }
 SOObjectRepositoryTest >> testFirstSegment [ 
 	self assert: soil objectRepository firstSegment id equals: 1

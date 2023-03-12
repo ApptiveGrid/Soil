@@ -63,7 +63,9 @@ SoilMigrationTest >> setUp [
 { #category : #running }
 SoilMigrationTest >> tearDown [ 
 	migrationClass removeFromSystem.
-	super tearDown
+	super tearDown.
+	soil ifNotNil: [ 
+		soil close ]
 ]
 
 { #category : #'tests - change classlayout' }

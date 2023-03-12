@@ -21,6 +21,13 @@ SOMultiVersionTest >> setUp [
 		initializeFilesystem
 ]
 
+{ #category : #running }
+SOMultiVersionTest >> tearDown [ 
+	super tearDown.
+	soil ifNotNil: [ 
+		soil close ]
+]
+
 { #category : #tests }
 SOMultiVersionTest >> testReadIsolation [
 	| tx1 tx2 tx3 object |

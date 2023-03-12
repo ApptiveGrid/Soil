@@ -19,6 +19,13 @@ SoilSkipListTest >> setUp [
 		initializeFilesystem
 ]
 
+{ #category : #running }
+SoilSkipListTest >> tearDown [ 
+	super tearDown.
+	skipList ifNotNil: [ 
+		skipList close ]
+]
+
 { #category : #tests }
 SoilSkipListTest >> testAddFirstOverflow [
 	

@@ -21,6 +21,13 @@ SOLockingTest >> setUp [
 		initializeFilesystem 
 ]
 
+{ #category : #running }
+SOLockingTest >> tearDown [ 
+	super tearDown.
+	soil ifNotNil: [ 
+		soil close ]
+]
+
 { #category : #tests }
 SOLockingTest >> testObjectLocks [
 	| tx obj |

@@ -21,6 +21,24 @@ SoilTransactionTest >> setUp [
 		initializeFilesystem 
 ]
 
+{ #category : #running }
+SoilTransactionTest >> tearDown [ 
+	super tearDown.
+	soil ifNotNil: [ 
+		soil close ]
+]
+
+{ #category : #tests }
+SoilTransactionTest >> testCheckpointAndContinue [
+	| tx |
+	tx := soil newTransaction.
+	tx root: Object new.
+	tx checkpointAndContinue.
+	self deny: tx hasModifications.
+	 
+	
+]
+
 { #category : #tests }
 SoilTransactionTest >> testRootObjectModifies [ 
 	| tx |
