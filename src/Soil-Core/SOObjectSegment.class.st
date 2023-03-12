@@ -51,7 +51,6 @@ SOObjectSegment >> at: anInteger putBytes: bytes [
 	| position |
 	position := self objectFile size.
 	objectFile appendBytes: bytes.
-	('writing new position ', position asString, ' for index ', anInteger asString) apptiveEmit.  
 	self indexFile at: anInteger putPosition: position.
 	^ position
 ]
