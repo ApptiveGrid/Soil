@@ -52,6 +52,11 @@ SOObjectProxy >> soilLoadedIn: aTransaction [
 	transaction := aTransaction  
 ]
 
+{ #category : #'as yet unclassified' }
+SOObjectProxy >> theNonSoilProxy [ 
+	^ self object
+]
+
 { #category : #accessing }
 SOObjectProxy >> transaction: aTransaction [ 
 	transaction := aTransaction 
