@@ -72,6 +72,11 @@ SoilSkipList >> first: anInteger [
 ]
 
 { #category : #accessing }
+SoilSkipList >> firstItem [
+	^ self startPage firstItem
+]
+
+{ #category : #accessing }
 SoilSkipList >> firstPage [
 	^ self pageRegistry pageAt: 1
 ]

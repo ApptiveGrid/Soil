@@ -38,6 +38,11 @@ SoilSkipListDictionary >> at: key put: anObject [
 ]
 
 { #category : #accessing }
+SoilSkipListDictionary >> first [
+	^ self index firstItem
+]
+
+{ #category : #accessing }
 SoilSkipListDictionary >> first: anInteger [ 
 	^ (self index first: anInteger) collect: [ :each | self objectFromKey: each ]  
 ]
