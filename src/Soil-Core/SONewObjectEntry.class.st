@@ -3,7 +3,9 @@ Class {
 	#superclass : #SOJournalEntry,
 	#instVars : [
 		'objectId',
-		'bytes'
+		'bytes',
+		'position',
+		'record'
 	],
 	#category : #'Soil-Core'
 }
@@ -19,23 +21,30 @@ SONewObjectEntry >> bytes: aCollection [
 	bytes := aCollection
 ]
 
-{ #category : #accessing }
-SONewObjectEntry >> commit [
-	self objectRepository  
-		at: objectId 
-		put: bytes
-]
-
 { #category : #'as yet unclassified' }
 SONewObjectEntry >> commitIn: transaction [ 
-	transaction objectRepository  
+	position := transaction objectRepository  
 		at: objectId 
-		put: bytes
+		put: bytes.
+	record ifNotNil: [ 
+		record position: position ]
 ]
 
 { #category : #accessing }
 SONewObjectEntry >> objectId: aSOObjectId [ 
 	objectId := aSOObjectId
+]
+
+{ #category : #accessing }
+SONewObjectEntry >> record [
+
+	^ record
+]
+
+{ #category : #accessing }
+SONewObjectEntry >> record: anObject [
+
+	record := anObject
 ]
 
 { #category : #writing }

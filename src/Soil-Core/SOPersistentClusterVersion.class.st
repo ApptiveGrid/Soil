@@ -53,6 +53,11 @@ SOPersistentClusterVersion >> newMaterializer [
 	^ transaction newMaterializer
 ]
 
+{ #category : #accessing }
+SOPersistentClusterVersion >> position: anInteger [ 
+	position := anInteger
+]
+
 { #category : #printing }
 SOPersistentClusterVersion >> printOn: aStream [ 
 	aStream << 'persistent record: '.

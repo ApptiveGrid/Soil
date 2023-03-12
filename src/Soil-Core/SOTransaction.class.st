@@ -191,11 +191,29 @@ SOTransaction >> checkpoint [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SOTransaction >> checkpointAndContinue [
+	self 
+		checkpoint;
+		continue
+]
+
 { #category : #accessing }
 SOTransaction >> commit [
 	self 
 		checkpoint;
 		abort
+]
+
+{ #category : #actions }
+SOTransaction >> continue [
+	recordsToCommit do: [ :record | | persistentRecord |
+		persistentRecord := record asPersistentClusterVersion.
+		objectMap at: record object put: persistentRecord.
+		idMap at: record objectId put: persistentRecord ].
+	recordsToCommit := nil.
+	readVersion := writeVersion.
+	journal := nil
 ]
 
 { #category : #aborting }
