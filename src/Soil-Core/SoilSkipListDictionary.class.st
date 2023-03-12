@@ -104,14 +104,16 @@ SoilSkipListDictionary >> soilClusterRootIn: aTransaction [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilLoadedIn: aTransaction [
-	transaction := aTransaction 
+	transaction := aTransaction.
+	"when being materialized newValues is not initialized so we do it here"
+	newValues := Dictionary new 
 ]
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilSerialize: aSerializer [ 
 	| objectId |
 	super soilSerialize: aSerializer.
-	index path ifNil: [  
+	self index path ifNil: [  
 		aSerializer registerIndexedObject: self ].
 	newValues keysAndValuesDo: [ :key :object |
 		objectId := transaction makeRoot: object.

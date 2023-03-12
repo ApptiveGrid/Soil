@@ -297,8 +297,9 @@ SOTransaction >> makeRoot: anObject [
 { #category : #public }
 SOTransaction >> markDirty: anObject [
 	| record |
+	"look up the non-proxy object in the local cache"
 	record := objectMap 
-		at: anObject 
+		at: anObject theNonSoilProxy
 		ifAbsent: [ SoilNotAClusterRoot signal: 'cannot mark dirty a non-existing root' ].
 	record beChanged. 
 	

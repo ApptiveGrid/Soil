@@ -137,7 +137,6 @@ SoilPageRegistry >> readPageAt: anInteger [
 	page := skipList newPage 
 		registry: self;
 		readFrom: stream.
-	((anInteger = 1) and: [ page items size = 2 ]) ifTrue: [ self halt ].
 	"(pages size > anInteger) ifFalse: [ 
 		 pages := pages grownBy: (anInteger - pages size)]."
 	pages at: anInteger put: page.
