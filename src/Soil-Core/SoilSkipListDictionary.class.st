@@ -85,6 +85,14 @@ SoilSkipListDictionary >> maxLevel: anInteger [
 	index maxLevel: anInteger 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipListDictionary >> nextAfter: key [  
+	| page |
+	page := (self index iteratorForKey: key asInteger) page.
+	^ page itemAfter: key asInteger.
+
+]
+
 { #category : #accessing }
 SoilSkipListDictionary >> objectFromKey: key [ 
 	| objectId |

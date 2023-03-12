@@ -20,6 +20,11 @@ SoilSkipListIterator >> levelAt: anInteger [
 ]
 
 { #category : #accessing }
+SoilSkipListIterator >> levels [
+	^ levels
+]
+
+{ #category : #accessing }
 SoilSkipListIterator >> maxLevel: anInteger [ 
 	maxLevel := anInteger.
 	levels := Array new: anInteger  

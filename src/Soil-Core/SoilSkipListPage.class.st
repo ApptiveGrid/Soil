@@ -108,6 +108,14 @@ SoilSkipListPage >> isDirty [
 	^ dirty 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipListPage >> itemAfter: key [ 
+	| i |
+	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ self halt ] .
+	(i > (items size - 1)) ifTrue: [ self halt ].
+	^ items at: i + 1
+]
+
 { #category : #accessing }
 SoilSkipListPage >> itemAt: anInteger put: anObject [ 
 	items 
