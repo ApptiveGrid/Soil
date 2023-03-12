@@ -203,6 +203,11 @@ SOTransaction >> dirtyObjects [
 	^ (idMap select: [ :each | each hasChanged ]) collect: #object
 ]
 
+{ #category : #testing }
+SOTransaction >> hasModifications [ 
+	^ self dirtyObjects notEmpty
+]
+
 { #category : #'as yet unclassified' }
 SOTransaction >> idOf: anObject [ 
 	| id |
@@ -244,7 +249,7 @@ SOTransaction >> isAborted [
 
 { #category : #testing }
 SOTransaction >> isChanged [
-	^ self dirtyObjects notEmpty
+	^ self hasModifications 
 ]
 
 { #category : #testing }

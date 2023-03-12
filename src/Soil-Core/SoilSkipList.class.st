@@ -48,11 +48,6 @@ SoilSkipList >> close [
 	self pageRegistry close
 ]
 
-{ #category : #accessing }
-SoilSkipList >> defaultKeySize [
-	^ 16
-]
-
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
@@ -125,7 +120,6 @@ SoilSkipList >> keySize [
 { #category : #accessing }
 SoilSkipList >> keySize: anObject [
 
-	"keySize := anObject"
 	self headerPage keySize: anObject
 ]
 

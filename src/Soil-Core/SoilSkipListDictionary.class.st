@@ -29,7 +29,6 @@ SoilSkipListDictionary >> at: key [
 
 { #category : #accessing }
 SoilSkipListDictionary >> at: key put: anObject [
-	| objectId |
 "	objectId := transaction makeRoot: anObject.
 "	"(transaction isPersistent: anObject) ifFalse: [ 
 		transaction makeRoot: anObject ]."
