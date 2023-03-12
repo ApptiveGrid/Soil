@@ -17,7 +17,7 @@ SoilSkipListTest >> setUp [
 		path: 'sunit-skiplist';
 		destroy;
 		open;
-		initializeList
+		initializeFilesystem
 ]
 
 { #category : #tests }

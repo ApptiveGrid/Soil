@@ -21,11 +21,6 @@ SoilSerializer class >> serializeToBytes: anObject [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilSerializer >> createSkipListIndex: anObject [ 
-	^ transaction createSkipListIndex: anObject 
-]
-
 { #category : #writing }
 SoilSerializer >> nextPutArray: anArray [ 
 	self 
@@ -186,6 +181,11 @@ SoilSerializer >> nextPutSystemDictionary: aCollection [
 { #category : #writing }
 SoilSerializer >> notSupportedError: anObject [ 
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
+]
+
+{ #category : #'as yet unclassified' }
+SoilSerializer >> registerIndexedObject: anObject [ 
+	^ transaction registerIndexedObject: anObject 
 ]
 
 { #category : #registry }

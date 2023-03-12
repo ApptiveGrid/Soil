@@ -91,15 +91,15 @@ SoilSkipList >> headerPage [
 	^ self pageRegistry headerPage
 ]
 
+{ #category : #initialization }
+SoilSkipList >> initializeFilesystem [ 
+	self pageRegistry 
+		initializeFilesystem
+]
+
 { #category : #writing }
 SoilSkipList >> initializeHeaderPage [
 	self pageRegistry initializeHeaderPage
-]
-
-{ #category : #initialization }
-SoilSkipList >> initializeList [ 
-	self pageRegistry 
-		initializeFilesystem
 ]
 
 { #category : #'as yet unclassified' }

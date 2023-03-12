@@ -80,11 +80,6 @@ SOObjectSegment >> close [
 		objectFile close ]
 ]
 
-{ #category : #'as yet unclassified' }
-SOObjectSegment >> createSkipListIndex: aSoilSkipListDictionary [ 
-	^ self indexManager createSkipListIndex: aSoilSkipListDictionary 
-]
-
 { #category : #accessing }
 SOObjectSegment >> id [
 
@@ -197,6 +192,11 @@ SOObjectSegment >> path [
 { #category : #printing }
 SOObjectSegment >> printOn: aStream [ 
 	aStream << 'segment #' << id asString 
+]
+
+{ #category : #'as yet unclassified' }
+SOObjectSegment >> registerIndexedObject: aSoilSkipListDictionary [ 
+	^ self indexManager registerIndexedObject: aSoilSkipListDictionary 
 ]
 
 { #category : #accessing }

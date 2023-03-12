@@ -13,13 +13,6 @@ SoilIndexManager >> close [
 	
 ]
 
-{ #category : #'as yet unclassified' }
-SoilIndexManager >> createSkipListIndex: aSoilSkipListDictionary [ 
-	^ aSoilSkipListDictionary index
-		path: segment path / aSoilSkipListDictionary id, #index;
-		initializeList
-]
-
 { #category : #initialization }
 SoilIndexManager >> initializeFilesystem [
 	
@@ -28,6 +21,13 @@ SoilIndexManager >> initializeFilesystem [
 { #category : #'instance creation' }
 SoilIndexManager >> open [
 	
+]
+
+{ #category : #'as yet unclassified' }
+SoilIndexManager >> registerIndexedObject: aSoilSkipListDictionary [ 
+	^ aSoilSkipListDictionary index
+		path: segment path / aSoilSkipListDictionary id, #index;
+		initializeFilesystem
 ]
 
 { #category : #accessing }

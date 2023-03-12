@@ -198,14 +198,6 @@ SOTransaction >> commit [
 		abort
 ]
 
-{ #category : #'as yet unclassified' }
-SOTransaction >> createSkipListIndex: anObject [ 
-	| objectId segment |
-	objectId := (objectMap at: anObject) objectId.
-	segment := self objectRepository segmentAt: objectId segment.
-	^ segment createSkipListIndex: anObject
-]
-
 { #category : #aborting }
 SOTransaction >> dirtyObjects [
 	^ (idMap select: [ :each | each hasChanged ]) collect: #object
@@ -302,7 +294,7 @@ SOTransaction >> markDirty: anObject [
 	| record |
 	record := objectMap 
 		at: anObject 
-		ifAbsent: [ Error signal: 'cannot mark dirty a non-existing root' ].
+		ifAbsent: [ SoilNotAClusterRoot signal: 'cannot mark dirty a non-existing root' ].
 	record beChanged. 
 	
 ]
@@ -405,6 +397,14 @@ SOTransaction >> readVersion: anInteger [
 { #category : #accessing }
 SOTransaction >> records [
 	^ idMap values
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> registerIndexedObject: anObject [ 
+	| objectId segment |
+	objectId := (objectMap at: anObject) objectId.
+	segment := self objectRepository segmentAt: objectId segment.
+	^ segment registerIndexedObject: anObject
 ]
 
 { #category : #'as yet unclassified' }

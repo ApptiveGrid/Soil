@@ -113,7 +113,7 @@ SoilSkipListDictionary >> soilSerialize: aSerializer [
 	| objectId |
 	super soilSerialize: aSerializer.
 	index path ifNil: [  
-		aSerializer createSkipListIndex: self ].
+		aSerializer registerIndexedObject: self ].
 	newValues keysAndValuesDo: [ :key :object |
 		objectId := transaction makeRoot: object.
 		objectId initializeIndex: transaction objectRepository.
