@@ -139,6 +139,7 @@ SoilSkipListPage >> keySize [
 
 { #category : #accessing }
 SoilSkipListPage >> keySize: anInteger [ 
+	(anInteger = 0) ifTrue: [ self halt ].
 	keySize := anInteger 
 ]
 

@@ -119,9 +119,6 @@ SoilSkipList >> iteratorForKey: key [
 
 { #category : #accessing }
 SoilSkipList >> keySize [
-
-	"^ keySize ifNil: [ 
-		keySize := self defaultKeySize ]"
 	^ self headerPage keySize
 ]
 
