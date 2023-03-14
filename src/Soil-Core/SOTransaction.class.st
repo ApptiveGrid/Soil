@@ -307,8 +307,10 @@ SOTransaction >> makePersistent: anObject [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> makeRoot: anObject [ 
+	| objectId |
+	objectId := self addClusterObject: anObject.
 	anObject soilClusterRootIn: self.
-	^ self addClusterObject: anObject.
+	^ objectId
 
 ]
 

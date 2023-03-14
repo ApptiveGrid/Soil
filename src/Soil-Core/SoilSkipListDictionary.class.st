@@ -29,11 +29,9 @@ SoilSkipListDictionary >> at: key [
 
 { #category : #accessing }
 SoilSkipListDictionary >> at: key put: anObject [
-"	objectId := transaction makeRoot: anObject.
-"	"(transaction isPersistent: anObject) ifFalse: [ 
-		transaction makeRoot: anObject ]."
-	
-	"newValues at: key put: objectId"
+	transaction ifNotNil: [
+		transaction makeRoot: anObject.
+		transaction markDirty: self ].
 	newValues at: key put: anObject
 ]
 
@@ -112,7 +110,12 @@ SoilSkipListDictionary >> size [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilClusterRootIn: aTransaction [
-	transaction := aTransaction 
+	transaction ifNotNil: [ ^ self ].
+	transaction := aTransaction.
+	newValues ifNotEmpty: [
+		newValues values do: [ :object |
+			transaction makeRoot: object ].
+		transaction markDirty: self]
 ]
 
 { #category : #'as yet unclassified' }

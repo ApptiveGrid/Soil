@@ -30,7 +30,7 @@ SORangeLock class >> from: from to: to context: lockContext [
 { #category : #'as yet unclassified' }
 SORangeLock >> conflictsFrom: aFrom to: aTo context: contextObject [ 
 	"conflicts if ranges overlap but only for different contexts"
-	^ (self intersectsFrom: from to: to) &  (context ~~ contextObject)
+	^ (self intersectsFrom: aFrom to: aTo) &  (context ~~ contextObject)
 ]
 
 { #category : #'as yet unclassified' }
