@@ -21,6 +21,13 @@ SoilPersistentDictionaryTest >> setUp [
 		initializeFilesystem
 ]
 
+{ #category : #running }
+SoilPersistentDictionaryTest >> tearDown [ 
+	super tearDown.
+	soil ifNotNil: [ 
+		soil close ]
+]
+
 { #category : #tests }
 SoilPersistentDictionaryTest >> testAt [
 

@@ -42,6 +42,13 @@ SoilTest >> simpleGraph [
 					label: 'nested under cluster')))
 ]
 
+{ #category : #running }
+SoilTest >> tearDown [ 
+	super tearDown.
+	soil ifNotNil: [ 
+		soil close ]
+]
+
 { #category : #tests }
 SoilTest >> testInitializeDatabase [
 	self assert: (soil path / #segments / '1' / #index) exists

@@ -41,11 +41,13 @@ SOTransaction >> acquireLocksAndDetectWriteSkew [
 
 { #category : #adding }
 SOTransaction >> addClusterObject: anObject [ 
-	objectMap at: anObject ifPresent: [ ^ self ].
+	| objectId |
+	objectMap at: anObject ifPresent: [ :record |  ^ record objectId ].
+	objectId := self newObjectId .
 	self 
-		atObjectId: self newObjectId 
+		atObjectId: objectId
 		putObject: anObject.
-	^ anObject
+	^ objectId
 
 ]
 
@@ -189,6 +191,13 @@ SOTransaction >> checkpoint [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SOTransaction >> checkpointAndContinue [
+	self 
+		checkpoint;
+		continue
+]
+
 { #category : #accessing }
 SOTransaction >> commit [
 	self 
@@ -196,9 +205,25 @@ SOTransaction >> commit [
 		abort
 ]
 
+{ #category : #actions }
+SOTransaction >> continue [
+	recordsToCommit do: [ :record | | persistentRecord |
+		persistentRecord := record asPersistentClusterVersion.
+		objectMap at: record object put: persistentRecord.
+		idMap at: record objectId put: persistentRecord ].
+	recordsToCommit := nil.
+	readVersion := writeVersion.
+	journal := nil
+]
+
 { #category : #aborting }
 SOTransaction >> dirtyObjects [
 	^ (idMap select: [ :each | each hasChanged ]) collect: #object
+]
+
+{ #category : #testing }
+SOTransaction >> hasModifications [ 
+	^ self dirtyObjects notEmpty
 ]
 
 { #category : #'as yet unclassified' }
@@ -241,6 +266,11 @@ SOTransaction >> isAborted [
 ]
 
 { #category : #testing }
+SOTransaction >> isChanged [
+	^ self hasModifications 
+]
+
+{ #category : #testing }
 SOTransaction >> isRoot: anObject [
 	self flag: #todo.
 	"this is surely not true but a shortcut for now"
@@ -252,6 +282,14 @@ SOTransaction >> isRoot: anObject [
 { #category : #'as yet unclassified' }
 SOTransaction >> lockObjectId: aSOObjectId [ 
 	^ self objectRepository lockObjectId: aSOObjectId for: self
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> lookupIndex: anObject [ 
+	| objectId segment |
+	objectId := (objectMap at: anObject) objectId.
+	segment := self objectRepository segmentAt: objectId segment.
+	^ segment indexAt: anObject
 ]
 
 { #category : #public }
@@ -269,16 +307,20 @@ SOTransaction >> makePersistent: anObject [
 
 { #category : #'as yet unclassified' }
 SOTransaction >> makeRoot: anObject [ 
-	self addClusterObject: anObject.
-	anObject soilClusterRootIn: self
+	| objectId |
+	objectId := self addClusterObject: anObject.
+	anObject soilClusterRootIn: self.
+	^ objectId
+
 ]
 
 { #category : #public }
 SOTransaction >> markDirty: anObject [
 	| record |
+	"look up the non-proxy object in the local cache"
 	record := objectMap 
-		at: anObject 
-		ifAbsent: [ Error signal: 'cannot mark dirty a non-existing root' ].
+		at: anObject theNonSoilProxy
+		ifAbsent: [ SoilNotAClusterRoot signal: 'cannot mark dirty a non-existing root' ].
 	record beChanged. 
 	
 ]
@@ -381,6 +423,14 @@ SOTransaction >> readVersion: anInteger [
 { #category : #accessing }
 SOTransaction >> records [
 	^ idMap values
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> registerIndexedObject: anObject [ 
+	| objectId segment |
+	objectId := (objectMap at: anObject) objectId.
+	segment := self objectRepository segmentAt: objectId segment.
+	^ segment registerIndexedObject: anObject
 ]
 
 { #category : #'as yet unclassified' }

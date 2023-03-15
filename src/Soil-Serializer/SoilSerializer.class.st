@@ -183,6 +183,11 @@ SoilSerializer >> notSupportedError: anObject [
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSerializer >> registerIndexedObject: anObject [ 
+	^ transaction registerIndexedObject: anObject 
+]
+
 { #category : #registry }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 	| index externalIndex |

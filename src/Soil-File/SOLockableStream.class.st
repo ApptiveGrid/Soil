@@ -22,7 +22,8 @@ SOLockableStream class >> path: aStringOrFileReference [
 SOLockableStream >> close [
 	self releaseAllLocks.
 	fileStream ifNotNil: [  
-		fileStream close ].
+		fileStream closed 
+			ifFalse: [ fileStream close ] ].
 
 ]
 

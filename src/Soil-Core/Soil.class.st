@@ -71,7 +71,7 @@ Soil >> initializeFilesystem [
 	behaviorRegistry := SoilBehaviorRegistry new
 			soil: self;
 			initializeFilesystem;
-			yourself
+			yourself.
 ]
 
 { #category : #'as yet unclassified' }
@@ -127,7 +127,8 @@ Soil >> open [
 	behaviorRegistry := SoilBehaviorRegistry new
 			soil: self;
 			open;
-			yourself
+			yourself.
+
 	
 ]
 

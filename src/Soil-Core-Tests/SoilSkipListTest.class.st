@@ -16,8 +16,14 @@ SoilSkipListTest >> setUp [
 		valueSize: 8;
 		path: 'sunit-skiplist';
 		destroy;
-		open;
-		initializeList
+		initializeFilesystem
+]
+
+{ #category : #running }
+SoilSkipListTest >> tearDown [ 
+	super tearDown.
+	skipList ifNotNil: [ 
+		skipList close ]
 ]
 
 { #category : #tests }

@@ -126,7 +126,7 @@ SOCleanCodeTest >> testNoUnsentMessages [
 
 	"To be fixed, see https://github.com/ApptiveGrid/Soil/issues/24"
 	knownviolations :=
-	 #('idOf:' 'inspectionObject' 'versionSize' 'makePersistent:').
+	 #('idOf:' 'inspectionObject' 'versionSize' 'makePersistent:' 'nextAfter:').
 
 	found := found copyWithoutAll: knownviolations.
 

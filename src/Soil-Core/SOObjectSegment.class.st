@@ -6,7 +6,8 @@ Class {
 		'soil',
 		'objectRepository',
 		'indexFile',
-		'objectFile'
+		'objectFile',
+		'indexManager'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -51,7 +52,7 @@ SOObjectSegment >> at: anInteger putBytes: bytes [
 	position := self objectFile size.
 	objectFile appendBytes: bytes.
 	self indexFile at: anInteger putPosition: position.
-	^ bytes
+	^ position
 ]
 
 { #category : #accessing }
@@ -92,6 +93,11 @@ SOObjectSegment >> id: anObject [
 ]
 
 { #category : #accessing }
+SOObjectSegment >> indexAt: anIndexedObject [ 
+	^ anIndexedObject loadFrom: self path / anIndexedObject id , #index
+]
+
+{ #category : #accessing }
 SOObjectSegment >> indexFile [
 	^ indexFile ifNil: [
 		indexFile := SOObjectIndexFile new 
@@ -104,6 +110,15 @@ SOObjectSegment >> indexFile: aSOObjectIndexFile [
 	indexFile := aSOObjectIndexFile
 ]
 
+{ #category : #accessing }
+SOObjectSegment >> indexManager [ 
+	^ indexManager ifNil: [ 
+		indexManager := SoilIndexManager new 
+			segment: self;
+			open;
+			yourself ]
+]
+
 { #category : #initialization }
 SOObjectSegment >> initializeFilesystem [
 	self path ensureCreateDirectory.
@@ -112,6 +127,10 @@ SOObjectSegment >> initializeFilesystem [
 		initializeFilesystem;
 		close.
 	SOObjectIndexFile new
+		segment: self;
+		initializeFilesystem;
+		close.
+	SoilIndexManager new 
 		segment: self;
 		initializeFilesystem;
 		close
@@ -173,6 +192,11 @@ SOObjectSegment >> path [
 { #category : #printing }
 SOObjectSegment >> printOn: aStream [ 
 	aStream << 'segment #' << id asString 
+]
+
+{ #category : #'as yet unclassified' }
+SOObjectSegment >> registerIndexedObject: aSoilSkipListDictionary [ 
+	^ self indexManager registerIndexedObject: aSoilSkipListDictionary 
 ]
 
 { #category : #accessing }

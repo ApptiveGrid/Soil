@@ -63,7 +63,7 @@ SoilBehaviorRegistry >> initializeFilesystem [
 		keySize: 64;
 		valueSize: 8;
 		path: self path;
-		initializeList.
+		initializeFilesystem.
 	self addSpecialObjects.
 	index writePages
 ]

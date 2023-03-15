@@ -17,10 +17,10 @@ SoilBehaviorRegistryTest >> setUp [
 ]
 
 { #category : #running }
-SoilBehaviorRegistryTest >> tearDown [ 	
+SoilBehaviorRegistryTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
-		soil destroy ]
+		soil close ]
 ]
 
 { #category : #tests }

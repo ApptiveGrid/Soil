@@ -219,7 +219,13 @@ SoilMaterializer >> nextPersistentDictionary: aClass [
 
 { #category : #reading }
 SoilMaterializer >> nextSoilObject [ 
-	^ (TypeCodeMapping at: self nextByte) soilMaterialize: self 
+	| byte |
+
+	byte := self nextByte.
+	^ (TypeCodeMapping 
+		at: byte
+		ifAbsent: [ Error signal: 'cannot find type code for ', byte asString]) 
+			soilMaterialize: self 
 ]
 
 { #category : #registry }

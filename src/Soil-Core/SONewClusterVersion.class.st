@@ -3,7 +3,8 @@ Class {
 	#superclass : #SOClusterRecord,
 	#instVars : [
 		'externalObjects',
-		'previousVersionRecord'
+		'previousVersionRecord',
+		'position'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -23,6 +24,7 @@ SONewClusterVersion >> asJournalEntry [
 				oldBytes: previousVersionRecord bytes ]
 		ifFalse: [ SONewObjectEntry new ].
 	entry 
+		record: self;
 		objectId: objectId;
 		bytes: self serialize.
 
@@ -32,6 +34,20 @@ SONewClusterVersion >> asJournalEntry [
 { #category : #converting }
 SONewClusterVersion >> asNewClusterVersion [
 	^ self
+]
+
+{ #category : #converting }
+SONewClusterVersion >> asPersistentClusterVersion [
+	^ SOPersistentClusterVersion new
+		transaction: transaction;
+		position: position;
+		previousVersionPosition: previousVersionPosition;
+		objectId: objectId;
+		object: object;
+		version: version;
+		bytes: bytes
+		
+		 
 ]
 
 { #category : #'as yet unclassified' }
@@ -92,6 +108,11 @@ SONewClusterVersion >> lockIndex [
 ]
 
 { #category : #accessing }
+SONewClusterVersion >> position: anInteger [ 
+	position := anInteger
+]
+
+{ #category : #accessing }
 SONewClusterVersion >> previousVersionRecord: anObject [
 
 	previousVersionRecord := anObject
@@ -101,6 +122,7 @@ SONewClusterVersion >> previousVersionRecord: anObject [
 SONewClusterVersion >> printOn: aStream [ 
 	aStream << 'new record: '.
 	objectId printOn: aStream.
+	aStream << ' previous postion: ' << previousVersionPosition asString.
 	aStream << ' '.
 	object printOn: aStream.
 	

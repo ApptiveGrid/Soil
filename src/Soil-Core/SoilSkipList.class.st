@@ -2,11 +2,8 @@ Class {
 	#name : #SoilSkipList,
 	#superclass : #Object,
 	#instVars : [
-		'maxLevel',
 		'path',
-		'keySize',
-		'pageRegistry',
-		'valueSize'
+		'pageRegistry'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -51,11 +48,6 @@ SoilSkipList >> close [
 	self pageRegistry close
 ]
 
-{ #category : #accessing }
-SoilSkipList >> defaultKeySize [
-	^ 16
-]
-
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
@@ -75,6 +67,16 @@ SoilSkipList >> findPageCandidateFor: key [
 ]
 
 { #category : #accessing }
+SoilSkipList >> first: anInteger [ 
+	^ ((self pageAt: 1) items allButFirst allButLast first: 3) collect: #key
+]
+
+{ #category : #accessing }
+SoilSkipList >> firstItem [
+	^ self startPage firstItem
+]
+
+{ #category : #accessing }
 SoilSkipList >> firstPage [
 	^ self pageRegistry pageAt: 1
 ]
@@ -89,23 +91,23 @@ SoilSkipList >> headerPage [
 	^ self pageRegistry headerPage
 ]
 
+{ #category : #initialization }
+SoilSkipList >> initializeFilesystem [ 
+	self pageRegistry 
+		initializeFilesystem
+]
+
 { #category : #writing }
 SoilSkipList >> initializeHeaderPage [
 	self pageRegistry initializeHeaderPage
-]
-
-{ #category : #initialization }
-SoilSkipList >> initializeList [ 
-	self pageRegistry 
-		initializeFilesystem
 ]
 
 { #category : #'as yet unclassified' }
 SoilSkipList >> iteratorForKey: key [
 	| currentPage iterator right |
 	currentPage := self startPage.
-	iterator := SoilSkipListIterator new maxLevel: maxLevel.
-	maxLevel to: 1 by: -1 do: [ :level |
+	iterator := SoilSkipListIterator new maxLevel: self maxLevel.
+	self maxLevel to: 1 by: -1 do: [ :level |
 		[ 
 			right := currentPage rightAt: level.
 			right > 0 and: [ (self pageRegistry pageAt: right) smallestKey < key ] ]
@@ -117,33 +119,30 @@ SoilSkipList >> iteratorForKey: key [
 
 { #category : #accessing }
 SoilSkipList >> keySize [
-
-	^ keySize ifNil: [ 
-		keySize := self defaultKeySize ]
+	^ self headerPage keySize
 ]
 
 { #category : #accessing }
 SoilSkipList >> keySize: anObject [
 
-	keySize := anObject
+	self headerPage keySize: anObject
 ]
 
 { #category : #actions }
 SoilSkipList >> load [
-	maxLevel := self stream 
-		position: 0;
-		next.
 	self readPageAt: 1
 ]
 
 { #category : #accessing }
 SoilSkipList >> maxLevel [
-	^ maxLevel
+	"^ maxLevel"
+	^ self headerPage maxLevel
 ]
 
 { #category : #accessing }
 SoilSkipList >> maxLevel: anInteger [ 
-	maxLevel := anInteger 
+	"maxLevel := anInteger "
+	self headerPage maxLevel: anInteger 
 ]
 
 { #category : #'instance creation' }
@@ -195,6 +194,11 @@ SoilSkipList >> path: aStringOrFileReference [
 	path := aStringOrFileReference asFileReference 
 ]
 
+{ #category : #accessing }
+SoilSkipList >> size [ 
+	^ self pageRegistry allItems size - 2
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipList >> startPage [
 	^ self pageRegistry startPage
@@ -202,12 +206,14 @@ SoilSkipList >> startPage [
 
 { #category : #accessing }
 SoilSkipList >> valueSize [
-	^ 8
+	"^ 8"
+	^ self headerPage valueSize
 ]
 
 { #category : #accessing }
 SoilSkipList >> valueSize: anInteger [ 
-	valueSize := anInteger
+	"valueSize := anInteger"
+	self headerPage valueSize: anInteger 
 ]
 
 { #category : #writing }

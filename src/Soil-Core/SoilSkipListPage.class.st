@@ -45,6 +45,11 @@ SoilSkipListPage >> biggestKey [
 	^ items last key
 ]
 
+{ #category : #accessing }
+SoilSkipListPage >> firstItem [
+	^ items first
+]
+
 { #category : #testing }
 SoilSkipListPage >> hasRoom [
 	^ self headerSize + ((items size + 1) * (keySize + valueSize)) <= self pageSize
@@ -108,6 +113,14 @@ SoilSkipListPage >> isDirty [
 	^ dirty 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipListPage >> itemAfter: key [ 
+	| i |
+	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ self halt ] .
+	(i >= (items size - 1)) ifTrue: [ ^ nil].
+	^ items at: i + 1
+]
+
 { #category : #accessing }
 SoilSkipListPage >> itemAt: anInteger put: anObject [ 
 	items 
@@ -139,6 +152,7 @@ SoilSkipListPage >> keySize [
 
 { #category : #accessing }
 SoilSkipListPage >> keySize: anInteger [ 
+	(anInteger = 0) ifTrue: [ self halt ].
 	keySize := anInteger 
 ]
 

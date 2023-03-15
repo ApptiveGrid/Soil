@@ -4,3 +4,8 @@ Extension { #name : #Object }
 Object >> soilClusterRootIn: aSOTransaction [ 
 	
 ]
+
+{ #category : #'*Soil-Core' }
+Object >> theNonSoilProxy [
+	^ self 
+]
