@@ -10,11 +10,6 @@ Class {
 	#category : #'Soil-Core'
 }
 
-{ #category : #materializing }
-SoilSkipListDictionary class >> soilMaterialize: aMaterializer [ 
-	self halt.
-]
-
 { #category : #accessing }
 SoilSkipListDictionary class >> soilTransientInstVars [ 
 	^ #( index transaction newValues )
@@ -69,6 +64,15 @@ SoilSkipListDictionary >> initialize [
 { #category : #accessing }
 SoilSkipListDictionary >> keySize: anInteger [ 
 	index keySize: anInteger 
+]
+
+{ #category : #accessing }
+SoilSkipListDictionary >> last [
+	| objectId bytes assoc |
+	assoc := self index last.
+	assoc ifNil: [ ^ nil ].
+	objectId := SOObjectId readFrom: assoc value readStream.
+	^ assoc key -> (transaction objectWithId: objectId)
 ]
 
 { #category : #private }

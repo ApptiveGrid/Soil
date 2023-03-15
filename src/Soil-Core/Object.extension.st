@@ -1,8 +1,18 @@
 Extension { #name : #Object }
 
 { #category : #'*Soil-Core' }
+Object >> asSoilSignal [ 
+	^ SoilSignal on: self 
+]
+
+{ #category : #'*Soil-Core' }
 Object >> soilClusterRootIn: aSOTransaction [ 
 	
+]
+
+{ #category : #'*Soil-Core' }
+Object >> soilEmit [ 
+	self asSoilSignal emit
 ]
 
 { #category : #'*Soil-Core' }

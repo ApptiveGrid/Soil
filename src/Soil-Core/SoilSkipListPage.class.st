@@ -157,6 +157,13 @@ SoilSkipListPage >> keySize: anInteger [
 ]
 
 { #category : #accessing }
+SoilSkipListPage >> lastItem [
+	(items size = 2) ifTrue: [ ^ nil ].
+	(items size = 3) ifTrue: [ ^ items second ].
+	self halt.
+]
+
+{ #category : #accessing }
 SoilSkipListPage >> level [
 	^ level
 ]

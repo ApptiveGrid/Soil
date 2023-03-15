@@ -128,6 +128,19 @@ SoilSkipList >> keySize: anObject [
 	self headerPage keySize: anObject
 ]
 
+{ #category : #accessing }
+SoilSkipList >> last [
+	| key  iterator |
+	key := (SoilSkipListSentinel upper keySize: self keySize) numericValue.
+	iterator := self iteratorForKey: key.
+	^ iterator page lastItem
+]
+
+{ #category : #accessing }
+SoilSkipList >> lastPage [
+	self shouldBeImplemented.
+]
+
 { #category : #actions }
 SoilSkipList >> load [
 	self readPageAt: 1

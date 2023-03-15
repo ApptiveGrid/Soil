@@ -5,7 +5,7 @@ Class {
 		'transaction',
 		'dict'
 	],
-	#category : #'Soil-Core-Collections'
+	#category : #'Soil-Serializer'
 }
 
 { #category : #'instance creation' }
