@@ -55,7 +55,7 @@ SOObjectId >> asByteArray [
 
 { #category : #converting }
 SOObjectId >> asByteArrayOfSize: anInteger [ 
-	(anInteger = 8) ifFalse: [ self halt ].
+	(anInteger = 8) ifFalse: [ Error signal: 'for now an objectId is of size 8' ].
 	^ self asByteArray 
 ]
 

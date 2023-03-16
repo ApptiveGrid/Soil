@@ -20,7 +20,7 @@ SOObjectFile >> atPosition: anInteger [
 	stream position: anInteger.
 	clusterVersion := SOPersistentClusterVersion readFrom: stream.
 	(clusterVersion position = anInteger) ifFalse: [ 
-		self halt ].
+		Error signal: 'position do not match' ].
 	^ clusterVersion 
 ]
 

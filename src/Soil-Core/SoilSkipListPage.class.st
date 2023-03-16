@@ -159,7 +159,7 @@ SoilSkipListPage >> keySize [
 
 { #category : #accessing }
 SoilSkipListPage >> keySize: anInteger [ 
-	(anInteger = 0) ifTrue: [ self halt ].
+	(anInteger = 0) ifTrue: [ Error signal: 'cannot use key size 0' ].
 	keySize := anInteger 
 ]
 
@@ -167,7 +167,7 @@ SoilSkipListPage >> keySize: anInteger [
 SoilSkipListPage >> lastItem [
 	(items size = 2) ifTrue: [ ^ nil ].
 	(items size = 3) ifTrue: [ ^ items second ].
-	self halt.
+	self shouldBeImplemented 
 ]
 
 { #category : #accessing }
