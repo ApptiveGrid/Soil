@@ -42,7 +42,7 @@ SoilSkipListDictionary >> do: aBlock [
 { #category : #accessing }
 SoilSkipListDictionary >> first [
 	self index path ifNotNil: [  
-		^ self index firstItem ].
+		^ self objectFromByteArray: self index firstItem value ].
 	^ newValues at: newValues keys sorted first
 ]
 
@@ -109,6 +109,12 @@ SoilSkipListDictionary >> nextAfter: key [
 	page := (self index iteratorForKey: key asInteger) page.
 	^ page itemAfter: key asInteger.
 
+]
+
+{ #category : #enumerating }
+SoilSkipListDictionary >> objectFromByteArray: aByteArray [
+	
+	^ transaction objectWithId: (SOObjectId readFrom: aByteArray readStream)
 ]
 
 { #category : #accessing }
