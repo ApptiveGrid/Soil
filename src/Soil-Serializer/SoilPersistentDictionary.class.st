@@ -64,6 +64,13 @@ SoilPersistentDictionary >> collect: aBlock [
 	^ dict collect: aBlock
 ]
 
+{ #category : #enumerating }
+SoilPersistentDictionary >> detect: detectBlock ifNone: noneBlock [ 
+	^ dict values
+		detect: detectBlock 
+		ifNone: noneBlock 
+]
+
 { #category : #forwarded }
 SoilPersistentDictionary >> includesKey: key [
 	^dict includesKey: key

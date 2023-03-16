@@ -64,8 +64,7 @@ SOObjectProxy >> soilLoadedIn: aTransaction [
 
 { #category : #'as yet unclassified' }
 SOObjectProxy >> soilSerialize: aSerializer [ 
-	object ifNil: [ Error signal: 'object cannot be nil' ].
-	^ object soilSerialize: aSerializer 
+	^ self object soilSerialize: aSerializer 
 ]
 
 { #category : #'as yet unclassified' }
