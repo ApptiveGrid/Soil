@@ -6,6 +6,11 @@ Object >> asSoilSignal [
 ]
 
 { #category : #'*Soil-Core' }
+Object >> isSoilProxy [ 
+	^ false
+]
+
+{ #category : #'*Soil-Core' }
 Object >> soilClusterRootIn: aSOTransaction [ 
 	
 ]

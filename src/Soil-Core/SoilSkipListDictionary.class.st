@@ -118,6 +118,12 @@ SoilSkipListDictionary >> objectFromKey: key [
 	^ transaction objectWithId: objectId
 ]
 
+{ #category : #printing }
+SoilSkipListDictionary >> printOn: aStream [ 
+	super printOn: aStream.
+	aStream << ' id=' << id asString
+]
+
 { #category : #accessing }
 SoilSkipListDictionary >> size [ 
 	^ self index size

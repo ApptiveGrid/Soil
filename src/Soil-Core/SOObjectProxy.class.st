@@ -29,6 +29,11 @@ SOObjectProxy >> inspectionObject [
 
 ]
 
+{ #category : #testing }
+SOObjectProxy >> isSoilProxy [ 
+	^ true
+]
+
 { #category : #'reflective operations' }
 SOObjectProxy >> object [
 	^ object ifNil: [  
@@ -45,6 +50,11 @@ SOObjectProxy >> objectId [
 SOObjectProxy >> objectId: anObject [
 
 	objectId := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SOObjectProxy >> objectIsNotLoaded [ 
+	^ objectId isNil
 ]
 
 { #category : #'as yet unclassified' }
