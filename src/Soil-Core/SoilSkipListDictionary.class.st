@@ -48,7 +48,7 @@ SoilSkipListDictionary >> first [
 
 { #category : #accessing }
 SoilSkipListDictionary >> first: anInteger [ 
-	^ (self index first: anInteger) collect: [ :each | self objectFromKey: each ]  
+	^ (self index first: anInteger) collect: [ :each | self objectFromByteArray: each ]  
 ]
 
 { #category : #accessing }

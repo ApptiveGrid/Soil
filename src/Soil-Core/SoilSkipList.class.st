@@ -75,7 +75,14 @@ SoilSkipList >> findPageCandidateFor: key [
 
 { #category : #accessing }
 SoilSkipList >> first: anInteger [ 
-	^ ((self pageAt: 1) items allButFirst allButLast first: 3) collect: #key
+	| iterator col |
+	iterator := self iterator.
+	col := OrderedCollection new.
+	anInteger timesRepeat: [ 
+		(iterator next)
+			ifNotNil: [ :value | col add: value ]
+			ifNil: [ ^ col ]].
+	^ col
 ]
 
 { #category : #accessing }
