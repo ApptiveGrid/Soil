@@ -56,6 +56,13 @@ SoilSkipListPage >> firstItem [
 ]
 
 { #category : #testing }
+SoilSkipListPage >> hasItems [
+	self flag: #todo.
+	"need to filter lowest and highest key and check for zero"
+	^ items size > 2
+]
+
+{ #category : #testing }
 SoilSkipListPage >> hasRoom [
 	^ self headerSize + ((items size + 1) * (keySize + valueSize)) <= self pageSize
 ]

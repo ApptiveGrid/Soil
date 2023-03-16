@@ -72,6 +72,12 @@ SoilSkipListDictionary >> initialize [
 		yourself
 ]
 
+{ #category : #testing }
+SoilSkipListDictionary >> isEmpty [
+	newValues ifNotEmpty: [ ^ false ].
+	^ self index isEmpty
+]
+
 { #category : #accessing }
 SoilSkipListDictionary >> keySize: anInteger [ 
 	index keySize: anInteger 
@@ -131,8 +137,17 @@ SoilSkipListDictionary >> printOn: aStream [
 ]
 
 { #category : #accessing }
+SoilSkipListDictionary >> second [
+	self index path ifNotNil: [  
+		^ index iterator first; next ].
+	^ newValues associations second
+]
+
+{ #category : #accessing }
 SoilSkipListDictionary >> size [ 
-	^ self index size
+	^ self index path 
+		ifNotNil: [ self index size + newValues size ]
+		ifNil: [ newValues size ] 
 ]
 
 { #category : #'as yet unclassified' }

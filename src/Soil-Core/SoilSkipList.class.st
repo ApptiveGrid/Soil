@@ -116,6 +116,11 @@ SoilSkipList >> initializeHeaderPage [
 	self pageRegistry initializeHeaderPage
 ]
 
+{ #category : #testing }
+SoilSkipList >> isEmpty [
+	^ self pageRegistry startPage hasItems
+]
+
 { #category : #'public/accessing' }
 SoilSkipList >> iterator [ 
 	^ SoilSkipListIter on: self 
