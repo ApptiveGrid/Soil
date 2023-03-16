@@ -47,7 +47,12 @@ SoilSkipListPage >> biggestKey [
 
 { #category : #accessing }
 SoilSkipListPage >> firstItem [
-	^ items first
+	| item |
+	item := items first.
+	^ (item key = 0)
+		ifTrue: [ items second ]
+		ifFalse: [ item  ]
+	
 ]
 
 { #category : #testing }
@@ -115,10 +120,12 @@ SoilSkipListPage >> isDirty [
 
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> itemAfter: key [ 
-	| i |
-	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ self halt ] .
-	(i >= (items size - 1)) ifTrue: [ ^ nil].
-	^ items at: i + 1
+	| i item |
+	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
+	(i = items size) ifTrue: [ ^ nil].
+	item := items at: i + 1.
+	(item key > (2 raisedTo: 64)) ifTrue: [ ^ nil ].
+	^ item
 ]
 
 { #category : #accessing }

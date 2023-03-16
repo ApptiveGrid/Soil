@@ -30,9 +30,20 @@ SoilSkipListDictionary >> at: key put: anObject [
 	newValues at: key put: anObject
 ]
 
+{ #category : #enumerating }
+SoilSkipListDictionary >> do: aBlock [ 
+	| objectId |
+	self index do: [ :ba |
+		objectId := SOObjectId readFrom: ba readStream.
+		aBlock value: (transaction objectWithId: objectId) ].
+	newValues values do: [ :each | aBlock value: each ] 
+]
+
 { #category : #accessing }
 SoilSkipListDictionary >> first [
-	^ self index firstItem
+	self index path ifNotNil: [  
+		^ self index firstItem ].
+	^ newValues at: newValues keys sorted first
 ]
 
 { #category : #accessing }
@@ -140,4 +151,12 @@ SoilSkipListDictionary >> soilSerialize: aSerializer [
 		objectId initializeIndex: transaction objectRepository.
 		index at: key put: objectId ].
 	index writePages
+]
+
+{ #category : #accessing }
+SoilSkipListDictionary >> values [
+	| col |
+	col := OrderedCollection new.
+	self do: [ :each | col add: each ].
+	^ col
 ]

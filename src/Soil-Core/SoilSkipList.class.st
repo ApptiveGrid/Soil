@@ -17,6 +17,7 @@ SoilSkipList >> at: aByteArray [
 
 { #category : #private }
 SoilSkipList >> at: anObject ifAbsent: aBlock [
+	path ifNil: [ aBlock value ].
 	^ (self find: anObject) 
 		ifNotNil: [:node | node value ]
 		ifNil: [ aBlock value ] 
@@ -51,6 +52,12 @@ SoilSkipList >> close [
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
+]
+
+{ #category : #enumerating }
+SoilSkipList >> do: aBlock [
+	path ifNotNil: [ 
+		self iterator do: aBlock ]
 ]
 
 { #category : #private }
@@ -100,6 +107,11 @@ SoilSkipList >> initializeFilesystem [
 { #category : #writing }
 SoilSkipList >> initializeHeaderPage [
 	self pageRegistry initializeHeaderPage
+]
+
+{ #category : #'public/accessing' }
+SoilSkipList >> iterator [ 
+	^ SoilSkipListIter on: self 
 ]
 
 { #category : #'as yet unclassified' }
