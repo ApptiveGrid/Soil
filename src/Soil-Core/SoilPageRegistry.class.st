@@ -87,6 +87,17 @@ SoilPageRegistry >> initializeHeaderPage [
 ]
 
 { #category : #accessing }
+SoilPageRegistry >> lastPage [
+	| maxLevel page pageNumber |
+	maxLevel := skipList maxLevel.
+	page := self startPage.
+	[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
+		page := self pageAt: pageNumber ].
+	^ page
+	
+]
+
+{ #category : #accessing }
 SoilPageRegistry >> maxLevel [
 	^ skipList maxLevel
 ]

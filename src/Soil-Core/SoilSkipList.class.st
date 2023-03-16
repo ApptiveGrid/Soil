@@ -149,10 +149,7 @@ SoilSkipList >> keySize: anObject [
 
 { #category : #accessing }
 SoilSkipList >> last [
-	| key  iterator |
-	key := (SoilSkipListSentinel upper keySize: self keySize) numericValue.
-	iterator := self iteratorForKey: key.
-	^ iterator page lastItem
+	^ self pageRegistry lastPage lastItem
 ]
 
 { #category : #accessing }

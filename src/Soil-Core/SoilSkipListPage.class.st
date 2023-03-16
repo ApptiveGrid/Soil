@@ -165,9 +165,13 @@ SoilSkipListPage >> keySize: anInteger [
 
 { #category : #accessing }
 SoilSkipListPage >> lastItem [
-	(items size = 2) ifTrue: [ ^ nil ].
-	(items size = 3) ifTrue: [ ^ items second ].
-	self shouldBeImplemented 
+	| item maxKey |
+	maxKey := (2 raisedTo: (keySize * 8)) - 1. 
+	item := items last.
+	^ (item key = maxKey)
+		ifTrue: [ items at: items size - 1 ]
+		ifFalse: [ item ] 
+	
 ]
 
 { #category : #accessing }
