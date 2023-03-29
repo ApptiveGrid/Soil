@@ -24,11 +24,21 @@ SoilSkipListIter >> do: aBlock [
 
 { #category : #accessing }
 SoilSkipListIter >> first [
+	^ self firstAssociation ifNotNil: [ :assoc | assoc value ]
+]
+
+{ #category : #accessing }
+SoilSkipListIter >> firstAssociation [ 
 	^ skipList pageRegistry startPage firstItem
 ]
 
 { #category : #accessing }
 SoilSkipListIter >> next [
+	^ self nextAssociation ifNotNil: [ :assoc | assoc value ]
+]
+
+{ #category : #accessing }
+SoilSkipListIter >> nextAssociation [
 	| item i2 |
 	page ifNil: [ 
 		page := skipList pageRegistry startPage.
@@ -39,7 +49,7 @@ SoilSkipListIter >> next [
 				(page itemAfter: key)
 					ifNotNil: [ :i | 
 						key := i key. 
-						^ i value ]
+						^ i ]
 					ifNil: [ 
 						((page right at: 1) = 0) ifTrue: [ ^ nil ].
 						page := skipList pageRegistry pageAt: (page rightAt: 1).
@@ -47,7 +57,7 @@ SoilSkipListIter >> next [
 			ifNil: [
 				i2 := page firstItem.
 				key := i2 key.
-				^ i2 value]].
+				^ i2 ]].
 	Error signal: 'shouldnt happen'
 ]
 

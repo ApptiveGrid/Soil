@@ -131,7 +131,7 @@ SoilSkipListPage >> itemAfter: key [
 	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
 	(i = items size) ifTrue: [ ^ nil].
 	item := items at: i + 1.
-	(item key > (2 raisedTo: 64)) ifTrue: [ ^ nil ].
+	(item key >= ((2 raisedTo: 64) - 1)) ifTrue: [ ^ nil ].
 	^ item
 ]
 
