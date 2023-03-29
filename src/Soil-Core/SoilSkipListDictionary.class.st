@@ -30,6 +30,16 @@ SoilSkipListDictionary >> at: key put: anObject [
 	newValues at: key put: anObject
 ]
 
+{ #category : #accessing }
+SoilSkipListDictionary >> atIndex: anInteger [ 
+	| current iterator |
+	iterator := index iterator.
+	current := iterator first.
+	2 to: anInteger do: [ :idx |
+		current := iterator next ].
+	^ current value
+]
+
 { #category : #enumerating }
 SoilSkipListDictionary >> do: aBlock [ 
 	| objectId |

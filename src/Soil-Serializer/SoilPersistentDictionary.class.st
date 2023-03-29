@@ -118,3 +118,8 @@ SoilPersistentDictionary >> soilClusterRootIn: aTransaction [
 SoilPersistentDictionary >> soilLoadedIn: aSOTransaction [
 	transaction := aSOTransaction 
 ]
+
+{ #category : #accessing }
+SoilPersistentDictionary >> values [
+	^ dict values
+]
