@@ -32,6 +32,11 @@ SoilPersistentDictionary >> add: anAssociation [
 	^return
 ]
 
+{ #category : #accessing }
+SoilPersistentDictionary >> anyOne [ 
+	^ dict anyOne
+]
+
 { #category : #forwarded }
 SoilPersistentDictionary >> at: key [
 	^ dict at: key
