@@ -415,6 +415,12 @@ SOTransaction >> printOn: aStream [
 	aStream << 'transaction read: ' << readVersion asString << ', write: ' << writeVersion asString
 ]
 
+{ #category : #'as yet unclassified' }
+SOTransaction >> proxyForObjectId: aSOObjectId [ 
+	^ aSOObjectId asSoilObjectProxy 
+		transaction: self
+]
+
 { #category : #accessing }
 SOTransaction >> readVersion: anInteger [ 
 	readVersion := anInteger

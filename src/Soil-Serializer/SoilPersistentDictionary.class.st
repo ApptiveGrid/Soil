@@ -81,6 +81,11 @@ SoilPersistentDictionary >> initialize [
 	dict := Dictionary new
 ]
 
+{ #category : #testing }
+SoilPersistentDictionary >> isCollection [ 
+	^ true
+]
+
 { #category : #forwarded }
 SoilPersistentDictionary >> keysAndValuesDo: aBlock [
 	^ dict keysAndValuesDo: aBlock

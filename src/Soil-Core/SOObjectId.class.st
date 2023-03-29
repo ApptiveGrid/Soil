@@ -59,6 +59,12 @@ SOObjectId >> asByteArrayOfSize: anInteger [
 	^ self asByteArray 
 ]
 
+{ #category : #converting }
+SOObjectId >> asSoilObjectProxy [
+	^ SOObjectProxy new 
+		objectId: self
+]
+
 { #category : #comparing }
 SOObjectId >> hash [ 
 	^ segment hash bitXor: index hash
