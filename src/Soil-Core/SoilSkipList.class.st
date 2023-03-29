@@ -130,21 +130,6 @@ SoilSkipList >> iterator [
 	^ SoilSkipListIterator on: self 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilSkipList >> iteratorForKey: key [
-	| currentPage iterator right |
-	currentPage := self startPage.
-	iterator := self iterator .
-	self maxLevel to: 1 by: -1 do: [ :level |
-		[ 
-			right := currentPage rightAt: level.
-			right > 0 and: [ (self pageRegistry pageAt: right) smallestKey < key ] ]
-			whileTrue: [ currentPage := self pageRegistry pageAt: right  ].
-			iterator atLevel: level put: currentPage. ].
-	iterator page: currentPage.
-	^ iterator 
-]
-
 { #category : #accessing }
 SoilSkipList >> keySize [
 	^ self headerPage keySize
