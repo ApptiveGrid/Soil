@@ -133,20 +133,20 @@ SoilSkipList >> isEmpty [
 
 { #category : #'public/accessing' }
 SoilSkipList >> iterator [ 
-	^ SoilSkipListIter on: self 
+	^ SoilSkipListIterator on: self 
 ]
 
 { #category : #'as yet unclassified' }
 SoilSkipList >> iteratorForKey: key [
 	| currentPage iterator right |
 	currentPage := self startPage.
-	iterator := SoilSkipListIterator new maxLevel: self maxLevel.
+	iterator := self iterator .
 	self maxLevel to: 1 by: -1 do: [ :level |
 		[ 
 			right := currentPage rightAt: level.
 			right > 0 and: [ (self pageRegistry pageAt: right) smallestKey < key ] ]
 			whileTrue: [ currentPage := self pageRegistry pageAt: right  ].
-			iterator at: level put: currentPage. ].
+			iterator atLevel: level put: currentPage. ].
 	iterator page: currentPage.
 	^ iterator 
 ]
