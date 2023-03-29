@@ -44,6 +44,16 @@ SoilSkipList >> at: aKeyObject put: anObject [
 	^ anObject
 ]
 
+{ #category : #accessing }
+SoilSkipList >> atIndex: anInteger [ 
+	| current iterator |
+	iterator := self iterator.
+	current := iterator first.
+	2 to: anInteger do: [ :idx |
+		current := iterator next ].
+	^ current value
+]
+
 { #category : #'initialize-release' }
 SoilSkipList >> close [
 	self pageRegistry close

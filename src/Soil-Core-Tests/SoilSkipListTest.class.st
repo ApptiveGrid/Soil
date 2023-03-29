@@ -104,6 +104,15 @@ SoilSkipListTest >> testAddLastFitting [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testAtIndex [
+	| value |
+	1 to: 200 do: [ :n |
+		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	value := skipList atIndex: 133. 
+	self assert: value equals: #[ 1 2 3 4 5 6 7 8 ]
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testCreation [
 	self assert: skipList pages size equals: 1
 ]
