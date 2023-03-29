@@ -27,7 +27,8 @@ SoilSkipList >> at: anObject ifAbsent: aBlock [
 SoilSkipList >> at: aKeyObject put: anObject [
 	| key iterator page index newPage |
 	key := (aKeyObject asSkipListKeyOfSize: self keySize) asInteger.
-	iterator := self iteratorForKey: key.
+	iterator := self iterator.
+	iterator find: key.
 	page := iterator page.
 	index := page indexOfKey: key.
 	(index > 0)
@@ -72,15 +73,8 @@ SoilSkipList >> do: aBlock [
 
 { #category : #private }
 SoilSkipList >> find: aString [ 
-	| page key |
-	key := (aString asSkipListKeyOfSize: self keySize) asInteger.
-	page := self findPageCandidateFor: key.
-	^ (page valueAt: key) value
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipList >> findPageCandidateFor: key [
-	^ (self iteratorForKey: key) page
+	^ self iterator 
+		find: (aString asSkipListKeyOfSize: self keySize) asInteger
 ]
 
 { #category : #accessing }

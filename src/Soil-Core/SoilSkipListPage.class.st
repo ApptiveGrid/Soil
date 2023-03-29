@@ -30,6 +30,13 @@ SoilSkipListPage >> addItem: anAssociation [
 	dirty := true
 ]
 
+{ #category : #accessing }
+SoilSkipListPage >> associationAt: anInteger [ 
+	^ items 
+		detect: [:each | each key = anInteger ] 
+		ifNone: [ nil ]
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> beFirstPage [
 	index := 1.
@@ -289,9 +296,7 @@ SoilSkipListPage >> split [
 
 { #category : #accessing }
 SoilSkipListPage >> valueAt: anInteger [ 
-	^ items 
-		detect: [:each | each key = anInteger ] 
-		ifNone: [ nil ]
+	^ (self associationAt: anInteger) value
 ]
 
 { #category : #accessing }
