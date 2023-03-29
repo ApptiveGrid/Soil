@@ -159,7 +159,6 @@ Soil >> renameClassNamed: oldName to: newName [
 
 	"modify existing description and increment version"
 	behaviorDescription initializeFromBehavior: (Smalltalk at: newName).
-	behaviorDescription incrementVersion.
 
 	self behaviorRegistry
 		nameAt: newName

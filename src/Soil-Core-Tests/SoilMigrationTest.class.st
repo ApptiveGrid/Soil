@@ -214,6 +214,54 @@ SoilMigrationTest >> testMaterializingObjectWithChangedShape [
 ]
 
 { #category : #tests }
+SoilMigrationTest >> testMaterializingObjectWithIVarRemovedAndAddedBack [
+
+	| tx tx2 root materializedRoot object |
+
+	"this test checks that removing an ivar and adding it back later means this is a new ivar,
+	this makes sure iterating over behavior description history works, see
+	 PointerLayout>>#updateIvars:with:for:"
+	root := Dictionary new.
+	object := migrationClass new.
+	object
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2.
+	tx := soil newTransaction.
+	root at: #version1 put: object.
+	tx root: root.
+	tx commit.
+
+	"now we change the class and store an object with the changed shape"
+
+	migrationClass
+		removeSlot: (migrationClass slotNamed: #two).
+
+	object := migrationClass new.
+	object
+		instVarNamed: #one put: 'one'.
+	root
+		at: #version2 put: object.
+
+	tx := soil newTransaction.
+	tx root: root.
+	tx commit.
+
+	migrationClass := (SOBaseTestObject << #SOMigrationObject
+		layout: FixedLayout;
+		slots: { #one .#two . #three };
+		package: self class package name) install.
+
+	"load back, the object at #varsion1 loads the stored two ivars"
+	tx2 := soil newTransaction.
+	materializedRoot := tx2 root.
+	self assert: ((materializedRoot at: #version1) instVarNamed: #one ) equals: 1.
+	self assert: ((materializedRoot at: #version2) instVarNamed: #one ) equals: 'one'.
+	"the ivar for both is nil"
+	self assert: ((materializedRoot at: #version1) instVarNamed: #two ) equals: nil.
+	self assert: ((materializedRoot at: #version2) instVarNamed: #two ) equals: nil
+]
+
+{ #category : #tests }
 SoilMigrationTest >> testMaterializingObjectWithIvarRemoved [
 	"We can load an object that was saved with two ivars even if the current class has just one"
 	| tx tx2 materializedRoot object |
@@ -284,6 +332,43 @@ SoilMigrationTest >> testMaterializingObjectWithIvarRemovedThenCommit [
 	materializedRoot := tx2 root.
 	self assert: materializedRoot class instVarNames size equals: 1.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1
+]
+
+{ #category : #tests }
+SoilMigrationTest >> testMaterializingObjectWithMultipleChangesinHistory [
+	| tx tx2 root materializedRoot object |
+
+	"this test checks that we can read object where we change multiple times the class"
+	root := Dictionary new.
+	object := migrationClass new.
+	object
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2.
+	tx := soil newTransaction.
+	root at: #version1 put: object.
+	tx root: root.
+	tx commit.
+
+	"now we change the class and store an object with the changed shape"
+
+	migrationClass
+		removeSlot: (migrationClass slotNamed: #two).
+
+	object := migrationClass new.
+	object
+		instVarNamed: #one put: 'one'.
+	root
+		at: #version2 put: object.
+
+	tx := soil newTransaction.
+	tx root: root.
+	tx commit.
+
+	"load back, the object at #varsion1 loads the stored two ivars"
+	tx2 := soil newTransaction.
+	materializedRoot := tx2 root.
+	self assert: ((materializedRoot at: #version1) instVarNamed: #one ) equals: 1.
+	self assert: ((materializedRoot at: #version2) instVarNamed: #one ) equals: 'one'
 ]
 
 { #category : #tests }

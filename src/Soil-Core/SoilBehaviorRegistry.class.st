@@ -25,7 +25,7 @@ SoilBehaviorRegistry >> behaviorDescriptionWithIndex: behaviorIndex andVersion: 
 	versionsOfBehavior := versions at: behaviorIndex ifAbsent: [Error signal: 'shouldnt happen'].
 
 	^versionsOfBehavior
-		detect: [ :behav | behav version >= version ]
+		detect: [ :behav | behav version = version ]
 		ifNone: [(SOObjectNotFound new segment: 0; index: behaviorIndex) signal]
 ]
 
