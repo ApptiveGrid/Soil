@@ -152,6 +152,21 @@ SoilSkipListTest >> testIteratorDo [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testIteratorFindAndNext [
+	
+	| capacity iterator value |
+	capacity := skipList firstPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		skipList at: n put: (n asByteArrayOfSize: 8) ].
+	self assert: skipList pages size equals: 4.
+	iterator := skipList iterator.
+	value := iterator
+		find: 222;
+		next.
+	self assert: value equals: (223 asByteArrayOfSize: 8)
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testIteratorFirst [
 	
 	| capacity first |

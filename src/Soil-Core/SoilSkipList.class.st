@@ -27,7 +27,8 @@ SoilSkipList >> at: anObject ifAbsent: aBlock [
 SoilSkipList >> at: aKeyObject put: anObject [
 	| key iterator page index newPage |
 	key := (aKeyObject asSkipListKeyOfSize: self keySize) asInteger.
-	iterator := self iteratorForKey: key.
+	iterator := self iterator.
+	iterator find: key.
 	page := iterator page.
 	index := page indexOfKey: key.
 	(index > 0)
@@ -72,15 +73,8 @@ SoilSkipList >> do: aBlock [
 
 { #category : #private }
 SoilSkipList >> find: aString [ 
-	| page key |
-	key := (aString asSkipListKeyOfSize: self keySize) asInteger.
-	page := self findPageCandidateFor: key.
-	^ (page valueAt: key) value
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipList >> findPageCandidateFor: key [
-	^ (self iteratorForKey: key) page
+	^ self iterator 
+		find: (aString asSkipListKeyOfSize: self keySize) asInteger
 ]
 
 { #category : #accessing }
@@ -133,22 +127,7 @@ SoilSkipList >> isEmpty [
 
 { #category : #'public/accessing' }
 SoilSkipList >> iterator [ 
-	^ SoilSkipListIter on: self 
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipList >> iteratorForKey: key [
-	| currentPage iterator right |
-	currentPage := self startPage.
-	iterator := SoilSkipListIterator new maxLevel: self maxLevel.
-	self maxLevel to: 1 by: -1 do: [ :level |
-		[ 
-			right := currentPage rightAt: level.
-			right > 0 and: [ (self pageRegistry pageAt: right) smallestKey < key ] ]
-			whileTrue: [ currentPage := self pageRegistry pageAt: right  ].
-			iterator at: level put: currentPage. ].
-	iterator page: currentPage.
-	^ iterator 
+	^ SoilSkipListIterator on: self 
 ]
 
 { #category : #accessing }
