@@ -271,6 +271,11 @@ SOTransaction >> isChanged [
 ]
 
 { #category : #testing }
+SOTransaction >> isPersistent: anObject [
+	^ self isRoot: anObject
+]
+
+{ #category : #testing }
 SOTransaction >> isRoot: anObject [
 	self flag: #todo.
 	"this is surely not true but a shortcut for now"
