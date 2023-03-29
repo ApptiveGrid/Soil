@@ -4,7 +4,6 @@ Class {
 	#instVars : [
 		'skipList',
 		'page',
-		'index',
 		'key'
 	],
 	#category : #'Soil-Core-Index-SkipList'

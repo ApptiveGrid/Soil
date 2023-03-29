@@ -54,7 +54,7 @@ SOObjectProxy >> objectId: anObject [
 
 { #category : #'as yet unclassified' }
 SOObjectProxy >> objectIsNotLoaded [ 
-	^ objectId isNil
+	^ object isNil
 ]
 
 { #category : #'as yet unclassified' }

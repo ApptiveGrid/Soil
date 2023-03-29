@@ -52,13 +52,13 @@ SoilSkipListDictionary >> do: aBlock [
 { #category : #accessing }
 SoilSkipListDictionary >> first [
 	self index path ifNotNil: [  
-		^ self objectFromByteArray: self index firstItem value ].
+		^ self proxyFromByteArray: self index firstItem value ].
 	^ newValues at: newValues keys sorted first
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> first: anInteger [ 
-	^ (self index first: anInteger) collect: [ :each | self objectFromByteArray: each ]  
+	^ (self index first: anInteger) collect: [ :each | self proxyFromByteArray: each ]  
 ]
 
 { #category : #accessing }
@@ -127,23 +127,16 @@ SoilSkipListDictionary >> nextAfter: key [
 
 ]
 
-{ #category : #enumerating }
-SoilSkipListDictionary >> objectFromByteArray: aByteArray [
-	
-	^ transaction proxyForObjectId: (SOObjectId readFrom: aByteArray readStream)
-]
-
-{ #category : #accessing }
-SoilSkipListDictionary >> objectFromKey: key [ 
-	| objectId |
-	objectId := SOObjectId readFrom: (self index at: key) readStream.
-	^ transaction proxyForObjectId: objectId
-]
-
 { #category : #printing }
 SoilSkipListDictionary >> printOn: aStream [ 
 	super printOn: aStream.
 	aStream << ' id=' << id asString
+]
+
+{ #category : #enumerating }
+SoilSkipListDictionary >> proxyFromByteArray: aByteArray [
+	
+	^ transaction proxyForObjectId: (SOObjectId readFrom: aByteArray readStream)
 ]
 
 { #category : #accessing }
