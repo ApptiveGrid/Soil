@@ -3,9 +3,9 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'skipList',
-		'page',
-		'key',
-		'levels'
+		'levels',
+		'currentPage',
+		'currentKey'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -51,23 +51,23 @@ SoilSkipListIterator >> next [
 { #category : #accessing }
 SoilSkipListIterator >> nextAssociation [
 	| item i2 |
-	page ifNil: [ 
-		page := skipList pageRegistry startPage.
-		key := nil ].
-	[ page isNil ] whileFalse: [  
-		item := key 
+	currentPage ifNil: [ 
+		currentPage := skipList pageRegistry startPage.
+		currentKey := nil ].
+	[ currentPage isNil ] whileFalse: [  
+		item := currentKey 
 			ifNotNil: [  
-				(page itemAfter: key)
+				(currentPage itemAfter: currentKey)
 					ifNotNil: [ :i | 
-						key := i key. 
+						currentKey := i key. 
 						^ i ]
 					ifNil: [ 
-						((page right at: 1) = 0) ifTrue: [ ^ nil ].
-						page := skipList pageRegistry pageAt: (page rightAt: 1).
-						key := nil ] ]
+						((currentPage right at: 1) = 0) ifTrue: [ ^ nil ].
+						currentPage := skipList pageRegistry pageAt: (currentPage rightAt: 1).
+						currentKey := nil ] ]
 			ifNil: [
-				i2 := page firstItem.
-				key := i2 key.
+				i2 := currentPage firstItem.
+				currentKey := i2 key.
 				^ i2 ]].
 	Error signal: 'shouldnt happen'
 ]
@@ -75,13 +75,13 @@ SoilSkipListIterator >> nextAssociation [
 { #category : #accessing }
 SoilSkipListIterator >> page [
 
-	^ page
+	^ currentPage
 ]
 
 { #category : #accessing }
 SoilSkipListIterator >> page: anObject [
 
-	page := anObject
+	currentPage := anObject
 ]
 
 { #category : #printing }
