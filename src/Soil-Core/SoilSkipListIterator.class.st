@@ -30,14 +30,16 @@ SoilSkipListIterator >> do: aBlock [
 
 { #category : #private }
 SoilSkipListIterator >> find: key [
-	| right |
+	| pageIndex candidatePage |
 	currentPage := skipList startPage.
-	currentKey := key asInteger.
+	currentKey := key.
 	levels size to: 1 by: -1 do: [ :level |
 		[ 
-			right := currentPage rightAt: level.
-			right > 0 and: [ (self pageAt: right) smallestKey < currentKey] ]
-			whileTrue: [ currentPage := self pageAt: right  ].
+			pageIndex := currentPage rightAt: level.
+			(pageIndex > 0) and: [ 
+				candidatePage := self pageAt: pageIndex.
+				candidatePage smallestKey < currentKey ] ]
+					whileTrue: [ currentPage := candidatePage  ].
 			self atLevel: level put: currentPage. ].
 	^ currentPage valueAt: currentKey
 ]
