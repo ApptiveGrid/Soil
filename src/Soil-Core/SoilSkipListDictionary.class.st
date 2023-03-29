@@ -146,20 +146,6 @@ SoilSkipListDictionary >> printOn: aStream [
 	aStream << ' id=' << id asString
 ]
 
-{ #category : #removing }
-SoilSkipListDictionary >> removeIdentical: anObject [
-	| assoc keysToBeRemoved iterator |
-	iterator := index iterator.
-	assoc := iterator first.
-	keysToBeRemoved := Set new.
-	[assoc isNil] whileFalse: [
-		(assoc value isIdenticalTo: anObject) ifTrue: [ keysToBeRemoved add: assoc key ].
-		assoc := iterator next ].
-	keysToBeRemoved do: [ :key |
-		self removeKey: key  ]
-	
-]
-
 { #category : #accessing }
 SoilSkipListDictionary >> second [
 	self index path ifNotNil: [  
