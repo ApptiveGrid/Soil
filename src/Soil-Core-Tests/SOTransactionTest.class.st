@@ -20,7 +20,8 @@ SOTransactionTest >> setUp [
 { #category : #running }
 SOTransactionTest >> tearDown [ 
 	super tearDown.
-	soil destroy
+	soil ifNotNil: [ 
+		soil close ]
 ]
 
 { #category : #tests }

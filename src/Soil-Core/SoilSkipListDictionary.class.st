@@ -32,6 +32,10 @@ SoilSkipListDictionary >> at: key put: anObject [
 
 { #category : #accessing }
 SoilSkipListDictionary >> atIndex: anInteger [ 
+	| key |
+	index path ifNil: [ 
+		key := newValues keyAtIndex: anInteger ifAbsent: [ ^ nil ].
+		^ newValues at: key  ].
 	^ index atIndex: anInteger 
 ]
 
@@ -70,7 +74,7 @@ SoilSkipListDictionary >> index [
 { #category : #initialization }
 SoilSkipListDictionary >> initialize [ 
 	super initialize.
-	newValues := Dictionary new.
+	newValues := OrderedDictionary new.
 	id := UUID new asString36.
 	index := SoilSkipList new 
 		valueSize: 8;
@@ -91,6 +95,8 @@ SoilSkipListDictionary >> keySize: anInteger [
 { #category : #accessing }
 SoilSkipListDictionary >> last [
 	| objectId assoc |
+	index path ifNil: [ 
+		^ newValues at: (newValues keyAtIndex: newValues size) ].
 	assoc := self index last.
 	assoc ifNil: [ ^ nil ].
 	objectId := SOObjectId readFrom: assoc value readStream.
