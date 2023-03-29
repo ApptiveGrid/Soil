@@ -29,6 +29,11 @@ SOObjectProxy >> inspectionObject [
 
 ]
 
+{ #category : #testing }
+SOObjectProxy >> isSoilProxy [ 
+	^ true
+]
+
 { #category : #'reflective operations' }
 SOObjectProxy >> object [
 	^ object ifNil: [  
@@ -48,8 +53,18 @@ SOObjectProxy >> objectId: anObject [
 ]
 
 { #category : #'as yet unclassified' }
+SOObjectProxy >> objectIsNotLoaded [ 
+	^ object isNil
+]
+
+{ #category : #'as yet unclassified' }
 SOObjectProxy >> soilLoadedIn: aTransaction [ 
 	transaction := aTransaction  
+]
+
+{ #category : #'as yet unclassified' }
+SOObjectProxy >> soilSerialize: aSerializer [ 
+	^ self object soilSerialize: aSerializer 
 ]
 
 { #category : #'as yet unclassified' }

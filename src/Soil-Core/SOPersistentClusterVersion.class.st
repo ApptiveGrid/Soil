@@ -54,6 +54,11 @@ SOPersistentClusterVersion >> newMaterializer [
 ]
 
 { #category : #accessing }
+SOPersistentClusterVersion >> position [
+	^ position 
+]
+
+{ #category : #accessing }
 SOPersistentClusterVersion >> position: anInteger [ 
 	position := anInteger
 ]

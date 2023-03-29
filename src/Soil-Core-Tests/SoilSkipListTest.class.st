@@ -104,6 +104,15 @@ SoilSkipListTest >> testAddLastFitting [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testAtIndex [
+	| value |
+	1 to: 200 do: [ :n |
+		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	value := skipList atIndex: 133. 
+	self assert: value equals: #[ 1 2 3 4 5 6 7 8 ]
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testCreation [
 	self assert: skipList pages size equals: 1
 ]
@@ -125,6 +134,34 @@ SoilSkipListTest >> testFindKeyReverse [
 	"skipList writePages."
 	value := skipList find: 133. 
 	self assert: value equals: #[ 1 2 3 4 5 6 7 8 ]
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testIteratorDo [
+	
+	| capacity col |
+	capacity := skipList firstPage itemCapacity.
+	skipList at: 1 put: #[ 8 7 6 5 4 3 2 1 ].
+	2 to: capacity do: [ :n |
+		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	self assert: skipList pages size equals: 2.
+	col := OrderedCollection new.
+	skipList iterator do: [ :item | col add: item ].
+	self assert: col first equals: #[ 8 7 6 5 4 3 2 1 ].
+	self assert: col size equals: capacity
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testIteratorFirst [
+	
+	| capacity first |
+	capacity := skipList firstPage itemCapacity * 2.
+	skipList at: 1 put: #[ 8 7 6 5 4 3 2 1 ].
+	2 to: capacity do: [ :n |
+		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	self assert: skipList pages size equals: 4.
+	first := skipList iterator first.
+	self assert: first equals: #[ 8 7 6 5 4 3 2 1 ]
 ]
 
 { #category : #tests }

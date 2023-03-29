@@ -17,6 +17,7 @@ SoilSkipList >> at: aByteArray [
 
 { #category : #private }
 SoilSkipList >> at: anObject ifAbsent: aBlock [
+	path ifNil: [ aBlock value ].
 	^ (self find: anObject) 
 		ifNotNil: [:node | node value ]
 		ifNil: [ aBlock value ] 
@@ -43,6 +44,16 @@ SoilSkipList >> at: aKeyObject put: anObject [
 	^ anObject
 ]
 
+{ #category : #accessing }
+SoilSkipList >> atIndex: anInteger [ 
+	| current iterator |
+	iterator := self iterator.
+	current := iterator first.
+	2 to: anInteger do: [ :idx |
+		current := iterator next ].
+	^ current value
+]
+
 { #category : #'initialize-release' }
 SoilSkipList >> close [
 	self pageRegistry close
@@ -51,6 +62,12 @@ SoilSkipList >> close [
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
+]
+
+{ #category : #enumerating }
+SoilSkipList >> do: aBlock [
+	path ifNotNil: [ 
+		self iterator do: aBlock ]
 ]
 
 { #category : #private }
@@ -68,7 +85,14 @@ SoilSkipList >> findPageCandidateFor: key [
 
 { #category : #accessing }
 SoilSkipList >> first: anInteger [ 
-	^ ((self pageAt: 1) items allButFirst allButLast first: 3) collect: #key
+	| iterator col |
+	iterator := self iterator.
+	col := OrderedCollection new.
+	anInteger timesRepeat: [ 
+		(iterator next)
+			ifNotNil: [ :value | col add: value ]
+			ifNil: [ ^ col ]].
+	^ col
 ]
 
 { #category : #accessing }
@@ -102,6 +126,16 @@ SoilSkipList >> initializeHeaderPage [
 	self pageRegistry initializeHeaderPage
 ]
 
+{ #category : #testing }
+SoilSkipList >> isEmpty [
+	^ self pageRegistry startPage hasItems
+]
+
+{ #category : #'public/accessing' }
+SoilSkipList >> iterator [ 
+	^ SoilSkipListIter on: self 
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipList >> iteratorForKey: key [
 	| currentPage iterator right |
@@ -126,6 +160,16 @@ SoilSkipList >> keySize [
 SoilSkipList >> keySize: anObject [
 
 	self headerPage keySize: anObject
+]
+
+{ #category : #accessing }
+SoilSkipList >> last [
+	^ self pageRegistry lastPage lastItem
+]
+
+{ #category : #accessing }
+SoilSkipList >> lastPage [
+	self shouldBeImplemented.
 ]
 
 { #category : #actions }

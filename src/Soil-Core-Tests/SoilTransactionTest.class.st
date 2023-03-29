@@ -41,11 +41,14 @@ SoilTransactionTest >> testCheckpointAndContinue [
 
 { #category : #tests }
 SoilTransactionTest >> testRootObjectModifies [ 
-	| tx |
+	| tx obj |
+	obj := Object new.
 	tx := soil newTransaction.
-	tx root: Object new.
+	tx root: obj.
 	self assert: tx hasModifications.
 	self assert: tx isChanged.
+	self assert: (tx isRoot: obj).
+	self assert: (tx isPersistent: obj)
 	 
-	
+
 ]

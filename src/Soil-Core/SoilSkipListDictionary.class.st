@@ -10,11 +10,6 @@ Class {
 	#category : #'Soil-Core'
 }
 
-{ #category : #materializing }
-SoilSkipListDictionary class >> soilMaterialize: aMaterializer [ 
-	self halt.
-]
-
 { #category : #accessing }
 SoilSkipListDictionary class >> soilTransientInstVars [ 
 	^ #( index transaction newValues )
@@ -24,7 +19,7 @@ SoilSkipListDictionary class >> soilTransientInstVars [
 SoilSkipListDictionary >> at: key [ 
 	| objectId |
 	objectId := SOObjectId readFrom: (self index at: key) readStream.
-	^ transaction objectWithId: objectId
+	^ transaction proxyForObjectId: objectId
 ]
 
 { #category : #accessing }
@@ -36,13 +31,29 @@ SoilSkipListDictionary >> at: key put: anObject [
 ]
 
 { #category : #accessing }
+SoilSkipListDictionary >> atIndex: anInteger [ 
+	^ index atIndex: anInteger 
+]
+
+{ #category : #enumerating }
+SoilSkipListDictionary >> do: aBlock [ 
+	| objectId |
+	self index do: [ :ba |
+		objectId := SOObjectId readFrom: ba readStream.
+		aBlock value: (transaction proxyForObjectId: objectId) ].
+	newValues values do: [ :each | aBlock value: each ] 
+]
+
+{ #category : #accessing }
 SoilSkipListDictionary >> first [
-	^ self index firstItem
+	self index path ifNotNil: [  
+		^ self proxyFromByteArray: self index firstItem value ].
+	^ newValues at: newValues keys sorted first
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> first: anInteger [ 
-	^ (self index first: anInteger) collect: [ :each | self objectFromKey: each ]  
+	^ (self index first: anInteger) collect: [ :each | self proxyFromByteArray: each ]  
 ]
 
 { #category : #accessing }
@@ -66,9 +77,24 @@ SoilSkipListDictionary >> initialize [
 		yourself
 ]
 
+{ #category : #testing }
+SoilSkipListDictionary >> isEmpty [
+	newValues ifNotEmpty: [ ^ false ].
+	^ self index isEmpty
+]
+
 { #category : #accessing }
 SoilSkipListDictionary >> keySize: anInteger [ 
 	index keySize: anInteger 
+]
+
+{ #category : #accessing }
+SoilSkipListDictionary >> last [
+	| objectId assoc |
+	assoc := self index last.
+	assoc ifNil: [ ^ nil ].
+	objectId := SOObjectId readFrom: assoc value readStream.
+	^ assoc key -> (transaction proxyForObjectId: objectId)
 ]
 
 { #category : #private }
@@ -96,16 +122,30 @@ SoilSkipListDictionary >> nextAfter: key [
 
 ]
 
+{ #category : #printing }
+SoilSkipListDictionary >> printOn: aStream [ 
+	super printOn: aStream.
+	aStream << ' id=' << id asString
+]
+
+{ #category : #enumerating }
+SoilSkipListDictionary >> proxyFromByteArray: aByteArray [
+	
+	^ transaction proxyForObjectId: (SOObjectId readFrom: aByteArray readStream)
+]
+
 { #category : #accessing }
-SoilSkipListDictionary >> objectFromKey: key [ 
-	| objectId |
-	objectId := SOObjectId readFrom: (self index at: key) readStream.
-	^ transaction objectWithId: objectId
+SoilSkipListDictionary >> second [
+	self index path ifNotNil: [  
+		^ index iterator first; next ].
+	^ newValues associations second
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> size [ 
-	^ self index size
+	^ self index path 
+		ifNotNil: [ self index size + newValues size ]
+		ifNil: [ newValues size ] 
 ]
 
 { #category : #'as yet unclassified' }
@@ -136,4 +176,12 @@ SoilSkipListDictionary >> soilSerialize: aSerializer [
 		objectId initializeIndex: transaction objectRepository.
 		index at: key put: objectId ].
 	index writePages
+]
+
+{ #category : #accessing }
+SoilSkipListDictionary >> values [
+	| col |
+	col := OrderedCollection new.
+	self do: [ :each | col add: each ].
+	^ col
 ]

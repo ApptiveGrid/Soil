@@ -117,6 +117,7 @@ Soil >> objectRepository [
 
 { #category : #'instance creation' }
 Soil >> open [
+	('open soil database at ', path asString) soilEmit.
 	parameters := SoilParameterFile new
 		soil: self;
 		open.

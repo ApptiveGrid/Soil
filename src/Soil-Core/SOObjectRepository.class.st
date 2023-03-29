@@ -63,7 +63,7 @@ SOObjectRepository >> at: objectid [
 { #category : #accessing }
 SOObjectRepository >> at: objectId put: bytes [ 
 	| segment |
-	(objectId index = 0) ifTrue: [ self halt ].
+	(objectId index = 0) ifTrue: [ Error signal: 'objectId is not initialized when trying to store' ].
 	segment := self segmentAt: objectId segment.
 	^ segment at: objectId index putBytes: bytes	
 ]

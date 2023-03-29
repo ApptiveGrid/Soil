@@ -22,7 +22,8 @@ SoilBehaviorRegistry >> behaviorDescriptionWithIndex: behaviorIndex andVersion: 
 
 	self loadHistoryForBehaviorWithIndex: behaviorIndex transaction: transaction.
 
-	versionsOfBehavior := versions at: behaviorIndex ifAbsent: [self halt].
+	versionsOfBehavior := versions at: behaviorIndex ifAbsent: [Error signal: 'shouldnt happen'].
+
 	^versionsOfBehavior
 		detect: [ :behav | behav version = version ]
 		ifNone: [(SOObjectNotFound new segment: 0; index: behaviorIndex) signal]
@@ -33,7 +34,7 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction
 	| objectId chain offset |
 	objectId := self 
 		nameAt: aSOBehaviorDescription behaviorIdentifier 
-		ifAbsent: [ self halt ].
+		ifAbsent: [ Error signal: 'shouldnt happen' ].
 	self loadHistoryForBehaviorWithIndex: objectId index transaction: transaction.
 	chain := versions at: objectId index.
 	chain first isCurrent ifFalse: [ 

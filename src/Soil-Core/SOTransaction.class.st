@@ -271,6 +271,11 @@ SOTransaction >> isChanged [
 ]
 
 { #category : #testing }
+SOTransaction >> isPersistent: anObject [
+	^ self isRoot: anObject
+]
+
+{ #category : #testing }
 SOTransaction >> isRoot: anObject [
 	self flag: #todo.
 	"this is surely not true but a shortcut for now"
@@ -308,6 +313,7 @@ SOTransaction >> makePersistent: anObject [
 { #category : #'as yet unclassified' }
 SOTransaction >> makeRoot: anObject [ 
 	| objectId |
+	(anObject class = SOObjectProxy) ifTrue: [ Error signal: 'an object proxy cannot be made root' ]. 
 	objectId := self addClusterObject: anObject.
 	anObject soilClusterRootIn: self.
 	^ objectId
@@ -368,7 +374,6 @@ SOTransaction >> newPersistentClusterVersion [
 
 { #category : #accessing }
 SOTransaction >> newSerializer [
-	soil ifNil: [ self halt ].
 	^ soil newSerializer
 		transaction: self;
 		yourself
@@ -413,6 +418,12 @@ SOTransaction >> prepareRecordsForCommit [.
 { #category : #printing }
 SOTransaction >> printOn: aStream [ 
 	aStream << 'transaction read: ' << readVersion asString << ', write: ' << writeVersion asString
+]
+
+{ #category : #'as yet unclassified' }
+SOTransaction >> proxyForObjectId: aSOObjectId [ 
+	^ aSOObjectId asSoilObjectProxy 
+		transaction: self
 ]
 
 { #category : #accessing }

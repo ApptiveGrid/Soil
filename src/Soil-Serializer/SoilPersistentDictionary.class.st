@@ -5,7 +5,7 @@ Class {
 		'transaction',
 		'dict'
 	],
-	#category : #'Soil-Core-Collections'
+	#category : #'Soil-Serializer'
 }
 
 { #category : #'instance creation' }
@@ -64,6 +64,13 @@ SoilPersistentDictionary >> collect: aBlock [
 	^ dict collect: aBlock
 ]
 
+{ #category : #enumerating }
+SoilPersistentDictionary >> detect: detectBlock ifNone: noneBlock [ 
+	^ dict values
+		detect: detectBlock 
+		ifNone: noneBlock 
+]
+
 { #category : #forwarded }
 SoilPersistentDictionary >> includesKey: key [
 	^dict includesKey: key
@@ -72,6 +79,11 @@ SoilPersistentDictionary >> includesKey: key [
 { #category : #initialization }
 SoilPersistentDictionary >> initialize [
 	dict := Dictionary new
+]
+
+{ #category : #testing }
+SoilPersistentDictionary >> isCollection [ 
+	^ true
 ]
 
 { #category : #forwarded }
@@ -110,4 +122,9 @@ SoilPersistentDictionary >> soilClusterRootIn: aTransaction [
 { #category : #'as yet unclassified' }
 SoilPersistentDictionary >> soilLoadedIn: aSOTransaction [
 	transaction := aSOTransaction 
+]
+
+{ #category : #accessing }
+SoilPersistentDictionary >> values [
+	^ dict values
 ]

@@ -104,7 +104,8 @@ SoilTest >> testSerializingRootTwoCluster [
 	tx checkpoint.
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
-	self assert: materializedRoot nested reference class equals: SOObjectProxy.
+	self assert: materializedRoot nested reference objectIsNotLoaded.
+	self assert: materializedRoot nested reference isSoilProxy.
 	self assert: materializedRoot nested reference nested label equals: 'nested under cluster'
 	
 ]

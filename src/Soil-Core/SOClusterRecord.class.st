@@ -22,7 +22,7 @@ SOClusterRecord class >> readFrom: aStream [
 
 { #category : #'instance creation' }
 SOClusterRecord >> addReference: reference [
-	references detect: [ :each | each = reference ] ifFound: [ self halt ].
+	references detect: [ :each | each = reference ] ifFound: [ Error signal: 'reference already there' ].
 	references add: reference 
 ]
 
@@ -95,7 +95,7 @@ SOClusterRecord >> printOn: aStream [
 
 { #category : #accessing }
 SOClusterRecord >> referenceAt: anInteger [
-	(references at: anInteger) ifNil: [ self halt ].
+	(references at: anInteger) ifNil: [ Error signal: 'reference at ', anInteger ,' not found' ].
 	^ SOObjectProxy 
 		forId: (references at: anInteger) 
 		transaction: transaction

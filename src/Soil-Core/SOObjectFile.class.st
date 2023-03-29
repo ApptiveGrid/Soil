@@ -16,8 +16,12 @@ SOObjectFile >> appendBytes: aCollection [
 
 { #category : #accessing }
 SOObjectFile >> atPosition: anInteger [ 
+	| clusterVersion |
 	stream position: anInteger.
-	^ SOPersistentClusterVersion readFrom: stream
+	clusterVersion := SOPersistentClusterVersion readFrom: stream.
+	(clusterVersion position = anInteger) ifFalse: [ 
+		Error signal: 'position do not match' ].
+	^ clusterVersion 
 ]
 
 { #category : #accessing }
