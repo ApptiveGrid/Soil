@@ -30,6 +30,14 @@ SoilSkipListPage >> addItem: anAssociation [
 	dirty := true
 ]
 
+{ #category : #converting }
+SoilSkipListPage >> asModifiable [ 
+	| page |
+	page := self as: SoilWritableSkipListPage.
+	registry replace: self with: page.
+	^ page
+]
+
 { #category : #accessing }
 SoilSkipListPage >> associationAt: anInteger [ 
 	^ items 

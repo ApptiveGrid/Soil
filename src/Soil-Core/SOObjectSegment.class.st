@@ -93,8 +93,12 @@ SOObjectSegment >> id: anObject [
 ]
 
 { #category : #accessing }
-SOObjectSegment >> indexAt: anIndexedObject [ 
-	^ anIndexedObject loadFrom: self path / anIndexedObject id , #index
+SOObjectSegment >> indexAt: anIndexedObject ifAbsent: aBlock [
+	| path |
+	path := self path / anIndexedObject id , #index.
+	^ path exists
+		ifTrue: [ anIndexedObject loadFrom: path ]
+		ifFalse: [ aBlock value ]
 ]
 
 { #category : #accessing }

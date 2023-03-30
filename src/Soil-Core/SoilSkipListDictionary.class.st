@@ -17,8 +17,16 @@ SoilSkipListDictionary class >> soilTransientInstVars [
 
 { #category : #accessing }
 SoilSkipListDictionary >> at: key [ 
+	^ self 
+		at: key
+		ifAbsent: [ KeyNotFound signal: key asString, ' not found' ]
+
+]
+
+{ #category : #accessing }
+SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 	| objectId |
-	objectId := SOObjectId readFrom: (self index at: key) readStream.
+	objectId := SOObjectId readFrom: (self index at: key ifAbsent: [ ^ aBlock value ]) readStream.
 	^ transaction proxyForObjectId: objectId
 ]
 
@@ -27,7 +35,8 @@ SoilSkipListDictionary >> at: key put: anObject [
 	transaction ifNotNil: [
 		transaction makeRoot: anObject.
 		transaction markDirty: self ].
-	newValues at: key put: anObject
+	newValues at: key put: anObject.
+	self index at: key put: anObject.
 ]
 
 { #category : #accessing }
@@ -64,7 +73,7 @@ SoilSkipListDictionary >> id [
 { #category : #accessing }
 SoilSkipListDictionary >> index [
 	^ index ifNil: [ 
-		index := self lookupIndex ]
+		index := self lookupIndex asModifiableIndex  ]
 ]
 
 { #category : #initialization }
@@ -72,7 +81,7 @@ SoilSkipListDictionary >> initialize [
 	super initialize.
 	newValues := Dictionary new.
 	id := UUID new asString36.
-	index := SoilSkipList new 
+	index := SoilModifiableSkipList new 
 		valueSize: 8;
 		yourself
 ]
@@ -81,6 +90,18 @@ SoilSkipListDictionary >> initialize [
 SoilSkipListDictionary >> isEmpty [
 	newValues ifNotEmpty: [ ^ false ].
 	^ self index isEmpty
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListDictionary >> journalEntries [
+	| entries |
+	entries := OrderedCollection new.
+	newValues keysAndValuesDo: [ :key :value |
+		entries add: (SoilNewKeyEntry new 
+			indexId: id;
+			key: key;
+			value: value) ].
+	^ entries
 ]
 
 { #category : #accessing }
@@ -106,7 +127,9 @@ SoilSkipListDictionary >> loadFrom: aFileReference [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> lookupIndex [
-	^ transaction lookupIndex: self
+	^ transaction 
+		indexAt: self
+		ifAbsent: [ self newIndexInstance ]
 ]
 
 { #category : #accessing }

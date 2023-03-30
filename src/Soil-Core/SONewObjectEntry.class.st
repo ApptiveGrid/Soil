@@ -49,7 +49,7 @@ SONewObjectEntry >> record: anObject [
 
 { #category : #writing }
 SONewObjectEntry >> writeOn: aStream [ 
-	aStream nextPut: self class journalTypeCode.
+	super writeOn: aStream.
 	objectId writeOn: aStream.
 	aStream 
 		nextPutAll: bytes
