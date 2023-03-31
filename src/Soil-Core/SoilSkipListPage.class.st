@@ -30,6 +30,14 @@ SoilSkipListPage >> addItem: anAssociation [
 	dirty := true
 ]
 
+{ #category : #converting }
+SoilSkipListPage >> asModifiable [ 
+	| page |
+	page := self as: SoilWritableSkipListPage.
+	registry replace: self with: page.
+	^ page
+]
+
 { #category : #accessing }
 SoilSkipListPage >> associationAt: anInteger [ 
 	^ items 
@@ -148,7 +156,8 @@ SoilSkipListPage >> itemAt: anInteger put: anObject [
 		findBinaryIndex: [ :each |  anInteger - each key ] 
 		do: [:ind | items removeAt: ind ]
 		ifNone: [ 0 ].
-	items add: (anInteger -> anObject)
+	items add: (anInteger -> anObject).
+	dirty := true
 ]
 
 { #category : #'as yet unclassified' }

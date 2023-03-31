@@ -15,6 +15,13 @@ SoilPageRegistry >> allItems [
 	^ (self readPageAt: 1) items
 ]
 
+{ #category : #converting }
+SoilPageRegistry >> asModifiableRegistry [
+	^ (self as: SoilWritablePageRegistry)
+		clonePages;
+		yourself
+]
+
 { #category : #initialization }
 SoilPageRegistry >> buildHeaderPage [
 	^ SoilSkipListHeaderPage new 
@@ -152,6 +159,13 @@ SoilPageRegistry >> readPageAt: anInteger [
 		 pages := pages grownBy: (anInteger - pages size)]."
 	pages at: anInteger put: page.
 	^ page
+]
+
+{ #category : #accessing }
+SoilPageRegistry >> replace: oldPage with: newPage [ 
+	pages
+		at: oldPage index 
+		put:newPage 
 ]
 
 { #category : #accessing }

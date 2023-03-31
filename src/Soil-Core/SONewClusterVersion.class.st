@@ -17,18 +17,22 @@ SONewClusterVersion >> addObject: anObject reference: anObjectId [
 
 { #category : #converting }
 SONewClusterVersion >> asJournalEntry [
-	| entry |
-	entry := self hasPreviousVersion 
+	| objectEntry entries |
+	entries := OrderedCollection new.
+	objectEntry := self hasPreviousVersion 
 		ifTrue: [ 
 			SONewObjectVersionEntry new
 				oldBytes: previousVersionRecord bytes ]
 		ifFalse: [ SONewObjectEntry new ].
-	entry 
+	objectEntry 
 		record: self;
 		objectId: objectId;
 		bytes: self serialize.
+	entries add: objectEntry.
 
-	^ entry
+	object journalEntries do: [ :each | entries add: each ].
+	
+	^ entries
 ]
 
 { #category : #converting }

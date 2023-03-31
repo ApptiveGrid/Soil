@@ -8,6 +8,13 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #converting }
+SoilSkipList >> asModifiableIndex [
+	^ (self as: SoilModifiableSkipList)
+		pageRegistry: pageRegistry asModifiableRegistry;
+		yourself 
+]
+
 { #category : #private }
 SoilSkipList >> at: aByteArray [ 
 	^ self 
@@ -170,12 +177,18 @@ SoilSkipList >> maxLevel: anInteger [
 
 { #category : #'instance creation' }
 SoilSkipList >> newPage [
-	^ SoilSkipListPage new 
+	^ self pageClass new 
 		initializeLevel: self maxLevel;
 		keySize: self keySize;
 		valueSize: self valueSize;
 		size: self pageSize;
 		yourself
+]
+
+{ #category : #'instance creation' }
+SoilSkipList >> newPageRegistry [
+	^ SoilPageRegistry new
+			skipList: self
 ]
 
 { #category : #opening }
@@ -188,11 +201,21 @@ SoilSkipList >> pageAt: anInteger [
 	^ self pageRegistry pageAt: anInteger 
 ]
 
+{ #category : #'instance creation' }
+SoilSkipList >> pageClass [
+	^ SoilSkipListPage
+]
+
 { #category : #accessing }
 SoilSkipList >> pageRegistry [
 	^ pageRegistry ifNil: [ 
-		pageRegistry := SoilPageRegistry new
-			skipList: self ]
+		pageRegistry := self newPageRegistry ]
+]
+
+{ #category : #accessing }
+SoilSkipList >> pageRegistry: anObject [
+
+	pageRegistry := anObject
 ]
 
 { #category : #accessing }
