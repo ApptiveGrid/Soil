@@ -29,7 +29,7 @@ SoilSkipListDictionaryTest >> tearDown [
 ]
 
 { #category : #tests }
-SoilSkipListDictionaryTest >> testAddToExistingList [
+SoilSkipListDictionaryTest >> testAddToExistingEmptyList [
 	| dict tx tx2 tx3 tx4 |
 	"create emtpy skip list dictionary ..."
 	dict := SoilSkipListDictionary new
@@ -62,7 +62,7 @@ SoilSkipListDictionaryTest >> testAddToExistingList [
 ]
 
 { #category : #tests }
-SoilSkipListDictionaryTest >> testAddToExistingList2 [
+SoilSkipListDictionaryTest >> testAddToExistingNonEmptyList [
 	| dict tx tx2 tx3 tx4 |
 	"create skip list dictionary with a key ..."
 	dict := SoilSkipListDictionary new
@@ -102,7 +102,7 @@ SoilSkipListDictionaryTest >> testAddToNewList [
 		keySize: 10;
 		maxLevel: 8;
 		yourself.
-  	dict
-		at: #foo put: #bar.
-		
+  	self 
+		shouldnt: [ dict at: #foo put: #bar ]
+		raise: Error
 ]

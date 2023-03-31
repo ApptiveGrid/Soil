@@ -35,10 +35,11 @@ SoilSkipListDictionary >> at: key put: anObject [
 	| objectId |
 	transaction ifNotNil: [
 		transaction makeRoot: anObject.
-		transaction markDirty: self ].
-	objectId := (transaction objectIndex at: anObject) objectId.
+		transaction markDirty: self.
+		objectId := (transaction objectIndex at: anObject) objectId.
+		self index at: key put: objectId. ].
 	newValues at: key put: objectId.
-	self index at: key put: objectId.
+
 ]
 
 { #category : #accessing }
