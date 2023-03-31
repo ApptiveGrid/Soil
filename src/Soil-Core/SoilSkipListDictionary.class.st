@@ -141,6 +141,11 @@ SoilSkipListDictionary >> maxLevel: anInteger [
 ]
 
 { #category : #'as yet unclassified' }
+SoilSkipListDictionary >> newIndexInstance [
+	self halt.
+]
+
+{ #category : #'as yet unclassified' }
 SoilSkipListDictionary >> nextAfter: key [  
 	| page |
 	page := self index iterator find: key asInteger;  page.
@@ -193,7 +198,6 @@ SoilSkipListDictionary >> soilLoadedIn: aTransaction [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilSerialize: aSerializer [ 
-	| objectId |
 	super soilSerialize: aSerializer.
 	self index path ifNil: [  
 		index := aSerializer registerIndexedObject: self ].
