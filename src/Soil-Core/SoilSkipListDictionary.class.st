@@ -32,11 +32,13 @@ SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilSkipListDictionary >> at: key put: anObject [
+	| objectId |
 	transaction ifNotNil: [
 		transaction makeRoot: anObject.
 		transaction markDirty: self ].
-	newValues at: key put: anObject.
-	self index at: key put: anObject.
+	objectId := (transaction objectIndex at: anObject) objectId.
+	newValues at: key put: objectId.
+	self index at: key put: objectId.
 ]
 
 { #category : #accessing }
@@ -193,12 +195,12 @@ SoilSkipListDictionary >> soilSerialize: aSerializer [
 	| objectId |
 	super soilSerialize: aSerializer.
 	self index path ifNil: [  
-		aSerializer registerIndexedObject: self ].
-	newValues keysAndValuesDo: [ :key :object |
+		index := aSerializer registerIndexedObject: self ].
+	"newValues keysAndValuesDo: [ :key :object |
 		objectId := transaction makeRoot: object.
 		objectId initializeIndex: transaction objectRepository.
 		index at: key put: objectId ].
-	index writePages
+	index writePages"
 ]
 
 { #category : #accessing }

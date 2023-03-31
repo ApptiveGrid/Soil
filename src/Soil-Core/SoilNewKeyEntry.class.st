@@ -20,7 +20,7 @@ SoilNewKeyEntry >> commitIn: transaction [
 	index := (transaction indexes associations 
 		detect: [ :each | each key id = indexId ]
 		ifNone: [ Error signal: 'shouldnt happen' ]) value.
-	index at: key put: value
+	index at: key put: value asByteArray 
 ]
 
 { #category : #accessing }
@@ -44,5 +44,5 @@ SoilNewKeyEntry >> writeOn: aStream [
 	aStream 
 		nextPutAll: indexId;
 		nextPutAll: key;
-		nextPutAll: value
+		nextPutAll: value asByteArray
 ]

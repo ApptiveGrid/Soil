@@ -463,9 +463,12 @@ SOTransaction >> records [
 { #category : #'as yet unclassified' }
 SOTransaction >> registerIndexedObject: anObject [ 
 	| objectId segment |
+	indexes at: anObject ifPresent: [ Error signal: 'shouldnt happen' ].
 	objectId := (objectMap at: anObject) objectId.
 	segment := self objectRepository segmentAt: objectId segment.
-	^ segment registerIndexedObject: anObject
+	^ indexes 
+		at: anObject 
+		put: (segment registerIndexedObject: anObject)
 ]
 
 { #category : #'as yet unclassified' }

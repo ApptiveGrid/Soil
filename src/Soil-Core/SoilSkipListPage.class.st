@@ -156,7 +156,8 @@ SoilSkipListPage >> itemAt: anInteger put: anObject [
 		findBinaryIndex: [ :each |  anInteger - each key ] 
 		do: [:ind | items removeAt: ind ]
 		ifNone: [ 0 ].
-	items add: (anInteger -> anObject)
+	items add: (anInteger -> anObject).
+	dirty := true
 ]
 
 { #category : #'as yet unclassified' }
