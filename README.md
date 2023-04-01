@@ -19,11 +19,4 @@ Soil is still in very early ramp up stage but we are working towards a milestone
 
 **caution** Soil is a moving target and milestones are a way for us to focus. Nothing of this is considered stable, formats and structure will change. Do not expect to be able to load back data from an older version. If you need something reliable wait for a release
 
-A list of past milestones: 
-
-- [x] object level locking. On commit all objects are range locked before writing to them
-- [x] MVCC: supported multi version concurrency control with writing records versioned and support versioned snapshot isolation on read
-- [x] segment zero: move all behaviors to a special segment that has several performance and storage benefits
-- [x] basic support for splitting and storing an arbitrary object graph (not all object classes but including clean blocks)
-
 If you want to watch more closely what we are at have a look at the [project board](https://github.com/orgs/ApptiveGrid/projects/2)
