@@ -129,8 +129,7 @@ SoilPagedFileIndexStore >> positionOfPageIndex: anInteger [
 
 { #category : #private }
 SoilPagedFileIndexStore >> prepare [
-	self headerPage prepare.
-	self flush
+	self headerPage prepare
 ]
 
 { #category : #'as yet unclassified' }

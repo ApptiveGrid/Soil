@@ -7,10 +7,10 @@ Class {
 { #category : #tests }
 SoilSkipListPageTest >> testCreation [ 
 	| page |
-	page := SoilSkipListPage new 
+	page := SoilSkipListTruncPage new 
 		index: 1;
-		level: 8;
-		size: 4096;
+		maxLevel: 8;
+		pageSize: 4096;
 		keySize: 16;
 		valueSize: 8.
 	self assert: page hasRoom
@@ -20,9 +20,9 @@ SoilSkipListPageTest >> testCreation [
 { #category : #tests }
 SoilSkipListPageTest >> testWriteAndRead [
 	| page bytes readPage |
-	page := SoilSkipListPage new 
+	page := SoilSkipListTruncPage new 
 		index: 1;
-		level: 8.
+		maxLevel: 8.
 	self assert: page isDirty.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
@@ -36,9 +36,9 @@ SoilSkipListPageTest >> testWriteAndRead [
 { #category : #tests }
 SoilSkipListPageTest >> testWriteAndReadRightArray [
 	| page bytes readPage |
-	page := SoilSkipListPage new 
+	page := SoilSkipListTruncPage new 
 		index: 1;
-		level: 8;
+		maxLevel: 8;
 		setRight: #( 1 2 3 4 5 6 7 8 ).
 	self assert: page isDirty.
 	bytes := ByteArray streamContents: [ :stream |

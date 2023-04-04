@@ -138,7 +138,8 @@ SoilSkipListDictionary >> lookupIndex [
 
 { #category : #accessing }
 SoilSkipListDictionary >> maxLevel: anInteger [ 
-	index maxLevel: anInteger 
+	index maxLevel: anInteger.
+
 ]
 
 { #category : #'as yet unclassified' }

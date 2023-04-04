@@ -202,12 +202,11 @@ SoilSkipList >> newHeaderPage [
 
 { #category : #'instance creation' }
 SoilSkipList >> newPage [
-self halt.
 	^ self pageClass new 
 		initializeLevel: self maxLevel;
 		keySize: self keySize;
 		valueSize: self valueSize;
-		size: self pageSize;
+		pageSize: self pageSize;
 		yourself
 ]
 
@@ -280,7 +279,7 @@ SoilSkipList >> size [
 SoilSkipList >> splitPage: aIterator [ 
 	| newPage page |
 	page := aIterator page.
-	newPage := page split.
+	newPage := page split: store newPage.
 	newPage index: self store highestPageIndex + 1.
 	newPage level to: 1 by: -1  do: [ :level |
 		(level > page level)

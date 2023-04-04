@@ -1,6 +1,9 @@
 Class {
 	#name : #SoilSkipListHeaderPage,
 	#superclass : #SoilSkipListDataPage,
+	#instVars : [
+		'maxLevel'
+	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
@@ -36,13 +39,15 @@ SoilSkipListHeaderPage >> keySize: anInteger [
 
 { #category : #accessing }
 SoilSkipListHeaderPage >> maxLevel [
+
 	^ maxLevel
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> maxLevel: anInteger [ 
+SoilSkipListHeaderPage >> maxLevel: anInteger [
+
 	maxLevel := anInteger.
-	self initializeRight 
+	right := Array new: anInteger withAll: 0 
 ]
 
 { #category : #private }

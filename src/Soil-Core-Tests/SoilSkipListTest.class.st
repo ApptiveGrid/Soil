@@ -11,6 +11,7 @@ Class {
 SoilSkipListTest >> setUp [ 
 	super setUp.
 	skipList := SoilSkipList new 
+		store: SoilPagedFileIndexStore new;
 		maxLevel: 4;
 		keySize: 8;
 		valueSize: 8;
@@ -30,7 +31,7 @@ SoilSkipListTest >> tearDown [
 SoilSkipListTest >> testAddFirstOverflow [
 	
 	| page capacity |
-	capacity := skipList firstPage itemCapacity - 2.
+	capacity := skipList firstPage itemCapacity .
 	1 to: capacity do: [ :n | 
 		skipList at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: skipList pages size equals: 1.

@@ -2,7 +2,6 @@ Class {
 	#name : #SoilSkipListDataPage,
 	#superclass : #SoilSkipListPage,
 	#instVars : [
-		'maxLevel',
 		'right',
 		'items',
 		'keySize',
@@ -81,17 +80,12 @@ SoilSkipListDataPage >> initialize [
 { #category : #initialization }
 SoilSkipListDataPage >> initializeLevel: anInteger [
 	| promote level |
-	level := 1.
+	level := 1. 
 	promote := true.
 	[ (level < anInteger) & (promote = true) ] whileTrue: [ 
 		level := level + 1.
 		promote := self class random next > 0.5 ].
-	self initializeRight 
-]
-
-{ #category : #initialization }
-SoilSkipListDataPage >> initializeRight [ 
-	right := Array new: maxLevel withAll: 0.
+	right := Array new: level withAll: 0. 
 ]
 
 { #category : #'as yet unclassified' }
@@ -152,6 +146,11 @@ SoilSkipListDataPage >> lastItem [
 ]
 
 { #category : #accessing }
+SoilSkipListDataPage >> level [ 
+	^ right size
+]
+
+{ #category : #accessing }
 SoilSkipListDataPage >> numberOfItems [
 	^ items size 
 ]
@@ -167,9 +166,10 @@ SoilSkipListDataPage >> readItemsFrom: aStream [
 
 { #category : #writing }
 SoilSkipListDataPage >> readLevelsFrom: aStream [ 
-	maxLevel := aStream next asInteger.
-	right := Array new: maxLevel.
-	1 to: maxLevel do: [ :n |
+	| level |
+	level := aStream next asInteger.
+	right := Array new: level. 
+	1 to: level do: [ :n |
 		right at: n put: (aStream next: self rightSize) asInteger ]
 ]
 
@@ -180,7 +180,7 @@ SoilSkipListDataPage >> right [
 
 { #category : #accessing }
 SoilSkipListDataPage >> rightAt: anInteger [ 
-	(anInteger > maxLevel) ifTrue: [ ^ 0 ]. 
+	(anInteger > self level) ifTrue: [ ^ 0 ]. 
 	^ self right at: anInteger 
 ]
 
@@ -222,6 +222,18 @@ SoilSkipListDataPage >> split [
 	
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipListDataPage >> split: newPage [
+	| middle |
+	newPage 
+		index: index.
+	middle := (items size / 2) ceiling.
+	newPage setItems: (items copyFrom: middle + 1 to: items size).
+	items removeLast: items size - middle.
+	^ newPage
+	
+]
+
 { #category : #accessing }
 SoilSkipListDataPage >> valueAt: anInteger [ 
 	^ (self associationAt: anInteger) value
@@ -251,7 +263,7 @@ SoilSkipListDataPage >> writeItemsOn: aStream [
 { #category : #writing }
 SoilSkipListDataPage >> writeLevelsOn: aStream [ 
 	aStream 
-		nextPut: maxLevel.
-	1 to: maxLevel do: [ :n |
+		nextPut: self level.
+	1 to: self level do: [ :n |
 		aStream nextPutAll: ((right at: n) asByteArrayOfSize: self rightSize) ]
 ]

@@ -40,6 +40,11 @@ SoilPagedIndexStore >> isCopyOnWrite [
 	^ false
 ]
 
+{ #category : #'instance creation' }
+SoilPagedIndexStore >> newPage [
+	^ index newPage
+]
+
 { #category : #accessing }
 SoilPagedIndexStore >> nextIndex [
 	^ pages size + 1
@@ -62,6 +67,7 @@ SoilPagedIndexStore >> pageAt: anInteger put: aPage [
 { #category : #accessing }
 SoilPagedIndexStore >> pageFaultAt: anInteger [ 
 	| page |
+	self halt.
 	page := index pageAt: anInteger.
 ]
 
