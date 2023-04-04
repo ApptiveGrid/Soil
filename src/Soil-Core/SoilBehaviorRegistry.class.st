@@ -112,6 +112,7 @@ SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 SoilBehaviorRegistry >> open [ 
 	index ifNotNil: [ index close ].
 	index :=  SoilSkipList new 
+		store: SoilPagedFileIndexStore new;
 		maxLevel: 16;
 		keySize: 64;
 		valueSize: 8;

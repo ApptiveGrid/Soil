@@ -151,6 +151,11 @@ SoilSkipListDataPage >> level [
 ]
 
 { #category : #accessing }
+SoilSkipListDataPage >> level: anInteger [ 
+	right := Array new: anInteger withAll: 0
+]
+
+{ #category : #accessing }
 SoilSkipListDataPage >> numberOfItems [
 	^ items size 
 ]
