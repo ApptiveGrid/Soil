@@ -60,11 +60,13 @@ SoilBehaviorRegistry >> initialize [
 { #category : #initialization }
 SoilBehaviorRegistry >> initializeFilesystem [
 	index := SoilSkipList new 
+		path: self path;
+		store: SoilPagedFileIndexStore new;
+		initializeFilesystem;
 		maxLevel: 8;
 		keySize: 64;
 		valueSize: 8;
-		path: self path;
-		initializeFilesystem.
+		prepare.
 	self addSpecialObjects.
 	index writePages
 ]

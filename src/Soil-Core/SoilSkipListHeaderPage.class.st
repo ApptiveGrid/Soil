@@ -1,19 +1,27 @@
 Class {
 	#name : #SoilSkipListHeaderPage,
-	#superclass : #Object,
-	#instVars : [
-		'startPageIndex',
-		'keySize',
-		'valueSize',
-		'maxLevel'
-	],
+	#superclass : #SoilSkipListDataPage,
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #initialization }
-SoilSkipListHeaderPage >> initialize [ 
-	super initialize.
-	startPageIndex := 1
+{ #category : #'as yet unclassified' }
+SoilSkipListHeaderPage class >> pageCode [ 
+	^ 1 
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListHeaderPage >> beHeaderPage [
+	index := 1.
+	"level := self collection maxLevel.
+	self initializeRight."
+	items 
+		add: ((SoilSkipListSentinel lower keySize: self collection keySize) numericValue -> 0);
+		add: ((SoilSkipListSentinel upper keySize: self collection keySize) numericValue -> 0)
+]
+
+{ #category : #utilities }
+SoilSkipListHeaderPage >> headerSize [
+	^ self indexSize + 6 + (maxLevel * self indexSize)
 ]
 
 { #category : #accessing }
@@ -33,26 +41,31 @@ SoilSkipListHeaderPage >> maxLevel [
 
 { #category : #accessing }
 SoilSkipListHeaderPage >> maxLevel: anInteger [ 
-	maxLevel := anInteger
+	maxLevel := anInteger.
+	self initializeRight 
+]
+
+{ #category : #private }
+SoilSkipListHeaderPage >> prepare [
+	items 
+		add: ((SoilSkipListSentinel lower keySize: keySize) numericValue -> 0);
+		add: ((SoilSkipListSentinel upper keySize: keySize) numericValue -> 0)
 ]
 
 { #category : #'instance creation' }
 SoilSkipListHeaderPage >> readFrom: aStream [ 
-	aStream next.
-	startPageIndex := (aStream next: 8) asInteger.
+	super readFrom: aStream.
+	self 
+		readHeaderFrom: aStream;
+		readLevelsFrom: aStream;
+		readItemsFrom: aStream
+]
+
+{ #category : #'instance creation' }
+SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	maxLevel := (aStream next: 2) asInteger
-]
-
-{ #category : #accessing }
-SoilSkipListHeaderPage >> startPageIndex [
-	^ startPageIndex
-]
-
-{ #category : #accessing }
-SoilSkipListHeaderPage >> startPageIndex: anInteger [ 
-	startPageIndex := anInteger 
 ]
 
 { #category : #accessing }
@@ -67,10 +80,12 @@ SoilSkipListHeaderPage >> valueSize: anInteger [
 
 { #category : #writing }
 SoilSkipListHeaderPage >> writeOn: aStream [ 
-	aStream nextPut: 0.
+	super writeOn: aStream.
 	aStream 
-		nextPutAll: (startPageIndex asByteArrayOfSize: 8);
 		nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
 		nextPutAll: (maxLevel asByteArrayOfSize: 2).
+	self 
+		writeLevelsOn: aStream;
+		writeItemsOn: aStream
 ]

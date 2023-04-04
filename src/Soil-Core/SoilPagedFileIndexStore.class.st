@@ -2,8 +2,7 @@ Class {
 	#name : #SoilPagedFileIndexStore,
 	#superclass : #SoilPagedIndexStore,
 	#instVars : [
-		'stream',
-		'headerPage'
+		'stream'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -20,19 +19,9 @@ SoilPagedFileIndexStore >> asCopyOnWriteStore [
 		underlyingStore: self
 ]
 
-{ #category : #converting }
-SoilPagedFileIndexStore >> asModifiableRegistry [
-	^ (self as: SoilWritablePageRegistry)
-		clonePages;
-		yourself
-]
-
 { #category : #initialization }
 SoilPagedFileIndexStore >> buildHeaderPage [
 	^ index newHeaderPage 
-		startPageIndex: 1;
-		yourself.
-
 ]
 
 { #category : #'initialize-release' }
@@ -66,34 +55,23 @@ SoilPagedFileIndexStore >> hasStream [
 ]
 
 { #category : #accessing }
-SoilPagedFileIndexStore >> headerPage [
-	^ headerPage ifNil: [ 
-		headerPage := self buildHeaderPage ]
+SoilPagedFileIndexStore >> index: anIndex [ 
+	super index: anIndex.
+	pages ifEmpty: [ self initializeHeaderPage ]
 ]
 
 { #category : #initialization }
 SoilPagedFileIndexStore >> initializeFilesystem [
-	self 
-		openStream;
-		initializeHeaderPage;
-		initializeFirstPage
-]
-
-{ #category : #initialization }
-SoilPagedFileIndexStore >> initializeFirstPage [
-	| page |
-	page := index newPage
-		registry: self;
-		beFirstPage;
-		yourself.
-	pages at: page index put: page.
-	self writePage: page
-		
+	self openStream
 ]
 
 { #category : #initialization }
 SoilPagedFileIndexStore >> initializeHeaderPage [
-	self writeHeaderPage 
+	| page |
+	page := index newHeaderPage.
+	pages at: page index put: page.
+	"self writePage: page"
+		
 ]
 
 { #category : #accessing }
@@ -101,7 +79,7 @@ SoilPagedFileIndexStore >> lastPage [
 	| maxLevel page pageNumber |
 	self halt.
 	maxLevel := index maxLevel.
-	page := self startPage.
+	page := self headerPage.
 	[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
 		page := self pageAt: pageNumber ].
 	^ page
@@ -114,10 +92,11 @@ self halt.
 	^ index maxLevel
 ]
 
-{ #category : #opening }
+{ #category : #'instance creation' }
 SoilPagedFileIndexStore >> open [
-	self openStream.
-	headerPage := self readHeaderPage
+	self 
+		openStream;
+		readHeaderPage 
 ]
 
 { #category : #opening }
@@ -145,13 +124,19 @@ SoilPagedFileIndexStore >> pagesStart [
 
 { #category : #'instance creation' }
 SoilPagedFileIndexStore >> positionOfPageIndex: anInteger [
-	^ self pagesStart + ((anInteger - 1) * self filePageSize)
+	^ ((anInteger - 1) * self filePageSize)
+]
+
+{ #category : #private }
+SoilPagedFileIndexStore >> prepare [
+	self headerPage prepare.
+	self flush
 ]
 
 { #category : #'as yet unclassified' }
 SoilPagedFileIndexStore >> readHeaderPage [
 	stream position: 0.
-	^ index newHeaderPage readFrom: stream
+	pages at: 1 put: (index newHeaderPage readFrom: stream)
 ]
 
 { #category : #accessing }

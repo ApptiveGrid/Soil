@@ -8,6 +8,11 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #'as yet unclassified' }
+SoilPagedIndexStore >> headerPage [
+	^ self pageAt: 1
+]
+
 { #category : #accessing }
 SoilPagedIndexStore >> highestPageIndex [ 
 	^ pages size
@@ -63,11 +68,6 @@ SoilPagedIndexStore >> pageFaultAt: anInteger [
 { #category : #accessing }
 SoilPagedIndexStore >> pages [
 	^ pages
-]
-
-{ #category : #'as yet unclassified' }
-SoilPagedIndexStore >> startPage [
-	^ self pageAt: self headerPage startPageIndex
 ]
 
 { #category : #'as yet unclassified' }
