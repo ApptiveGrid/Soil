@@ -12,14 +12,11 @@ SoilSkipListHeaderPage class >> pageCode [
 	^ 1 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilSkipListHeaderPage >> beHeaderPage [
-	index := 1.
-	"level := self collection maxLevel.
-	self initializeRight."
+{ #category : #private }
+SoilSkipListHeaderPage >> addSentinelItems [
 	items 
-		add: ((SoilSkipListSentinel lower keySize: self collection keySize) numericValue -> 0);
-		add: ((SoilSkipListSentinel upper keySize: self collection keySize) numericValue -> 0)
+		add: ((SoilSkipListSentinel lower keySize: keySize) numericValue -> 0);
+		add: ((SoilSkipListSentinel upper keySize: keySize) numericValue -> 0)
 ]
 
 { #category : #utilities }
@@ -34,7 +31,9 @@ SoilSkipListHeaderPage >> keySize [
 
 { #category : #accessing }
 SoilSkipListHeaderPage >> keySize: anInteger [ 
-	keySize := anInteger
+	keySize ifNotNil: [ Error signal: 'key size has been set alread' ].
+	keySize := anInteger.
+	self addSentinelItems 
 ]
 
 { #category : #accessing }
@@ -48,13 +47,6 @@ SoilSkipListHeaderPage >> maxLevel: anInteger [
 
 	maxLevel := anInteger.
 	right := Array new: anInteger withAll: 0 
-]
-
-{ #category : #private }
-SoilSkipListHeaderPage >> prepare [
-	items 
-		add: ((SoilSkipListSentinel lower keySize: keySize) numericValue -> 0);
-		add: ((SoilSkipListSentinel upper keySize: keySize) numericValue -> 0)
 ]
 
 { #category : #'instance creation' }

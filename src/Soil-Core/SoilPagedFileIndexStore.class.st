@@ -19,11 +19,6 @@ SoilPagedFileIndexStore >> asCopyOnWriteStore [
 		underlyingStore: self
 ]
 
-{ #category : #initialization }
-SoilPagedFileIndexStore >> buildHeaderPage [
-	^ index newHeaderPage 
-]
-
 { #category : #'initialize-release' }
 SoilPagedFileIndexStore >> close [ 
 	stream ifNotNil: [  
@@ -125,11 +120,6 @@ SoilPagedFileIndexStore >> pagesStart [
 { #category : #'instance creation' }
 SoilPagedFileIndexStore >> positionOfPageIndex: anInteger [
 	^ ((anInteger - 1) * self filePageSize)
-]
-
-{ #category : #private }
-SoilPagedFileIndexStore >> prepare [
-	self headerPage prepare
 ]
 
 { #category : #'as yet unclassified' }

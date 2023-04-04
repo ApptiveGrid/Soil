@@ -44,6 +44,11 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction
 ]
 
 { #category : #accessing }
+SoilBehaviorRegistry >> flush [
+	self index flush
+]
+
+{ #category : #accessing }
 SoilBehaviorRegistry >> index [
 	^ index 
 ]
@@ -65,8 +70,7 @@ SoilBehaviorRegistry >> initializeFilesystem [
 		initializeFilesystem;
 		maxLevel: 8;
 		keySize: 64;
-		valueSize: 8;
-		prepare.
+		valueSize: 8.
 	self addSpecialObjects.
 	index writePages
 ]

@@ -32,10 +32,9 @@ SoilCopyOnWriteIndexStore >> isCopyOnWrite [
 { #category : #accessing }
 SoilCopyOnWriteIndexStore >> pageFaultAt: anInteger [ 
 	| page |
-	underlyingStore ifNotNil: [ 
-		"underlyingStore hasStream 
-			ifTrue: [" ^ underlyingStore pageAt: anInteger "]" ].
-	page := self createNewPage.
+	page := underlyingStore 
+		ifNotNil: [ underlyingStore pageAt: anInteger ]
+		ifNil: [ self createNewPage ].
 	pages at: anInteger put: page.
 	^ page 
 ]

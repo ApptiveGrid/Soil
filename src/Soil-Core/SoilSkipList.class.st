@@ -265,11 +265,6 @@ SoilSkipList >> path: aStringOrFileReference [
 	path := aStringOrFileReference asFileReference 
 ]
 
-{ #category : #private }
-SoilSkipList >> prepare [
-	store prepare
-]
-
 { #category : #accessing }
 SoilSkipList >> size [ 
 	^ self store allItems size - 2

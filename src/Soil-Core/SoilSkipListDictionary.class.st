@@ -7,7 +7,7 @@ Class {
 		'index',
 		'newValues'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Index-SkipList'
 }
 
 { #category : #accessing }

@@ -188,6 +188,7 @@ SOTransaction >> checkpoint [
 		soil behaviorRegistry 
 			nameAt: description value behaviorIdentifier 
 			put: description objectId ].
+	soil behaviorRegistry flush.
 	soil databaseVersion: writeVersion ]
 			ensure: [self releaseLocks ]
 

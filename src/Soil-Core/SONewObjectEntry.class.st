@@ -7,7 +7,7 @@ Class {
 		'position',
 		'record'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Journal'
 }
 
 { #category : #'accessing - defaults' }
