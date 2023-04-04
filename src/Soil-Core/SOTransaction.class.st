@@ -245,14 +245,6 @@ SOTransaction >> indexAt: anObject ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
-SOTransaction >> indexAtObject: anObject ifAbsent: aBlock [ 
-	^ indexes
-		at: anObject id
-		ifAbsentPut: [ 
-			(self lookupIndex: anObject ifNone: aBlock) asModifiableIndex ]
-]
-
-{ #category : #accessing }
 SOTransaction >> indexes [ 
 	^ indexes
 ]

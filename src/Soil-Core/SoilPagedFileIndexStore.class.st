@@ -1,76 +1,78 @@
 Class {
-	#name : #SoilPageRegistry,
-	#superclass : #Object,
+	#name : #SoilPagedFileIndexStore,
+	#superclass : #SoilPagedIndexStore,
 	#instVars : [
-		'skipList',
-		'headerPage',
 		'stream',
-		'pages'
+		'headerPage'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
 { #category : #queries }
-SoilPageRegistry >> allItems [
+SoilPagedFileIndexStore >> allItems [
+self halt.
 	^ (self pageFaultAt: 1) items
 ]
 
 { #category : #converting }
-SoilPageRegistry >> asModifiableRegistry [
-self halt.
+SoilPagedFileIndexStore >> asCopyOnWriteStore [
+	^ SoilCopyOnWriteIndexStore new 
+		underlyingStore: self
+]
+
+{ #category : #converting }
+SoilPagedFileIndexStore >> asModifiableRegistry [
 	^ (self as: SoilWritablePageRegistry)
 		clonePages;
 		yourself
 ]
 
 { #category : #initialization }
-SoilPageRegistry >> buildHeaderPage [
-	^ SoilSkipListHeaderPage new 
+SoilPagedFileIndexStore >> buildHeaderPage [
+	^ index newHeaderPage 
 		startPageIndex: 1;
 		yourself.
 
 ]
 
 { #category : #'initialize-release' }
-SoilPageRegistry >> close [ 
+SoilPagedFileIndexStore >> close [ 
 	stream ifNotNil: [  
 		stream close.
 		stream := nil ]
 ]
 
 { #category : #'instance creation' }
-SoilPageRegistry >> filePageSize [
+SoilPagedFileIndexStore >> filePageSize [
 	"most OSses use a file page size of 4k today"
 	^ 4096
 ]
 
 { #category : #accessing }
-SoilPageRegistry >> flush [
+SoilPagedFileIndexStore >> flush [
 	self flushPages 
 ]
 
 { #category : #'as yet unclassified' }
-SoilPageRegistry >> flushPages [
+SoilPagedFileIndexStore >> flushPages [
 	pages valuesDo: [ :page |
 		page isDirty ifTrue: [ 
 			self writePage: page ] ]
 ]
 
-{ #category : #'as yet unclassified' }
-SoilPageRegistry >> headerPage [
+{ #category : #testing }
+SoilPagedFileIndexStore >> hasStream [
+	^ stream notNil
+]
+
+{ #category : #accessing }
+SoilPagedFileIndexStore >> headerPage [
 	^ headerPage ifNil: [ 
 		headerPage := self buildHeaderPage ]
 ]
 
 { #category : #initialization }
-SoilPageRegistry >> initialize [ 
-	super initialize.
-	pages := Dictionary new.
-
-]
-
-{ #category : #initialization }
-SoilPageRegistry >> initializeFilesystem [
+SoilPagedFileIndexStore >> initializeFilesystem [
 	self 
 		openStream;
 		initializeHeaderPage;
@@ -78,9 +80,9 @@ SoilPageRegistry >> initializeFilesystem [
 ]
 
 { #category : #initialization }
-SoilPageRegistry >> initializeFirstPage [
+SoilPagedFileIndexStore >> initializeFirstPage [
 	| page |
-	page := skipList newPage
+	page := index newPage
 		registry: self;
 		beFirstPage;
 		yourself.
@@ -90,14 +92,15 @@ SoilPageRegistry >> initializeFirstPage [
 ]
 
 { #category : #initialization }
-SoilPageRegistry >> initializeHeaderPage [
+SoilPagedFileIndexStore >> initializeHeaderPage [
 	self writeHeaderPage 
 ]
 
 { #category : #accessing }
-SoilPageRegistry >> lastPage [
+SoilPagedFileIndexStore >> lastPage [
 	| maxLevel page pageNumber |
-	maxLevel := skipList maxLevel.
+	self halt.
+	maxLevel := index maxLevel.
 	page := self startPage.
 	[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
 		page := self pageAt: pageNumber ].
@@ -106,33 +109,27 @@ SoilPageRegistry >> lastPage [
 ]
 
 { #category : #accessing }
-SoilPageRegistry >> maxLevel [
-	^ skipList maxLevel
+SoilPagedFileIndexStore >> maxLevel [
+self halt.
+	^ index maxLevel
 ]
 
 { #category : #opening }
-SoilPageRegistry >> open [
+SoilPagedFileIndexStore >> open [
 	self openStream.
 	headerPage := self readHeaderPage
 ]
 
 { #category : #opening }
-SoilPageRegistry >> openStream [
-	stream := SOLockableStream path: skipList path.
+SoilPagedFileIndexStore >> openStream [
+	stream := SOLockableStream path: index path.
 ]
 
 { #category : #accessing }
-SoilPageRegistry >> pageAt: anInteger [ 
-	^ pages 
-		at: anInteger 
-		ifAbsentPut: [ self pageFaultAt: anInteger ]
-]
-
-{ #category : #accessing }
-SoilPageRegistry >> pageFaultAt: anInteger [
+SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	| page |
 	stream position: (self positionOfPageIndex: anInteger).
-	page := skipList newPage 
+	page := index newPage 
 		registry: self;
 		readFrom: stream.
 	"(pages size > anInteger) ifFalse: [ 
@@ -141,47 +138,33 @@ SoilPageRegistry >> pageFaultAt: anInteger [
 	^ page
 ]
 
-{ #category : #accessing }
-SoilPageRegistry >> pages [
-	^ pages
-]
-
 { #category : #'as yet unclassified' }
-SoilPageRegistry >> pagesStart [
+SoilPagedFileIndexStore >> pagesStart [
 	^ 4096
 ]
 
 { #category : #'instance creation' }
-SoilPageRegistry >> positionOfPageIndex: anInteger [
+SoilPagedFileIndexStore >> positionOfPageIndex: anInteger [
 	^ self pagesStart + ((anInteger - 1) * self filePageSize)
 ]
 
 { #category : #'as yet unclassified' }
-SoilPageRegistry >> readHeaderPage [
+SoilPagedFileIndexStore >> readHeaderPage [
 	stream position: 0.
-	^ SoilSkipListHeaderPage new readFrom: stream
+	^ index newHeaderPage readFrom: stream
 ]
 
 { #category : #accessing }
-SoilPageRegistry >> replace: oldPage with: newPage [ 
+SoilPagedFileIndexStore >> replace: oldPage with: newPage [ 
 	pages
 		at: oldPage index 
 		put:newPage 
 ]
 
-{ #category : #accessing }
-SoilPageRegistry >> skipList [
-	^ skipList
-]
-
-{ #category : #accessing }
-SoilPageRegistry >> skipList: aSoilSkipList [ 
-	skipList := aSoilSkipList 
-]
-
 { #category : #'as yet unclassified' }
-SoilPageRegistry >> splitPage: aIterator [ 
+SoilPagedFileIndexStore >> splitPage: aIterator [ 
 	| newPage page |
+	self halt.
 	page := aIterator page.
 	newPage := page split.
 	newPage index: pages size + 1.
@@ -198,24 +181,19 @@ SoilPageRegistry >> splitPage: aIterator [
 	^ newPage 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilPageRegistry >> startPage [
-	^ self pageAt: self headerPage startPageIndex
-]
-
 { #category : #accessing }
-SoilPageRegistry >> stream [
+SoilPagedFileIndexStore >> stream [
 	^ stream 
 ]
 
 { #category : #writing }
-SoilPageRegistry >> writeHeaderPage [
+SoilPagedFileIndexStore >> writeHeaderPage [
 	self stream position: 0.
 	self headerPage writeOn: self stream
 ]
 
 { #category : #writing }
-SoilPageRegistry >> writePage: aPage [ 
+SoilPagedFileIndexStore >> writePage: aPage [ 
 	| pagePosition |
 	pagePosition := self positionOfPageIndex: aPage index.  
 	stream position: pagePosition.

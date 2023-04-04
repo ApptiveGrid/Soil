@@ -84,7 +84,8 @@ SoilSkipListDictionary >> initialize [
 	super initialize.
 	newValues := Dictionary new.
 	id := UUID new asString36.
-	index := SoilModifiableSkipList new 
+	index := SoilSkipList new
+		beCopyOnWrite; 
 		valueSize: 8;
 		yourself
 ]
@@ -200,7 +201,7 @@ SoilSkipListDictionary >> soilLoadedIn: aTransaction [
 SoilSkipListDictionary >> soilSerialize: aSerializer [ 
 	super soilSerialize: aSerializer.
 	self index path ifNil: [  
-		index := aSerializer registerIndexedObject: self ].
+		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ].
 	"newValues keysAndValuesDo: [ :key :object |
 		objectId := transaction makeRoot: object.
 		objectId initializeIndex: transaction objectRepository.

@@ -53,9 +53,11 @@ SoilIndexTest >> testIndexCreationAndRead [
 		keySize: 8;
 		maxLevel: 4.
 	tx root: dict.
+	self halt.
 	dict 
 		at: #foo put: obj1;
 		at: #boo put: obj2.
+		self halt.
 	tx commit.
 	tx2 := soil newTransaction.
 	self assert: (tx2 root at: #foo) nested equals: 'object1'.

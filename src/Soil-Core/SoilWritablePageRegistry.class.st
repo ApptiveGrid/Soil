@@ -15,7 +15,7 @@ SoilWritablePageRegistry >> pageAt: anInteger [
 		at: anInteger 
 		ifAbsentPut: [ 
 			stream 
-				ifNotNil: [ self readPageAt: anInteger ]
+				ifNotNil: [ self pageFaultAt: anInteger ]
 				ifNil: [ 
 					(anInteger = 1) 
 						ifTrue: [  

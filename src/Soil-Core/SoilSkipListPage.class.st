@@ -48,16 +48,21 @@ SoilSkipListPage >> associationAt: anInteger [
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> beFirstPage [
 	index := 1.
-	level := self skipList maxLevel.
+	level := self collection maxLevel.
 	self initializeRight.
 	items 
-		add: ((SoilSkipListSentinel lower keySize: self skipList keySize) numericValue -> 0);
-		add: ((SoilSkipListSentinel upper keySize: self skipList keySize) numericValue -> 0)
+		add: ((SoilSkipListSentinel lower keySize: self collection keySize) numericValue -> 0);
+		add: ((SoilSkipListSentinel upper keySize: self collection keySize) numericValue -> 0)
 ]
 
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> biggestKey [
 	^ items last key
+]
+
+{ #category : #accessin }
+SoilSkipListPage >> collection [
+	^ registry index
 ]
 
 { #category : #accessing }
@@ -293,7 +298,7 @@ SoilSkipListPage >> smallestKey [
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> split [
 	| newPage middle |
-	newPage := self skipList newPage.
+	newPage := self collection newPage.
 	newPage 
 		registry: registry.
 	middle := (items size / 2) ceiling.
