@@ -10,6 +10,11 @@ Class {
 }
 
 { #category : #adding }
+SOJournal >> addEntries: aCollection [ 
+	aCollection do: [ :each | self addEntry: each ]
+]
+
+{ #category : #adding }
 SOJournal >> addEntry: aJournalEntry [
 	entries add: aJournalEntry 
 ]

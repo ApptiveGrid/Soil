@@ -11,7 +11,8 @@ Class {
 		'behaviorDescriptions',
 		'locks',
 		'lastObjectIndexes',
-		'journal'
+		'journal',
+		'indexes'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -145,7 +146,7 @@ SOTransaction >> buildJournal [
 		create.
 	recordsToCommit do: [ :record | 
 		record version: writeVersion.
-		journal addEntry: record asJournalEntry.
+		journal addEntries: record asJournalEntry.
 		record committed  ].
 	^ journal
 ]
@@ -178,14 +179,16 @@ SOTransaction >> checkpoint [
 	self buildJournal
 		write;
 		commit.
+	indexes values do: #flush.
 	"write back the accumulated new indexes for alll segments"
-	lastObjectIndexes keysAndValuesDo: [ :segment :indexes |
-		segment lastObjectIndex: indexes value ].
+	lastObjectIndexes keysAndValuesDo: [ :segment :index |
+		segment lastObjectIndex: index value ].
 	
 	behaviorDescriptions do: [ :description |
 		soil behaviorRegistry 
 			nameAt: description value behaviorIdentifier 
 			put: description objectId ].
+	soil behaviorRegistry flush.
 	soil databaseVersion: writeVersion ]
 			ensure: [self releaseLocks ]
 
@@ -234,13 +237,27 @@ SOTransaction >> idOf: anObject [
 	^ id
 ]
 
+{ #category : #accessing }
+SOTransaction >> indexAt: anObject ifAbsent: aBlock [ 
+	^ indexes
+		at: anObject
+		ifAbsentPut: [ 
+			self lookupIndex: anObject ifNone: aBlock ]
+]
+
+{ #category : #accessing }
+SOTransaction >> indexes [ 
+	^ indexes
+]
+
 { #category : #initialization }
 SOTransaction >> initialize [ 
 	super initialize.
 	idMap := IdentityDictionary new.
 	objectMap := IdentityDictionary new.
 	behaviorDescriptions := Dictionary new.
-	locks := OrderedCollection new
+	locks := OrderedCollection new.
+	indexes := IdentityDictionary new
 ]
 
 { #category : #'as yet unclassified' }
@@ -290,11 +307,11 @@ SOTransaction >> lockObjectId: aSOObjectId [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> lookupIndex: anObject [ 
+SOTransaction >> lookupIndex: anObject ifNone: aBlock [
 	| objectId segment |
 	objectId := (objectMap at: anObject) objectId.
 	segment := self objectRepository segmentAt: objectId segment.
-	^ segment indexAt: anObject
+	^ segment indexAt: anObject ifAbsent: aBlock
 ]
 
 { #category : #public }
@@ -439,9 +456,12 @@ SOTransaction >> records [
 { #category : #'as yet unclassified' }
 SOTransaction >> registerIndexedObject: anObject [ 
 	| objectId segment |
+	indexes at: anObject ifPresent: [ Error signal: 'shouldnt happen' ].
 	objectId := (objectMap at: anObject) objectId.
 	segment := self objectRepository segmentAt: objectId segment.
-	^ segment registerIndexedObject: anObject
+	^ indexes 
+		at: anObject 
+		put: (segment registerIndexedObject: anObject)
 ]
 
 { #category : #'as yet unclassified' }

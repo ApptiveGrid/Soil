@@ -11,6 +11,11 @@ Object >> isSoilProxy [
 ]
 
 { #category : #'*Soil-Core' }
+Object >> journalEntries [
+	^ #()
+]
+
+{ #category : #'*Soil-Core' }
 Object >> soilClusterRootIn: aSOTransaction [ 
 	
 ]

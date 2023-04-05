@@ -31,7 +31,7 @@ SoilSkipListIterator >> do: aBlock [
 { #category : #private }
 SoilSkipListIterator >> find: key [
 	| pageIndex candidatePage |
-	currentPage := skipList startPage.
+	currentPage := skipList headerPage.
 	currentKey := key.
 	levels size to: 1 by: -1 do: [ :level |
 		[ 
@@ -51,7 +51,7 @@ SoilSkipListIterator >> first [
 
 { #category : #accessing }
 SoilSkipListIterator >> firstAssociation [ 
-	^ skipList pageRegistry startPage firstItem
+	^ skipList store headerPage firstItem
 ]
 
 { #category : #accessing }
@@ -73,7 +73,7 @@ SoilSkipListIterator >> next [
 SoilSkipListIterator >> nextAssociation [
 	| item i2 |
 	currentPage ifNil: [ 
-		currentPage := skipList pageRegistry startPage.
+		currentPage := skipList store headerPage.
 		currentKey := nil ].
 	[ currentPage isNil ] whileFalse: [  
 		item := currentKey 
@@ -84,7 +84,7 @@ SoilSkipListIterator >> nextAssociation [
 						^ i ]
 					ifNil: [ 
 						((currentPage right at: 1) = 0) ifTrue: [ ^ nil ].
-						currentPage := skipList pageRegistry pageAt: (currentPage rightAt: 1).
+						currentPage := skipList store pageAt: (currentPage rightAt: 1).
 						currentKey := nil ] ]
 			ifNil: [
 				i2 := currentPage firstItem.
@@ -107,7 +107,7 @@ SoilSkipListIterator >> page: anObject [
 
 { #category : #private }
 SoilSkipListIterator >> pageAt: anInteger [
-	^ skipList pageRegistry pageAt: anInteger
+	^ skipList store pageAt: anInteger
 ]
 
 { #category : #printing }

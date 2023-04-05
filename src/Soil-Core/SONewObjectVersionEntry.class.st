@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'oldBytes'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Journal'
 }
 
 { #category : #'accessing - defaults' }

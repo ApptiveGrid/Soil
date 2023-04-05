@@ -7,7 +7,7 @@ Class {
 		'index',
 		'newValues'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Index-SkipList'
 }
 
 { #category : #accessing }
@@ -17,17 +17,29 @@ SoilSkipListDictionary class >> soilTransientInstVars [
 
 { #category : #accessing }
 SoilSkipListDictionary >> at: key [ 
+	^ self 
+		at: key
+		ifAbsent: [ KeyNotFound signal: key asString, ' not found' ]
+
+]
+
+{ #category : #accessing }
+SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 	| objectId |
-	objectId := SOObjectId readFrom: (self index at: key) readStream.
+	objectId := SOObjectId readFrom: (self index at: key ifAbsent: [ ^ aBlock value ]) readStream.
 	^ transaction proxyForObjectId: objectId
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> at: key put: anObject [
+	| objectId |
 	transaction ifNotNil: [
 		transaction makeRoot: anObject.
-		transaction markDirty: self ].
-	newValues at: key put: anObject
+		transaction markDirty: self.
+		objectId := (transaction objectIndex at: anObject) objectId.
+		self index at: key put: objectId. ].
+	newValues at: key put: objectId.
+
 ]
 
 { #category : #accessing }
@@ -68,7 +80,7 @@ SoilSkipListDictionary >> id [
 { #category : #accessing }
 SoilSkipListDictionary >> index [
 	^ index ifNil: [ 
-		index := self lookupIndex ]
+		index := self lookupIndex asModifiableIndex  ]
 ]
 
 { #category : #initialization }
@@ -85,6 +97,18 @@ SoilSkipListDictionary >> initialize [
 SoilSkipListDictionary >> isEmpty [
 	newValues ifNotEmpty: [ ^ false ].
 	^ self index isEmpty
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListDictionary >> journalEntries [
+	| entries |
+	entries := OrderedCollection new.
+	newValues keysAndValuesDo: [ :key :value |
+		entries add: (SoilNewKeyEntry new 
+			indexId: id;
+			key: key;
+			value: value) ].
+	^ entries
 ]
 
 { #category : #accessing }
@@ -112,12 +136,20 @@ SoilSkipListDictionary >> loadFrom: aFileReference [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> lookupIndex [
-	^ transaction lookupIndex: self
+	^ transaction 
+		indexAt: self
+		ifAbsent: [ self newIndexInstance ]
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> maxLevel: anInteger [ 
-	index maxLevel: anInteger 
+	index maxLevel: anInteger.
+
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListDictionary >> newIndexInstance [
+	self halt.
 ]
 
 { #category : #'as yet unclassified' }
@@ -173,15 +205,14 @@ SoilSkipListDictionary >> soilLoadedIn: aTransaction [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilSerialize: aSerializer [ 
-	| objectId |
 	super soilSerialize: aSerializer.
 	self index path ifNil: [  
-		aSerializer registerIndexedObject: self ].
-	newValues keysAndValuesDo: [ :key :object |
+		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ].
+	"newValues keysAndValuesDo: [ :key :object |
 		objectId := transaction makeRoot: object.
 		objectId initializeIndex: transaction objectRepository.
 		index at: key put: objectId ].
-	index writePages
+	index writePages"
 ]
 
 { #category : #accessing }
