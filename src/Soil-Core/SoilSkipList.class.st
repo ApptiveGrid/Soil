@@ -93,8 +93,7 @@ SoilSkipList >> destroy [
 
 { #category : #enumerating }
 SoilSkipList >> do: aBlock [
-	path ifNotNil: [ 
-		self iterator do: aBlock ]
+	self iterator do: aBlock
 ]
 
 { #category : #private }
