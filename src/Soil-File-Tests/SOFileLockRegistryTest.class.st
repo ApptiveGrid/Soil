@@ -4,6 +4,12 @@ Class {
 	#category : #'Soil-File-Tests'
 }
 
+{ #category : #initialization }
+SOFileLockRegistryTest >> setUp [
+	super setUp.
+	SOFileLockRegistry reset
+]
+
 { #category : #running }
 SOFileLockRegistryTest >> tearDown [ 
 	super tearDown.
