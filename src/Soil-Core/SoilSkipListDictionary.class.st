@@ -164,7 +164,9 @@ SoilSkipListDictionary >> newIndexInstance [
 SoilSkipListDictionary >> nextAfter: key [  
 	| page |
 	page := self index iterator find: key asInteger;  page.
-	^ page itemAfter: key asInteger.
+	^ (page itemAfter: key asInteger)
+		ifNotNil: [ :assoc | 
+			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
 ]
 
