@@ -26,7 +26,7 @@ SoilSkipListDictionary >> at: key [
 { #category : #accessing }
 SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 	| objectId |
-	objectId := SOObjectId readFrom: (self index at: key ifAbsent: [ ^ aBlock value ]) readStream.
+	objectId := (self index at: key ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
 	^ transaction proxyForObjectId: objectId
 ]
 

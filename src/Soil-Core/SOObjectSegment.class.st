@@ -77,7 +77,9 @@ SOObjectSegment >> close [
 	indexFile ifNotNil: [ 
 		indexFile close ].
 	objectFile ifNotNil: [ 
-		objectFile close ]
+		objectFile close ].
+	indexManager ifNotNil: [ 
+		indexManager close ]
 ]
 
 { #category : #accessing }
@@ -94,11 +96,9 @@ SOObjectSegment >> id: anObject [
 
 { #category : #accessing }
 SOObjectSegment >> indexAt: anIndexedObject ifAbsent: aBlock [
-	| path |
-	path := self path / anIndexedObject id , #index.
-	^ path exists
-		ifTrue: [ anIndexedObject loadFrom: path ]
-		ifFalse: [ aBlock value ]
+	^ self indexManager 
+		at: anIndexedObject 
+		ifAbsent: aBlock
 ]
 
 { #category : #accessing }

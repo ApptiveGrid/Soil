@@ -35,7 +35,7 @@ SoilCopyOnWriteIndexStore >> pageFaultAt: anInteger [
 	page := underlyingStore 
 		ifNotNil: [ underlyingStore pageAt: anInteger ]
 		ifNil: [ self createNewPage ].
-	pages at: anInteger put: page.
+	pages at: anInteger put: page copy.
 	^ page 
 ]
 

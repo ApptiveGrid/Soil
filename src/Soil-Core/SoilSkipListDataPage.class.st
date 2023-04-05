@@ -166,6 +166,12 @@ SoilSkipListDataPage >> numberOfItems [
 	^ items size 
 ]
 
+{ #category : #copying }
+SoilSkipListDataPage >> postCopy [ 
+	super postCopy.
+	items := items copy
+]
+
 { #category : #writing }
 SoilSkipListDataPage >> readItemsFrom: aStream [ 
 	| numberOfItems |
