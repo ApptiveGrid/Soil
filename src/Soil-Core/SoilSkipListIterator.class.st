@@ -55,6 +55,11 @@ SoilSkipListIterator >> firstAssociation [
 ]
 
 { #category : #accessing }
+SoilSkipListIterator >> lastAssociation [ 
+	^ skipList store lastPage lastItem
+]
+
+{ #category : #accessing }
 SoilSkipListIterator >> levelAt: anInteger [ 
 	^ levels at: anInteger 
 ]

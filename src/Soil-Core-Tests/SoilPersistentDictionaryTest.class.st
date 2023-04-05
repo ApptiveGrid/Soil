@@ -33,7 +33,7 @@ SoilPersistentDictionaryTest >> testAt [
 
 	| dict transaction |
 	transaction := soil newTransaction.
-	dict := SoilPersistentDictionary new "soilMakePersistentIn: transaction".
+	dict := SoilPersistentDictionary new.
 	transaction makeRoot: dict.
 	
 	dict add: (#test -> 'string').

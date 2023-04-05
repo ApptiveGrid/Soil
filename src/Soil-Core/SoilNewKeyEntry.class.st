@@ -42,7 +42,7 @@ SoilNewKeyEntry >> value: aString [
 SoilNewKeyEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
 	aStream 
-		nextPutAll: indexId;
-		nextPutAll: key;
+		nextPutAll: indexId asByteArray;
+		nextPutAll: key asByteArray ;
 		nextPutAll: value asByteArray
 ]
