@@ -51,6 +51,11 @@ SoilPagedIndexStore >> lastPage [
 	
 ]
 
+{ #category : #acessing }
+SoilPagedIndexStore >> lastPageIndex [
+	^ self headerPage lastPageIndex
+]
+
 { #category : #'instance creation' }
 SoilPagedIndexStore >> newPage [
 	^ index newPage
