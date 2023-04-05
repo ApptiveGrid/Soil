@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #queries }
+SoilCopyOnWriteIndexStore >> allItems [
+	^ underlyingStore allItems 
+]
+
 { #category : #'as yet unclassified' }
 SoilCopyOnWriteIndexStore >> createNewPage [
 	^ index newWritablePage 
@@ -30,7 +35,7 @@ SoilCopyOnWriteIndexStore >> pageFaultAt: anInteger [
 	page := underlyingStore 
 		ifNotNil: [ underlyingStore pageAt: anInteger ]
 		ifNil: [ self createNewPage ].
-	pages at: anInteger put: page.
+	pages at: anInteger put: page copy.
 	^ page 
 ]
 

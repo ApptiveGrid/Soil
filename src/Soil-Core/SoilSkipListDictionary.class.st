@@ -26,7 +26,7 @@ SoilSkipListDictionary >> at: key [
 { #category : #accessing }
 SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 	| objectId |
-	objectId := SOObjectId readFrom: (self index at: key ifAbsent: [ ^ aBlock value ]) readStream.
+	objectId := (self index at: key ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
 	^ transaction proxyForObjectId: objectId
 ]
 
@@ -34,42 +34,46 @@ SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 SoilSkipListDictionary >> at: key put: anObject [
 	| objectId |
 	transaction ifNotNil: [
-		transaction makeRoot: anObject.
+		objectId := transaction makeRoot: anObject.
 		transaction markDirty: self.
-		objectId := (transaction objectIndex at: anObject) objectId.
-		self index at: key put: objectId. ].
-	newValues at: key put: objectId.
+		self index at: key put: objectId. 
+		^ newValues at: key put: objectId ].
+	newValues at: key put: anObject.
 
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> atIndex: anInteger [ 
-	| key |
-	index path ifNil: [ 
-		key := newValues keyAtIndex: anInteger ifAbsent: [ ^ nil ].
-		^ newValues at: key  ].
-	^ index atIndex: anInteger 
+	^ self proxyFromByteArray: (self index atIndex: anInteger) 
 ]
 
 { #category : #enumerating }
 SoilSkipListDictionary >> do: aBlock [ 
-	| objectId |
-	self index do: [ :ba |
-		objectId := SOObjectId readFrom: ba readStream.
-		aBlock value: (transaction proxyForObjectId: objectId) ].
-	newValues values do: [ :each | aBlock value: each ] 
+	transaction 
+		ifNotNil: [  
+			self index do: [ :byteArrayOrObjectId |
+				aBlock value: (transaction proxyForObjectId: byteArrayOrObjectId asSoilObjectId ) ] ]
+		ifNil: [.
+			newValues values do: [ :each | 
+				aBlock value: (each isObjectId
+					ifTrue: [ transaction objectWithId: each ]
+				 	ifFalse: [ each ]) ] ]
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> first [
-	self index path ifNotNil: [  
-		^ self proxyFromByteArray: self index firstItem value ].
-	^ newValues at: newValues keys sorted first
+	^ transaction 
+		ifNotNil: [ self proxyFromByteArray: self index firstItem value ]
+		ifNil: [ newValues associations first value ]
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> first: anInteger [ 
-	^ (self index first: anInteger) collect: [ :each | self proxyFromByteArray: each ]  
+	^ transaction 
+		ifNotNil: [ 
+			(self index first: anInteger) 
+				collect: [ :each | self proxyFromByteArray: each ] ]
+		ifNil: [ (newValues associations first: anInteger) collect: #value ]  
 ]
 
 { #category : #accessing }
@@ -118,13 +122,13 @@ SoilSkipListDictionary >> keySize: anInteger [
 
 { #category : #accessing }
 SoilSkipListDictionary >> last [
-	| objectId assoc |
-	index path ifNil: [ 
-		^ newValues at: (newValues keyAtIndex: newValues size) ].
-	assoc := self index last.
-	assoc ifNil: [ ^ nil ].
-	objectId := SOObjectId readFrom: assoc value readStream.
-	^ assoc key -> (transaction proxyForObjectId: objectId)
+	| assoc |
+	^ transaction 
+		ifNotNil: [  
+			assoc := self index last.
+			assoc ifNil: [ ^ nil ].
+			assoc key -> (transaction proxyForObjectId: assoc value asSoilObjectId) ]
+		ifNil: [ newValues associations last value ]
 ]
 
 { #category : #private }
@@ -160,6 +164,14 @@ SoilSkipListDictionary >> nextAfter: key [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipListDictionary >> prepareNewValues [
+	newValues copy keysAndValuesDo: [ :key :object |
+		object isObjectId ifFalse: [
+			newValues at: key put: (transaction makeRoot: object) ] ].
+	transaction markDirty: self
+]
+
 { #category : #printing }
 SoilSkipListDictionary >> printOn: aStream [ 
 	super printOn: aStream.
@@ -169,31 +181,36 @@ SoilSkipListDictionary >> printOn: aStream [
 { #category : #enumerating }
 SoilSkipListDictionary >> proxyFromByteArray: aByteArray [
 	
-	^ transaction proxyForObjectId: (SOObjectId readFrom: aByteArray readStream)
+	^ transaction proxyForObjectId: aByteArray asSoilObjectId
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> second [
-	self index path ifNotNil: [  
-		^ index iterator first; next ].
-	^ newValues associations second
+	^ transaction 
+		ifNotNil: [ index iterator first; next ]
+		ifNil: [ newValues associations second value ]
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> size [ 
-	^ self index path 
-		ifNotNil: [ self index size + newValues size ]
-		ifNil: [ newValues size ] 
+	^ transaction 
+		ifNotNil: [ self index size ]
+		ifNil: [ newValues size ]
 ]
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
-	newValues ifNotEmpty: [
-		newValues values do: [ :object |
-			transaction makeRoot: object ].
-		transaction markDirty: self]
+	newValues copy keysAndValuesDo: [ :key :object | | obj |
+		obj := object isObjectId
+			ifTrue: [ object ] 
+			ifFalse: [
+				newValues 
+					at: key 
+					put: (transaction makeRoot: object) ].
+		self index at: key put: obj ].
+	transaction markDirty: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -205,6 +222,9 @@ SoilSkipListDictionary >> soilLoadedIn: aTransaction [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilSerialize: aSerializer [ 
+	transaction ifNil: [ 
+		transaction := aSerializer transaction.
+		self prepareNewValues ].
 	super soilSerialize: aSerializer.
 	self index path ifNil: [  
 		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ].

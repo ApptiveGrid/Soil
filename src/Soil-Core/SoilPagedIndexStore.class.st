@@ -40,6 +40,17 @@ SoilPagedIndexStore >> isCopyOnWrite [
 	^ false
 ]
 
+{ #category : #accessing }
+SoilPagedIndexStore >> lastPage [
+	| maxLevel page pageNumber |
+	maxLevel := index maxLevel.
+	page := self headerPage.
+	[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
+		page := self pageAt: pageNumber ].
+	^ page
+	
+]
+
 { #category : #'instance creation' }
 SoilPagedIndexStore >> newPage [
 	^ index newPage

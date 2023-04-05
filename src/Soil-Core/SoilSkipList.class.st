@@ -93,8 +93,7 @@ SoilSkipList >> destroy [
 
 { #category : #enumerating }
 SoilSkipList >> do: aBlock [
-	path ifNotNil: [ 
-		self iterator do: aBlock ]
+	self iterator do: aBlock
 ]
 
 { #category : #private }
@@ -147,7 +146,7 @@ SoilSkipList >> initializeHeaderPage [
 
 { #category : #testing }
 SoilSkipList >> isEmpty [
-	^ self store headerPage hasItems
+	^ self store headerPage hasItems not
 ]
 
 { #category : #'public/accessing' }
@@ -161,9 +160,9 @@ SoilSkipList >> keySize [
 ]
 
 { #category : #accessing }
-SoilSkipList >> keySize: anObject [
-
-	self headerPage keySize: anObject
+SoilSkipList >> keySize: anInteger [
+	anInteger isZero ifTrue: [ self halt ].
+	self headerPage keySize: anInteger
 ]
 
 { #category : #accessing }

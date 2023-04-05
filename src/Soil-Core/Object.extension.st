@@ -6,6 +6,11 @@ Object >> asSoilSignal [
 ]
 
 { #category : #'*Soil-Core' }
+Object >> isObjectId [
+	^ false
+]
+
+{ #category : #'*Soil-Core' }
 Object >> isSoilProxy [ 
 	^ false
 ]
