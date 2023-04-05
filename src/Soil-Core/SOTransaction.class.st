@@ -178,7 +178,8 @@ SOTransaction >> checkpoint [
 		locks add: (segment lockAppendingFor: self) ].
 	self buildJournal
 		write;
-		commit.
+		commit;
+		close.
 	indexes values do: #flush.
 	"write back the accumulated new indexes for alll segments"
 	lastObjectIndexes keysAndValuesDo: [ :segment :index |

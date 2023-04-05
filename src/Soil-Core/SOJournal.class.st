@@ -19,6 +19,11 @@ SOJournal >> addEntry: aJournalEntry [
 	entries add: aJournalEntry 
 ]
 
+{ #category : #'initialize-release' }
+SOJournal >> close [ 
+	stream ifNotNil: [ stream close ]
+]
+
 { #category : #accessing }
 SOJournal >> commit [
 	entries do: [ :each | each commitIn: transaction ]
