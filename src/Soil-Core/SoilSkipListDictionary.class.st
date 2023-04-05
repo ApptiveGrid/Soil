@@ -53,10 +53,8 @@ SoilSkipListDictionary >> atIndex: anInteger [
 
 { #category : #enumerating }
 SoilSkipListDictionary >> do: aBlock [ 
-	| objectId |
-	self index do: [ :ba |
-		objectId := SOObjectId readFrom: ba readStream.
-		aBlock value: (transaction proxyForObjectId: objectId) ].
+	self index do: [ :byteArrayOrObjectId |
+		aBlock value: (transaction proxyForObjectId: byteArrayOrObjectId asSoilObjectId ) ].
 	newValues values do: [ :each | 
 		aBlock value: (each isObjectId
 			ifTrue: [ transaction objectWithId: each ]

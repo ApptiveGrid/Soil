@@ -60,6 +60,11 @@ SOObjectId >> asByteArrayOfSize: anInteger [
 ]
 
 { #category : #converting }
+SOObjectId >> asSoilObjectId [
+	^ self 
+]
+
+{ #category : #converting }
 SOObjectId >> asSoilObjectProxy [
 	^ SOObjectProxy new 
 		objectId: self
