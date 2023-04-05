@@ -57,7 +57,10 @@ SoilSkipListDictionary >> do: aBlock [
 	self index do: [ :ba |
 		objectId := SOObjectId readFrom: ba readStream.
 		aBlock value: (transaction proxyForObjectId: objectId) ].
-	newValues values do: [ :each | aBlock value: each ] 
+	newValues values do: [ :each | 
+		aBlock value: (each isObjectId
+			ifTrue: [ transaction objectWithId: each ]
+		 	ifFalse: [ each ]) ]
 ]
 
 { #category : #accessing }
@@ -196,7 +199,7 @@ SoilSkipListDictionary >> size [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilClusterRootIn: aTransaction [
-	aTransaction ifNotNil: [ ^ self ].
+	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
 	newValues copy keysAndValuesDo: [ :key :object |
 		object isObjectId ifFalse: [
