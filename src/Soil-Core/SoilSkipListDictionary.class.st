@@ -80,6 +80,15 @@ SoilSkipListDictionary >> first: anInteger [
 		ifNil: [ (newValues associations first: anInteger) collect: #value ]  
 ]
 
+{ #category : #accesing }
+SoilSkipListDictionary >> firstAssociation [
+	self index path ifNil: [ 
+		^ newValues at: (newValues keyAtIndex: 1) ].
+	^ index iterator firstAssociation ifNotNil: [ :assoc | 
+			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
+
+]
+
 { #category : #accessing }
 SoilSkipListDictionary >> id [
 	^ id
@@ -133,6 +142,13 @@ SoilSkipListDictionary >> last [
 			assoc ifNil: [ ^ nil ].
 			assoc key -> (transaction proxyForObjectId: assoc value asSoilObjectId) ]
 		ifNil: [ newValues associations last value ]
+]
+
+{ #category : #accessing }
+SoilSkipListDictionary >> lastAssociation [
+	^ self index iterator lastAssociation ifNotNil: [ :assoc | 
+			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
+
 ]
 
 { #category : #private }
