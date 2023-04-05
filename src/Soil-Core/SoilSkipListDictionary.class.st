@@ -113,14 +113,10 @@ SoilSkipListDictionary >> keySize: anInteger [
 
 { #category : #accessing }
 SoilSkipListDictionary >> last [
-	| objectId assoc |
-	self halt.
-	index path ifNil: [ 
-		^ newValues at: (newValues keyAtIndex: newValues size) ].
+	| assoc |
 	assoc := self index last.
 	assoc ifNil: [ ^ nil ].
-	objectId := SOObjectId readFrom: assoc value readStream.
-	^ assoc key -> (transaction proxyForObjectId: objectId)
+	^ assoc key -> (transaction proxyForObjectId: assoc value asSoilObjectId)
 ]
 
 { #category : #private }
