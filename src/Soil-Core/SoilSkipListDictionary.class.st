@@ -34,11 +34,11 @@ SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 SoilSkipListDictionary >> at: key put: anObject [
 	| objectId |
 	transaction ifNotNil: [
-		transaction makeRoot: anObject.
+		objectId := transaction makeRoot: anObject.
 		transaction markDirty: self.
-		objectId := (transaction objectIndex at: anObject) objectId.
-		self index at: key put: objectId. ].
-	newValues at: key put: objectId.
+		self index at: key put: objectId. 
+		^ newValues at: key put: objectId ].
+	newValues at: key put: anObject.
 
 ]
 
@@ -160,6 +160,14 @@ SoilSkipListDictionary >> nextAfter: key [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipListDictionary >> prepareNewValues [
+	newValues copy keysAndValuesDo: [ :key :object |
+		object isObjectId ifFalse: [
+			newValues at: key put: (transaction makeRoot: object) ] ].
+	transaction markDirty: self
+]
+
 { #category : #printing }
 SoilSkipListDictionary >> printOn: aStream [ 
 	super printOn: aStream.
@@ -188,12 +196,12 @@ SoilSkipListDictionary >> size [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilClusterRootIn: aTransaction [
-	transaction ifNotNil: [ ^ self ].
+	aTransaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
-	newValues ifNotEmpty: [
-		newValues values do: [ :object |
-			transaction makeRoot: object ].
-		transaction markDirty: self]
+	newValues copy keysAndValuesDo: [ :key :object |
+		object isObjectId ifFalse: [
+			newValues at: key put: (transaction makeRoot: object) ] ].
+	transaction markDirty: self
 ]
 
 { #category : #'as yet unclassified' }
@@ -205,6 +213,9 @@ SoilSkipListDictionary >> soilLoadedIn: aTransaction [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilSerialize: aSerializer [ 
+	transaction ifNil: [ 
+		transaction := aSerializer transaction.
+		self prepareNewValues ].
 	super soilSerialize: aSerializer.
 	self index path ifNil: [  
 		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ].

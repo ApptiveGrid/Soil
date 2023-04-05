@@ -161,9 +161,9 @@ SoilSkipList >> keySize [
 ]
 
 { #category : #accessing }
-SoilSkipList >> keySize: anObject [
-
-	self headerPage keySize: anObject
+SoilSkipList >> keySize: anInteger [
+	anInteger isZero ifTrue: [ self halt ].
+	self headerPage keySize: anInteger
 ]
 
 { #category : #accessing }

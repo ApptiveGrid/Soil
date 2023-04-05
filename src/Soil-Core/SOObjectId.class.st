@@ -97,6 +97,11 @@ SOObjectId >> isInitialized [
 	^ index > 0
 ]
 
+{ #category : #testing }
+SOObjectId >> isObjectId [ 
+	^ true
+]
+
 { #category : #printing }
 SOObjectId >> printOn: aStream [ 
 	aStream << 'ObjectId(' << segment asString << ':' << index asString << ')'

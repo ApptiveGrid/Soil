@@ -9,8 +9,7 @@ Class {
 
 { #category : #queries }
 SoilPagedFileIndexStore >> allItems [
-self halt.
-	^ (self pageFaultAt: 1) items
+	^ pages flatCollect: [ :page | page items ]
 ]
 
 { #category : #converting }

@@ -239,3 +239,8 @@ SoilSerializer >> serializeToBytes: anObject [
 		serialize: anObject
 
 ]
+
+{ #category : #accessing }
+SoilSerializer >> transaction [
+	^ transaction 
+]
