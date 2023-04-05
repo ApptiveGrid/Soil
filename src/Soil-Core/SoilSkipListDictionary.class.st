@@ -43,9 +43,12 @@ SoilSkipListDictionary >> at: key put: anObject [
 ]
 
 { #category : #accessing }
-SoilSkipListDictionary >> atIndex: anInteger [ 
-	^ (self index atIndex: anInteger)
-		ifNotNil: [ :bytes | self proxyFromByteArray: bytes ]
+SoilSkipListDictionary >> atIndex: anInteger [
+	^ transaction 
+		ifNotNil: [  
+			(self index atIndex: anInteger)
+				ifNotNil: [ :bytes | self proxyFromByteArray: bytes ] ]
+		ifNil: [ (newValues associations at: anInteger) value  ]
 ]
 
 { #category : #enumerating }
