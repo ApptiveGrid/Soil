@@ -68,18 +68,6 @@ SoilPagedFileIndexStore >> initializeHeaderPage [
 		
 ]
 
-{ #category : #accessing }
-SoilPagedFileIndexStore >> lastPage [
-	| maxLevel page pageNumber |
-	self halt.
-	maxLevel := index maxLevel.
-	page := self headerPage.
-	[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
-		page := self pageAt: pageNumber ].
-	^ page
-	
-]
-
 { #category : #'instance creation' }
 SoilPagedFileIndexStore >> open [
 	self 
