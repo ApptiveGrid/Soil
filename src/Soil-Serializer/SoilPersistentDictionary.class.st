@@ -91,6 +91,11 @@ SoilPersistentDictionary >> isCollection [
 	^ true
 ]
 
+{ #category : #testing }
+SoilPersistentDictionary >> isEmpty [
+	^ dict isEmpty
+]
+
 { #category : #forwarded }
 SoilPersistentDictionary >> keysAndValuesDo: aBlock [
 	^ dict keysAndValuesDo: aBlock

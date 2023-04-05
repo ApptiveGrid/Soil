@@ -44,10 +44,6 @@ SoilSkipListDictionary >> at: key put: anObject [
 
 { #category : #accessing }
 SoilSkipListDictionary >> atIndex: anInteger [ 
-	| key |
-	index path ifNil: [ 
-		key := newValues keyAtIndex: anInteger ifAbsent: [ ^ nil ].
-		^ newValues at: key  ].
 	^ index atIndex: anInteger 
 ]
 
@@ -63,9 +59,7 @@ SoilSkipListDictionary >> do: aBlock [
 
 { #category : #accessing }
 SoilSkipListDictionary >> first [
-	self index path ifNotNil: [  
-		^ self proxyFromByteArray: self index firstItem value ].
-	^ newValues at: newValues keys sorted first
+	^ self proxyFromByteArray: self index firstItem value
 ]
 
 { #category : #accessing }
@@ -120,6 +114,7 @@ SoilSkipListDictionary >> keySize: anInteger [
 { #category : #accessing }
 SoilSkipListDictionary >> last [
 	| objectId assoc |
+	self halt.
 	index path ifNil: [ 
 		^ newValues at: (newValues keyAtIndex: newValues size) ].
 	assoc := self index last.
@@ -178,21 +173,17 @@ SoilSkipListDictionary >> printOn: aStream [
 { #category : #enumerating }
 SoilSkipListDictionary >> proxyFromByteArray: aByteArray [
 	
-	^ transaction proxyForObjectId: (SOObjectId readFrom: aByteArray readStream)
+	^ transaction proxyForObjectId: aByteArray asSoilObjectId
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> second [
-	self index path ifNotNil: [  
-		^ index iterator first; next ].
-	^ newValues associations second
+	^ index iterator first; next
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> size [ 
-	^ self index path 
-		ifNotNil: [ self index size ]
-		ifNil: [ newValues size ] 
+	^ self index size
 ]
 
 { #category : #'as yet unclassified' }
