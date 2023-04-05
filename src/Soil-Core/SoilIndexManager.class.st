@@ -25,7 +25,7 @@ SoilIndexManager >> open [
 
 { #category : #'as yet unclassified' }
 SoilIndexManager >> registerIndexedObject: aSoilSkipListDictionary [ 
-	^ aSoilSkipListDictionary index
+	^ aSoilSkipListDictionary index asWritableIndex
 		path: segment path / aSoilSkipListDictionary id, #index;
 		initializeFilesystem
 ]

@@ -3,16 +3,27 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'path',
-		'pageRegistry'
+		'store'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
 { #category : #converting }
 SoilSkipList >> asModifiableIndex [
-	^ (self as: SoilModifiableSkipList)
-		pageRegistry: pageRegistry asModifiableRegistry;
+	^ self copy
+		store: store asCopyOnWriteStore;
 		yourself 
+]
+
+{ #category : #converting }
+SoilSkipList >> asWritableIndex [
+	| writableStore |
+	writableStore := store isCopyOnWrite
+		ifTrue: [ store underlyingStore ]
+		ifFalse: [ store ].
+	^ self copy 
+		store: writableStore;
+		yourself
 ]
 
 { #category : #private }
@@ -44,7 +55,7 @@ SoilSkipList >> at: aKeyObject put: anObject [
 			page hasRoom 
 				ifTrue: [ iterator page addItem: (key -> anObject) ]
 				ifFalse: [ 
-					newPage := self pageRegistry splitPage: iterator.
+					newPage := self splitPage: iterator.
 					((page biggestKey < key)
 						ifTrue: [ newPage ]
 						ifFalse: [ page ])
@@ -62,9 +73,17 @@ SoilSkipList >> atIndex: anInteger [
 	^ current value
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipList >> beCopyOnWrite [
+	store := SoilCopyOnWriteIndexStore new
+		index: self;
+		underlyingStore: (SoilPagedFileIndexStore new
+		 index: self)
+]
+
 { #category : #'initialize-release' }
 SoilSkipList >> close [
-	self pageRegistry close
+	self store close
 ]
 
 { #category : #deleting }
@@ -98,38 +117,37 @@ SoilSkipList >> first: anInteger [
 
 { #category : #accessing }
 SoilSkipList >> firstItem [
-	^ self startPage firstItem
+	^ self headerPage firstItem
 ]
 
 { #category : #accessing }
 SoilSkipList >> firstPage [
-	^ self pageRegistry pageAt: 1
+	^ self store pageAt: 1
 ]
 
 { #category : #accessing }
 SoilSkipList >> flush [
-	self pageRegistry flush
+	self store flush
 ]
 
 { #category : #'as yet unclassified' }
 SoilSkipList >> headerPage [
-	^ self pageRegistry headerPage
+	^ self store headerPage
 ]
 
 { #category : #initialization }
 SoilSkipList >> initializeFilesystem [ 
-	self pageRegistry 
-		initializeFilesystem
+	store initializeFilesystem
 ]
 
 { #category : #writing }
 SoilSkipList >> initializeHeaderPage [
-	self pageRegistry initializeHeaderPage
+	self store initializeHeaderPage
 ]
 
 { #category : #testing }
 SoilSkipList >> isEmpty [
-	^ self pageRegistry startPage hasItems
+	^ self store headerPage hasItems
 ]
 
 { #category : #'public/accessing' }
@@ -150,7 +168,7 @@ SoilSkipList >> keySize: anObject [
 
 { #category : #accessing }
 SoilSkipList >> last [
-	^ self pageRegistry lastPage lastItem
+	^ self store lastPage lastItem
 ]
 
 { #category : #accessing }
@@ -160,7 +178,7 @@ SoilSkipList >> lastPage [
 
 { #category : #actions }
 SoilSkipList >> load [
-	self readPageAt: 1
+	self pageFaultAt: 1
 ]
 
 { #category : #accessing }
@@ -172,7 +190,15 @@ SoilSkipList >> maxLevel [
 { #category : #accessing }
 SoilSkipList >> maxLevel: anInteger [ 
 	"maxLevel := anInteger "
-	self headerPage maxLevel: anInteger 
+	store headerPage maxLevel: anInteger 
+]
+
+{ #category : #'instance creation' }
+SoilSkipList >> newHeaderPage [
+	^ SoilSkipListHeaderPage new
+		index: 1;
+		lastPageIndex: 1;
+		pageSize: self pageSize
 ]
 
 { #category : #'instance creation' }
@@ -181,41 +207,41 @@ SoilSkipList >> newPage [
 		initializeLevel: self maxLevel;
 		keySize: self keySize;
 		valueSize: self valueSize;
-		size: self pageSize;
+		pageSize: self pageSize;
 		yourself
 ]
 
 { #category : #'instance creation' }
 SoilSkipList >> newPageRegistry [
-	^ SoilPageRegistry new
-			skipList: self
+	^ SoilPagedFileIndexStore new
+		index: self
+]
+
+{ #category : #'instance creation' }
+SoilSkipList >> newWritablePage [
+self halt.
+	^ SoilWritableSkipListPage new
+		level: self maxLevel;
+		size: 4096;
+		keySize: 16;
+		valueSize: 8.
+		
+		
 ]
 
 { #category : #opening }
 SoilSkipList >> open [
-	self pageRegistry open
+	self store open
 ]
 
 { #category : #accessing }
 SoilSkipList >> pageAt: anInteger [ 
-	^ self pageRegistry pageAt: anInteger 
+	^ self store pageAt: anInteger 
 ]
 
 { #category : #'instance creation' }
 SoilSkipList >> pageClass [
-	^ SoilSkipListPage
-]
-
-{ #category : #accessing }
-SoilSkipList >> pageRegistry [
-	^ pageRegistry ifNil: [ 
-		pageRegistry := self newPageRegistry ]
-]
-
-{ #category : #accessing }
-SoilSkipList >> pageRegistry: anObject [
-
-	pageRegistry := anObject
+	^ SoilSkipListTruncPage
 ]
 
 { #category : #accessing }
@@ -225,7 +251,7 @@ SoilSkipList >> pageSize [
 
 { #category : #accessing }
 SoilSkipList >> pages [
-	^ self pageRegistry pages
+	^ self store pages
 ]
 
 { #category : #accessing }
@@ -242,12 +268,38 @@ SoilSkipList >> path: aStringOrFileReference [
 
 { #category : #accessing }
 SoilSkipList >> size [ 
-	^ self pageRegistry allItems size - 2
+	^ self store allItems size - 2
 ]
 
 { #category : #'as yet unclassified' }
-SoilSkipList >> startPage [
-	^ self pageRegistry startPage
+SoilSkipList >> splitPage: aIterator [ 
+	| newPage page |
+	page := aIterator page.
+	newPage := page split: store newPage.
+	newPage index: self store nextPageIndex.
+	newPage level to: 1 by: -1  do: [ :level |
+		(level > page level)
+			ifTrue: [ 
+				newPage rightAt: level put: ((aIterator levelAt: level) rightAt: level).
+				(aIterator levelAt: level) rightAt: level put: newPage index ]
+			ifFalse: [ 
+				(page rightAt: level) ifNotNil: [ :r | 
+					newPage rightAt: level put: r ].
+				page rightAt: level put: newPage index ]].
+	self store pageAt: newPage index put: newPage.
+	^ newPage 
+]
+
+{ #category : #accessing }
+SoilSkipList >> store [
+	^ store ifNil: [ 
+		store := self newPageRegistry ]
+]
+
+{ #category : #accessing }
+SoilSkipList >> store: anObject [
+	anObject index: self.
+	store := anObject
 ]
 
 { #category : #accessing }
@@ -264,10 +316,10 @@ SoilSkipList >> valueSize: anInteger [
 
 { #category : #writing }
 SoilSkipList >> writeHeaderPage [
-	self pageRegistry writeHeaderPage
+	self store writeHeaderPage
 ]
 
 { #category : #writing }
 SoilSkipList >> writePages [
-	self pageRegistry flushPages
+	self store flushPages
 ]

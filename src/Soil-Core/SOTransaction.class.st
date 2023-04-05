@@ -188,6 +188,7 @@ SOTransaction >> checkpoint [
 		soil behaviorRegistry 
 			nameAt: description value behaviorIdentifier 
 			put: description objectId ].
+	soil behaviorRegistry flush.
 	soil databaseVersion: writeVersion ]
 			ensure: [self releaseLocks ]
 
@@ -242,14 +243,6 @@ SOTransaction >> indexAt: anObject ifAbsent: aBlock [
 		at: anObject
 		ifAbsentPut: [ 
 			self lookupIndex: anObject ifNone: aBlock ]
-]
-
-{ #category : #accessing }
-SOTransaction >> indexAtObject: anObject ifAbsent: aBlock [ 
-	^ indexes
-		at: anObject id
-		ifAbsentPut: [ 
-			(self lookupIndex: anObject ifNone: aBlock) asModifiableIndex ]
 ]
 
 { #category : #accessing }

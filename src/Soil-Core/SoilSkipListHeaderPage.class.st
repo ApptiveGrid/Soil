@@ -1,76 +1,97 @@
 Class {
 	#name : #SoilSkipListHeaderPage,
-	#superclass : #Object,
+	#superclass : #SoilSkipListDataPage,
 	#instVars : [
-		'startPageIndex',
-		'keySize',
-		'valueSize',
-		'maxLevel'
+		'maxLevel',
+		'lastPageIndex'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #initialization }
-SoilSkipListHeaderPage >> initialize [ 
-	super initialize.
-	startPageIndex := 1
+{ #category : #'as yet unclassified' }
+SoilSkipListHeaderPage class >> pageCode [ 
+	^ 1 
+]
+
+{ #category : #private }
+SoilSkipListHeaderPage >> addSentinelItems [
+	items 
+		add: ((SoilSkipListSentinel lower keySize: keySize) numericValue -> 0);
+		add: ((SoilSkipListSentinel upper keySize: keySize) numericValue -> 0)
+]
+
+{ #category : #utilities }
+SoilSkipListHeaderPage >> headerSize [
+	^ self indexSize + 6 + (maxLevel * self indexSize)
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> keySize [
-	^ keySize
+SoilSkipListHeaderPage >> keySize: anInteger [
+	keySize ifNotNil: [ Error signal: 'key size has been set alread' ].
+	super keySize: anInteger.
+	self addSentinelItems 
+	
+
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> keySize: anInteger [ 
-	keySize := anInteger
+SoilSkipListHeaderPage >> lastPageIndex [
+
+	^ lastPageIndex
+]
+
+{ #category : #accessing }
+SoilSkipListHeaderPage >> lastPageIndex: anObject [
+	lastPageIndex := anObject.
+	dirty := true
 ]
 
 { #category : #accessing }
 SoilSkipListHeaderPage >> maxLevel [
+
 	^ maxLevel
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> maxLevel: anInteger [ 
-	maxLevel := anInteger
+SoilSkipListHeaderPage >> maxLevel: anInteger [
+
+	maxLevel := anInteger.
+	right := Array new: anInteger withAll: 0 
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListHeaderPage >> nextPageIndex [
+	lastPageIndex := lastPageIndex + 1.
+	dirty := true.
+	^ lastPageIndex 
 ]
 
 { #category : #'instance creation' }
 SoilSkipListHeaderPage >> readFrom: aStream [ 
-	aStream next.
-	startPageIndex := (aStream next: 8) asInteger.
+	super readFrom: aStream.
+	self 
+		readHeaderFrom: aStream;
+		readLevelsFrom: aStream;
+		readItemsFrom: aStream
+]
+
+{ #category : #'instance creation' }
+SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
-	maxLevel := (aStream next: 2) asInteger
-]
-
-{ #category : #accessing }
-SoilSkipListHeaderPage >> startPageIndex [
-	^ startPageIndex
-]
-
-{ #category : #accessing }
-SoilSkipListHeaderPage >> startPageIndex: anInteger [ 
-	startPageIndex := anInteger 
-]
-
-{ #category : #accessing }
-SoilSkipListHeaderPage >> valueSize [
-	^ valueSize
-]
-
-{ #category : #accessing }
-SoilSkipListHeaderPage >> valueSize: anInteger [ 
-	valueSize := anInteger
+	maxLevel := (aStream next: 2) asInteger.
+	lastPageIndex :=(aStream next: 2) asInteger 
 ]
 
 { #category : #writing }
 SoilSkipListHeaderPage >> writeOn: aStream [ 
-	aStream nextPut: 0.
+	super writeOn: aStream.
 	aStream 
-		nextPutAll: (startPageIndex asByteArrayOfSize: 8);
 		nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
-		nextPutAll: (maxLevel asByteArrayOfSize: 2).
+		nextPutAll: (maxLevel asByteArrayOfSize: 2);
+		nextPutAll: (lastPageIndex asByteArrayOfSize: 2).
+	self 
+		writeLevelsOn: aStream;
+		writeItemsOn: aStream
 ]

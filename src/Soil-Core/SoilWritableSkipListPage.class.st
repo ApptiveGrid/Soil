@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilWritableSkipListPage,
-	#superclass : #SoilSkipListPage,
+	#superclass : #Object,
 	#category : #'Soil-Core-Index-SkipList'
 }
 

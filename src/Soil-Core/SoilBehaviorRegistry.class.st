@@ -44,6 +44,11 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction
 ]
 
 { #category : #accessing }
+SoilBehaviorRegistry >> flush [
+	self index flush
+]
+
+{ #category : #accessing }
 SoilBehaviorRegistry >> index [
 	^ index 
 ]
@@ -60,11 +65,12 @@ SoilBehaviorRegistry >> initialize [
 { #category : #initialization }
 SoilBehaviorRegistry >> initializeFilesystem [
 	index := SoilSkipList new 
+		path: self path;
+		store: SoilPagedFileIndexStore new;
+		initializeFilesystem;
 		maxLevel: 8;
 		keySize: 64;
-		valueSize: 8;
-		path: self path;
-		initializeFilesystem.
+		valueSize: 8.
 	self addSpecialObjects.
 	index writePages
 ]
@@ -103,14 +109,14 @@ SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 	(objectId index = 0) ifTrue: [ Error signal: 'cannot add non-initialized object id' ].
 	dict := self index 
 		at: classIdentifier put: objectId asByteArray;
-		yourself.
-	index writePages 
+		yourself
 ]
 
 { #category : #'instance creation' }
 SoilBehaviorRegistry >> open [ 
 	index ifNotNil: [ index close ].
 	index :=  SoilSkipList new 
+		store: SoilPagedFileIndexStore new;
 		maxLevel: 16;
 		keySize: 64;
 		valueSize: 8;

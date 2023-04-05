@@ -1,7 +1,7 @@
 Class {
 	#name : #SOJournalEntry,
 	#superclass : #Object,
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Journal'
 }
 
 { #category : #writing }

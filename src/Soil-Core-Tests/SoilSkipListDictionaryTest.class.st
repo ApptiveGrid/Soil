@@ -90,8 +90,7 @@ SoilSkipListDictionaryTest >> testAddToExistingNonEmptyList [
 	self assert: (tx3 root at: #foo) equals: #one.
 	tx3 abort.	
 	tx4 := soil newTransaction.
-	self assert: (tx4 root at: #foo) equals: #bar
-	
+	self assert: (tx4 root at: #foo) equals: #bar.	
 		
 ]
 
