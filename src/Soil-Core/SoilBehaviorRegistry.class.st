@@ -43,6 +43,11 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction
 	^ chain copyFrom: 1 to: offset
 ]
 
+{ #category : #'initialize-release' }
+SoilBehaviorRegistry >> close [
+	index close
+]
+
 { #category : #accessing }
 SoilBehaviorRegistry >> flush [
 	self index flush

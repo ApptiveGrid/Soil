@@ -79,6 +79,7 @@ SOObjectRepository >> at: objectid version: version [
 
 { #category : #'initialize-release' }
 SOObjectRepository >> close [
+	metaSegment close.
 	segments do: #close
 ]
 
