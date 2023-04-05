@@ -9,7 +9,7 @@ Class {
 
 { #category : #queries }
 SoilPagedFileIndexStore >> allItems [
-	^ pages flatCollect: [ :page | page items ]
+	^ (pages flatCollect: [ :page | page items ]) allButLast allButFirst
 ]
 
 { #category : #converting }
@@ -97,7 +97,6 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	| page |
 	stream position: (self positionOfPageIndex: anInteger).
 	page := index newPage 
-		registry: self;
 		readFrom: stream.
 	"(pages size > anInteger) ifFalse: [ 
 		 pages := pages grownBy: (anInteger - pages size)]."

@@ -190,7 +190,7 @@ SoilSkipListDictionary >> second [
 { #category : #accessing }
 SoilSkipListDictionary >> size [ 
 	^ self index path 
-		ifNotNil: [ self index size + newValues size ]
+		ifNotNil: [ self index size ]
 		ifNil: [ newValues size ] 
 ]
 
