@@ -147,7 +147,7 @@ SoilSkipList >> initializeHeaderPage [
 
 { #category : #testing }
 SoilSkipList >> isEmpty [
-	^ self store headerPage hasItems
+	^ self store headerPage hasItems not
 ]
 
 { #category : #'public/accessing' }
