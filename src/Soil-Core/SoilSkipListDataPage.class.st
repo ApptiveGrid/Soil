@@ -131,7 +131,7 @@ SoilSkipListDataPage >> keySize [
 { #category : #accessing }
 SoilSkipListDataPage >> keySize: anInteger [ 
 	(anInteger = 0) ifTrue: [ Error signal: 'cannot use key size 0' ].
-	keySize := anInteger 
+	keySize := anInteger.
 ]
 
 { #category : #accessing }

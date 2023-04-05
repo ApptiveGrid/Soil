@@ -197,6 +197,7 @@ SoilSkipList >> maxLevel: anInteger [
 SoilSkipList >> newHeaderPage [
 	^ SoilSkipListHeaderPage new
 		index: 1;
+		lastPageIndex: 1;
 		pageSize: self pageSize
 ]
 
@@ -275,7 +276,7 @@ SoilSkipList >> splitPage: aIterator [
 	| newPage page |
 	page := aIterator page.
 	newPage := page split: store newPage.
-	newPage index: self store highestPageIndex + 1.
+	newPage index: self store nextPageIndex.
 	newPage level to: 1 by: -1  do: [ :level |
 		(level > page level)
 			ifTrue: [ 

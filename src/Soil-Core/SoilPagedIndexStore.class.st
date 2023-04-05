@@ -50,6 +50,11 @@ SoilPagedIndexStore >> nextIndex [
 	^ pages size + 1
 ]
 
+{ #category : #'as yet unclassified' }
+SoilPagedIndexStore >> nextPageIndex [
+	^ self headerPage nextPageIndex
+]
+
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger [ 
 	^ pages 
@@ -65,18 +70,6 @@ SoilPagedIndexStore >> pageAt: anInteger put: aPage [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> pageFaultAt: anInteger [ 
-	| page |
-	self halt.
-	page := index pageAt: anInteger.
-]
-
-{ #category : #accessing }
 SoilPagedIndexStore >> pages [
 	^ pages
-]
-
-{ #category : #'as yet unclassified' }
-SoilPagedIndexStore >> writableStore [
-	^ self 
 ]

@@ -3,7 +3,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'index',
-		'store',
 		'dirty',
 		'pageSize'
 	],
@@ -73,6 +72,7 @@ SoilSkipListPage >> readIndexFrom: aStream [
 
 { #category : #writing }
 SoilSkipListPage >> writeOn: aStream [ 
+	dirty := false.
 	aStream 
 		nextPutAll: (index asByteArrayOfSize: self indexSize)
 ]

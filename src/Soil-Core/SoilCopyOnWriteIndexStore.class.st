@@ -19,11 +19,6 @@ SoilCopyOnWriteIndexStore >> flush [
 	^ underlyingStore flush
 ]
 
-{ #category : #accessing }
-SoilCopyOnWriteIndexStore >> headerPage [ 
-	^ self pageAt: 1
-]
-
 { #category : #testing }
 SoilCopyOnWriteIndexStore >> isCopyOnWrite [ 
 	^ true
@@ -49,9 +44,4 @@ SoilCopyOnWriteIndexStore >> underlyingStore [
 SoilCopyOnWriteIndexStore >> underlyingStore: anObject [
 
 	underlyingStore := anObject
-]
-
-{ #category : #'as yet unclassified' }
-SoilCopyOnWriteIndexStore >> writableStore [ 
-	^ underlyingStore 
 ]

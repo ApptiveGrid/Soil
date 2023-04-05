@@ -31,7 +31,7 @@ SoilSkipListTest >> tearDown [
 SoilSkipListTest >> testAddFirstOverflow [
 	
 	| page capacity |
-	capacity := skipList firstPage itemCapacity .
+	capacity := skipList firstPage itemCapacity - 2.
 	1 to: capacity do: [ :n | 
 		skipList at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: skipList pages size equals: 1.

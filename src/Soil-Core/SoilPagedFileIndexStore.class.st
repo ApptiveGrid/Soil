@@ -81,12 +81,6 @@ SoilPagedFileIndexStore >> lastPage [
 	
 ]
 
-{ #category : #accessing }
-SoilPagedFileIndexStore >> maxLevel [
-self halt.
-	^ index maxLevel
-]
-
 { #category : #'instance creation' }
 SoilPagedFileIndexStore >> open [
 	self 
@@ -133,26 +127,6 @@ SoilPagedFileIndexStore >> replace: oldPage with: newPage [
 	pages
 		at: oldPage index 
 		put:newPage 
-]
-
-{ #category : #'as yet unclassified' }
-SoilPagedFileIndexStore >> splitPage: aIterator [ 
-	| newPage page |
-	self halt.
-	page := aIterator page.
-	newPage := page split.
-	newPage index: pages size + 1.
-	newPage level to: 1 by: -1  do: [ :level |
-		(level > page level)
-			ifTrue: [ 
-				newPage rightAt: level put: ((aIterator levelAt: level) rightAt: level).
-				(aIterator levelAt: level) rightAt: level put: newPage index ]
-			ifFalse: [ 
-				(page rightAt: level) ifNotNil: [ :r | 
-					newPage rightAt: level put: r ].
-				page rightAt: level put: newPage index ]].
-	pages at: newPage index put: newPage.
-	^ newPage 
 ]
 
 { #category : #accessing }
