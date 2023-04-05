@@ -44,27 +44,36 @@ SoilSkipListDictionary >> at: key put: anObject [
 
 { #category : #accessing }
 SoilSkipListDictionary >> atIndex: anInteger [ 
-	^ index atIndex: anInteger 
+	^ self proxyFromByteArray: (self index atIndex: anInteger) 
 ]
 
 { #category : #enumerating }
 SoilSkipListDictionary >> do: aBlock [ 
-	self index do: [ :byteArrayOrObjectId |
-		aBlock value: (transaction proxyForObjectId: byteArrayOrObjectId asSoilObjectId ) ].
-	newValues values do: [ :each | 
-		aBlock value: (each isObjectId
-			ifTrue: [ transaction objectWithId: each ]
-		 	ifFalse: [ each ]) ]
+	transaction 
+		ifNotNil: [  
+			self index do: [ :byteArrayOrObjectId |
+				aBlock value: (transaction proxyForObjectId: byteArrayOrObjectId asSoilObjectId ) ] ]
+		ifNil: [.
+			newValues values do: [ :each | 
+				aBlock value: (each isObjectId
+					ifTrue: [ transaction objectWithId: each ]
+				 	ifFalse: [ each ]) ] ]
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> first [
-	^ self proxyFromByteArray: self index firstItem value
+	^ transaction 
+		ifNotNil: [ self proxyFromByteArray: self index firstItem value ]
+		ifNil: [ newValues associations first value ]
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> first: anInteger [ 
-	^ (self index first: anInteger) collect: [ :each | self proxyFromByteArray: each ]  
+	^ transaction 
+		ifNotNil: [ 
+			(self index first: anInteger) 
+				collect: [ :each | self proxyFromByteArray: each ] ]
+		ifNil: [ (newValues associations first: anInteger) collect: #value ]  
 ]
 
 { #category : #accessing }
@@ -114,9 +123,12 @@ SoilSkipListDictionary >> keySize: anInteger [
 { #category : #accessing }
 SoilSkipListDictionary >> last [
 	| assoc |
-	assoc := self index last.
-	assoc ifNil: [ ^ nil ].
-	^ assoc key -> (transaction proxyForObjectId: assoc value asSoilObjectId)
+	^ transaction 
+		ifNotNil: [  
+			assoc := self index last.
+			assoc ifNil: [ ^ nil ].
+			assoc key -> (transaction proxyForObjectId: assoc value asSoilObjectId) ]
+		ifNil: [ newValues associations last value ]
 ]
 
 { #category : #private }
@@ -174,12 +186,16 @@ SoilSkipListDictionary >> proxyFromByteArray: aByteArray [
 
 { #category : #accessing }
 SoilSkipListDictionary >> second [
-	^ index iterator first; next
+	^ transaction 
+		ifNotNil: [ index iterator first; next ]
+		ifNil: [ newValues associations second value ]
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> size [ 
-	^ self index size
+	^ transaction 
+		ifNotNil: [ self index size ]
+		ifNil: [ newValues size ]
 ]
 
 { #category : #'as yet unclassified' }
