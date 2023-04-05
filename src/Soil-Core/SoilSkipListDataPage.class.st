@@ -36,10 +36,16 @@ SoilSkipListDataPage >> biggestKey [
 { #category : #accessing }
 SoilSkipListDataPage >> firstItem [
 	| item |
+	self flag: #todo.
+	"bad way of determine the first item. Here we filter out the lower and
+	upper element"
 	item := items first.
 	^ (item key = 0)
-		ifTrue: [ items second ]
-		ifFalse: [ item  ]
+		ifTrue: [ 
+			(items second value = 0)
+				ifTrue: [ ^ nil ]
+				ifFalse: [ items second ] ]
+		ifFalse: [ item ]
 	
 ]
 

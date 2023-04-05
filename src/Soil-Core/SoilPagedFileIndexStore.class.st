@@ -9,8 +9,7 @@ Class {
 
 { #category : #queries }
 SoilPagedFileIndexStore >> allItems [
-self halt.
-	^ (self pageFaultAt: 1) items
+	^ (pages flatCollect: [ :page | page items ]) allButLast allButFirst
 ]
 
 { #category : #converting }
@@ -69,18 +68,6 @@ SoilPagedFileIndexStore >> initializeHeaderPage [
 		
 ]
 
-{ #category : #accessing }
-SoilPagedFileIndexStore >> lastPage [
-	| maxLevel page pageNumber |
-	self halt.
-	maxLevel := index maxLevel.
-	page := self headerPage.
-	[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
-		page := self pageAt: pageNumber ].
-	^ page
-	
-]
-
 { #category : #'instance creation' }
 SoilPagedFileIndexStore >> open [
 	self 
@@ -98,7 +85,6 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	| page |
 	stream position: (self positionOfPageIndex: anInteger).
 	page := index newPage 
-		registry: self;
 		readFrom: stream.
 	"(pages size > anInteger) ifFalse: [ 
 		 pages := pages grownBy: (anInteger - pages size)]."

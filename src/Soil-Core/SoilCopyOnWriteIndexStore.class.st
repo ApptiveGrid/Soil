@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #queries }
+SoilCopyOnWriteIndexStore >> allItems [
+	^ underlyingStore allItems 
+]
+
 { #category : #'as yet unclassified' }
 SoilCopyOnWriteIndexStore >> createNewPage [
 	^ index newWritablePage 

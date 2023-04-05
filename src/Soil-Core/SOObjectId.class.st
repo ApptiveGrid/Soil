@@ -60,6 +60,11 @@ SOObjectId >> asByteArrayOfSize: anInteger [
 ]
 
 { #category : #converting }
+SOObjectId >> asSoilObjectId [
+	^ self 
+]
+
+{ #category : #converting }
 SOObjectId >> asSoilObjectProxy [
 	^ SOObjectProxy new 
 		objectId: self
@@ -95,6 +100,11 @@ SOObjectId >> initializeIndex: objectRepository [
 { #category : #testing }
 SOObjectId >> isInitialized [
 	^ index > 0
+]
+
+{ #category : #testing }
+SOObjectId >> isObjectId [ 
+	^ true
 ]
 
 { #category : #printing }
