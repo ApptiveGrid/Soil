@@ -267,7 +267,7 @@ SoilSkipList >> path: aStringOrFileReference [
 
 { #category : #accessing }
 SoilSkipList >> size [ 
-	^ self store allItems size - 2
+	^ self store allItems size 
 ]
 
 { #category : #'as yet unclassified' }
