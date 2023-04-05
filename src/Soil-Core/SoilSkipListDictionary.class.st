@@ -186,9 +186,14 @@ SoilSkipListDictionary >> size [
 SoilSkipListDictionary >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
-	newValues copy keysAndValuesDo: [ :key :object |
-		object isObjectId ifFalse: [
-			newValues at: key put: (transaction makeRoot: object) ] ].
+	newValues copy keysAndValuesDo: [ :key :object | | obj |
+		obj := object isObjectId
+			ifTrue: [ object ] 
+			ifFalse: [
+				newValues 
+					at: key 
+					put: (transaction makeRoot: object) ].
+		self index at: key put: obj ].
 	transaction markDirty: self
 ]
 
