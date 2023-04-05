@@ -44,7 +44,8 @@ SoilSkipListDictionary >> at: key put: anObject [
 
 { #category : #accessing }
 SoilSkipListDictionary >> atIndex: anInteger [ 
-	^ self proxyFromByteArray: (self index atIndex: anInteger) 
+	^ (self index atIndex: anInteger)
+		ifNotNil: [ :bytes | self proxyFromByteArray: bytes ]
 ]
 
 { #category : #enumerating }
