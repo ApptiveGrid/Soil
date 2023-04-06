@@ -26,7 +26,7 @@ SoilBasicSerializer >> basicNextPutSymbol: aSymbol [
 { #category : #initialization }
 SoilBasicSerializer >> initialize [ 
 	super initialize.
-	objectIdTable := SoilObjectTable new
+	objectIdTable := OrderedCollection new
 ]
 
 { #category : #'writing - basic' }
