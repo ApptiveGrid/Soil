@@ -161,7 +161,7 @@ SoilSkipList >> keySize [
 
 { #category : #accessing }
 SoilSkipList >> keySize: anInteger [
-	anInteger isZero ifTrue: [ self halt ].
+	anInteger isZero ifTrue: [ Error signal: 'keySize cannot be zero yet' ].
 	self headerPage keySize: anInteger
 ]
 
@@ -218,7 +218,6 @@ SoilSkipList >> newPage [
 
 { #category : #'instance creation' }
 SoilSkipList >> newWritablePage [
-self halt.
 	^ SoilWritableSkipListPage new
 		level: self maxLevel;
 		size: 4096;

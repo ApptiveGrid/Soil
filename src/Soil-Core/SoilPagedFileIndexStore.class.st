@@ -78,7 +78,6 @@ SoilPagedFileIndexStore >> openStream [
 SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	| page |
 	stream position: (self positionOfPageIndex: anInteger).
-	self halt.
 	page := index newPage 
 		readFrom: stream.
 	"(pages size > anInteger) ifFalse: [ 
