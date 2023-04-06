@@ -195,10 +195,11 @@ SoilSerializer >> registerIndexedObject: anObject [
 { #category : #registry }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 	| index externalIndex |
-	(anObject == clusterRoot) ifTrue: [
-		"later references could reference the cluster root so we put
-		it as first object to be able to have an internal reference to it"
-		objectIdTable add: anObject.
+	objectIdTable ifEmpty: [
+		"the cluster root is serialized first so we put it in the object able
+		for later references. Above we checked for an empty object table so
+		later references to the cluster root will become an internal reference"
+		objectIdTable ifEmpty: [ objectIdTable add: anObject ].
 		^ aBlock value ].
 	index := objectIdTable identityIndexOf: anObject.
 	(index > 0) ifTrue: [
