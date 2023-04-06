@@ -190,8 +190,7 @@ SoilSkipListDictionary >> nextAfter: key [
 SoilSkipListDictionary >> prepareNewValues [
 	newValues copy keysAndValuesDo: [ :key :object |
 		object isObjectId ifFalse: [
-			newValues at: key put: (transaction makeRoot: object) ] ].
-	transaction markDirty: self
+			newValues at: key put: (transaction makeRoot: object) ] ]
 ]
 
 { #category : #printing }
@@ -249,12 +248,7 @@ SoilSkipListDictionary >> soilSerialize: aSerializer [
 		self prepareNewValues ].
 	super soilSerialize: aSerializer.
 	self index path ifNil: [  
-		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ].
-	"newValues keysAndValuesDo: [ :key :object |
-		objectId := transaction makeRoot: object.
-		objectId initializeIndex: transaction objectRepository.
-		index at: key put: objectId ].
-	index writePages"
+		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ]
 ]
 
 { #category : #accessing }

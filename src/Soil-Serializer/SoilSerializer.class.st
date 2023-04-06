@@ -185,7 +185,11 @@ SoilSerializer >> notSupportedError: anObject [
 
 { #category : #'as yet unclassified' }
 SoilSerializer >> registerIndexedObject: anObject [ 
-	^ transaction registerIndexedObject: anObject 
+	"indexes are registered in the segment of the cluster root. So we pass
+	the cluster root in order to figure the segment"
+	^ transaction 
+		registerIndexedObject: anObject 
+		forRoot: clusterRoot 
 ]
 
 { #category : #registry }
