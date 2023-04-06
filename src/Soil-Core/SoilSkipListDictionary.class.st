@@ -105,7 +105,8 @@ SoilSkipListDictionary >> initialize [
 	super initialize.
 	newValues := OrderedDictionary new.
 	id := UUID new asString36.
-	index := SoilSkipList new 
+	index := SoilSkipList new
+		initializeHeaderPage;
 		valueSize: 8;
 		yourself
 ]

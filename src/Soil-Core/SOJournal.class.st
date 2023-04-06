@@ -9,6 +9,11 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #accessing }
+SOJournal class >> soilTransientInstVars [ 
+	^ #( transaction )
+]
+
 { #category : #adding }
 SOJournal >> addEntries: aCollection [ 
 	aCollection do: [ :each | self addEntry: each ]

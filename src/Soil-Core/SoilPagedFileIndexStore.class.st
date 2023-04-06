@@ -48,12 +48,6 @@ SoilPagedFileIndexStore >> hasStream [
 	^ stream notNil
 ]
 
-{ #category : #accessing }
-SoilPagedFileIndexStore >> index: anIndex [ 
-	super index: anIndex.
-	pages ifEmpty: [ self initializeHeaderPage ]
-]
-
 { #category : #initialization }
 SoilPagedFileIndexStore >> initializeFilesystem [
 	self openStream
@@ -84,6 +78,7 @@ SoilPagedFileIndexStore >> openStream [
 SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	| page |
 	stream position: (self positionOfPageIndex: anInteger).
+	self halt.
 	page := index newPage 
 		readFrom: stream.
 	"(pages size > anInteger) ifFalse: [ 

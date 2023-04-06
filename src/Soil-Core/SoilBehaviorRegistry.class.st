@@ -69,10 +69,11 @@ SoilBehaviorRegistry >> initialize [
 
 { #category : #initialization }
 SoilBehaviorRegistry >> initializeFilesystem [
+self halt.
 	index := SoilSkipList new 
 		path: self path;
-		store: SoilPagedFileIndexStore new;
 		initializeFilesystem;
+		initializeHeaderPage;
 		maxLevel: 8;
 		keySize: 64;
 		valueSize: 8.
@@ -121,10 +122,6 @@ SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 SoilBehaviorRegistry >> open [ 
 	index ifNotNil: [ index close ].
 	index :=  SoilSkipList new 
-		store: SoilPagedFileIndexStore new;
-		maxLevel: 16;
-		keySize: 64;
-		valueSize: 8;
 		path: self path;
 		open
 ]

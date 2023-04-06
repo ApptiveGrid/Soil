@@ -136,7 +136,7 @@ SoilSkipList >> headerPage [
 
 { #category : #initialization }
 SoilSkipList >> initializeFilesystem [ 
-	store initializeFilesystem
+	self store initializeFilesystem
 ]
 
 { #category : #writing }
@@ -189,7 +189,13 @@ SoilSkipList >> maxLevel [
 { #category : #accessing }
 SoilSkipList >> maxLevel: anInteger [ 
 	"maxLevel := anInteger "
-	store headerPage maxLevel: anInteger 
+	self store headerPage maxLevel: anInteger 
+]
+
+{ #category : #'instance creation' }
+SoilSkipList >> newFileStore [
+	^ SoilPagedFileIndexStore new
+		index: self
 ]
 
 { #category : #'instance creation' }
@@ -208,12 +214,6 @@ SoilSkipList >> newPage [
 		valueSize: self valueSize;
 		pageSize: self pageSize;
 		yourself
-]
-
-{ #category : #'instance creation' }
-SoilSkipList >> newPageRegistry [
-	^ SoilPagedFileIndexStore new
-		index: self
 ]
 
 { #category : #'instance creation' }
@@ -292,7 +292,7 @@ SoilSkipList >> splitPage: aIterator [
 { #category : #accessing }
 SoilSkipList >> store [
 	^ store ifNil: [ 
-		store := self newPageRegistry ]
+		store := self newFileStore ]
 ]
 
 { #category : #accessing }
