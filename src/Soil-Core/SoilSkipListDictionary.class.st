@@ -220,6 +220,16 @@ SoilSkipListDictionary >> size [
 ]
 
 { #category : #'as yet unclassified' }
+SoilSkipListDictionary >> soilBasicSerialize: aSerializer [ 
+	transaction ifNil: [ 
+		transaction := aSerializer transaction.
+		self prepareNewValues ].
+	super soilBasicSerialize: aSerializer.
+	self index path ifNil: [  
+		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ]
+]
+
+{ #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
@@ -239,16 +249,6 @@ SoilSkipListDictionary >> soilLoadedIn: aTransaction [
 	transaction := aTransaction.
 	"when being materialized newValues is not initialized so we do it here"
 	newValues := Dictionary new 
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipListDictionary >> soilSerialize: aSerializer [ 
-	transaction ifNil: [ 
-		transaction := aSerializer transaction.
-		self prepareNewValues ].
-	super soilSerialize: aSerializer.
-	self index path ifNil: [  
-		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ]
 ]
 
 { #category : #accessing }
