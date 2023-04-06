@@ -155,7 +155,7 @@ SoilSerializer >> nextPutOrderedCollection: aCollection [
 	self
 		nextPutByte: TypeCodeOrderedCollection;
 		nextPutLengthEncodedInteger: aCollection size.
-	aCollection do: [:each | each soilSerialize: self ].
+	aCollection do: [:each | each theNonSoilProxy soilSerialize: self ].
 ]
 
 { #category : #writing }
@@ -165,7 +165,7 @@ SoilSerializer >> nextPutPersistentDictionary: aPersistentDictionary [
 		nextPutLengthEncodedInteger: aPersistentDictionary size.
 	aPersistentDictionary keysAndValuesDo: [:key :value |
 		key soilSerialize: self.
-		value soilSerialize: self ]
+		value theNonSoilProxy soilSerialize: self ]
 ]
 
 { #category : #writing }

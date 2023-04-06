@@ -69,7 +69,6 @@ SoilBehaviorRegistry >> initialize [
 
 { #category : #initialization }
 SoilBehaviorRegistry >> initializeFilesystem [
-self halt.
 	index := SoilSkipList new 
 		path: self path;
 		initializeFilesystem;
