@@ -27,14 +27,14 @@ SoilSerializer >> nextPutArray: anArray [
 		nextPutByte: TypeCodeArray;
 		nextPutLengthEncodedInteger: anArray size.
 	1 to: anArray size do: [:i | 
-		(anArray at: i) soilSerialize: self ].
+		(anArray at: i) theNonSoilProxy soilSerialize: self ].
 ]
 
 { #category : #writing }
 SoilSerializer >> nextPutAssociation: anAssociation [ 
 	self nextPutByte: TypeCodeAssociation.
-	anAssociation key soilSerialize: self.
-	anAssociation value soilSerialize: self.
+	anAssociation key theNonSoilProxy soilSerialize: self.
+	anAssociation value theNonSoilProxy soilSerialize: self.
 ]
 
 { #category : #writing }
@@ -102,8 +102,8 @@ SoilSerializer >> nextPutDictionary: aDictionary [
 		nextPutByte: TypeCodeDictionary;
 		nextPutLengthEncodedInteger: aDictionary size.
 	aDictionary keysAndValuesDo: [:key :value |
-		key soilSerialize: self.
-		value soilSerialize: self ]
+		key theNonSoilProxy soilSerialize: self.
+		value theNonSoilProxy soilSerialize: self ]
 ]
 
 { #category : #registry }
@@ -119,8 +119,8 @@ SoilSerializer >> nextPutIdentityDictionary: anIdentityDictionary [
 		nextPutByte: TypeCodeIdentityDictionary;
 		nextPutLengthEncodedInteger: anIdentityDictionary size.
 	anIdentityDictionary keysAndValuesDo: [:key :value |
-		key soilSerialize: self.
-		value soilSerialize: self ]
+		key theNonSoilProxy soilSerialize: self.
+		value theNonSoilProxy soilSerialize: self ]
 ]
 
 { #category : #writing }
@@ -164,7 +164,7 @@ SoilSerializer >> nextPutPersistentDictionary: aPersistentDictionary [
 		nextPutByte: TypeCodePersistentDictionary;
 		nextPutLengthEncodedInteger: aPersistentDictionary size.
 	aPersistentDictionary keysAndValuesDo: [:key :value |
-		key soilSerialize: self.
+		key theNonSoilProxy soilSerialize: self.
 		value theNonSoilProxy soilSerialize: self ]
 ]
 
