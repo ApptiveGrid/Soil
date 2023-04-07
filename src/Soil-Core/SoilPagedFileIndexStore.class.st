@@ -10,7 +10,7 @@ Class {
 
 { #category : #queries }
 SoilPagedFileIndexStore >> allItems [
-	^ pagesSemaphore critical: [  
+	^ pagesMutex critical: [  
 		(pages flatCollect: [ :page | page items ]) allButLast allButFirst ]
 ]
 
@@ -40,7 +40,7 @@ SoilPagedFileIndexStore >> flush [
 
 { #category : #'as yet unclassified' }
 SoilPagedFileIndexStore >> flushPages [
-	pagesSemaphore critical: [  
+	pagesMutex critical: [  
 		pages valuesDo: [ :page |
 			page isDirty ifTrue: [ 
 				self writePage: page ] ] ]
@@ -66,7 +66,7 @@ SoilPagedFileIndexStore >> initializeFilesystem [
 SoilPagedFileIndexStore >> initializeHeaderPage [
 	| page |
 	page := index newHeaderPage.
-	pagesSemaphore critical: [  
+	pagesMutex critical: [  
 		pages at: page index put: page	]
 ]
 
@@ -91,7 +91,7 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 			readFrom: stream ].
 	"(pages size > anInteger) ifFalse: [ 
 		 pages := pages grownBy: (anInteger - pages size)]."
-	pagesSemaphore critical: [  
+	pagesMutex critical: [  
 		pages at: anInteger put: page ].
 	^ page
 ]
@@ -112,13 +112,13 @@ SoilPagedFileIndexStore >> readHeaderPage [
 	streamSemaphore critical: [  
 		stream position: 0.
 		headerPage := index newHeaderPage readFrom: stream ].
-	pagesSemaphore critical: [  
+	pagesMutex critical: [  
 		pages at: 1 put: headerPage ]
 ]
 
 { #category : #accessing }
 SoilPagedFileIndexStore >> replace: oldPage with: newPage [ 
-	pagesSemaphore critical: [  
+	pagesMutex critical: [  
 		pages
 			at: oldPage index 
 			put:newPage ]

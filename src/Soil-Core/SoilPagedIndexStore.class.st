@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'pages',
 		'index',
-		'pagesSemaphore'
+		'pagesMutex'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -33,7 +33,7 @@ SoilPagedIndexStore >> index: aCollection [
 SoilPagedIndexStore >> initialize [ 
 	super initialize.
 	pages := Dictionary new.
-	pagesSemaphore := Semaphore forMutualExclusion 
+	pagesMutex := Mutex new
 
 ]
 
@@ -45,7 +45,7 @@ SoilPagedIndexStore >> isCopyOnWrite [
 { #category : #accessing }
 SoilPagedIndexStore >> lastPage [
 	| maxLevel page pageNumber |
-	^ pagesSemaphore critical: [  
+	^ pagesMutex critical: [  
 		maxLevel := index maxLevel.
 		page := self headerPage.
 		[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
@@ -76,7 +76,7 @@ SoilPagedIndexStore >> nextPageIndex [
 
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger [ 
-	^ pagesSemaphore critical: [  
+	^ pagesMutex critical: [  
 		pages 
 			at: anInteger 
 			ifAbsent: [ self pageFaultAt: anInteger ] ]
@@ -84,7 +84,7 @@ SoilPagedIndexStore >> pageAt: anInteger [
 
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger put: aPage [ 
-	pagesSemaphore critical: [  
+	pagesMutex critical: [  
 		pages 
 			at: anInteger 
 			put: aPage ]
