@@ -2,7 +2,8 @@ Class {
 	#name : #SOObjectIndexFile,
 	#superclass : #SOSegmentFile,
 	#instVars : [
-		'lastObjectIndex'
+		'lastObjectIndex',
+		'semaphore'
 	],
 	#category : #'Soil-Core-Files'
 }
@@ -17,21 +18,29 @@ SOObjectIndexFile >> allocateNewIndex [
 
 { #category : #accessing }
 SOObjectIndexFile >> at: index [ 
-	stream position: (self indexPositionAt: index).
-	^ (stream next: 8) asInteger 
+	^ semaphore critical: [  
+		stream position: (self indexPositionAt: index).
+		(stream next: 8) asInteger ]
 ]
 
 { #category : #accessing }
 SOObjectIndexFile >> at: index putPosition: position [ 
-	stream position: (self indexPositionAt: index).
-	stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize).
-	stream flush
+	^ semaphore critical: [  
+		stream position: (self indexPositionAt: index).
+		stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize).
+		stream flush ]
 ]
 
 { #category : #accessing }
 SOObjectIndexFile >> indexPositionAt: anInteger [ 
 	(anInteger > 0) ifFalse: [ SOIndexOutOfRange signal: 'object index needs to be larger than zero' ].
 	^ self headerSize + self objectIndexSize + (anInteger - 1 * self objectIndexSize)
+]
+
+{ #category : #initialization }
+SOObjectIndexFile >> initialize [ 
+	super initialize.
+	semaphore := Semaphore forMutualExclusion 
 ]
 
 { #category : #initialization }
@@ -50,27 +59,30 @@ SOObjectIndexFile >> lastObjectIndex [
 
 { #category : #accessing }
 SOObjectIndexFile >> lastObjectIndex: anInteger [ 
-	self stream 
-		position: self headerSize;
-		nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
-		flush.
-	lastObjectIndex := anInteger 
+	semaphore critical: [  
+		stream 
+			position: self headerSize;
+			nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
+			flush.
+		lastObjectIndex := anInteger ]
 ]
 
 { #category : #lockgin }
 SOObjectIndexFile >> lockLastObjectIndexFor: lockContext [ 
-	^ stream 
-		lockFrom: self headerSize 
-		length: self objectIndexSize
-		for: lockContext
+	^ semaphore critical: [  
+		stream 
+			lockFrom: self headerSize 
+			length: self objectIndexSize
+			for: lockContext ]
 ]
 
 { #category : #'as yet unclassified' }
 SOObjectIndexFile >> lockObjectId: aSOObjectId for: lockContext [
-	^ stream 
-		lockFrom: (self indexPositionAt: aSOObjectId index) 
-		length: self objectIndexSize  
-		for: lockContext
+	semaphore critical: [  
+		stream 
+			lockFrom: (self indexPositionAt: aSOObjectId index) 
+			length: self objectIndexSize  
+			for: lockContext ]
 ]
 
 { #category : #accessing }
@@ -90,8 +102,9 @@ SOObjectIndexFile >> path [
 
 { #category : #accessing }
 SOObjectIndexFile >> positionAt: anInteger [ 
-	stream position: (self indexPositionAt: anInteger).
-	^ (stream next: self objectIndexSize) asInteger
+	^ semaphore critical: [  
+		stream position: (self indexPositionAt: anInteger).
+		(stream next: self objectIndexSize) asInteger ]
 ]
 
 { #category : #accessing }
