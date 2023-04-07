@@ -59,7 +59,7 @@ SoilIndexManager >> registerIndexedObject: aSoilSkipListDictionary [
 	registeredIndex :=  aSoilSkipListDictionary index asWritableIndex
 		path: segment path / aSoilSkipListDictionary id, #index;
 		initializeFilesystem.
-	semaphore critical: [  
+	^ semaphore critical: [  
 		indexes 
 			at: aSoilSkipListDictionary id
 			put: registeredIndex ]
