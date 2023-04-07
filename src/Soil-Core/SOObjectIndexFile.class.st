@@ -25,7 +25,7 @@ SOObjectIndexFile >> at: index [
 
 { #category : #accessing }
 SOObjectIndexFile >> at: index putPosition: position [ 
-	^ semaphore critical: [  
+	semaphore critical: [  
 		stream position: (self indexPositionAt: index).
 		stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize).
 		stream flush ]
@@ -78,7 +78,7 @@ SOObjectIndexFile >> lockLastObjectIndexFor: lockContext [
 
 { #category : #'as yet unclassified' }
 SOObjectIndexFile >> lockObjectId: aSOObjectId for: lockContext [
-	semaphore critical: [  
+	^ semaphore critical: [  
 		stream 
 			lockFrom: (self indexPositionAt: aSOObjectId index) 
 			length: self objectIndexSize  
