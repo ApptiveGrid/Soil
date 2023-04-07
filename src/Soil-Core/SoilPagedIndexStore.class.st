@@ -11,8 +11,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SoilPagedIndexStore >> headerPage [
-	^ pagesSemaphore critical: [  
-		self pageAt: 1 ]
+	^ self pageAt: 1
 ]
 
 { #category : #accessing }
@@ -72,8 +71,7 @@ SoilPagedIndexStore >> nextIndex [
 
 { #category : #'as yet unclassified' }
 SoilPagedIndexStore >> nextPageIndex [
-	^ pagesSemaphore critical: [  
-		self headerPage nextPageIndex ]
+	^ self headerPage nextPageIndex
 ]
 
 { #category : #accessing }
