@@ -2,35 +2,36 @@ Class {
 	#name : #SoilIndexManager,
 	#superclass : #Object,
 	#instVars : [
-		'soil',
 		'segment',
-		'indexes'
+		'indexes',
+		'semaphore'
 	],
 	#category : #'Soil-Core-Model'
 }
 
 { #category : #accessing }
 SoilIndexManager >> at: anIndexedObject ifAbsent: aBlock [ 
-	indexes ifNil: [ indexes := Dictionary new ].
-	^ indexes 
-		at: anIndexedObject id 
-		ifAbsentPut: [ 
-			self 
-				loadIndexWithId: anIndexedObject 
-				ifNone: [ aBlock value ] ]
-	
+	^ semaphore critical: [  
+		indexes 
+			at: anIndexedObject id 
+			ifAbsentPut: [ 
+				self 
+					loadIndexWithId: anIndexedObject 
+					ifNone: [ aBlock value ] ] ]
+		
 ]
 
 { #category : #'initialize-release' }
 SoilIndexManager >> close [
-	
-	indexes values do: #close 
+	semaphore critical: [  
+		indexes values do: #close ]
 ]
 
 { #category : #initialization }
 SoilIndexManager >> initialize [ 
 	super initialize.
-	indexes := Dictionary new
+	indexes := Dictionary new.
+	semaphore := Semaphore forMutualExclusion 
 ]
 
 { #category : #initialization }
@@ -54,17 +55,17 @@ SoilIndexManager >> open [
 
 { #category : #'as yet unclassified' }
 SoilIndexManager >> registerIndexedObject: aSoilSkipListDictionary [ 
-	^ aSoilSkipListDictionary index asWritableIndex
+	| registeredIndex |
+	registeredIndex :=  aSoilSkipListDictionary index asWritableIndex
 		path: segment path / aSoilSkipListDictionary id, #index;
-		initializeFilesystem
+		initializeFilesystem.
+	^ semaphore critical: [  
+		indexes 
+			at: aSoilSkipListDictionary id
+			put: registeredIndex ]
 ]
 
 { #category : #accessing }
 SoilIndexManager >> segment: aSOObjectSegment [ 
 	segment := aSOObjectSegment 
-]
-
-{ #category : #accessing }
-SoilIndexManager >> soil: aSoil [ 
-	soil := aSoil
 ]

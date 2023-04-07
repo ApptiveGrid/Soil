@@ -43,8 +43,12 @@ SoilSkipListDictionary >> at: key put: anObject [
 ]
 
 { #category : #accessing }
-SoilSkipListDictionary >> atIndex: anInteger [ 
-	^ self proxyFromByteArray: (self index atIndex: anInteger) 
+SoilSkipListDictionary >> atIndex: anInteger [
+	^ transaction 
+		ifNotNil: [  
+			(self index atIndex: anInteger)
+				ifNotNil: [ :bytes | self proxyFromByteArray: bytes ] ]
+		ifNil: [ (newValues associations at: anInteger) value  ]
 ]
 
 { #category : #enumerating }
@@ -76,6 +80,15 @@ SoilSkipListDictionary >> first: anInteger [
 		ifNil: [ (newValues associations first: anInteger) collect: #value ]  
 ]
 
+{ #category : #accesing }
+SoilSkipListDictionary >> firstAssociation [
+	self index path ifNil: [ 
+		^ newValues at: (newValues keyAtIndex: 1) ].
+	^ index iterator firstAssociation ifNotNil: [ :assoc | 
+			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
+
+]
+
 { #category : #accessing }
 SoilSkipListDictionary >> id [
 	^ id
@@ -92,7 +105,8 @@ SoilSkipListDictionary >> initialize [
 	super initialize.
 	newValues := OrderedDictionary new.
 	id := UUID new asString36.
-	index := SoilSkipList new 
+	index := SoilSkipList new
+		initializeHeaderPage;
 		valueSize: 8;
 		yourself
 ]
@@ -131,6 +145,13 @@ SoilSkipListDictionary >> last [
 		ifNil: [ newValues associations last value ]
 ]
 
+{ #category : #accessing }
+SoilSkipListDictionary >> lastAssociation [
+	^ self index iterator lastAssociation ifNotNil: [ :assoc | 
+			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
+
+]
+
 { #category : #private }
 SoilSkipListDictionary >> loadFrom: aFileReference [ 
 	^ SoilSkipList new 
@@ -160,7 +181,9 @@ SoilSkipListDictionary >> newIndexInstance [
 SoilSkipListDictionary >> nextAfter: key [  
 	| page |
 	page := self index iterator find: key asInteger;  page.
-	^ page itemAfter: key asInteger.
+	^ (page itemAfter: key asInteger)
+		ifNotNil: [ :assoc | 
+			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
 ]
 
@@ -168,8 +191,7 @@ SoilSkipListDictionary >> nextAfter: key [
 SoilSkipListDictionary >> prepareNewValues [
 	newValues copy keysAndValuesDo: [ :key :object |
 		object isObjectId ifFalse: [
-			newValues at: key put: (transaction makeRoot: object) ] ].
-	transaction markDirty: self
+			newValues at: key put: (transaction makeRoot: object) ] ]
 ]
 
 { #category : #printing }
@@ -199,6 +221,16 @@ SoilSkipListDictionary >> size [
 ]
 
 { #category : #'as yet unclassified' }
+SoilSkipListDictionary >> soilBasicSerialize: aSerializer [ 
+	transaction ifNil: [ 
+		transaction := aSerializer transaction.
+		self prepareNewValues ].
+	super soilBasicSerialize: aSerializer.
+	self index path ifNil: [  
+		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ]
+]
+
+{ #category : #'as yet unclassified' }
 SoilSkipListDictionary >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
@@ -218,21 +250,6 @@ SoilSkipListDictionary >> soilLoadedIn: aTransaction [
 	transaction := aTransaction.
 	"when being materialized newValues is not initialized so we do it here"
 	newValues := Dictionary new 
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipListDictionary >> soilSerialize: aSerializer [ 
-	transaction ifNil: [ 
-		transaction := aSerializer transaction.
-		self prepareNewValues ].
-	super soilSerialize: aSerializer.
-	self index path ifNil: [  
-		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ].
-	"newValues keysAndValuesDo: [ :key :object |
-		objectId := transaction makeRoot: object.
-		objectId initializeIndex: transaction objectRepository.
-		index at: key put: objectId ].
-	index writePages"
 ]
 
 { #category : #accessing }

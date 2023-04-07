@@ -35,7 +35,11 @@ Soil >> behaviorRegistry [
 { #category : #'initialize-release' }
 Soil >> close [
 	objectRepository ifNotNil: [ 
-		objectRepository close ]
+		objectRepository close ].
+	behaviorRegistry ifNotNil: [ 
+		behaviorRegistry close ].
+	parameters ifNotNil: [ 
+		parameters close ]
 ]
 
 { #category : #accessing }

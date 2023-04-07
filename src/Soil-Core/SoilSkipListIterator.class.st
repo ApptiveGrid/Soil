@@ -71,7 +71,7 @@ SoilSkipListIterator >> next [
 
 { #category : #accessing }
 SoilSkipListIterator >> nextAssociation [
-	| item i2 |
+	| item |
 	currentPage ifNil: [ 
 		currentPage := skipList store headerPage.
 		currentKey := nil ].
@@ -87,9 +87,7 @@ SoilSkipListIterator >> nextAssociation [
 						currentPage := skipList store pageAt: (currentPage rightAt: 1).
 						currentKey := nil ] ]
 			ifNil: [
-				i2 := currentPage firstItem.
-				currentKey := i2 key.
-				^ i2 ]].
+				^ currentPage firstItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
 	Error signal: 'shouldnt happen'
 ]
 

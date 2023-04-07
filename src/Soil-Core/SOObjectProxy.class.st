@@ -57,6 +57,19 @@ SOObjectProxy >> objectIsNotLoaded [
 	^ object isNil
 ]
 
+{ #category : #printing }
+SOObjectProxy >> printOn: aStream [ 
+	aStream << 'proxy ' << objectId asString.
+	object ifNotNil: [ 
+		aStream <<  ': '.
+		object printOn: aStream ]
+]
+
+{ #category : #printing }
+SOObjectProxy >> printString [ 
+	^ String streamContents: [ :s | self printOn: s ] limitedTo: 1000 
+]
+
 { #category : #'as yet unclassified' }
 SOObjectProxy >> soilLoadedIn: aTransaction [ 
 	transaction := aTransaction  

@@ -178,7 +178,8 @@ SOTransaction >> checkpoint [
 		locks add: (segment lockAppendingFor: self) ].
 	self buildJournal
 		write;
-		commit.
+		commit;
+		close.
 	indexes values do: #flush.
 	"write back the accumulated new indexes for alll segments"
 	lastObjectIndexes keysAndValuesDo: [ :segment :index |
@@ -454,10 +455,10 @@ SOTransaction >> records [
 ]
 
 { #category : #'as yet unclassified' }
-SOTransaction >> registerIndexedObject: anObject [ 
+SOTransaction >> registerIndexedObject: anObject forRoot: aClusterRoot [
 	| objectId segment |
 	indexes at: anObject ifPresent: [ Error signal: 'shouldnt happen' ].
-	objectId := (objectMap at: anObject) objectId.
+	objectId := (objectMap at: aClusterRoot) objectId.
 	segment := self objectRepository segmentAt: objectId segment.
 	^ indexes 
 		at: anObject 

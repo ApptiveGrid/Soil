@@ -9,6 +9,11 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #accessing }
+SOJournal class >> soilTransientInstVars [ 
+	^ #( transaction )
+]
+
 { #category : #adding }
 SOJournal >> addEntries: aCollection [ 
 	aCollection do: [ :each | self addEntry: each ]
@@ -17,6 +22,11 @@ SOJournal >> addEntries: aCollection [
 { #category : #adding }
 SOJournal >> addEntry: aJournalEntry [
 	entries add: aJournalEntry 
+]
+
+{ #category : #'initialize-release' }
+SOJournal >> close [ 
+	stream ifNotNil: [ stream close ]
 ]
 
 { #category : #accessing }

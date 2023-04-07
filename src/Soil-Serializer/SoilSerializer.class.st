@@ -27,14 +27,14 @@ SoilSerializer >> nextPutArray: anArray [
 		nextPutByte: TypeCodeArray;
 		nextPutLengthEncodedInteger: anArray size.
 	1 to: anArray size do: [:i | 
-		(anArray at: i) soilSerialize: self ].
+		(anArray at: i) theNonSoilProxy soilSerialize: self ].
 ]
 
 { #category : #writing }
 SoilSerializer >> nextPutAssociation: anAssociation [ 
 	self nextPutByte: TypeCodeAssociation.
-	anAssociation key soilSerialize: self.
-	anAssociation value soilSerialize: self.
+	anAssociation key theNonSoilProxy soilSerialize: self.
+	anAssociation value theNonSoilProxy soilSerialize: self.
 ]
 
 { #category : #writing }
@@ -102,8 +102,8 @@ SoilSerializer >> nextPutDictionary: aDictionary [
 		nextPutByte: TypeCodeDictionary;
 		nextPutLengthEncodedInteger: aDictionary size.
 	aDictionary keysAndValuesDo: [:key :value |
-		key soilSerialize: self.
-		value soilSerialize: self ]
+		key theNonSoilProxy soilSerialize: self.
+		value theNonSoilProxy soilSerialize: self ]
 ]
 
 { #category : #registry }
@@ -119,8 +119,8 @@ SoilSerializer >> nextPutIdentityDictionary: anIdentityDictionary [
 		nextPutByte: TypeCodeIdentityDictionary;
 		nextPutLengthEncodedInteger: anIdentityDictionary size.
 	anIdentityDictionary keysAndValuesDo: [:key :value |
-		key soilSerialize: self.
-		value soilSerialize: self ]
+		key theNonSoilProxy soilSerialize: self.
+		value theNonSoilProxy soilSerialize: self ]
 ]
 
 { #category : #writing }
@@ -155,7 +155,7 @@ SoilSerializer >> nextPutOrderedCollection: aCollection [
 	self
 		nextPutByte: TypeCodeOrderedCollection;
 		nextPutLengthEncodedInteger: aCollection size.
-	aCollection do: [:each | each soilSerialize: self ].
+	aCollection do: [:each | each theNonSoilProxy soilSerialize: self ].
 ]
 
 { #category : #writing }
@@ -164,8 +164,8 @@ SoilSerializer >> nextPutPersistentDictionary: aPersistentDictionary [
 		nextPutByte: TypeCodePersistentDictionary;
 		nextPutLengthEncodedInteger: aPersistentDictionary size.
 	aPersistentDictionary keysAndValuesDo: [:key :value |
-		key soilSerialize: self.
-		value soilSerialize: self ]
+		key theNonSoilProxy soilSerialize: self.
+		value theNonSoilProxy soilSerialize: self ]
 ]
 
 { #category : #writing }
@@ -185,16 +185,21 @@ SoilSerializer >> notSupportedError: anObject [
 
 { #category : #'as yet unclassified' }
 SoilSerializer >> registerIndexedObject: anObject [ 
-	^ transaction registerIndexedObject: anObject 
+	"indexes are registered in the segment of the cluster root. So we pass
+	the cluster root in order to figure the segment"
+	^ transaction 
+		registerIndexedObject: anObject 
+		forRoot: clusterRoot 
 ]
 
 { #category : #registry }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 	| index externalIndex |
-	(anObject == clusterRoot) ifTrue: [
-		"later references could reference the cluster root so we put
-		it as first object to be able to have an internal reference to it"
-		objectIdTable add: anObject.
+	objectIdTable ifEmpty: [
+		"the cluster root is serialized first so we put it in the object able
+		for later references. Above we checked for an empty object table so
+		later references to the cluster root will become an internal reference"
+		objectIdTable ifEmpty: [ objectIdTable add: anObject ].
 		^ aBlock value ].
 	index := objectIdTable identityIndexOf: anObject.
 	(index > 0) ifTrue: [

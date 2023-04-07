@@ -15,7 +15,7 @@ Class {
 SORangeLock class >> from: from length: length context: lockContext [ 
 	^ self new 
 		from: from;
-		to: from + length;
+		to: from + length - 1;
 		context: lockContext 
 ]
 

@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'pages',
-		'index'
+		'index',
+		'pagesMutex'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -32,6 +33,7 @@ SoilPagedIndexStore >> index: aCollection [
 SoilPagedIndexStore >> initialize [ 
 	super initialize.
 	pages := Dictionary new.
+	pagesMutex := Mutex new
 
 ]
 
@@ -43,12 +45,18 @@ SoilPagedIndexStore >> isCopyOnWrite [
 { #category : #accessing }
 SoilPagedIndexStore >> lastPage [
 	| maxLevel page pageNumber |
-	maxLevel := index maxLevel.
-	page := self headerPage.
-	[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
-		page := self pageAt: pageNumber ].
-	^ page
+	^ pagesMutex critical: [  
+		maxLevel := index maxLevel.
+		page := self headerPage.
+		[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
+			page := self pageAt: pageNumber ].
+		page ]
 	
+]
+
+{ #category : #acessing }
+SoilPagedIndexStore >> lastPageIndex [
+	^ self headerPage lastPageIndex
 ]
 
 { #category : #'instance creation' }
@@ -68,16 +76,18 @@ SoilPagedIndexStore >> nextPageIndex [
 
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger [ 
-	^ pages 
-		at: anInteger 
-		ifAbsent: [ self pageFaultAt: anInteger]
+	^ pagesMutex critical: [  
+		pages 
+			at: anInteger 
+			ifAbsent: [ self pageFaultAt: anInteger ] ]
 ]
 
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger put: aPage [ 
-	pages 
-		at: anInteger 
-		put: aPage
+	pagesMutex critical: [  
+		pages 
+			at: anInteger 
+			put: aPage ]
 ]
 
 { #category : #accessing }

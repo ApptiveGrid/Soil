@@ -9,7 +9,13 @@ Class {
 
 { #category : #queries }
 SoilCopyOnWriteIndexStore >> allItems [
-	^ underlyingStore allItems 
+	| highestIndex col |
+	highestIndex := self lastPageIndex.
+	col := OrderedCollection new.
+	1 to: highestIndex do: [ :n |
+		col addAll: (self pageAt: n) items ].
+	^ (col reject: [ :each | 
+			(each value class = ByteArray) and: [ each value asInteger = 0 ] ]) collect: #value
 ]
 
 { #category : #'as yet unclassified' }

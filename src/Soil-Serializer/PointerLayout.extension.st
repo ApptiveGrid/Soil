@@ -5,7 +5,7 @@ PointerLayout >> soilBasicSerialize: anObject with: serializer [
 	| description |
 	description := serializer serializeBehaviorDescriptionFor: anObject.
 
-	description instVarNames do: [:ivarName | (anObject instVarNamed: ivarName) soilSerialize: serializer ]
+	description instVarNames do: [:ivarName | (anObject instVarNamed: ivarName) theNonSoilProxy soilSerialize: serializer ]
 ]
 
 { #category : #'*Soil-Serializer' }
