@@ -3,14 +3,16 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'pages',
-		'index'
+		'index',
+		'pagesSemaphore'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
 { #category : #'as yet unclassified' }
 SoilPagedIndexStore >> headerPage [
-	^ self pageAt: 1
+	^ pagesSemaphore critical: [  
+		self pageAt: 1 ]
 ]
 
 { #category : #accessing }
@@ -32,6 +34,7 @@ SoilPagedIndexStore >> index: aCollection [
 SoilPagedIndexStore >> initialize [ 
 	super initialize.
 	pages := Dictionary new.
+	pagesSemaphore := Semaphore forMutualExclusion 
 
 ]
 
@@ -43,11 +46,12 @@ SoilPagedIndexStore >> isCopyOnWrite [
 { #category : #accessing }
 SoilPagedIndexStore >> lastPage [
 	| maxLevel page pageNumber |
-	maxLevel := index maxLevel.
-	page := self headerPage.
-	[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
-		page := self pageAt: pageNumber ].
-	^ page
+	^ pagesSemaphore critical: [  
+		maxLevel := index maxLevel.
+		page := self headerPage.
+		[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
+			page := self pageAt: pageNumber ].
+		page ]
 	
 ]
 
@@ -68,21 +72,24 @@ SoilPagedIndexStore >> nextIndex [
 
 { #category : #'as yet unclassified' }
 SoilPagedIndexStore >> nextPageIndex [
-	^ self headerPage nextPageIndex
+	^ pagesSemaphore critical: [  
+		self headerPage nextPageIndex ]
 ]
 
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger [ 
-	^ pages 
-		at: anInteger 
-		ifAbsent: [ self pageFaultAt: anInteger]
+	^ pagesSemaphore critical: [  
+		pages 
+			at: anInteger 
+			ifAbsent: [ self pageFaultAt: anInteger ] ]
 ]
 
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger put: aPage [ 
-	pages 
-		at: anInteger 
-		put: aPage
+	pagesSemaphore critical: [  
+		pages 
+			at: anInteger 
+			put: aPage ]
 ]
 
 { #category : #accessing }
