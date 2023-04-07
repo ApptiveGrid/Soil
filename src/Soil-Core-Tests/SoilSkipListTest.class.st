@@ -11,13 +11,13 @@ Class {
 SoilSkipListTest >> setUp [ 
 	super setUp.
 	skipList := SoilSkipList new 
-		store: SoilPagedFileIndexStore new;
-		maxLevel: 4;
-		keySize: 8;
-		valueSize: 8;
 		path: 'sunit-skiplist';
 		destroy;
-		initializeFilesystem
+		initializeFilesystem;
+		initializeHeaderPage;
+		maxLevel: 4;
+		keySize: 8;
+		valueSize: 8
 ]
 
 { #category : #running }

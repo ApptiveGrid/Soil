@@ -57,9 +57,7 @@ SoilPagedFileIndexStore >> initializeFilesystem [
 SoilPagedFileIndexStore >> initializeHeaderPage [
 	| page |
 	page := index newHeaderPage.
-	pages at: page index put: page.
-	"self writePage: page"
-		
+	pages at: page index put: page		
 ]
 
 { #category : #'instance creation' }
