@@ -115,11 +115,6 @@ SoilBasicSkipList >> last [
 ]
 
 { #category : #accessing }
-SoilBasicSkipList >> lastPage [
-	self shouldBeImplemented.
-]
-
-{ #category : #accessing }
 SoilBasicSkipList >> maxLevel [
 
 	^ self headerPage maxLevel
