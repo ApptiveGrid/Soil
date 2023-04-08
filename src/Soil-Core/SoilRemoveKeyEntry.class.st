@@ -20,7 +20,9 @@ SoilRemoveKeyEntry >> commitIn: transaction [
 	index := (transaction indexes associations 
 		detect: [ :each | each key id = indexId ]
 		ifNone: [ Error signal: 'shouldnt happen' ]) value.
-	index removeKey: key
+	self flag: #todo.
+	"ifAbsent: should not be used here"
+	index removeKey: key ifAbsent: [ ]
 ]
 
 { #category : #accessing }
