@@ -121,14 +121,14 @@ SoilBasicSkipList >> lastPage [
 
 { #category : #accessing }
 SoilBasicSkipList >> maxLevel [
-	"^ maxLevel"
+
 	^ self headerPage maxLevel
 ]
 
 { #category : #accessing }
 SoilBasicSkipList >> maxLevel: anInteger [ 
-	"maxLevel := anInteger "
-	self store headerPage maxLevel: anInteger 
+
+	self headerPage maxLevel: anInteger 
 ]
 
 { #category : #'public/accessing' }
