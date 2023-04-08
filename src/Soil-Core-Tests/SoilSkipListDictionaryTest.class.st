@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Tests'
 }
 
+{ #category : #helper }
+SoilSkipListDictionaryTest class >> classUnderTest [ 	
+	^ SoilSkipListDictionary 
+]
+
 { #category : #accessing }
 SoilSkipListDictionaryTest >> path [ 
 	^ 'soil-tests'

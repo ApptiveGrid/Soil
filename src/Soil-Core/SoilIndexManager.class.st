@@ -56,7 +56,7 @@ SoilIndexManager >> open [
 { #category : #'as yet unclassified' }
 SoilIndexManager >> registerIndexedObject: aSoilSkipListDictionary [ 
 	| registeredIndex |
-	registeredIndex :=  aSoilSkipListDictionary index asWritableIndex
+	registeredIndex :=  aSoilSkipListDictionary index thePersistentInstance
 		path: segment path / aSoilSkipListDictionary id, #index;
 		initializeFilesystem.
 	^ semaphore critical: [  

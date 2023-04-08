@@ -17,7 +17,7 @@ SoilPagedFileIndexStore >> allItems [
 { #category : #converting }
 SoilPagedFileIndexStore >> asCopyOnWriteStore [
 	^ SoilCopyOnWriteIndexStore new 
-		underlyingStore: self
+		wrappedStore: self
 ]
 
 { #category : #'initialize-release' }

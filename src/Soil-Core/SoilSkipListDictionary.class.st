@@ -97,7 +97,7 @@ SoilSkipListDictionary >> id [
 { #category : #accessing }
 SoilSkipListDictionary >> index [
 	^ index ifNil: [ 
-		index := self lookupIndex asModifiableIndex  ]
+		index := self lookupIndex asCopyOnWrite  ]
 ]
 
 { #category : #initialization }
@@ -115,6 +115,11 @@ SoilSkipListDictionary >> initialize [
 SoilSkipListDictionary >> isEmpty [
 	newValues ifNotEmpty: [ ^ false ].
 	^ self index isEmpty
+]
+
+{ #category : #testing }
+SoilSkipListDictionary >> isRegistered [
+	^ index isRegistered 
 ]
 
 { #category : #'as yet unclassified' }
@@ -206,6 +211,11 @@ SoilSkipListDictionary >> proxyFromByteArray: aByteArray [
 	^ transaction proxyForObjectId: aByteArray asSoilObjectId
 ]
 
+{ #category : #removing }
+SoilSkipListDictionary >> removeKey: anInteger [ 
+	self shouldBeImplemented.
+]
+
 { #category : #accessing }
 SoilSkipListDictionary >> second [
 	^ transaction 
@@ -226,8 +236,8 @@ SoilSkipListDictionary >> soilBasicSerialize: aSerializer [
 		transaction := aSerializer transaction.
 		self prepareNewValues ].
 	super soilBasicSerialize: aSerializer.
-	self index path ifNil: [  
-		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ]
+	self isRegistered ifFalse: [  
+		index := (aSerializer registerIndexedObject: self) asCopyOnWrite  ]
 ]
 
 { #category : #'as yet unclassified' }

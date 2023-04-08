@@ -2,7 +2,7 @@ Class {
 	#name : #SoilCopyOnWriteIndexStore,
 	#superclass : #SoilPagedIndexStore,
 	#instVars : [
-		'underlyingStore'
+		'wrappedStore'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -27,7 +27,7 @@ SoilCopyOnWriteIndexStore >> createNewPage [
 
 { #category : #accessing }
 SoilCopyOnWriteIndexStore >> flush [ 
-	^ underlyingStore flush
+	^ wrappedStore flush
 ]
 
 { #category : #testing }
@@ -38,21 +38,21 @@ SoilCopyOnWriteIndexStore >> isCopyOnWrite [
 { #category : #accessing }
 SoilCopyOnWriteIndexStore >> pageFaultAt: anInteger [ 
 	| page |
-	page := underlyingStore 
-		ifNotNil: [ underlyingStore pageAt: anInteger ]
+	page := wrappedStore 
+		ifNotNil: [ wrappedStore pageAt: anInteger ]
 		ifNil: [ self createNewPage ].
 	pages at: anInteger put: page copy.
 	^ page 
 ]
 
 { #category : #accessing }
-SoilCopyOnWriteIndexStore >> underlyingStore [
+SoilCopyOnWriteIndexStore >> wrappedStore [
 
-	^ underlyingStore
+	^ wrappedStore
 ]
 
 { #category : #accessing }
-SoilCopyOnWriteIndexStore >> underlyingStore: anObject [
+SoilCopyOnWriteIndexStore >> wrappedStore: anObject [
 
-	underlyingStore := anObject
+	wrappedStore := anObject
 ]
