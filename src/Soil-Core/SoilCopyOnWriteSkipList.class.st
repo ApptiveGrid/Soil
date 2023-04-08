@@ -26,5 +26,5 @@ SoilCopyOnWriteSkipList >> wrappedSkipList [
 SoilCopyOnWriteSkipList >> wrappedSkipList: anObject [
 
 	wrappedSkipList := anObject.
-	store := wrappedSkipList store asCopyOnWriteStore 
+	self store: wrappedSkipList store asCopyOnWriteStore 
 ]
