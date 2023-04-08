@@ -165,6 +165,11 @@ SoilBasicSkipList >> removeKey: aString ifAbsent: aBlock [
 		ifFalse: [ aBlock value ]
 ]
 
+{ #category : #accessing }
+SoilBasicSkipList >> size [ 
+	^ self store allItems size 
+]
+
 { #category : #'as yet unclassified' }
 SoilBasicSkipList >> splitPage: aIterator [ 
 	| newPage page |
