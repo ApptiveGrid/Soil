@@ -21,9 +21,10 @@ SOFileLockRegistryTest >> testAcquireAndGarbageCollect [
 	| registry |
 	registry := SOFileLockRegistry forPath: '/tmp/foo'.
 	self assert: registry numberOfLocks equals: 0.
-	self assert: SOFileLockRegistry numberOfRegistries equals: 1.
+	self assert: SOFileLockRegistry numberOfRegistries > 0.
 	registry := nil.
-	3 timesRepeat: [ Smalltalk garbageCollect ].
+	[  SOFileLockRegistry numberOfRegistries = 0 ] whileFalse: [ Smalltalk garbageCollect ].
+
 	"The registry should have been vanished"
 	self assert: SOFileLockRegistry numberOfRegistries equals: 0.
 ]

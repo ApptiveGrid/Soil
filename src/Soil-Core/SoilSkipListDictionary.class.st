@@ -5,7 +5,8 @@ Class {
 		'id',
 		'transaction',
 		'index',
-		'newValues'
+		'newValues',
+		'removedValues'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -26,8 +27,11 @@ SoilSkipListDictionary >> at: key [
 { #category : #accessing }
 SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 	| objectId |
-	objectId := (self index at: key ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
-	^ transaction proxyForObjectId: objectId
+	^ transaction 
+		ifNotNil: [  
+			objectId := (self index at: key ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
+			transaction proxyForObjectId: objectId ]
+		ifNil: [ newValues at: key ifAbsent: aBlock ]
 ]
 
 { #category : #accessing }
@@ -36,7 +40,10 @@ SoilSkipListDictionary >> at: key put: anObject [
 	transaction ifNotNil: [
 		objectId := transaction makeRoot: anObject.
 		transaction markDirty: self.
-		self index at: key put: objectId. 
+		self index at: key put: objectId.
+		"if there has been a prior removal of the key this new
+		addition invalidates it"
+		removedValues removeKey: key ifAbsent: [  ]. 
 		^ newValues at: key put: objectId ].
 	newValues at: key put: anObject.
 
@@ -84,7 +91,7 @@ SoilSkipListDictionary >> first: anInteger [
 SoilSkipListDictionary >> firstAssociation [
 	self index path ifNil: [ 
 		^ newValues at: (newValues keyAtIndex: 1) ].
-	^ index iterator firstAssociation ifNotNil: [ :assoc | 
+	^ index newIterator firstAssociation ifNotNil: [ :assoc | 
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
 ]
@@ -97,13 +104,14 @@ SoilSkipListDictionary >> id [
 { #category : #accessing }
 SoilSkipListDictionary >> index [
 	^ index ifNil: [ 
-		index := self lookupIndex asModifiableIndex  ]
+		index := self lookupIndex asCopyOnWrite  ]
 ]
 
 { #category : #initialization }
 SoilSkipListDictionary >> initialize [ 
 	super initialize.
 	newValues := OrderedDictionary new.
+	removedValues := OrderedDictionary new.
 	id := UUID new asString36.
 	index := SoilSkipList new
 		initializeHeaderPage;
@@ -117,12 +125,22 @@ SoilSkipListDictionary >> isEmpty [
 	^ self index isEmpty
 ]
 
+{ #category : #testing }
+SoilSkipListDictionary >> isRegistered [
+	^ index isRegistered 
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> journalEntries [
 	| entries |
 	entries := OrderedCollection new.
 	newValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilNewKeyEntry new 
+			indexId: id;
+			key: key;
+			value: value) ].
+	removedValues keysAndValuesDo: [ :key :value |
+		entries add: (SoilRemoveKeyEntry new 
 			indexId: id;
 			key: key;
 			value: value) ].
@@ -147,7 +165,7 @@ SoilSkipListDictionary >> last [
 
 { #category : #accessing }
 SoilSkipListDictionary >> lastAssociation [
-	^ self index iterator lastAssociation ifNotNil: [ :assoc | 
+	^ self index newIterator lastAssociation ifNotNil: [ :assoc | 
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
 ]
@@ -180,7 +198,7 @@ SoilSkipListDictionary >> newIndexInstance [
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> nextAfter: key [  
 	| page |
-	page := self index iterator find: key asInteger;  page.
+	page := self index newIterator find: key asInteger;  page.
 	^ (page itemAfter: key asInteger)
 		ifNotNil: [ :assoc | 
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
@@ -206,10 +224,36 @@ SoilSkipListDictionary >> proxyFromByteArray: aByteArray [
 	^ transaction proxyForObjectId: aByteArray asSoilObjectId
 ]
 
+{ #category : #removing }
+SoilSkipListDictionary >> removeKey: key [
+	^ self 
+		removeKey: key 
+		ifAbsent: [ KeyNotFound signalFor: key ]
+]
+
+{ #category : #removing }
+SoilSkipListDictionary >> removeKey: key ifAbsent: aBlock [
+	^ transaction 
+		ifNotNil: [ 
+			"remove from newValues as there could be a new at:put: on that
+			key but removing the key will remove the value again"
+			newValues removeKey: key ifAbsent: [ ].
+			transaction markDirty: self.
+			removedValues 
+				at: key 
+				put: (self index 
+					removeKey: key 
+					ifAbsent: [ ^ aBlock value ]) asSoilObjectId ]
+		ifNil: [ 
+			removedValues 
+				at: key
+				put: (newValues removeKey: key ifAbsent: [ ^ aBlock value ]) ]
+]
+
 { #category : #accessing }
 SoilSkipListDictionary >> second [
 	^ transaction 
-		ifNotNil: [ index iterator first; next ]
+		ifNotNil: [ index newIterator first; next ]
 		ifNil: [ newValues associations second value ]
 ]
 
@@ -226,8 +270,8 @@ SoilSkipListDictionary >> soilBasicSerialize: aSerializer [
 		transaction := aSerializer transaction.
 		self prepareNewValues ].
 	super soilBasicSerialize: aSerializer.
-	self index path ifNil: [  
-		index := (aSerializer registerIndexedObject: self) asModifiableIndex  ]
+	self isRegistered ifFalse: [  
+		index := (aSerializer registerIndexedObject: self) asCopyOnWrite  ]
 ]
 
 { #category : #'as yet unclassified' }

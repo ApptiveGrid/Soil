@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Tests'
 }
 
+{ #category : #helper }
+SoilSkipListDictionaryTest class >> classUnderTest [ 	
+	^ SoilSkipListDictionary 
+]
+
 { #category : #accessing }
 SoilSkipListDictionaryTest >> path [ 
 	^ 'soil-tests'
@@ -26,6 +31,45 @@ SoilSkipListDictionaryTest >> tearDown [
 	super tearDown.
 	soil ifNotNil: [ 
 		soil close ]
+]
+
+{ #category : #tests }
+SoilSkipListDictionaryTest >> testAddAndRemoveExistingList [
+	| dict tx tx2 tx3 |
+	"create skip list dictionary with a key ..."
+	dict := SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+	"... and persist it"
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #foo put: #one.
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"... and remove the key from the persisted list"
+	tx2 root
+		removeKey: #foo.
+	tx2 commit.
+	tx3 := soil newTransaction.
+	self assert: (tx3 root at: #foo ifAbsent: [ nil ]) equals: nil.
+
+]
+
+{ #category : #tests }
+SoilSkipListDictionaryTest >> testAddAndRemoveOnNewList [
+	| dict |
+	dict := SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+  	self 
+		shouldnt: [ dict at: #foo put: #bar ]
+		raise: Error.
+	self assert: (dict at: #foo) equals: #bar.
+	dict removeKey: #foo.
+	self assert: dict size equals: 0
 ]
 
 { #category : #tests }
@@ -103,5 +147,6 @@ SoilSkipListDictionaryTest >> testAddToNewList [
 		yourself.
   	self 
 		shouldnt: [ dict at: #foo put: #bar ]
-		raise: Error
+		raise: Error.
+	self assert: (dict at: #foo) equals: #bar
 ]
