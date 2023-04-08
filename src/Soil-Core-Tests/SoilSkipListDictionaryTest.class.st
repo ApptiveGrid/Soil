@@ -48,7 +48,7 @@ SoilSkipListDictionaryTest >> testAddAndRemoveExistingList [
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
-	"... add a key but do not commit"
+	"... and remove the key from the persisted list"
 	tx2 root
 		removeKey: #foo.
 	tx2 commit.

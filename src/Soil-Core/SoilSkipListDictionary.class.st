@@ -91,7 +91,7 @@ SoilSkipListDictionary >> first: anInteger [
 SoilSkipListDictionary >> firstAssociation [
 	self index path ifNil: [ 
 		^ newValues at: (newValues keyAtIndex: 1) ].
-	^ index iterator firstAssociation ifNotNil: [ :assoc | 
+	^ index newIterator firstAssociation ifNotNil: [ :assoc | 
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
 ]
@@ -165,7 +165,7 @@ SoilSkipListDictionary >> last [
 
 { #category : #accessing }
 SoilSkipListDictionary >> lastAssociation [
-	^ self index iterator lastAssociation ifNotNil: [ :assoc | 
+	^ self index newIterator lastAssociation ifNotNil: [ :assoc | 
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
 ]
@@ -198,7 +198,7 @@ SoilSkipListDictionary >> newIndexInstance [
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> nextAfter: key [  
 	| page |
-	page := self index iterator find: key asInteger;  page.
+	page := self index newIterator find: key asInteger;  page.
 	^ (page itemAfter: key asInteger)
 		ifNotNil: [ :assoc | 
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
@@ -253,7 +253,7 @@ SoilSkipListDictionary >> removeKey: key ifAbsent: aBlock [
 { #category : #accessing }
 SoilSkipListDictionary >> second [
 	^ transaction 
-		ifNotNil: [ index iterator first; next ]
+		ifNotNil: [ index newIterator first; next ]
 		ifNil: [ newValues associations second value ]
 ]
 

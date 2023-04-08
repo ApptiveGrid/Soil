@@ -8,10 +8,10 @@ Class {
 }
 
 { #category : #private }
-SoilBasicSkipList >> at: aByteArray [ 
+SoilBasicSkipList >> at: key [ 
 	^ self 
-		at: aByteArray 
-		ifAbsent: [ Error signal: 'no found' ]
+		at: key 
+		ifAbsent: [ KeyNotFound signal: key ]
 ]
 
 { #category : #private }
@@ -25,7 +25,7 @@ SoilBasicSkipList >> at: anObject ifAbsent: aBlock [
 SoilBasicSkipList >> at: aKeyObject put: anObject [
 	| key iterator page index newPage |
 	key := (aKeyObject asSkipListKeyOfSize: self keySize) asInteger.
-	iterator := self iterator.
+	iterator := self newIterator.
 	iterator find: key.
 	page := iterator page.
 	index := page indexOfKey: key.
@@ -48,7 +48,7 @@ SoilBasicSkipList >> at: aKeyObject put: anObject [
 { #category : #accessing }
 SoilBasicSkipList >> atIndex: anInteger [ 
 	| current iterator |
-	iterator := self iterator.
+	iterator := self newIterator.
 	current := iterator first.
 	2 to: anInteger do: [ :idx |
 		current := iterator next ].
@@ -57,19 +57,19 @@ SoilBasicSkipList >> atIndex: anInteger [
 
 { #category : #enumerating }
 SoilBasicSkipList >> do: aBlock [
-	self iterator do: aBlock
+	self newIterator do: aBlock
 ]
 
 { #category : #private }
 SoilBasicSkipList >> find: aString [ 
-	^ self iterator 
+	^ self newIterator 
 		find: (aString asSkipListKeyOfSize: self keySize) asInteger
 ]
 
 { #category : #accessing }
 SoilBasicSkipList >> first: anInteger [ 
 	| iterator col |
-	iterator := self iterator.
+	iterator := self newIterator.
 	col := OrderedCollection new.
 	anInteger timesRepeat: [ 
 		(iterator next)
@@ -96,11 +96,6 @@ SoilBasicSkipList >> headerPage [
 { #category : #testing }
 SoilBasicSkipList >> isEmpty [
 	^ self store headerPage hasItems not
-]
-
-{ #category : #'public/accessing' }
-SoilBasicSkipList >> iterator [ 
-	^ SoilSkipListIterator on: self 
 ]
 
 { #category : #accessing }
@@ -136,6 +131,11 @@ SoilBasicSkipList >> maxLevel: anInteger [
 	self store headerPage maxLevel: anInteger 
 ]
 
+{ #category : #'public/accessing' }
+SoilBasicSkipList >> newIterator [ 
+	^ SoilSkipListIterator on: self 
+]
+
 { #category : #accessing }
 SoilBasicSkipList >> pageAt: anInteger [ 
 	^ self store pageAt: anInteger 
@@ -157,7 +157,7 @@ SoilBasicSkipList >> removeKey: key [
 SoilBasicSkipList >> removeKey: aString ifAbsent: aBlock [
 	| page index key |
 	key := (aString asSkipListKeyOfSize: self keySize) asInteger.
-	page := self iterator 
+	page := self newIterator 
 		find: key;
 		page.
 	^ ((index := page indexOfKey: key) > 0) 
