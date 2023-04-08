@@ -29,7 +29,9 @@ SoilBasicSkipList >> at: aKeyObject put: anObject [
 	iterator find: key.
 	page := iterator page.
 	index := page indexOfKey: key.
-	(index > 0)
+	"as an optimization we return the prior value stored in the list. If
+	there was none we return nil"
+	^ (index > 0)
 		ifTrue: [ page itemAt: key put: anObject ] 
 		ifFalse: [ 
 			page hasRoom 
@@ -39,8 +41,8 @@ SoilBasicSkipList >> at: aKeyObject put: anObject [
 					((page biggestKey < key)
 						ifTrue: [ newPage ]
 						ifFalse: [ page ])
-							addItem: (key -> anObject) ] ].
-	^ anObject
+							addItem: (key -> anObject).
+							nil ] ]
 ]
 
 { #category : #accessing }
@@ -142,6 +144,25 @@ SoilBasicSkipList >> pageAt: anInteger [
 { #category : #accessing }
 SoilBasicSkipList >> pageSize [
 	^ 4 * 1024
+]
+
+{ #category : #removing }
+SoilBasicSkipList >> removeKey: key [ 
+	^ self
+		removeKey: key 
+		ifAbsent: [ KeyNotFound signal: key ]
+]
+
+{ #category : #removing }
+SoilBasicSkipList >> removeKey: aString ifAbsent: aBlock [
+	| page index key |
+	key := (aString asSkipListKeyOfSize: self keySize) asInteger.
+	page := self iterator 
+		find: key;
+		page.
+	^ ((index := page indexOfKey: key) > 0) 
+		ifTrue: [ (page itemRemoveIndex: index) value ]
+		ifFalse: [ aBlock value ]
 ]
 
 { #category : #'as yet unclassified' }

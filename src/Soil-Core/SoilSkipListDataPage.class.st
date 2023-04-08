@@ -105,18 +105,44 @@ SoilSkipListDataPage >> itemAfter: key [
 ]
 
 { #category : #accessing }
-SoilSkipListDataPage >> itemAt: anInteger put: anObject [ 
-	items 
-		findBinaryIndex: [ :each |  anInteger - each key ] 
-		do: [:ind | items removeAt: ind ]
-		ifNone: [ 0 ].
-	items add: (anInteger -> anObject).
-	dirty := true
+SoilSkipListDataPage >> itemAt: key put: anObject [ 
+	| removedItem |
+	removedItem := self itemRemoveAt: key.
+	items add: (key -> anObject).
+	dirty := true.
+	^ removedItem
 ]
 
 { #category : #'as yet unclassified' }
 SoilSkipListDataPage >> itemCapacity [
 	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
+]
+
+{ #category : #accessing }
+SoilSkipListDataPage >> itemRemoveAt: key [ 
+	^ self 
+		itemRemoveAt: key 
+		ifAbsent: [ KeyNotFound signal: key ]
+]
+
+{ #category : #accessing }
+SoilSkipListDataPage >> itemRemoveAt: anInteger ifAbsent: aBlock [
+	| item |
+	items 
+		findBinaryIndex: [ :each |  anInteger - each key ] 
+		do: [:ind | item := items removeAt: ind ]
+		ifNone: [ ^ aBlock value ].
+	dirty := true.
+	^ item
+]
+
+{ #category : #accessing }
+SoilSkipListDataPage >> itemRemoveIndex: anInteger [
+	| item |
+	item := items at: anInteger.
+	items removeAt: anInteger.
+	dirty := true.
+	^ item
 ]
 
 { #category : #accessing }

@@ -34,6 +34,45 @@ SoilSkipListDictionaryTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilSkipListDictionaryTest >> testAddAndRemoveExistingList [
+	| dict tx tx2 tx3 |
+	"create skip list dictionary with a key ..."
+	dict := SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+	"... and persist it"
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #foo put: #one.
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"... add a key but do not commit"
+	tx2 root
+		removeKey: #foo.
+	tx2 commit.
+	tx3 := soil newTransaction.
+	self assert: (tx3 root at: #foo ifAbsent: [ nil ]) equals: nil.
+
+]
+
+{ #category : #tests }
+SoilSkipListDictionaryTest >> testAddAndRemoveOnNewList [
+	| dict |
+	dict := SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+  	self 
+		shouldnt: [ dict at: #foo put: #bar ]
+		raise: Error.
+	self assert: (dict at: #foo) equals: #bar.
+	dict removeKey: #foo.
+	self assert: dict size equals: 0
+]
+
+{ #category : #tests }
 SoilSkipListDictionaryTest >> testAddToExistingEmptyList [
 	| dict tx tx2 tx3 tx4 |
 	"create emtpy skip list dictionary ..."
@@ -108,5 +147,6 @@ SoilSkipListDictionaryTest >> testAddToNewList [
 		yourself.
   	self 
 		shouldnt: [ dict at: #foo put: #bar ]
-		raise: Error
+		raise: Error.
+	self assert: (dict at: #foo) equals: #bar
 ]

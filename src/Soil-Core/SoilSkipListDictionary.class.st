@@ -5,7 +5,8 @@ Class {
 		'id',
 		'transaction',
 		'index',
-		'newValues'
+		'newValues',
+		'removedValues'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -26,8 +27,11 @@ SoilSkipListDictionary >> at: key [
 { #category : #accessing }
 SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 	| objectId |
-	objectId := (self index at: key ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
-	^ transaction proxyForObjectId: objectId
+	^ transaction 
+		ifNotNil: [  
+			objectId := (self index at: key ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
+			transaction proxyForObjectId: objectId ]
+		ifNil: [ newValues at: key ifAbsent: aBlock ]
 ]
 
 { #category : #accessing }
@@ -36,7 +40,10 @@ SoilSkipListDictionary >> at: key put: anObject [
 	transaction ifNotNil: [
 		objectId := transaction makeRoot: anObject.
 		transaction markDirty: self.
-		self index at: key put: objectId. 
+		self index at: key put: objectId.
+		"if there has been a prior removal of the key this new
+		addition invalidates it"
+		removedValues removeKey: key ifAbsent: [  ]. 
 		^ newValues at: key put: objectId ].
 	newValues at: key put: anObject.
 
@@ -104,6 +111,7 @@ SoilSkipListDictionary >> index [
 SoilSkipListDictionary >> initialize [ 
 	super initialize.
 	newValues := OrderedDictionary new.
+	removedValues := OrderedDictionary new.
 	id := UUID new asString36.
 	index := SoilSkipList new
 		initializeHeaderPage;
@@ -128,6 +136,11 @@ SoilSkipListDictionary >> journalEntries [
 	entries := OrderedCollection new.
 	newValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilNewKeyEntry new 
+			indexId: id;
+			key: key;
+			value: value) ].
+	removedValues keysAndValuesDo: [ :key :value |
+		entries add: (SoilRemoveKeyEntry new 
 			indexId: id;
 			key: key;
 			value: value) ].
@@ -212,8 +225,29 @@ SoilSkipListDictionary >> proxyFromByteArray: aByteArray [
 ]
 
 { #category : #removing }
-SoilSkipListDictionary >> removeKey: anInteger [ 
-	self shouldBeImplemented.
+SoilSkipListDictionary >> removeKey: key [
+	^ self 
+		removeKey: key 
+		ifAbsent: [ KeyNotFound signalFor: key ]
+]
+
+{ #category : #removing }
+SoilSkipListDictionary >> removeKey: key ifAbsent: aBlock [
+	^ transaction 
+		ifNotNil: [ 
+			"remove from newValues as there could be a new at:put: on that
+			key but removing the key will remove the value again"
+			newValues removeKey: key ifAbsent: [ ].
+			transaction markDirty: self.
+			removedValues 
+				at: key 
+				put: (self index 
+					removeKey: key 
+					ifAbsent: [ ^ aBlock value ]) asSoilObjectId ]
+		ifNil: [ 
+			removedValues 
+				at: key
+				put: (newValues removeKey: key ifAbsent: [ ^ aBlock value ]) ]
 ]
 
 { #category : #accessing }

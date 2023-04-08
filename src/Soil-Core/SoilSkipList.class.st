@@ -118,13 +118,6 @@ SoilSkipList >> size [
 
 { #category : #converting }
 SoilSkipList >> thePersistentInstance [
-	"| writableStore |
-	writableStore := store isCopyOnWrite
-		ifTrue: [ store wrappedStore ]
-		ifFalse: [ store ].
-	^ self copy 
-		store: writableStore;
-		yourself"
 	^ self
 	
 ]
