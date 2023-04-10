@@ -142,7 +142,7 @@ SoilSkipListDictionary >> journalEntries [
 	removedValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilRemoveKeyEntry new 
 			indexId: id;
-			key: key;
+			key: key; 
 			value: value) ].
 	^ entries
 ]

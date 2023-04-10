@@ -51,12 +51,19 @@ SoilSkipListIterator >> first [
 
 { #category : #accessing }
 SoilSkipListIterator >> firstAssociation [ 
-	^ skipList store headerPage firstItem
+	| item |
+	currentPage := skipList store headerPage.
+	item := currentPage firstItem.
+	currentKey := item key.
+	^ item
 ]
 
 { #category : #accessing }
 SoilSkipListIterator >> lastAssociation [ 
-	^ skipList store lastPage lastItem
+	| item |
+	currentPage := skipList store lastPage.
+	item := currentPage lastItem.
+	^ item
 ]
 
 { #category : #accessing }

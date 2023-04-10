@@ -30,23 +30,14 @@ SoilSkipListDataPage >> associationAt: anInteger [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDataPage >> biggestKey [
-	^ items last key
+	^ self isLastPage 
+		ifTrue: [ (2 raisedTo: (keySize * 8)) - 1 ]
+		ifFalse: [ items last key ]
 ]
 
 { #category : #accessing }
 SoilSkipListDataPage >> firstItem [
-	| item |
-	self flag: #todo.
-	"bad way of determine the first item. Here we filter out the lower and
-	upper element"
-	item := items first.
-	^ (item key = 0)
-		ifTrue: [ 
-			(items second value = 0)
-				ifTrue: [ ^ nil ]
-				ifFalse: [ items second ] ]
-		ifFalse: [ item ]
-	
+	^ items first
 ]
 
 { #category : #testing }
@@ -92,6 +83,11 @@ SoilSkipListDataPage >> initializeLevel: anInteger [
 		level := level + 1.
 		promote := self class random next > 0.5 ].
 	right := Array new: level withAll: 0. 
+]
+
+{ #category : #testing }
+SoilSkipListDataPage >> isLastPage [
+	^ (right at: 1) = 0
 ]
 
 { #category : #'as yet unclassified' }

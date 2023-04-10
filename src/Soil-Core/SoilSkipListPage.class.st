@@ -43,6 +43,11 @@ SoilSkipListPage >> isDirty [
 	^ dirty 
 ]
 
+{ #category : #testing }
+SoilSkipListPage >> isLastPage [
+	self shouldBeImplemented.
+]
+
 { #category : #accessing }
 SoilSkipListPage >> pageSize [
 	^ pageSize
