@@ -331,8 +331,7 @@ SOTransaction >> makePersistent: anObject [
 { #category : #'as yet unclassified' }
 SOTransaction >> makeRoot: anObject [ 
 	| objectId |
-	(anObject class = SOObjectProxy) ifTrue: [ Error signal: 'an object proxy cannot be made root' ]. 
-	objectId := self addClusterObject: anObject.
+	objectId := self addClusterObject: anObject theNonSoilProxy.
 	anObject soilClusterRootIn: self.
 	^ objectId
 
