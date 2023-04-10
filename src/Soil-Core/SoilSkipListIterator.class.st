@@ -94,6 +94,7 @@ SoilSkipListIterator >> nextAssociation [
 						currentPage := skipList store pageAt: (currentPage rightAt: 1).
 						currentKey := nil ] ]
 			ifNil: [
+				currentPage isEmpty ifTrue: [ ^ nil ].
 				^ currentPage firstItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
 	Error signal: 'shouldnt happen'
 ]

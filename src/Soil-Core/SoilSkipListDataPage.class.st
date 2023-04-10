@@ -86,6 +86,11 @@ SoilSkipListDataPage >> initializeLevel: anInteger [
 ]
 
 { #category : #testing }
+SoilSkipListDataPage >> isEmpty [
+	^ items isEmpty 
+]
+
+{ #category : #testing }
 SoilSkipListDataPage >> isLastPage [
 	^ (right at: 1) = 0
 ]
