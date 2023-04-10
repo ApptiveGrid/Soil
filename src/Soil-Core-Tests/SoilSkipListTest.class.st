@@ -147,7 +147,7 @@ SoilSkipListTest >> testIteratorDo [
 		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: skipList pages size equals: 2.
 	col := OrderedCollection new.
-	skipList iterator do: [ :item | col add: item ].
+	skipList newIterator do: [ :item | col add: item ].
 	self assert: col first equals: #[ 8 7 6 5 4 3 2 1 ].
 	self assert: col size equals: capacity
 ]
@@ -160,7 +160,7 @@ SoilSkipListTest >> testIteratorFindAndNext [
 	1 to: capacity do: [ :n |
 		skipList at: n put: (n asByteArrayOfSize: 8) ].
 	self assert: skipList pages size equals: 4.
-	iterator := skipList iterator.
+	iterator := skipList newIterator.
 	value := iterator
 		find: 222;
 		next.
@@ -176,7 +176,7 @@ SoilSkipListTest >> testIteratorFirst [
 	2 to: capacity do: [ :n |
 		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: skipList pages size equals: 4.
-	first := skipList iterator first.
+	first := skipList newIterator first.
 	self assert: first equals: #[ 8 7 6 5 4 3 2 1 ]
 ]
 
