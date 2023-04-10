@@ -298,7 +298,7 @@ SOTransaction >> isRoot: anObject [
 	self flag: #todo.
 	"this is surely not true but a shortcut for now"
 	^ (objectMap 
-		at: anObject 
+		at: anObject theNonSoilProxy 
 		ifAbsent: [ nil ]) notNil
 ]
 
