@@ -4,3 +4,8 @@ Extension { #name : #Integer }
 Integer >> asSkipListKeyOfSize: keySize [ 
 	^ self asByteArrayOfSize: keySize 
 ]
+
+{ #category : #'*soil-core' }
+Integer >> asSoilObjectId [
+	^ self asByteArray asSoilObjectId 
+]

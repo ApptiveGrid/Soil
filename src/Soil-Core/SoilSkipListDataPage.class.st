@@ -226,7 +226,7 @@ SoilSkipListDataPage >> readItemsFrom: aStream [
 	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
 	items := SortedCollection new: numberOfItems.
 	numberOfItems timesRepeat: [ 
-		items add: ((aStream next: self keySize) asInteger -> (aStream next: self valueSize)) ]
+		items add: ((aStream next: self keySize) asInteger -> (aStream next: self valueSize) asSoilObjectId) ]
 ]
 
 { #category : #writing }
