@@ -79,7 +79,7 @@ SoilPagedFileIndexStore >> open [
 
 { #category : #opening }
 SoilPagedFileIndexStore >> openStream [
-	stream := SOLockableStream path: index path.
+	stream := SoilLockableStream path: index path.
 ]
 
 { #category : #accessing }

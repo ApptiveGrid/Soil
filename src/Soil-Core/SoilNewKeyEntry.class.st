@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilNewKeyEntry,
-	#superclass : #SOJournalEntry,
+	#superclass : #SoilJournalEntry,
 	#instVars : [
 		'indexId',
 		'key',

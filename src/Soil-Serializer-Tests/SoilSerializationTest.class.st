@@ -242,7 +242,7 @@ SoilSerializationTest >> testSerializationObjectTwice [
 { #category : #tests }
 SoilSerializationTest >> testSerializationObjectWithTransient [
 	| object serialized materialized |
-	object := SOTestClassWithTransient new.
+	object := SoilTestClassWithTransient new.
 	object one: 1; two: 2; three: 3.
 	serialized := self serializeToBytes: object.
 	materialized := self materializeFromBytes: serialized.
@@ -257,7 +257,7 @@ SoilSerializationTest >> testSerializationSet [
 
 	| set object2 serialized materialized |
 	set := Set new.
-	object2 := SOTestClass1 new.
+	object2 := SoilTestClass1 new.
 	set add: object2.
 
 	serialized := self serializeToBytes: set.

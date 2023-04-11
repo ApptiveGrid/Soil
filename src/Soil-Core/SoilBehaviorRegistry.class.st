@@ -12,8 +12,8 @@ Class {
 { #category : #adding }
 SoilBehaviorRegistry >> addSpecialObjects [
 	self
-		nameAt: #SOBehaviorDescription
-		put: SOBehaviorDescription metaId
+		nameAt: #SoilBehaviorDescription
+		put: SoilBehaviorDescription metaId
 ]
 
 { #category : #'as yet unclassified' }
@@ -26,7 +26,7 @@ SoilBehaviorRegistry >> behaviorDescriptionWithIndex: behaviorIndex andVersion: 
 
 	^versionsOfBehavior
 		detect: [ :behav | behav version = version ]
-		ifNone: [(SOObjectNotFound new segment: 0; index: behaviorIndex) signal]
+		ifNone: [(SoilObjectNotFound new segment: 0; index: behaviorIndex) signal]
 ]
 
 { #category : #'as yet unclassified' }
@@ -38,7 +38,7 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction
 	self loadHistoryForBehaviorWithIndex: objectId index transaction: transaction.
 	chain := versions at: objectId index.
 	chain first isCurrent ifFalse: [ 
-		chain addFirst: ((SOBehaviorDescription for: aSOBehaviorDescription objectClass) version: (aSOBehaviorDescription version + 1))].
+		chain addFirst: ((SoilBehaviorDescription for: aSOBehaviorDescription objectClass) version: (aSOBehaviorDescription version + 1))].
 	offset := chain detectIndex: [ :each | each matchesDescription: aSOBehaviorDescription ].
 	^ chain copyFrom: 1 to: offset
 ]
@@ -64,7 +64,7 @@ SoilBehaviorRegistry >> initialize [
 	super initialize.
 	versions := Dictionary new
 		            at: 2
-		            put: (OrderedCollection with: SOBehaviorDescription meta); yourself
+		            put: (OrderedCollection with: SoilBehaviorDescription meta); yourself
 ]
 
 { #category : #initialization }

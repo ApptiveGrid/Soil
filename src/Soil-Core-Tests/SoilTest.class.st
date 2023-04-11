@@ -34,11 +34,11 @@ SoilTest >> setUp [
 
 { #category : #tests }
 SoilTest >> simpleGraph [
-	^ SOTestGraphRoot new 
-		nested: (SOTestNestedObject new 
+	^ SoilTestGraphRoot new 
+		nested: (SoilTestNestedObject new 
 			label: 'nested under root';
-			reference: (SOTestClusterRoot new 
-				nested: (SOTestNestedObject new
+			reference: (SoilTestClusterRoot new 
+				nested: (SoilTestNestedObject new
 					label: 'nested under cluster')))
 ]
 
@@ -64,7 +64,7 @@ SoilTest >> testInitializeDatabaseFailsIfExisting [
 { #category : #tests }
 SoilTest >> testSerializingClassDescription [
 	| obj bytes obj2 stream transaction |
-	obj :=  { #C -> (SOBehaviorDescription for: SOTestClusterAlwaysRoot ) } asDictionary.
+	obj :=  { #C -> (SoilBehaviorDescription for: SOTestClusterAlwaysRoot ) } asDictionary.
 	stream := ByteArray new writeStream.
 	transaction := soil newTransaction.
 	SoilSerializer new
@@ -78,7 +78,7 @@ SoilTest >> testSerializingClassDescription [
 		transaction: transaction;
 		stream: bytes readStream;
 		materialize.
-	self assert: (obj2 at: #C) class equals: SOBehaviorDescription   
+	self assert: (obj2 at: #C) class equals: SoilBehaviorDescription   
 	
 ]
 
@@ -90,7 +90,7 @@ SoilTest >> testSerializingRootOneCluster [
 	tx commit.
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
-	self assert: materializedRoot nested reference class equals: SOTestClusterRoot  
+	self assert: materializedRoot nested reference class equals: SoilTestClusterRoot  
 	
 ]
 
@@ -134,9 +134,9 @@ SoilTest >> testSerializingToSavedRoot [
 	tx3 := soil3 newTransaction.
 	materializedRoot := tx3 root.
 	materializedModelMap := materializedRoot at: modelName.
-	self assert: materializedModelMap class equals: SOObjectProxy.
+	self assert: materializedModelMap class equals: SoilObjectProxy.
 	self assert: materializedModelMap soilRealObject class equals: Dictionary.
-	self assert: (materializedModelMap soilRealObject at: 'foo') class equals: SOTestGraphRoot.
+	self assert: (materializedModelMap soilRealObject at: 'foo') class equals: SoilTestGraphRoot.
 	self assert: (materializedModelMap soilRealObject at: 'foo') nested reference nested label equals: 'nested under cluster'
 ]
 

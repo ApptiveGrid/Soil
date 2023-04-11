@@ -74,13 +74,13 @@ Soil >> initialize [
 { #category : #initialization }
 Soil >> initializeFilesystem [
 	(path exists and: [ path hasChildren ]) 
-		ifTrue: [ SODatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
+		ifTrue: [ SoilDatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
 	self path ensureCreateDirectory.
 	parameters := SoilParameterFile new
 		soil: self;
 		initializeFilesystem;
 		yourself.
-	objectRepository := SOObjectRepository new 
+	objectRepository := SoilObjectRepository new 
 		soil: self;
 		initializeFilesystem;
 		yourself.
@@ -102,7 +102,7 @@ Soil >> lockableStream [
 
 { #category : #accessing }
 Soil >> lockableStreamClass [
-	^ SOLockableStream 
+	^ SoilLockableStream 
 ]
 
 { #category : #'instance creation' }
@@ -120,7 +120,7 @@ Soil >> newSerializer [
 
 { #category : #transactions }
 Soil >> newTransaction [
-	^ SOTransaction new 
+	^ SoilTransaction new 
 		soil: self;
 		readVersion: self databaseVersion;
 		yourself
@@ -137,7 +137,7 @@ Soil >> open [
 	parameters := SoilParameterFile new
 		soil: self;
 		open.
-	objectRepository := SOObjectRepository new 
+	objectRepository := SoilObjectRepository new 
 		soil: self;
 		loadSegments;
 		yourself.

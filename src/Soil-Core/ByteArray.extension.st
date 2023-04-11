@@ -7,7 +7,7 @@ ByteArray >> asSkipListKeyOfSize: anInteger [
 
 { #category : #'*Soil-Core' }
 ByteArray >> asSoilObjectId [
-	 ^ SOObjectId readFrom: self readStream.
+	 ^ SoilObjectId readFrom: self readStream.
 ]
 
 { #category : #'*Soil-Core' }

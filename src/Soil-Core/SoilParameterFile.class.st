@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilParameterFile,
-	#superclass : #SOBinaryFile,
+	#superclass : #SoilBinaryFile,
 	#instVars : [
 		'soil',
 		'databaseVersion'
