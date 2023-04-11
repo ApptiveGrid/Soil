@@ -115,11 +115,6 @@ SoilBasicSkipList >> last [
 ]
 
 { #category : #accessing }
-SoilBasicSkipList >> lastPage [
-	self shouldBeImplemented.
-]
-
-{ #category : #accessing }
 SoilBasicSkipList >> maxLevel [
 
 	^ self headerPage maxLevel
@@ -163,6 +158,11 @@ SoilBasicSkipList >> removeKey: aString ifAbsent: aBlock [
 	^ ((index := page indexOfKey: key) > 0) 
 		ifTrue: [ (page itemRemoveIndex: index) value ]
 		ifFalse: [ aBlock value ]
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> size [ 
+	^ self store allItems size 
 ]
 
 { #category : #'as yet unclassified' }

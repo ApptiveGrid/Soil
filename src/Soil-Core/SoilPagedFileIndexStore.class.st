@@ -11,7 +11,7 @@ Class {
 { #category : #queries }
 SoilPagedFileIndexStore >> allItems [
 	^ pagesMutex critical: [  
-		(pages flatCollect: [ :page | page items ]) allButLast allButFirst ]
+		pages flatCollect: #items ]
 ]
 
 { #category : #converting }
@@ -89,8 +89,6 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 		stream position: (self positionOfPageIndex: anInteger).
 		page := index newPage 
 			readFrom: stream ].
-	"(pages size > anInteger) ifFalse: [ 
-		 pages := pages grownBy: (anInteger - pages size)]."
 	pagesMutex critical: [  
 		pages at: anInteger put: page ].
 	^ page

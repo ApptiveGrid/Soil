@@ -81,7 +81,7 @@ SoilMaterializer >> nextBehaviorDescription [
 { #category : #reading }
 SoilMaterializer >> nextClass [
 	^ Smalltalk 
-		at: self nextString asSymbol 
+		at: self basicNextString asSymbol 
 		ifAbsent: nil
 ]
 

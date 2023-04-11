@@ -46,7 +46,7 @@ SoilPagedIndexStore >> isCopyOnWrite [
 SoilPagedIndexStore >> lastPage [
 	| maxLevel page pageNumber |
 	^ pagesMutex critical: [  
-		maxLevel := index maxLevel.
+		maxLevel := self index maxLevel.
 		page := self headerPage.
 		[ (pageNumber := page rightAt: maxLevel) isZero ] whileFalse: [ 
 			page := self pageAt: pageNumber ].

@@ -30,23 +30,14 @@ SoilSkipListDataPage >> associationAt: anInteger [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDataPage >> biggestKey [
-	^ items last key
+	^ self isLastPage 
+		ifTrue: [ (2 raisedTo: (keySize * 8)) - 1 ]
+		ifFalse: [ items last key ]
 ]
 
 { #category : #accessing }
 SoilSkipListDataPage >> firstItem [
-	| item |
-	self flag: #todo.
-	"bad way of determine the first item. Here we filter out the lower and
-	upper element"
-	item := items first.
-	^ (item key = 0)
-		ifTrue: [ 
-			(items second value = 0)
-				ifTrue: [ ^ nil ]
-				ifFalse: [ items second ] ]
-		ifFalse: [ item ]
-	
+	^ items first
 ]
 
 { #category : #testing }
@@ -94,6 +85,16 @@ SoilSkipListDataPage >> initializeLevel: anInteger [
 	right := Array new: level withAll: 0. 
 ]
 
+{ #category : #testing }
+SoilSkipListDataPage >> isEmpty [
+	^ items isEmpty 
+]
+
+{ #category : #testing }
+SoilSkipListDataPage >> isLastPage [
+	^ (right at: 1) = 0
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipListDataPage >> itemAfter: key [ 
 	| i item |
@@ -102,6 +103,14 @@ SoilSkipListDataPage >> itemAfter: key [
 	item := items at: i + 1.
 	(item key >= ((2 raisedTo: 64) - 1)) ifTrue: [ ^ nil ].
 	^ item
+]
+
+{ #category : #accessing }
+SoilSkipListDataPage >> itemAt: anInteger ifAbsent: aBlock [
+	^ items 
+		findBinaryIndex: [ :each |  anInteger - each key ] 
+		do: [:ind | items at: ind ]
+		ifNone: [ aBlock value ]
 ]
 
 { #category : #accessing }
@@ -153,6 +162,19 @@ SoilSkipListDataPage >> items [
 { #category : #writing }
 SoilSkipListDataPage >> itemsSizeSize [
 	^ 2
+]
+
+{ #category : #accessing }
+SoilSkipListDataPage >> keyOrClosestAfter: key [ 
+	"find the closest key in this page. This returns the exact key if 
+	present or the key that comes after. This is useful if we enter the
+	list at an unknown point"
+	items ifEmpty: [ ^ nil ].
+	^ items 
+		findBinaryIndex: [ :each | key - each key ] 
+		do: [ :e | e key] 
+		ifNone: [ :a :b | 
+			(items at: (b min: items size)) key ]
 ]
 
 { #category : #accessing }

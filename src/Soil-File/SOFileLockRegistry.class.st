@@ -49,7 +49,7 @@ SOFileLockRegistry >> addLock: aLock [
 	^ semaphore critical: [  
 		locks 
 			detect: [:lock | lock conflictsWith: aLock ]
-			ifFound: [:lock | SOAlreadyLocked signal: 'already locked: ', lock asString  ].
+			ifFound: [:lock | SOAlreadyLocked signal: 'cannot lock <', aLock asString, '> because is locked by  <', lock asString,'>'  ].
 		locks add: aLock ]
 	
 ]

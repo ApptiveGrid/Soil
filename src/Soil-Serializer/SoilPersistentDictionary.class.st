@@ -101,6 +101,11 @@ SoilPersistentDictionary >> keysAndValuesDo: aBlock [
 	^ dict keysAndValuesDo: aBlock
 ]
 
+{ #category : #copying }
+SoilPersistentDictionary >> postCopy [ 
+	dict := dict copy
+]
+
 { #category : #forwarded }
 SoilPersistentDictionary >> removeKey: anObject [
 	| return |

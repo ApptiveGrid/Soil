@@ -89,7 +89,7 @@ SoilSkipListDictionary >> first: anInteger [
 
 { #category : #accesing }
 SoilSkipListDictionary >> firstAssociation [
-	self index path ifNil: [ 
+	self index isRegistered ifFalse: [ 
 		^ newValues at: (newValues keyAtIndex: 1) ].
 	^ index newIterator firstAssociation ifNotNil: [ :assoc | 
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
@@ -142,7 +142,7 @@ SoilSkipListDictionary >> journalEntries [
 	removedValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilRemoveKeyEntry new 
 			indexId: id;
-			key: key;
+			key: key; 
 			value: value) ].
 	^ entries
 ]
@@ -166,7 +166,7 @@ SoilSkipListDictionary >> last [
 { #category : #accessing }
 SoilSkipListDictionary >> lastAssociation [
 	^ self index newIterator lastAssociation ifNotNil: [ :assoc | 
-			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
+		assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
 ]
 

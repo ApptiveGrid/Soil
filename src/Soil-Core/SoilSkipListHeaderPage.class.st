@@ -13,13 +13,6 @@ SoilSkipListHeaderPage class >> pageCode [
 	^ 1 
 ]
 
-{ #category : #private }
-SoilSkipListHeaderPage >> addSentinelItems [
-	items 
-		add: ((SoilSkipListSentinel lower keySize: keySize) numericValue -> 0);
-		add: ((SoilSkipListSentinel upper keySize: keySize) numericValue -> 0)
-]
-
 { #category : #utilities }
 SoilSkipListHeaderPage >> headerSize [
 	^ self indexSize + 6 + (maxLevel * self indexSize)
@@ -29,7 +22,6 @@ SoilSkipListHeaderPage >> headerSize [
 SoilSkipListHeaderPage >> keySize: anInteger [
 	keySize ifNotNil: [ Error signal: 'key size has been set alread' ].
 	super keySize: anInteger.
-	self addSentinelItems 
 	
 
 ]
@@ -81,6 +73,11 @@ SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	valueSize := (aStream next: 2) asInteger.
 	maxLevel := (aStream next: 2) asInteger.
 	lastPageIndex :=(aStream next: 2) asInteger 
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListHeaderPage >> smallestKey [ 
+	^ 0
 ]
 
 { #category : #writing }

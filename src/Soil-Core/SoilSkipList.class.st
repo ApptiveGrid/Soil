@@ -111,11 +111,6 @@ SoilSkipList >> path: aStringOrFileReference [
 	path := aStringOrFileReference asFileReference 
 ]
 
-{ #category : #accessing }
-SoilSkipList >> size [ 
-	^ self store allItems size 
-]
-
 { #category : #converting }
 SoilSkipList >> thePersistentInstance [
 	^ self
