@@ -161,37 +161,41 @@ SOTransaction >> checkpoint [
 	"serialize objects and collect all to be written records. This can be done without 
 	resources that need locking. This reduces time needed for locking"
 	self prepareRecordsForCommit.
+	"only one transactions is allowed at a time. We use the critical block of the database
+	to avoid parallel committing"
+	soil critical: [ 
 	"enter lock phase. Acquire lock on global databaseVersion which centrally locks
 	the database for commiting until this checkpoint is done. The ensure block is needed
 	to be sure to release all locks at the end."
-	[ locks add: (soil lockDatabaseVersionFor: self).
-	"Now the version is locked. We can read it again to have the real version and
-	increment"
-	writeVersion := self buildWriteVersion.
-	"lock all records in the segment and check indexes for out of date versions"
-	self acquireLocksAndDetectWriteSkew.
-	"convert the records into journal entries, write the journal to disk and then
-	execute the journal on the database"
-	"lastObjectIndex contains all version number updates, so these are the segments
-	that will be written so we lock all of the segments heap files for appending"
-	lastObjectIndexes keys do: [ :segment |
-		locks add: (segment lockAppendingFor: self) ].
-	self buildJournal
-		write;
-		commit;
-		close.
-	indexes values do: #flush.
-	"write back the accumulated new indexes for alll segments"
-	lastObjectIndexes keysAndValuesDo: [ :segment :index |
-		segment lastObjectIndex: index value ].
-	
-	behaviorDescriptions do: [ :description |
-		soil behaviorRegistry 
-			nameAt: description value behaviorIdentifier 
-			put: description objectId ].
-	soil behaviorRegistry flush.
-	soil databaseVersion: writeVersion ]
-			ensure: [self releaseLocks ]
+		[ 
+		locks add: (soil lockDatabaseVersionFor: self).
+		"Now the version is locked. We can read it again to have the real version and
+		increment"
+		writeVersion := self buildWriteVersion.
+		"lock all records in the segment and check indexes for out of date versions"
+		self acquireLocksAndDetectWriteSkew.
+		"convert the records into journal entries, write the journal to disk and then
+		execute the journal on the database"
+		"lastObjectIndex contains all version number updates, so these are the segments
+		that will be written so we lock all of the segments heap files for appending"
+		lastObjectIndexes keys do: [ :segment |
+			locks add: (segment lockAppendingFor: self) ].
+		self buildJournal
+			write;
+			commit;
+			close.
+		indexes values do: #flush.
+		"write back the accumulated new indexes for all segments"
+		lastObjectIndexes keysAndValuesDo: [ :segment :index |
+			segment lastObjectIndex: index value ].
+		
+		behaviorDescriptions do: [ :description |
+			soil behaviorRegistry 
+				nameAt: description value behaviorIdentifier 
+				put: description objectId ].
+		soil behaviorRegistry flush.
+		soil databaseVersion: writeVersion ]
+				ensure: [self releaseLocks ] ]
 
 ]
 

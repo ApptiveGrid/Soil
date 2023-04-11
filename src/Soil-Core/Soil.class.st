@@ -5,7 +5,8 @@ Class {
 		'path',
 		'objectRepository',
 		'behaviorRegistry',
-		'parameters'
+		'parameters',
+		'semaphore'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -42,6 +43,11 @@ Soil >> close [
 		parameters close ]
 ]
 
+{ #category : #initialization }
+Soil >> critical: aBlock [ 
+	semaphore critical: aBlock
+]
+
 { #category : #accessing }
 Soil >> databaseVersion [
 	^ parameters databaseVersion 
@@ -57,6 +63,12 @@ Soil >> destroy [
 	path exists ifFalse: [ ^ self ].
 	path children do: #deleteAll.
 	path delete
+]
+
+{ #category : #initialization }
+Soil >> initialize [ 
+	super initialize.
+	semaphore := Semaphore forMutualExclusion 
 ]
 
 { #category : #initialization }
