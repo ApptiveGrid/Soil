@@ -221,6 +221,7 @@ SoilTransaction >> continue [
 		idMap at: record objectId put: persistentRecord ].
 	recordsToCommit := nil.
 	readVersion := writeVersion.
+	writeVersion := nil.
 	journal := nil
 ]
 
@@ -470,7 +471,8 @@ SoilTransaction >> registerIndexedObject: anObject forRoot: aClusterRoot [
 
 { #category : #'as yet unclassified' }
 SoilTransaction >> releaseLocks [
-	locks do: [ :lock | lock release ]
+	locks do: [ :lock | lock release ].
+	locks := OrderedCollection new
 ]
 
 { #category : #accessing }
