@@ -106,6 +106,14 @@ SoilSkipListDataPage >> itemAfter: key [
 ]
 
 { #category : #accessing }
+SoilSkipListDataPage >> itemAt: anInteger ifAbsent: aBlock [
+	^ items 
+		findBinaryIndex: [ :each |  anInteger - each key ] 
+		do: [:ind | items at: ind ]
+		ifNone: [ aBlock value ]
+]
+
+{ #category : #accessing }
 SoilSkipListDataPage >> itemAt: key put: anObject [ 
 	| removedItem |
 	removedItem := self itemRemoveAt: key.

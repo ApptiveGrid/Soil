@@ -5,7 +5,8 @@ Class {
 		'skipList',
 		'levels',
 		'currentPage',
-		'currentKey'
+		'currentKey',
+		'nextKey'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -30,18 +31,26 @@ SoilSkipListIterator >> do: aBlock [
 
 { #category : #private }
 SoilSkipListIterator >> find: key [
-	| pageIndex candidatePage |
-	currentPage := skipList headerPage.
 	currentKey := key.
+	self 
+		findPageFor: key 
+		startingAt: skipList headerPage.
+	^ currentPage valueAt: currentKey
+]
+
+{ #category : #private }
+SoilSkipListIterator >> findPageFor: key startingAt: page [
+	| pageIndex candidatePage |
+	currentPage := page.
 	levels size to: 1 by: -1 do: [ :level |
 		[ 
 			pageIndex := currentPage rightAt: level.
 			(pageIndex > 0) and: [ 
 				candidatePage := self pageAt: pageIndex.
-				candidatePage smallestKey < currentKey ] ]
+				candidatePage smallestKey < key ] ]
 					whileTrue: [ currentPage := candidatePage  ].
 			self atLevel: level put: currentPage. ].
-	^ currentPage valueAt: currentKey
+	^ currentPage 
 ]
 
 { #category : #accessing }
@@ -79,6 +88,15 @@ SoilSkipListIterator >> next [
 { #category : #accessing }
 SoilSkipListIterator >> nextAssociation [
 	| item |
+	"preliminary support for nextKey. This is useful when iterating via #next 
+	in order not jump over the first search key. nextKey implies the currentPage
+	is on the right spot"
+	nextKey ifNotNil: [ 
+		item := currentPage 
+			itemAt: nextKey 
+			ifAbsent: [ Error signal: 'shoulndt be possible' ].
+		nextKey := nil.
+		^ item ].
 	currentPage ifNil: [ 
 		currentPage := skipList store headerPage.
 		currentKey := nil ].
@@ -97,6 +115,14 @@ SoilSkipListIterator >> nextAssociation [
 				currentPage isEmpty ifTrue: [ ^ nil ].
 				^ currentPage firstItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
 	Error signal: 'shouldnt happen'
+]
+
+{ #category : #private }
+SoilSkipListIterator >> nextKeyCloseTo: key [
+	self 
+		findPageFor: key
+		startingAt: skipList headerPage.
+	nextKey := currentPage keyOrClosestAfter: key
 ]
 
 { #category : #accessing }
