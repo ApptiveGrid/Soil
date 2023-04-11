@@ -19,25 +19,19 @@ SOObjectProxy class >> forId: objectId transaction: transaction [
 
 { #category : #'reflective operations' }
 SOObjectProxy >> doesNotUnderstand: aMessage [ 
-	^ aMessage sendTo: self object
+	^ aMessage sendTo: self soilRealObject
 ]
 
 { #category : #inspector }
 SOObjectProxy >> inspectionObject [
 	<inspectorPresentationOrder: 30 title: 'object'>
-	^ StRawInspection on: self object
+	^ StRawInspection on: self soilRealObject 
 
 ]
 
 { #category : #testing }
 SOObjectProxy >> isSoilProxy [ 
 	^ true
-]
-
-{ #category : #'reflective operations' }
-SOObjectProxy >> object [
-	^ object ifNil: [  
-		object := transaction objectWithId: objectId ]
 ]
 
 { #category : #accessing }
@@ -75,14 +69,20 @@ SOObjectProxy >> soilLoadedIn: aTransaction [
 	transaction := aTransaction  
 ]
 
+{ #category : #'reflective operations' }
+SOObjectProxy >> soilRealObject [
+	^ object ifNil: [  
+		object := transaction objectWithId: objectId ]
+]
+
 { #category : #'as yet unclassified' }
 SOObjectProxy >> soilSerialize: aSerializer [ 
-	^ self object soilSerialize: aSerializer 
+	^ self soilRealObject soilSerialize: aSerializer 
 ]
 
 { #category : #'as yet unclassified' }
 SOObjectProxy >> theNonSoilProxy [ 
-	^ self object
+	^ self soilRealObject
 ]
 
 { #category : #accessing }
