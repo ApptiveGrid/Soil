@@ -2,7 +2,6 @@ Class {
 	#name : #SoilObjectFile,
 	#superclass : #SoilSegmentFile,
 	#instVars : [
-		'fuelVersion',
 		'semaphore'
 	],
 	#category : #'Soil-Core-Files'
@@ -34,40 +33,10 @@ SoilObjectFile >> basicAtPosition: anInteger length: length [
 		stream next: length ]
 ]
 
-{ #category : #accessing }
-SoilObjectFile >> fuelVersion [
-	^ fuelVersion
-]
-
-{ #category : #accessing }
-SoilObjectFile >> fuelVersion: anInteger [ 
-	self flag: #todo.
-	"fuel is gone so should this"
-	stream position: self prefix size + self fileVersionSize.
-	stream nextPutAll: (anInteger asByteArrayOfSize: self fuelVersionSize)
-]
-
-{ #category : #'as yet unclassified' }
-SoilObjectFile >> fuelVersionSize [
-	^ 2
-]
-
-{ #category : #writing }
-SoilObjectFile >> headerSize [ 
-	"this header adds the fuel version"
-	^ super headerSize + self fuelVersionSize 
-]
-
 { #category : #initialization }
 SoilObjectFile >> initialize [
 	super initialize.
 	semaphore := Semaphore forMutualExclusion 
-]
-
-{ #category : #initialization }
-SoilObjectFile >> initializeHeader [
-	super initializeHeader.
-	self fuelVersion: 1
 ]
 
 { #category : #initialization }
@@ -83,12 +52,6 @@ SoilObjectFile >> path [
 { #category : #writing }
 SoilObjectFile >> prefix [ 
 	^ 'SOIL|OBJECT ' asByteArray
-]
-
-{ #category : #'private - decoding' }
-SoilObjectFile >> readHeader [
-	super readHeader.
-	fuelVersion := (stream next: self fuelVersionSize) asInteger
 ]
 
 { #category : #accessing }
