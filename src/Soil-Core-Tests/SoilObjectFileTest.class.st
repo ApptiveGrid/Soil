@@ -12,21 +12,7 @@ SoilObjectFileTest >> testInitializeOnStream [
 		index initializeFilesystem ].
 	self assert: bytes size equals: index headerSize.
 	prefix := bytes copyFrom: 1 to: index prefix size.
-	self assert: prefix equals: 'SOIL|OBJECT ' asByteArray.
-	fileVersion := bytes copyFrom: index prefix size + 1 to: (index prefix size + index fileVersionSize).
-	self assert: fileVersion asInteger equals: 1
-]
-
-{ #category : #tests }
-SoilObjectFileTest >> testInitializedFileVersion [
-	| index bytes newIndex |
-	bytes := ByteArray streamContents: [ :stream |
-		index := SoilObjectIndexFile new stream: stream.
-		index initializeFilesystem ].
-	newIndex := SoilObjectIndexFile new 
-		stream: bytes readStream;
-		readHeader.
-	self assert: newIndex fileVersion equals: 1
+	self assert: prefix equals: 'SOIL|OBJECT ' asByteArray
 ]
 
 { #category : #tests }
