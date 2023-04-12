@@ -20,7 +20,7 @@ SoilNewKeyEntry >> commitIn: transaction [
 	index := (transaction indexes associations 
 		detect: [ :each | each key id = indexId ]
 		ifNone: [ Error signal: 'shouldnt happen' ]) value.
-	index at: key put: value asByteArray 
+	index at: key put: value 
 ]
 
 { #category : #accessing }

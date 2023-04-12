@@ -70,6 +70,11 @@ SOObjectId >> asSoilObjectProxy [
 		objectId: self
 ]
 
+{ #category : #testing }
+SOObjectId >> hasSameSegment: aSegment andIndex: anIndex [ 
+	^ (segment = aSegment) & (index = anIndex) 
+]
+
 { #category : #comparing }
 SOObjectId >> hash [ 
 	^ segment hash bitXor: index hash
@@ -105,6 +110,11 @@ SOObjectId >> isInitialized [
 { #category : #testing }
 SOObjectId >> isObjectId [ 
 	^ true
+]
+
+{ #category : #testing }
+SOObjectId >> isSameObjectId: aSOObjectId [ 
+	^ aSOObjectId hasSameSegment: segment andIndex: index
 ]
 
 { #category : #printing }
