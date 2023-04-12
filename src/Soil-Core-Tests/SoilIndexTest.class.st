@@ -45,9 +45,9 @@ SoilIndexTest >> testIndexCreation [
 SoilIndexTest >> testIndexCreationAndRead [
 	| tx dict obj1 obj2 tx2 |
 	tx := soil newTransaction.
-	obj1 := SOTestClusterRoot new nested: 'object1'.
+	obj1 := SoilTestClusterRoot new nested: 'object1'.
 	tx makeRoot: obj1.
-	obj2 := SOTestClusterRoot new nested: 'object2'.
+	obj2 := SoilTestClusterRoot new nested: 'object2'.
 	tx makeRoot: obj2.
 	dict := SoilSkipListDictionary new
 		keySize: 8;

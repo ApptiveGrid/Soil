@@ -1,6 +1,6 @@
 Class {
 	#name : #SOTestClusterAlwaysRoot,
-	#superclass : #SOTestClusterRoot,
+	#superclass : #SoilTestClusterRoot,
 	#category : #'Soil-Core-Tests'
 }
 

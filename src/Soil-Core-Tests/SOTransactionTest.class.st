@@ -27,17 +27,17 @@ SOTransactionTest >> tearDown [
 { #category : #tests }
 SOTransactionTest >> testAddSameObjectIdTwice [
 	| tx |
-	tx := SOTransaction new.
-	tx atObjectId: (SOObjectId segment: 1 index: 0) putObject: Object new. 
-	tx atObjectId: (SOObjectId segment: 1 index: 0) putObject: Object new. 
+	tx := SoilTransaction new.
+	tx atObjectId: (SoilObjectId segment: 1 index: 0) putObject: Object new. 
+	tx atObjectId: (SoilObjectId segment: 1 index: 0) putObject: Object new. 
 	self assert: tx dirtyObjects size equals: 2
 ]
 
 { #category : #tests }
 SOTransactionTest >> testConflictingReadVersion [
 	| obj tx1 tx2 tx3 |
-	obj := SOTestGraphRoot new 
-		nested: (SOTestNestedObject new label: 'first').
+	obj := SoilTestGraphRoot new 
+		nested: (SoilTestNestedObject new label: 'first').
 	"make object to test to be in database"
 	tx1 := soil newTransaction.
 	tx1 root: obj.
@@ -56,13 +56,13 @@ SOTransactionTest >> testConflictingReadVersion [
 	modification should throw an exception"
 	self 
 		should: [ tx2 commit ]
-		raise: SOObjectHasConcurrentChange 
+		raise: SoilObjectHasConcurrentChange 
 ]
 
 { #category : #tests }
 SOTransactionTest >> testEmptyAbort [
 	| tx |
-	tx := SOTransaction new.
+	tx := SoilTransaction new.
 	tx root: Object new.
 	tx abort.
 	self assert: tx isAborted
@@ -72,7 +72,7 @@ SOTransactionTest >> testEmptyAbort [
 SOTransactionTest >> testTwoRootsWithAlwaysRoot [
 	| tx obj1 obj2 |
 	tx := soil newTransaction.
-	obj1 := SOTestGraphRoot new.
+	obj1 := SoilTestGraphRoot new.
 	obj2 := SOTestClusterAlwaysRoot new.
 	obj1 nested: obj2.
 	tx makeRoot: obj1.

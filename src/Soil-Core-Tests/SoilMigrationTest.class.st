@@ -10,14 +10,14 @@ Class {
 
 { #category : #helpers }
 SoilMigrationTest >> createMigrationClassByteLayout [
-	^ (SOBaseTestObject << #SOMigrationObject
+	^ (SoilBaseTestObject << #SOMigrationObject
 		layout: ByteLayout;
 		package: self class package name) install
 ]
 
 { #category : #helpers }
 SoilMigrationTest >> createMigrationClassFixedLayout [
-	^ (SOBaseTestObject << #SOMigrationObject
+	^ (SoilBaseTestObject << #SOMigrationObject
 		layout: FixedLayout;
 		slots: { #one . #two }; 
 		package: self class package name) install
@@ -25,7 +25,7 @@ SoilMigrationTest >> createMigrationClassFixedLayout [
 
 { #category : #helpers }
 SoilMigrationTest >> createMigrationClassFixedLayout2 [
-	^ (SOBaseTestObject << #SOMigrationObject2
+	^ (SoilBaseTestObject << #SOMigrationObject2
 		layout: FixedLayout;
 		slots: { #one . #two }; 
 		package: self class package name) install
@@ -33,7 +33,7 @@ SoilMigrationTest >> createMigrationClassFixedLayout2 [
 
 { #category : #helpers }
 SoilMigrationTest >> createMigrationClassVariableLayout [
-	^ (SOBaseTestObject << #SOMigrationObject
+	^ (SoilBaseTestObject << #SOMigrationObject
 		layout: VariableLayout;
 		slots: { #one . #two }; 
 		package: self class package name) install
@@ -84,7 +84,7 @@ SoilMigrationTest >> testMaterializingObjectByteLayputFromFixedLayout [
 	migrationClass := self createMigrationClassByteLayout.
 	tx2 := soil newTransaction.
 
-	self should: [materializedRoot := tx2 root] raise: SOLayoutMigrationError
+	self should: [materializedRoot := tx2 root] raise: SoilLayoutMigrationError
 
 ]
 
@@ -104,7 +104,7 @@ SoilMigrationTest >> testMaterializingObjectFixedLayputFromByteLayout [
 	migrationClass := self createMigrationClassFixedLayout.
 	tx2 := soil newTransaction.
 
-	self should: [materializedRoot := tx2 root] raise: SOLayoutMigrationError
+	self should: [materializedRoot := tx2 root] raise: SoilLayoutMigrationError
 ]
 
 { #category : #'tests - change classlayout' }
@@ -246,7 +246,7 @@ SoilMigrationTest >> testMaterializingObjectWithIVarRemovedAndAddedBack [
 	tx root: root.
 	tx commit.
 
-	migrationClass := (SOBaseTestObject << #SOMigrationObject
+	migrationClass := (SoilBaseTestObject << #SOMigrationObject
 		layout: FixedLayout;
 		slots: { #one .#two . #three };
 		package: self class package name) install.
@@ -386,7 +386,7 @@ SoilMigrationTest >> testMaterializingObjectWithReOrderedIvars [
 	tx root: object. 
 	tx commit.
 	
-	migrationClass := (SOBaseTestObject << #SOMigrationObject
+	migrationClass := (SoilBaseTestObject << #SOMigrationObject
 		layout: FixedLayout;
 		slots: { #two .#one }; 
 		package: self class package name) install.
