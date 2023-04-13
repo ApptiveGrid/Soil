@@ -191,6 +191,7 @@ SoilSkipListDataPage >> keySize: anInteger [
 { #category : #accessing }
 SoilSkipListDataPage >> lastItem [
 	| item maxKey |
+	items ifEmpty: [ ^ nil ].
 	maxKey := (2 raisedTo: (keySize * 8)) - 1. 
 	item := items last.
 	^ (item key = maxKey)
