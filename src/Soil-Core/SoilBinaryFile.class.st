@@ -2,7 +2,6 @@ Class {
 	#name : #SoilBinaryFile,
 	#superclass : #Object,
 	#instVars : [
-		'fileVersion',
 		'stream'
 	],
 	#category : #'Soil-Core-Files'
@@ -20,27 +19,9 @@ SoilBinaryFile >> close [
 		stream close ]
 ]
 
-{ #category : #accessing }
-SoilBinaryFile >> fileVersion [
-	^ fileVersion
-]
-
-{ #category : #accessing }
-SoilBinaryFile >> fileVersion: anInteger [ 
-	self stream position: self prefix size.
-	stream nextPutAll: (anInteger asByteArrayOfSize: self fileVersionSize)
-]
-
-{ #category : #utilities }
-SoilBinaryFile >> fileVersionSize [
-	^ 2
-]
-
 { #category : #utilities }
 SoilBinaryFile >> headerSize [ 
-	"the file header stores a prefix and the version for the file format and 
-	the version of fuel being used"
-	^ self prefix size + self fileVersionSize
+	^ self prefix size
 ]
 
 { #category : #initialization }
@@ -55,8 +36,7 @@ SoilBinaryFile >> initializeFilesystem [
 SoilBinaryFile >> initializeHeader [
 	self stream 
 		position: 0;
-		nextPutAll: self prefix asByteArray.
-	self fileVersion: 1
+		nextPutAll: self prefix asByteArray
 ]
 
 { #category : #initialization }
@@ -90,8 +70,7 @@ SoilBinaryFile >> readHeader [
 	stream position: 0.
 	prefix := stream next: self prefix size.
 	(prefix = self prefix asByteArray) ifFalse: [ 
-		Error signal: 'read incorrect prefix: ', prefix asString ].
-	fileVersion := (stream next: self fileVersionSize) asInteger
+		Error signal: 'read incorrect prefix: ', prefix asString ]
 ]
 
 { #category : #accessing }

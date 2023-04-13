@@ -5,8 +5,8 @@ Class {
 		'path',
 		'objectRepository',
 		'behaviorRegistry',
-		'parameters',
-		'semaphore'
+		'semaphore',
+		'settings'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -14,6 +14,11 @@ Class {
 { #category : #accessing }
 Soil class >> characterEncoding: aString [ 
 	SoilObjectCodec characterEncoding: aString
+]
+
+{ #category : #accessing }
+Soil class >> databaseFormatVersion [ 
+	^ 1
 ]
 
 { #category : #'as yet unclassified' }
@@ -39,8 +44,8 @@ Soil >> close [
 		objectRepository close ].
 	behaviorRegistry ifNotNil: [ 
 		behaviorRegistry close ].
-	parameters ifNotNil: [ 
-		parameters close ]
+	settings ifNotNil: [ 
+		settings close ]
 ]
 
 { #category : #initialization }
@@ -50,12 +55,12 @@ Soil >> critical: aBlock [
 
 { #category : #accessing }
 Soil >> databaseVersion [
-	^ parameters databaseVersion 
+	^ settings databaseVersion
 ]
 
 { #category : #accessing }
 Soil >> databaseVersion: anInteger [ 
-	parameters databaseVersion: anInteger 
+	settings databaseVersion: anInteger
 ]
 
 { #category : #'as yet unclassified' }
@@ -76,7 +81,7 @@ Soil >> initializeFilesystem [
 	(path exists and: [ path hasChildren ]) 
 		ifTrue: [ SoilDatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
 	self path ensureCreateDirectory.
-	parameters := SoilParameterFile new
+	settings := SoilParameterFile new
 		soil: self;
 		initializeFilesystem;
 		yourself.
@@ -92,7 +97,7 @@ Soil >> initializeFilesystem [
 
 { #category : #'as yet unclassified' }
 Soil >> lockDatabaseVersionFor: lockContext [ 
-	^ parameters lockDatabaseVersionFor: lockContext 
+	^ settings lockDatabaseVersionFor: lockContext 
 ]
 
 { #category : #'as yet unclassified' }
@@ -134,7 +139,7 @@ Soil >> objectRepository [
 { #category : #'instance creation' }
 Soil >> open [
 	('open soil database at ', path asString) soilEmit.
-	parameters := SoilParameterFile new
+	settings := SoilParameterFile new
 		soil: self;
 		open.
 	objectRepository := SoilObjectRepository new 
@@ -183,4 +188,10 @@ Soil >> renameClassNamed: oldName to: newName [
 
 	transaction markDirty: behaviorDescription.
 	transaction commit
+]
+
+{ #category : #accessing }
+Soil >> settings [
+
+	^ settings
 ]

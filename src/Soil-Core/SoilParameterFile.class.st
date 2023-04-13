@@ -3,22 +3,66 @@ Class {
 	#superclass : #SoilBinaryFile,
 	#instVars : [
 		'soil',
-		'databaseVersion'
+		'databaseVersion',
+		'databaseFormatVersion',
+		'applicationVersion'
 	],
 	#category : #'Soil-Core-Files'
 }
 
 { #category : #accessing }
+SoilParameterFile >> applicationVersion [
+	^ applicationVersion ifNil: [ 
+		stream position: self headerSize + self databaseFormatVersionSize + self databaseVersionSize.
+		applicationVersion := (stream next: self applicationVersionSize) asInteger ]
+]
+
+{ #category : #accessing }
+SoilParameterFile >> applicationVersion: anInteger [
+	self stream 
+		position: self headerSize + self databaseFormatVersionSize + self databaseVersionSize;
+		nextPutAll: (anInteger asByteArrayOfSize: self applicationVersionSize);
+		flush.
+	applicationVersion := anInteger 
+]
+
+{ #category : #accessing }
+SoilParameterFile >> applicationVersionSize [
+	^ 8
+]
+
+{ #category : #accessing }
+SoilParameterFile >> databaseFormatVersion [
+	^ databaseFormatVersion ifNil: [ 
+		stream position: self headerSize.
+		databaseFormatVersion := (stream next: self databaseFormatVersionSize) asInteger ]
+]
+
+{ #category : #accessing }
+SoilParameterFile >> databaseFormatVersion: anInteger [
+	self stream 
+		position: self headerSize;
+		nextPutAll: (anInteger asByteArrayOfSize: self databaseFormatVersionSize);
+		flush.
+	databaseFormatVersion := anInteger 
+]
+
+{ #category : #accessing }
+SoilParameterFile >> databaseFormatVersionSize [
+	^ 1
+]
+
+{ #category : #accessing }
 SoilParameterFile >> databaseVersion [
 	^ databaseVersion ifNil: [ 
-		stream position: self headerSize.
+		stream position: self headerSize + self databaseFormatVersionSize.
 		databaseVersion := (stream next: self databaseVersionSize) asInteger ]
 ]
 
 { #category : #accessing }
 SoilParameterFile >> databaseVersion: anInteger [
 	self stream 
-		position: self headerSize;
+		position: self headerSize + self databaseFormatVersionSize;
 		nextPutAll: (anInteger asByteArrayOfSize: self databaseVersionSize);
 		flush.
 	databaseVersion := anInteger 
@@ -31,7 +75,9 @@ SoilParameterFile >> databaseVersionSize [
 
 { #category : #initialization }
 SoilParameterFile >> initializeStart [
+	self databaseFormatVersion: 1.
 	self databaseVersion: 1.
+	self applicationVersion: 1
 ]
 
 { #category : #'as yet unclassified' }
@@ -42,6 +88,13 @@ SoilParameterFile >> lockDatabaseVersionFor: lockContext [
 		for: lockContext 
 ]
 
+{ #category : #'instance creation' }
+SoilParameterFile >> open [ 
+	super open.
+	(Soil databaseFormatVersion = self databaseFormatVersion)	
+		ifFalse: [ SoilIncompatibleDatabaseFormat signal: 'database format version ', Soil databaseFormatVersion asString, ' does not match persisted database format version ', self databaseFormatVersion asString] 
+]
+
 { #category : #accessing }
 SoilParameterFile >> path [
 	^ soil path / #settings
@@ -49,7 +102,7 @@ SoilParameterFile >> path [
 
 { #category : #utilities }
 SoilParameterFile >> prefix [ 
-	^ 'SOIL|PARAMETERS ' asByteArray
+	^ 'SOIL|PARAMETERS' asByteArray
 ]
 
 { #category : #accessing }

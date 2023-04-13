@@ -50,6 +50,17 @@ SoilTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilTest >> testIncompatibleDatabaseFormatVersion [ 
+	soil settings databaseFormatVersion: 2.
+	soil close.
+	
+	soil := Soil path: self path.
+	self 
+		should: [ soil open ]
+		raise: SoilIncompatibleDatabaseFormat 
+]
+
+{ #category : #tests }
 SoilTest >> testInitializeDatabase [
 	self assert: (soil path / #segments / '1' / #index) exists
 ]
