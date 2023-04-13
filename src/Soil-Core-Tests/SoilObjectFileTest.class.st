@@ -6,7 +6,7 @@ Class {
 
 { #category : #tests }
 SoilObjectFileTest >> testInitializeOnStream [
-	| index bytes prefix fileVersion fuelVersion |
+	| index bytes prefix fileVersion |
 	bytes := ByteArray streamContents: [ :stream |
 		index := SoilObjectFile new stream: stream.
 		index initializeFilesystem ].
@@ -14,10 +14,7 @@ SoilObjectFileTest >> testInitializeOnStream [
 	prefix := bytes copyFrom: 1 to: index prefix size.
 	self assert: prefix equals: 'SOIL|OBJECT ' asByteArray.
 	fileVersion := bytes copyFrom: index prefix size + 1 to: (index prefix size + index fileVersionSize).
-	self assert: fileVersion asInteger equals: 1.
-	fuelVersion := bytes copyFrom: index prefix size + index fileVersionSize + 1 to: (index prefix size + index fileVersionSize + index fuelVersionSize).
-	self assert: fuelVersion asInteger equals: 1
-	 
+	self assert: fileVersion asInteger equals: 1
 ]
 
 { #category : #tests }
@@ -30,18 +27,6 @@ SoilObjectFileTest >> testInitializedFileVersion [
 		stream: bytes readStream;
 		readHeader.
 	self assert: newIndex fileVersion equals: 1
-]
-
-{ #category : #tests }
-SoilObjectFileTest >> testInitializedFuelVersion [
-	| index bytes newIndex |
-	bytes := ByteArray streamContents: [ :stream |
-		index := SoilObjectFile new stream: stream.
-		index initializeFilesystem ].
-	newIndex := SoilObjectFile new 
-		stream: bytes readStream;
-		readHeader.
-	self assert: newIndex fuelVersion equals: 1
 ]
 
 { #category : #tests }
