@@ -73,17 +73,6 @@ SoilSkipList >> newPage [
 		yourself
 ]
 
-{ #category : #'instance creation' }
-SoilSkipList >> newWritablePage [
-	^ SoilWritableSkipListPage new
-		level: self maxLevel;
-		size: 4096;
-		keySize: 16;
-		valueSize: 8.
-		
-		
-]
-
 { #category : #opening }
 SoilSkipList >> open [
 	self store open

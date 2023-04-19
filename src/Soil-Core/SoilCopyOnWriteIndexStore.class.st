@@ -18,13 +18,6 @@ SoilCopyOnWriteIndexStore >> allItems [
 			(each value class = SmallInteger) and: [ each value asInteger = 0 ] ]) collect: #value
 ]
 
-{ #category : #'as yet unclassified' }
-SoilCopyOnWriteIndexStore >> createNewPage [
-	^ index newWritablePage 
-		index: self nextIndex;
-		registry: self
-]
-
 { #category : #accessing }
 SoilCopyOnWriteIndexStore >> flush [ 
 	^ wrappedStore flush
@@ -38,9 +31,7 @@ SoilCopyOnWriteIndexStore >> isCopyOnWrite [
 { #category : #accessing }
 SoilCopyOnWriteIndexStore >> pageFaultAt: anInteger [ 
 	| page |
-	page := wrappedStore 
-		ifNotNil: [ wrappedStore pageAt: anInteger ]
-		ifNil: [ self createNewPage ].
+	page := wrappedStore pageAt: anInteger.
 	pages at: anInteger put: page copy.
 	^ page 
 ]
