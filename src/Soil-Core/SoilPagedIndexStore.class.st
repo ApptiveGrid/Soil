@@ -10,6 +10,16 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SoilPagedIndexStore >> allItems [
+	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SoilPagedIndexStore >> flush [
+	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
 SoilPagedIndexStore >> headerPage [
 	^ self pageAt: 1
 ]
@@ -88,6 +98,11 @@ SoilPagedIndexStore >> pageAt: anInteger put: aPage [
 		pages 
 			at: anInteger 
 			put: aPage ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilPagedIndexStore >> pageFaultAt: anInteger [ 
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
