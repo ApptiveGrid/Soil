@@ -160,6 +160,12 @@ SoilBTree >> rootPage [
 	^ self store pageAt: 2
 ]
 
+{ #category : #accessing }
+SoilBTree >> size [
+	"We iterate over all elements to get the size. Slow!"
+	^ self newIterator size 
+]
+
 { #category : #splitting }
 SoilBTree >> splitIndexPage: page [ 
 	| newPage |

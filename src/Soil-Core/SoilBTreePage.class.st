@@ -27,6 +27,11 @@ SoilBTreePage >> biggestKey [
 	^ items last key
 ]
 
+{ #category : #accessing }
+SoilBTreePage >> firstItem [
+	^ items first
+]
+
 { #category : #testing }
 SoilBTreePage >> hasRoom [
 	^ self headerSize + ((items size + 1) * (self keySize + self valueSize)) <= self pageSize
@@ -49,6 +54,21 @@ SoilBTreePage >> initialize [
 	super initialize.
 	items := SortedCollection new.
 	dirty := true
+]
+
+{ #category : #testing }
+SoilBTreePage >> isEmpty [
+	^ items isEmpty 
+]
+
+{ #category : #'as yet unclassified' }
+SoilBTreePage >> itemAfter: key [ 
+	| i item |
+	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
+	(i = items size) ifTrue: [ ^ nil].
+	item := items at: i + 1.
+	(item key >= ((2 raisedTo: 64) - 1)) ifTrue: [ ^ nil ].
+	^ item
 ]
 
 { #category : #accessing }

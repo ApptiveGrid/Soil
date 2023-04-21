@@ -172,3 +172,16 @@ SoilBTreeTest >> testPageAddFirst [
 	
 	
 ]
+
+{ #category : #tests }
+SoilBTreeTest >> testSize [
+	
+	| capacity |
+	capacity := btree headerPage itemCapacity.
+	btree at: 1 put: #[ 8 7 6 5 4 3 2 1 ].
+	2 to: capacity do: [ :n |
+		btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	btree at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: btree pages size equals: 3.
+	self assert: btree size equals: capacity + 1.
+]

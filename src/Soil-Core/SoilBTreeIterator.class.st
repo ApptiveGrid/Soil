@@ -73,3 +73,12 @@ SoilBTreeIterator >> page [
 
 	^ currentPage
 ]
+
+{ #category : #accessing }
+SoilBTreeIterator >> size [
+	"We iterate over all elements to get the size. Slow!"
+	| sum |
+	sum := 0.
+	self do: [ :each | sum := sum + 1 ].
+	^ sum
+]
