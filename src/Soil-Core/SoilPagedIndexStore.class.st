@@ -10,11 +10,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SoilPagedIndexStore >> allItems [
-	^ self subclassResponsibility
-]
-
-{ #category : #'as yet unclassified' }
 SoilPagedIndexStore >> flush [
 	^ self subclassResponsibility
 ]

@@ -8,12 +8,6 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #queries }
-SoilPagedFileIndexStore >> allItems [
-	^ pagesMutex critical: [  
-		pages flatCollect: #items ]
-]
-
 { #category : #converting }
 SoilPagedFileIndexStore >> asCopyOnWriteStore [
 	^ SoilCopyOnWriteIndexStore new 

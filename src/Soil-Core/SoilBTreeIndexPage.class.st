@@ -33,8 +33,8 @@ SoilBTreeIndexPage >> insert: anItem into: aBtree [
 	indexItem := newPage smallestKey -> newPage index.
 	"if the insert resulted in a split, we have to update the index, which might habe to split, too"
 	self hasRoom ifTrue: [ self addItem: indexItem . ^ nil ].
-
-	newPage := aBtree splitPage: self.
+	self halt. "untested"
+	newPage := aBtree splitIndexPage: self.
 	
 	((self biggestKey < newPage smallestKey)
 						ifTrue: [ newPage ]
