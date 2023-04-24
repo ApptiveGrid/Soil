@@ -69,7 +69,7 @@ SoilBTree >> keySize [
 { #category : #accessing }
 SoilBTree >> keySize: anInteger [
 	self headerPage keySize: anInteger.
-	self rootPage keySize: anInteger.
+	self rootPage keySize: anInteger
 ]
 
 { #category : #'instance creation' }
@@ -193,14 +193,13 @@ SoilBTree >> store [
 
 { #category : #accessing }
 SoilBTree >> valueSize [
-	"^ 8"
 	^ self headerPage valueSize
 ]
 
 { #category : #accessing }
-SoilBTree >> valueSize: anInteger [ 
+SoilBTree >> valueSize: anInteger [
 	self headerPage valueSize: anInteger.
-	self rootPage valueSize: anInteger 
+	self rootPage valueSize: anInteger
 ]
 
 { #category : #writing }

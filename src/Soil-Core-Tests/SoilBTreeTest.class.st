@@ -67,7 +67,7 @@ SoilBTreeTest >> testAddSecondOverflow [
 { #category : #tests }
 SoilBTreeTest >> testAddSecondOverflowReload [
 	| page capacity |
-	self skip.
+
 	self flag: #TODO.
 	"Need to implement page saving and loading of index pages"
 
@@ -84,14 +84,13 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 	"check that the next pointer is correct after split"
 	self assert: ((btree headerPage nextPageIn: btree) nextPageIn: btree) identicalTo: (btree pageAt: 4).
 
-	"btree writePages.
+	btree writePages.
 	btree close.
 	btree := SoilBTree new 
 		path: 'sunit-btree';
 		initializeFilesystem;
-		open;
-		keySize: 8. 	self halt.
-	self assert: (btree at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ]."
+		open.
+	"self assert: (btree at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ]."
 ]
 
 { #category : #tests }
@@ -171,6 +170,36 @@ SoilBTreeTest >> testPageAddFirst [
 	self assert: indexPage items size equals: 1
 	
 	
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testPageAddFirstAndLoad [
+	
+	| page indexPage |
+	btree at: #foo put: #[ 1 2 3 4 5 6 7 8 ].
+	btree writePages.
+	self assert: btree pages size equals: 2.
+	page := btree headerPage.
+	self assert: page numberOfItems equals: 1.
+	self assert: page items first key equals: (#foo asSkipListKeyOfSize: 8) asInteger.
+	"the index page was updated"
+	indexPage := btree rootPage.
+	"Index has been updated"
+	self assert: indexPage items size equals: 1.
+
+	"load back"
+	
+	btree close.
+	btree := SoilBTree new 
+		path: 'sunit-btree';
+		initializeFilesystem;
+		open.
+	
+	self assert: page items first key equals: (#foo asSkipListKeyOfSize: 8) asInteger.	
+	self flag: #TODO.
+	"index not yet loaded"
+	"self assert: (btree at: 1) equals: #[ 1 2 3 4 5 6 7 8 ]."
+
 ]
 
 { #category : #tests }

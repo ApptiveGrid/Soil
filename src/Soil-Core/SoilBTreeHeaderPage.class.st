@@ -19,3 +19,35 @@ SoilBTreeHeaderPage >> nextPageIndex [
 	dirty := true.
 	^ lastPageIndex 
 ]
+
+{ #category : #writing }
+SoilBTreeHeaderPage >> readFrom: aStream [ 
+	dirty := false.
+	self readIndexFrom: aStream.
+	self readNextFrom: aStream.
+	self readHeaderFrom: aStream.
+
+	self readItemsFrom: aStream
+]
+
+{ #category : #'initialize-release' }
+SoilBTreeHeaderPage >> readHeaderFrom: aStream [
+	keySize := (aStream next: 2) asInteger.
+	valueSize := (aStream next: 2) asInteger.
+	lastPageIndex :=(aStream next: 2) asInteger 
+	
+]
+
+{ #category : #writing }
+SoilBTreeHeaderPage >> writeOn: aStream [ 
+	dirty := false.
+	aStream 
+		nextPutAll: (index asByteArrayOfSize: self indexSize);
+		nextPutAll: (next asByteArrayOfSize: self pointerSize);
+		nextPutAll: (keySize asByteArrayOfSize: 2);
+		nextPutAll: (valueSize asByteArrayOfSize: 2);
+		nextPutAll: (lastPageIndex asByteArrayOfSize: 2).
+		
+	self 
+		writeItemsOn: aStream
+]

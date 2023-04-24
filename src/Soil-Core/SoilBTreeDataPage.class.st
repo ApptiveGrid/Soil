@@ -74,9 +74,12 @@ SoilBTreeDataPage >> pointerSize [
 
 { #category : #'instance creation' }
 SoilBTreeDataPage >> readFrom: aStream [ 
-	dirty := false.
-	self readIndexFrom: aStream.
-	self readNextFrom: aStream
+	super readFrom: aStream.
+	self readNextFrom: aStream.
+	keySize := (aStream next: 2) asInteger.
+	valueSize := (aStream next: 2) asInteger.
+
+	self readItemsFrom: aStream
 ]
 
 { #category : #'instance creation' }
@@ -87,8 +90,12 @@ SoilBTreeDataPage >> readNextFrom: aStream [
 
 { #category : #writing }
 SoilBTreeDataPage >> writeOn: aStream [ 
-	dirty := false.
-	aStream 
-		nextPutAll: (index asByteArrayOfSize: self indexSize);
-		nextPutAll: (next asByteArrayOfSize: self pointerSize)
+	super writeOn: aStream.
+	aStream
+		nextPutAll: (next asByteArrayOfSize: self pointerSize);
+		nextPutAll: (keySize asByteArrayOfSize: 2);
+		nextPutAll: (valueSize asByteArrayOfSize: 2).
+		
+	self 
+		writeItemsOn: aStream
 ]

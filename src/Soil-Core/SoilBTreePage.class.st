@@ -81,6 +81,11 @@ SoilBTreePage >> items [
 	^ items
 ]
 
+{ #category : #writing }
+SoilBTreePage >> itemsSizeSize [
+	^ 2
+]
+
 { #category : #accessing }
 SoilBTreePage >> keySize [
 	^ keySize
@@ -94,6 +99,15 @@ SoilBTreePage >> keySize: anInteger [
 { #category : #accessing }
 SoilBTreePage >> numberOfItems [
 	^ items size
+]
+
+{ #category : #writing }
+SoilBTreePage >> readItemsFrom: aStream [ 
+	| numberOfItems |
+	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
+	items := SortedCollection new: numberOfItems.
+	numberOfItems timesRepeat: [ 
+		items add: (aStream next: self keySize) asInteger -> (aStream next: self valueSize) ]
 ]
 
 { #category : #initialization }
@@ -115,6 +129,7 @@ SoilBTreePage >> split: newPage [
 	middle := (items size / 2) ceiling.
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.
+	
 	^ newPage
 ]
 
@@ -131,4 +146,14 @@ SoilBTreePage >> valueSize [
 { #category : #accessing }
 SoilBTreePage >> valueSize: anInteger [ 
 	valueSize := anInteger 
+]
+
+{ #category : #writing }
+SoilBTreePage >> writeItemsOn: aStream [ 
+	aStream
+		nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
+	items do: [ :assoc |
+		aStream 
+			nextPutAll: (assoc key asByteArrayOfSize: self keySize);
+			nextPutAll: (assoc value asByteArrayOfSize: self valueSize)]
 ]
