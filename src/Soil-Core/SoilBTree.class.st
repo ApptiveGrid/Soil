@@ -155,6 +155,11 @@ SoilBTree >> path: aStringOrFileReference [
 	path := aStringOrFileReference asFileReference 
 ]
 
+{ #category : #'instance creation' }
+SoilBTree >> readPageFrom: aStream [
+	^ SoilBTreePage readPageFrom: aStream
+]
+
 { #category : #accessing }
 SoilBTree >> rootPage [
 	^ self store pageAt: 2

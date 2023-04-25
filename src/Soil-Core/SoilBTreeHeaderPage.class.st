@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Index-BTree'
 }
 
+{ #category : #'as yet unclassified' }
+SoilBTreeHeaderPage class >> pageCode [ 
+	^ 3
+]
+
 { #category : #accessing }
 SoilBTreeHeaderPage >> lastPageIndex: anObject [
 	lastPageIndex := anObject.
@@ -23,6 +28,7 @@ SoilBTreeHeaderPage >> nextPageIndex [
 { #category : #writing }
 SoilBTreeHeaderPage >> readFrom: aStream [ 
 	dirty := false.
+	self readPageCodeFrom: aStream.
 	self readIndexFrom: aStream.
 	self readNextFrom: aStream.
 	self readHeaderFrom: aStream.
@@ -42,6 +48,7 @@ SoilBTreeHeaderPage >> readHeaderFrom: aStream [
 SoilBTreeHeaderPage >> writeOn: aStream [ 
 	dirty := false.
 	aStream 
+		nextPut: self class pageCode;
 		nextPutAll: (index asByteArrayOfSize: self indexSize);
 		nextPutAll: (next asByteArrayOfSize: self pointerSize);
 		nextPutAll: (keySize asByteArrayOfSize: 2);

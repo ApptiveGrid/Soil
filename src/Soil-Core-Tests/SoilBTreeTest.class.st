@@ -89,8 +89,8 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 	btree := SoilBTree new 
 		path: 'sunit-btree';
 		initializeFilesystem;
-		open.
-	"self assert: (btree at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ]."
+		open. 
+	self assert: (btree at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
 ]
 
 { #category : #tests }
@@ -196,9 +196,8 @@ SoilBTreeTest >> testPageAddFirstAndLoad [
 		open.
 	
 	self assert: page items first key equals: (#foo asSkipListKeyOfSize: 8) asInteger.	
-	self flag: #TODO.
-	"index not yet loaded"
-	"self assert: (btree at: 1) equals: #[ 1 2 3 4 5 6 7 8 ]."
+	"load succeeds"
+	self assert: (btree at: #foo) equals: #[ 1 2 3 4 5 6 7 8 ].
 
 ]
 

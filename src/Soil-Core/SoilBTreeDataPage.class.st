@@ -8,6 +8,11 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
+SoilBTreeDataPage class >> pageCode [ 
+	^ 4
+]
+
+{ #category : #'as yet unclassified' }
 SoilBTreeDataPage >> biggestKey [
 	^ self isLastPage 
 		ifTrue: [ (2 raisedTo: (keySize * 8)) - 1 ]
