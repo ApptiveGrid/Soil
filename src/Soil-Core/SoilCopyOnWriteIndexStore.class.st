@@ -7,17 +7,6 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #queries }
-SoilCopyOnWriteIndexStore >> allItems [
-	| highestIndex col |
-	highestIndex := self lastPageIndex.
-	col := OrderedCollection new.
-	1 to: highestIndex do: [ :n |
-		col addAll: (self pageAt: n) items ].
-	^ (col reject: [ :each | 
-			(each value class = SmallInteger) and: [ each value asInteger = 0 ] ]) collect: #value
-]
-
 { #category : #accessing }
 SoilCopyOnWriteIndexStore >> flush [ 
 	^ wrappedStore flush

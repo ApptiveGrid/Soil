@@ -8,12 +8,6 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #queries }
-SoilPagedFileIndexStore >> allItems [
-	^ pagesMutex critical: [  
-		pages flatCollect: #items ]
-]
-
 { #category : #converting }
 SoilPagedFileIndexStore >> asCopyOnWriteStore [
 	^ SoilCopyOnWriteIndexStore new 
@@ -87,8 +81,7 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	| page |
 	streamSemaphore critical: [  
 		stream position: (self positionOfPageIndex: anInteger).
-		page := index newPage 
-			readFrom: stream ].
+		page := index readPageFrom: stream ].
 	pagesMutex critical: [  
 		pages at: anInteger put: page ].
 	^ page

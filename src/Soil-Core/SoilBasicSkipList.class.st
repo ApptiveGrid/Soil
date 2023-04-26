@@ -98,6 +98,11 @@ SoilBasicSkipList >> isEmpty [
 	^ self store headerPage hasItems not
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBasicSkipList >> isRegistered [
+	^ self subclassResponsibility
+]
+
 { #category : #accessing }
 SoilBasicSkipList >> keySize [
 	^ self headerPage keySize
@@ -161,8 +166,9 @@ SoilBasicSkipList >> removeKey: aString ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
-SoilBasicSkipList >> size [ 
-	^ self store allItems size 
+SoilBasicSkipList >> size [
+	"We iterate over all elements to get the size. Slow!"
+	^ self newIterator size 
 ]
 
 { #category : #'as yet unclassified' }

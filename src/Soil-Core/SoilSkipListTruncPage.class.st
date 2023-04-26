@@ -6,7 +6,7 @@ Class {
 
 { #category : #'as yet unclassified' }
 SoilSkipListTruncPage class >> pageCode [ 
-	^ 1
+	^ 2
 ]
 
 { #category : #utilities }

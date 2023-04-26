@@ -22,9 +22,9 @@ SoilSkipListTest >> setUp [
 
 { #category : #running }
 SoilSkipListTest >> tearDown [ 
-	super tearDown.
 	skipList ifNotNil: [ 
-		skipList close ]
+		skipList close ].
+	super tearDown
 ]
 
 { #category : #tests }
@@ -102,6 +102,22 @@ SoilSkipListTest >> testAddLastFitting [
 	page := skipList pageAt: 1.
 	self assert: page numberOfItems equals: 62.
 	self assert: page items last key asByteArray equals: #[ 54 51 ]
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testAt [
+	
+	| capacity |
+	capacity := skipList firstPage itemCapacity.
+	1 to: capacity do: [ :n | 
+		skipList at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	self assert: skipList pages size equals: 1.
+	skipList at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: skipList pages size equals: 2.
+	
+	"we should be able to find the key that is on the second page"
+	self assert: (skipList at: capacity + 1) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self should: [ skipList at: capacity + 2  ] raise: KeyNotFound
 ]
 
 { #category : #tests }
@@ -199,4 +215,17 @@ SoilSkipListTest >> testPageAddFirst [
 	page := skipList firstPage.
 	self assert: page numberOfItems equals: 1.
 	self assert: page items first key equals: (#foo asSkipListKeyOfSize: 8) asInteger
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testSize [
+	
+	| capacity |
+	capacity := skipList firstPage itemCapacity.
+	skipList at: 1 put: #[ 8 7 6 5 4 3 2 1 ].
+	2 to: capacity do: [ :n |
+		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	skipList at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: skipList pages size equals: 2.
+	self assert: skipList size equals: capacity + 1.
 ]
