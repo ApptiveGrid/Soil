@@ -202,19 +202,6 @@ SoilBTree >> splitPage: page [
 	^ newPage 
 ]
 
-{ #category : #splitting }
-SoilBTree >> splitRootIndexPage: page [ 
-	| newPage newPage2 |
-	newPage := page split: self newIndexPage.
-	newPage index: self store nextPageIndex.
-	self store pageAt: newPage index put: newPage.
-	
-	newPage2 := self newIndexPage.
-	newPage2 index: self store nextPageIndex.
-	self store pageAt: newPage2 index put: newPage2.
-	^ { newPage . newPage2 }
-]
-
 { #category : #accessing }
 SoilBTree >> store [
 	^ store ifNil: [ 
