@@ -96,6 +96,18 @@ SoilBTree >> newIndexPage [
 ]
 
 { #category : #'instance creation' }
+SoilBTree >> newIndexPageFromRoot: rootIndexPage [
+	| newPage |
+	newPage := self newIndexPage.
+	newPage index: self store nextPageIndex.
+	self store pageAt: newPage index put: newPage.
+	"now move over all items"
+	newPage setItems: rootIndexPage items.
+	rootIndexPage setItems: SortedCollection new.
+	^newPage
+]
+
+{ #category : #'instance creation' }
 SoilBTree >> newIterator [ 
 	^ SoilBTreeIterator on: self 
 ]
@@ -188,6 +200,19 @@ SoilBTree >> splitPage: page [
 	page next: newPage index.
 	self store pageAt: newPage index put: newPage.
 	^ newPage 
+]
+
+{ #category : #splitting }
+SoilBTree >> splitRootIndexPage: page [ 
+	| newPage newPage2 |
+	newPage := page split: self newIndexPage.
+	newPage index: self store nextPageIndex.
+	self store pageAt: newPage index put: newPage.
+	
+	newPage2 := self newIndexPage.
+	newPage2 index: self store nextPageIndex.
+	self store pageAt: newPage2 index put: newPage2.
+	^ { newPage . newPage2 }
 ]
 
 { #category : #accessing }

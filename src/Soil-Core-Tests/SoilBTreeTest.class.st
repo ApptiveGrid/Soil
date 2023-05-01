@@ -68,9 +68,6 @@ SoilBTreeTest >> testAddSecondOverflow [
 SoilBTreeTest >> testAddSecondOverflowReload [
 	| page capacity |
 
-	self flag: #TODO.
-	"Need to implement page saving and loading of index pages"
-
 	capacity := btree headerPage itemCapacity.
 	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: btree pages size equals: 2.
@@ -212,4 +209,29 @@ SoilBTreeTest >> testSize [
 	btree at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: btree pages size equals: 3.
 	self assert: btree size equals: capacity + 1.
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testSplitRootIndexPage [ 
+	"we add until the root Index is full and has to be split"
+	| capacity n indexPages |
+	n := 1.
+	capacity := btree headerPage itemCapacity.
+	[btree rootPage hasRoom] whileTrue: [
+		btree at: n put: #[ 1 2 3 4 5 6 7 8 ].
+		n:= n+1. ].
+	self assert: btree pages size equals: 256.
+	
+	"if we lots of more pages, the root index has to be split"
+	1 to: capacity do: [ :i | btree at:  i + n put: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	self assert: btree pages size equals: 259.
+	indexPages := btree pages values select: [ :each | each isKindOf: SoilBTreeIndexPage ].
+	"we now have indeed three index pages"
+	self assert: indexPages size equals: 3.
+	self assert: btree rootPage equals: indexPages second.
+	"the root page now points to the new index page"
+	self assert: (btree rootPage items anySatisfy: [ :item | item value asInteger = indexPages third index ]).
+	"and we can find the key added last"
+	self assert: (btree at: capacity + n ) equals:  #[ 1 2 3 4 5 6 7 8 ]
 ]
