@@ -116,7 +116,7 @@ SoilBasicSkipList >> keySize: anInteger [
 
 { #category : #accessing }
 SoilBasicSkipList >> last [
-	^ self store lastPage lastItem
+	^ self newIterator lastPage lastItem value
 ]
 
 { #category : #accessing }

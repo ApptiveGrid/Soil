@@ -76,6 +76,17 @@ SoilSkipListIterator >> lastAssociation [
 ]
 
 { #category : #accessing }
+SoilSkipListIterator >> lastPage [
+	| maxLevel pageNumber |
+	maxLevel := "self index maxLevel."1.
+	"there is a bug with right being 0 for pages other then the last"
+	currentPage := skipList headerPage.
+	[ (pageNumber := currentPage rightAt: maxLevel) isZero ] whileFalse: [ 
+		currentPage := self pageAt: pageNumber ].
+	^currentPage
+]
+
+{ #category : #accessing }
 SoilSkipListIterator >> levelAt: anInteger [ 
 	^ levels at: anInteger 
 ]
