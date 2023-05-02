@@ -55,7 +55,7 @@ SoilSkipListIterator >> findPageFor: key startingAt: page [
 
 { #category : #accessing }
 SoilSkipListIterator >> first [
-	^ self firstAssociation ifNotNil: [ :assoc | assoc value ]
+	^ self firstAssociation value
 ]
 
 { #category : #accessing }
@@ -68,8 +68,16 @@ SoilSkipListIterator >> firstAssociation [
 ]
 
 { #category : #accessing }
-SoilSkipListIterator >> lastAssociation [ 
-	^  self lastPage lastItem
+SoilSkipListIterator >> last [
+	^ self lastAssociation value
+]
+
+{ #category : #accessing }
+SoilSkipListIterator >> lastAssociation [
+	| item |
+	item := self lastPage lastItem. "sets currentPage"
+	currentKey := item key.
+	^ item
 ]
 
 { #category : #accessing }
