@@ -69,10 +69,7 @@ SoilSkipListIterator >> firstAssociation [
 
 { #category : #accessing }
 SoilSkipListIterator >> lastAssociation [ 
-	| item |
-	currentPage := skipList store lastPage.
-	item := currentPage lastItem.
-	^ item
+	^  self lastPage lastItem
 ]
 
 { #category : #accessing }
