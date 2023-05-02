@@ -32,7 +32,7 @@ SoilPersistentDictionary >> add: anAssociation [
 	^return
 ]
 
-{ #category : #accessing }
+{ #category : #forwarded }
 SoilPersistentDictionary >> anyOne [ 
 	^ dict anyOne
 ]
@@ -97,6 +97,11 @@ SoilPersistentDictionary >> isEmpty [
 ]
 
 { #category : #forwarded }
+SoilPersistentDictionary >> keys [
+	^ dict keys
+]
+
+{ #category : #forwarded }
 SoilPersistentDictionary >> keysAndValuesDo: aBlock [
 	^ dict keysAndValuesDo: aBlock
 ]
@@ -139,7 +144,7 @@ SoilPersistentDictionary >> soilLoadedIn: aSOTransaction [
 	transaction := aSOTransaction 
 ]
 
-{ #category : #accessing }
+{ #category : #forwarded }
 SoilPersistentDictionary >> values [
 	^ dict values
 ]

@@ -84,6 +84,21 @@ SoilPersistentDictionaryTest >> testCommitAndRead [
 ]
 
 { #category : #tests }
+SoilPersistentDictionaryTest >> testKeys [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	dict at: #test put: 'string'.
+	dict at: #test2 put: 'string2'.
+	transaction commit.
+		
+	self assert: (dict keys includes: 'test').
+	self assert: (dict keys includes: 'test2')
+]
+
+{ #category : #tests }
 SoilPersistentDictionaryTest >> testNewPersistentDictionary [
 
 	| dict |
@@ -110,4 +125,19 @@ SoilPersistentDictionaryTest >> testRemoveKey [
 	
 
 
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testValues [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	dict at: #test put: 'string'.
+	dict at: #test2 put: 'string2'.
+	transaction commit.
+		
+	self assert: (dict values includes: 'string').
+	self assert: (dict values includes: 'string2')
 ]

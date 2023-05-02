@@ -150,3 +150,70 @@ SoilSkipListDictionaryTest >> testAddToNewList [
 		raise: Error.
 	self assert: (dict at: #foo) equals: #bar
 ]
+
+{ #category : #tests }
+SoilSkipListDictionaryTest >> testFirst [
+	| dict |
+	dict := SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+	dict at: #foo put: #bar.
+	dict at: #foo2 put: #bar2.
+
+	self assert: dict first equals: #bar.
+	self assert: (dict first: 1) first equals: #bar.
+]
+
+{ #category : #tests }
+SoilSkipListDictionaryTest >> testLast [
+	| dict |
+	dict := SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+	dict at: #foo put: #bar.
+	dict at: #foo2 put: #bar2.
+
+	self assert: dict last equals: #bar2
+]
+
+{ #category : #tests }
+SoilSkipListDictionaryTest >> testSecond [
+	| dict |
+	dict := SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+	dict at: #foo put: #bar.
+	dict at: #foo2 put: #bar2.
+
+	self assert: dict second equals: #bar2
+]
+
+{ #category : #tests }
+SoilSkipListDictionaryTest >> testSize [
+	| dict |
+	dict := SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+	dict at: #foo put: #bar.
+	dict at: #foo2 put: #bar2.
+
+	self assert: dict size equals: 2
+]
+
+{ #category : #tests }
+SoilSkipListDictionaryTest >> testValues [
+	| dict |
+	dict := SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+	dict at: #foo put: #bar.
+	dict at: #foo2 put: #bar2.
+
+	self assert: (dict values includes: 'bar').
+	self assert: (dict values includes: 'bar2')
+]
