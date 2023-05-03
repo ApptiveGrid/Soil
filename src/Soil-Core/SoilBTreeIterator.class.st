@@ -72,7 +72,7 @@ SoilBTreeIterator >> lastPage [
 
 { #category : #accessing }
 SoilBTreeIterator >> next [
-	^ self nextAssociation ifNotNil: [ :assoc | assoc value ]
+	^ self nextAssociation value
 ]
 
 { #category : #accessing }
@@ -85,7 +85,7 @@ SoilBTreeIterator >> nextAssociation [
 		nextKey := nil.
 		^ item ].
 	currentPage ifNil: [ 
-		currentPage := btree store headerPage.
+		currentPage := btree headerPage.
 		currentKey := nil ].
 	[ currentPage isNil ] whileFalse: [  
 		item := currentKey 
@@ -96,7 +96,7 @@ SoilBTreeIterator >> nextAssociation [
 						^ i ]
 					ifNil: [ 
 						(currentPage next == 0) ifTrue: [ ^ nil ].
-						currentPage := btree store pageAt: (currentPage next).
+						currentPage := self pageAt: currentPage next.
 						currentKey := nil ] ]
 			ifNil: [
 				currentPage isEmpty ifTrue: [ ^ nil ].
