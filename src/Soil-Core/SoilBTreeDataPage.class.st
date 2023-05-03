@@ -12,7 +12,7 @@ SoilBTreeDataPage class >> pageCode [
 	^ 4
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilBTreeDataPage >> biggestKey [
 	^ self isLastPage 
 		ifTrue: [ (2 raisedTo: (keySize * 8)) - 1 ]
@@ -21,7 +21,7 @@ SoilBTreeDataPage >> biggestKey [
 
 { #category : #private }
 SoilBTreeDataPage >> find: aKey with: aBTree [
-	^ self valueAt: aKey.
+	^ self
 
 ]
 
@@ -55,6 +55,17 @@ SoilBTreeDataPage >> insert: anItem into: aBtree [
 { #category : #testing }
 SoilBTreeDataPage >> isLastPage [
 	^ next == 0
+]
+
+{ #category : #accessing }
+SoilBTreeDataPage >> lastItem [
+	| item maxKey |
+	items ifEmpty: [ ^ nil ].
+	maxKey := (2 raisedTo: (keySize * 8)) - 1. 
+	item := items last.
+	^ (item key = maxKey)
+		ifTrue: [ items at: items size - 1 ]
+		ifFalse: [ item ] 
 ]
 
 { #category : #accessing }

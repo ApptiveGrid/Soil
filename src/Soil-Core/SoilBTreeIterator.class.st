@@ -31,12 +31,49 @@ SoilBTreeIterator >> do: aBlock [
 { #category : #private }
 SoilBTreeIterator >> find: key [
 	currentKey := key.
-	^btree rootPage find: key with: btree
+	currentPage := btree rootPage find: key with: btree.
+	^ currentPage valueAt: currentKey
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> first [
+	^ self firstAssociation value
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> firstAssociation [ 
+	| item |
+	currentPage := btree store headerPage.
+	item := currentPage firstItem.
+	currentKey := item key.
+	^ item
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> last [
+	^ self lastAssociation value
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> lastAssociation [
+	| item |
+	item := self lastPage lastItem. "sets currentPage"
+	currentKey := item key.
+	^ item
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> lastPage [
+	| pageNumber |
+	currentPage := btree headerPage.
+	[ (pageNumber := currentPage next) isZero ] whileFalse: [ 
+		currentPage := self pageAt: pageNumber ].
+	^currentPage
 ]
 
 { #category : #accessing }
 SoilBTreeIterator >> next [
-	^ self nextAssociation ifNotNil: [ :assoc | assoc value ]
+	^ self nextAssociation value
 ]
 
 { #category : #accessing }
@@ -49,7 +86,7 @@ SoilBTreeIterator >> nextAssociation [
 		nextKey := nil.
 		^ item ].
 	currentPage ifNil: [ 
-		currentPage := btree store headerPage.
+		currentPage := btree headerPage.
 		currentKey := nil ].
 	[ currentPage isNil ] whileFalse: [  
 		item := currentKey 
@@ -60,7 +97,7 @@ SoilBTreeIterator >> nextAssociation [
 						^ i ]
 					ifNil: [ 
 						(currentPage next == 0) ifTrue: [ ^ nil ].
-						currentPage := btree store pageAt: (currentPage next).
+						currentPage := self pageAt: currentPage next.
 						currentKey := nil ] ]
 			ifNil: [
 				currentPage isEmpty ifTrue: [ ^ nil ].
@@ -72,6 +109,11 @@ SoilBTreeIterator >> nextAssociation [
 SoilBTreeIterator >> page [
 
 	^ currentPage
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> pageAt: anInteger [
+	^ btree store pageAt: anInteger
 ]
 
 { #category : #accessing }

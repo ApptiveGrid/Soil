@@ -72,6 +72,11 @@ SoilBTree >> keySize: anInteger [
 	self rootPage keySize: anInteger
 ]
 
+{ #category : #accessing }
+SoilBTree >> last [
+	^ self newIterator last
+]
+
 { #category : #'instance creation' }
 SoilBTree >> newFileStore [
 	^ SoilPagedFileIndexStoreBTree new

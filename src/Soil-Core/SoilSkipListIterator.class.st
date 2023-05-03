@@ -98,7 +98,7 @@ SoilSkipListIterator >> levelAt: anInteger [
 
 { #category : #accessing }
 SoilSkipListIterator >> next [
-	^ self nextAssociation ifNotNil: [ :assoc | assoc value ]
+	^ self nextAssociation value
 ]
 
 { #category : #accessing }
