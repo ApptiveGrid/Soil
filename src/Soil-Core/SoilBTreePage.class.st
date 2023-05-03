@@ -85,6 +85,24 @@ SoilBTreePage >> itemCapacity [
 ]
 
 { #category : #accessing }
+SoilBTreePage >> itemRemoveAt: key [ 
+	^ self 
+		itemRemoveAt: key 
+		ifAbsent: [ KeyNotFound signal: key ]
+]
+
+{ #category : #accessing }
+SoilBTreePage >> itemRemoveAt: anInteger ifAbsent: aBlock [
+	| item |
+	items 
+		findBinaryIndex: [ :each |  anInteger - each key ] 
+		do: [:ind | item := items removeAt: ind ]
+		ifNone: [ ^ aBlock value ].
+	dirty := true.
+	^ item
+]
+
+{ #category : #accessing }
 SoilBTreePage >> items [
 	^ items
 ]

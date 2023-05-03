@@ -96,6 +96,18 @@ SoilBTree >> newIndexPage [
 ]
 
 { #category : #'instance creation' }
+SoilBTree >> newIndexPageFromRoot: rootIndexPage [
+	| newPage |
+	newPage := self newIndexPage.
+	newPage index: self store nextPageIndex.
+	self store pageAt: newPage index put: newPage.
+	"now move over all items"
+	newPage setItems: rootIndexPage items.
+	rootIndexPage setItems: SortedCollection new.
+	^newPage
+]
+
+{ #category : #'instance creation' }
 SoilBTree >> newIterator [ 
 	^ SoilBTreeIterator on: self 
 ]
