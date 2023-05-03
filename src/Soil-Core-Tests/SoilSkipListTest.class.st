@@ -198,6 +198,19 @@ SoilSkipListTest >> testIteratorFirst [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testLast [
+	
+	| capacity |
+	capacity := skipList firstPage itemCapacity * 2.
+
+	1 to: capacity - 1 do: [ :n |
+		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	skipList at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
+	self assert: skipList pages size equals: 3.
+	self assert: skipList last equals: #[ 8 7 6 5 4 3 2 1 ]
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testMorePages [
 	1 to: 512 do: [ :n |
 		skipList at: (n asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ] ].

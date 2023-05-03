@@ -55,7 +55,7 @@ SoilSkipListIterator >> findPageFor: key startingAt: page [
 
 { #category : #accessing }
 SoilSkipListIterator >> first [
-	^ self firstAssociation ifNotNil: [ :assoc | assoc value ]
+	^ self firstAssociation value
 ]
 
 { #category : #accessing }
@@ -68,11 +68,27 @@ SoilSkipListIterator >> firstAssociation [
 ]
 
 { #category : #accessing }
-SoilSkipListIterator >> lastAssociation [ 
+SoilSkipListIterator >> last [
+	^ self lastAssociation value
+]
+
+{ #category : #accessing }
+SoilSkipListIterator >> lastAssociation [
 	| item |
-	currentPage := skipList store lastPage.
-	item := currentPage lastItem.
+	item := self lastPage lastItem. "sets currentPage"
+	currentKey := item key.
 	^ item
+]
+
+{ #category : #accessing }
+SoilSkipListIterator >> lastPage [
+	| maxLevel pageNumber |
+	maxLevel := "self index maxLevel."1.
+	"there is a bug with right being 0 for pages other then the last"
+	currentPage := skipList headerPage.
+	[ (pageNumber := currentPage rightAt: maxLevel) isZero ] whileFalse: [ 
+		currentPage := self pageAt: pageNumber ].
+	^currentPage
 ]
 
 { #category : #accessing }
