@@ -35,6 +35,20 @@ SoilBTreeIterator >> find: key [
 ]
 
 { #category : #accessing }
+SoilBTreeIterator >> first [
+	^ self firstAssociation value
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> firstAssociation [ 
+	| item |
+	currentPage := btree store headerPage.
+	item := currentPage firstItem.
+	currentKey := item key.
+	^ item
+]
+
+{ #category : #accessing }
 SoilBTreeIterator >> last [
 	^ self lastAssociation value
 ]
