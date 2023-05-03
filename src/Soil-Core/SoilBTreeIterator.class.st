@@ -35,6 +35,28 @@ SoilBTreeIterator >> find: key [
 ]
 
 { #category : #accessing }
+SoilBTreeIterator >> last [
+	^ self lastAssociation value
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> lastAssociation [
+	| item |
+	item := self lastPage lastItem. "sets currentPage"
+	currentKey := item key.
+	^ item
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> lastPage [
+	| pageNumber |
+	currentPage := btree headerPage.
+	[ (pageNumber := currentPage next) isZero ] whileFalse: [ 
+		currentPage := self pageAt: pageNumber ].
+	^currentPage
+]
+
+{ #category : #accessing }
 SoilBTreeIterator >> next [
 	^ self nextAssociation ifNotNil: [ :assoc | assoc value ]
 ]
@@ -72,6 +94,11 @@ SoilBTreeIterator >> nextAssociation [
 SoilBTreeIterator >> page [
 
 	^ currentPage
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> pageAt: anInteger [
+	^ btree store pageAt: anInteger
 ]
 
 { #category : #accessing }
