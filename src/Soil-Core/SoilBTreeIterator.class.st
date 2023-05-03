@@ -31,7 +31,8 @@ SoilBTreeIterator >> do: aBlock [
 { #category : #private }
 SoilBTreeIterator >> find: key [
 	currentKey := key.
-	^btree rootPage find: key with: btree
+	currentPage := btree rootPage find: key with: btree.
+	^ currentPage valueAt: currentKey
 ]
 
 { #category : #accessing }

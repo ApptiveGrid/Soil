@@ -21,7 +21,7 @@ SoilBTreeDataPage >> biggestKey [
 
 { #category : #private }
 SoilBTreeDataPage >> find: aKey with: aBTree [
-	^ self valueAt: aKey.
+	^ self
 
 ]
 
