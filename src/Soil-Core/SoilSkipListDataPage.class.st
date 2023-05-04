@@ -282,19 +282,6 @@ SoilSkipListDataPage >> smallestKey [
 ]
 
 { #category : #'as yet unclassified' }
-SoilSkipListDataPage >> split [
-	| newPage middle |
-	newPage := self collection newPage.
-	newPage 
-		index: index.
-	middle := (items size / 2) ceiling.
-	newPage setItems: (items copyFrom: middle + 1 to: items size).
-	items removeLast: items size - middle.
-	^ newPage
-	
-]
-
-{ #category : #'as yet unclassified' }
 SoilSkipListDataPage >> split: newPage [
 	| middle |
 	newPage 
