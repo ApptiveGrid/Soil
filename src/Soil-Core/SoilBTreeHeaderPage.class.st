@@ -7,7 +7,7 @@ Class {
 	#category : #'Soil-Core-Index-BTree'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilBTreeHeaderPage class >> pageCode [ 
 	^ 3
 ]
@@ -28,7 +28,7 @@ SoilBTreeHeaderPage >> nextPageIndex [
 { #category : #writing }
 SoilBTreeHeaderPage >> readFrom: aStream [ 
 	dirty := false.
-	self readPageCodeFrom: aStream.
+	"we do not read the pageCode, that was done before"
 	self readIndexFrom: aStream.
 	self readNextFrom: aStream.
 	self readHeaderFrom: aStream.

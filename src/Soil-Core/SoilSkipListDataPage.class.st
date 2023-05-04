@@ -15,6 +15,12 @@ SoilSkipListDataPage class >> isAbstract [
 	^ self == SoilSkipListDataPage 
 ]
 
+{ #category : #accessing }
+SoilSkipListDataPage class >> pageCode [
+	"abstract"
+	^ 0 
+]
+
 { #category : #adding }
 SoilSkipListDataPage >> addItem: anAssociation [ 
 	items add: anAssociation.

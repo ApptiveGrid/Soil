@@ -8,7 +8,7 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilSkipListHeaderPage class >> pageCode [ 
 	^ 1 
 ]

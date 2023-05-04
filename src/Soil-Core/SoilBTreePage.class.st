@@ -9,12 +9,10 @@ Class {
 	#category : #'Soil-Core-Index-BTree'
 }
 
-{ #category : #'instance creation' }
-SoilBTreePage class >> readPageFrom: aStream [
-	| pageCode pageClass |
-	pageCode := aStream next asInteger.
-	pageClass := self allSubclasses detect: [ :class | class pageCode = pageCode ].
-	^pageClass new readFrom: aStream.
+{ #category : #accessing }
+SoilBTreePage class >> pageCode [
+	"abstract"
+	^0
 ]
 
 { #category : #adding }
@@ -136,11 +134,6 @@ SoilBTreePage >> readItemsFrom: aStream [
 		items add: (aStream next: self keySize) asInteger -> (aStream next: self valueSize) ]
 ]
 
-{ #category : #reading }
-SoilBTreePage >> readPageCodeFrom: aStream [
-	^ aStream next asInteger
-]
-
 { #category : #initialization }
 SoilBTreePage >> setItems: aCollection [ 
 	items := aCollection
@@ -187,12 +180,4 @@ SoilBTreePage >> writeItemsOn: aStream [
 		aStream 
 			nextPutAll: (assoc key asByteArrayOfSize: self keySize);
 			nextPutAll: (assoc value asByteArrayOfSize: self valueSize)]
-]
-
-{ #category : #writing }
-SoilBTreePage >> writeOn: aStream [ 
-	dirty := false.
-	aStream 
-		nextPut: self class pageCode;
-		nextPutAll: (index asByteArrayOfSize: self indexSize)
 ]

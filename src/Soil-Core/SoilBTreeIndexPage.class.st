@@ -4,7 +4,7 @@ Class {
 	#category : #'Soil-Core-Index-BTree'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilBTreeIndexPage class >> pageCode [ 
 	^ 5
 ]
