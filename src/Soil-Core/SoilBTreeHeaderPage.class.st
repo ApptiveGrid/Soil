@@ -25,6 +25,11 @@ SoilBTreeHeaderPage >> nextPageIndex [
 	^ lastPageIndex 
 ]
 
+{ #category : #printing }
+SoilBTreeHeaderPage >> printOn: aStream [ 
+	aStream << 'header page : #' << index asString
+]
+
 { #category : #writing }
 SoilBTreeHeaderPage >> readFrom: aStream [ 
 	dirty := false.

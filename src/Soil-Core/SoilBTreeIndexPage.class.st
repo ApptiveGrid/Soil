@@ -21,7 +21,7 @@ SoilBTreeIndexPage >> findPageFor: aKey with: aBTree [
 	items
 		reverseDo: [ :each |
 			each key <= aKey 
-				ifTrue: [ ^ aBTree pageAt: each value asInteger ] ].
+				ifTrue: [ ^ aBTree pageAt: each value ] ].
 	^nil
 ]
 
@@ -32,19 +32,25 @@ SoilBTreeIndexPage >> headerSize [
 
 { #category : #accessing }
 SoilBTreeIndexPage >> insert: anItem into: aBtree [
-	| indexPage newPage indexItem |
+	| indexPage newPage indexItem newIndexPage  |
 	indexPage := self findPageFor: anItem key with: aBtree.
 	indexPage ifNil: [ ^nil ]. "nothing to do"
 	newPage := indexPage insert: anItem into: aBtree.
 	newPage ifNil: [ ^nil ]. "nothing to do"
 	
-	indexItem := newPage smallestKey -> (newPage index asByteArrayOfSize: 2).
+	indexItem := newPage smallestKey -> newPage index.
 	"if the insert resulted in a split, we have to update the index, which might habe to split, too"
 	self hasRoom ifTrue: [ self addItem: indexItem . ^ nil ].
-	newPage := aBtree splitIndexPage: self.
+	newIndexPage := aBtree splitIndexPage: self.				
+	((newIndexPage smallestKey <= anItem key) 
+		ifTrue: [ newIndexPage ] 
+		ifFalse: [ self ]) addItem: indexItem.
+	^newIndexPage
+]
 
-	self addItem: indexItem.
-	^newPage
+{ #category : #printing }
+SoilBTreeIndexPage >> printOn: aStream [ 
+	aStream << 'index page : #' << index asString
 ]
 
 { #category : #reading }
@@ -60,16 +66,15 @@ SoilBTreeIndexPage >> readFrom: aStream [
 SoilBTreeIndexPage >> readItemsFrom: aStream [ 
 	| numberOfItems |
 	
-	self flag: #fixme. "duplicated code from superclass, should not be needed if valueSize is correct"
 	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
 	items := SortedCollection new: numberOfItems.
 	numberOfItems timesRepeat: [ 
-		items add: (aStream next: self keySize) asInteger -> (aStream next: 2) ]
+		items add: (aStream next: self keySize) asInteger -> (aStream next: 2) asInteger ]
 ]
 
 { #category : #writing }
 SoilBTreeIndexPage >> writeItemsOn: aStream [ 
-	self flag: #fixme. "duplicated code from superclass, should not be needed if valueSize is correct"
+
 	aStream
 		nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
 	items do: [ :assoc |
