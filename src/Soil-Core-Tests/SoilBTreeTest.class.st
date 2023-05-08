@@ -260,7 +260,9 @@ SoilBTreeTest >> testRemoveKey [
 	
 	self assert: (btree at: 1) equals: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: (btree at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
-	self should: [ btree at: 20  ] raise: KeyNotFound
+	self should: [ btree at: 20  ] raise: KeyNotFound.
+	btree at: 20 put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (btree at: 20) equals: #[ 1 2 3 4 5 6 7 8 ].
 ]
 
 { #category : #tests }

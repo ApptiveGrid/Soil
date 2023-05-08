@@ -154,6 +154,11 @@ SoilSkipListTest >> testFindKeyReverse [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testIsEmpty [
+	self assert: skipList isEmpty
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testIteratorDo [
 	
 	| capacity col |
@@ -228,6 +233,22 @@ SoilSkipListTest >> testPageAddFirst [
 	page := skipList firstPage.
 	self assert: page numberOfItems equals: 1.
 	self assert: page items first key equals: (#foo asSkipListKeyOfSize: 8) asInteger
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testRemoveKey [
+
+	| capacity |
+	capacity := skipList headerPage itemCapacity.
+	1 to: capacity do: [ :n | skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	
+	skipList removeKey: 20.
+	
+	self assert: (skipList at: 1) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (skipList at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self should: [ skipList at: 20  ] raise: KeyNotFound.
+	skipList at: 20 put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (skipList at: 20) equals: #[ 1 2 3 4 5 6 7 8 ].
 ]
 
 { #category : #tests }
