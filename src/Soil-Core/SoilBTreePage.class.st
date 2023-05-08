@@ -103,6 +103,15 @@ SoilBTreePage >> itemRemoveAt: anInteger ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
+SoilBTreePage >> itemRemoveIndex: anInteger [
+	| item |
+	item := items at: anInteger.
+	items removeAt: anInteger.
+	dirty := true.
+	^ item
+]
+
+{ #category : #accessing }
 SoilBTreePage >> items [
 	^ items
 ]
