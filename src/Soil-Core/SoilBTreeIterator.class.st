@@ -1,79 +1,29 @@
 Class {
 	#name : #SoilBTreeIterator,
-	#superclass : #Object,
-	#instVars : [
-		'btree',
-		'currentPage',
-		'currentKey',
-		'nextKey'
-	],
+	#superclass : #SoilIndexIterator,
 	#category : #'Soil-Core-Index-BTree'
 }
 
 { #category : #'instance creation' }
 SoilBTreeIterator class >> on: aSoilBtree [
 	^ self new 
-		btree: aSoilBtree 
-]
-
-{ #category : #accessing }
-SoilBTreeIterator >> btree: aBtree [
-	btree := aBtree
-]
-
-{ #category : #enumerating }
-SoilBTreeIterator >> do: aBlock [
-	| item |
-	[ (item := self next) isNil ] whileFalse: [ 
-		aBlock value: item ]
+		index: aSoilBtree 
 ]
 
 { #category : #private }
 SoilBTreeIterator >> find: key [
 	currentKey := key.
-	currentPage := btree rootPage find: key with: btree.
+	currentPage := index rootPage find: key with: index.
 	^ currentPage valueAt: currentKey
-]
-
-{ #category : #accessing }
-SoilBTreeIterator >> first [
-	^ self firstAssociation value
-]
-
-{ #category : #accessing }
-SoilBTreeIterator >> firstAssociation [ 
-	| item |
-	currentPage := btree store headerPage.
-	item := currentPage firstItem.
-	currentKey := item key.
-	^ item
-]
-
-{ #category : #accessing }
-SoilBTreeIterator >> last [
-	^ self lastAssociation value
-]
-
-{ #category : #accessing }
-SoilBTreeIterator >> lastAssociation [
-	| item |
-	item := self lastPage lastItem. "sets currentPage"
-	currentKey := item key.
-	^ item
 ]
 
 { #category : #accessing }
 SoilBTreeIterator >> lastPage [
 	| pageNumber |
-	currentPage := btree headerPage.
+	currentPage := index headerPage.
 	[ (pageNumber := currentPage next) isZero ] whileFalse: [ 
 		currentPage := self pageAt: pageNumber ].
 	^currentPage
-]
-
-{ #category : #accessing }
-SoilBTreeIterator >> next [
-	^ self nextAssociation value
 ]
 
 { #category : #accessing }
@@ -86,7 +36,7 @@ SoilBTreeIterator >> nextAssociation [
 		nextKey := nil.
 		^ item ].
 	currentPage ifNil: [ 
-		currentPage := btree headerPage.
+		currentPage := index headerPage.
 		currentKey := nil ].
 	[ currentPage isNil ] whileFalse: [  
 		item := currentKey 
@@ -103,24 +53,4 @@ SoilBTreeIterator >> nextAssociation [
 				currentPage isEmpty ifTrue: [ ^ nil ].
 				^ currentPage firstItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
 	Error signal: 'shouldnt happen'
-]
-
-{ #category : #accessing }
-SoilBTreeIterator >> page [
-
-	^ currentPage
-]
-
-{ #category : #accessing }
-SoilBTreeIterator >> pageAt: anInteger [
-	^ btree store pageAt: anInteger
-]
-
-{ #category : #accessing }
-SoilBTreeIterator >> size [
-	"We iterate over all elements to get the size. Slow!"
-	| sum |
-	sum := 0.
-	self do: [ :each | sum := sum + 1 ].
-	^ sum
 ]
