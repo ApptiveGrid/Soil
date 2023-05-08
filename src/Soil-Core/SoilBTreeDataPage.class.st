@@ -25,6 +25,11 @@ SoilBTreeDataPage >> find: aKey with: aBTree [
 
 ]
 
+{ #category : #testing }
+SoilBTreeDataPage >> hasItems [
+	^ items notEmpty
+]
+
 { #category : #utilities }
 SoilBTreeDataPage >> headerSize [
 	^ self indexSize + self pointerSize

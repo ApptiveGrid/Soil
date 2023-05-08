@@ -61,6 +61,11 @@ SoilBTree >> initializeHeaderPage [
 	self store initializeHeaderPage
 ]
 
+{ #category : #testing }
+SoilBTree >> isEmpty [
+	^ self store headerPage hasItems not
+]
+
 { #category : #accessing }
 SoilBTree >> keySize [
 	^ self headerPage keySize

@@ -177,6 +177,13 @@ SoilBTreeTest >> testCreation [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testIsEmpty [
+	self assert: btree isEmpty.
+	btree at: 1 put: #[1 2].
+	self deny: btree isEmpty
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testIteratorFirst [
 	
 	| capacity first |

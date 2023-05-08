@@ -155,7 +155,9 @@ SoilSkipListTest >> testFindKeyReverse [
 
 { #category : #tests }
 SoilSkipListTest >> testIsEmpty [
-	self assert: skipList isEmpty
+	self assert: skipList isEmpty.
+	skipList at: 1 put: #[1 2].
+	self deny: skipList isEmpty
 ]
 
 { #category : #tests }
