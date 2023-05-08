@@ -7,12 +7,6 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #'instance creation' }
-SoilSkipListIterator class >> on: aSoilSkipList [ 
-	^ self new 
-		index: aSoilSkipList 
-]
-
 { #category : #accessing }
 SoilSkipListIterator >> atLevel: key put: anObject [
 	levels at: key put: anObject 

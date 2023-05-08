@@ -4,12 +4,6 @@ Class {
 	#category : #'Soil-Core-Index-BTree'
 }
 
-{ #category : #'instance creation' }
-SoilBTreeIterator class >> on: aSoilBtree [
-	^ self new 
-		index: aSoilBtree 
-]
-
 { #category : #private }
 SoilBTreeIterator >> find: key [
 	currentKey := key.

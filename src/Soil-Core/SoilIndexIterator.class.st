@@ -10,6 +10,12 @@ Class {
 	#category : #'Soil-Core-Index-Common'
 }
 
+{ #category : #'instance creation' }
+SoilIndexIterator class >> on: aSoilIndex [
+	^ self new 
+		index: aSoilIndex 
+]
+
 { #category : #enumerating }
 SoilIndexIterator >> do: aBlock [
 	| item |
