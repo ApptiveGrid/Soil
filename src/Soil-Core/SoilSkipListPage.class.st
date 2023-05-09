@@ -12,7 +12,7 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilSkipListPage class >> pageCode [ 
 	self subclassResponsibility 
 ]
@@ -21,6 +21,14 @@ SoilSkipListPage class >> pageCode [
 SoilSkipListPage class >> random [
 	^ random ifNil: [ 
 		random := Random seed: Time microsecondClockValue. ]
+]
+
+{ #category : #'instance creation' }
+SoilSkipListPage class >> readPageFrom: aStream [
+	| pageCode pageClass |
+	pageCode := aStream next asInteger.
+	pageClass := self allSubclasses detect: [ :class | class pageCode = pageCode ].
+	^pageClass new readFrom: aStream.
 ]
 
 { #category : #accessing }
@@ -66,6 +74,7 @@ SoilSkipListPage >> printOn: aStream [
 { #category : #writing }
 SoilSkipListPage >> readFrom: aStream [ 
 	dirty := false.
+	"we do not read the pageCode here as it was read already"
 	self readIndexFrom: aStream
 ]
 
@@ -78,6 +87,7 @@ SoilSkipListPage >> readIndexFrom: aStream [
 { #category : #writing }
 SoilSkipListPage >> writeOn: aStream [ 
 	dirty := false.
-	aStream 
+	aStream
+		nextPut: self class pageCode;
 		nextPutAll: (index asByteArrayOfSize: self indexSize)
 ]

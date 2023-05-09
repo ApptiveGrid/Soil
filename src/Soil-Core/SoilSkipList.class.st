@@ -102,8 +102,7 @@ SoilSkipList >> path: aStringOrFileReference [
 
 { #category : #'instance creation' }
 SoilSkipList >> readPageFrom: aStream [
-	"Here we should take the pageCode into account, see readPageFrom: on Btree"
-	^ self newPage readFrom: aStream
+	^ SoilSkipListPage readPageFrom: aStream
 ]
 
 { #category : #converting }

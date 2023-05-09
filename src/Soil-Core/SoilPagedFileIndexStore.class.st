@@ -102,7 +102,8 @@ SoilPagedFileIndexStore >> readHeaderPage [
 	| headerPage |
 	streamSemaphore critical: [  
 		stream position: 0.
-		headerPage := index newHeaderPage readFrom: stream ].
+		stream next. "pageCode"
+		headerPage :=  index newHeaderPage readFrom: stream ].
 	pagesMutex critical: [  
 		pages at: 1 put: headerPage ]
 ]

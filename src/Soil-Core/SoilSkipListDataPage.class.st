@@ -15,6 +15,12 @@ SoilSkipListDataPage class >> isAbstract [
 	^ self == SoilSkipListDataPage 
 ]
 
+{ #category : #accessing }
+SoilSkipListDataPage class >> pageCode [
+	"abstract"
+	^ 0 
+]
+
 { #category : #adding }
 SoilSkipListDataPage >> addItem: anAssociation [ 
 	items add: anAssociation.
@@ -271,19 +277,6 @@ SoilSkipListDataPage >> setRight: aCollection [
 { #category : #'as yet unclassified' }
 SoilSkipListDataPage >> smallestKey [
 	^ items first key
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipListDataPage >> split [
-	| newPage middle |
-	newPage := self collection newPage.
-	newPage 
-		index: index.
-	middle := (items size / 2) ceiling.
-	newPage setItems: (items copyFrom: middle + 1 to: items size).
-	items removeLast: items size - middle.
-	^ newPage
-	
 ]
 
 { #category : #'as yet unclassified' }
