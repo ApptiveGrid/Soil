@@ -67,6 +67,11 @@ SoilBasicSkipList >> find: aString [
 ]
 
 { #category : #accessing }
+SoilBasicSkipList >> first [
+	^ self newIterator first
+]
+
+{ #category : #accessing }
 SoilBasicSkipList >> first: anInteger [ 
 	| iterator col |
 	iterator := self newIterator.
@@ -76,11 +81,6 @@ SoilBasicSkipList >> first: anInteger [
 			ifNotNil: [ :value | col add: value ]
 			ifNil: [ ^ col ]].
 	^ col
-]
-
-{ #category : #accessing }
-SoilBasicSkipList >> firstItem [
-	^ self headerPage firstItem
 ]
 
 { #category : #accessing }
@@ -98,7 +98,7 @@ SoilBasicSkipList >> isEmpty [
 	^ self store headerPage hasItems not
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilBasicSkipList >> isRegistered [
 	^ self subclassResponsibility
 ]
@@ -200,6 +200,11 @@ SoilBasicSkipList >> store [
 SoilBasicSkipList >> store: anObject [
 	anObject index: self.
 	store := anObject
+]
+
+{ #category : #'as yet unclassified' }
+SoilBasicSkipList >> thePersistentInstance [
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }

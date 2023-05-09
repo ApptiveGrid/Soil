@@ -47,6 +47,23 @@ SoilBTree >> find: aString [
 ]
 
 { #category : #accessing }
+SoilBTree >> first [
+	^ self newIterator first
+]
+
+{ #category : #accessing }
+SoilBTree >> first: anInteger [ 
+	| iterator col |
+	iterator := self newIterator.
+	col := OrderedCollection new.
+	anInteger timesRepeat: [ 
+		(iterator next)
+			ifNotNil: [ :value | col add: value ]
+			ifNil: [ ^ col ]].
+	^ col
+]
+
+{ #category : #accessing }
 SoilBTree >> headerPage [
 	^ self store headerPage
 ]

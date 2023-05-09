@@ -74,7 +74,7 @@ SoilSkipListDictionary >> do: aBlock [
 { #category : #accessing }
 SoilSkipListDictionary >> first [
 	^ transaction 
-		ifNotNil: [ self proxyFromByteArray: self index firstItem value ]
+		ifNotNil: [ self proxyFromByteArray: self index first ]
 		ifNil: [ newValues associations first value ]
 ]
 
