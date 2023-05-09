@@ -1,32 +1,15 @@
 Class {
 	#name : #SoilSkipListIterator,
-	#superclass : #Object,
+	#superclass : #SoilIndexIterator,
 	#instVars : [
-		'skipList',
-		'levels',
-		'currentPage',
-		'currentKey',
-		'nextKey'
+		'levels'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #'instance creation' }
-SoilSkipListIterator class >> on: aSoilSkipList [ 
-	^ self new 
-		skipList: aSoilSkipList 
-]
-
 { #category : #accessing }
 SoilSkipListIterator >> atLevel: key put: anObject [
 	levels at: key put: anObject 
-]
-
-{ #category : #enumerating }
-SoilSkipListIterator >> do: aBlock [
-	| item |
-	[ (item := self next) isNil ] whileFalse: [ 
-		aBlock value: item ]
 ]
 
 { #category : #private }
@@ -34,7 +17,7 @@ SoilSkipListIterator >> find: key [
 	currentKey := key.
 	self 
 		findPageFor: key 
-		startingAt: skipList headerPage.
+		startingAt: index headerPage.
 	^ currentPage valueAt: currentKey
 ]
 
@@ -54,30 +37,9 @@ SoilSkipListIterator >> findPageFor: key startingAt: page [
 ]
 
 { #category : #accessing }
-SoilSkipListIterator >> first [
-	^ self firstAssociation value
-]
-
-{ #category : #accessing }
-SoilSkipListIterator >> firstAssociation [ 
-	| item |
-	currentPage := skipList store headerPage.
-	item := currentPage firstItem.
-	currentKey := item key.
-	^ item
-]
-
-{ #category : #accessing }
-SoilSkipListIterator >> last [
-	^ self lastAssociation value
-]
-
-{ #category : #accessing }
-SoilSkipListIterator >> lastAssociation [
-	| item |
-	item := self lastPage lastItem. "sets currentPage"
-	currentKey := item key.
-	^ item
+SoilSkipListIterator >> index: aSoilSkipList [ 
+	super index: aSoilSkipList.
+	levels := Array new: index maxLevel 
 ]
 
 { #category : #accessing }
@@ -85,7 +47,7 @@ SoilSkipListIterator >> lastPage [
 	| maxLevel pageNumber |
 	maxLevel := "self index maxLevel."1.
 	"there is a bug with right being 0 for pages other then the last"
-	currentPage := skipList headerPage.
+	currentPage := index headerPage.
 	[ (pageNumber := currentPage rightAt: maxLevel) isZero ] whileFalse: [ 
 		currentPage := self pageAt: pageNumber ].
 	^currentPage
@@ -94,11 +56,6 @@ SoilSkipListIterator >> lastPage [
 { #category : #accessing }
 SoilSkipListIterator >> levelAt: anInteger [ 
 	^ levels at: anInteger 
-]
-
-{ #category : #accessing }
-SoilSkipListIterator >> next [
-	^ self nextAssociation value
 ]
 
 { #category : #accessing }
@@ -114,7 +71,7 @@ SoilSkipListIterator >> nextAssociation [
 		nextKey := nil.
 		^ item ].
 	currentPage ifNil: [ 
-		currentPage := skipList store headerPage.
+		currentPage := index store headerPage.
 		currentKey := nil ].
 	[ currentPage isNil ] whileFalse: [  
 		item := currentKey 
@@ -125,7 +82,7 @@ SoilSkipListIterator >> nextAssociation [
 						^ i ]
 					ifNil: [ 
 						((currentPage right at: 1) = 0) ifTrue: [ ^ nil ].
-						currentPage := skipList store pageAt: (currentPage rightAt: 1).
+						currentPage := index store pageAt: (currentPage rightAt: 1).
 						currentKey := nil ] ]
 			ifNil: [
 				currentPage isEmpty ifTrue: [ ^ nil ].
@@ -137,43 +94,11 @@ SoilSkipListIterator >> nextAssociation [
 SoilSkipListIterator >> nextKeyCloseTo: key [
 	self 
 		findPageFor: key
-		startingAt: skipList headerPage.
+		startingAt: index headerPage.
 	nextKey := currentPage keyOrClosestAfter: key
-]
-
-{ #category : #accessing }
-SoilSkipListIterator >> page [
-
-	^ currentPage
-]
-
-{ #category : #accessing }
-SoilSkipListIterator >> page: anObject [
-
-	currentPage := anObject
-]
-
-{ #category : #private }
-SoilSkipListIterator >> pageAt: anInteger [
-	^ skipList store pageAt: anInteger
 ]
 
 { #category : #printing }
 SoilSkipListIterator >> printOn: aStream [ 
 	aStream << 'path: ' << levels asString
-]
-
-{ #category : #accessing }
-SoilSkipListIterator >> size [
-	"We iterate over all elements to get the size. Slow!"
-	| sum |
-	sum := 0.
-	self do: [ :each | sum := sum + 1 ].
-	^ sum
-]
-
-{ #category : #accessing }
-SoilSkipListIterator >> skipList: aSoilSkipList [ 
-	skipList := aSoilSkipList.
-	levels := Array new: skipList maxLevel 
 ]
