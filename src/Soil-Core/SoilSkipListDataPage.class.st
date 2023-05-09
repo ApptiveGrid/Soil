@@ -42,9 +42,7 @@ SoilSkipListDataPage >> firstItem [
 
 { #category : #testing }
 SoilSkipListDataPage >> hasItems [
-	self flag: #todo.
-	"need to filter lowest and highest key and check for zero"
-	^ items size > 2
+	^ items notEmpty
 ]
 
 { #category : #testing }

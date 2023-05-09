@@ -46,6 +46,31 @@ SoilBTreeTest >> testAddFirstOverflow [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testAddRandom [
+	| numEntries entries |
+	"just some random addind and checking that we can find it. tree is configured to create lots of pages"
+	btree := SoilBTree new 
+		path: 'sunit-btree';
+		destroy;
+		initializeFilesystem;
+		initializeHeaderPage;
+		keySize: 512;
+		valueSize: 512.
+	
+	numEntries := 20.
+	entries := Set new: numEntries.
+	
+	
+	numEntries timesRepeat: [ | toAdd |
+		toAdd := (numEntries*20) atRandom.
+		entries add: toAdd.
+		btree at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (btree at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testAddSecondOverflow [
 
 	| page capacity |
@@ -152,6 +177,13 @@ SoilBTreeTest >> testCreation [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testIsEmpty [
+	self assert: btree isEmpty.
+	btree at: 1 put: #[1 2].
+	self deny: btree isEmpty
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testIteratorFirst [
 	
 	| capacity first |
@@ -225,6 +257,22 @@ SoilBTreeTest >> testPageAddFirstAndLoad [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testRemoveKey [
+
+	| capacity |
+	capacity := btree headerPage itemCapacity.
+	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	
+	btree removeKey: 20.
+	
+	self assert: (btree at: 1) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (btree at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self should: [ btree at: 20  ] raise: KeyNotFound.
+	btree at: 20 put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (btree at: 20) equals: #[ 1 2 3 4 5 6 7 8 ].
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testSize [
 	
 	| capacity |
@@ -235,6 +283,61 @@ SoilBTreeTest >> testSize [
 	btree at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: btree pages size equals: 3.
 	self assert: btree size equals: capacity + 1.
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testSplitIndexPage [
+	| entries |
+	"this test leads to a split of a non-root index page"
+	btree := SoilBTree new 
+		path: 'sunit-btree';
+		destroy;
+		initializeFilesystem;
+		initializeHeaderPage;
+		keySize: 512;
+		valueSize: 512.
+	
+	entries :=  #(104 247 56 281 61 286 66 337 308 1 400 272 347 335 45 62 207 7 123 140).
+	
+	
+	entries do: [:toAdd |
+		btree at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (btree at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testSplitIndexPageReleoad [
+	| entries |
+	"this test leads to a split of a non-root index page"
+	btree := SoilBTree new 
+		path: 'sunit-btree';
+		destroy;
+		initializeFilesystem;
+		initializeHeaderPage;
+		keySize: 512 ;
+		valueSize: 512.
+	
+	entries :=  #(104 247 56 281 61 286 66 337 308 1 400 272 347 335 45 62 207 7 123 140).
+	
+	
+	entries do: [:toAdd |
+		btree at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (btree at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	"write and reload"
+	btree writePages.
+	btree close.
+	btree := SoilBTree new 
+		path: 'sunit-btree';
+		initializeFilesystem;
+		open. 
+	
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (btree at: each ) equals: (#[ 1 2 3 4 5 6 7 8 ] asByteArrayOfSize: 512)].
 ]
 
 { #category : #tests }
@@ -260,4 +363,29 @@ SoilBTreeTest >> testSplitRootIndexPage [
 	self assert: (btree rootPage items anySatisfy: [ :item | item value asInteger = indexPages third index ]).
 	"and we can find the key added last"
 	self assert: (btree at: capacity + n ) equals:  #[ 1 2 3 4 5 6 7 8 ]
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testSplitRootIndexPageReload [
+	"we add until the root Index is full and has to be split"
+	| capacity n |
+	n := 1.
+	capacity := btree headerPage itemCapacity.
+	[btree rootPage hasRoom] whileTrue: [
+		btree at: n put: #[ 1 2 3 4 5 6 7 8 ].
+		n:= n+1. ].
+	self assert: btree pages size equals: 256.
+	
+	"if we lots of more pages, the root index has to be split"
+	1 to: capacity do: [ :i | btree at:  i + n put: #[ 1 2 3 4 5 6 7 8 ]].
+
+	btree writePages.
+	btree close.
+	btree := SoilBTree new 
+		path: 'sunit-btree';
+		initializeFilesystem;
+		open. 
+	
+	"and we can find the key added last"
+	self assert: (btree at: capacity + n ) equals:  #[ 1 2 3 4 5 6 7 8 ].
 ]

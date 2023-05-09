@@ -61,6 +61,11 @@ SoilBTree >> initializeHeaderPage [
 	self store initializeHeaderPage
 ]
 
+{ #category : #testing }
+SoilBTree >> isEmpty [
+	^ self store headerPage hasItems not
+]
+
 { #category : #accessing }
 SoilBTree >> keySize [
 	^ self headerPage keySize
@@ -175,6 +180,25 @@ SoilBTree >> path: aStringOrFileReference [
 { #category : #'instance creation' }
 SoilBTree >> readPageFrom: aStream [
 	^ SoilBTreePage readPageFrom: aStream
+]
+
+{ #category : #removing }
+SoilBTree >> removeKey: key [ 
+	^ self
+		removeKey: key 
+		ifAbsent: [ KeyNotFound signal: key ]
+]
+
+{ #category : #removing }
+SoilBTree >> removeKey: aString ifAbsent: aBlock [
+	| page index key |
+	key := (aString asSkipListKeyOfSize: self keySize) asInteger.
+	page := self newIterator 
+		find: key;
+		page.
+	^ ((index := page indexOfKey: key) > 0) 
+		ifTrue: [ (page itemRemoveIndex: index) value ]
+		ifFalse: [ aBlock value ]
 ]
 
 { #category : #accessing }
