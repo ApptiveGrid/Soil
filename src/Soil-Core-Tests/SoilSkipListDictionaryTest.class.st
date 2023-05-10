@@ -166,6 +166,19 @@ SoilSkipListDictionaryTest >> testFirst [
 ]
 
 { #category : #tests }
+SoilSkipListDictionaryTest >> testIsEmpty [
+	| dict |
+	dict := SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+		
+	self assert: dict isEmpty.
+	dict at: #foo put: #bar.
+	self deny: dict isEmpty
+]
+
+{ #category : #tests }
 SoilSkipListDictionaryTest >> testLast [
 	| dict |
 	dict := SoilSkipListDictionary new

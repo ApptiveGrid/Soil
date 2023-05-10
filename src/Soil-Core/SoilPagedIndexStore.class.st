@@ -47,7 +47,7 @@ SoilPagedIndexStore >> isCopyOnWrite [
 	^ false
 ]
 
-{ #category : #acessing }
+{ #category : #accessing }
 SoilPagedIndexStore >> lastPageIndex [
 	^ self headerPage lastPageIndex
 ]
@@ -55,11 +55,6 @@ SoilPagedIndexStore >> lastPageIndex [
 { #category : #'instance creation' }
 SoilPagedIndexStore >> newPage [
 	^ index newPage
-]
-
-{ #category : #accessing }
-SoilPagedIndexStore >> nextIndex [
-	^ pages size + 1
 ]
 
 { #category : #'as yet unclassified' }

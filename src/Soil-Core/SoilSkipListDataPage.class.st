@@ -11,7 +11,8 @@ Class {
 }
 
 { #category : #testing }
-SoilSkipListDataPage class >> isAbstract [ 
+SoilSkipListDataPage class >> isAbstract [
+	<ignoreForCoverage>
 	^ self == SoilSkipListDataPage 
 ]
 
