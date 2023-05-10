@@ -135,7 +135,7 @@ SoilSkipListDataPage >> itemCapacity [
 SoilSkipListDataPage >> itemRemoveAt: key [ 
 	^ self 
 		itemRemoveAt: key 
-		ifAbsent: [ KeyNotFound signal: key ]
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #accessing }

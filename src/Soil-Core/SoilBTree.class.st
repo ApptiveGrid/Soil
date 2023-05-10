@@ -186,7 +186,7 @@ SoilBTree >> readPageFrom: aStream [
 SoilBTree >> removeKey: key [ 
 	^ self
 		removeKey: key 
-		ifAbsent: [ KeyNotFound signal: key ]
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #removing }

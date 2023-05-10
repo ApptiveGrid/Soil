@@ -20,7 +20,7 @@ SoilSkipListDictionary class >> soilTransientInstVars [
 SoilSkipListDictionary >> at: key [ 
 	^ self 
 		at: key
-		ifAbsent: [ KeyNotFound signal: key asString, ' not found' ]
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 
 ]
 
@@ -228,7 +228,7 @@ SoilSkipListDictionary >> proxyFromByteArray: aByteArray [
 SoilSkipListDictionary >> removeKey: key [
 	^ self 
 		removeKey: key 
-		ifAbsent: [ KeyNotFound signalFor: key ]
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #removing }
