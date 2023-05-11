@@ -74,6 +74,11 @@ SoilBTreeIndexPage >> readItemsFrom: aStream [
 		items add: (aStream next: self keySize) asInteger -> (aStream next: self pointerSize) asInteger ]
 ]
 
+{ #category : #accessing }
+SoilBTreeIndexPage >> valueSize: anInteger [
+	"ignore, not used"
+]
+
 { #category : #'reading-writing' }
 SoilBTreeIndexPage >> writeItemsOn: aStream [ 
 

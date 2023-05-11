@@ -14,13 +14,14 @@ SoilBTreePage class >> pageCode [
 	^0
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SoilBTreePage class >> readPageFrom: aStream keySize: anInteger [
 	| pageCode pageClass page |
 	pageCode := aStream next asInteger.
 	pageClass := self allSubclasses detect: [ :class | class pageCode = pageCode ].
 	page := pageClass new.
 	page keySize: anInteger.
+	page valueSize: anInteger.
 	^page readFrom: aStream.
 ]
 

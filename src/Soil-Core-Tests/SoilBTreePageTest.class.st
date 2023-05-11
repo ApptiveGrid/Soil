@@ -37,7 +37,7 @@ SoilBTreePageTest >> testWriteAndRead [
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self deny: page isDirty.
-	readPage := SoilBTreePage readPageFrom: bytes readStream.
+	readPage := SoilBTreePage readPageFrom: bytes readStream keySize: 8.
 	self assert: readPage next equals: page next.
 	self assert: readPage valueSize equals: page valueSize.
 	self assert: readPage keySize equals: page keySize.
@@ -73,7 +73,7 @@ SoilBTreePageTest >> testWriteAndReadPageCode [
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self deny: page isDirty.
-	readPage := SoilBTreePage readPageFrom: bytes readStream.
+	readPage := SoilBTreePage readPageFrom: bytes readStream keySize: 8.
 	self assert: readPage next equals: page next.
 	self assert: readPage valueSize equals: page valueSize.
 	self assert: readPage keySize equals: page keySize.
