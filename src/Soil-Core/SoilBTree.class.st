@@ -117,7 +117,6 @@ SoilBTree >> newHeaderPage [
 SoilBTree >> newIndexPage [
 	^ SoilBTreeIndexPage new 
 		keySize: self keySize;
-		valueSize: self valueSize;
 		pageSize: self pageSize;
 		yourself
 ]
@@ -152,7 +151,6 @@ SoilBTree >> newPage [
 SoilBTree >> newRootPage [
 	^ SoilBTreeRootPage new
 		index: 2;
-		valueSize: self valueSize;
 		keySize: self keySize;
 		pageSize: self pageSize
 ]
@@ -261,8 +259,7 @@ SoilBTree >> valueSize [
 
 { #category : #accessing }
 SoilBTree >> valueSize: anInteger [
-	self headerPage valueSize: anInteger.
-	self rootPage valueSize: anInteger
+	self headerPage valueSize: anInteger
 ]
 
 { #category : #writing }

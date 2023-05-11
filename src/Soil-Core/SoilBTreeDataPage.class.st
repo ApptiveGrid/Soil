@@ -2,7 +2,8 @@ Class {
 	#name : #SoilBTreeDataPage,
 	#superclass : #SoilBTreePage,
 	#instVars : [
-		'next'
+		'next',
+		'valueSize'
 	],
 	#category : #'Soil-Core-Index-BTree'
 }
@@ -88,11 +89,6 @@ SoilBTreeDataPage >> nextPageIn: btree [
 	^btree pageAt: next
 ]
 
-{ #category : #accessing }
-SoilBTreeDataPage >> pointerSize [
-	^ 2
-]
-
 { #category : #'instance creation' }
 SoilBTreeDataPage >> readFrom: aStream [ 
 	super readFrom: aStream.
@@ -107,6 +103,16 @@ SoilBTreeDataPage >> readFrom: aStream [
 SoilBTreeDataPage >> readNextFrom: aStream [
 	
 	next := (aStream next: self pointerSize) asInteger.
+]
+
+{ #category : #accessing }
+SoilBTreeDataPage >> valueSize [ 
+	^ valueSize
+]
+
+{ #category : #accessing }
+SoilBTreeDataPage >> valueSize: anInteger [ 
+	valueSize := anInteger 
 ]
 
 { #category : #writing }

@@ -3,8 +3,7 @@ Class {
 	#superclass : #SoilSkipListPage,
 	#instVars : [
 		'items',
-		'keySize',
-		'valueSize'
+		'keySize'
 	],
 	#category : #'Soil-Core-Index-BTree'
 }
@@ -31,6 +30,11 @@ SoilBTreePage >> associationAt: anInteger [
 { #category : #accessing }
 SoilBTreePage >> biggestKey [
 	^ items last key
+]
+
+{ #category : #'as yet unclassified' }
+SoilBTreePage >> find: aKey with: aBTree [ 
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
@@ -60,6 +64,11 @@ SoilBTreePage >> initialize [
 	super initialize.
 	items := SortedCollection new.
 	dirty := true
+]
+
+{ #category : #'as yet unclassified' }
+SoilBTreePage >> insert: anItem into: aBtree [ 
+	^ self subclassResponsibility
 ]
 
 { #category : #testing }
@@ -134,6 +143,11 @@ SoilBTreePage >> numberOfItems [
 	^ items size
 ]
 
+{ #category : #accessing }
+SoilBTreePage >> pointerSize [
+	^ 2
+]
+
 { #category : #reading }
 SoilBTreePage >> readItemsFrom: aStream [ 
 	| numberOfItems |
@@ -169,16 +183,6 @@ SoilBTreePage >> split: newPage [
 { #category : #accessing }
 SoilBTreePage >> valueAt: anInteger [ 
 	^ (self associationAt: anInteger) value
-]
-
-{ #category : #accessing }
-SoilBTreePage >> valueSize [ 
-	^ valueSize
-]
-
-{ #category : #accessing }
-SoilBTreePage >> valueSize: anInteger [ 
-	valueSize := anInteger 
 ]
 
 { #category : #writing }
