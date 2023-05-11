@@ -27,7 +27,7 @@ SoilSkipListPageTest >> testWriteAndRead [
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self deny: page isDirty.
-	readPage := SoilSkipListPage readPageFrom: bytes readStream.
+	readPage := SoilSkipListPage readPageFrom: bytes readStream keySize: 8 valueSize: 8.
 	self assert: readPage index equals: 1.
 	self assert: readPage level equals: 8.
 	self deny: readPage isDirty 
@@ -44,7 +44,7 @@ SoilSkipListPageTest >> testWriteAndReadRightArray [
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self deny: page isDirty.
-	readPage := SoilSkipListPage readPageFrom: bytes readStream.
+	readPage := SoilSkipListPage readPageFrom: bytes readStream keySize: 8 valueSize: 8. 
 	self assert: readPage index equals: 1.
 	self assert: readPage level equals: 8.
 	self assert: readPage right equals: #( 1 2 3 4 5 6 7 8).

@@ -195,7 +195,7 @@ SoilBTree >> path: aStringOrFileReference [
 
 { #category : #'instance creation' }
 SoilBTree >> readPageFrom: aStream [
-	^ SoilBTreePage readPageFrom: aStream keySize: self keySize
+	^ SoilBTreePage readPageFrom: aStream keySize: self keySize valueSize: self valueSize
 ]
 
 { #category : #removing }

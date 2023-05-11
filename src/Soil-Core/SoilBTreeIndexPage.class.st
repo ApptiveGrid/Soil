@@ -76,7 +76,7 @@ SoilBTreeIndexPage >> readItemsFrom: aStream [
 
 { #category : #accessing }
 SoilBTreeIndexPage >> valueSize: anInteger [
-	"ignore, not used"
+	"ignore, not used, the index pages store the pageID as the value, size is static defined in #pointerSize"
 ]
 
 { #category : #'reading-writing' }
@@ -93,6 +93,5 @@ SoilBTreeIndexPage >> writeItemsOn: aStream [
 { #category : #'reading-writing' }
 SoilBTreeIndexPage >> writeOn: aStream [ 
 	super writeOn: aStream.
-	self 
-		writeItemsOn: aStream
+	self writeItemsOn: aStream
 ]
