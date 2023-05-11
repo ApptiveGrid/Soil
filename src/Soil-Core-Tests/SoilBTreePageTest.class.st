@@ -21,8 +21,7 @@ SoilBTreePageTest >> testCreationIndex [
 	page := SoilBTreeIndexPage new 
 		index: 1;
 		pageSize: 4096;
-		keySize: 16;
-		valueSize: 8.
+		keySize: 16.
 	self assert: page hasRoom
 ]
 
@@ -52,7 +51,6 @@ SoilBTreePageTest >> testWriteAndReadIndex [
 	| page bytes readPage |
 	page := SoilBTreeIndexPage new 
 		index: 1;
-		valueSize: 8;
 		keySize: 8.
 	self assert: page isDirty.
 	bytes := ByteArray streamContents: [ :stream |
