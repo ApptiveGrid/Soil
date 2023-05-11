@@ -58,15 +58,13 @@ SoilBTreeIndexPage >> printOn: aStream [
 	aStream << 'index page : #' << index asString
 ]
 
-{ #category : #reading }
+{ #category : #'reading-writing' }
 SoilBTreeIndexPage >> readFrom: aStream [ 
 	super readFrom: aStream.
-	keySize := (aStream next: 2) asInteger.
-
 	self readItemsFrom: aStream
 ]
 
-{ #category : #writing }
+{ #category : #'reading-writing' }
 SoilBTreeIndexPage >> readItemsFrom: aStream [ 
 	| numberOfItems |
 	
@@ -76,7 +74,7 @@ SoilBTreeIndexPage >> readItemsFrom: aStream [
 		items add: (aStream next: self keySize) asInteger -> (aStream next: self pointerSize) asInteger ]
 ]
 
-{ #category : #writing }
+{ #category : #'reading-writing' }
 SoilBTreeIndexPage >> writeItemsOn: aStream [ 
 
 	aStream
@@ -87,11 +85,9 @@ SoilBTreeIndexPage >> writeItemsOn: aStream [
 			nextPutAll: (assoc value asByteArrayOfSize: self pointerSize)]
 ]
 
-{ #category : #writing }
+{ #category : #'reading-writing' }
 SoilBTreeIndexPage >> writeOn: aStream [ 
 	super writeOn: aStream.
-	aStream
-		nextPutAll: (keySize asByteArrayOfSize: 2).
 	self 
 		writeItemsOn: aStream
 ]

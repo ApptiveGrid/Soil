@@ -91,6 +91,7 @@ SoilBTree >> keySize [
 { #category : #accessing }
 SoilBTree >> keySize: anInteger [
 	self headerPage keySize: anInteger.
+	"we have to set the keySize of the rootPage, too, as the page gets created before the keySize is known"
 	self rootPage keySize: anInteger
 ]
 
@@ -194,7 +195,7 @@ SoilBTree >> path: aStringOrFileReference [
 
 { #category : #'instance creation' }
 SoilBTree >> readPageFrom: aStream [
-	^ SoilBTreePage readPageFrom: aStream
+	^ SoilBTreePage readPageFrom: aStream keySize: self keySize
 ]
 
 { #category : #removing }
