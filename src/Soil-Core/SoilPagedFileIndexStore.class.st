@@ -5,7 +5,7 @@ Class {
 		'stream',
 		'streamSemaphore'
 	],
-	#category : #'Soil-Core-Index-SkipList'
+	#category : #'Soil-Core-Index-Common'
 }
 
 { #category : #converting }
@@ -14,7 +14,7 @@ SoilPagedFileIndexStore >> asCopyOnWriteStore [
 		wrappedStore: self
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'open/close' }
 SoilPagedFileIndexStore >> close [ 
 	stream ifNotNil: [  
 		stream close.
@@ -27,12 +27,12 @@ SoilPagedFileIndexStore >> filePageSize [
 	^ 4096
 ]
 
-{ #category : #accessing }
+{ #category : #flushing }
 SoilPagedFileIndexStore >> flush [
 	self flushPages 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #flushing }
 SoilPagedFileIndexStore >> flushPages [
 	pagesMutex critical: [  
 		pages valuesDo: [ :page |
@@ -64,14 +64,14 @@ SoilPagedFileIndexStore >> initializeHeaderPage [
 		pages at: page index put: page	]
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'open/close' }
 SoilPagedFileIndexStore >> open [
 	self 
 		openStream;
 		readHeaderPage 
 ]
 
-{ #category : #opening }
+{ #category : #'open/close' }
 SoilPagedFileIndexStore >> openStream [
 	stream := SoilLockableStream path: index path.
 ]
@@ -87,7 +87,7 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	^ page
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilPagedFileIndexStore >> pagesStart [
 	^ 4096
 ]
@@ -97,7 +97,7 @@ SoilPagedFileIndexStore >> positionOfPageIndex: anInteger [
 	^ ((anInteger - 1) * self filePageSize)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #writing }
 SoilPagedFileIndexStore >> readHeaderPage [
 	| headerPage |
 	streamSemaphore critical: [  
