@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'clusterRoot'
 	],
-	#category : #'Soil-Serializer'
+	#category : #'Soil-Serializer-Serializer/Materializer'
 }
 
 { #category : #'instance creation' }
@@ -183,7 +183,7 @@ SoilSerializer >> notSupportedError: anObject [
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #registry }
 SoilSerializer >> registerIndexedObject: anObject [ 
 	"indexes are registered in the segment of the cluster root. So we pass
 	the cluster root in order to figure the segment"

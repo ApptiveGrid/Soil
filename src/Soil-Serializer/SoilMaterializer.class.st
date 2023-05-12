@@ -1,10 +1,10 @@
 Class {
 	#name : #SoilMaterializer,
 	#superclass : #SoilBasicMaterializer,
-	#category : #'Soil-Serializer'
+	#category : #'Soil-Serializer-Serializer/Materializer'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #materializing }
 SoilMaterializer class >> materializeFromBytes: aByteArray [
 	^ (self on: aByteArray readStream)
 		materialize
@@ -14,6 +14,7 @@ SoilMaterializer class >> materializeFromBytes: aByteArray [
 SoilMaterializer class >> nextLengthEncodedInteger [
 
 	| value aSoilMaterializer |
+	self flag: #TODO. "seems to be not called and does not work"
 	aSoilMaterializer := self new.
 	value := aSoilMaterializer nextByte.
 	value < 128 ifTrue: [ ^ value ].
@@ -21,7 +22,7 @@ SoilMaterializer class >> nextLengthEncodedInteger [
 		  (value bitAnd: 127)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SoilMaterializer class >> on: aReadStream [
 	^ self new 
 		stream: aReadStream 

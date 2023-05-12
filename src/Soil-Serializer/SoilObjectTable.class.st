@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'table'
 	],
-	#category : #'Soil-Serializer'
+	#category : #'Soil-Serializer-Base'
 }
 
 { #category : #api }

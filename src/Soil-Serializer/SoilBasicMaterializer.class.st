@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'objects'
 	],
-	#category : #'Soil-Serializer'
+	#category : #'Soil-Serializer-Serializer/Materializer'
 }
 
 { #category : #'reading - basic' }
