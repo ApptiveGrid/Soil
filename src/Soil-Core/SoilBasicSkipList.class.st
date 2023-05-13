@@ -11,7 +11,7 @@ Class {
 SoilBasicSkipList >> at: key [ 
 	^ self 
 		at: key 
-		ifAbsent: [ KeyNotFound signal: key ]
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #private }
@@ -150,7 +150,7 @@ SoilBasicSkipList >> pageSize [
 SoilBasicSkipList >> removeKey: key [ 
 	^ self
 		removeKey: key 
-		ifAbsent: [ KeyNotFound signal: key ]
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #removing }

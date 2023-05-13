@@ -7,7 +7,7 @@ Class {
 	#category : #'Soil-Core-Tests'
 }
 
-{ #category : #initialization }
+{ #category : #running }
 SoilSkipListTest >> setUp [ 
 	super setUp.
 	skipList := SoilSkipList new 

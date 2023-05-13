@@ -86,7 +86,7 @@ SoilBTreePage >> itemCapacity [
 SoilBTreePage >> itemRemoveAt: key [ 
 	^ self 
 		itemRemoveAt: key 
-		ifAbsent: [ KeyNotFound signal: key ]
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #accessing }
