@@ -21,6 +21,16 @@ SoilNewBehaviorEntry >> commitIn: aSoilTransaction [
 ]
 
 { #category : #accessing }
+SoilNewBehaviorEntry >> context [ 
+	^ objectId 
+]
+
+{ #category : #'as yet unclassified' }
+SoilNewBehaviorEntry >> effect [
+	^ identifier 
+]
+
+{ #category : #accessing }
 SoilNewBehaviorEntry >> identifier: aString [ 
 	identifier := aString 
 ]

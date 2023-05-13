@@ -31,6 +31,16 @@ SoilNewObjectEntry >> commitIn: transaction [
 ]
 
 { #category : #accessing }
+SoilNewObjectEntry >> context [
+	^ objectId
+]
+
+{ #category : #'as yet unclassified' }
+SoilNewObjectEntry >> effect [ 
+	^ 'position: ', position asString
+]
+
+{ #category : #accessing }
 SoilNewObjectEntry >> objectId [
 	^ objectId
 ]

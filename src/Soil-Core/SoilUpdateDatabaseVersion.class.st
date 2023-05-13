@@ -17,6 +17,16 @@ SoilUpdateDatabaseVersion >> commitIn: aSoilTransaction [
 	aSoilTransaction soil databaseVersion: version
 ]
 
+{ #category : #accessing }
+SoilUpdateDatabaseVersion >> context [
+	^ #global
+]
+
+{ #category : #'as yet unclassified' }
+SoilUpdateDatabaseVersion >> effect [ 
+	^ version 
+]
+
 { #category : #printing }
 SoilUpdateDatabaseVersion >> printOn: aStream [ 
 	super printOn: aStream.

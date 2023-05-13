@@ -38,6 +38,11 @@ Soil >> behaviorRegistry [
 	^ behaviorRegistry
 ]
 
+{ #category : #'as yet unclassified' }
+Soil >> buildTransactionJournalPath: anInteger [
+	^ self path / #journal / anInteger asString , #journal
+]
+
 { #category : #'initialize-release' }
 Soil >> close [
 	objectRepository ifNotNil: [ 
@@ -96,6 +101,13 @@ Soil >> initializeFilesystem [
 ]
 
 { #category : #'as yet unclassified' }
+Soil >> inspectionJournal [
+	<inspectorPresentationOrder: 40 title: 'journal'>
+
+	^ self journal inspectionContent
+]
+
+{ #category : #'as yet unclassified' }
 Soil >> lockDatabaseVersionFor: lockContext [ 
 	^ settings lockDatabaseVersionFor: lockContext 
 ]
@@ -129,6 +141,12 @@ Soil >> newTransaction [
 		soil: self;
 		readVersion: self databaseVersion;
 		yourself
+]
+
+{ #category : #'instance creation' }
+Soil >> newTransactionJournalFor: anInteger [ 
+	^ SoilTransactionJournal new 
+		on: (self buildTransactionJournalPath: anInteger)
 ]
 
 { #category : #accessing }

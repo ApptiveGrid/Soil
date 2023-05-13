@@ -24,6 +24,16 @@ SoilNewKeyEntry >> commitIn: transaction [
 ]
 
 { #category : #accessing }
+SoilNewKeyEntry >> context [ 
+	^ indexId 
+]
+
+{ #category : #'as yet unclassified' }
+SoilNewKeyEntry >> effect [
+	^ key -> value 
+]
+
+{ #category : #accessing }
 SoilNewKeyEntry >> indexId: aString [ 
 	indexId := aString
 ]

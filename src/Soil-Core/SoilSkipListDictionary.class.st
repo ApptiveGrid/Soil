@@ -13,7 +13,7 @@ Class {
 
 { #category : #accessing }
 SoilSkipListDictionary class >> soilTransientInstVars [ 
-	^ #( index transaction newValues )
+	^ #( index transaction newValues removedValues )
 ]
 
 { #category : #accessing }
