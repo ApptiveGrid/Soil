@@ -75,7 +75,12 @@ SoilBTree >> initializeFilesystem [
 
 { #category : #initialization }
 SoilBTree >> initializeHeaderPage [
-	self store initializeHeaderPage
+	| rootIndexPage |
+	self store 
+		initializeHeaderPage.
+	"we create the first index page as the root here"	
+	rootIndexPage := self newRootPage.
+	self store pageAt: rootIndexPage index put: rootIndexPage
 ]
 
 { #category : #testing }
@@ -101,7 +106,7 @@ SoilBTree >> last [
 
 { #category : #'instance creation' }
 SoilBTree >> newFileStore [
-	^ SoilPagedFileIndexStoreBTree new
+	^ SoilPagedFileIndexStore new
 		index: self
 ]
 
