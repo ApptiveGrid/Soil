@@ -25,6 +25,11 @@ SoilBTreeIndexPage >> findPageFor: aKey with: aBTree [
 	^nil
 ]
 
+{ #category : #testing }
+SoilBTreeIndexPage >> hasRoom [
+	^ self headerSize + ((items size + 1) * (self keySize + self pointerSize)) <= self pageSize
+]
+
 { #category : #utilities }
 SoilBTreeIndexPage >> headerSize [
 	^ self indexSize
@@ -53,26 +58,28 @@ SoilBTreeIndexPage >> printOn: aStream [
 	aStream << 'index page : #' << index asString
 ]
 
-{ #category : #reading }
+{ #category : #'reading-writing' }
 SoilBTreeIndexPage >> readFrom: aStream [ 
 	super readFrom: aStream.
-	keySize := (aStream next: 2) asInteger.
-	valueSize := (aStream next: 2) asInteger.
-
 	self readItemsFrom: aStream
 ]
 
-{ #category : #writing }
+{ #category : #'reading-writing' }
 SoilBTreeIndexPage >> readItemsFrom: aStream [ 
 	| numberOfItems |
 	
 	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
 	items := SortedCollection new: numberOfItems.
 	numberOfItems timesRepeat: [ 
-		items add: (aStream next: self keySize) asInteger -> (aStream next: 2) asInteger ]
+		items add: (aStream next: self keySize) asInteger -> (aStream next: self pointerSize) asInteger ]
 ]
 
-{ #category : #writing }
+{ #category : #accessing }
+SoilBTreeIndexPage >> valueSize: anInteger [
+	"ignore, not used, the index pages store the pageID as the value, size is static defined in #pointerSize"
+]
+
+{ #category : #'reading-writing' }
 SoilBTreeIndexPage >> writeItemsOn: aStream [ 
 
 	aStream
@@ -80,15 +87,11 @@ SoilBTreeIndexPage >> writeItemsOn: aStream [
 	items do: [ :assoc |
 		aStream 
 			nextPutAll: (assoc key asByteArrayOfSize: self keySize);
-			nextPutAll: (assoc value asByteArrayOfSize: 2)]
+			nextPutAll: (assoc value asByteArrayOfSize: self pointerSize)]
 ]
 
-{ #category : #writing }
+{ #category : #'reading-writing' }
 SoilBTreeIndexPage >> writeOn: aStream [ 
 	super writeOn: aStream.
-	aStream
-		nextPutAll: (keySize asByteArrayOfSize: 2);
-		nextPutAll: (valueSize asByteArrayOfSize: 2).
-	self 
-		writeItemsOn: aStream
+	self writeItemsOn: aStream
 ]

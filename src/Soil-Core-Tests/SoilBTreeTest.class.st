@@ -363,18 +363,18 @@ SoilBTreeTest >> testSplitRootIndexPage [
 	[btree rootPage hasRoom] whileTrue: [
 		btree at: n put: #[ 1 2 3 4 5 6 7 8 ].
 		n:= n+1. ].
-	self assert: btree pages size equals: 256.
+	self assert: btree pages size equals: 410.
 	
 	"if we lots of more pages, the root index has to be split"
 	1 to: capacity do: [ :i | btree at:  i + n put: #[ 1 2 3 4 5 6 7 8 ]].
 	
-	self assert: btree pages size equals: 259.
+	self assert: btree pages size equals: 413.
 	indexPages := btree pages values select: [ :each | each isKindOf: SoilBTreeIndexPage ].
 	"we now have indeed three index pages"
 	self assert: indexPages size equals: 3.
-	self assert: btree rootPage equals: indexPages second.
+	self assert: btree rootPage equals: indexPages third.
 	"the root page now points to the new index page"
-	self assert: (btree rootPage items anySatisfy: [ :item | item value asInteger = indexPages third index ]).
+	self assert: (btree rootPage items anySatisfy: [ :item | item value asInteger = indexPages first index ]).
 	"and we can find the key added last"
 	self assert: (btree at: capacity + n ) equals:  #[ 1 2 3 4 5 6 7 8 ]
 ]
@@ -388,7 +388,7 @@ SoilBTreeTest >> testSplitRootIndexPageReload [
 	[btree rootPage hasRoom] whileTrue: [
 		btree at: n put: #[ 1 2 3 4 5 6 7 8 ].
 		n:= n+1. ].
-	self assert: btree pages size equals: 256.
+	self assert: btree pages size equals: 410.
 	
 	"if we lots of more pages, the root index has to be split"
 	1 to: capacity do: [ :i | btree at:  i + n put: #[ 1 2 3 4 5 6 7 8 ]].

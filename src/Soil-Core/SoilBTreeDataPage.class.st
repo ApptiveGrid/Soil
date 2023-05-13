@@ -2,7 +2,8 @@ Class {
 	#name : #SoilBTreeDataPage,
 	#superclass : #SoilBTreePage,
 	#instVars : [
-		'next'
+		'next',
+		'valueSize'
 	],
 	#category : #'Soil-Core-Index-BTree'
 }
@@ -88,35 +89,40 @@ SoilBTreeDataPage >> nextPageIn: btree [
 	^btree pageAt: next
 ]
 
-{ #category : #accessing }
-SoilBTreeDataPage >> pointerSize [
-	^ 2
-]
-
-{ #category : #'instance creation' }
+{ #category : #'reading-writing' }
 SoilBTreeDataPage >> readFrom: aStream [ 
 	super readFrom: aStream.
-	self readNextFrom: aStream.
-	keySize := (aStream next: 2) asInteger.
-	valueSize := (aStream next: 2) asInteger.
-
-	self readItemsFrom: aStream
+	self 
+		readNextFrom: aStream;
+		readItemsFrom: aStream
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'reading-writing' }
 SoilBTreeDataPage >> readNextFrom: aStream [
 	
 	next := (aStream next: self pointerSize) asInteger.
 ]
 
-{ #category : #writing }
+{ #category : #accessing }
+SoilBTreeDataPage >> valueSize [ 
+	^ valueSize
+]
+
+{ #category : #accessing }
+SoilBTreeDataPage >> valueSize: anInteger [ 
+	valueSize := anInteger 
+]
+
+{ #category : #'reading-writing' }
+SoilBTreeDataPage >> writeNextOn: aStream [
+	aStream
+		nextPutAll: (next asByteArrayOfSize: self pointerSize)
+]
+
+{ #category : #'reading-writing' }
 SoilBTreeDataPage >> writeOn: aStream [ 
 	super writeOn: aStream.
-	aStream
-		nextPutAll: (next asByteArrayOfSize: self pointerSize);
-		nextPutAll: (keySize asByteArrayOfSize: 2);
-		nextPutAll: (valueSize asByteArrayOfSize: 2).
-		
 	self 
+		writeNextOn: aStream;
 		writeItemsOn: aStream
 ]

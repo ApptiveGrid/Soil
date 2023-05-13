@@ -24,11 +24,14 @@ SoilSkipListPage class >> random [
 ]
 
 { #category : #'instance creation' }
-SoilSkipListPage class >> readPageFrom: aStream [
-	| pageCode pageClass |
+SoilSkipListPage class >> readPageFrom: aStream keySize: keySize valueSize: valueSize [
+	| pageCode pageClass page |
 	pageCode := aStream next asInteger.
 	pageClass := self allSubclasses detect: [ :class | class pageCode = pageCode ].
-	^pageClass new readFrom: aStream.
+	page := pageClass new.
+	page keySize: keySize.
+	page valueSize: valueSize.
+	^page readFrom: aStream.
 ]
 
 { #category : #accessing }

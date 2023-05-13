@@ -44,6 +44,32 @@ SoilSkipListTest >> testAddFirstOverflow [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testAddFirstOverflowReload [
+	
+	| page capacity |
+	capacity := skipList firstPage itemCapacity.
+	1 to: capacity do: [ :n | 
+		skipList at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	self assert: skipList pages size equals: 1.
+	skipList at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: skipList pages size equals: 2.
+	page := skipList pageAt: 2.
+	self assert: page numberOfItems equals: 128.
+	self assert: page items first key equals: 129.
+	self assert: page items last key asByteArray equals: #[ 1 0 ].
+	
+	"write it and then read it back with a new SoilSkipList"
+	skipList writePages.
+	skipList close.
+	skipList := SoilSkipList new 
+		path: 'sunit-skiplist';
+		initializeFilesystem;
+		open.
+	"we should be able to do a lookup"
+	self assert: ((skipList at: capacity) asByteArrayOfSize: 8) equals: #[ 1 2 3 4 5 6 7 8 ].
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testAddInBetween [
 	
 	| page capacity |
