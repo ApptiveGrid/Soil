@@ -4,10 +4,10 @@ Class {
 	#instVars : [
 		'wrappedStore'
 	],
-	#category : #'Soil-Core-Index-SkipList'
+	#category : #'Soil-Core-Index-Common'
 }
 
-{ #category : #accessing }
+{ #category : #flushing }
 SoilCopyOnWriteIndexStore >> flush [ 
 	^ wrappedStore flush
 ]

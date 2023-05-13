@@ -10,6 +10,12 @@ Class {
 	#category : #'Soil-Core-Index-Common'
 }
 
+{ #category : #testing }
+SoilIndexIterator class >> isAbstract [
+
+	^ self == SoilIndexIterator
+]
+
 { #category : #'instance creation' }
 SoilIndexIterator class >> on: aSoilIndex [
 	^ self new 

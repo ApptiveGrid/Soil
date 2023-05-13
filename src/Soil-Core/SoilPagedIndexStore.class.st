@@ -6,15 +6,20 @@ Class {
 		'index',
 		'pagesMutex'
 	],
-	#category : #'Soil-Core-Index-SkipList'
+	#category : #'Soil-Core-Index-Common'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
+SoilPagedIndexStore class >> isAbstract [
+	^ self == SoilPagedIndexStore
+]
+
+{ #category : #flushing }
 SoilPagedIndexStore >> flush [
 	^ self subclassResponsibility
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilPagedIndexStore >> headerPage [
 	^ self pageAt: 1
 ]
@@ -57,7 +62,7 @@ SoilPagedIndexStore >> newPage [
 	^ index newPage
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilPagedIndexStore >> nextPageIndex [
 	^ self headerPage nextPageIndex
 ]
@@ -78,7 +83,7 @@ SoilPagedIndexStore >> pageAt: anInteger put: aPage [
 			put: aPage ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilPagedIndexStore >> pageFaultAt: anInteger [ 
 	^ self subclassResponsibility
 ]
