@@ -5,7 +5,7 @@ Class {
 		'transaction',
 		'dict'
 	],
-	#category : #'Soil-Serializer'
+	#category : #'Soil-Serializer-Base'
 }
 
 { #category : #'instance creation' }
@@ -124,7 +124,7 @@ SoilPersistentDictionary >> size [
 	^ dict size
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #serialization }
 SoilPersistentDictionary >> soilBasicSerialize: serializer [
 	self class == SoilPersistentDictionary ifFalse: [ ^ super soilBasicSerialize: serializer ].
 	serializer nextPutPersistentDictionary: self
@@ -139,7 +139,7 @@ SoilPersistentDictionary >> soilClusterRootIn: aTransaction [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #serialization }
 SoilPersistentDictionary >> soilLoadedIn: aSOTransaction [
 	transaction := aSOTransaction 
 ]

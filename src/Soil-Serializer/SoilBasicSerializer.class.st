@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'objectIdTable'
 	],
-	#category : #'Soil-Serializer'
+	#category : #'Soil-Serializer-Serializer/Materializer'
 }
 
 { #category : #'writing - basic' }

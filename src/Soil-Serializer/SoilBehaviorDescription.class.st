@@ -8,7 +8,7 @@ Class {
 		'classLayout',
 		'version'
 	],
-	#category : #'Soil-Serializer'
+	#category : #'Soil-Serializer-Base'
 }
 
 { #category : #'instance creation' }
@@ -29,7 +29,7 @@ SoilBehaviorDescription class >> meta [
 		objectId: self metaId
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilBehaviorDescription class >> soilTransientInstVars [ 
 	^ #( objectId ) 
 ]
@@ -78,7 +78,7 @@ SoilBehaviorDescription >> compatibilityCheckObject: anObject [
 	^anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilBehaviorDescription >> incrementVersion [ 
 	version := version + 1
 ]
