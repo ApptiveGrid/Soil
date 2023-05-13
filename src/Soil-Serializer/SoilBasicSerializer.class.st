@@ -9,18 +9,16 @@ Class {
 
 { #category : #'writing - basic' }
 SoilBasicSerializer >> basicNextPutString: aString [ 
-	| buf |
-	buf := aString asByteArray.
 	self
-		nextPutLengthEncodedInteger: buf size;
-		nextPutBytesFrom: buf
+		nextPutLengthEncodedInteger: aString size;
+		nextPutBytesFrom: aString
 ]
 
 { #category : #writing }
 SoilBasicSerializer >> basicNextPutSymbol: aSymbol [ 
 	self
 		nextPutLengthEncodedInteger: aSymbol size;
-		nextPutBytesFrom: aSymbol asByteArray
+		nextPutBytesFrom: aSymbol
 ]
 
 { #category : #initialization }
@@ -44,7 +42,7 @@ SoilBasicSerializer >> nextPutByteArray: aByteArray [
 
 { #category : #'writing - basic' }
 SoilBasicSerializer >> nextPutBytesFrom: aByteArray [
-	stream nextPutAll: aByteArray 
+	stream nextBytesPutAll: aByteArray 
 
 ]
 
