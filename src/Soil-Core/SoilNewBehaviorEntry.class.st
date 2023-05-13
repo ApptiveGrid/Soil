@@ -26,6 +26,11 @@ SoilNewBehaviorEntry >> identifier: aString [
 ]
 
 { #category : #accessing }
+SoilNewBehaviorEntry >> objectId [
+	^ objectId
+]
+
+{ #category : #accessing }
 SoilNewBehaviorEntry >> objectId: aSoilObjectId [ 
 	objectId := aSoilObjectId 
 ]

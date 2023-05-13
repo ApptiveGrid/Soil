@@ -105,6 +105,9 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 			behaviorDescription := (SoilBehaviorDescription for: aClass)
 				beFirstVersion;
 				objectId: self newMetaObjectId.
+			self flag: #todo.
+			"this should be late bound. When the class referecenes are put into the
+			record this should be removed"
 			behaviorDescription objectId initializeIndex: self objectRepository.
 			self atObjectId: behaviorDescription objectId putObject: behaviorDescription. ].
 	
@@ -315,6 +318,11 @@ SoilTransaction >> isRoot: anObject [
 	^ (objectMap 
 		at: anObject theNonSoilProxy 
 		ifAbsent: [ nil ]) notNil
+]
+
+{ #category : #accessing }
+SoilTransaction >> journal [
+	^ journal
 ]
 
 { #category : #'as yet unclassified' }

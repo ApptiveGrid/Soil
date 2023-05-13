@@ -31,6 +31,11 @@ SoilNewObjectEntry >> commitIn: transaction [
 ]
 
 { #category : #accessing }
+SoilNewObjectEntry >> objectId [
+	^ objectId
+]
+
+{ #category : #accessing }
 SoilNewObjectEntry >> objectId: aSOObjectId [ 
 	objectId := aSOObjectId
 ]
