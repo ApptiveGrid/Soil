@@ -35,6 +35,14 @@ SoilNewObjectEntry >> objectId: aSOObjectId [
 	objectId := aSOObjectId
 ]
 
+{ #category : #printing }
+SoilNewObjectEntry >> printOn: aStream [ 
+	super printOn: aStream.
+	aStream 
+		<< ' objectId: '
+		<< objectId asString 
+]
+
 { #category : #accessing }
 SoilNewObjectEntry >> record [
 

@@ -144,15 +144,36 @@ SoilTransaction >> buildJournal [
 	journal := SoilJournal new
 		transaction: self;
 		create.
+	"create entries for all new objects and new object versions"
 	recordsToCommit do: [ :record | 
 		record version: writeVersion.
 		journal addEntries: record asJournalEntry.
 		record committed  ].
+	"for all new objects with a new behavior we create an entry to
+	add the behavior"
+	behaviorDescriptions do: [ :description |
+		journal addEntry: (SoilNewBehaviorEntry new 
+			identifier: description value behaviorIdentifier;
+			objectId: description objectId) ].
+	"add entries for updating the last index of each modified 
+	segment"
+	lastObjectIndexes keysAndValuesDo: [ :segment :index |
+		journal addEntry: (SoilUpdateSegmentIndexEntry new 
+			segment: segment;
+			index: index value) ].
+	"update the global database version"
+	journal addEntry: (SoilUpdateDatabaseVersion new 
+		version: writeVersion).
 	^ journal
 ]
 
 { #category : #accessing }
 SoilTransaction >> buildWriteVersion [
+	"first we lock the database version so it cannot be modified while we are 
+	checkpointing"
+	locks add: (soil lockDatabaseVersionFor: self).
+	"Now the version is locked. We can read it again to have the real version and
+	increment"
 	^ soil databaseVersion + 1 
 ]
 
@@ -168,9 +189,7 @@ SoilTransaction >> checkpoint [
 	the database for commiting until this checkpoint is done. The ensure block is needed
 	to be sure to release all locks at the end."
 		[ 
-		locks add: (soil lockDatabaseVersionFor: self).
-		"Now the version is locked. We can read it again to have the real version and
-		increment"
+		"lock global database version and create a version for new modification"
 		writeVersion := self buildWriteVersion.
 		"lock all records in the segment and check indexes for out of date versions"
 		self acquireLocksAndDetectWriteSkew.
@@ -185,16 +204,7 @@ SoilTransaction >> checkpoint [
 			commit;
 			close.
 		indexes values do: #flush.
-		"write back the accumulated new indexes for all segments"
-		lastObjectIndexes keysAndValuesDo: [ :segment :index |
-			segment lastObjectIndex: index value ].
-		
-		behaviorDescriptions do: [ :description |
-			soil behaviorRegistry 
-				nameAt: description value behaviorIdentifier 
-				put: description objectId ].
-		soil behaviorRegistry flush.
-		soil databaseVersion: writeVersion ]
+		soil behaviorRegistry flush ]
 				ensure: [self releaseLocks ] ]
 
 ]
@@ -487,6 +497,11 @@ SoilTransaction >> root: anObject [
 		atObjectId: SoilObjectId root 
 		putObject: anObject.
 	anObject soilClusterRootIn: self
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransaction >> segmentAt: anInteger [ 
+	^ self objectRepository segmentAt: anInteger 
 ]
 
 { #category : #accessing }
