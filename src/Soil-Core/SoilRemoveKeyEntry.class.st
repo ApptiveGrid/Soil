@@ -26,6 +26,11 @@ SoilRemoveKeyEntry >> commitIn: transaction [
 ]
 
 { #category : #accessing }
+SoilRemoveKeyEntry >> context [ 
+	self halt.
+]
+
+{ #category : #accessing }
 SoilRemoveKeyEntry >> indexId: aString [ 
 	indexId := aString
 ]

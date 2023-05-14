@@ -13,7 +13,7 @@ Class {
 
 { #category : #accessing }
 SoilSkipListDictionary class >> soilTransientInstVars [ 
-	^ #( index transaction newValues )
+	^ #( index transaction newValues removedValues )
 ]
 
 { #category : #accessing }
@@ -293,7 +293,8 @@ SoilSkipListDictionary >> soilClusterRootIn: aTransaction [
 SoilSkipListDictionary >> soilLoadedIn: aTransaction [
 	transaction := aTransaction.
 	"when being materialized newValues is not initialized so we do it here"
-	newValues := Dictionary new 
+	newValues := Dictionary new.
+	removedValues := Dictionary new 
 ]
 
 { #category : #accessing }

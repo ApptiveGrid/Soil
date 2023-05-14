@@ -40,6 +40,24 @@ SoilJournalTest >> testNewRootObject [
 ]
 
 { #category : #tests }
+SoilJournalTest >> testNewRootSkipList [
+	| tx journal |
+	tx := soil newTransaction.
+	tx root: (SoilSkipListDictionary new
+		maxLevel: 8;
+		keySize: 16;
+		at: #foo put: #bar).
+	tx checkpoint.
+	journal := tx journal.
+	self assert: journal size equals: 7.
+	self assert: (journal anyEntrySatisfy:[:each | each objectId isSameObjectId: (SoilObjectId segment: 1 index: 1) ]).
+	self assert: (journal anyEntrySatisfy: [:each | each class = SoilNewKeyEntry ]).
+	self assert: (journal entryAt: 5) class equals: SoilNewBehaviorEntry.
+	self assert: (journal entryAt: 6) class equals: SoilUpdateSegmentIndexEntry.
+	self assert: (journal entryAt: 7) class equals: SoilUpdateDatabaseVersion.
+]
+
+{ #category : #tests }
 SoilJournalTest >> testRootObjectUpdate [
 	| tx tx2 journal |
 	tx := soil newTransaction.
@@ -75,6 +93,7 @@ SoilJournalTest >> testRootObjectUpdateClusterObject [
 	self assert: (journal entries anySatisfy: [:entry | entry class = SoilNewBehaviorEntry ]).
 	self assert: (journal entries anySatisfy: [:entry | entry class = SoilUpdateSegmentIndexEntry ]).
 	self assert: (journal entryAt: 6) class equals: SoilUpdateDatabaseVersion.
+
 ]
 
 { #category : #tests }
@@ -94,4 +113,5 @@ SoilJournalTest >> testRootObjectUpdateClusterPrimitive [
 	self assert: journal size equals: 4.
 	self assert: (journal entries anySatisfy: [:entry | entry objectId isSameObjectId: (SoilObjectId segment: 1 index: 1) ]).
 	self assert: (journal entryAt: 4) class equals: SoilUpdateDatabaseVersion.
+
 ]

@@ -20,6 +20,16 @@ SoilUpdateSegmentIndexEntry >> commitIn: aSoilTransaction [
 ]
 
 { #category : #accessing }
+SoilUpdateSegmentIndexEntry >> context [
+	^ 'segment #', segmentId asString
+]
+
+{ #category : #'as yet unclassified' }
+SoilUpdateSegmentIndexEntry >> effect [
+	^ index
+]
+
+{ #category : #accessing }
 SoilUpdateSegmentIndexEntry >> index: anInteger [ 
 	index := anInteger 
 ]

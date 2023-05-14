@@ -144,9 +144,7 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 
 { #category : #accessing }
 SoilTransaction >> buildJournal [
-	journal := SoilJournal new
-		transaction: self;
-		create.
+	journal := soil newTransactionJournalFor: writeVersion.
 	"create entries for all new objects and new object versions"
 	recordsToCommit do: [ :record | 
 		record version: writeVersion.
@@ -204,7 +202,7 @@ SoilTransaction >> checkpoint [
 			locks add: (segment lockAppendingFor: self) ].
 		self buildJournal
 			write;
-			commit;
+			commitIn: self;
 			close.
 		indexes values do: #flush.
 		soil behaviorRegistry flush ]
