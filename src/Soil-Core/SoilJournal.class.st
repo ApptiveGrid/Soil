@@ -42,6 +42,16 @@ SoilJournal >> create [
 		binaryWriteStream 
 ]
 
+{ #category : #accessing }
+SoilJournal >> entries [
+	^ entries
+]
+
+{ #category : #accessing }
+SoilJournal >> entryAt: anInteger [ 
+	^ entries at: anInteger 
+]
+
 { #category : #initialization }
 SoilJournal >> initialize [ 
 	super initialize.
@@ -51,6 +61,11 @@ SoilJournal >> initialize [
 { #category : #accessing }
 SoilJournal >> path [
 	^ self soil path / #journal / transaction writeVersion asString , #journal
+]
+
+{ #category : #accessing }
+SoilJournal >> size [ 
+	^ entries size
 ]
 
 { #category : #accessing }

@@ -25,6 +25,7 @@ SoilObjectIndexFile >> at: index [
 
 { #category : #accessing }
 SoilObjectIndexFile >> at: index putPosition: position [ 
+	(position > 0) ifFalse: [ SoilIndexOutOfRange signal: 'object index needs to be larger than zero' ].
 	semaphore critical: [  
 		stream position: (self indexPositionAt: index).
 		stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize).
@@ -47,7 +48,7 @@ SoilObjectIndexFile >> initialize [
 SoilObjectIndexFile >> initializeStart [
 	self lastObjectIndex: 1.
 	"intialize the slot for the root object"
-	self at: 1 putPosition: 0.
+	self at: 1 putPosition: 1.
 ]
 
 { #category : #accessing }

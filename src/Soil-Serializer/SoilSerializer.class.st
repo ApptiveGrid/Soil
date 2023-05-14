@@ -39,6 +39,7 @@ SoilSerializer >> nextPutAssociation: anAssociation [
 
 { #category : #writing }
 SoilSerializer >> nextPutBehaviorDescription: description [
+	(description objectId index > 0) ifFalse: [ SoilIndexOutOfRange signal: 'object index needs to be larger than zero' ].
 	self
 		nextPutObjectType;
 		nextPutLengthEncodedInteger: (description objectId index);
