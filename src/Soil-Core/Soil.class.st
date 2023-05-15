@@ -103,6 +103,8 @@ Soil >> initializeFilesystem [
 { #category : #'as yet unclassified' }
 Soil >> inspectionJournal [
 	<inspectorPresentationOrder: 40 title: 'journal'>
+	<ignoreNotImplementedSelectors: #(inspectionContent)>
+	self flag: #TODO.
 
 	^ self journal inspectionContent
 ]
