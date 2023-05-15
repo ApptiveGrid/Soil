@@ -104,13 +104,15 @@ SoilCleanCodeTest >> testNoUncategorizedMethods [
 SoilCleanCodeTest >> testNoUnimplementedCalls [
 
 	| remaining |
-	self skip.
-	"How is this pragma supposed to be used?"
+	"To tag selectors send that are not implemented that should not trigger this rule, use the pragma 
+	<ignoreNotImplementedSelectors: #(selector:to:be:ignored)>"
+	
 	remaining := Soil package methods select: [ :meth | 
 		             | ignored |
-		             ignored := (meth pragmaAt: #ignoreUnimplementedCalls:)
-			                        ifNotNil: [ :pragma | pragma argumentAt: 1 ]
-			                        ifNil: [ #(  ) ].
+						 "when not supporting Pharo10, we can use #allIgnoredNotImplementedSelectors"
+		             ignored := (meth pragmaAt: #ignoreNotImplementedSelectors:)
+		  					ifNotNil: [ :pragma | pragma argumentAt: 1 ]
+		  					ifNil: [ #(  ) ].
 		             meth messages anySatisfy: [ :m | 
 			             m isSelectorSymbol not and: [ 
 				             (ignored includes: m) not ] ] ].
