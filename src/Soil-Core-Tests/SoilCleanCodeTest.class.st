@@ -109,7 +109,10 @@ SoilCleanCodeTest >> testNoUnimplementedCalls [
 	
 	remaining := Soil package methods select: [ :meth | 
 		             | ignored |
-		             ignored := meth allIgnoredNotImplementedSelectors.
+						 "when not supporting Pharo10, we can use #allIgnoredNotImplementedSelectors"
+		             ignored := (meth pragmaAt: #ignoreNotImplementedSelectors:)
+		  					ifNotNil: [ :pragma | pragma argumentAt: 1 ]
+		  					ifNil: [ #(  ) ].
 		             meth messages anySatisfy: [ :m | 
 			             m isSelectorSymbol not and: [ 
 				             (ignored includes: m) not ] ] ].
