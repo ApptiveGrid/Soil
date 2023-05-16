@@ -7,6 +7,39 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #private }
+SoilSkipListIterator >> at: key ifAbsent: aBlock [
+	currentKey := (key asSkipListKeyOfSize: index keySize) asInteger.
+	self 
+		findPageFor: key 
+		startingAt: index headerPage.
+	^ currentPage 
+		valueAt: currentKey
+		ifAbsent: [ aBlock value ]
+]
+
+{ #category : #accessing }
+SoilSkipListIterator >> at: aKeyObject put: anObject [
+	| key iterator  newPage |
+	key := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
+	self find: key.
+	index := currentPage indexOfKey: key.
+	"as an optimization we return the prior value stored in the list. If
+	there was none we return nil"
+	^ (index > 0)
+		ifTrue: [ currentPage itemAt: key put: anObject ] 
+		ifFalse: [ 
+			currentPage hasRoom 
+				ifTrue: [ currentPage addItem: (key -> anObject) ]
+				ifFalse: [ 
+					newPage := index splitPage: iterator.
+					((currentPage biggestKey < key)
+						ifTrue: [ newPage ]
+						ifFalse: [ currentPage ])
+							addItem: (key -> anObject).
+							nil ] ]
+]
+
 { #category : #accessing }
 SoilSkipListIterator >> atLevel: key put: anObject [
 	levels at: key put: anObject 

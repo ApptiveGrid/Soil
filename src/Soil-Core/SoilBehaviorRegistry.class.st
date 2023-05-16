@@ -110,7 +110,7 @@ SoilBehaviorRegistry >> nameAt: classIdentifier ifAbsent: aBlock [
 SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 	| dict |
 	(objectId index = 0) ifTrue: [ Error signal: 'cannot add non-initialized object id' ].
-	dict := self index 
+	dict := self index newIterator
 		at: classIdentifier put: objectId;
 		yourself
 ]

@@ -20,7 +20,10 @@ SoilNewKeyEntry >> commitIn: transaction [
 	index := (transaction indexes associations 
 		detect: [ :each | each key id = indexId ]
 		ifNone: [ Error signal: 'shouldnt happen' ]) value.
-	index at: key put: value 
+	index newIterator 
+		at: key put: value;
+		updateCurrentTransaction: transaction writeVersion 
+		
 ]
 
 { #category : #accessing }

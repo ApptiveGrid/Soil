@@ -40,7 +40,7 @@ SoilSkipListDictionary >> at: key put: anObject [
 	transaction ifNotNil: [
 		objectId := transaction makeRoot: anObject.
 		transaction markDirty: self.
-		self index at: key put: objectId.
+		self index newIterator at: key put: objectId.
 		"if there has been a prior removal of the key this new
 		addition invalidates it"
 		removedValues removeKey: key ifAbsent: [  ]. 
@@ -285,7 +285,7 @@ SoilSkipListDictionary >> soilClusterRootIn: aTransaction [
 				newValues 
 					at: key 
 					put: (transaction makeRoot: object) ].
-		self index at: key put: obj ].
+		self index newIterator at: key put: obj ].
 	transaction markDirty: self
 ]
 
