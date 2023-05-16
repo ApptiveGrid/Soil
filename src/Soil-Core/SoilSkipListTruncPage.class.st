@@ -11,7 +11,7 @@ SoilSkipListTruncPage class >> pageCode [
 
 { #category : #utilities }
 SoilSkipListTruncPage >> headerSize [
-	^ self indexSize + (self level * self indexSize)
+	^ super headerSize  + (self level * self indexSize)
 ]
 
 { #category : #'instance creation' }

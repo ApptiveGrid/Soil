@@ -67,7 +67,7 @@ SoilSkipListDataPage >> hasRoom [
 
 { #category : #utilities }
 SoilSkipListDataPage >> headerSize [
-	self subclassResponsibility 
+	^ self indexSize + 8 "last transaction"
 ]
 
 { #category : #accessing }

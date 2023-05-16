@@ -15,7 +15,7 @@ SoilSkipListHeaderPage class >> pageCode [
 
 { #category : #utilities }
 SoilSkipListHeaderPage >> headerSize [
-	^ self indexSize + 6 + (maxLevel * self indexSize)
+	^ super headerSize + 6 "keySize, valueSize, maxLevel" + (maxLevel * self indexSize)
 ]
 
 { #category : #accessing }
