@@ -22,9 +22,16 @@ SoilBTreePage >> addItem: anAssociation [
 
 { #category : #accessing }
 SoilBTreePage >> associationAt: anInteger [ 
+	^ self
+		associationAt: anInteger 
+		ifAbsent: [ nil ]
+]
+
+{ #category : #accessing }
+SoilBTreePage >> associationAt: anInteger ifAbsent: aBlock [
 	^ items 
 		detect: [:each | each key = anInteger ] 
-		ifNone: [ nil ]
+		ifNone: [ aBlock value ]
 ]
 
 { #category : #accessing }
@@ -182,7 +189,16 @@ SoilBTreePage >> split: newPage [
 
 { #category : #accessing }
 SoilBTreePage >> valueAt: anInteger [ 
-	^ (self associationAt: anInteger) value
+	^ self 
+		valueAt: anInteger 
+		ifAbsent: [ nil ]
+]
+
+{ #category : #accessing }
+SoilBTreePage >> valueAt: anInteger ifAbsent: aBlock [
+	^ (self 
+		associationAt: anInteger
+		ifAbsent: [ ^ aBlock value ]) value
 ]
 
 { #category : #writing }

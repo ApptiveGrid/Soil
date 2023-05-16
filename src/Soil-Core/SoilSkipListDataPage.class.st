@@ -5,7 +5,8 @@ Class {
 		'right',
 		'items',
 		'keySize',
-		'valueSize'
+		'valueSize',
+		'lastTransaction'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -30,9 +31,16 @@ SoilSkipListDataPage >> addItem: anAssociation [
 
 { #category : #accessing }
 SoilSkipListDataPage >> associationAt: anInteger [ 
+	^ self 
+		associationAt: anInteger 
+		ifAbsent: [ nil ]
+]
+
+{ #category : #accessing }
+SoilSkipListDataPage >> associationAt: anInteger ifAbsent: aBlock [
 	^ items 
 		detect: [:each | each key = anInteger ] 
-		ifNone: [ nil ]
+		ifNone: [ aBlock value ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -59,7 +67,7 @@ SoilSkipListDataPage >> hasRoom [
 
 { #category : #utilities }
 SoilSkipListDataPage >> headerSize [
-	self subclassResponsibility 
+	^ self indexSize + 8 "last transaction"
 ]
 
 { #category : #accessing }
@@ -75,6 +83,7 @@ SoilSkipListDataPage >> indexOfKey: anInteger [
 SoilSkipListDataPage >> initialize [ 
 	super initialize.
 	items := SortedCollection new.
+	lastTransaction := 0.
 	dirty := true.
 
 ]
@@ -206,6 +215,16 @@ SoilSkipListDataPage >> lastItem [
 ]
 
 { #category : #accessing }
+SoilSkipListDataPage >> lastTransaction [
+	^ lastTransaction
+]
+
+{ #category : #accessing }
+SoilSkipListDataPage >> lastTransaction: anInteger [ 
+	lastTransaction := anInteger
+]
+
+{ #category : #accessing }
 SoilSkipListDataPage >> level [ 
 	^ right size
 ]
@@ -226,6 +245,12 @@ SoilSkipListDataPage >> postCopy [
 	items := items copy
 ]
 
+{ #category : #'instance creation' }
+SoilSkipListDataPage >> readFrom: aStream [ 
+	super readFrom: aStream.
+	self readLastTransactionFrom: aStream
+]
+
 { #category : #writing }
 SoilSkipListDataPage >> readItemsFrom: aStream [ 
 	| numberOfItems |
@@ -233,6 +258,12 @@ SoilSkipListDataPage >> readItemsFrom: aStream [
 	items := SortedCollection new: numberOfItems.
 	numberOfItems timesRepeat: [ 
 		items add: ((aStream next: self keySize) asInteger -> (aStream next: self valueSize) asSoilObjectId) ]
+]
+
+{ #category : #writing }
+SoilSkipListDataPage >> readLastTransactionFrom: aStream [ 
+	lastTransaction := (aStream next: 8) asInteger.
+
 ]
 
 { #category : #writing }
@@ -294,7 +325,16 @@ SoilSkipListDataPage >> split: newPage [
 
 { #category : #accessing }
 SoilSkipListDataPage >> valueAt: anInteger [ 
-	^ (self associationAt: anInteger) value
+	^ self 
+		valueAt: anInteger 
+		ifAbsent: [ nil ]
+]
+
+{ #category : #accessing }
+SoilSkipListDataPage >> valueAt: anInteger ifAbsent: aBlock [ 
+	^ (self 
+		associationAt: anInteger
+		ifAbsent: [ ^ aBlock value ]) value
 ]
 
 { #category : #accessing }
@@ -324,4 +364,11 @@ SoilSkipListDataPage >> writeLevelsOn: aStream [
 		nextPut: self level.
 	1 to: self level do: [ :n |
 		aStream nextPutAll: ((right at: n) asByteArrayOfSize: self rightSize) ]
+]
+
+{ #category : #writing }
+SoilSkipListDataPage >> writeOn: aStream [ 
+	super writeOn: aStream.
+	aStream nextPutAll: (lastTransaction asByteArrayOfSize: 8)
+
 ]

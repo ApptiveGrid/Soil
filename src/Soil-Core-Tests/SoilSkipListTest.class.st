@@ -39,8 +39,8 @@ SoilSkipListTest >> testAddFirstOverflow [
 	self assert: skipList pages size equals: 2.
 	page := skipList pageAt: 2.
 	self assert: page numberOfItems equals: 128.
-	self assert: page items first key equals: 129.
-	self assert: page items last key asByteArray equals: #[ 1 0 ]
+	self assert: page items first key equals: 128.
+	self assert: page items last key asByteArray equals: #[ 255 ]
 ]
 
 { #category : #tests }
@@ -55,8 +55,8 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 	self assert: skipList pages size equals: 2.
 	page := skipList pageAt: 2.
 	self assert: page numberOfItems equals: 128.
-	self assert: page items first key equals: 129.
-	self assert: page items last key asByteArray equals: #[ 1 0 ].
+	self assert: page items first key equals: 128.
+	self assert: page items last key asByteArray equals: #[ 255 ].
 	
 	"write it and then read it back with a new SoilSkipList"
 	skipList writePages.
@@ -80,7 +80,7 @@ SoilSkipListTest >> testAddInBetween [
 	skipList at: (capacity / 2) floor put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: skipList pages size equals: 1.
 	page := skipList pageAt: 1.
-	self assert: page numberOfItems equals: 255.
+	self assert: page numberOfItems equals: 254.
 	self assert: (page items at: (capacity / 2) floor) key equals: 127
 ]
 
@@ -96,8 +96,8 @@ SoilSkipListTest >> testAddInBetweenOverflowing [
 	self assert: skipList pages size equals: 2.
 	page := skipList pageAt: 2.
 	self assert: page numberOfItems equals: 127.
-	self assert: (page items first) key equals: 257.
-	self assert: (page items last) key asByteArray equals: #[ 1  253 ].
+	self assert: (page items first) key equals: 255.
+	self assert: (page items last) key asByteArray equals: #[ 1 251 ].
 	skipList writePages 
 ]
 
@@ -112,7 +112,7 @@ SoilSkipListTest >> testAddInBetweenOverwriting [
 	skipList at: 31 put: #[ 8 7 6 5 4 3 2 1 ].
 	self assert: skipList pages size equals: 1.
 	page := skipList pageAt: 1.
-	self assert: page numberOfItems equals: 255.
+	self assert: page numberOfItems equals: 254.
 	self assert: (page items at: 16) value equals: #[ 8 7 6 5 4 3 2 1 ] 
 ]
 
