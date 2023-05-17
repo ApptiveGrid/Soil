@@ -70,7 +70,7 @@ SoilSkipListDictionary >> atIndex: anInteger [
 
 { #category : #accessing }
 SoilSkipListDictionary >> basicAt: aString ifAbsent: aBlock [ 
-	| iterator value journal |
+	| iterator value |
 	iterator := self index newIterator.
 	value := iterator at: aString ifAbsent: [ aBlock value ].
 	value isInitialized ifFalse: [  
