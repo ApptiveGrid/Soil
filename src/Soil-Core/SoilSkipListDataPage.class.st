@@ -109,6 +109,11 @@ SoilSkipListDataPage >> isLastPage [
 	^ (right at: 1) = 0
 ]
 
+{ #category : #testing }
+SoilSkipListDataPage >> isOlderThan: aVersionNumber [ 
+	^ lastTransaction <= aVersionNumber 
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipListDataPage >> itemAfter: key [ 
 	| i item |

@@ -44,6 +44,33 @@ SoilIndexTest >> testConcurrentAddKey [
 ]
 
 { #category : #tests }
+SoilIndexTest >> testConcurrentDo [
+	| tx1 tx2 tx3 col |
+	tx1 := soil newTransaction.
+	tx1 root: (SoilSkipListDictionary new 
+		maxLevel: 8;
+		keySize: 16;
+		at: #one put: #onevalue;
+		at: #two put: #twovalue;
+		at: #three put: #threevalue;
+		at: #four put: #fourvalue;
+		yourself).
+	tx1 commit.
+	tx2 := soil newTransaction.
+	"After creating tx2 we open a concurrent transaction and add a key to 
+	the dictionary which should be invisible to tx2"
+	tx3 := soil newTransaction.
+	tx3 root
+		at: #five put: #fivevalue.
+	tx3 commit.
+	col := OrderedCollection new.
+	tx2 root do: [ :each |
+		col add: each ].
+	self assert: col size  equals: 4.
+	self assert: (col noneSatisfy: [:each | each = #fiveValue ])
+]
+
+{ #category : #tests }
 SoilIndexTest >> testConcurrentRemoveKey [ 
 	| tx1 tx2 tx3 |
 	tx1 := soil newTransaction.

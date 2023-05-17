@@ -70,16 +70,17 @@ SoilSkipListDictionary >> atIndex: anInteger [
 
 { #category : #accessing }
 SoilSkipListDictionary >> basicAt: aString ifAbsent: aBlock [ 
-	| iterator value |
+	| iterator value key |
+	key := (aString asSkipListKeyOfSize: self index keySize) asInteger.
 	iterator := self index newIterator.
 	value := iterator at: aString ifAbsent: [ aBlock value ].
 	value isInitialized ifFalse: [  
-		^ (iterator currentPageIsVisible: transaction readVersion) 
+		^ (iterator currentPage isOlderThan: transaction readVersion) 
 			ifTrue: [ aBlock value ] 
 			ifFalse: [
 				(transaction 
-					findInJournal: aString 
-					forIndex: index 
+					journalEntriesFor: key 
+					inIndex: index 
 					startingAt: iterator currentPage lastTransaction)
 						ifNotEmpty: [:entries | 
 							entries last value ]
@@ -87,12 +88,12 @@ SoilSkipListDictionary >> basicAt: aString ifAbsent: aBlock [
 	"if the last modifying transaction of the current page is smaller
 	than ours then we don't need to check for visibility as all objects
 	are visible"
-	^ (iterator currentPageIsVisible: transaction readVersion)
+	^ (iterator currentPage isOlderThan: transaction readVersion)
 		ifTrue: [ value ]
 		ifFalse: [ 
 			(transaction 
-				findInJournal: aString 
-				forIndex: index 
+				journalEntriesFor: key 
+				inIndex: index 
 				startingAt: iterator currentPage lastTransaction)
 					ifNotEmpty: [:entries | 
 						entries last oldValue ifNil: [ aBlock value ] ]
@@ -102,18 +103,23 @@ SoilSkipListDictionary >> basicAt: aString ifAbsent: aBlock [
 ]
 
 { #category : #enumerating }
-SoilSkipListDictionary >> do: aBlock [ 
-	transaction 
-		ifNotNil: [  
-			self index do: [ :byteArrayOrObjectId | | objectId |
-				objectId := byteArrayOrObjectId asSoilObjectId.
-				transaction isVisibleObjectId: objectId.
-				aBlock value: (transaction proxyForObjectId: objectId ) ] ]
-		ifNil: [.
+SoilSkipListDictionary >> do: aBlock [
+
+	| iterator assoc |
+	transaction
+		ifNotNil: [ 
+			iterator := self index newIterator.
+			[ (assoc := iterator nextAssociation) notNil ] whileTrue: [ 
+				(self
+					 restoreValue: assoc value
+					 forKey: assoc key
+					 iterator: iterator) ifNotNil: [ :objectId | 
+					aBlock value: (transaction proxyForObjectId: objectId) ] ] ]
+		ifNil: [ 
 			newValues values do: [ :each | 
 				aBlock value: (each isObjectId
-					ifTrue: [ transaction objectWithId: each ]
-				 	ifFalse: [ each ]) ] ]
+						 ifTrue: [ transaction objectWithId: each ]
+						 ifFalse: [ each ]) ] ]
 ]
 
 { #category : #accessing }
@@ -139,6 +145,29 @@ SoilSkipListDictionary >> firstAssociation [
 	^ index newIterator firstAssociation ifNotNil: [ :assoc | 
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListDictionary >> historicValueAt: key iterator: iterator ifAbsent: absentBlock [ 
+	"a removed value will return ObjectId 0:0"
+	
+	^ (iterator currentPage isOlderThan: transaction readVersion) 
+		ifTrue: [ 
+			"all modifications to this page have been done before we
+			started the transaction, so the removal is visibile and 
+			value absent"
+			absentBlock value ] 
+		ifFalse: [
+			"we determine all changes between our transaction and the
+			last one modifying the page. if we get back changes for the
+			key the value of the oldes entry has the value it had before"
+			(transaction 
+				journalEntriesFor: key 
+				inIndex: index 
+				startingAt: iterator currentPage lastTransaction)
+					ifNotEmpty: [:entries | entries last value ]
+					ifEmpty: [ absentBlock value ] ] .
+	
 ]
 
 { #category : #accessing }
@@ -297,6 +326,24 @@ SoilSkipListDictionary >> removeKey: key ifAbsent: aBlock [
 			removedValues 
 				at: key
 				put: (newValues removeKey: key ifAbsent: [ ^ aBlock value ]) ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListDictionary >> restoreValue: value forKey: key iterator: iterator [ 
+	"restore a value that has been removed by a later 
+	transaction"
+	value isRemoved ifFalse: [
+		^ self 
+			historicValueAt: key 
+			iterator: iterator 
+			ifAbsent: [ nil ] ].
+	
+	"restore a value that has been overwritten by a later
+	transaction"
+	^ self 
+		historicValueAt: key 
+		iterator: iterator 
+		ifAbsent: [ value ]
 ]
 
 { #category : #accessing }

@@ -113,6 +113,11 @@ SoilObjectId >> isObjectId [
 ]
 
 { #category : #testing }
+SoilObjectId >> isRemoved [ 
+	^ segment = 0 & index = 0
+]
+
+{ #category : #testing }
 SoilObjectId >> isSameObjectId: aSOObjectId [ 
 	^ aSOObjectId hasSameSegment: segment andIndex: index
 ]

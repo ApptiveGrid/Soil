@@ -47,11 +47,6 @@ SoilSkipListIterator >> atLevel: key put: anObject [
 	levels at: key put: anObject 
 ]
 
-{ #category : #testing }
-SoilSkipListIterator >> currentPageIsVisible: anInteger [ 
-	^ currentPage lastTransaction <= anInteger
-]
-
 { #category : #private }
 SoilSkipListIterator >> find: key [
 	currentKey := key.

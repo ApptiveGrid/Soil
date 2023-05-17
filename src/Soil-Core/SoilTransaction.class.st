@@ -242,24 +242,6 @@ SoilTransaction >> dirtyObjects [
 	^ (idMap select: [ :each | each hasChanged ]) collect: #object
 ]
 
-{ #category : #accessing }
-SoilTransaction >> findInJournal: aString forIndex: aSoilIndex startingAt: anInteger [ 
-	| transactionId key entries |
-	key := (aString asString asSkipListKeyOfSize:  aSoilIndex keySize) asInteger.
-	entries := OrderedCollection new.
-	transactionId := anInteger.
-	[ transactionId > readVersion ] whileTrue: [  
-		journal := (soil journal at: transactionId) readAll.
-		journal entries do: [ :each | 
-			((each class = SoilNewKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
-				(each key = key) ifTrue: [ 
-					entries add: each ] ]  ].
-		transactionId := transactionId - 1.
-	].
-   ^ entries
-	
-]
-
 { #category : #testing }
 SoilTransaction >> hasModifications [ 
 	^ self dirtyObjects notEmpty
@@ -345,6 +327,23 @@ SoilTransaction >> isVisibleObjectId: aSoilObjectId [
 { #category : #accessing }
 SoilTransaction >> journal [
 	^ journal
+]
+
+{ #category : #accessing }
+SoilTransaction >> journalEntriesFor: key inIndex: aSoilIndex startingAt: anInteger [ 
+	| transactionId entries |
+	entries := OrderedCollection new.
+	transactionId := anInteger.
+	[ transactionId > readVersion ] whileTrue: [  
+		journal := (soil journal at: transactionId) readAll.
+		journal entries do: [ :each | 
+			((each class = SoilNewKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
+				(each key = key) ifTrue: [ 
+					entries add: each ] ]  ].
+		transactionId := transactionId - 1.
+	].
+   ^ entries
+	
 ]
 
 { #category : #'as yet unclassified' }
