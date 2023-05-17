@@ -251,7 +251,7 @@ SoilTransaction >> findInJournal: aString forIndex: aSoilIndex startingAt: anInt
 	[ transactionId > readVersion ] whileTrue: [  
 		journal := (self journal at: transactionId) readAll.
 		journal entries do: [ :each | 
-			(each class = SoilNewKeyEntry) ifTrue: [ 
+			((each class = SoilNewKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
 				(each key = key) ifTrue: [ 
 					entries add: each ] ]  ].
 		transactionId := transactionId - 1.

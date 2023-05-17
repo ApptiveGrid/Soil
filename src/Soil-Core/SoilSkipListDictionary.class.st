@@ -73,6 +73,17 @@ SoilSkipListDictionary >> basicAt: aString ifAbsent: aBlock [
 	| iterator value journal |
 	iterator := self index newIterator.
 	value := iterator at: aString ifAbsent: [ aBlock value ].
+	value isInitialized ifFalse: [  
+		^ (iterator currentPageIsVisible: transaction readVersion) 
+			ifTrue: [ aBlock value ] 
+			ifFalse: [
+				(transaction 
+					findInJournal: aString 
+					forIndex: index 
+					startingAt: iterator currentPage lastTransaction)
+						ifNotEmpty: [:entries | 
+							entries last value ]
+						ifEmpty: [ self halt. ] ] ].
 	"if the last modifying transaction of the current page is smaller
 	than ours then we don't need to check for visibility as all objects
 	are visible"
@@ -169,7 +180,7 @@ SoilSkipListDictionary >> isRegistered [
 SoilSkipListDictionary >> journalEntries [
 	| entries |
 	entries := OrderedCollection new.
-	newValues keysAndValuesDo: [ :key :value | | newKeyEntry |
+	newValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilNewKeyEntry new 
 			indexId: id;
 			key: key;
@@ -269,17 +280,19 @@ SoilSkipListDictionary >> removeKey: key [
 
 { #category : #removing }
 SoilSkipListDictionary >> removeKey: key ifAbsent: aBlock [
+	| iterator v |
 	^ transaction 
 		ifNotNil: [ 
 			"remove from newValues as there could be a new at:put: on that
 			key but removing the key will remove the value again"
 			newValues removeKey: key ifAbsent: [ ].
 			transaction markDirty: self.
+			iterator := self index newIterator.
+			v := iterator at: key ifAbsent: [ Error signal ].
 			removedValues 
 				at: key 
-				put: (self index 
-					removeKey: key 
-					ifAbsent: [ ^ aBlock value ]) asSoilObjectId ]
+				put: v asSoilObjectId.
+			iterator at: key put: (SoilObjectId segment: 0 index: 0) ]
 		ifNil: [ 
 			removedValues 
 				at: key
