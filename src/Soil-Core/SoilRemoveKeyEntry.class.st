@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'indexId',
 		'key',
-		'value'
+		'oldValue'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -48,6 +48,17 @@ SoilRemoveKeyEntry >> key: aString [
 	key := aString 
 ]
 
+{ #category : #accessing }
+SoilRemoveKeyEntry >> oldValue [
+
+	^ oldValue
+]
+
+{ #category : #accessing }
+SoilRemoveKeyEntry >> oldValue: aString [ 
+	oldValue := aString
+]
+
 { #category : #'instance creation' }
 SoilRemoveKeyEntry >> readFrom: aStream [
 	| indexIdSize |
@@ -55,18 +66,7 @@ SoilRemoveKeyEntry >> readFrom: aStream [
 	indexIdSize := aStream next.
 	indexId := (aStream next: indexIdSize) asString.
 	key := (aStream next: (aStream next: 2) asInteger) asInteger.
-	value := (aStream next: (aStream next: 2) asInteger) asSoilObjectId .
-]
-
-{ #category : #accessing }
-SoilRemoveKeyEntry >> value [
-
-	^ value
-]
-
-{ #category : #accessing }
-SoilRemoveKeyEntry >> value: aString [ 
-	value := aString
+	oldValue := (aStream next: (aStream next: 2) asInteger) asSoilObjectId .
 ]
 
 { #category : #writing }
@@ -77,7 +77,7 @@ SoilRemoveKeyEntry >> writeOn: aStream [
 		nextPutAll: indexId asByteArray;
 		nextPutAll: (key size asByteArrayOfSize: 2);
 		nextPutAll: key asByteArray ;
-		nextPutAll: (value asByteArray size asByteArrayOfSize: 2);
-		nextPutAll: value asByteArray
+		nextPutAll: (oldValue asByteArray size asByteArrayOfSize: 2);
+		nextPutAll: oldValue asByteArray
 		
 ]
