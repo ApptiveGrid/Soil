@@ -148,22 +148,25 @@ SoilTransaction >> buildJournal [
 	"create entries for all new objects and new object versions"
 	recordsToCommit do: [ :record | 
 		record version: writeVersion.
-		journal addEntries: record asJournalEntry.
+		journal addEntries: (record asJournalEntry do: [:each | each transactionId: writeVersion ]).
 		record committed  ].
 	"for all new objects with a new behavior we create an entry to
 	add the behavior"
 	behaviorDescriptions do: [ :description |
 		journal addEntry: (SoilNewBehaviorEntry new 
+			transactionId: self writeVersion;
 			identifier: description value behaviorIdentifier;
 			objectId: description objectId) ].
 	"add entries for updating the last index of each modified 
 	segment"
 	lastObjectIndexes keysAndValuesDo: [ :segment :index |
 		journal addEntry: (SoilUpdateSegmentIndexEntry new 
+			transactionId: self writeVersion;
 			segment: segment;
 			index: index value) ].
 	"update the global database version"
 	journal addEntry: (SoilUpdateDatabaseVersion new 
+		transactionId: self writeVersion;
 		version: writeVersion;
 		previousVersion: readVersion).
 	^ journal

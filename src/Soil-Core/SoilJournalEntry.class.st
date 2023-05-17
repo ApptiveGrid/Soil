@@ -1,6 +1,9 @@
 Class {
 	#name : #SoilJournalEntry,
 	#superclass : #Object,
+	#instVars : [
+		'transactionId'
+	],
 	#category : #'Soil-Core-Journal'
 }
 
@@ -11,13 +14,32 @@ SoilJournalEntry class >> withTypeCode: anInteger [
 		ifNone: [ Error signal: 'cannot find class for journal type code ', anInteger asString ]
 ]
 
+{ #category : #accessing }
+SoilJournalEntry >> oldValue [
+	^ nil
+]
+
 { #category : #writing }
 SoilJournalEntry >> readFrom: aStream [ 
 	"skip because the type code is already read"
+	transactionId := (aStream next: 8) asInteger
+]
+
+{ #category : #accessing }
+SoilJournalEntry >> transactionId [
+
+	^ transactionId
+]
+
+{ #category : #accessing }
+SoilJournalEntry >> transactionId: anObject [
+
+	transactionId := anObject
 ]
 
 { #category : #writing }
 SoilJournalEntry >> writeOn: aStream [ 
-	aStream nextPut: self class journalTypeCode
-	
+	aStream 
+		nextPut: self class journalTypeCode;
+		nextPutAll: (transactionId asByteArrayOfSize: 8)
 ]
