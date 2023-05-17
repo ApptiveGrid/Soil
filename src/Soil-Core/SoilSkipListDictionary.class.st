@@ -83,7 +83,7 @@ SoilSkipListDictionary >> basicAt: aString ifAbsent: aBlock [
 					inIndex: index 
 					startingAt: iterator currentPage lastTransaction)
 						ifNotEmpty: [:entries | 
-							entries last value ]
+							entries last oldValue ]
 						ifEmpty: [ self halt. ] ] ].
 	"if the last modifying transaction of the current page is smaller
 	than ours then we don't need to check for visibility as all objects
