@@ -20,19 +20,21 @@ SoilSkipListIterator >> at: key ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilSkipListIterator >> at: aKeyObject put: anObject [
-	| key iterator  newPage |
+	| key  newPage itemIndex |
 	key := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
-	self find: key.
-	index := currentPage indexOfKey: key.
+	self 
+		findPageFor: key 
+		startingAt: index headerPage.
+	itemIndex := currentPage indexOfKey: key.
 	"as an optimization we return the prior value stored in the list. If
 	there was none we return nil"
-	^ (index > 0)
+	^ (itemIndex > 0)
 		ifTrue: [ currentPage itemAt: key put: anObject ] 
 		ifFalse: [ 
 			currentPage hasRoom 
 				ifTrue: [ currentPage addItem: (key -> anObject) ]
 				ifFalse: [ 
-					newPage := index splitPage: iterator.
+					newPage := index splitPage: currentPage.
 					((currentPage biggestKey < key)
 						ifTrue: [ newPage ]
 						ifFalse: [ currentPage ])
@@ -43,6 +45,11 @@ SoilSkipListIterator >> at: aKeyObject put: anObject [
 { #category : #accessing }
 SoilSkipListIterator >> atLevel: key put: anObject [
 	levels at: key put: anObject 
+]
+
+{ #category : #testing }
+SoilSkipListIterator >> currentPageIsVisible: anInteger [ 
+	^ currentPage lastTransaction <= anInteger
 ]
 
 { #category : #private }
@@ -134,4 +141,9 @@ SoilSkipListIterator >> nextKeyCloseTo: key [
 { #category : #printing }
 SoilSkipListIterator >> printOn: aStream [ 
 	aStream << 'path: ' << levels asString
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListIterator >> updateCurrentTransaction: anInteger [ 
+	currentPage lastTransaction: anInteger
 ]

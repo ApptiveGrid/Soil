@@ -2,7 +2,8 @@ Class {
 	#name : #SoilUpdateDatabaseVersion,
 	#superclass : #SoilJournalEntry,
 	#instVars : [
-		'version'
+		'version',
+		'previousVersion'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -27,6 +28,11 @@ SoilUpdateDatabaseVersion >> effect [
 	^ version 
 ]
 
+{ #category : #accessing }
+SoilUpdateDatabaseVersion >> previousVersion: anInteger [ 
+	previousVersion := anInteger
+]
+
 { #category : #printing }
 SoilUpdateDatabaseVersion >> printOn: aStream [ 
 	super printOn: aStream.
@@ -35,7 +41,21 @@ SoilUpdateDatabaseVersion >> printOn: aStream [
 		<< version asString.
 ]
 
+{ #category : #'instance creation' }
+SoilUpdateDatabaseVersion >> readFrom: aStream [ 
+	super readFrom: aStream.
+	version := (aStream next: 8) asInteger.
+	previousVersion := (aStream next: 8) asInteger
+]
+
 { #category : #accessing }
 SoilUpdateDatabaseVersion >> version: anInteger [ 
 	version := anInteger
+]
+
+{ #category : #writing }
+SoilUpdateDatabaseVersion >> writeOn: aStream [ 
+	super writeOn: aStream.
+	aStream nextPutAll: (version asByteArrayOfSize: 8).
+	aStream nextPutAll: (previousVersion asByteArrayOfSize: 8).
 ]

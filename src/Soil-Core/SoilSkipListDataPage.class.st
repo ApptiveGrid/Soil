@@ -37,9 +37,9 @@ SoilSkipListDataPage >> associationAt: anInteger [
 ]
 
 { #category : #accessing }
-SoilSkipListDataPage >> associationAt: anInteger ifAbsent: aBlock [
+SoilSkipListDataPage >> associationAt: key ifAbsent: aBlock [
 	^ items 
-		detect: [:each | each key = anInteger ] 
+		detect: [:each | each key = key ] 
 		ifNone: [ aBlock value ]
 ]
 
@@ -130,7 +130,7 @@ SoilSkipListDataPage >> itemAt: anInteger ifAbsent: aBlock [
 { #category : #accessing }
 SoilSkipListDataPage >> itemAt: key put: anObject [ 
 	| removedItem |
-	removedItem := self itemRemoveAt: key.
+	removedItem := self itemRemoveAt: key ifAbsent: [ "ignore" ].
 	items add: (key -> anObject).
 	dirty := true.
 	^ removedItem
@@ -331,9 +331,9 @@ SoilSkipListDataPage >> valueAt: anInteger [
 ]
 
 { #category : #accessing }
-SoilSkipListDataPage >> valueAt: anInteger ifAbsent: aBlock [ 
+SoilSkipListDataPage >> valueAt: key ifAbsent: aBlock [ 
 	^ (self 
-		associationAt: anInteger
+		associationAt: key
 		ifAbsent: [ ^ aBlock value ]) value
 ]
 

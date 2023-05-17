@@ -6,7 +6,8 @@ Class {
 		'transaction',
 		'index',
 		'newValues',
-		'removedValues'
+		'removedValues',
+		'oldValues'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -29,18 +30,23 @@ SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 	| objectId |
 	^ transaction 
 		ifNotNil: [  
-			objectId := (self index at: key ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
+			objectId := (self basicAt: key ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
 			transaction proxyForObjectId: objectId ]
 		ifNil: [ newValues at: key ifAbsent: aBlock ]
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> at: key put: anObject [
-	| objectId |
+	| objectId iterator binKey |
 	transaction ifNotNil: [
 		objectId := transaction makeRoot: anObject.
 		transaction markDirty: self.
-		self index newIterator at: key put: objectId.
+		iterator := self index newIterator.
+		binKey := (key asSkipListKeyOfSize: index keySize) asInteger.
+		iterator findPageFor: binKey startingAt: index headerPage.
+		(iterator currentPage itemAt: binKey ifAbsent: [ nil ])
+			ifNotNil: [ :value | oldValues at: binKey ifAbsentPut: value ].	
+		iterator currentPage itemAt: binKey put: anObject.
 		"if there has been a prior removal of the key this new
 		addition invalidates it"
 		removedValues removeKey: key ifAbsent: [  ]. 
@@ -54,16 +60,44 @@ SoilSkipListDictionary >> atIndex: anInteger [
 	^ transaction 
 		ifNotNil: [  
 			(self index atIndex: anInteger)
-				ifNotNil: [ :bytes | self proxyFromByteArray: bytes ] ]
+				ifNotNil: [ :bytes |
+					transaction 
+						objectId: bytes asSoilObjectId
+						ifVisible: [:objectId | objectId asSoilObjectProxy ]
+						ifHidden: [ nil ] ] ]
 		ifNil: [ (newValues associations at: anInteger) value  ]
+]
+
+{ #category : #accessing }
+SoilSkipListDictionary >> basicAt: aString ifAbsent: aBlock [ 
+	| iterator value journal |
+	iterator := self index newIterator.
+	value := iterator at: aString ifAbsent: [ aBlock value ].
+	"if the last modifying transaction of the current page is smaller
+	than ours then we don't need to check for visibility as all objects
+	are visible"
+	^ (iterator currentPageIsVisible: transaction readVersion)
+		ifTrue: [ value ]
+		ifFalse: [ 
+			(transaction 
+				findInJournal: aString 
+				forIndex: index 
+				startingAt: iterator currentPage lastTransaction)
+					ifNotEmpty: [:entries | 
+						entries last oldValue ifNil: [ aBlock value ] ]
+					ifEmpty: [ value ].
+			 ]
+	
 ]
 
 { #category : #enumerating }
 SoilSkipListDictionary >> do: aBlock [ 
 	transaction 
 		ifNotNil: [  
-			self index do: [ :byteArrayOrObjectId |
-				aBlock value: (transaction proxyForObjectId: byteArrayOrObjectId asSoilObjectId ) ] ]
+			self index do: [ :byteArrayOrObjectId | | objectId |
+				objectId := byteArrayOrObjectId asSoilObjectId.
+				transaction isVisibleObjectId: objectId.
+				aBlock value: (transaction proxyForObjectId: objectId ) ] ]
 		ifNil: [.
 			newValues values do: [ :each | 
 				aBlock value: (each isObjectId
@@ -111,6 +145,7 @@ SoilSkipListDictionary >> index [
 SoilSkipListDictionary >> initialize [ 
 	super initialize.
 	newValues := OrderedDictionary new.
+	oldValues := Dictionary new.
 	removedValues := OrderedDictionary new.
 	id := UUID new asString36.
 	index := SoilSkipList new
@@ -134,11 +169,12 @@ SoilSkipListDictionary >> isRegistered [
 SoilSkipListDictionary >> journalEntries [
 	| entries |
 	entries := OrderedCollection new.
-	newValues keysAndValuesDo: [ :key :value |
+	newValues keysAndValuesDo: [ :key :value | | newKeyEntry |
 		entries add: (SoilNewKeyEntry new 
 			indexId: id;
 			key: key;
-			value: value) ].
+			value: value;
+			oldValue: (oldValues at: key ifAbsent: [nil ])) ].
 	removedValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilRemoveKeyEntry new 
 			indexId: id;
@@ -294,7 +330,8 @@ SoilSkipListDictionary >> soilLoadedIn: aTransaction [
 	transaction := aTransaction.
 	"when being materialized newValues is not initialized so we do it here"
 	newValues := Dictionary new.
-	removedValues := Dictionary new 
+	removedValues := Dictionary new.
+	oldValues := Dictionary new
 ]
 
 { #category : #accessing }

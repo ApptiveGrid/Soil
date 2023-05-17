@@ -40,6 +40,11 @@ SoilRemoveKeyEntry >> key: aString [
 	key := aString 
 ]
 
+{ #category : #'instance creation' }
+SoilRemoveKeyEntry >> readFrom: aStream [
+	self halt.
+]
+
 { #category : #accessing }
 SoilRemoveKeyEntry >> value: aString [ 
 	value := aString

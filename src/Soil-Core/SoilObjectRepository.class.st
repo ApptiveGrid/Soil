@@ -73,8 +73,7 @@ SoilObjectRepository >> at: objectid version: version [
 	| segment |
 	segment := self segmentAt: objectid segment.
 	^ (segment at: objectid index version: version)
-		objectId: objectid;
-		yourself
+		ifNotNil: [ :record | record objectId: objectid ]
 ]
 
 { #category : #'initialize-release' }
