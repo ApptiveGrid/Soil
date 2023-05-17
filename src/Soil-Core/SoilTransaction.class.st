@@ -249,7 +249,7 @@ SoilTransaction >> findInJournal: aString forIndex: aSoilIndex startingAt: anInt
 	entries := OrderedCollection new.
 	transactionId := anInteger.
 	[ transactionId > readVersion ] whileTrue: [  
-		journal := (self journal at: transactionId) readAll.
+		journal := (soil journal at: transactionId) readAll.
 		journal entries do: [ :each | 
 			((each class = SoilNewKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
 				(each key = key) ifTrue: [ 
@@ -344,7 +344,7 @@ SoilTransaction >> isVisibleObjectId: aSoilObjectId [
 
 { #category : #accessing }
 SoilTransaction >> journal [
-	^ soil journal
+	^ journal
 ]
 
 { #category : #'as yet unclassified' }
