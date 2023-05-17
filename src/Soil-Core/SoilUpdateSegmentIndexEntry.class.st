@@ -13,10 +13,20 @@ SoilUpdateSegmentIndexEntry class >> journalTypeCode [
 	^ 6
 ]
 
+{ #category : #accessing }
+SoilUpdateSegmentIndexEntry >> address [
+	^ #objectIndex
+]
+
 { #category : #committing }
 SoilUpdateSegmentIndexEntry >> commitIn: aSoilTransaction [ 
 	(aSoilTransaction segmentAt: segmentId) 
 		lastObjectIndex: index value
+]
+
+{ #category : #accessing }
+SoilUpdateSegmentIndexEntry >> container [
+	^ 'segment #', segmentId asString
 ]
 
 { #category : #accessing }
@@ -54,6 +64,11 @@ SoilUpdateSegmentIndexEntry >> readFrom: aStream [
 { #category : #accessing }
 SoilUpdateSegmentIndexEntry >> segment: aSoilObjectSegment [ 
 	segmentId := aSoilObjectSegment id
+]
+
+{ #category : #accessing }
+SoilUpdateSegmentIndexEntry >> value [ 
+	^ index 
 ]
 
 { #category : #writing }
