@@ -118,7 +118,7 @@ SoilMaterializer >> nextCompiledBlock: aClass [
 { #category : #reading }
 SoilMaterializer >> nextCompiledMethod: aClass [
 
- 	| header bytecodesPlusTrailerSize compiledMethod |
+ 	| header bytecodesPlusTrailerSize compiledMethod trailerSize |
 
  	header :=  self nextSoilObject.
  	bytecodesPlusTrailerSize := self nextLengthEncodedInteger.
@@ -135,8 +135,12 @@ SoilMaterializer >> nextCompiledMethod: aClass [
  				compiledMethod literalAt: i  put: self nextSoilObject ].			
 
  	"then the bytecodes, we ignore the trailer for now"
+	trailerSize := 
+	(SystemVersion current major = 12)
+		ifFalse: [  compiledMethod trailer size ] 
+		ifTrue: [  CompiledMethod trailerSize ].
  	compiledMethod initialPC 
- 		to: compiledMethod size - compiledMethod trailer size
+ 		to: compiledMethod size - trailerSize
  		do: [ :index |
  			compiledMethod
  				at: index
