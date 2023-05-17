@@ -220,20 +220,6 @@ Soil >> renameClassNamed: oldName to: newName [
 	transaction commit
 ]
 
-{ #category : #'as yet unclassified' }
-Soil >> replay: aSoilJournal [ 
-	aSoilJournal do: [ :each |
-		 each commitTo: self ]
-]
-
-{ #category : #'as yet unclassified' }
-Soil >> replicateTo: aString [ 
-	| replicatedSoil |
-	replicatedSoil := Soil new path: aString asFileReference.
-	replicatedSoil replay: self journal.
-	replicatedSoil close
-]
-
 { #category : #accessing }
 Soil >> settings [
 
