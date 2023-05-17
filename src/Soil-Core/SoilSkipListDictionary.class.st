@@ -165,8 +165,8 @@ SoilSkipListDictionary >> historicValueAt: key iterator: iterator ifAbsent: abse
 				journalEntriesFor: key 
 				inIndex: index 
 				startingAt: iterator currentPage lastTransaction)
-					ifNotEmpty: [:entries | entries last value ]
-					ifEmpty: [ absentBlock value ] ] .
+					ifNotEmpty: [:entries | entries last oldValue ]
+					ifEmpty: [ absentBlock value ] ]
 	
 ]
 
@@ -211,15 +211,17 @@ SoilSkipListDictionary >> journalEntries [
 	entries := OrderedCollection new.
 	newValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilNewKeyEntry new 
+			transactionId: transaction writeVersion;
 			indexId: id;
 			key: key;
 			value: value;
 			oldValue: (oldValues at: key ifAbsent: [nil ])) ].
 	removedValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilRemoveKeyEntry new 
+			transactionId: transaction writeVersion;
 			indexId: id;
 			key: key; 
-			value: value) ].
+			oldValue: value) ].
 	^ entries
 ]
 
@@ -332,18 +334,19 @@ SoilSkipListDictionary >> removeKey: key ifAbsent: aBlock [
 SoilSkipListDictionary >> restoreValue: value forKey: key iterator: iterator [ 
 	"restore a value that has been removed by a later 
 	transaction"
-	value isRemoved ifFalse: [
-		^ self 
-			historicValueAt: key 
-			iterator: iterator 
-			ifAbsent: [ nil ] ].
-	
-	"restore a value that has been overwritten by a later
-	transaction"
-	^ self 
-		historicValueAt: key 
-		iterator: iterator 
-		ifAbsent: [ value ]
+	^ value isRemoved 
+		ifTrue: [
+			self 
+				historicValueAt: key 
+				iterator: iterator 
+				ifAbsent: [ nil ] ]
+		ifFalse: [
+			"restore a value that has been overwritten by a later
+			transaction"   
+			self 
+				historicValueAt: key 
+				iterator: iterator 
+				ifAbsent: [ value ] ]
 ]
 
 { #category : #accessing }

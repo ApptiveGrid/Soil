@@ -67,7 +67,8 @@ SoilIndexTest >> testConcurrentDo [
 	tx2 root do: [ :each |
 		col add: each ].
 	self assert: col size  equals: 4.
-	self assert: (col noneSatisfy: [:each | each = #fiveValue ])
+	self assert: (col noneSatisfy: [:each | each = #fiveValue ]).
+
 ]
 
 { #category : #tests }
