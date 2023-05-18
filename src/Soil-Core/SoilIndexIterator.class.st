@@ -22,6 +22,18 @@ SoilIndexIterator class >> on: aSoilIndex [
 		index: aSoilIndex 
 ]
 
+{ #category : #accessing }
+SoilIndexIterator >> currentPage [
+
+	^ currentPage
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> currentPage: anObject [
+
+	currentPage := anObject
+]
+
 { #category : #enumerating }
 SoilIndexIterator >> do: aBlock [
 	| item |
@@ -79,18 +91,6 @@ SoilIndexIterator >> next [
 { #category : #accessing }
 SoilIndexIterator >> nextAssociation [
 	^ self subclassResponsibility
-]
-
-{ #category : #accessing }
-SoilIndexIterator >> page [
-
-	^ currentPage
-]
-
-{ #category : #accessing }
-SoilIndexIterator >> page: anObject [
-
-	currentPage := anObject
 ]
 
 { #category : #accessing }

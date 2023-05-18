@@ -6,7 +6,8 @@ Class {
 		'objectRepository',
 		'behaviorRegistry',
 		'semaphore',
-		'settings'
+		'settings',
+		'journal'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -109,6 +110,13 @@ Soil >> inspectionJournal [
 	^ self journal inspectionContent
 ]
 
+{ #category : #accessing }
+Soil >> journal [
+	^ journal ifNil: [ 
+		journal := SoilJournal new 
+			path: self path / #journal ] 
+]
+
 { #category : #'as yet unclassified' }
 Soil >> lockDatabaseVersionFor: lockContext [ 
 	^ settings lockDatabaseVersionFor: lockContext 
@@ -148,7 +156,7 @@ Soil >> newTransaction [
 { #category : #'instance creation' }
 Soil >> newTransactionJournalFor: anInteger [ 
 	^ SoilTransactionJournal new 
-		on: (self buildTransactionJournalPath: anInteger)
+		createOn: (self buildTransactionJournalPath: anInteger)
 ]
 
 { #category : #accessing }

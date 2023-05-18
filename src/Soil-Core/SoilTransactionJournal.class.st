@@ -46,6 +46,14 @@ SoilTransactionJournal >> create [
 		binaryWriteStream 
 ]
 
+{ #category : #'instance creation' }
+SoilTransactionJournal >> createOn: aFileReference [
+	stream := aFileReference 
+		deleteIfAbsent: []; 
+		ensureCreateFile;
+		binaryWriteStream 
+]
+
 { #category : #accessing }
 SoilTransactionJournal >> entries [
 	^ entries
@@ -85,10 +93,21 @@ SoilTransactionJournal >> inspectionEntries [
 
 { #category : #'instance creation' }
 SoilTransactionJournal >> on: aFileReference [
-	stream := aFileReference 
-		deleteIfAbsent: []; 
-		ensureCreateFile;
-		binaryWriteStream 
+	stream := aFileReference binaryReadStream 
+]
+
+{ #category : #accessing }
+SoilTransactionJournal >> path: aFileReference [ 
+	self shouldBeImplemented.
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransactionJournal >> readAll [
+	| pageCode entry |
+	[ stream atEnd ] whileFalse: [ 
+		pageCode := stream next asInteger.
+		entry := (SoilJournalEntry withTypeCode: pageCode) new.
+		entries add: (entry readFrom: stream) ].
 ]
 
 { #category : #accessing }

@@ -55,3 +55,20 @@ SoilNewBehaviorEntry >> printOn: aStream [
 		<< identifier asString
 		
 ]
+
+{ #category : #'instance creation' }
+SoilNewBehaviorEntry >> readFrom: aStream [ 
+	| size |
+	super readFrom: aStream.
+	objectId := SoilObjectId readFrom: aStream.
+	size := (aStream next: 2) asInteger.
+	identifier := (aStream next: size) asString
+]
+
+{ #category : #writing }
+SoilNewBehaviorEntry >> writeOn: aStream [ 
+	super writeOn: aStream.
+	objectId writeOn: aStream.
+	aStream nextPutAll: (identifier size asByteArrayOfSize: 2).
+	aStream nextPutAll: identifier asByteArray
+]

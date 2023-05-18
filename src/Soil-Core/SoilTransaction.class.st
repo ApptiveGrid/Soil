@@ -148,23 +148,27 @@ SoilTransaction >> buildJournal [
 	"create entries for all new objects and new object versions"
 	recordsToCommit do: [ :record | 
 		record version: writeVersion.
-		journal addEntries: record asJournalEntry.
+		journal addEntries: (record asJournalEntry do: [:each | each transactionId: writeVersion ]).
 		record committed  ].
 	"for all new objects with a new behavior we create an entry to
 	add the behavior"
 	behaviorDescriptions do: [ :description |
 		journal addEntry: (SoilNewBehaviorEntry new 
+			transactionId: self writeVersion;
 			identifier: description value behaviorIdentifier;
 			objectId: description objectId) ].
 	"add entries for updating the last index of each modified 
 	segment"
 	lastObjectIndexes keysAndValuesDo: [ :segment :index |
 		journal addEntry: (SoilUpdateSegmentIndexEntry new 
+			transactionId: self writeVersion;
 			segment: segment;
 			index: index value) ].
 	"update the global database version"
 	journal addEntry: (SoilUpdateDatabaseVersion new 
-		version: writeVersion).
+		transactionId: self writeVersion;
+		version: writeVersion;
+		previousVersion: readVersion).
 	^ journal
 ]
 
@@ -318,9 +322,31 @@ SoilTransaction >> isRoot: anObject [
 		ifAbsent: [ nil ]) notNil
 ]
 
+{ #category : #testing }
+SoilTransaction >> isVisibleObjectId: aSoilObjectId [ 
+	^ (self recordWithId: aSoilObjectId) notNil 
+]
+
 { #category : #accessing }
 SoilTransaction >> journal [
 	^ journal
+]
+
+{ #category : #accessing }
+SoilTransaction >> journalEntriesFor: key inIndex: aSoilIndex startingAt: anInteger [ 
+	| transactionId entries |
+	entries := OrderedCollection new.
+	transactionId := anInteger.
+	[ transactionId > readVersion ] whileTrue: [  
+		journal := (soil journal at: transactionId) readAll.
+		journal entries do: [ :each | 
+			((each class = SoilNewKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
+				(each key = key) ifTrue: [ 
+					entries add: each ] ]  ].
+		transactionId := transactionId - 1.
+	].
+   ^ entries
+	
 ]
 
 { #category : #'as yet unclassified' }
@@ -370,14 +396,10 @@ SoilTransaction >> markDirty: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SoilTransaction >> materializationWithId: objectId [
-	| record |
-	record := (self objectRepository at: objectId version: readVersion)
+SoilTransaction >> materializeRecord: record [
+	^ record
 		transaction: self;
-		materializeObject. 
-	idMap at: objectId put: record.
-	objectMap at: record object put: record.
-	^ record object
+		materializeObject
 ]
 
 { #category : #'instance creation' }
@@ -418,6 +440,13 @@ SoilTransaction >> newSerializer [
 
 ]
 
+{ #category : #testing }
+SoilTransaction >> objectId: objectId ifVisible: visibleBlock ifHidden: hiddenBlock [ 
+	^ (self isVisibleObjectId: objectId)
+		ifTrue: [ visibleBlock cull: objectId ]
+		ifFalse: [ hiddenBlock cull: objectId ] 
+]
+
 { #category : #accessing }
 SoilTransaction >> objectIndex [
 	^ objectMap
@@ -434,9 +463,14 @@ SoilTransaction >> objectWithId: objectId [
 		detect: [ :each | each objectId = objectId ]
 		ifFound: [ :record | ^ record object ].
 
-	^ (self materializationWithId: objectId)
-		soilLoadedIn: self;
-		yourself
+	^ (self recordWithId: objectId)
+		ifNotNil: [ :record |
+			self materializeRecord: record.
+			idMap at: objectId put: record.
+			objectMap at: record object put: record.
+			record object
+				soilLoadedIn: self;
+				yourself ]
 ]
 
 { #category : #accessing }
@@ -465,8 +499,20 @@ SoilTransaction >> proxyForObjectId: aSOObjectId [
 ]
 
 { #category : #accessing }
+SoilTransaction >> readVersion [
+	^ readVersion
+]
+
+{ #category : #accessing }
 SoilTransaction >> readVersion: anInteger [ 
 	readVersion := anInteger
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransaction >> recordWithId: objectId [
+	^ self objectRepository 
+		at: objectId 
+		version: readVersion
 ]
 
 { #category : #accessing }

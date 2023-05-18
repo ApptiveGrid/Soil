@@ -18,9 +18,18 @@ SoilNewObjectVersionEntry >> oldBytes: aCollection [
 	oldBytes := aCollection
 ]
 
+{ #category : #'instance creation' }
+SoilNewObjectVersionEntry >> readFrom: aStream [ 
+	| oldBytesSize |
+	super readFrom: aStream.
+	oldBytesSize := (aStream next: 2) asInteger.
+	oldBytes := aStream next: oldBytesSize
+]
+
 { #category : #writing }
 SoilNewObjectVersionEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
+	aStream nextPutAll: (oldBytes size asByteArrayOfSize: 2).
 	aStream nextPutAll: oldBytes.
 	
 ]

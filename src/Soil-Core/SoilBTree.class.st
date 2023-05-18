@@ -216,7 +216,7 @@ SoilBTree >> removeKey: aString ifAbsent: aBlock [
 	key := (aString asSkipListKeyOfSize: self keySize) asInteger.
 	page := self newIterator 
 		find: key;
-		page.
+		currentPage.
 	^ ((index := page indexOfKey: key) > 0) 
 		ifTrue: [ (page itemRemoveIndex: index) value ]
 		ifFalse: [ aBlock value ]

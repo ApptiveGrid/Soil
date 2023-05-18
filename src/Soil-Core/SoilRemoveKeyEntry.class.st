@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'indexId',
 		'key',
-		'value'
+		'oldValue'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -22,12 +22,14 @@ SoilRemoveKeyEntry >> commitIn: transaction [
 		ifNone: [ Error signal: 'shouldnt happen' ]) value.
 	self flag: #todo.
 	"ifAbsent: should not be used here"
-	index removeKey: key ifAbsent: [ ]
+	index newIterator 
+		at: key put: (SoilObjectId segment: 0 index: 0);
+		updateCurrentTransaction: transaction writeVersion 
 ]
 
 { #category : #accessing }
 SoilRemoveKeyEntry >> context [ 
-	self halt.
+	^ indexId 
 ]
 
 { #category : #accessing }
@@ -36,20 +38,46 @@ SoilRemoveKeyEntry >> indexId: aString [
 ]
 
 { #category : #accessing }
+SoilRemoveKeyEntry >> key [
+
+	^ key
+]
+
+{ #category : #accessing }
 SoilRemoveKeyEntry >> key: aString [ 
 	key := aString 
 ]
 
 { #category : #accessing }
-SoilRemoveKeyEntry >> value: aString [ 
-	value := aString
+SoilRemoveKeyEntry >> oldValue [
+
+	^ oldValue
+]
+
+{ #category : #accessing }
+SoilRemoveKeyEntry >> oldValue: aString [ 
+	oldValue := aString
+]
+
+{ #category : #'instance creation' }
+SoilRemoveKeyEntry >> readFrom: aStream [
+	| indexIdSize |
+	super readFrom: aStream.
+	indexIdSize := aStream next.
+	indexId := (aStream next: indexIdSize) asString.
+	key := (aStream next: (aStream next: 2) asInteger) asInteger.
+	oldValue := (aStream next: (aStream next: 2) asInteger) asSoilObjectId .
 ]
 
 { #category : #writing }
 SoilRemoveKeyEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
 	aStream 
+		nextPut: indexId size; 
 		nextPutAll: indexId asByteArray;
+		nextPutAll: (key size asByteArrayOfSize: 2);
 		nextPutAll: key asByteArray ;
-		nextPutAll: value asByteArray
+		nextPutAll: (oldValue asByteArray size asByteArrayOfSize: 2);
+		nextPutAll: oldValue asByteArray
+		
 ]
