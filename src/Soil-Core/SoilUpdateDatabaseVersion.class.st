@@ -13,9 +13,19 @@ SoilUpdateDatabaseVersion class >> journalTypeCode [
 	^ 5
 ]
 
+{ #category : #accessing }
+SoilUpdateDatabaseVersion >> address [
+	^ #databaseVersion
+]
+
 { #category : #committing }
 SoilUpdateDatabaseVersion >> commitIn: aSoilTransaction [ 
 	aSoilTransaction soil databaseVersion: version
+]
+
+{ #category : #accessing }
+SoilUpdateDatabaseVersion >> container [
+	^ #soil
 ]
 
 { #category : #accessing }
@@ -26,6 +36,11 @@ SoilUpdateDatabaseVersion >> context [
 { #category : #'as yet unclassified' }
 SoilUpdateDatabaseVersion >> effect [ 
 	^ version 
+]
+
+{ #category : #accessing }
+SoilUpdateDatabaseVersion >> oldValue [ 
+	^ previousVersion 
 ]
 
 { #category : #accessing }
@@ -46,6 +61,11 @@ SoilUpdateDatabaseVersion >> readFrom: aStream [
 	super readFrom: aStream.
 	version := (aStream next: 8) asInteger.
 	previousVersion := (aStream next: 8) asInteger
+]
+
+{ #category : #accessing }
+SoilUpdateDatabaseVersion >> value [ 
+	^ version
 ]
 
 { #category : #accessing }

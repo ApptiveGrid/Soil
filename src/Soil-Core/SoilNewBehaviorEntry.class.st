@@ -13,11 +13,21 @@ SoilNewBehaviorEntry class >> journalTypeCode [
 	^ 7
 ]
 
+{ #category : #accessing }
+SoilNewBehaviorEntry >> address [
+	^ identifier 
+]
+
 { #category : #commiting }
 SoilNewBehaviorEntry >> commitIn: aSoilTransaction [ 
 	aSoilTransaction behaviorRegistry 
 		nameAt: identifier  
 		put: objectId 
+]
+
+{ #category : #accessing }
+SoilNewBehaviorEntry >> container [
+	^ #behaviorRegistry
 ]
 
 { #category : #accessing }
@@ -63,6 +73,11 @@ SoilNewBehaviorEntry >> readFrom: aStream [
 	objectId := SoilObjectId readFrom: aStream.
 	size := (aStream next: 2) asInteger.
 	identifier := (aStream next: size) asString
+]
+
+{ #category : #accessing }
+SoilNewBehaviorEntry >> value [ 
+	^ objectId
 ]
 
 { #category : #writing }

@@ -15,6 +15,11 @@ SoilNewKeyEntry class >> journalTypeCode [
 	^ 3
 ]
 
+{ #category : #accessing }
+SoilNewKeyEntry >> address [
+	^ key asByteArray asString
+]
+
 { #category : #'as yet unclassified' }
 SoilNewKeyEntry >> commitIn: transaction [ 
 	| index |
@@ -25,6 +30,11 @@ SoilNewKeyEntry >> commitIn: transaction [
 		at: key put: value;
 		updateCurrentTransaction: transaction writeVersion 
 		
+]
+
+{ #category : #accessing }
+SoilNewKeyEntry >> container [
+	^ 'index: ', indexId asString
 ]
 
 { #category : #accessing }
@@ -70,6 +80,11 @@ SoilNewKeyEntry >> readFrom: aStream [
 	indexId := (aStream next: indexIdSize) asString.
 	key := (aStream next: (aStream next: 2) asInteger) asInteger.
 	value := (aStream next: (aStream next: 2) asInteger) asSoilObjectId .
+]
+
+{ #category : #accessing }
+SoilNewKeyEntry >> value [ 
+	^ value
 ]
 
 { #category : #accessing }

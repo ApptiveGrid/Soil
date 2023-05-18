@@ -107,7 +107,9 @@ Soil >> inspectionJournal [
 	<ignoreNotImplementedSelectors: #(inspectionContent)>
 	self flag: #TODO.
 
-	^ self journal inspectionContent
+	^ SoilJournalEntries new 
+		entries: (self journal allTransactionJournals flatCollect: #entries);
+		inspectionEntries
 ]
 
 { #category : #accessing }

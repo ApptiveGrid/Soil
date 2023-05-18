@@ -84,11 +84,17 @@ SoilTransactionJournal >> inspectionEntries [
 			title: 'Name';
 			addColumn: (SpStringTableColumn evaluated: [:each | each class name ]));
 		addColumn: (SpCompositeTableColumn new
-			title: 'context';
-			addColumn: (SpStringTableColumn evaluated: [:each | each context ]));
+			title: 'container';
+			addColumn: (SpStringTableColumn evaluated: [:each | each container ]));
 		addColumn: (SpCompositeTableColumn new
-			title: 'effect';
-			addColumn: (SpStringTableColumn evaluated: [:each | each effect ]))
+			title: 'address';
+			addColumn: (SpStringTableColumn evaluated: [:each | each address ]));
+		addColumn: (SpCompositeTableColumn new
+			title: 'value';
+			addColumn: (SpStringTableColumn evaluated: [:each | each value ]));
+		addColumn: (SpCompositeTableColumn new
+			title: 'oldValue';
+			addColumn: (SpStringTableColumn evaluated: [:each | each oldValue ]))
 ]
 
 { #category : #'instance creation' }

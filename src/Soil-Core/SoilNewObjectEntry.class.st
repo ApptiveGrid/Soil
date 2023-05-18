@@ -17,6 +17,11 @@ SoilNewObjectEntry class >> journalTypeCode [
 ]
 
 { #category : #accessing }
+SoilNewObjectEntry >> address [
+	^ objectId 
+]
+
+{ #category : #accessing }
 SoilNewObjectEntry >> bytes: aCollection [ 
 	bytes := aCollection
 ]
@@ -28,6 +33,11 @@ SoilNewObjectEntry >> commitIn: transaction [
 		put: bytes.
 	record ifNotNil: [ 
 		record position: position ]
+]
+
+{ #category : #accessing }
+SoilNewObjectEntry >> container [
+	^ 'segment #', objectId segment asString
 ]
 
 { #category : #accessing }
@@ -77,6 +87,11 @@ SoilNewObjectEntry >> record [
 SoilNewObjectEntry >> record: anObject [
 
 	record := anObject
+]
+
+{ #category : #accessing }
+SoilNewObjectEntry >> value [ 
+	^ position 
 ]
 
 { #category : #writing }
