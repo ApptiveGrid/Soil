@@ -45,8 +45,8 @@ SoilSkipListDictionary >> at: key put: anObject [
 		binKey := (key asSkipListKeyOfSize: index keySize) asInteger.
 		iterator findPageFor: binKey startingAt: index headerPage.
 		(iterator currentPage itemAt: binKey ifAbsent: [ nil ])
-			ifNotNil: [ :value | oldValues at: binKey ifAbsentPut: value ].	
-		iterator currentPage itemAt: binKey put: anObject.
+			ifNotNil: [ :value | oldValues at: binKey ifAbsentPut: objectId ].	
+		iterator currentPage itemAt: binKey put: objectId.
 		"if there has been a prior removal of the key this new
 		addition invalidates it"
 		removedValues removeKey: key ifAbsent: [  ]. 
