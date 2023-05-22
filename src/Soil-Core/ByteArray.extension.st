@@ -14,3 +14,8 @@ ByteArray >> asSoilObjectId [
 ByteArray >> asSoilObjectProxy [ 
 	^ self asSoilObjectId asSoilObjectProxy 
 ]
+
+{ #category : #'*Soil-Core' }
+ByteArray >> isRemoved [
+	^ self asInteger isZero
+]
