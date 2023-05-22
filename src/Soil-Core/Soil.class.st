@@ -108,7 +108,7 @@ Soil >> inspectionJournal [
 	self flag: #TODO.
 
 	^ SoilJournalEntries new 
-		entries: (self journal allTransactionJournals flatCollect: #entries);
+		entries: (self journal allTransactionJournals flatCollect: [:each | each entries reverse ]);
 		inspectionEntries
 ]
 

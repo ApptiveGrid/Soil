@@ -11,7 +11,7 @@ Class {
 SoilJournal >> allTransactionJournals [
 	| files |
 	files := path childrenMatching: '*.journal'.
-	^ files sorted collect: [ :each | 
+	^ (files sorted: [:a :b | a withoutExtension basename asNumber > b withoutExtension basename asNumber]) collect: [ :each | 
 		(SoilTransactionJournal new on: each)
 			readAll ]
 ]
