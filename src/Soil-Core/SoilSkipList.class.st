@@ -102,7 +102,8 @@ SoilSkipList >> path: aStringOrFileReference [
 
 { #category : #'instance creation' }
 SoilSkipList >> readPageFrom: aStream [
-	^ SoilSkipListPage readPageFrom: aStream keySize: self keySize valueSize: self valueSize
+	^ (SoilSkipListPage readPageFrom: aStream keySize: self keySize valueSize: self valueSize)
+		pageSize: self pageSize 
 ]
 
 { #category : #converting }
