@@ -65,6 +65,17 @@ SoilNewClusterVersion >> hasChanged [
 ]
 
 { #category : #accessing }
+SoilNewClusterVersion >> indexOfBehaviorDescription: aBehavior [
+	| index |
+	index := behaviorDescriptions 
+		detectIndex: [ :each | each behaviorIdentifier = aBehavior name ]
+		ifNone: [ 0 ].
+	(index > 0) ifTrue: [ ^ index ].
+	behaviorDescriptions add: (transaction behaviorDescriptionFor: aBehavior).
+	^ behaviorDescriptions size
+]
+
+{ #category : #accessing }
 SoilNewClusterVersion >> indexOfExternalReference: anObject [
 	| index |
 	(anObject == object) ifTrue: [ ^ 0 ].
@@ -158,9 +169,16 @@ SoilNewClusterVersion >> serializeOn: stream [
 
 	serializer 
 		nextPutLengthEncodedInteger: version;
-		nextPutLengthEncodedInteger: previousVersionPosition;
-		nextPutLengthEncodedInteger: references size.
-	
+		nextPutLengthEncodedInteger: previousVersionPosition.
+		
+	serializer
+		nextPutLengthEncodedInteger: behaviorDescriptions size.
+	behaviorDescriptions do: [ :behavior |
+		serializer 
+			nextPutLengthEncodedInteger: behavior objectId index;
+			nextPutLengthEncodedInteger: behavior version ].
+		
+	serializer nextPutLengthEncodedInteger: references size.
 	references do: [ :ref |
 		"do not write zero index, try to allocate a new index before"
 		(ref index = 0) ifTrue: [ 

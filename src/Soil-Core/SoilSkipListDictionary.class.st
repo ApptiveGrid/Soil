@@ -235,7 +235,7 @@ SoilSkipListDictionary >> last [
 	| assoc |
 	^ transaction 
 		ifNotNil: [  
-			assoc := self index last.
+			assoc := self index newIterator lastAssociation.
 			assoc ifNil: [ ^ nil ].
 			assoc key -> (transaction proxyForObjectId: assoc value asSoilObjectId) ]
 		ifNil: [ newValues associations last value ]

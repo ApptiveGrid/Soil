@@ -23,6 +23,11 @@ SoilPersistentClusterVersion >> beChanged [
 	changed := true
 ]
 
+{ #category : #'as yet unclassified' }
+SoilPersistentClusterVersion >> behaviorDescriptionWithIndex: anInteger [ 
+	^ behaviorDescriptions at: anInteger 
+]
+
 { #category : #accessing }
 SoilPersistentClusterVersion >> changed: aBoolean [
 	changed := aBoolean 
@@ -81,13 +86,19 @@ SoilPersistentClusterVersion >> printOn: aStream [
 
 { #category : #'instance creation' }
 SoilPersistentClusterVersion >> readFrom: stream [ 
-	| numberOfReferences objectSize materializer |
+	| numberOfReferences objectSize materializer numberOfBehaviorDescriptions |
 	materializer := SoilBasicMaterializer new stream: stream.
 	position := stream position.
 	version := materializer nextLengthEncodedInteger.
 	previousVersionPosition := materializer nextLengthEncodedInteger.
+	
+	numberOfBehaviorDescriptions := materializer nextLengthEncodedInteger.
+	behaviorDescriptions := OrderedCollection new: numberOfBehaviorDescriptions.
+	1 to: numberOfBehaviorDescriptions do: [:n |
+		behaviorDescriptions add: ((SoilVersionedObjectId segment: 0 index: materializer nextLengthEncodedInteger)
+			version: materializer nextLengthEncodedInteger) ]. 
 	numberOfReferences := materializer nextLengthEncodedInteger.
-	references := OrderedCollection new.
+	references := OrderedCollection new: numberOfReferences.
 	1 to: numberOfReferences do: [:n | self addReference: (SoilObjectId readFrom: stream)]. 
 	objectSize := materializer nextLengthEncodedInteger.
 	bytes := stream next: objectSize.

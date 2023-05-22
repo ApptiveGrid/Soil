@@ -71,12 +71,11 @@ SoilMaterializer >> nextAssociation: aClass [
 
 { #category : #reading }
 SoilMaterializer >> nextBehaviorDescription [
-	| behaviorIndex behaviorVersion |
+	| behaviorIndex objectId |
 	behaviorIndex := self nextLengthEncodedInteger.
-	behaviorVersion := self nextLengthEncodedInteger.
-	^ transaction
-				behaviorDescriptionWithIndex: behaviorIndex
-				andVersion: behaviorVersion
+	objectId := externalObjectRegistry 
+				behaviorDescriptionWithIndex: behaviorIndex.
+	^ transaction behaviorDescriptionWithIndex: objectId index andVersion: objectId version
 ]
 
 { #category : #reading }
