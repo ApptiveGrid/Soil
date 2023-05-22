@@ -57,7 +57,7 @@ SoilSkipListDataPage >> firstItem [
 
 { #category : #testing }
 SoilSkipListDataPage >> hasItems [
-	^ items notEmpty
+	^ (items reject: [ :each | each value isRemoved ]) notEmpty
 ]
 
 { #category : #testing }
