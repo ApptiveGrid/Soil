@@ -77,10 +77,10 @@ SoilIndexIterator >> last [
 
 { #category : #accessing }
 SoilIndexIterator >> lastAssociation [
-	| item |
-	item := self lastPage lastItem. "sets currentPage"
-	currentKey := item key.
-	^ item
+	^ self lastPage lastItem  "sets currentPage"
+		ifNotNil: [: item | 
+			currentKey := item key.
+			item ]
 ]
 
 { #category : #accessing }
