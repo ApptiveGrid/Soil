@@ -56,6 +56,11 @@ SoilIndexIterator >> firstAssociation [
 	| item |
 	currentPage := index store headerPage.
 	item := currentPage firstItem.
+	"if we get back a key that has been marked removed 
+	we iterate until we find one that hasn't been 
+	removed"
+	[ item value isRemoved ] whileTrue: [ 
+		item := self nextAssociation ].
 	currentKey := item key.
 	^ item
 ]

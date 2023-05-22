@@ -275,9 +275,9 @@ SoilSkipListDictionary >> newIndexInstance [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> nextAfter: key [  
-	| page |
-	page := self index newIterator find: key asInteger;  page.
-	^ (page itemAfter: key asInteger)
+	| currentPage |
+	currentPage := self index newIterator find: key asInteger;  currentPage.
+	^ (currentPage itemAfter: key asInteger)
 		ifNotNil: [ :assoc | 
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
