@@ -38,7 +38,8 @@ SoilIndexIterator >> currentPage: anObject [
 SoilIndexIterator >> do: aBlock [
 	| item |
 	[ (item := self next) isNil ] whileFalse: [ 
-		aBlock value: item ]
+		item isRemoved ifFalse: [  
+			aBlock value: item ] ]
 ]
 
 { #category : #private }
