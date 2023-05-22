@@ -75,7 +75,7 @@ SoilRemoveKeyEntry >> writeOn: aStream [
 	aStream 
 		nextPut: indexId size; 
 		nextPutAll: indexId asByteArray;
-		nextPutAll: (key size asByteArrayOfSize: 2);
+		nextPutAll: (key asByteArray size asByteArrayOfSize: 2);
 		nextPutAll: key asByteArray ;
 		nextPutAll: (oldValue asByteArray size asByteArrayOfSize: 2);
 		nextPutAll: oldValue asByteArray
