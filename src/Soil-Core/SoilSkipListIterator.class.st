@@ -34,7 +34,7 @@ SoilSkipListIterator >> at: aKeyObject put: anObject [
 			currentPage hasRoom 
 				ifTrue: [ currentPage addItem: (key -> anObject) ]
 				ifFalse: [ 
-					newPage := index splitPage: currentPage.
+					newPage := index splitPage: self.
 					((currentPage biggestKey < key)
 						ifTrue: [ newPage ]
 						ifFalse: [ currentPage ])
