@@ -88,7 +88,7 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 			ifTrue: [ ^ SoilBehaviorDescription meta ]
 			ifFalse: [ (self objectWithId: objectId) 
 				ifNotNil: [ :object | object objectId: objectId ]
-				ifNil: [ ('could not find object with ', objectId asString, ' for class ', aClass name, ' in transaction ', self printString) apptiveEmit. Error signal: ('could not find object with ', objectId asString, ' for class ', aClass name, ' in transaction ', self printString) ] ].
+				ifNil: [ Error signal: ('could not find object with ', objectId asString, ' for class ', aClass name, ' in transaction ', self printString) ] ].
 		"the description in the database might not be current, if not, we create a new one later"
 		behaviorDescription isCurrent 
 			ifTrue: [ ^ behaviorDescription ] ].
@@ -377,7 +377,7 @@ SoilTransaction >> makeNewVersion: classDescription [
 
 { #category : #'as yet unclassified' }
 SoilTransaction >> makePersistent: anObject [ 
-	self makeRoot: anObject 
+	^ self makeRoot: anObject 
 ]
 
 { #category : #'as yet unclassified' }
