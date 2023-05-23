@@ -86,7 +86,9 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 	objectId ifNotNil: [ 
 		behaviorDescription := (objectId index = 2)
 			ifTrue: [ ^ SoilBehaviorDescription meta ]
-			ifFalse: [ (self objectWithId: objectId) objectId: objectId].
+			ifFalse: [ (self objectWithId: objectId) 
+				ifNotNil: [ :object | object objectId: objectId ]
+				ifNil: [ ('could not find object with ', objectId asString, ' for class ', aClass name, ' in transaction ', self printString) apptiveEmit. Error signal: 'could not find registered objectId' ] ].
 		"the description in the database might not be current, if not, we create a new one later"
 		behaviorDescription isCurrent 
 			ifTrue: [ ^ behaviorDescription ] ].
@@ -119,9 +121,8 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 
 { #category : #'as yet unclassified' }
 SoilTransaction >> behaviorDescriptionWithIndex: index andVersion: version [ 
-	
 	idMap 
-		detect: [ :each | each objectId = index ]
+		detect: [ :each | each objectId index = index ]
 		ifFound: [ :record | 
 			(record object version = version)
 				ifTrue: [ ^ record object ] ].
