@@ -122,12 +122,12 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 { #category : #'as yet unclassified' }
 SoilTransaction >> behaviorDescriptionWithIndex: index andVersion: version [ 
 	idMap 
-		detect: [ :each | each objectId index = index ]
+		detect: [ :each | each objectId = index ]
 		ifFound: [ :record | 
 			(record object version = version)
 				ifTrue: [ ^ record object ] ].
 
-	^ self behaviorRegistry behaviorDescriptionWithIndex: index andVersion: version transaction: self
+	^ self behaviorRegistry behaviorDescriptionWithIndex: index index andVersion: version transaction: self
 ]
 
 { #category : #accessing }

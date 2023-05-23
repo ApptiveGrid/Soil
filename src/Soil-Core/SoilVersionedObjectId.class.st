@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #converting }
+SoilVersionedObjectId >> asSoilObjectId [
+	^ self as: SoilObjectId 
+]
+
 { #category : #accessing }
 SoilVersionedObjectId >> version [
 
