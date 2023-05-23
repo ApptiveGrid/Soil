@@ -11,7 +11,7 @@ Class {
 SoilSkipListIterator >> at: key ifAbsent: aBlock [
 	currentKey := (key asSkipListKeyOfSize: index keySize) asInteger.
 	self 
-		findPageFor: key 
+		findPageFor: currentKey 
 		startingAt: index headerPage.
 	^ currentPage 
 		valueAt: currentKey
