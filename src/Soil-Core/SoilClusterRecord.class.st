@@ -103,9 +103,7 @@ SoilClusterRecord >> printOn: aStream [
 { #category : #accessing }
 SoilClusterRecord >> referenceAt: anInteger [
 	(references at: anInteger) ifNil: [ Error signal: 'reference at ', anInteger ,' not found' ].
-	^ SoilObjectProxy 
-		forId: (references at: anInteger) 
-		transaction: transaction
+	^ references at: anInteger
 ]
 
 { #category : #accessing }

@@ -9,14 +9,6 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
-{ #category : #'as yet unclassified' }
-SoilObjectProxy class >> forId: objectId transaction: transaction [
-	^ self new
-		objectId: objectId;
-		transaction: transaction
-		"do not call #yourself as this would return the proxied object"
-]
-
 { #category : #'reflective operations' }
 SoilObjectProxy >> doesNotUnderstand: aMessage [ 
 	^ aMessage sendTo: self soilRealObject
