@@ -3,7 +3,6 @@ Class {
 	#superclass : #SoilBinaryFile,
 	#instVars : [
 		'soil',
-		'databaseVersion',
 		'databaseFormatVersion',
 		'applicationVersion'
 	],
@@ -54,9 +53,9 @@ SoilParameterFile >> databaseFormatVersionSize [
 
 { #category : #accessing }
 SoilParameterFile >> databaseVersion [
-	^ databaseVersion ifNil: [ 
-		stream position: self headerSize + self databaseFormatVersionSize.
-		databaseVersion := (stream next: self databaseVersionSize) asInteger ]
+	stream position: self headerSize + self databaseFormatVersionSize.
+	^ (stream next: self databaseVersionSize) asInteger
+	
 ]
 
 { #category : #accessing }
@@ -64,8 +63,7 @@ SoilParameterFile >> databaseVersion: anInteger [
 	self stream 
 		position: self headerSize + self databaseFormatVersionSize;
 		nextPutAll: (anInteger asByteArrayOfSize: self databaseVersionSize);
-		flush.
-	databaseVersion := anInteger 
+		flush
 ]
 
 { #category : #accessing }
