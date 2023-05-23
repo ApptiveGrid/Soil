@@ -63,7 +63,7 @@ SoilSkipListDictionary >> atIndex: anInteger [
 				ifNotNil: [ :bytes |
 					transaction 
 						objectId: bytes asSoilObjectId
-						ifVisible: [:objectId | objectId asSoilObjectProxy ]
+						ifVisible: [:objectId | (objectId asSoilObjectProxy) transaction: transaction ]
 						ifHidden: [ nil ] ] ]
 		ifNil: [ (newValues associations at: anInteger) value  ]
 ]

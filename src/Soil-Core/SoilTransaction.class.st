@@ -325,6 +325,9 @@ SoilTransaction >> isRoot: anObject [
 
 { #category : #testing }
 SoilTransaction >> isVisibleObjectId: aSoilObjectId [ 
+	"not initialized objectIds are private to this transaction
+	and therefor visible"
+	aSoilObjectId isInitialized ifFalse: [ ^ true ].
 	^ (self recordWithId: aSoilObjectId) notNil 
 ]
 
