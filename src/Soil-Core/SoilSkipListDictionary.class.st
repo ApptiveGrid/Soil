@@ -63,7 +63,7 @@ SoilSkipListDictionary >> atIndex: anInteger [
 				ifNotNil: [ :bytes |
 					transaction 
 						objectId: bytes asSoilObjectId
-						ifVisible: [:objectId | objectId asSoilObjectProxy ]
+						ifVisible: [:objectId | (objectId asSoilObjectProxy) transaction: transaction ]
 						ifHidden: [ nil ] ] ]
 		ifNil: [ (newValues associations at: anInteger) value  ]
 ]
@@ -235,8 +235,9 @@ SoilSkipListDictionary >> last [
 	| assoc |
 	^ transaction 
 		ifNotNil: [  
-			assoc := self index last.
+			assoc := self index newIterator lastAssociation.
 			assoc ifNil: [ ^ nil ].
+			assoc value isRemoved ifTrue: [ ^ nil ].
 			assoc key -> (transaction proxyForObjectId: assoc value asSoilObjectId) ]
 		ifNil: [ newValues associations last value ]
 ]

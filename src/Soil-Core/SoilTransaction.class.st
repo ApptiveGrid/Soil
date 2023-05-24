@@ -189,6 +189,7 @@ SoilTransaction >> checkpoint [
 	self prepareRecordsForCommit.
 	"only one transactions is allowed at a time. We use the critical block of the database
 	to avoid parallel committing"
+	recordsToCommit ifEmpty: [ ^ self ].
 	soil critical: [ 
 	"enter lock phase. Acquire lock on global databaseVersion which centrally locks
 	the database for commiting until this checkpoint is done. The ensure block is needed
@@ -324,6 +325,9 @@ SoilTransaction >> isRoot: anObject [
 
 { #category : #testing }
 SoilTransaction >> isVisibleObjectId: aSoilObjectId [ 
+	"not initialized objectIds are private to this transaction
+	and therefor visible"
+	aSoilObjectId isInitialized ifFalse: [ ^ true ].
 	^ (self recordWithId: aSoilObjectId) notNil 
 ]
 
