@@ -12,7 +12,7 @@ Class {
 { #category : #adding }
 SoilNewClusterVersion >> addObject: anObject reference: anObjectId [
 	externalObjects add: anObject.
-	references addLast: anObjectId
+	self addReference: anObjectId
 ]
 
 { #category : #converting }
