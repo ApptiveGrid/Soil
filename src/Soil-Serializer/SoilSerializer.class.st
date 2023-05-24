@@ -38,15 +38,6 @@ SoilSerializer >> nextPutAssociation: anAssociation [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutBehaviorDescription: description [
-	(description objectId index > 0) ifFalse: [ SoilIndexOutOfRange signal: 'object index needs to be larger than zero' ].
-	self
-		nextPutObjectType;
-		nextPutLengthEncodedInteger: (description objectId index);
-		nextPutLengthEncodedInteger: (description version)
-]
-
-{ #category : #writing }
 SoilSerializer >> nextPutClass: aClass [ 
 
 	self 
@@ -232,10 +223,11 @@ SoilSerializer >> serialize: anObject [
 
 { #category : #public }
 SoilSerializer >> serializeBehaviorDescriptionFor: anObject [
-	| description |
-	description := transaction behaviorDescriptionFor: anObject class.
-	self nextPutBehaviorDescription: description.
-	^ description
+	| index |
+	index := externalObjectRegistry indexOfBehaviorDescription: anObject class.
+	self nextPutObjectType.
+	self nextPutLengthEncodedInteger: index.
+	^ externalObjectRegistry behaviorDescriptionAt: index
 ]
 
 { #category : #public }

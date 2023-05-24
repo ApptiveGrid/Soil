@@ -9,7 +9,8 @@ Class {
 		'bytes',
 		'committed',
 		'previousVersionPosition',
-		'version'
+		'version',
+		'behaviorDescriptions'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -24,6 +25,11 @@ SoilClusterRecord class >> readFrom: aStream [
 SoilClusterRecord >> addReference: reference [
 	references detect: [ :each | each = reference ] ifFound: [ Error signal: 'reference already there' ].
 	references add: reference 
+]
+
+{ #category : #accessing }
+SoilClusterRecord >> behaviorDescriptionAt: anInteger [ 
+	^ behaviorDescriptions at: anInteger 
 ]
 
 { #category : #accessing }
@@ -50,6 +56,7 @@ SoilClusterRecord >> hasPreviousVersion [
 { #category : #initialization }
 SoilClusterRecord >> initialize [ 
 	super initialize.
+	behaviorDescriptions := OrderedCollection new.
 	references := OrderedCollection new.
 	committed := false.
 	previousVersionPosition := 0.
@@ -96,9 +103,7 @@ SoilClusterRecord >> printOn: aStream [
 { #category : #accessing }
 SoilClusterRecord >> referenceAt: anInteger [
 	(references at: anInteger) ifNil: [ Error signal: 'reference at ', anInteger ,' not found' ].
-	^ SoilObjectProxy 
-		forId: (references at: anInteger) 
-		transaction: transaction
+	^ references at: anInteger
 ]
 
 { #category : #accessing }

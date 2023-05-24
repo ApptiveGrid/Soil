@@ -71,12 +71,12 @@ SoilMaterializer >> nextAssociation: aClass [
 
 { #category : #reading }
 SoilMaterializer >> nextBehaviorDescription [
-	| behaviorIndex behaviorVersion |
+	| behaviorIndex objectId |
 	behaviorIndex := self nextLengthEncodedInteger.
-	behaviorVersion := self nextLengthEncodedInteger.
-	^ transaction
-				behaviorDescriptionWithIndex: behaviorIndex
-				andVersion: behaviorVersion
+	(behaviorIndex = 0) ifTrue: [ Error signal: 'index cannot be zero' ].
+	objectId := externalObjectRegistry 
+				behaviorDescriptionWithIndex: behaviorIndex.
+	^ transaction behaviorDescriptionWithIndex: objectId asSoilObjectId andVersion: objectId version
 ]
 
 { #category : #reading }
@@ -166,7 +166,7 @@ SoilMaterializer >> nextDictionary: aClass [
 SoilMaterializer >> nextExternalReference [
 	| index |
 	index := self nextLengthEncodedInteger.
-	^ externalObjectRegistry referenceAt: index
+	^ transaction proxyForObjectId:  (externalObjectRegistry referenceAt: index) 
 ]
 
 { #category : #reading }

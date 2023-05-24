@@ -39,7 +39,8 @@ SoilPersistentDictionary >> anyOne [
 
 { #category : #forwarded }
 SoilPersistentDictionary >> at: key [
-	^ dict at: key
+	^ dict at: key ifAbsent: [ 
+		KeyNotFound signal: ('cannot find key in dict with keys: ', dict keys printString)  ]
 ]
 
 { #category : #forwarded }
