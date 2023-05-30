@@ -218,6 +218,18 @@ SoilPrimitiveSerializationTest >> testSerializationDate [
 ]
 
 { #category : #tests }
+SoilPrimitiveSerializationTest >> testSerializationDateNegative [
+	| object serialized materialized |
+	object := Date year: 1900 month: 1 day: 1.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[14 4 237 2 3 120].
+	self assert: (serialized at: 1) equals: TypeCodeDate.
+
+	materialized := SoilMaterializer materializeFromBytes: serialized.
+	self assert: materialized equals: object
+]
+
+{ #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationDateWithLocalTimeZone [
 	| utc est bst object utc14plus utc545plus utc12minus utc330minus serialized materialized |
 	utc := TimeZone abbreviated: 'UTC'.
