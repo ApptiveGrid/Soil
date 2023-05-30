@@ -61,7 +61,7 @@ SoilBasicSerializer >> nextPutCharacter: aCharacter [
 SoilBasicSerializer >> nextPutDate: aDate [ 
 	self 
 		nextPutByte: TypeCodeDate; 
-		nextPutLengthEncodedInteger: aDate julianDayNumber - 2415386; 
+		nextPutInteger: aDate julianDayNumber - 2415386; 
 		nextPutInteger: ((aDate offset hours * 60) + aDate offset minutes)
 ]
 

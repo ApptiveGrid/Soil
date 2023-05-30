@@ -51,7 +51,7 @@ SoilBasicMaterializer >> nextCharacter [
 SoilBasicMaterializer >> nextDate: aClass [ 
 	| date |
 	date := aClass 
-		julianDayNumber: 2415386 + self nextLengthEncodedInteger 
+		julianDayNumber: 2415386 + self nextSoilObject 
 		offset: (Duration minutes: self nextSoilObject).
 	self registerObject: date.
 	^ date

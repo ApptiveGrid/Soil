@@ -210,7 +210,19 @@ SoilPrimitiveSerializationTest >> testSerializationDate [
 	| object serialized materialized |
 	object := Date fromDays: 10.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[14 10 3 0].
+	self assert: serialized equals: #[14 3 10 3 0].
+	self assert: (serialized at: 1) equals: TypeCodeDate.
+
+	materialized := SoilMaterializer materializeFromBytes: serialized.
+	self assert: materialized equals: object
+]
+
+{ #category : #tests }
+SoilPrimitiveSerializationTest >> testSerializationDateNegative [
+	| object serialized materialized |
+	object := (DateAndTime year: 1900 month: 1 day: 1 hour: 0 minute: 0 second: 0 offset: 0 hours) asDate.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[14 4 237 2 3 0].
 	self assert: (serialized at: 1) equals: TypeCodeDate.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
@@ -252,7 +264,7 @@ SoilPrimitiveSerializationTest >> testSerializationDateWithNegativeOffset [
 	| object serialized materialized |
 	object := (Date fromDays: 10) offset: -5 hours.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[14 9 4 172 2].
+	self assert: serialized equals: #[14 3 9 4 172 2].
 	self assert: (serialized at: 1) equals: TypeCodeDate.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
