@@ -36,13 +36,13 @@ SoilIndexManager >> initialize [
 
 { #category : #initialization }
 SoilIndexManager >> initializeFilesystem [
-	
+	self path ensureCreateDirectory 
 ]
 
 { #category : #'as yet unclassified' }
 SoilIndexManager >> loadIndexWithId: anIndexedObject ifNone: aBlock [
 	| path |
-	path := segment path / anIndexedObject id , #index.
+	path := self path / anIndexedObject id , #index.
 	^ path exists
 		ifTrue: [ anIndexedObject loadFrom: path ]
 		ifFalse: [ aBlock value ]
@@ -53,11 +53,16 @@ SoilIndexManager >> open [
 	
 ]
 
+{ #category : #accessing }
+SoilIndexManager >> path [ 
+	^ segment path / #indexes
+]
+
 { #category : #'as yet unclassified' }
 SoilIndexManager >> registerIndexedObject: aSoilSkipListDictionary [ 
 	| registeredIndex |
 	registeredIndex :=  aSoilSkipListDictionary index thePersistentInstance
-		path: segment path / aSoilSkipListDictionary id, #index;
+		path: self path / aSoilSkipListDictionary id, #index;
 		initializeFilesystem.
 	^ semaphore critical: [  
 		indexes 
