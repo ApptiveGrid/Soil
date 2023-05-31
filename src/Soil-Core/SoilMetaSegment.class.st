@@ -5,6 +5,6 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SoilMetaSegment >> nameIndexPath [
+SoilMetaSegment >> identifierIndexPath [
 	^ self indexManager path / #identifier , #index
 ]

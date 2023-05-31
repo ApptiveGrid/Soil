@@ -125,7 +125,7 @@ SoilBehaviorRegistry >> open [
 
 { #category : #accessing }
 SoilBehaviorRegistry >> path [
-	^ soil objectRepository metaSegment nameIndexPath
+	^ soil objectRepository metaSegment identifierIndexPath
 ]
 
 { #category : #accessing }
