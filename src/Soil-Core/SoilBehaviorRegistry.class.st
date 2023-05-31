@@ -73,7 +73,7 @@ SoilBehaviorRegistry >> initializeFilesystem [
 		path: self path;
 		initializeFilesystem;
 		initializeHeaderPage;
-		maxLevel: 8;
+		maxLevel: 10;
 		keySize: 64;
 		valueSize: 8.
 	self addSpecialObjects.
