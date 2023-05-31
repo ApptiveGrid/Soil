@@ -67,6 +67,7 @@ SoilNewClusterVersion >> hasChanged [
 { #category : #accessing }
 SoilNewClusterVersion >> indexOfBehaviorDescription: aBehavior [
 	| index |
+	(aBehavior = SoilBehaviorDescription) ifTrue: [ ^ 0 ]. 
 	index := behaviorDescriptions 
 		detectIndex: [ :each | each behaviorIdentifier = aBehavior name ]
 		ifNone: [ 0 ].

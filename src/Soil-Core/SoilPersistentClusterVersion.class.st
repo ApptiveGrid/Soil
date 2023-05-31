@@ -25,6 +25,7 @@ SoilPersistentClusterVersion >> beChanged [
 
 { #category : #'as yet unclassified' }
 SoilPersistentClusterVersion >> behaviorDescriptionWithIndex: anInteger [ 
+	(anInteger = 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
 	^ behaviorDescriptions at: anInteger 
 ]
 

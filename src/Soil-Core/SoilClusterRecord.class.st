@@ -29,6 +29,7 @@ SoilClusterRecord >> addReference: reference [
 
 { #category : #accessing }
 SoilClusterRecord >> behaviorDescriptionAt: anInteger [ 
+	(anInteger = 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
 	^ behaviorDescriptions at: anInteger 
 ]
 
