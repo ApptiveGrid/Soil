@@ -218,3 +218,12 @@ SoilBasicSkipList >> valueSize: anInteger [
 	"valueSize := anInteger"
 	self headerPage valueSize: anInteger 
 ]
+
+{ #category : #enumerating }
+SoilBasicSkipList >> values [ 
+	| values |
+	values := OrderedCollection new.
+	self do: [ :each |
+		values add: each value ].
+	^ values
+]

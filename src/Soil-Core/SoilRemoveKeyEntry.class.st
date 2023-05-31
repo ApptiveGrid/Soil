@@ -14,6 +14,11 @@ SoilRemoveKeyEntry class >> journalTypeCode [
 	^ 4
 ]
 
+{ #category : #accessing }
+SoilRemoveKeyEntry >> address [
+	^ key asByteArray asString
+]
+
 { #category : #'as yet unclassified' }
 SoilRemoveKeyEntry >> commitIn: transaction [ 
 	| index |
@@ -25,6 +30,11 @@ SoilRemoveKeyEntry >> commitIn: transaction [
 	index newIterator 
 		at: key put: (SoilObjectId segment: 0 index: 0);
 		updateCurrentTransaction: transaction writeVersion 
+]
+
+{ #category : #accessing }
+SoilRemoveKeyEntry >> container [
+	^ 'index: ', indexId asString
 ]
 
 { #category : #accessing }
@@ -67,6 +77,11 @@ SoilRemoveKeyEntry >> readFrom: aStream [
 	indexId := (aStream next: indexIdSize) asString.
 	key := (aStream next: (aStream next: 2) asInteger) asInteger.
 	oldValue := (aStream next: (aStream next: 2) asInteger) asSoilObjectId .
+]
+
+{ #category : #accessing }
+SoilRemoveKeyEntry >> value [ 
+	^ #removed
 ]
 
 { #category : #writing }
