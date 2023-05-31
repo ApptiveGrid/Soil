@@ -73,7 +73,7 @@ SoilMaterializer >> nextAssociation: aClass [
 SoilMaterializer >> nextBehaviorDescription [
 	| behaviorIndex objectId |
 	behaviorIndex := self nextLengthEncodedInteger.
-	(behaviorIndex = 0) ifTrue: [ Error signal: 'index cannot be zero' ].
+	(behaviorIndex = 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
 	objectId := externalObjectRegistry 
 				behaviorDescriptionWithIndex: behaviorIndex.
 	^ transaction behaviorDescriptionWithIndex: objectId asSoilObjectId andVersion: objectId version
