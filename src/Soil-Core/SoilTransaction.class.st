@@ -446,6 +446,14 @@ SoilTransaction >> newSerializer [
 
 ]
 
+{ #category : #accessing }
+SoilTransaction >> objectAt: anObjectId ifAbsent: aBlock [
+	idMap 
+		detect: [ :each | each objectId = anObjectId ]
+		ifFound: [ :record | ^ record object ]
+		ifNone: [ aBlock value ]
+]
+
 { #category : #testing }
 SoilTransaction >> objectId: objectId ifVisible: visibleBlock ifHidden: hiddenBlock [ 
 	^ (self isVisibleObjectId: objectId)
