@@ -7,5 +7,5 @@ Integer >> asSkipListKeyOfSize: keySize [
 
 { #category : #'*soil-core' }
 Integer >> asSoilObjectId [
-	^ self asByteArray asSoilObjectId 
+	^ (self asByteArrayOfSize: 8) asSoilObjectId 
 ]
