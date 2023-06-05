@@ -127,10 +127,13 @@ SoilSkipListIterator >> nextAssociation [
 
 { #category : #private }
 SoilSkipListIterator >> nextKeyCloseTo: key [
+	
+	| binKey |
+	binKey := (key asSkipListKeyOfSize: index keySize) asInteger.
 	self 
-		findPageFor: key
+		findPageFor: binKey
 		startingAt: index headerPage.
-	nextKey := currentPage keyOrClosestAfter: key
+	nextKey := currentPage keyOrClosestAfter: binKey
 ]
 
 { #category : #printing }
