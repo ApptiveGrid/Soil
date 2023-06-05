@@ -28,7 +28,7 @@ SoilSkipListTest >> tearDown [
 ]
 
 { #category : #tests }
-SoilSkipListTest >> testAddFirstOverflow [
+SoilSkipListTest >> testAddFirstOverflowAppending [
 	
 	| page capacity |
 	capacity := skipList firstPage itemCapacity.
@@ -38,9 +38,9 @@ SoilSkipListTest >> testAddFirstOverflow [
 	skipList at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: skipList pages size equals: 2.
 	page := skipList pageAt: 2.
-	self assert: page numberOfItems equals: 128.
-	self assert: page items first key equals: 128.
-	self assert: page items last key asByteArray equals: #[ 255 ]
+	self assert: page numberOfItems equals: 1.
+	self assert: page items first key equals: 254.
+	self assert: page items last key asByteArray equals: #[ 254 ]
 ]
 
 { #category : #tests }
@@ -54,9 +54,9 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 	skipList at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: skipList pages size equals: 2.
 	page := skipList pageAt: 2.
-	self assert: page numberOfItems equals: 128.
-	self assert: page items first key equals: 128.
-	self assert: page items last key asByteArray equals: #[ 255 ].
+	self assert: page numberOfItems equals: 1.
+	self assert: page items first key equals: 254.
+	self assert: page items last key asByteArray equals: #[ 254 ].
 	
 	"write it and then read it back with a new SoilSkipList"
 	skipList writePages.
@@ -70,6 +70,22 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testAddFirstOverflowSplitting [
+	
+	| page capacity |
+	capacity := skipList firstPage itemCapacity.
+	1 to: capacity * 2 by: 2 do: [ :n | 
+		skipList at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	self assert: skipList pages size equals: 1.
+	skipList at: capacity - 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: skipList pages size equals: 2.
+	page := skipList pageAt: 2.
+	self assert: page numberOfItems equals: 126.
+	self assert: page items first key equals: 255.
+	self assert: page items last key asByteArray equals: #[ 1 249 ]
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testAddInBetween [
 	
 	| page capacity |
@@ -80,8 +96,8 @@ SoilSkipListTest >> testAddInBetween [
 	skipList at: (capacity / 2) floor put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: skipList pages size equals: 1.
 	page := skipList pageAt: 1.
-	self assert: page numberOfItems equals: 254.
-	self assert: (page items at: (capacity / 2) floor) key equals: 127
+	self assert: page numberOfItems equals: 253.
+	self assert: (page items at: (capacity / 2) floor) key equals: 126
 ]
 
 { #category : #tests }
@@ -95,9 +111,9 @@ SoilSkipListTest >> testAddInBetweenOverflowing [
 	skipList at: 32 put: #[ 8 7 6 5 4 3 2 1 ].
 	self assert: skipList pages size equals: 2.
 	page := skipList pageAt: 2.
-	self assert: page numberOfItems equals: 127.
+	self assert: page numberOfItems equals: 126.
 	self assert: (page items first) key equals: 255.
-	self assert: (page items last) key asByteArray equals: #[ 1 251 ].
+	self assert: (page items last) key asByteArray equals: #[ 1 249 ].
 	skipList writePages 
 ]
 
@@ -112,7 +128,7 @@ SoilSkipListTest >> testAddInBetweenOverwriting [
 	skipList at: 31 put: #[ 8 7 6 5 4 3 2 1 ].
 	self assert: skipList pages size equals: 1.
 	page := skipList pageAt: 1.
-	self assert: page numberOfItems equals: 254.
+	self assert: page numberOfItems equals: 253.
 	self assert: (page items at: 16) value equals: #[ 8 7 6 5 4 3 2 1 ] 
 ]
 
@@ -223,7 +239,7 @@ SoilSkipListTest >> testIteratorFindAndNext [
 	capacity := skipList firstPage itemCapacity * 2.
 	1 to: capacity do: [ :n |
 		skipList at: n put: (n asByteArrayOfSize: 8) ].
-	self assert: skipList pages size equals: 3.
+	self assert: skipList pages size equals: 2.
 	iterator := skipList newIterator.
 	value := iterator
 		find: 222;
@@ -240,7 +256,7 @@ SoilSkipListTest >> testLast [
 	1 to: capacity - 1 do: [ :n |
 		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	skipList at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
-	self assert: skipList pages size equals: 3.
+	self assert: skipList pages size equals: 2.
 	self assert: skipList last equals: #[ 8 7 6 5 4 3 2 1 ]
 ]
 
@@ -249,7 +265,7 @@ SoilSkipListTest >> testMorePages [
 	1 to: 512 do: [ :n |
 		skipList at: (n asString asSkipListKeyOfSize: 8) put: #[ 1 2 3 4 5 6 7 8 ] ].
 	skipList writePages.
-	self assert: skipList pages size equals: 4
+	self assert: skipList pages size equals: 3
 ]
 
 { #category : #tests }

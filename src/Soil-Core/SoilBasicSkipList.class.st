@@ -37,7 +37,7 @@ SoilBasicSkipList >> at: aKeyObject put: anObject [
 			page hasRoom 
 				ifTrue: [ iterator currentPage addItem: (key -> anObject) ]
 				ifFalse: [ 
-					newPage := self splitPage: iterator.
+					newPage := self splitPage: iterator forKey: key.
 					((page biggestKey < key)
 						ifTrue: [ newPage ]
 						ifFalse: [ page ])
@@ -172,10 +172,16 @@ SoilBasicSkipList >> size [
 ]
 
 { #category : #'as yet unclassified' }
-SoilBasicSkipList >> splitPage: aIterator [ 
+SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 	| newPage page |
 	page := aIterator currentPage.
-	newPage := page split: store newPage.
+	"if we are on the last page and the new key is bigger then the
+	last key of the page we can append a page and add the new key
+	there. If the key is in between or the page is not the last we
+	split the page with each containing half of the items"
+	newPage := (page isLastPage and: [ page lastKey < aKey ])
+		ifTrue: [ store newPage ] 
+		ifFalse: [ page split: store newPage ].
 	newPage index: self store nextPageIndex.
 	newPage level to: 1 by: -1  do: [ :level |
 		(level > page level)

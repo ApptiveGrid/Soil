@@ -62,7 +62,10 @@ SoilSkipListDataPage >> hasItems [
 
 { #category : #testing }
 SoilSkipListDataPage >> hasRoom [
-	^ self headerSize + ((items size + 1) * (keySize + valueSize)) <= self pageSize
+	| used itemSize |
+	itemSize := keySize + valueSize.
+	used := self headerSize + (items size * itemSize).
+	^ used <= (self pageSize - itemSize)
 ]
 
 { #category : #utilities }
@@ -217,6 +220,11 @@ SoilSkipListDataPage >> lastItem [
 		ifTrue: [ items at: items size - 1 ]
 		ifFalse: [ item ] 
 	
+]
+
+{ #category : #accessing }
+SoilSkipListDataPage >> lastKey [
+	^ items last key
 ]
 
 { #category : #accessing }
