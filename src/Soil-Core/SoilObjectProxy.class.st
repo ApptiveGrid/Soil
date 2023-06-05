@@ -53,8 +53,15 @@ SoilObjectProxy >> objectId: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SoilObjectProxy >> objectIsNotLoaded [ 
-	^ object isNil
+SoilObjectProxy >> objectIsNotLoaded [
+
+	"a present object is loaded"
+	object ifNotNil: [ ^ false ].
+	"it is also loaded if the transaction has it."
+	object := transaction 
+		objectAt: objectId 
+		ifAbsent: [ ^ true ].
+	^ false
 ]
 
 { #category : #printing }
