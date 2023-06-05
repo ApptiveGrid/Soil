@@ -22,10 +22,17 @@ SoilObjectProxy >> inspectionObject [
 ]
 
 { #category : #testing }
+SoilObjectProxy >> isEqualTo: anObject [ 
+	anObject isSoilProxy ifTrue: [^ objectId = anObject objectId].
+	(anObject isNil or: [ self objectIsNotLoaded ]) ifTrue: [^false].
+	^ object = anObject
+]
+
+{ #category : #testing }
 SoilObjectProxy >> isIdenticalTo: anObject [ 
 	anObject isSoilProxy ifTrue: [^ objectId = anObject objectId].
 	(anObject isNil or: [ self objectIsNotLoaded ]) ifTrue: [^false].
-	^ self soilRealObject == anObject
+	^ object == anObject
 ]
 
 { #category : #testing }
