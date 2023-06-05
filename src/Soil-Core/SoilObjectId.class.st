@@ -25,7 +25,7 @@ SoilObjectId class >> readFrom: stream [
 	| segment index |
 	segment := (stream next: 2) asInteger.
 	index := (stream next: 6) asInteger.
-	(index = 0) ifTrue: [ SoilIndexOutOfRange signal: 'index cannot be zero' ].
+	"(index = 0) ifTrue: [ SoilIndexOutOfRange signal: 'index cannot be zero' ]."
 	^ self new 
 		segment: segment;
 		index: index

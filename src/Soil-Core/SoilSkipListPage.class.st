@@ -34,6 +34,11 @@ SoilSkipListPage class >> readPageFrom: aStream keySize: keySize valueSize: valu
 	^page readFrom: aStream.
 ]
 
+{ #category : #utilities }
+SoilSkipListPage >> headerSize [ 
+	^ 1 "pageCode" + self indexSize
+]
+
 { #category : #accessing }
 SoilSkipListPage >> index [
 	^ index
