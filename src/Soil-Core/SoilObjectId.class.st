@@ -22,9 +22,13 @@ SoilObjectId class >> example [
 SoilObjectId class >> readFrom: stream [ 
 	"for now fix the segment id to be the 16 upper bits and the index 
 	be 48 lower bits"
+	| segment index |
+	segment := (stream next: 2) asInteger.
+	index := (stream next: 6) asInteger.
+	(index = 0) ifTrue: [ SoilIndexOutOfRange signal: 'index cannot be zero' ].
 	^ self new 
-		segment: (stream next: 2) asInteger;
-		index: (stream next: 6) asInteger
+		segment: segment;
+		index: index
 ]
 
 { #category : #'instance creation' }
