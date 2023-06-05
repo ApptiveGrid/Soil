@@ -67,7 +67,7 @@ SoilSkipListDataPage >> hasRoom [
 
 { #category : #utilities }
 SoilSkipListDataPage >> headerSize [
-	^ self indexSize + 8 "last transaction"
+	^ super headerSize + 8 "last transaction number"
 ]
 
 { #category : #accessing }
@@ -309,6 +309,11 @@ SoilSkipListDataPage >> setItems: aCollection [
 { #category : #accessing }
 SoilSkipListDataPage >> setRight: aCollection [ 
 	right := aCollection 
+]
+
+{ #category : #private }
+SoilSkipListDataPage >> sizeInBytes [
+	^ self headerSize + (items size * (self keySize + self valueSize))
 ]
 
 { #category : #'as yet unclassified' }
