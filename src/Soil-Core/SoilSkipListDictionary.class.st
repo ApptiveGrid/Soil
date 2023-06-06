@@ -370,6 +370,7 @@ SoilSkipListDictionary >> soilBasicSerialize: aSerializer [
 		transaction := aSerializer transaction.
 		self prepareNewValues ].
 	super soilBasicSerialize: aSerializer.
+	aSerializer registerIndexId: id.
 	self isRegistered ifFalse: [  
 		index := (aSerializer registerIndexedObject: self) asCopyOnWrite  ]
 ]

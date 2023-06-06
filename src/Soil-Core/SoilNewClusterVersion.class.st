@@ -164,20 +164,27 @@ SoilNewClusterVersion >> serializeOn: stream [
 	serializer 
 		nextPutLengthEncodedInteger: version;
 		nextPutLengthEncodedInteger: previousVersionPosition.
-		
+	"behavior descriptions"
 	serializer
 		nextPutLengthEncodedInteger: behaviorDescriptions size.
 	behaviorDescriptions do: [ :behavior |
 		serializer 
 			nextPutLengthEncodedInteger: behavior objectId index;
 			nextPutLengthEncodedInteger: behavior version ].
-		
+	"references"
 	serializer nextPutLengthEncodedInteger: references size.
 	references do: [ :ref |
 		"do not write zero index, try to allocate a new index before"
 		(ref index = 0) ifTrue: [ 
 			transaction allocateObjectId: ref ].
 		ref writeOn: stream ].
+	"indexes"
+	serializer nextPutLengthEncodedInteger: indexIds size.
+	indexIds do: [ :indexId |
+		stream 
+			nextPut: indexId size;
+			nextPutAll: indexId asByteArray].
+	"object in bytes"
 	serializer nextPutLengthEncodedInteger: bytes size.
 	stream nextPutAll: bytes .
 ]
