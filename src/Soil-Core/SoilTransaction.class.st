@@ -12,7 +12,8 @@ Class {
 		'locks',
 		'lastObjectIndexes',
 		'journal',
-		'indexes'
+		'indexes',
+		'createdAt'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -147,6 +148,9 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 { #category : #accessing }
 SoilTransaction >> buildJournal [
 	journal := soil newTransactionJournalFor: writeVersion.
+	journal addEntry: (SoilNewTransactionEntry new 
+		transactionId: writeVersion;
+		createdAt: createdAt).
 	"create entries for all new objects and new object versions"
 	recordsToCommit do: [ :record | 
 		record version: writeVersion.
@@ -210,6 +214,7 @@ SoilTransaction >> checkpoint [
 		self buildJournal
 			write;
 			commitIn: self;
+			checkpoint: self;
 			close.
 		indexes values do: #flush.
 		soil behaviorRegistry flush ]
@@ -597,6 +602,11 @@ SoilTransaction >> soil [
 { #category : #accessing }
 SoilTransaction >> soil: aSoil [ 
 	soil := aSoil
+]
+
+{ #category : #accessing }
+SoilTransaction >> start [
+	createdAt := DateAndTime now
 ]
 
 { #category : #accessing }
