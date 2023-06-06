@@ -10,11 +10,11 @@ SoilClusterVersionTest >> testPersistentClusterVersionRoundtrip [
 	record := SoilPersistentClusterVersion new
 		version: 12;
 		previousVersionPosition: 100;
-		setBytes: #[ 9 8 7 6 5 4 3 2 1];
-		setBehaviorDescriptions: ({ 1 . 2 . 3 } collect: [ : each | SoilBehaviorDescription new 
+		bytes: #[ 9 8 7 6 5 4 3 2 1];
+		behaviorDescriptions: ({ 1 . 2 . 3 } collect: [ : each | SoilBehaviorDescription new 
 			objectId: each asSoilObjectId;
 			version: 10 atRandom ]);
-		setReferences: ({ 4 . 5 . 6 } collect: #asSoilObjectId).
+		references: ({ 4 . 5 . 6 } collect: #asSoilObjectId).
 	bytes := ByteArray streamContents: [ :stream |
 		record serializeOn: stream ].
 	read := SoilPersistentClusterVersion new readFrom: bytes readStream.
