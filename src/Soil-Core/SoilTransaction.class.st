@@ -214,7 +214,7 @@ SoilTransaction >> checkpoint [
 		self buildJournal
 			write;
 			commitIn: self;
-			checkpoint: self;
+			checkpoint: self; 
 			close.
 		indexes values do: #flush.
 		soil behaviorRegistry flush ]
@@ -258,20 +258,20 @@ SoilTransaction >> hasModifications [
 	^ self dirtyObjects notEmpty
 ]
 
-{ #category : #'as yet unclassified' }
-SoilTransaction >> idOf: anObject [ 
-	| id |
-	id := objectMap at: anObject.
-	(id index = 0) ifTrue: [ Error signal: 'index of object id is not initialized' ].
-	^ id
-]
-
 { #category : #accessing }
 SoilTransaction >> indexAt: anObject ifAbsent: aBlock [ 
 	^ indexes
 		at: anObject
 		ifAbsentPut: [ 
 			self lookupIndex: anObject ifNone: aBlock ]
+]
+
+{ #category : #accessing }
+SoilTransaction >> indexAt: aString segment: anInteger [ 
+	^ indexes 
+		at: aString 
+		ifAbsentPut: [ 
+			(self segmentAt: anInteger) indexAt: aString  ]
 ]
 
 { #category : #accessing }
@@ -370,7 +370,7 @@ SoilTransaction >> lookupIndex: anObject ifNone: aBlock [
 	| objectId segment |
 	objectId := (objectMap at: anObject) objectId.
 	segment := self objectRepository segmentAt: objectId segment.
-	^ segment indexAt: anObject ifAbsent: aBlock
+	^ segment indexAt: anObject id ifAbsent: aBlock
 ]
 
 { #category : #public }
@@ -464,6 +464,12 @@ SoilTransaction >> objectId: objectId ifVisible: visibleBlock ifHidden: hiddenBl
 	^ (self isVisibleObjectId: objectId)
 		ifTrue: [ visibleBlock cull: objectId ]
 		ifFalse: [ hiddenBlock cull: objectId ] 
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransaction >> objectIdOf: anObject [ 
+	^ (objectMap at: anObject) objectId.
+	
 ]
 
 { #category : #accessing }

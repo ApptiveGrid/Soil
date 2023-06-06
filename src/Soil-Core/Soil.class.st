@@ -256,6 +256,15 @@ Soil >> renameClassNamed: oldName to: newName [
 	transaction commit
 ]
 
+{ #category : #'as yet unclassified' }
+Soil >> replayJournal: aSoilJournal [ 
+	| tx |
+	tx := self newTransaction.
+	aSoilJournal allTransactionJournals do: [ :j |
+		j commitIn: tx ].
+	tx commit
+]
+
 { #category : #accessing }
 Soil >> settings [
 

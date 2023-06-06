@@ -49,12 +49,12 @@ SoilJournalTest >> testNewRootSkipList [
 		at: #foo put: #bar).
 	tx checkpoint.
 	journal := tx journal.
-	self assert: journal size equals: 9.
+	self assert: journal size equals: 10.
 	self assert: (journal anyEntrySatisfy:[:each | each objectId notNil and: [ each objectId isSameObjectId: (SoilObjectId segment: 1 index: 1) ]]).
 	self assert: (journal anyEntrySatisfy: [:each | each class = SoilNewKeyEntry ]).
-	self assert: (journal entryAt: 6) class equals: SoilNewBehaviorEntry.
-	self assert: (journal entryAt: 7) class equals: SoilUpdateSegmentIndexEntry.
-	self assert: (journal entryAt: 8) class equals: SoilUpdateDatabaseVersion.
+	self assert: (journal entryAt: 7) class equals: SoilNewBehaviorEntry.
+	self assert: (journal entryAt: 8) class equals: SoilUpdateSegmentIndexEntry.
+	self assert: (journal entryAt: 9) class equals: SoilUpdateDatabaseVersion.
 ]
 
 { #category : #tests }

@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'indexId',
 		'key',
-		'oldValue'
+		'oldValue',
+		'segment'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -77,6 +78,11 @@ SoilRemoveKeyEntry >> readFrom: aStream [
 	indexId := (aStream next: indexIdSize) asString.
 	key := (aStream next: (aStream next: 2) asInteger) asInteger.
 	oldValue := (aStream next: (aStream next: 2) asInteger) asSoilObjectId .
+]
+
+{ #category : #accessing }
+SoilRemoveKeyEntry >> segment: anInteger [ 
+	segment := anInteger 
 ]
 
 { #category : #accessing }

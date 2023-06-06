@@ -2,6 +2,7 @@ Class {
 	#name : #SoilNewKeyEntry,
 	#superclass : #SoilJournalEntry,
 	#instVars : [
+		'segment',
 		'indexId',
 		'key',
 		'value',
@@ -23,9 +24,7 @@ SoilNewKeyEntry >> address [
 { #category : #'as yet unclassified' }
 SoilNewKeyEntry >> commitIn: transaction [ 
 	| index |
-	index := (transaction indexes associations 
-		detect: [ :each | each key id = indexId ]
-		ifNone: [ Error signal: 'shouldnt happen' ]) value.
+	index := transaction indexAt: indexId segment: 1.
 	index newIterator 
 		at: key put: value;
 		updateCurrentTransaction: transaction writeVersion 
@@ -80,6 +79,11 @@ SoilNewKeyEntry >> readFrom: aStream [
 	indexId := (aStream next: indexIdSize) asString.
 	key := (aStream next: (aStream next: 2) asInteger) asInteger.
 	value := (aStream next: (aStream next: 2) asInteger) asSoilObjectId .
+]
+
+{ #category : #accessing }
+SoilNewKeyEntry >> segment: anInteger [ 
+	segment := anInteger
 ]
 
 { #category : #accessing }

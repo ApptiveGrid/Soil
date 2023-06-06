@@ -207,11 +207,21 @@ SoilSkipListDictionary >> isRegistered [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> journalEntries [
-	| entries |
+	| entries segment |
 	entries := OrderedCollection new.
+	segment := (transaction objectIdOf: self) segment.
+	self isRegistered ifFalse: [
+		entries add: (SoilNewSkipListIndexEntry new 
+			transactionId: transaction writeVersion;
+			segment: segment;
+			indexId: id;
+			maxLevel: index maxLevel;
+			keySize: index keySize;
+			valueSize: index valueSize) ].
 	newValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilNewKeyEntry new 
 			transactionId: transaction writeVersion;
+			segment: segment;
 			indexId: id;
 			key: key;
 			value: value;
@@ -219,6 +229,7 @@ SoilSkipListDictionary >> journalEntries [
 	removedValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilRemoveKeyEntry new 
 			transactionId: transaction writeVersion;
+			segment: segment;
 			indexId: id;
 			key: key; 
 			oldValue: value) ].
@@ -371,8 +382,6 @@ SoilSkipListDictionary >> soilBasicSerialize: aSerializer [
 		self prepareNewValues ].
 	super soilBasicSerialize: aSerializer.
 	aSerializer registerIndexId: id.
-	self isRegistered ifFalse: [  
-		index := (aSerializer registerIndexedObject: self) asCopyOnWrite  ]
 ]
 
 { #category : #'as yet unclassified' }
