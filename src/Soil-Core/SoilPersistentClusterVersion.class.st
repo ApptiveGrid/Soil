@@ -8,6 +8,11 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #visiting }
+SoilPersistentClusterVersion >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitPersistentClusterVersion: self
+]
+
 { #category : #converting }
 SoilPersistentClusterVersion >> asNewClusterVersion [
 	^ SoilNewClusterVersion new 
@@ -104,6 +109,32 @@ SoilPersistentClusterVersion >> readFrom: stream [
 	objectSize := materializer nextLengthEncodedInteger.
 	bytes := stream next: objectSize.
 		
+]
+
+{ #category : #serializing }
+SoilPersistentClusterVersion >> serializeOn: stream [
+	| serializer |
+	bytes ifNil: [ self serializeObject ].
+	self flag: #todo.
+	serializer := SoilBasicSerializer new stream: stream.
+	serializer 
+		nextPutLengthEncodedInteger: version;
+		nextPutLengthEncodedInteger: previousVersionPosition;
+		nextPutLengthEncodedInteger: behaviorDescriptions size.
+	behaviorDescriptions do: [ :behavior |
+		serializer 
+			nextPutLengthEncodedInteger: behavior objectId index;
+			nextPutLengthEncodedInteger: behavior version ].
+	serializer
+		nextPutLengthEncodedInteger: references size.
+	
+	references do: [ :ref |
+		"do not write zero index, try to allocate a new index before"
+		(ref index = 0) ifTrue: [ 
+			Error signal: 'there should be no uninitialized reference' ].
+		ref writeOn: stream ].
+	serializer nextPutLengthEncodedInteger: bytes size.
+	stream nextPutAll: bytes .
 ]
 
 { #category : #asserting }

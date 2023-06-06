@@ -9,6 +9,11 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #visiting }
+SoilObjectRepository >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitObjectRepository: self
+]
+
 { #category : #adding }
 SoilObjectRepository >> addFirstSegment [
 	| segment |
@@ -42,6 +47,11 @@ SoilObjectRepository >> addNewSegment: aSegment [
 		initializeFilesystem.
 	segments add: aSegment.
 	^ aSegment 
+]
+
+{ #category : #'as yet unclassified' }
+SoilObjectRepository >> allSegments [ 
+	^ segments copyWithFirst: metaSegment 
 ]
 
 { #category : #'as yet unclassified' }

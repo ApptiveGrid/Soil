@@ -33,6 +33,11 @@ SoilClusterRecord >> behaviorDescriptionAt: anInteger [
 	^ behaviorDescriptions at: anInteger 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilClusterRecord >> behaviorDescriptions [
+	^ behaviorDescriptions
+]
+
 { #category : #accessing }
 SoilClusterRecord >> bytes [
 	^ bytes
@@ -110,6 +115,13 @@ SoilClusterRecord >> referenceAt: anInteger [
 { #category : #accessing }
 SoilClusterRecord >> references [
 	^ references
+]
+
+{ #category : #serializing }
+SoilClusterRecord >> serialize [
+	^ ByteArray streamContents: [ :stream |
+		self serializeOn: stream ]
+				
 ]
 
 { #category : #accessing }

@@ -145,13 +145,6 @@ SoilNewClusterVersion >> printOn: aStream [
 ]
 
 { #category : #serializing }
-SoilNewClusterVersion >> serialize [
-	^ ByteArray streamContents: [ :stream |
-		self serializeOn: stream ]
-				
-]
-
-{ #category : #serializing }
 SoilNewClusterVersion >> serializeObject [
 	bytes := ByteArray streamContents: [ :s |
 		transaction newSerializer 

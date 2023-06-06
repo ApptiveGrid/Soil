@@ -12,6 +12,11 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #visiting }
+SoilObjectSegment >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitObjectSegment: self
+]
+
 { #category : #adding }
 SoilObjectSegment >> addNewRaw: aByteArray [ 
 	| objectIndex |
@@ -43,7 +48,8 @@ SoilObjectSegment >> allocateNextIndex [
 SoilObjectSegment >> at: anInteger [ 
 	| position |
 	position := self indexFile positionAt: anInteger.
-	^ self objectFile atPosition: position
+	^ (self objectFile atPosition: position) ifNotNil: [ :record | 
+		record objectId: (SoilObjectId segment: id index: anInteger) ]
 ]
 
 { #category : #accessing }

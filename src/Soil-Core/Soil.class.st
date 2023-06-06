@@ -34,6 +34,25 @@ Soil class >> path: aString [
 		path: aString
 ]
 
+{ #category : #visiting }
+Soil >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitSoil: self 
+]
+
+{ #category : #visiting }
+Soil >> backupTo: aStringOrFileReference [ 
+	| backupSoil |
+	backupSoil := self class new 
+		path: aStringOrFileReference asFileReference;
+		destroy;
+		initializeFilesystem.
+	SoilBackupVisitor new 
+		target: backupSoil;
+		backup: self.
+	backupSoil close
+		
+]
+
 { #category : #accessing }
 Soil >> behaviorRegistry [
 	^ behaviorRegistry
@@ -110,6 +129,13 @@ Soil >> inspectionJournal [
 	^ SoilJournalEntries new 
 		entries: (self journal allTransactionJournals flatCollect: [:each | each entries reverse ]);
 		inspectionEntries
+]
+
+{ #category : #'as yet unclassified' }
+Soil >> inspectionParameters [
+	<inspectorPresentationOrder: 2100 title: 'parameters'>
+
+	^ self settings inspectionParameters 
 ]
 
 { #category : #accessing }
