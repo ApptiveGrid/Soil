@@ -9,6 +9,11 @@ Class {
 }
 
 { #category : #accessing }
+SoilBTreePage class >> indexClass [ 
+	^ SoilBTree 
+]
+
+{ #category : #accessing }
 SoilBTreePage class >> pageCode [
 	"abstract"
 	^0

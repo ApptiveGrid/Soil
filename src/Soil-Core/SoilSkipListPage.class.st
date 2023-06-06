@@ -11,6 +11,11 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #accessing }
+SoilSkipListPage class >> indexClass [
+	^ SoilSkipList 
+]
+
 { #category : #testing }
 SoilSkipListPage class >> isAbstract [
 	<ignoreForCoverage>
