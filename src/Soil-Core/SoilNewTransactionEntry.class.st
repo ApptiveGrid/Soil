@@ -53,7 +53,8 @@ SoilNewTransactionEntry >> value [
 SoilNewTransactionEntry >> writeOn: aStream [ 
 	| timestamp |
 	super writeOn: aStream.
-	timestamp := createdAt asMicrosecondsSinceEpoch asByteArray.
+	
+	timestamp := (createdAt asSeconds * 1000000 + (createdAt nanoSecond // 1000)) asByteArray..
 	aStream
 		nextPut: timestamp size; 
 		nextPutAll: timestamp

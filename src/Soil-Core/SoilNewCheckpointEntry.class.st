@@ -45,7 +45,8 @@ SoilNewCheckpointEntry >> value [
 SoilNewCheckpointEntry >> writeOn: aStream [ 
 	| timestamp |
 	super writeOn: aStream.
-	timestamp := checkpointedAt asMicrosecondsSinceEpoch asByteArray.
+	
+	timestamp := (checkpointedAt asSeconds * 1000000 + (checkpointedAt nanoSecond // 1000)) asByteArray.
 	
 	aStream
 		nextPut: timestamp size; 
