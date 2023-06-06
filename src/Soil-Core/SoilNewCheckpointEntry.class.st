@@ -33,7 +33,7 @@ SoilNewCheckpointEntry >> readFrom: aStream [
 	| size |
 	super readFrom: aStream.
 	size := aStream next.
-	checkpointedAt := DateAndTime epoch + ((aStream next: size) asInteger / 1000) milliseconds  
+	checkpointedAt := DateAndTime epoch + ((aStream next: size) asInteger / 1000) milliSeconds  
 ]
 
 { #category : #accessing }

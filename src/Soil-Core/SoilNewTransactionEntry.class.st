@@ -41,7 +41,7 @@ SoilNewTransactionEntry >> readFrom: aStream [
 	| size |
 	super readFrom: aStream.
 	size := aStream next.
-	createdAt := DateAndTime epoch + ((aStream next: size) asInteger / 1000) milliseconds  
+	createdAt := DateAndTime epoch + ((aStream next: size) asInteger / 1000) milliSeconds  
 ]
 
 { #category : #accessing }
