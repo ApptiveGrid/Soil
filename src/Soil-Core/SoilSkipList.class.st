@@ -80,7 +80,7 @@ SoilSkipList >> open [
 
 { #category : #'instance creation' }
 SoilSkipList >> pageClass [
-	^ SoilSkipListTruncPage
+	^ SoilSkipListDataPage
 ]
 
 { #category : #accessing }
@@ -102,7 +102,7 @@ SoilSkipList >> path: aStringOrFileReference [
 
 { #category : #'instance creation' }
 SoilSkipList >> readPageFrom: aStream [
-	^ (SoilSkipListPage readPageFrom: aStream keySize: self keySize valueSize: self valueSize)
+	^ (SoilIndexPage readPageFrom: aStream keySize: self keySize valueSize: self valueSize)
 		pageSize: self pageSize 
 ]
 

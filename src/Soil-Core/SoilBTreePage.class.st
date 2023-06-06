@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilBTreePage,
-	#superclass : #SoilSkipListPage,
+	#superclass : #SoilIndexPage,
 	#instVars : [
 		'items',
 		'keySize'
