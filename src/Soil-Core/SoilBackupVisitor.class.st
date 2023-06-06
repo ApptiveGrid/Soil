@@ -23,18 +23,17 @@ SoilBackupVisitor >> backup: aSoil [
 
 { #category : #visiting }
 SoilBackupVisitor >> copyIndexAt: aFileReference indexManager: anIndexManager [
-	| sourceIndex targetPath targetIndex iterator assoc |
-	sourceIndex := SoilSkipList new 
+	| sourceIndex targetPath targetIndex iterator assoc indexClass |
+	indexClass := SoilIndexManager indexClassFromFile: aFileReference.
+	sourceIndex := indexClass new 
 		path: aFileReference;
 		open.
 	targetPath := (target objectRepository segmentAt: anIndexManager segment id) indexManager path / aFileReference basename.
-	targetIndex := SoilSkipList new 
+	targetIndex := indexClass new 
 		path: targetPath;
 		initializeFilesystem;
 		initializeHeaderPage;
-		maxLevel: sourceIndex maxLevel;
-		keySize: sourceIndex keySize;
-		valueSize: sourceIndex valueSize.
+		initializeParametersFrom: sourceIndex. 
 	iterator := sourceIndex newIterator.
 	[ (assoc := iterator nextAssociation) isNil  ] whileFalse: [  
 		targetIndex 

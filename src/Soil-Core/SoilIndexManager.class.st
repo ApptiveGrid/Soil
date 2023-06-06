@@ -9,6 +9,16 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #accessing }
+SoilIndexManager class >> indexClassFromFile: aFileReference [ 
+	| stream pageCode headerPage |
+	stream := aFileReference binaryReadStream.
+	pageCode := stream next.
+	stream close.
+	headerPage :={ SoilSkipListHeaderPage . SoilBTreeHeaderPage } detect: [ :each | each pageCode = pageCode ].
+	^ headerPage indexClass
+]
+
 { #category : #visiting }
 SoilIndexManager >> acceptSoil: aSoilVisitor [ 
 	^ aSoilVisitor visitIndexManager: self 

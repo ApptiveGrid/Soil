@@ -39,6 +39,14 @@ SoilSkipList >> initializeHeaderPage [
 	self store initializeHeaderPage
 ]
 
+{ #category : #initialization }
+SoilSkipList >> initializeParametersFrom: aSoilSkipList [ 
+	self 
+		maxLevel: aSoilSkipList maxLevel;
+		keySize: aSoilSkipList keySize;
+		valueSize: aSoilSkipList valueSize
+]
+
 { #category : #private }
 SoilSkipList >> isPersistent [
 	^ path notNil
