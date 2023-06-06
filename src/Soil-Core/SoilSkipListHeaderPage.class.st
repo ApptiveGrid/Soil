@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilSkipListHeaderPage,
-	#superclass : #SoilSkipListDataPage,
+	#superclass : #SoilSkipListPage,
 	#instVars : [
 		'maxLevel',
 		'lastPageIndex'
@@ -15,7 +15,10 @@ SoilSkipListHeaderPage class >> pageCode [
 
 { #category : #utilities }
 SoilSkipListHeaderPage >> headerSize [
-	^ super headerSize + 8 "keySize, valueSize, maxLevel, lastPageIndex" + (maxLevel * self rightSize)
+	^ super headerSize 
+		+ 8 "keySize, valueSize, maxLevel, lastPageIndex" 
+		+ 1 "level" 
+		+ (self level * self rightSize)
 ]
 
 { #category : #accessing }
@@ -81,14 +84,13 @@ SoilSkipListHeaderPage >> smallestKey [
 ]
 
 { #category : #writing }
-SoilSkipListHeaderPage >> writeOn: aStream [ 
-	super writeOn: aStream.
+SoilSkipListHeaderPage >> writeHeaderOn: aStream [ 
+	super writeHeaderOn: aStream.
 	aStream 
 		nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
 		nextPutAll: (maxLevel asByteArrayOfSize: 2);
 		nextPutAll: (lastPageIndex asByteArrayOfSize: 2).
 	self 
-		writeLevelsOn: aStream;
-		writeItemsOn: aStream
+		writeLevelsOn: aStream
 ]
