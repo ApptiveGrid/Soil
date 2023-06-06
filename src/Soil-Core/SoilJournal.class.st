@@ -10,6 +10,7 @@ Class {
 { #category : #'as yet unclassified' }
 SoilJournal >> allTransactionJournals [
 	| files |
+	path exists ifFalse: [ ^ #() ].
 	files := path childrenMatching: '*.journal'.
 	^ (files sorted: [:a :b | a withoutExtension basename asNumber > b withoutExtension basename asNumber]) collect: [ :each | 
 		(SoilTransactionJournal new on: each)

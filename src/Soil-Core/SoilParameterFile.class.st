@@ -9,6 +9,11 @@ Class {
 	#category : #'Soil-Core-Files'
 }
 
+{ #category : #visiting }
+SoilParameterFile >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitParameters: self
+]
+
 { #category : #accessing }
 SoilParameterFile >> applicationVersion [
 	^ applicationVersion ifNil: [ 
@@ -79,6 +84,20 @@ SoilParameterFile >> initializeStart [
 ]
 
 { #category : #'as yet unclassified' }
+SoilParameterFile >> inspectionParameters [
+	<inspectorPresentationOrder: 1000 title: 'soil parameters'>
+
+	^ SpTablePresenter new
+		items: self parameterNames;
+		addColumn: (SpCompositeTableColumn new
+			title: 'key';
+			addColumn: (SpStringTableColumn evaluated: [:each | each printString ]));
+		addColumn: (SpCompositeTableColumn new
+			title: 'value';
+			addColumn: (SpStringTableColumn evaluated: [:each | self perform: each asSymbol ]))
+]
+
+{ #category : #'as yet unclassified' }
 SoilParameterFile >> lockDatabaseVersionFor: lockContext [
 	^ stream 
 		lockFrom: self headerSize
@@ -91,6 +110,11 @@ SoilParameterFile >> open [
 	super open.
 	(Soil databaseFormatVersion = self databaseFormatVersion)	
 		ifFalse: [ SoilIncompatibleDatabaseFormat signal: 'database format version ', Soil databaseFormatVersion asString, ' does not match persisted database format version ', self databaseFormatVersion asString] 
+]
+
+{ #category : #'as yet unclassified' }
+SoilParameterFile >> parameterNames [
+	^ #( databaseFormatVersion databaseVersion applicationVersion ) 
 ]
 
 { #category : #accessing }

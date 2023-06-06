@@ -473,6 +473,9 @@ SoilTransaction >> objectRepository [
 
 { #category : #'as yet unclassified' }
 SoilTransaction >> objectWithId: objectId [
+	idMap ifNil: [ 
+		SoilTransactionAlreadyAborted signal: 'this transaction has already been aborted' ].
+
 	idMap 
 		detect: [ :each | each objectId = objectId ]
 		ifFound: [ :record | ^ record object ].
