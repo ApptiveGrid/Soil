@@ -178,6 +178,7 @@ Soil >> newTransaction [
 	^ SoilTransaction new 
 		soil: self;
 		readVersion: self databaseVersion;
+		start;
 		yourself
 ]
 

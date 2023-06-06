@@ -28,6 +28,16 @@ SoilTransactionJournal >> anyEntrySatisfy: aBlock [
 	^ entries anySatisfy: aBlock
 ]
 
+{ #category : #'as yet unclassified' }
+SoilTransactionJournal >> checkpoint: aTransaction [
+	| entry |
+	entry := SoilNewCheckpointEntry new 
+		transactionId: aTransaction writeVersion.
+	self addEntry: entry.
+	entry writeOn: stream.
+	stream flush
+]
+
 { #category : #'initialize-release' }
 SoilTransactionJournal >> close [ 
 	stream ifNotNil: [ stream close ]
