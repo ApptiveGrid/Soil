@@ -29,7 +29,8 @@ SoilVisitor >> visitObjectRepository: aSoilObjectRepository [
 
 { #category : #visiting }
 SoilVisitor >> visitObjectSegment: aSoilObjectSegment [ 
-	self visit: (aSoilObjectSegment at: 1)
+	self visit: (aSoilObjectSegment at: 1).
+	^ aSoilObjectSegment 
 ]
 
 { #category : #visiting }

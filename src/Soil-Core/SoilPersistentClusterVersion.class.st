@@ -111,6 +111,12 @@ SoilPersistentClusterVersion >> readFrom: stream [
 		
 ]
 
+{ #category : #accessing }
+SoilPersistentClusterVersion >> resetPreviousVersion [
+	previousVersionPosition := 0.
+	version := 1
+]
+
 { #category : #serializing }
 SoilPersistentClusterVersion >> serializeOn: stream [
 	| serializer |

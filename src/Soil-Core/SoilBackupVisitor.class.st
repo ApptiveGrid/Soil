@@ -19,11 +19,6 @@ SoilBackupVisitor >> target: aSoil [
 	target := aSoil
 ]
 
-{ #category : #'as yet unclassified' }
-SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [ 
-	self visit: (aSoilObjectSegment at: 1)
-]
-
 { #category : #visiting }
 SoilBackupVisitor >> visitParameters: aSoilParameterFile [ 
 	target settings 
@@ -34,10 +29,13 @@ SoilBackupVisitor >> visitParameters: aSoilParameterFile [
 
 { #category : #'as yet unclassified' }
 SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
+	| backupCluster |
+	backupCluster := aSoilPersistentClusterVersion copy
+		resetPreviousVersion.
 	target objectRepository 
-		at: aSoilPersistentClusterVersion objectId
-		put: aSoilPersistentClusterVersion serialize.
-	aSoilPersistentClusterVersion references do: [ :reference |
+		at: backupCluster objectId
+		put: backupCluster serialize.
+	backupCluster references do: [ :reference |
 		self visit: (source objectRepository at: reference) ].
 	^ aSoilPersistentClusterVersion 
 ]
