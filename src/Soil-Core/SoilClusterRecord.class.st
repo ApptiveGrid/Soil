@@ -10,7 +10,8 @@ Class {
 		'committed',
 		'previousVersionPosition',
 		'version',
-		'behaviorDescriptions'
+		'behaviorDescriptions',
+		'indexIds'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -69,6 +70,7 @@ SoilClusterRecord >> initialize [
 	super initialize.
 	behaviorDescriptions := OrderedCollection new.
 	references := OrderedCollection new.
+	indexIds := OrderedCollection new.
 	committed := false.
 	previousVersionPosition := 0.
 
@@ -125,6 +127,12 @@ SoilClusterRecord >> references [
 { #category : #accessing }
 SoilClusterRecord >> references: aCollection [ 
 	references := aCollection
+]
+
+{ #category : #'as yet unclassified' }
+SoilClusterRecord >> registerIndexId: aString [ 
+	(indexIds includes: aString) ifFalse: [ 
+		indexIds add: aString ]
 ]
 
 { #category : #accessing }

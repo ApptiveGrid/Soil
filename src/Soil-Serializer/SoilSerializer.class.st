@@ -175,6 +175,11 @@ SoilSerializer >> notSupportedError: anObject [
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSerializer >> registerIndexId: aString [ 
+	externalObjectRegistry registerIndexId: aString
+]
+
 { #category : #registry }
 SoilSerializer >> registerIndexedObject: anObject [ 
 	"indexes are registered in the segment of the cluster root. So we pass
