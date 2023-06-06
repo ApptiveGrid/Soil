@@ -23,8 +23,25 @@ SoilBasicSkipList >> at: anObject ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilBasicSkipList >> at: aKeyObject put: anObject [
-	| key iterator page index newPage |
-	key := (aKeyObject asSkipListKeyOfSize: self keySize) asInteger.
+
+	self 
+		basicAt: (aKeyObject asSkipListKeyOfSize: self keySize) asInteger
+		put: anObject
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> atIndex: anInteger [ 
+	| current iterator |
+	iterator := self newIterator.
+	current := iterator first.
+	2 to: anInteger do: [ :idx |
+		current := iterator next ].
+	^ current value
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> basicAt: key put: anObject [
+	| iterator page index newPage |
 	iterator := self newIterator.
 	iterator find: key.
 	page := iterator currentPage.
@@ -43,16 +60,6 @@ SoilBasicSkipList >> at: aKeyObject put: anObject [
 						ifFalse: [ page ])
 							addItem: (key -> anObject).
 							nil ] ]
-]
-
-{ #category : #accessing }
-SoilBasicSkipList >> atIndex: anInteger [ 
-	| current iterator |
-	iterator := self newIterator.
-	current := iterator first.
-	2 to: anInteger do: [ :idx |
-		current := iterator next ].
-	^ current value
 ]
 
 { #category : #enumerating }

@@ -39,6 +39,11 @@ SoilClusterRecord >> behaviorDescriptions [
 ]
 
 { #category : #accessing }
+SoilClusterRecord >> behaviorDescriptions: aCollection [ 
+	behaviorDescriptions := aCollection
+]
+
+{ #category : #accessing }
 SoilClusterRecord >> bytes [
 	^ bytes
 ]
@@ -115,6 +120,17 @@ SoilClusterRecord >> referenceAt: anInteger [
 { #category : #accessing }
 SoilClusterRecord >> references [
 	^ references
+]
+
+{ #category : #accessing }
+SoilClusterRecord >> references: aCollection [ 
+	references := aCollection
+]
+
+{ #category : #accessing }
+SoilClusterRecord >> resetPreviousVersion [
+	previousVersionPosition := 0.
+	version := 1
 ]
 
 { #category : #serializing }

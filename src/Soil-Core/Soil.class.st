@@ -220,6 +220,15 @@ Soil >> path: aString [
 	path := aString asFileReference
 ]
 
+{ #category : #printing }
+Soil >> printOn: aStream [ 
+	aStream 
+		<< 'Soil ['
+		<< self settings databaseVersion printString
+		<< '] '
+		<< self path pathString
+]
+
 { #category : #refactorings }
 Soil >> renameClassNamed: oldName to: newName [
 	| transaction behaviorDescription objectId |

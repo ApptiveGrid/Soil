@@ -9,6 +9,11 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #visiting }
+SoilIndexManager >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitIndexManager: self 
+]
+
 { #category : #accessing }
 SoilIndexManager >> at: anIndexedObject ifAbsent: aBlock [ 
 	^ semaphore critical: [  
@@ -59,15 +64,20 @@ SoilIndexManager >> path [
 ]
 
 { #category : #'as yet unclassified' }
-SoilIndexManager >> registerIndexedObject: aSoilSkipListDictionary [ 
+SoilIndexManager >> registerIndexedObject: aSoilIndexObject [ 
 	| registeredIndex |
-	registeredIndex :=  aSoilSkipListDictionary index thePersistentInstance
-		path: self path / aSoilSkipListDictionary id, #index;
+	registeredIndex :=  aSoilIndexObject index thePersistentInstance
+		path: self path / aSoilIndexObject id, #index;
 		initializeFilesystem.
 	^ semaphore critical: [  
 		indexes 
-			at: aSoilSkipListDictionary id
+			at: aSoilIndexObject id
 			put: registeredIndex ]
+]
+
+{ #category : #accessing }
+SoilIndexManager >> segment [
+	^ segment
 ]
 
 { #category : #accessing }

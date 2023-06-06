@@ -13,6 +13,11 @@ SoilVersionedObjectId >> asSoilObjectId [
 ]
 
 { #category : #accessing }
+SoilVersionedObjectId >> objectId [
+	^ self
+]
+
+{ #category : #accessing }
 SoilVersionedObjectId >> version [
 
 	^ version

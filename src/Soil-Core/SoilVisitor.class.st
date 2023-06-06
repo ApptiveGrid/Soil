@@ -18,6 +18,7 @@ SoilVisitor >> visitAll: aCollection [
 
 { #category : #'as yet unclassified' }
 SoilVisitor >> visitMetaSegment: aSoilMetaSegment [ 
+	self visit: aSoilMetaSegment indexManager.
 	^ aSoilMetaSegment 
 ]
 
@@ -29,7 +30,8 @@ SoilVisitor >> visitObjectRepository: aSoilObjectRepository [
 
 { #category : #visiting }
 SoilVisitor >> visitObjectSegment: aSoilObjectSegment [ 
-	self visit: (aSoilObjectSegment at: 1).
+	self visit: aSoilObjectSegment indexManager.
+
 	^ aSoilObjectSegment 
 ]
 
