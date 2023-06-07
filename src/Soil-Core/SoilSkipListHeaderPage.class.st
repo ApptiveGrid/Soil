@@ -16,7 +16,7 @@ SoilSkipListHeaderPage class >> pageCode [
 { #category : #utilities }
 SoilSkipListHeaderPage >> headerSize [
 	^ super headerSize 
-		+ 8 "keySize, valueSize, maxLevel, lastPageIndex" 
+		+ 10 "keySize, valueSize, maxLevel, lastPageIndex" 
 		+ 1 "level" 
 		+ (self level * self rightSize)
 ]
@@ -75,7 +75,7 @@ SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	maxLevel := (aStream next: 2) asInteger.
-	lastPageIndex :=(aStream next: 2) asInteger 
+	lastPageIndex :=(aStream next: 4) asInteger 
 ]
 
 { #category : #'as yet unclassified' }
@@ -90,9 +90,7 @@ SoilSkipListHeaderPage >> writeHeaderOn: aStream [
 		nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
 		nextPutAll: (maxLevel asByteArrayOfSize: 2);
-		flag: #todo;
-		"lastPageIndex must be 4 bytes"
-		nextPutAll: (lastPageIndex asByteArrayOfSize: 2).
+		nextPutAll: (lastPageIndex asByteArrayOfSize: 4).
 	self 
 		writeLevelsOn: aStream
 ]

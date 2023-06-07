@@ -36,7 +36,7 @@ SoilIndexPage class >> readPageFrom: aStream keySize: keySize valueSize: valueSi
 
 { #category : #utilities }
 SoilIndexPage >> headerSize [ 
-	^ 1 "pageCode" + self indexSize
+	^ 1 "pageCode" 
 ]
 
 { #category : #accessing }
@@ -90,7 +90,6 @@ SoilIndexPage >> printOn: aStream [
 SoilIndexPage >> readFrom: aStream [ 
 	dirty := false.
 	"we do not read the pageCode here as it was read already"
-	self readIndexFrom: aStream
 ]
 
 { #category : #writing }
@@ -105,11 +104,7 @@ SoilIndexPage >> readIndexFrom: aStream [
 { #category : #writing }
 SoilIndexPage >> writeHeaderOn: aStream [ 
 	aStream
-		nextPut: self class pageCode;
-		flag: #todo;
-		"we write 0 as index because the code should not rely on
-		the persisted value as it will go away"
-		nextPutAll: (0 asByteArrayOfSize: self indexSize)
+		nextPut: self class pageCode
 ]
 
 { #category : #writing }

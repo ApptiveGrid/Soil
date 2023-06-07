@@ -108,9 +108,6 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 			behaviorDescription := (SoilBehaviorDescription for: aClass)
 				beFirstVersion;
 				objectId: self newMetaObjectId.
-			self flag: #todo.
-			"this should be late bound. When the class referecenes are put into the
-			record this should be removed"
 			self initializeObjectId: behaviorDescription objectId.
 			self atObjectId: behaviorDescription objectId putObject: behaviorDescription. ].
 	
