@@ -8,11 +8,6 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
-{ #category : #'accessing - defaults' }
-SoilNewIndexEntry class >> journalTypeCode [
-	^ 0
-]
-
 { #category : #accessing }
 SoilNewIndexEntry >> keySize [
 

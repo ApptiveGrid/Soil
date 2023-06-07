@@ -20,18 +20,9 @@ SoilRemoveKeyEntry >> address [
 
 { #category : #'as yet unclassified' }
 SoilRemoveKeyEntry >> commitIn: transaction [ 
-	| index |
-	index := transaction indexAt: id segment: segment.
-	self flag: #todo.
-	"ifAbsent: should not be used here"
-	index newIterator 
+	(transaction indexAt: id segment: segment) newIterator 
 		at: key put: (SoilObjectId segment: 0 index: 0);
 		updateCurrentTransaction: transaction writeVersion 
-]
-
-{ #category : #accessing }
-SoilRemoveKeyEntry >> container [
-	^ 'index: ', id asString
 ]
 
 { #category : #accessing }
