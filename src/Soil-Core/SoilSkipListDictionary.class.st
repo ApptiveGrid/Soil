@@ -177,8 +177,7 @@ SoilSkipListDictionary >> id [
 
 { #category : #accessing }
 SoilSkipListDictionary >> index [
-	^ index ifNil: [ 
-		index := self lookupIndex asCopyOnWrite  ]
+	^ index
 ]
 
 { #category : #initialization }
@@ -265,13 +264,6 @@ SoilSkipListDictionary >> loadFrom: aFileReference [
 	^ SoilSkipList new 
 		path: aFileReference;
 		open
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipListDictionary >> lookupIndex [
-	^ transaction 
-		indexAt: self
-		ifAbsent: [ self newIndexInstance ]
 ]
 
 { #category : #accessing }
@@ -406,6 +398,14 @@ SoilSkipListDictionary >> soilLoadedIn: aTransaction [
 	newValues := Dictionary new.
 	removedValues := Dictionary new.
 	oldValues := Dictionary new
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListDictionary >> soilMaterialized: aMaterializer [
+	"connect the global index at materialization time when we
+	know the cluster root which defines the location of the index.
+	Store a copy-on-write version so all changes are per transaction"
+	index := (aMaterializer indexAt: id) asCopyOnWrite
 ]
 
 { #category : #accessing }

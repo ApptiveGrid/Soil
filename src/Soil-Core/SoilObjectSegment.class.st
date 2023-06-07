@@ -101,14 +101,16 @@ SoilObjectSegment >> id: anObject [
 ]
 
 { #category : #accessing }
-SoilObjectSegment >> indexAt: aString [ 
-	^ self indexManager at: aString ifAbsent: [ Error signal: 'index not found' ]
+SoilObjectSegment >> indexAt: indexId [ 
+	^ self indexManager 
+		at: indexId 
+		ifAbsent: [ SoilIndexNotFound signal: 'index not found' ] 
 ]
 
 { #category : #accessing }
-SoilObjectSegment >> indexAt: anIndexedObject ifAbsent: aBlock [
+SoilObjectSegment >> indexAt: indexId ifAbsent: aBlock [
 	^ self indexManager 
-		at: anIndexedObject 
+		at: indexId 
 		ifAbsent: aBlock
 ]
 
@@ -212,11 +214,6 @@ SoilObjectSegment >> printOn: aStream [
 { #category : #'as yet unclassified' }
 SoilObjectSegment >> registerIndex: aSoilIndex at: indexId [
 	^ self indexManager registerIndex: aSoilIndex at: indexId
-]
-
-{ #category : #'as yet unclassified' }
-SoilObjectSegment >> registerIndexedObject: aSoilSkipListDictionary [ 
-	^ self indexManager registerIndexedObject: aSoilSkipListDictionary 
 ]
 
 { #category : #accessing }

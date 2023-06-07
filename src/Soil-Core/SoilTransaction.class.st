@@ -259,19 +259,11 @@ SoilTransaction >> hasModifications [
 ]
 
 { #category : #accessing }
-SoilTransaction >> indexAt: anObject ifAbsent: aBlock [ 
-	^ indexes
-		at: anObject
-		ifAbsentPut: [ 
-			self lookupIndex: anObject ifNone: aBlock ]
-]
-
-{ #category : #accessing }
-SoilTransaction >> indexAt: aString segment: anInteger [ 
+SoilTransaction >> indexAt: indexId segment: segmentIndex [ 
 	^ indexes 
-		at: aString 
+		at: indexId 
 		ifAbsentPut: [ 
-			(self segmentAt: anInteger) indexAt: aString  ]
+			(self segmentAt: segmentIndex) indexAt: indexId  ]
 ]
 
 { #category : #accessing }
@@ -363,14 +355,6 @@ SoilTransaction >> journalEntriesFor: key inIndex: aSoilIndex startingAt: anInte
 { #category : #'as yet unclassified' }
 SoilTransaction >> lockObjectId: aSOObjectId [ 
 	^ self objectRepository lockObjectId: aSOObjectId for: self
-]
-
-{ #category : #'as yet unclassified' }
-SoilTransaction >> lookupIndex: anObject ifNone: aBlock [
-	| objectId segment |
-	objectId := (objectMap at: anObject) objectId.
-	segment := self objectRepository segmentAt: objectId segment.
-	^ segment indexAt: anObject id ifAbsent: aBlock
 ]
 
 { #category : #public }
@@ -551,17 +535,6 @@ SoilTransaction >> records [
 { #category : #accessing }
 SoilTransaction >> recordsToCommit [
 	^ recordsToCommit
-]
-
-{ #category : #'as yet unclassified' }
-SoilTransaction >> registerIndexedObject: anObject forRoot: aClusterRoot [
-	| objectId segment |
-	indexes at: anObject ifPresent: [ Error signal: 'shouldnt happen' ].
-	objectId := (objectMap at: aClusterRoot) objectId.
-	segment := self objectRepository segmentAt: objectId segment.
-	^ indexes 
-		at: anObject 
-		put: (segment registerIndexedObject: anObject)
 ]
 
 { #category : #'as yet unclassified' }

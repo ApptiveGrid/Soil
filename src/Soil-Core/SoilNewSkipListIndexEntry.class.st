@@ -11,7 +11,7 @@ Class {
 SoilNewSkipListIndexEntry >> commitIn: aSoilTransaction [ 
 	| index |
 	index := SoilSkipList new.
-	(aSoilTransaction objectRepository segmentAt: segment)
+	(aSoilTransaction segmentAt: segment)
 		registerIndex: index at: id.
 	index 
 		initializeHeaderPage;

@@ -33,6 +33,11 @@ SoilMaterializer >> behaviorVersionsUpTo: aDescription [
 	^ transaction behaviorVersionsUpTo: aDescription 
 ]
 
+{ #category : #accessing }
+SoilMaterializer >> indexAt: indexId [ 
+	^ externalObjectRegistry indexAt: indexId
+]
+
 { #category : #public }
 SoilMaterializer >> materialize [
 	^ self nextSoilObject

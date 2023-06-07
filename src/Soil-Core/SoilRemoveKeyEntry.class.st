@@ -23,9 +23,7 @@ SoilRemoveKeyEntry >> address [
 { #category : #'as yet unclassified' }
 SoilRemoveKeyEntry >> commitIn: transaction [ 
 	| index |
-	index := (transaction indexes associations 
-		detect: [ :each | each key id = indexId ]
-		ifNone: [ Error signal: 'shouldnt happen' ]) value.
+	index := transaction indexAt: indexId segment: 1.
 	self flag: #todo.
 	"ifAbsent: should not be used here"
 	index newIterator 
