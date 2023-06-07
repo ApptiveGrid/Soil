@@ -36,6 +36,14 @@ SoilIndexManager >> at: indexId ifAbsent: aBlock [
 		
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndexManager >> at: indexId put: aSoilIndex [
+	^ semaphore critical: [  
+		indexes 
+			at: indexId
+			put: aSoilIndex thePersistentInstance ]
+]
+
 { #category : #'initialize-release' }
 SoilIndexManager >> close [
 	semaphore critical: [  
@@ -76,28 +84,9 @@ SoilIndexManager >> path [
 	^ segment path / #indexes
 ]
 
-{ #category : #'as yet unclassified' }
-SoilIndexManager >> registerIndex: aSoilIndex at: indexId [
-	| registeredIndex |
-	registeredIndex :=  aSoilIndex thePersistentInstance
-		path: self path / indexId , #index;
-		initializeFilesystem.
-	^ semaphore critical: [  
-		indexes 
-			at: indexId
-			put: registeredIndex ]
-]
-
-{ #category : #'as yet unclassified' }
-SoilIndexManager >> registerIndexedObject: aSoilIndexObject [ 
-	| registeredIndex |
-	registeredIndex :=  aSoilIndexObject index thePersistentInstance
-		path: self path / aSoilIndexObject id, #index;
-		initializeFilesystem.
-	^ semaphore critical: [  
-		indexes 
-			at: aSoilIndexObject id
-			put: registeredIndex ]
+{ #category : #accessing }
+SoilIndexManager >> pathFor: indexId [ 
+	^ self path / indexId , #index
 ]
 
 { #category : #accessing }

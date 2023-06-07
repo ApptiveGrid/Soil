@@ -260,7 +260,7 @@ Soil >> renameClassNamed: oldName to: newName [
 Soil >> replayJournal: aSoilJournal [ 
 	| tx |
 	tx := self newTransaction.
-	aSoilJournal allTransactionJournals do: [ :j |
+	aSoilJournal allTransactionJournals reverse do: [ :j |
 		j commitIn: tx ].
 	tx commit
 ]

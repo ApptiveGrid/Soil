@@ -114,6 +114,12 @@ SoilObjectSegment >> indexAt: indexId ifAbsent: aBlock [
 		ifAbsent: aBlock
 ]
 
+{ #category : #'as yet unclassified' }
+SoilObjectSegment >> indexAt: indexId put: aSoilIndex [
+
+	^ self indexManager at: indexId put: aSoilIndex
+]
+
 { #category : #accessing }
 SoilObjectSegment >> indexFile [
 	^ indexFile ifNil: [
@@ -209,11 +215,6 @@ SoilObjectSegment >> path [
 { #category : #printing }
 SoilObjectSegment >> printOn: aStream [ 
 	aStream << 'segment #' << id asString 
-]
-
-{ #category : #'as yet unclassified' }
-SoilObjectSegment >> registerIndex: aSoilIndex at: indexId [
-	^ self indexManager registerIndex: aSoilIndex at: indexId
 ]
 
 { #category : #accessing }

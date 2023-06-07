@@ -8,17 +8,19 @@ Class {
 }
 
 { #category : #committing }
-SoilNewSkipListIndexEntry >> commitIn: aSoilTransaction [ 
-	| index |
-	index := SoilSkipList new.
-	(aSoilTransaction segmentAt: segment)
-		registerIndex: index at: id.
-	index 
+SoilNewSkipListIndexEntry >> commitIn: aSoilTransaction [
+
+	| index indexManager |
+	indexManager := (aSoilTransaction segmentAt: segment) indexManager.
+	index := SoilSkipList new
+		path: (indexManager pathFor: id);
+		initializeFilesystem;
 		initializeHeaderPage;
 		maxLevel: maxLevel;
 		keySize: keySize;
 		valueSize: valueSize;
 		flush.
+	indexManager at: id put: index
 ]
 
 { #category : #accessing }
