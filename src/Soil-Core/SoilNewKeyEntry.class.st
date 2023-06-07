@@ -24,7 +24,7 @@ SoilNewKeyEntry >> address [
 { #category : #'as yet unclassified' }
 SoilNewKeyEntry >> commitIn: transaction [ 
 	| index |
-	index := transaction indexAt: indexId segment: 1.
+	index := transaction indexAt: indexId segment: segment.
 	index newIterator 
 		at: key put: value;
 		updateCurrentTransaction: transaction writeVersion 
