@@ -133,9 +133,7 @@ SoilObjectId >> printOn: aStream [
 
 { #category : #accessing }
 SoilObjectId >> segment [
-	self flag: #todo.
-	"There should ne no default segment. This is a shortcut"
-	^ segment ifNil: [ 1 ]
+	^ segment
 ]
 
 { #category : #accessing }

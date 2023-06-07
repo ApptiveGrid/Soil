@@ -214,7 +214,7 @@ SoilTransaction >> checkpoint [
 		self buildJournal
 			write;
 			commitIn: self;
-			checkpoint: self;
+			checkpoint: self; 
 			close.
 		indexes values do: #flush.
 		soil behaviorRegistry flush ]
@@ -258,20 +258,12 @@ SoilTransaction >> hasModifications [
 	^ self dirtyObjects notEmpty
 ]
 
-{ #category : #'as yet unclassified' }
-SoilTransaction >> idOf: anObject [ 
-	| id |
-	id := objectMap at: anObject.
-	(id index = 0) ifTrue: [ Error signal: 'index of object id is not initialized' ].
-	^ id
-]
-
 { #category : #accessing }
-SoilTransaction >> indexAt: anObject ifAbsent: aBlock [ 
-	^ indexes
-		at: anObject
+SoilTransaction >> indexAt: indexId segment: segmentIndex [ 
+	^ indexes 
+		at: indexId 
 		ifAbsentPut: [ 
-			self lookupIndex: anObject ifNone: aBlock ]
+			(self segmentAt: segmentIndex) indexAt: indexId  ]
 ]
 
 { #category : #accessing }
@@ -363,14 +355,6 @@ SoilTransaction >> journalEntriesFor: key inIndex: aSoilIndex startingAt: anInte
 { #category : #'as yet unclassified' }
 SoilTransaction >> lockObjectId: aSOObjectId [ 
 	^ self objectRepository lockObjectId: aSOObjectId for: self
-]
-
-{ #category : #'as yet unclassified' }
-SoilTransaction >> lookupIndex: anObject ifNone: aBlock [
-	| objectId segment |
-	objectId := (objectMap at: anObject) objectId.
-	segment := self objectRepository segmentAt: objectId segment.
-	^ segment indexAt: anObject ifAbsent: aBlock
 ]
 
 { #category : #public }
@@ -466,6 +450,12 @@ SoilTransaction >> objectId: objectId ifVisible: visibleBlock ifHidden: hiddenBl
 		ifFalse: [ hiddenBlock cull: objectId ] 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilTransaction >> objectIdOf: anObject [ 
+	^ (objectMap at: anObject) objectId.
+	
+]
+
 { #category : #accessing }
 SoilTransaction >> objectIndex [
 	^ objectMap
@@ -545,17 +535,6 @@ SoilTransaction >> records [
 { #category : #accessing }
 SoilTransaction >> recordsToCommit [
 	^ recordsToCommit
-]
-
-{ #category : #'as yet unclassified' }
-SoilTransaction >> registerIndexedObject: anObject forRoot: aClusterRoot [
-	| objectId segment |
-	indexes at: anObject ifPresent: [ Error signal: 'shouldnt happen' ].
-	objectId := (objectMap at: aClusterRoot) objectId.
-	segment := self objectRepository segmentAt: objectId segment.
-	^ indexes 
-		at: anObject 
-		put: (segment registerIndexedObject: anObject)
 ]
 
 { #category : #'as yet unclassified' }

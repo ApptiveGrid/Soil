@@ -65,6 +65,13 @@ SoilClusterRecord >> hasPreviousVersion [
 	^ previousVersionPosition > 0 
 ]
 
+{ #category : #accessing }
+SoilClusterRecord >> indexAt: indexId [ 
+	"resolve the index in the segment of the cluster root"
+	^ (transaction segmentAt: objectId segment)
+		indexAt: indexId
+]
+
 { #category : #initialization }
 SoilClusterRecord >> initialize [ 
 	super initialize.

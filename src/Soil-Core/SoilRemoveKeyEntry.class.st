@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'indexId',
 		'key',
-		'oldValue'
+		'oldValue',
+		'segment'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -22,9 +23,7 @@ SoilRemoveKeyEntry >> address [
 { #category : #'as yet unclassified' }
 SoilRemoveKeyEntry >> commitIn: transaction [ 
 	| index |
-	index := (transaction indexes associations 
-		detect: [ :each | each key id = indexId ]
-		ifNone: [ Error signal: 'shouldnt happen' ]) value.
+	index := transaction indexAt: indexId segment: 1.
 	self flag: #todo.
 	"ifAbsent: should not be used here"
 	index newIterator 
@@ -77,6 +76,11 @@ SoilRemoveKeyEntry >> readFrom: aStream [
 	indexId := (aStream next: indexIdSize) asString.
 	key := (aStream next: (aStream next: 2) asInteger) asInteger.
 	oldValue := (aStream next: (aStream next: 2) asInteger) asSoilObjectId .
+]
+
+{ #category : #accessing }
+SoilRemoveKeyEntry >> segment: anInteger [ 
+	segment := anInteger 
 ]
 
 { #category : #accessing }

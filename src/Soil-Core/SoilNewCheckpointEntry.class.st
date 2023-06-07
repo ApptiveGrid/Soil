@@ -17,6 +17,10 @@ SoilNewCheckpointEntry >> address [
 	^ ''
 ]
 
+{ #category : #committing }
+SoilNewCheckpointEntry >> commitIn: aTransaction [ 
+]
+
 { #category : #accessing }
 SoilNewCheckpointEntry >> container [
 	^ #soil
@@ -33,7 +37,7 @@ SoilNewCheckpointEntry >> readFrom: aStream [
 	| size |
 	super readFrom: aStream.
 	size := aStream next.
-	checkpointedAt := DateAndTime epoch + ((aStream next: size) asInteger / 1000) milliSeconds  
+	checkpointedAt := (DateAndTime epoch + ((aStream next: size) asInteger / 1000) milliSeconds) asLocal
 ]
 
 { #category : #accessing }

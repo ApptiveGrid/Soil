@@ -177,8 +177,7 @@ SoilSkipListDictionary >> id [
 
 { #category : #accessing }
 SoilSkipListDictionary >> index [
-	^ index ifNil: [ 
-		index := self lookupIndex asCopyOnWrite  ]
+	^ index
 ]
 
 { #category : #initialization }
@@ -207,11 +206,21 @@ SoilSkipListDictionary >> isRegistered [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> journalEntries [
-	| entries |
+	| entries segment |
 	entries := OrderedCollection new.
+	segment := (transaction objectIdOf: self) segment.
+	self isRegistered ifFalse: [
+		entries add: (SoilNewSkipListIndexEntry new 
+			transactionId: transaction writeVersion;
+			segment: segment;
+			indexId: id;
+			maxLevel: index maxLevel;
+			keySize: index keySize;
+			valueSize: index valueSize) ].
 	newValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilNewKeyEntry new 
 			transactionId: transaction writeVersion;
+			segment: segment;
 			indexId: id;
 			key: key;
 			value: value;
@@ -219,6 +228,7 @@ SoilSkipListDictionary >> journalEntries [
 	removedValues keysAndValuesDo: [ :key :value |
 		entries add: (SoilRemoveKeyEntry new 
 			transactionId: transaction writeVersion;
+			segment: segment;
 			indexId: id;
 			key: key; 
 			oldValue: value) ].
@@ -254,13 +264,6 @@ SoilSkipListDictionary >> loadFrom: aFileReference [
 	^ SoilSkipList new 
 		path: aFileReference;
 		open
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipListDictionary >> lookupIndex [
-	^ transaction 
-		indexAt: self
-		ifAbsent: [ self newIndexInstance ]
 ]
 
 { #category : #accessing }
@@ -371,8 +374,6 @@ SoilSkipListDictionary >> soilBasicSerialize: aSerializer [
 		self prepareNewValues ].
 	super soilBasicSerialize: aSerializer.
 	aSerializer registerIndexId: id.
-	self isRegistered ifFalse: [  
-		index := (aSerializer registerIndexedObject: self) asCopyOnWrite  ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -397,6 +398,14 @@ SoilSkipListDictionary >> soilLoadedIn: aTransaction [
 	newValues := Dictionary new.
 	removedValues := Dictionary new.
 	oldValues := Dictionary new
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListDictionary >> soilMaterialized: aMaterializer [
+	"connect the global index at materialization time when we
+	know the cluster root which defines the location of the index.
+	Store a copy-on-write version so all changes are per transaction"
+	index := (aMaterializer indexAt: id) asCopyOnWrite
 ]
 
 { #category : #accessing }

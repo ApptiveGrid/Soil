@@ -181,15 +181,6 @@ SoilSerializer >> registerIndexId: aString [
 ]
 
 { #category : #registry }
-SoilSerializer >> registerIndexedObject: anObject [ 
-	"indexes are registered in the segment of the cluster root. So we pass
-	the cluster root in order to figure the segment"
-	^ transaction 
-		registerIndexedObject: anObject 
-		forRoot: clusterRoot 
-]
-
-{ #category : #registry }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 	| index externalIndex |
 	objectIdTable ifEmpty: [
