@@ -1,9 +1,7 @@
 Class {
 	#name : #SoilNewIndexEntry,
-	#superclass : #SoilJournalEntry,
+	#superclass : #SoilIndexJournalEntry,
 	#instVars : [
-		'id',
-		'segment',
 		'keySize',
 		'valueSize'
 	],
@@ -12,12 +10,13 @@ Class {
 
 { #category : #'accessing - defaults' }
 SoilNewIndexEntry class >> journalTypeCode [
-	^ 10
+	^ 0
 ]
 
 { #category : #accessing }
-SoilNewIndexEntry >> indexId: aString [ 
-	id := aString
+SoilNewIndexEntry >> keySize [
+
+	^ keySize
 ]
 
 { #category : #accessing }
@@ -26,8 +25,9 @@ SoilNewIndexEntry >> keySize: anInteger [
 ]
 
 { #category : #accessing }
-SoilNewIndexEntry >> segment: anInteger [ 
-	segment := anInteger
+SoilNewIndexEntry >> valueSize [
+
+	^ valueSize
 ]
 
 { #category : #accessing }

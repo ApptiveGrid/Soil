@@ -29,7 +29,6 @@ SoilTransaction >> abort [
 
 { #category : #accessing }
 SoilTransaction >> acquireLocksAndDetectWriteSkew [
-	lastObjectIndexes := Dictionary new.
 	"first iterate over all records to acquire locks and check for concurrent 
 	writes. Might be changed later to rely on the journal in case of accident"
 	recordsToCommit do: [ :record |
@@ -38,7 +37,7 @@ SoilTransaction >> acquireLocksAndDetectWriteSkew [
 		committed since we last read. Checking for the position in the index is sufficient
 		as each version relates to a unique position"
 		locks add: record lockIndex.
-		record validateReadVersion ]
+		record validateReadVersion ].
 ]
 
 { #category : #adding }
@@ -112,7 +111,7 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 			self flag: #todo.
 			"this should be late bound. When the class referecenes are put into the
 			record this should be removed"
-			behaviorDescription objectId initializeIndex: self objectRepository.
+			self initializeObjectId: behaviorDescription objectId.
 			self atObjectId: behaviorDescription objectId putObject: behaviorDescription. ].
 	
 	behaviorDescriptions
@@ -287,6 +286,7 @@ SoilTransaction >> initializeObjectId: anObjectId [
 	anObjectId isInitialized ifTrue: [ SoilObjectIdAlreadyInitialized signal: 'object id is already initialized: ', anObjectId asString ].
 	segment := self objectRepository segmentAt: anObjectId segment.
 	"maintain last object indexes per segment"
+	lastObjectIndexes ifNil: [ lastObjectIndexes := Dictionary new ].
 	assoc := lastObjectIndexes 
 		at: segment 
 		ifAbsentPut: [ 
@@ -343,7 +343,7 @@ SoilTransaction >> journalEntriesFor: key inIndex: aSoilIndex startingAt: anInte
 	[ transactionId > readVersion ] whileTrue: [  
 		journal := (soil journal at: transactionId) readAll.
 		journal entries do: [ :each | 
-			((each class = SoilNewKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
+			((each class = SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
 				(each key = key) ifTrue: [ 
 					entries add: each ] ]  ].
 		transactionId := transactionId - 1.
@@ -487,6 +487,7 @@ SoilTransaction >> objectWithId: objectId [
 
 { #category : #accessing }
 SoilTransaction >> prepareRecordsForCommit [.
+	lastObjectIndexes ifNil: [ lastObjectIndexes := Dictionary new ].
 	"select all dirty/new records and convert them to new version records"
 	recordsToCommit := idMap values asOrderedCollection 
 		select: [:each | each value shouldBeCommitted ]

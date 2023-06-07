@@ -51,8 +51,7 @@ SoilBackupTest >> testBackupWithIndex [
 		open.
 	[tx2 := backup newTransaction.
 	self assert: (tx2 root at: #foo) label equals: #indexed ]
-		ensure: [ backup close ]
-	
+		ensure: [ backup close ].
 	
 ]
 
