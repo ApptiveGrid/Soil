@@ -59,8 +59,8 @@ SoilUpdateDatabaseVersion >> printOn: aStream [
 { #category : #'instance creation' }
 SoilUpdateDatabaseVersion >> readFrom: aStream [ 
 	super readFrom: aStream.
-	version := (aStream next: 8) asInteger.
-	previousVersion := (aStream next: 8) asInteger
+	version := aStream nextLengthEncodedInteger.
+	previousVersion := aStream nextLengthEncodedInteger
 ]
 
 { #category : #accessing }
@@ -76,6 +76,6 @@ SoilUpdateDatabaseVersion >> version: anInteger [
 { #category : #writing }
 SoilUpdateDatabaseVersion >> writeOn: aStream [ 
 	super writeOn: aStream.
-	aStream nextPutAll: (version asByteArrayOfSize: 8).
-	aStream nextPutAll: (previousVersion asByteArrayOfSize: 8).
+	aStream nextPutLengthEncodedInteger: version.
+	aStream nextPutLengthEncodedInteger: previousVersion.
 ]

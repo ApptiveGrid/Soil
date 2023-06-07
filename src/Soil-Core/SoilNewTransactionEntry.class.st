@@ -38,10 +38,8 @@ SoilNewTransactionEntry >> objectId [
 
 { #category : #'instance creation' }
 SoilNewTransactionEntry >> readFrom: aStream [ 
-	| size |
 	super readFrom: aStream.
-	size := aStream next.
-	createdAt := (DateAndTime epoch + ((aStream next: size) asInteger / 1000) milliSeconds) asLocal
+	createdAt := (DateAndTime epoch + ((aStream nextLengthEncodedInteger) / 1000) milliSeconds) asLocal
 ]
 
 { #category : #accessing }
@@ -54,8 +52,6 @@ SoilNewTransactionEntry >> writeOn: aStream [
 	| timestamp |
 	super writeOn: aStream.
 	
-	timestamp := (createdAt asSeconds * 1000000 + (createdAt nanoSecond // 1000)) asByteArray..
-	aStream
-		nextPut: timestamp size; 
-		nextPutAll: timestamp
+	timestamp := createdAt asSeconds * 1000000 + (createdAt nanoSecond // 1000).
+	aStream nextPutLengthEncodedInteger: timestamp
 ]

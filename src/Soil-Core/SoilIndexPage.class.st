@@ -64,6 +64,13 @@ SoilIndexPage >> isLastPage [
 	self shouldBeImplemented.
 ]
 
+{ #category : #writing }
+SoilIndexPage >> itemsSizeSize [
+	"as long as we target 65536 bytes as maximum page size a two-byte 
+	number of items is sufficient"
+	^ 2
+]
+
 { #category : #accessing }
 SoilIndexPage >> pageSize [
 	^ pageSize

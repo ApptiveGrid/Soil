@@ -73,7 +73,7 @@ SoilNewObjectEntry >> readFrom: aStream [
 	| bytesSize |
 	super readFrom: aStream.
 	objectId := SoilObjectId readFrom: aStream.
-	bytesSize := (aStream next: 8) asInteger.
+	bytesSize := aStream nextLengthEncodedInteger.
 	bytes := aStream next: bytesSize.
 ]
 
@@ -98,8 +98,8 @@ SoilNewObjectEntry >> value [
 SoilNewObjectEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
 	objectId writeOn: aStream.
-	aStream nextPutAll: (bytes size asByteArrayOfSize: 8).
 	aStream 
+		nextPutLengthEncodedInteger: bytes size;
 		nextPutAll: bytes
 	
 ]

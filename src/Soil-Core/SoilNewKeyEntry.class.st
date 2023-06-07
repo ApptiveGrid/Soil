@@ -77,8 +77,8 @@ SoilNewKeyEntry >> readFrom: aStream [
 	super readFrom: aStream.
 	indexIdSize := aStream next.
 	indexId := (aStream next: indexIdSize) asString.
-	key := (aStream next: (aStream next: 2) asInteger) asInteger.
-	value := (aStream next: (aStream next: 2) asInteger) asSoilObjectId .
+	key := (aStream next: aStream nextLengthEncodedInteger) asInteger.
+	value := (aStream next: (aStream nextLengthEncodedInteger) asInteger) asSoilObjectId .
 ]
 
 { #category : #accessing }
@@ -102,8 +102,8 @@ SoilNewKeyEntry >> writeOn: aStream [
 	aStream 
 		nextPut: indexId size; 
 		nextPutAll: indexId asByteArray;
-		nextPutAll: (key asByteArray size asByteArrayOfSize: 2);
-		nextPutAll: key asByteArray ;
-		nextPutAll: (value asByteArray size asByteArrayOfSize: 2);
+		nextPutLengthEncodedInteger: key asByteArray size;
+		nextPutAll: key asByteArray;
+		nextPutLengthEncodedInteger: value asByteArray size;
 		nextPutAll: value asByteArray
 ]
