@@ -30,11 +30,6 @@ SoilRemoveKeyEntry >> commitIn: transaction [
 ]
 
 { #category : #accessing }
-SoilRemoveKeyEntry >> container [
-	^ 'index: ', id asString
-]
-
-{ #category : #accessing }
 SoilRemoveKeyEntry >> context [ 
 	^ id 
 ]

@@ -70,11 +70,6 @@ SoilAddKeyEntry >> readFrom: aStream [
 ]
 
 { #category : #accessing }
-SoilAddKeyEntry >> segment: anInteger [ 
-	segment := anInteger
-]
-
-{ #category : #accessing }
 SoilAddKeyEntry >> value [ 
 	^ value
 ]
