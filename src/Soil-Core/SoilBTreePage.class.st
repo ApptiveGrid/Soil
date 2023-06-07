@@ -135,11 +135,6 @@ SoilBTreePage >> items [
 	^ items
 ]
 
-{ #category : #writing }
-SoilBTreePage >> itemsSizeSize [
-	^ 2
-]
-
 { #category : #accessing }
 SoilBTreePage >> keySize [
 	^ keySize

@@ -71,7 +71,7 @@ SoilNewBehaviorEntry >> readFrom: aStream [
 	| size |
 	super readFrom: aStream.
 	objectId := SoilObjectId readFrom: aStream.
-	size := (aStream next: 2) asInteger.
+	size := aStream nextLengthEncodedInteger.
 	identifier := (aStream next: size) asString
 ]
 
@@ -84,6 +84,6 @@ SoilNewBehaviorEntry >> value [
 SoilNewBehaviorEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
 	objectId writeOn: aStream.
-	aStream nextPutAll: (identifier size asByteArrayOfSize: 2).
+	aStream nextPutLengthEncodedInteger:  identifier size.
 	aStream nextPutAll: identifier asByteArray
 ]

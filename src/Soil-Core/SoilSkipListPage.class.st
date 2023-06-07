@@ -185,11 +185,6 @@ SoilSkipListPage >> items [
 	^ items
 ]
 
-{ #category : #writing }
-SoilSkipListPage >> itemsSizeSize [
-	^ 2
-]
-
 { #category : #accessing }
 SoilSkipListPage >> keyOrClosestAfter: key [ 
 	"find the closest key in this page. This returns the exact key if 
@@ -310,6 +305,8 @@ SoilSkipListPage >> rightAt: anInteger put: anObject [
 
 { #category : #writing }
 SoilSkipListPage >> rightSize [
+	"this fixes the maximum number of pages to 32 bits which should be enough. This
+	17TB when using a page size of 4k"
 	^ 4
 ]
 

@@ -42,7 +42,6 @@ SoilBTreePageTest >> testWriteAndRead [
 	self assert: readPage valueSize equals: page valueSize.
 	self assert: readPage keySize equals: page keySize.
 	
-	self assert: readPage index equals: 1.
 	self deny: readPage isDirty 
 ]
 
@@ -57,7 +56,6 @@ SoilBTreePageTest >> testWriteAndReadIndex [
 		page writeOn: stream ].
 	self deny: page isDirty.
 	readPage := SoilBTreePage readPageFrom: bytes readStream keySize: 8 valueSize: 8.
-	self assert: readPage index equals: 1.
 	self deny: readPage isDirty
 ]
 
@@ -78,6 +76,5 @@ SoilBTreePageTest >> testWriteAndReadPageCode [
 	self assert: readPage valueSize equals: page valueSize.
 	self assert: readPage keySize equals: page keySize.
 	
-	self assert: readPage index equals: 1.
 	self deny: readPage isDirty 
 ]

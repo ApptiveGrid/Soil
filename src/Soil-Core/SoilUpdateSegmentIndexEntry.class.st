@@ -57,8 +57,8 @@ SoilUpdateSegmentIndexEntry >> printOn: aStream [
 { #category : #'instance creation' }
 SoilUpdateSegmentIndexEntry >> readFrom: aStream [ 
 	super readFrom: aStream.
-	segmentId := (aStream next: (aStream next: 2) asInteger) asInteger.
-	index := (aStream next: 8 asInteger) asInteger.
+	segmentId := aStream nextLengthEncodedInteger.
+	index := aStream nextLengthEncodedInteger 
 ]
 
 { #category : #accessing }
@@ -75,7 +75,6 @@ SoilUpdateSegmentIndexEntry >> value [
 SoilUpdateSegmentIndexEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
 	aStream 
-		nextPutAll: (segmentId asByteArray size asByteArrayOfSize: 2);
-		nextPutAll: segmentId asByteArray;
-		nextPutAll: (index asByteArrayOfSize: 8)
+		nextPutLengthEncodedInteger: segmentId;
+		nextPutLengthEncodedInteger: index
 ]

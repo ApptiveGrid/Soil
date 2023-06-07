@@ -90,6 +90,8 @@ SoilSkipListHeaderPage >> writeHeaderOn: aStream [
 		nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
 		nextPutAll: (maxLevel asByteArrayOfSize: 2);
+		flag: #todo;
+		"lastPageIndex must be 4 bytes"
 		nextPutAll: (lastPageIndex asByteArrayOfSize: 2).
 	self 
 		writeLevelsOn: aStream

@@ -34,10 +34,8 @@ SoilNewCheckpointEntry >> initialize [
 
 { #category : #'instance creation' }
 SoilNewCheckpointEntry >> readFrom: aStream [ 
-	| size |
 	super readFrom: aStream.
-	size := aStream next.
-	checkpointedAt := (DateAndTime epoch + ((aStream next: size) asInteger / 1000) milliSeconds) asLocal
+	checkpointedAt := (DateAndTime epoch + ((aStream nextLengthEncodedInteger) asInteger / 1000) milliSeconds) asLocal
 ]
 
 { #category : #accessing }
@@ -50,9 +48,7 @@ SoilNewCheckpointEntry >> writeOn: aStream [
 	| timestamp |
 	super writeOn: aStream.
 	
-	timestamp := (checkpointedAt asSeconds * 1000000 + (checkpointedAt nanoSecond // 1000)) asByteArray.
+	timestamp := checkpointedAt asSeconds * 1000000 + (checkpointedAt nanoSecond // 1000).
 	
-	aStream
-		nextPut: timestamp size; 
-		nextPutAll: timestamp
+	aStream nextPutLengthEncodedInteger:  timestamp
 ]

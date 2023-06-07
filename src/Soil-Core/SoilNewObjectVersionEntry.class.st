@@ -22,14 +22,14 @@ SoilNewObjectVersionEntry >> oldBytes: aCollection [
 SoilNewObjectVersionEntry >> readFrom: aStream [ 
 	| oldBytesSize |
 	super readFrom: aStream.
-	oldBytesSize := (aStream next: 8) asInteger.
+	oldBytesSize := aStream nextLengthEncodedInteger.
 	oldBytes := aStream next: oldBytesSize
 ]
 
 { #category : #writing }
 SoilNewObjectVersionEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
-	aStream nextPutAll: (oldBytes size asByteArrayOfSize: 8).
+	aStream nextPutLengthEncodedInteger: oldBytes size.
 	aStream nextPutAll: oldBytes.
 	
 ]
