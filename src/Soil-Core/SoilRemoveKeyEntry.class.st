@@ -1,11 +1,9 @@
 Class {
 	#name : #SoilRemoveKeyEntry,
-	#superclass : #SoilJournalEntry,
+	#superclass : #SoilIndexJournalEntry,
 	#instVars : [
-		'indexId',
 		'key',
-		'oldValue',
-		'segment'
+		'oldValue'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -23,7 +21,7 @@ SoilRemoveKeyEntry >> address [
 { #category : #'as yet unclassified' }
 SoilRemoveKeyEntry >> commitIn: transaction [ 
 	| index |
-	index := transaction indexAt: indexId segment: 1.
+	index := transaction indexAt: id segment: segment.
 	self flag: #todo.
 	"ifAbsent: should not be used here"
 	index newIterator 
@@ -32,18 +30,8 @@ SoilRemoveKeyEntry >> commitIn: transaction [
 ]
 
 { #category : #accessing }
-SoilRemoveKeyEntry >> container [
-	^ 'index: ', indexId asString
-]
-
-{ #category : #accessing }
 SoilRemoveKeyEntry >> context [ 
-	^ indexId 
-]
-
-{ #category : #accessing }
-SoilRemoveKeyEntry >> indexId: aString [ 
-	indexId := aString
+	^ id 
 ]
 
 { #category : #accessing }
@@ -70,17 +58,12 @@ SoilRemoveKeyEntry >> oldValue: aString [
 
 { #category : #'instance creation' }
 SoilRemoveKeyEntry >> readFrom: aStream [
-	| indexIdSize |
+	| idSize |
 	super readFrom: aStream.
-	indexIdSize := aStream next.
-	indexId := (aStream next: indexIdSize) asString.
+	idSize := aStream next.
+	id := (aStream next: idSize) asString.
 	key := (aStream next: aStream nextLengthEncodedInteger) asInteger.
 	oldValue := (aStream next: aStream nextLengthEncodedInteger) asSoilObjectId .
-]
-
-{ #category : #accessing }
-SoilRemoveKeyEntry >> segment: anInteger [ 
-	segment := anInteger 
 ]
 
 { #category : #accessing }
@@ -92,8 +75,8 @@ SoilRemoveKeyEntry >> value [
 SoilRemoveKeyEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
 	aStream 
-		nextPut: indexId size; 
-		nextPutAll: indexId asByteArray;
+		nextPut: id size; 
+		nextPutAll: id asByteArray;
 		nextPutLengthEncodedInteger: key asByteArray size;
 		nextPutAll: key asByteArray;
 		nextPutLengthEncodedInteger: oldValue asByteArray size;

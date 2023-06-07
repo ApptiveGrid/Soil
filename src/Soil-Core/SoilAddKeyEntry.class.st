@@ -1,9 +1,7 @@
 Class {
-	#name : #SoilNewKeyEntry,
-	#superclass : #SoilJournalEntry,
+	#name : #SoilAddKeyEntry,
+	#superclass : #SoilIndexJournalEntry,
 	#instVars : [
-		'segment',
-		'indexId',
 		'key',
 		'value',
 		'oldValue'
@@ -12,19 +10,19 @@ Class {
 }
 
 { #category : #'accessing - defaults' }
-SoilNewKeyEntry class >> journalTypeCode [
+SoilAddKeyEntry class >> journalTypeCode [
 	^ 3
 ]
 
 { #category : #accessing }
-SoilNewKeyEntry >> address [
+SoilAddKeyEntry >> address [
 	^ key asByteArray asString
 ]
 
 { #category : #'as yet unclassified' }
-SoilNewKeyEntry >> commitIn: transaction [ 
+SoilAddKeyEntry >> commitIn: transaction [ 
 	| index |
-	index := transaction indexAt: indexId segment: segment.
+	index := transaction indexAt: id segment: segment.
 	index newIterator 
 		at: key put: value;
 		updateCurrentTransaction: transaction writeVersion 
@@ -32,76 +30,61 @@ SoilNewKeyEntry >> commitIn: transaction [
 ]
 
 { #category : #accessing }
-SoilNewKeyEntry >> container [
-	^ 'index: ', indexId asString
-]
-
-{ #category : #accessing }
-SoilNewKeyEntry >> context [ 
-	^ indexId 
+SoilAddKeyEntry >> context [ 
+	^ id 
 ]
 
 { #category : #'as yet unclassified' }
-SoilNewKeyEntry >> effect [
+SoilAddKeyEntry >> effect [
 	^ key -> value 
 ]
 
 { #category : #accessing }
-SoilNewKeyEntry >> indexId: aString [ 
-	indexId := aString
-]
-
-{ #category : #accessing }
-SoilNewKeyEntry >> key [
+SoilAddKeyEntry >> key [
 	^ key
 ]
 
 { #category : #accessing }
-SoilNewKeyEntry >> key: aString [ 
+SoilAddKeyEntry >> key: aString [ 
 	key := aString 
 ]
 
 { #category : #accessing }
-SoilNewKeyEntry >> oldValue [
+SoilAddKeyEntry >> oldValue [
 	^ oldValue
 ]
 
 { #category : #accessing }
-SoilNewKeyEntry >> oldValue: anObject [
+SoilAddKeyEntry >> oldValue: anObject [
 	oldValue := anObject
 ]
 
 { #category : #writing }
-SoilNewKeyEntry >> readFrom: aStream [ 
-	| indexIdSize |
+SoilAddKeyEntry >> readFrom: aStream [ 
+	| idSize |
 	super readFrom: aStream.
-	indexIdSize := aStream next.
-	indexId := (aStream next: indexIdSize) asString.
+	idSize := aStream next.
+	id := (aStream next: idSize) asString.
 	key := (aStream next: aStream nextLengthEncodedInteger) asInteger.
 	value := (aStream next: (aStream nextLengthEncodedInteger) asInteger) asSoilObjectId .
 ]
 
 { #category : #accessing }
-SoilNewKeyEntry >> segment: anInteger [ 
-	segment := anInteger
-]
-
-{ #category : #accessing }
-SoilNewKeyEntry >> value [ 
+SoilAddKeyEntry >> value [ 
 	^ value
 ]
 
 { #category : #accessing }
-SoilNewKeyEntry >> value: aString [ 
+SoilAddKeyEntry >> value: aString [ 
 	value := aString
 ]
 
 { #category : #writing }
-SoilNewKeyEntry >> writeOn: aStream [ 
+SoilAddKeyEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
 	aStream 
-		nextPut: indexId size; 
-		nextPutAll: indexId asByteArray;
+		nextPut: id size; 
+		nextPutAll: id asByteArray;
 		nextPutLengthEncodedInteger: key asByteArray size;
 		nextPutAll: key asByteArray;
 		nextPutLengthEncodedInteger: value asByteArray size;

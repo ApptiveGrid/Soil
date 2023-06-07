@@ -141,7 +141,8 @@ Soil >> inspectionParameters [
 { #category : #accessing }
 Soil >> journal [
 	^ journal ifNil: [ 
-		journal := SoilJournal new 
+		journal := SoilJournal new
+			soil: self;
 			path: self path / #journal ] 
 ]
 
@@ -261,8 +262,10 @@ Soil >> replayJournal: aSoilJournal [
 	| tx |
 	tx := self newTransaction.
 	aSoilJournal allTransactionJournals reverse do: [ :j |
-		j commitIn: tx ].
-	tx commit
+		j commitIn: tx.
+		self journal importEntry: j ].
+	tx commit.
+
 ]
 
 { #category : #accessing }

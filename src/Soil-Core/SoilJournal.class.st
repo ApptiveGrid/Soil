@@ -2,7 +2,8 @@ Class {
 	#name : #SoilJournal,
 	#superclass : #Object,
 	#instVars : [
-		'path'
+		'path',
+		'soil'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -30,6 +31,15 @@ SoilJournal >> do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SoilJournal >> importEntry: aSoilTransactionJournal [ 
+	| id local |
+	id := aSoilTransactionJournal id.
+	local := soil newTransactionJournalFor: id.
+	local addEntries: aSoilTransactionJournal entries.
+	local write
+]
+
+{ #category : #'as yet unclassified' }
 SoilJournal >> inspectionContent [
 	<inspectorPresentationOrder: 0 title: 'journal entries'>
 
@@ -40,4 +50,9 @@ SoilJournal >> inspectionContent [
 { #category : #accessing }
 SoilJournal >> path: aFileReference [ 
 	path := aFileReference 
+]
+
+{ #category : #accessing }
+SoilJournal >> soil: aSoil [ 
+	soil := aSoil
 ]

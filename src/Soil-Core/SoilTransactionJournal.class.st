@@ -74,6 +74,11 @@ SoilTransactionJournal >> entryAt: anInteger [
 	^ entries at: anInteger 
 ]
 
+{ #category : #accessing }
+SoilTransactionJournal >> id [
+	^ (stream wrappedStream name asFileReference withoutExtension basename) asInteger
+]
+
 { #category : #initialization }
 SoilTransactionJournal >> initialize [ 
 	super initialize.

@@ -176,7 +176,7 @@ SoilObjectSegment >> lockAppendingFor: lockContext [
 
 { #category : #accessing }
 SoilObjectSegment >> lockLastObjectIndexFor: lockContext [ 
-	^ indexFile lockLastObjectIndexFor: lockContext 
+	^ self indexFile lockLastObjectIndexFor: lockContext 
 ]
 
 { #category : #'as yet unclassified' }

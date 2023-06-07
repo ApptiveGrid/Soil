@@ -213,15 +213,15 @@ SoilSkipListDictionary >> journalEntries [
 		entries add: (SoilNewSkipListIndexEntry new 
 			transactionId: transaction writeVersion;
 			segment: segment;
-			indexId: id;
+			id: id;
 			maxLevel: index maxLevel;
 			keySize: index keySize;
 			valueSize: index valueSize) ].
 	newValues keysAndValuesDo: [ :key :value |
-		entries add: (SoilNewKeyEntry new 
+		entries add: (SoilAddKeyEntry new 
 			transactionId: transaction writeVersion;
 			segment: segment;
-			indexId: id;
+			id: id;
 			key: key;
 			value: value;
 			oldValue: (oldValues at: key ifAbsent: [nil ])) ].
@@ -229,7 +229,7 @@ SoilSkipListDictionary >> journalEntries [
 		entries add: (SoilRemoveKeyEntry new 
 			transactionId: transaction writeVersion;
 			segment: segment;
-			indexId: id;
+			id: id;
 			key: key; 
 			oldValue: value) ].
 	^ entries
