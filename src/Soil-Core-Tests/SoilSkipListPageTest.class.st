@@ -64,7 +64,6 @@ SoilSkipListPageTest >> testDataPageWriteAndRead [
 		page writeOn: stream ].
 	self deny: page isDirty.
 	readPage := SoilIndexPage readPageFrom: bytes readStream keySize: 8 valueSize: 8.
-	self assert: readPage index equals: 1.
 	self assert: readPage level equals: 8.
 	self deny: readPage isDirty 
 ]
@@ -81,7 +80,6 @@ SoilSkipListPageTest >> testDataPageWriteAndReadRightArray [
 		page writeOn: stream ].
 	self deny: page isDirty.
 	readPage := SoilIndexPage readPageFrom: bytes readStream keySize: 8 valueSize: 8. 
-	self assert: readPage index equals: 1.
 	self assert: readPage level equals: 8.
 	self assert: readPage right equals: #( 1 2 3 4 5 6 7 8).
 	self deny: readPage isDirty 
@@ -142,7 +140,6 @@ SoilSkipListPageTest >> testHeaderPageWriteAndRead [
 		page writeOn: stream ].
 	self deny: page isDirty.
 	readPage := SoilIndexPage readPageFrom: bytes readStream keySize: 8 valueSize: 8.
-	self assert: readPage index equals: 1.
 	self assert: readPage level equals: 8.
 	self assert: readPage keySize equals: 16.
 	self assert: readPage valueSize equals: 8.

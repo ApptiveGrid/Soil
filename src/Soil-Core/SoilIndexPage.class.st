@@ -88,7 +88,10 @@ SoilIndexPage >> readFrom: aStream [
 
 { #category : #writing }
 SoilIndexPage >> readIndexFrom: aStream [ 
-	index := (aStream next: self indexSize) asInteger.
+	self flag: #todo.
+	"index should be determined at read time depending on the stream.
+	we let the dummy read here for compatibility"
+	"index :=" (aStream next: self indexSize) asInteger.
 
 ]
 
@@ -96,7 +99,10 @@ SoilIndexPage >> readIndexFrom: aStream [
 SoilIndexPage >> writeHeaderOn: aStream [ 
 	aStream
 		nextPut: self class pageCode;
-		nextPutAll: (index asByteArrayOfSize: self indexSize)
+		flag: #todo;
+		"we write 0 as index because the code should not rely on
+		the persisted value as it will go away"
+		nextPutAll: (0 asByteArrayOfSize: self indexSize)
 ]
 
 { #category : #writing }
