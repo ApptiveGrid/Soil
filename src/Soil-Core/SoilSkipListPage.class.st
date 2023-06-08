@@ -188,9 +188,10 @@ SoilSkipListPage >> items [
 { #category : #accessing }
 SoilSkipListPage >> keyOrClosestAfter: key [ 
 	"find the closest key in this page. This returns the exact key if 
-	present or the key that comes after. This is useful if we enter the
+	present or the key that comes after. Else returns nil. This is useful if we enter the
 	list at an unknown point"
 	items ifEmpty: [ ^ nil ].
+	self lastKey < key ifTrue: [ ^ nil ].
 	^ items 
 		findBinaryIndex: [ :each | key - each key ] 
 		do: [ :e | e key] 

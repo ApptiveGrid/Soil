@@ -133,7 +133,9 @@ SoilSkipListIterator >> nextKeyCloseTo: key [
 	self 
 		findPageFor: binKey
 		startingAt: index headerPage.
-	nextKey := currentPage keyOrClosestAfter: binKey
+	nextKey := currentPage keyOrClosestAfter: binKey.
+	nextKey ifNil: ["if there is no close key found, we position the cursor at the end, so that asking for the next association will return nil" 
+		currentKey := currentPage lastKey ]
 ]
 
 { #category : #printing }
