@@ -98,6 +98,6 @@ SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersio
 		at: backupCluster objectId
 		put: backupCluster serialize.
 	backupCluster references do: [ :reference |
-		self visit: (source objectRepository at: reference) ].
+		self process: reference ].
 	^ aSoilPersistentClusterVersion 
 ]
