@@ -22,18 +22,16 @@ SoilBackupVisitor >> backup: aSoil [
 ]
 
 { #category : #visiting }
-SoilBackupVisitor >> copyIndexAt: aFileReference indexManager: anIndexManager [
-	| sourceIndex targetPath targetIndex iterator assoc indexClass |
-	indexClass := SoilIndexManager indexClassFromFile: aFileReference.
-	sourceIndex := indexClass new 
-		path: aFileReference;
-		open.
-	targetPath := (target objectRepository segmentAt: anIndexManager segment id) indexManager path / aFileReference basename.
-	targetIndex := indexClass new 
-		path: targetPath;
-		initializeFilesystem;
-		initializeHeaderPage;
-		initializeParametersFrom: sourceIndex. 
+SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
+	| sourceSegment sourceIndex targetSegment targetIndex iterator assoc |
+	
+	sourceSegment := source objectRepository segmentAt: segmentId.
+	sourceIndex := sourceSegment indexManager loadIndexWithId: indexId ifNone: [ self halt ].
+	
+	targetSegment := target objectRepository segmentAt: segmentId.
+	targetIndex := targetSegment indexManager createIndexWithId: indexId class: sourceIndex class.
+	targetIndex initializeParametersFrom: sourceIndex. 
+	
 	iterator := sourceIndex newIterator.
 	[ (assoc := iterator nextAssociation) isNil  ] whileFalse: [  
 		targetIndex 
@@ -65,13 +63,6 @@ SoilBackupVisitor >> target: aSoil [
 ]
 
 { #category : #visiting }
-SoilBackupVisitor >> visitIndexManager: aSoilIndexManager [ 
-	
-	(aSoilIndexManager path childrenMatching: '*.index') do: [ :indexFile | 
-		self copyIndexAt: indexFile indexManager: aSoilIndexManager  ]
-]
-
-{ #category : #visiting }
 SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [ 
 	self process: SoilObjectId root.
 
@@ -99,5 +90,8 @@ SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersio
 		put: backupCluster serialize.
 	backupCluster references do: [ :reference |
 		self process: reference ].
+	aSoilPersistentClusterVersion indexIds do:[ :indexId |
+		self copyIndexAt: indexId segment: aSoilPersistentClusterVersion segment ].
+
 	^ aSoilPersistentClusterVersion 
 ]
