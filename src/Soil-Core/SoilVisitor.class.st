@@ -16,9 +16,15 @@ SoilVisitor >> visitAll: aCollection [
 		self visit: each ]
 ]
 
+{ #category : #visiting }
+SoilVisitor >> visitIndexManager: aSoilIndexManager [ 
+	^ aSoilIndexManager 
+]
+
 { #category : #'as yet unclassified' }
 SoilVisitor >> visitMetaSegment: aSoilMetaSegment [ 
 	self visit: aSoilMetaSegment indexManager.
+	self copyIndexAt: #identifier segment: 0. 
 	^ aSoilMetaSegment 
 ]
 

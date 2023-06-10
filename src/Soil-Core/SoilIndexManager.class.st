@@ -50,6 +50,14 @@ SoilIndexManager >> close [
 		indexes values do: #close ]
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndexManager >> createIndexWithId: indexId class: aClass [ 
+	^ aClass new 
+		path: (self pathFor: indexId);
+		initializeFilesystem;
+		initializeHeaderPage
+]
+
 { #category : #initialization }
 SoilIndexManager >> initialize [ 
 	super initialize.

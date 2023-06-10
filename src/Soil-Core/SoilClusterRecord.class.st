@@ -72,6 +72,11 @@ SoilClusterRecord >> indexAt: indexId [
 		indexAt: indexId
 ]
 
+{ #category : #accessing }
+SoilClusterRecord >> indexIds [
+	^ indexIds
+]
+
 { #category : #initialization }
 SoilClusterRecord >> initialize [ 
 	super initialize.
@@ -146,6 +151,11 @@ SoilClusterRecord >> registerIndexId: aString [
 SoilClusterRecord >> resetPreviousVersion [
 	previousVersionPosition := 0.
 	version := 1
+]
+
+{ #category : #accessing }
+SoilClusterRecord >> segment [
+	^ objectId segment
 ]
 
 { #category : #serializing }
