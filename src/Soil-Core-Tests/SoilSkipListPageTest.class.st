@@ -40,6 +40,26 @@ SoilSkipListPageTest >> testDataPageFull [
 ]
 
 { #category : #tests }
+SoilSkipListPageTest >> testDataPageFullStreamSize [
+	| page bytes number |
+	page := SoilSkipListDataPage new 
+		keySize: 8;
+		valueSize: 8;
+		index: 1;
+		level: 5;
+		pageSize: 4096.
+	number := 1.
+	[ page hasRoom ] whileTrue: [  
+		page addItem: (number -> number).
+		number := number + 1 ].
+	self assert: page hasRoom equals: false.
+	self assert: page isDirty.
+	bytes := ByteArray streamContents: [ :stream |
+		page writeOn: stream ].
+	self assert: bytes size <= page pageSize
+]
+
+{ #category : #tests }
 SoilSkipListPageTest >> testDataPageSizeOfHeader [
 	| page bytes |
 	page := SoilSkipListDataPage new 
@@ -107,6 +127,28 @@ SoilSkipListPageTest >> testHeaderPageFull [
 	1 to: 253 do: [ :n |
 		self assert: (page itemAt: n ifAbsent: nil) value equals: n ]
 
+]
+
+{ #category : #tests }
+SoilSkipListPageTest >> testHeaderPageFullStreamSize [
+	| page bytes number |
+	page := SoilSkipListHeaderPage new 
+		keySize: 7;
+		valueSize: 8;
+		maxLevel: 8;
+		lastPageIndex: 1;
+		index: 1;
+		level: 6;
+		pageSize: 4096.
+	number := 1.
+	[ page hasRoom ] whileTrue: [  
+		page addItem: (number -> number).
+		number := number + 1 ].
+	self assert: page hasRoom equals: false.
+	self assert: page isDirty.
+	bytes := ByteArray streamContents: [ :stream |
+		page writeOn: stream ].
+	self assert: bytes size <= page pageSize
 ]
 
 { #category : #tests }
