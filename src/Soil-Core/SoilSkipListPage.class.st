@@ -224,7 +224,9 @@ SoilSkipListPage >> lastItem [
 
 { #category : #accessing }
 SoilSkipListPage >> lastKey [
-	^ items last key
+	^ items 
+		ifNotEmpty: [ items last key ]
+		ifEmpty: [ nil ]
 ]
 
 { #category : #accessing }
