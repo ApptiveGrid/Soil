@@ -45,7 +45,7 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 { #category : #initialization }
 SoilBackupVisitor >> initialize [ 
 	super initialize.
-	seen := OrderedCollection new.
+	seen := Set new.
 	toBeProcessed := OrderedCollection new
 ]
 
