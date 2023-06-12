@@ -19,6 +19,7 @@ SoilSkipListHeaderPage >> headerSize [
 		+ 10 "keySize, valueSize, maxLevel, lastPageIndex" 
 		+ 1 "level" 
 		+ (self level * self rightSize)
+		+ 2 "items size"
 ]
 
 { #category : #accessing }
@@ -92,5 +93,7 @@ SoilSkipListHeaderPage >> writeHeaderOn: aStream [
 		nextPutAll: (maxLevel asByteArrayOfSize: 2);
 		nextPutAll: (lastPageIndex asByteArrayOfSize: 4).
 	self 
-		writeLevelsOn: aStream
+		writeLevelsOn: aStream.
+	aStream nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
+
 ]

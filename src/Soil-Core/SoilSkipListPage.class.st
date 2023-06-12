@@ -376,8 +376,6 @@ SoilSkipListPage >> writeHeaderOn: aStream [
 
 { #category : #writing }
 SoilSkipListPage >> writeItemsOn: aStream [ 
-	aStream
-		nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
 	items do: [ :assoc |
 		aStream 
 			nextPutAll: (assoc key asByteArrayOfSize: self keySize);

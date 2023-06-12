@@ -6,7 +6,7 @@ Class {
 
 { #category : #tests }
 SoilObjectFileTest >> testInitializeOnStream [
-	| index bytes prefix fileVersion |
+	| index bytes prefix |
 	bytes := ByteArray streamContents: [ :stream |
 		index := SoilObjectFile new stream: stream.
 		index initializeFilesystem ].
