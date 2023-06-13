@@ -48,13 +48,8 @@ SoilBasicSerializer >> nextPutBytesFrom: aByteArray [
 
 { #category : #writing }
 SoilBasicSerializer >> nextPutCharacter: aCharacter [
-	"we store 8bit characters with TypeCodeByteCharacter to save some space"
-	| charAsInteger |
-	charAsInteger := aCharacter asInteger.
-	self nextPutByte: (charAsInteger > 255
-			 ifTrue: [ TypeCodeCharacter ]
-			 ifFalse: [ TypeCodeByteCharacter ]).
-	self nextPutLengthEncodedInteger: charAsInteger
+	self nextPutByte: TypeCodeCharacter.
+	self nextPutLengthEncodedInteger: aCharacter asInteger
 ]
 
 { #category : #writing }
@@ -97,14 +92,14 @@ SoilBasicSerializer >> nextPutInteger: anInteger [
 { #category : #writing }
 SoilBasicSerializer >> nextPutLargeNegativeInteger: anInteger [ 
 	self 
-		nextPutByte: TypeCodeLargeNegativeInteger;
+		nextPutByte: TypeCodeNegativeInteger;
 		nextPutLengthEncodedInteger: 0 - anInteger
 ]
 
 { #category : #writing }
 SoilBasicSerializer >> nextPutLargePositiveInteger: anInteger [ 
 	self 
-		nextPutByte: TypeCodeLargePositiveInteger;
+		nextPutByte: TypeCodePositiveInteger;
 		nextPutLengthEncodedInteger: anInteger
 ]
 

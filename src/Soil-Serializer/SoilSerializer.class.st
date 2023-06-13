@@ -123,21 +123,6 @@ SoilSerializer >> nextPutInternalReference: anInteger [
 ]
 
 { #category : #writing }
-SoilSerializer >> nextPutMessage: aMessage [ 
-	self nextPutByte: TypeCodeMessage.
-	aMessage selector soilSerialize: self.
-	aMessage arguments soilSerialize: self
-]
-
-{ #category : #writing }
-SoilSerializer >> nextPutMessageSend: aMessageSend [ 
-	self nextPutByte: TypeCodeMessageSend.
-	aMessageSend receiver soilSerialize: self.
-	aMessageSend selector soilSerialize: self.
-	aMessageSend arguments soilSerialize: self
-]
-
-{ #category : #writing }
 SoilSerializer >> nextPutObjectType [
 	self nextPutByte: TypeCodeObject 
 ]
