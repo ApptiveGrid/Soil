@@ -17,6 +17,11 @@ SoilNewCheckpointEntry >> address [
 	^ ''
 ]
 
+{ #category : #accessing }
+SoilNewCheckpointEntry >> checkpointedAt [
+	^ checkpointedAt
+]
+
 { #category : #committing }
 SoilNewCheckpointEntry >> commitIn: aTransaction [ 
 ]
