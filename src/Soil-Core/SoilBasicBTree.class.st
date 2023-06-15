@@ -89,6 +89,11 @@ SoilBasicBTree >> isEmpty [
 	^ self store headerPage hasItems not
 ]
 
+{ #category : #testing }
+SoilBasicBTree >> isRegistered [
+	^ self subclassResponsibility
+]
+
 { #category : #accessing }
 SoilBasicBTree >> keySize [
 	^ self headerPage keySize

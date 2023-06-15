@@ -28,6 +28,16 @@ SoilClusterRecord >> addReference: reference [
 	references add: reference 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilClusterRecord >> asNewClusterVersion [
+	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SoilClusterRecord >> beChanged [
+	^ self subclassResponsibility
+]
+
 { #category : #accessing }
 SoilClusterRecord >> behaviorDescriptionAt: anInteger [ 
 	(anInteger = 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
@@ -58,6 +68,11 @@ SoilClusterRecord >> bytes: anObject [
 { #category : #asserting }
 SoilClusterRecord >> committed [ 
 	committed := true
+]
+
+{ #category : #'as yet unclassified' }
+SoilClusterRecord >> hasChanged [
+	^ self subclassResponsibility
 ]
 
 { #category : #testing }
@@ -163,6 +178,11 @@ SoilClusterRecord >> serialize [
 	^ ByteArray streamContents: [ :stream |
 		self serializeOn: stream ]
 				
+]
+
+{ #category : #'as yet unclassified' }
+SoilClusterRecord >> shouldBeCommitted [
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }

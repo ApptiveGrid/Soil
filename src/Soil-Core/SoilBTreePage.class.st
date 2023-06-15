@@ -1,10 +1,6 @@
 Class {
 	#name : #SoilBTreePage,
 	#superclass : #SoilIndexPage,
-	#instVars : [
-		'items',
-		'keySize'
-	],
 	#category : #'Soil-Core-Index-BTree'
 }
 
@@ -19,26 +15,6 @@ SoilBTreePage class >> pageCode [
 	^0
 ]
 
-{ #category : #adding }
-SoilBTreePage >> addItem: anAssociation [ 
-	items add: anAssociation.
-	dirty := true
-]
-
-{ #category : #accessing }
-SoilBTreePage >> associationAt: anInteger [ 
-	^ self
-		associationAt: anInteger 
-		ifAbsent: [ nil ]
-]
-
-{ #category : #accessing }
-SoilBTreePage >> associationAt: anInteger ifAbsent: aBlock [
-	^ items 
-		detect: [:each | each key = anInteger ] 
-		ifNone: [ aBlock value ]
-]
-
 { #category : #accessing }
 SoilBTreePage >> biggestKey [
 	^ items last key
@@ -49,11 +25,6 @@ SoilBTreePage >> find: aKey with: aBTree [
 	^ self subclassResponsibility
 ]
 
-{ #category : #accessing }
-SoilBTreePage >> firstItem [
-	^ items first
-]
-
 { #category : #testing }
 SoilBTreePage >> hasRoom [
 	^ self headerSize + ((items size + 1) * (self keySize + self valueSize)) <= self pageSize
@@ -62,13 +33,6 @@ SoilBTreePage >> hasRoom [
 { #category : #utilities }
 SoilBTreePage >> headerSize [
 	self subclassResponsibility
-]
-
-{ #category : #accessing }
-SoilBTreePage >> indexOfKey: anInteger [ 
-	items withIndexDo: [ :each :idx |
-		(each key = anInteger) ifTrue: [ ^ idx ] ].
-	^ 0
 ]
 
 { #category : #initialization }
@@ -83,11 +47,6 @@ SoilBTreePage >> insert: anItem into: aBtree [
 	^ self subclassResponsibility
 ]
 
-{ #category : #testing }
-SoilBTreePage >> isEmpty [
-	^ items isEmpty 
-]
-
 { #category : #'as yet unclassified' }
 SoilBTreePage >> itemAfter: key [ 
 	| i item |
@@ -96,58 +55,6 @@ SoilBTreePage >> itemAfter: key [
 	item := items at: i + 1.
 	(item key >= ((2 raisedTo: 64) - 1)) ifTrue: [ ^ nil ].
 	^ item
-]
-
-{ #category : #accessing }
-SoilBTreePage >> itemCapacity [
-	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
-]
-
-{ #category : #accessing }
-SoilBTreePage >> itemRemoveAt: key [ 
-	^ self 
-		itemRemoveAt: key 
-		ifAbsent: [ KeyNotFound signalFor: key in: self ]
-]
-
-{ #category : #accessing }
-SoilBTreePage >> itemRemoveAt: anInteger ifAbsent: aBlock [
-	| item |
-	items 
-		findBinaryIndex: [ :each |  anInteger - each key ] 
-		do: [:ind | item := items removeAt: ind ]
-		ifNone: [ ^ aBlock value ].
-	dirty := true.
-	^ item
-]
-
-{ #category : #accessing }
-SoilBTreePage >> itemRemoveIndex: anInteger [
-	| item |
-	item := items at: anInteger.
-	items removeAt: anInteger.
-	dirty := true.
-	^ item
-]
-
-{ #category : #accessing }
-SoilBTreePage >> items [
-	^ items
-]
-
-{ #category : #accessing }
-SoilBTreePage >> keySize [
-	^ keySize
-]
-
-{ #category : #accessing }
-SoilBTreePage >> keySize: anInteger [ 
-	keySize := anInteger
-]
-
-{ #category : #accessing }
-SoilBTreePage >> numberOfItems [
-	^ items size
 ]
 
 { #category : #accessing }
@@ -164,16 +71,6 @@ SoilBTreePage >> readItemsFrom: aStream [
 		items add: (aStream next: self keySize) asInteger -> (aStream next: self valueSize) ]
 ]
 
-{ #category : #initialization }
-SoilBTreePage >> setItems: aCollection [ 
-	items := aCollection
-]
-
-{ #category : #accessing }
-SoilBTreePage >> smallestKey [
-	^ items first key
-]
-
 { #category : #private }
 SoilBTreePage >> split: newPage [
 	| middle |
@@ -185,20 +82,6 @@ SoilBTreePage >> split: newPage [
 	items removeLast: items size - middle.
 	
 	^ newPage
-]
-
-{ #category : #accessing }
-SoilBTreePage >> valueAt: anInteger [ 
-	^ self 
-		valueAt: anInteger 
-		ifAbsent: [ nil ]
-]
-
-{ #category : #accessing }
-SoilBTreePage >> valueAt: anInteger ifAbsent: aBlock [
-	^ (self 
-		associationAt: anInteger
-		ifAbsent: [ ^ aBlock value ]) value
 ]
 
 { #category : #writing }

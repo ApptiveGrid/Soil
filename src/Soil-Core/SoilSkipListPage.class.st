@@ -3,8 +3,6 @@ Class {
 	#superclass : #SoilIndexPage,
 	#instVars : [
 		'right',
-		'items',
-		'keySize',
 		'valueSize',
 		'lastTransaction'
 	],
@@ -28,36 +26,11 @@ SoilSkipListPage class >> pageCode [
 	^ 0 
 ]
 
-{ #category : #adding }
-SoilSkipListPage >> addItem: anAssociation [ 
-	items add: anAssociation.
-	dirty := true
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> associationAt: anInteger [ 
-	^ self 
-		associationAt: anInteger 
-		ifAbsent: [ nil ]
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> associationAt: key ifAbsent: aBlock [
-	^ items 
-		detect: [:each | each key = key ] 
-		ifNone: [ aBlock value ]
-]
-
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> biggestKey [
 	^ self isLastPage 
 		ifTrue: [ (2 raisedTo: (keySize * 8)) - 1 ]
 		ifFalse: [ items last key ]
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> firstItem [
-	^ items first
 ]
 
 { #category : #testing }
@@ -78,15 +51,6 @@ SoilSkipListPage >> headerSize [
 	^ super headerSize + 8 "last transaction number"
 ]
 
-{ #category : #accessing }
-SoilSkipListPage >> indexOfKey: anInteger [ 
-	items withIndexDo: [ :each :idx |
-		(each key = anInteger) ifTrue: [ ^ idx ] ].
-	^ 0
-	
-		
-]
-
 { #category : #initialization }
 SoilSkipListPage >> initialize [ 
 	super initialize.
@@ -105,11 +69,6 @@ SoilSkipListPage >> initializeLevel: anInteger [
 		level := level + 1.
 		promote := self class random next > 0.5 ].
 	right := Array new: level withAll: 0. 
-]
-
-{ #category : #testing }
-SoilSkipListPage >> isEmpty [
-	^ items isEmpty 
 ]
 
 { #category : #testing }
@@ -148,43 +107,6 @@ SoilSkipListPage >> itemAt: key put: anObject [
 	^ removedItem
 ]
 
-{ #category : #'as yet unclassified' }
-SoilSkipListPage >> itemCapacity [
-	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> itemRemoveAt: key [ 
-	^ self 
-		itemRemoveAt: key 
-		ifAbsent: [ KeyNotFound signalFor: key in: self ]
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> itemRemoveAt: anInteger ifAbsent: aBlock [
-	| item |
-	items 
-		findBinaryIndex: [ :each |  anInteger - each key ] 
-		do: [:ind | item := items removeAt: ind ]
-		ifNone: [ ^ aBlock value ].
-	dirty := true.
-	^ item
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> itemRemoveIndex: anInteger [
-	| item |
-	item := items at: anInteger.
-	items removeAt: anInteger.
-	dirty := true.
-	^ item
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> items [
-	^ items
-]
-
 { #category : #accessing }
 SoilSkipListPage >> keyOrClosestAfter: key [ 
 	"find the closest key in this page. This returns the exact key if 
@@ -197,17 +119,6 @@ SoilSkipListPage >> keyOrClosestAfter: key [
 		do: [ :e | e key] 
 		ifNone: [ :a :b | 
 			(items at: (b min: items size)) key ]
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> keySize [ 
-	^ keySize
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> keySize: anInteger [ 
-	(anInteger = 0) ifTrue: [ Error signal: 'cannot use key size 0' ].
-	keySize := anInteger.
 ]
 
 { #category : #accessing }
@@ -247,11 +158,6 @@ SoilSkipListPage >> level [
 { #category : #accessing }
 SoilSkipListPage >> level: anInteger [ 
 	right := Array new: anInteger withAll: 0
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> numberOfItems [
-	^ items size 
 ]
 
 { #category : #copying }
@@ -314,11 +220,6 @@ SoilSkipListPage >> rightSize [
 ]
 
 { #category : #accessing }
-SoilSkipListPage >> setItems: aCollection [ 
-	items := aCollection
-]
-
-{ #category : #accessing }
 SoilSkipListPage >> setRight: aCollection [ 
 	right := aCollection 
 ]
@@ -326,11 +227,6 @@ SoilSkipListPage >> setRight: aCollection [
 { #category : #private }
 SoilSkipListPage >> sizeInBytes [
 	^ self headerSize + (items size * (self keySize + self valueSize))
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipListPage >> smallestKey [
-	^ items first key
 ]
 
 { #category : #'as yet unclassified' }
@@ -343,20 +239,6 @@ SoilSkipListPage >> split: newPage [
 	items removeLast: items size - middle.
 	^ newPage
 	
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> valueAt: anInteger [ 
-	^ self 
-		valueAt: anInteger 
-		ifAbsent: [ nil ]
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> valueAt: key ifAbsent: aBlock [ 
-	^ (self 
-		associationAt: key
-		ifAbsent: [ ^ aBlock value ]) value
 ]
 
 { #category : #accessing }
