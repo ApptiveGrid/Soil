@@ -176,7 +176,7 @@ SoilNewClusterVersion >> serializeOn: stream [
 	references do: [ :ref |
 		"do not write zero index, try to allocate a new index before"
 		(ref index = 0) ifTrue: [ 
-			transaction allocateObjectId: ref ].
+			SoilObjectIdNotInitialized signal: 'index should not be zero' ].
 		ref writeOn: stream ].
 	"indexes"
 	serializer nextPutLengthEncodedInteger: indexIds size.
