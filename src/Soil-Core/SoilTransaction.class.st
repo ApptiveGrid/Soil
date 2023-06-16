@@ -52,11 +52,6 @@ SoilTransaction >> addClusterObject: anObject [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilTransaction >> allocateObjectId: aSOObjectId [ 
-	aSOObjectId initializeIndex: self objectRepository 
-]
-
 { #category : #accessing }
 SoilTransaction >> atObjectId: objectId putObject: anObject [
 	| record |

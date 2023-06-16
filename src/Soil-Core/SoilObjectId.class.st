@@ -100,12 +100,6 @@ SoilObjectId >> initialize [
 	segment := 1
 ]
 
-{ #category : #initialization }
-SoilObjectId >> initializeIndex: objectRepository [ 
-	(index = 0) ifFalse: [ ^ self ].
-	index := (objectRepository segmentAt: segment) allocateNextIndex 
-]
-
 { #category : #testing }
 SoilObjectId >> isInitialized [
 	^ index > 0
