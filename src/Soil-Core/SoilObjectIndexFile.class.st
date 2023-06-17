@@ -2,7 +2,6 @@ Class {
 	#name : #SoilObjectIndexFile,
 	#superclass : #SoilSegmentFile,
 	#instVars : [
-		'lastObjectIndex',
 		'semaphore'
 	],
 	#category : #'Soil-Core-Files'
