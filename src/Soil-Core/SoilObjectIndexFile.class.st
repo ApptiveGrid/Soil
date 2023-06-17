@@ -53,9 +53,9 @@ SoilObjectIndexFile >> initializeStart [
 
 { #category : #accessing }
 SoilObjectIndexFile >> lastObjectIndex [
-	^ lastObjectIndex ifNil: [ 
-		stream position: self headerSize.
-		lastObjectIndex := (stream next: self objectIndexSize) asInteger ]
+	
+	stream position: self headerSize.
+	^ (stream next: self objectIndexSize) asInteger
 ]
 
 { #category : #accessing }
@@ -64,8 +64,7 @@ SoilObjectIndexFile >> lastObjectIndex: anInteger [
 		stream 
 			position: self headerSize;
 			nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
-			flush.
-		lastObjectIndex := anInteger ]
+			flush ]
 ]
 
 { #category : #lockgin }
