@@ -2,7 +2,8 @@ Class {
 	#name : #SoilNewTransactionEntry,
 	#superclass : #SoilJournalEntry,
 	#instVars : [
-		'createdAt'
+		'createdAt',
+		'readVersion'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -27,6 +28,11 @@ SoilNewTransactionEntry >> container [
 ]
 
 { #category : #accessing }
+SoilNewTransactionEntry >> createdAt [
+	^ createdAt
+]
+
+{ #category : #accessing }
 SoilNewTransactionEntry >> createdAt: aDateAndTime [ 
 	createdAt := aDateAndTime 
 ]
@@ -40,6 +46,18 @@ SoilNewTransactionEntry >> objectId [
 SoilNewTransactionEntry >> readFrom: aStream [ 
 	super readFrom: aStream.
 	createdAt := (DateAndTime epoch + ((aStream nextLengthEncodedInteger) / 1000) milliSeconds) asLocal
+]
+
+{ #category : #accessing }
+SoilNewTransactionEntry >> readVersion [
+
+	^ readVersion
+]
+
+{ #category : #accessing }
+SoilNewTransactionEntry >> readVersion: anObject [
+
+	readVersion := anObject
 ]
 
 { #category : #accessing }

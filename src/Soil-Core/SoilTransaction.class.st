@@ -52,11 +52,6 @@ SoilTransaction >> addClusterObject: anObject [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilTransaction >> allocateObjectId: aSOObjectId [ 
-	aSOObjectId initializeIndex: self objectRepository 
-]
-
 { #category : #accessing }
 SoilTransaction >> atObjectId: objectId putObject: anObject [
 	| record |
@@ -144,7 +139,8 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 { #category : #accessing }
 SoilTransaction >> buildJournal [
 	journal := soil newTransactionJournalFor: writeVersion.
-	journal addEntry: (SoilNewTransactionEntry new 
+	journal addEntry: (SoilNewTransactionEntry new
+		readVersion: readVersion; 
 		transactionId: writeVersion;
 		createdAt: createdAt).
 	"create entries for all new objects and new object versions"

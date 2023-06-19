@@ -128,12 +128,8 @@ Soil >> initializeFilesystem [
 { #category : #'as yet unclassified' }
 Soil >> inspectionJournal [
 	<inspectorPresentationOrder: 2000 title: 'journal'>
-	<ignoreNotImplementedSelectors: #(inspectionContent)>
-	self flag: #TODO.
 
-	^ SoilJournalEntries new 
-		entries: (self journal transactionJournals flatCollect: [:each | each entries reverse ]);
-		inspectionEntries
+	^ self journal inspectionContent
 ]
 
 { #category : #'as yet unclassified' }

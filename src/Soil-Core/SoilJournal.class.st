@@ -36,10 +36,28 @@ SoilJournal >> importEntry: aSoilTransactionJournal [
 
 { #category : #'as yet unclassified' }
 SoilJournal >> inspectionContent [
-	<inspectorPresentationOrder: 0 title: 'journal entries'>
+	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 
-	^ SpComponentListPresenter new
-		items: (self transactionJournals collect: #inspectionEntries)
+	^ SpTablePresenter new
+		items: (self allTransactionJournals);
+		addColumn: (SpStringTableColumn new 
+			title: 'id';
+			evaluated: #id;
+			width: 50);
+		addColumn: (SpStringTableColumn new 
+			title: #read;
+			evaluated: #readVersion;
+			width: 50);
+		addColumn: (SpStringTableColumn new 
+			title: #duration;
+			evaluated: #duration;
+			width: 50);
+		addColumn: (SpStringTableColumn new 
+			title: #created;
+			evaluated: #createdAt);
+		addColumn: (SpStringTableColumn new
+			title: #checkpoint;
+			evaluated: #checkpointedAt)
 ]
 
 { #category : #accessing }
