@@ -128,6 +128,8 @@ Soil >> initializeFilesystem [
 { #category : #'as yet unclassified' }
 Soil >> inspectionJournal [
 	<inspectorPresentationOrder: 2000 title: 'journal'>
+	<ignoreNotImplementedSelectors: #(inspectionContent)>
+
 
 	^ self journal inspectionContent
 ]
