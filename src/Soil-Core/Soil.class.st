@@ -132,7 +132,7 @@ Soil >> inspectionJournal [
 	self flag: #TODO.
 
 	^ SoilJournalEntries new 
-		entries: (self journal allTransactionJournals flatCollect: [:each | each entries reverse ]);
+		entries: (self journal transactionJournals flatCollect: [:each | each entries reverse ]);
 		inspectionEntries
 ]
 
@@ -266,7 +266,7 @@ Soil >> renameClassNamed: oldName to: newName [
 Soil >> replayJournal: aSoilJournal [ 
 	| tx |
 	tx := self newTransaction.
-	aSoilJournal allTransactionJournals reverse do: [ :j |
+	aSoilJournal transactionJournals reverse do: [ :j |
 		j commitIn: tx.
 		self journal importEntry: j ].
 	tx commit.
