@@ -44,6 +44,11 @@ SoilUpdateDatabaseVersion >> oldValue [
 ]
 
 { #category : #accessing }
+SoilUpdateDatabaseVersion >> previousVersion [ 
+	^ previousVersion 
+]
+
+{ #category : #accessing }
 SoilUpdateDatabaseVersion >> previousVersion: anInteger [ 
 	previousVersion := anInteger
 ]

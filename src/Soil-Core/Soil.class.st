@@ -128,6 +128,8 @@ Soil >> initializeFilesystem [
 { #category : #'as yet unclassified' }
 Soil >> inspectionJournal [
 	<inspectorPresentationOrder: 2000 title: 'journal'>
+	<ignoreNotImplementedSelectors: #(inspectionContent)>
+
 
 	^ self journal inspectionContent
 ]
@@ -262,7 +264,7 @@ Soil >> renameClassNamed: oldName to: newName [
 Soil >> replayJournal: aSoilJournal [ 
 	| tx |
 	tx := self newTransaction.
-	aSoilJournal allTransactionJournals reverse do: [ :j |
+	aSoilJournal transactionJournals reverse do: [ :j |
 		j commitIn: tx.
 		self journal importEntry: j ].
 	tx commit.

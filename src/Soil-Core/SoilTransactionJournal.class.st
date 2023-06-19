@@ -13,6 +13,11 @@ SoilTransactionJournal class >> soilTransientInstVars [
 	^ #( transaction )
 ]
 
+{ #category : #visiting }
+SoilTransactionJournal >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitTransactionJournal: self
+]
+
 { #category : #adding }
 SoilTransactionJournal >> addEntries: aCollection [ 
 	aCollection do: [ :each | self addEntry: each ]

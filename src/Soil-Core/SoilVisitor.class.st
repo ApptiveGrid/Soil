@@ -21,10 +21,15 @@ SoilVisitor >> visitIndexManager: aSoilIndexManager [
 	^ aSoilIndexManager 
 ]
 
+{ #category : #visiting }
+SoilVisitor >> visitJournal: aSoilJournal [ 
+	self visitAll: aSoilJournal transactionJournals.
+	^ aSoilJournal 
+]
+
 { #category : #'as yet unclassified' }
 SoilVisitor >> visitMetaSegment: aSoilMetaSegment [ 
 	self visit: aSoilMetaSegment indexManager.
-	self copyIndexAt: #identifier segment: 0. 
 	^ aSoilMetaSegment 
 ]
 
@@ -53,7 +58,13 @@ SoilVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [
 
 { #category : #visiting }
 SoilVisitor >> visitSoil: aSoil [ 
-	self visit: aSoil objectRepository.
 	self visit: aSoil settings.
+	self visit: aSoil objectRepository.
+	self visit: aSoil journal.
 	^ aSoil
+]
+
+{ #category : #visiting }
+SoilVisitor >> visitTransactionJournal: aSoilTransactionJournal [ 
+	^ aSoilTransactionJournal 
 ]

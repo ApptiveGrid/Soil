@@ -8,14 +8,9 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
-{ #category : #'as yet unclassified' }
-SoilJournal >> allTransactionJournals [
-	| files |
-	path exists ifFalse: [ ^ #() ].
-	files := path childrenMatching: '*.journal'.
-	^ (files sorted: [:a :b | a withoutExtension basename asNumber > b withoutExtension basename asNumber]) collect: [ :each | 
-		(SoilTransactionJournal new on: each)
-			readAll ]
+{ #category : #visting }
+SoilJournal >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitJournal: self
 ]
 
 { #category : #accessing }
@@ -26,7 +21,7 @@ SoilJournal >> at: anInteger [
 
 { #category : #enumerating }
 SoilJournal >> do: aBlock [ 
-	self allTransactionJournals do: aBlock
+	self transactionJournals do: aBlock
 	
 ]
 
@@ -73,4 +68,14 @@ SoilJournal >> path: aFileReference [
 { #category : #accessing }
 SoilJournal >> soil: aSoil [ 
 	soil := aSoil
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> transactionJournals [
+	| files |
+	path exists ifFalse: [ ^ #() ].
+	files := path childrenMatching: '*.journal'.
+	^ (files sorted: [:a :b | a withoutExtension basename asNumber > b withoutExtension basename asNumber]) collect: [ :each | 
+		(SoilTransactionJournal new on: each)
+			readAll ]
 ]
