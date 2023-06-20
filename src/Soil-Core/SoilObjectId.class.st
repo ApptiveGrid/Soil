@@ -81,6 +81,9 @@ SoilObjectId >> hasSameSegment: aSegment andIndex: anIndex [
 
 { #category : #comparing }
 SoilObjectId >> hash [ 
+	"if an index is 0 we fall back to identityHash in order to
+	make two uninitialized objectIds distinct"
+	(index = 0) ifTrue: [ ^ self identityHash ].
 	^ segment hash bitXor: index hash
 ]
 
