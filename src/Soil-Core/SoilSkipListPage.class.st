@@ -52,12 +52,14 @@ SoilSkipListPage >> associationAt: key ifAbsent: aBlock [
 SoilSkipListPage >> biggestKey [
 	^ self isLastPage 
 		ifTrue: [ (2 raisedTo: (keySize * 8)) - 1 ]
-		ifFalse: [ items last key ]
+		ifFalse: [ self lastKey ]
 ]
 
 { #category : #accessing }
 SoilSkipListPage >> firstItem [
-	^ items first
+	^ items 
+		ifNotEmpty: [ items first ]
+		ifEmpty: [ nil ]
 ]
 
 { #category : #testing }
@@ -142,7 +144,7 @@ SoilSkipListPage >> itemAt: anInteger ifAbsent: aBlock [
 { #category : #accessing }
 SoilSkipListPage >> itemAt: key put: anObject [ 
 	| removedItem |
-	removedItem := self itemRemoveAt: key ifAbsent: [ "ignore" ].
+	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
 	items add: (key -> anObject).
 	dirty := true.
 	^ removedItem
@@ -212,14 +214,8 @@ SoilSkipListPage >> keySize: anInteger [
 
 { #category : #accessing }
 SoilSkipListPage >> lastItem [
-	| item maxKey |
 	items ifEmpty: [ ^ nil ].
-	maxKey := (2 raisedTo: (keySize * 8)) - 1. 
-	item := items last.
-	^ (item key = maxKey)
-		ifTrue: [ items at: items size - 1 ]
-		ifFalse: [ item ] 
-	
+	^ items last
 ]
 
 { #category : #accessing }
@@ -336,8 +332,6 @@ SoilSkipListPage >> smallestKey [
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> split: newPage [
 	| middle |
-	newPage 
-		index: index.
 	middle := (items size / 2) ceiling.
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.

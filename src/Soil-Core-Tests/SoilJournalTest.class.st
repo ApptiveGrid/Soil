@@ -46,7 +46,8 @@ SoilJournalTest >> testNewRootSkipList [
 	tx root: (SoilSkipListDictionary new
 		maxLevel: 8;
 		keySize: 16;
-		at: #foo put: #bar).
+		at: #foo put: #bar;
+		yourself).
 	tx checkpoint.
 	journal := tx journal.
 	self assert: journal size equals: 11.

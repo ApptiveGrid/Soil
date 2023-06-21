@@ -37,22 +37,17 @@ SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilSkipListDictionary >> at: key put: anObject [
-	| objectId iterator binKey |
-	transaction ifNotNil: [
-		objectId := transaction makeRoot: anObject.
-		transaction markDirty: self.
-		iterator := self index newIterator.
-		binKey := (key asSkipListKeyOfSize: index keySize) asInteger.
-		iterator findPageFor: binKey startingAt: index headerPage.
-		(iterator currentPage itemAt: binKey ifAbsent: [ nil ])
-			ifNotNil: [ :value | oldValues at: binKey ifAbsentPut: objectId ].	
-		iterator currentPage itemAt: binKey put: objectId.
-		"if there has been a prior removal of the key this new
-		addition invalidates it"
-		removedValues removeKey: key ifAbsent: [  ]. 
-		^ newValues at: key put: objectId ].
-	newValues at: key put: anObject.
-
+	| objectId binKey |
+	^ transaction 
+		ifNotNil: [
+			objectId := transaction makeRoot: anObject.
+			binKey := (key asSkipListKeyOfSize: index keySize) asInteger.
+			(self basicAt: binKey put: objectId)
+				ifNotNil: [ :value | oldValues at: binKey ifAbsentPut: objectId ].	
+			removedValues removeKey: key ifAbsent: [  ].
+			newValues at: key put: objectId. ]
+		ifNil: [ 
+			newValues at: key put: anObject ]
 ]
 
 { #category : #accessing }
@@ -100,6 +95,25 @@ SoilSkipListDictionary >> basicAt: aString ifAbsent: aBlock [
 					ifEmpty: [ value ].
 			 ]
 	
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipListDictionary >> basicAt: key put: objectId [
+	| iterator |
+	transaction ifNotNil: [
+		transaction markDirty: self.
+		iterator := self index newIterator.
+		(iterator basicAt: key put: objectId)
+			ifNotNil: [ :value |
+				oldValues 
+					at: key
+					ifAbsentPut: objectId ].
+		"if there has been a prior removal of the key this new
+		addition invalidates it"
+		removedValues removeKey: key ifAbsent: [  ]. 
+		^ newValues at: key put: objectId  ].
+	newValues at: key put: objectId.
+
 ]
 
 { #category : #enumerating }
