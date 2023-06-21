@@ -207,9 +207,7 @@ SoilTransaction >> checkpoint [
 			write;
 			commitIn: self;
 			checkpoint: self; 
-			close.
-		indexes values do: #flush.
-		soil behaviorRegistry flush ]
+			close ]
 				ensure: [self releaseLocks ] ]
 
 ]
@@ -270,7 +268,7 @@ SoilTransaction >> initialize [
 	objectMap := IdentityDictionary new.
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
-	indexes := IdentityDictionary new
+	indexes := Dictionary new
 ]
 
 { #category : #'as yet unclassified' }

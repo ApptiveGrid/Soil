@@ -39,7 +39,7 @@ SoilJournal >> inspectionContent [
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 
 	^ SpTablePresenter new
-		items: (self allTransactionJournals);
+		items: (self transactionJournals);
 		addColumn: (SpStringTableColumn new 
 			title: 'id';
 			evaluated: #id;

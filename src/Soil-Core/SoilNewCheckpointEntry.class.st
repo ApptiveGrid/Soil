@@ -23,7 +23,14 @@ SoilNewCheckpointEntry >> checkpointedAt [
 ]
 
 { #category : #committing }
-SoilNewCheckpointEntry >> commitIn: aTransaction [ 
+SoilNewCheckpointEntry >> commitIn: aTransaction [
+	"make sure behavior registry gets flushed at the end of 
+	a transaction"
+	aTransaction behaviorRegistry flush.
+	"as indexes are just created and keys/values being added,
+	we need to flush sometime and the checkpoint time is good
+	for this"
+	aTransaction indexes do: #flush.
 ]
 
 { #category : #accessing }

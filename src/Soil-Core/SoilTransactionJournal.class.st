@@ -40,7 +40,8 @@ SoilTransactionJournal >> checkpoint: aTransaction [
 		transactionId: aTransaction writeVersion.
 	self addEntry: entry.
 	entry writeOn: stream.
-	stream flush
+	stream flush.
+	entry commitIn: aTransaction.
 ]
 
 { #category : #'as yet unclassified' }
