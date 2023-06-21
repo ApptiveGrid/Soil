@@ -156,5 +156,5 @@ SoilPersistentClusterVersion >> serializeOn: stream [
 
 { #category : #asserting }
 SoilPersistentClusterVersion >> shouldBeCommitted [ 
-	^ changed & committed not
+	^ changed and: [ committed not ]
 ]

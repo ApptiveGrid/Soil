@@ -30,7 +30,7 @@ SoilRangeLock class >> from: from to: to context: lockContext [
 { #category : #'as yet unclassified' }
 SoilRangeLock >> conflictsFrom: aFrom to: aTo context: contextObject [ 
 	"conflicts if ranges overlap but only for different contexts"
-	^ (self intersectsFrom: aFrom to: aTo) &  (context ~~ contextObject)
+	^ (self intersectsFrom: aFrom to: aTo) and: [ context ~~ contextObject ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -72,8 +72,9 @@ SoilRangeLock >> intersectsFrom: otherFrom to: otherTo [
 ]
 
 { #category : #testing }
-SoilRangeLock >> isFrom: aFrom to: aTo for: contextObject [ 
-	^ (from = aFrom)& (to = aTo) & (context = contextObject)
+SoilRangeLock >> isFrom: aFrom to: aTo for: contextObject [
+
+	^ from = aFrom and: [ to = aTo and: [ context = contextObject ] ]
 ]
 
 { #category : #'as yet unclassified' }

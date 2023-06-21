@@ -103,7 +103,7 @@ SoilSkipListPage >> initializeLevel: anInteger [
 	| promote level |
 	level := 1. 
 	promote := true.
-	[ (level < anInteger) & (promote = true) ] whileTrue: [ 
+	[ (level < anInteger) and: [ promote ] ] whileTrue: [ 
 		level := level + 1.
 		promote := self class random next > 0.5 ].
 	right := Array new: level withAll: 0. 
