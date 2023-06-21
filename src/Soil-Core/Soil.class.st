@@ -263,7 +263,7 @@ Soil >> renameClassNamed: oldName to: newName [
 { #category : #'as yet unclassified' }
 Soil >> replayJournal: aSoilJournal [ 
 	| tx |
-	tx := self newTransaction.
+	tx := self newTransaction setWriteVersion: 1.
 	aSoilJournal transactionJournals reverse do: [ :j |
 		j commitIn: tx.
 		self journal importEntry: j ].
