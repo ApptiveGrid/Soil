@@ -23,10 +23,10 @@ SoilBasicSkipList >> at: anObject ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilBasicSkipList >> at: aKeyObject put: anObject [
+	self newIterator 
+		at: aKeyObject 
+		put: anObject.
 
-	self 
-		basicAt: (aKeyObject asSkipListKeyOfSize: self keySize) asInteger
-		put: anObject
 ]
 
 { #category : #accessing }
@@ -41,25 +41,9 @@ SoilBasicSkipList >> atIndex: anInteger [
 
 { #category : #accessing }
 SoilBasicSkipList >> basicAt: key put: anObject [
-	| iterator page index newPage |
-	iterator := self newIterator.
-	iterator find: key.
-	page := iterator currentPage.
-	index := page indexOfKey: key.
-	"as an optimization we return the prior value stored in the list. If
-	there was none we return nil"
-	^ (index > 0)
-		ifTrue: [ page itemAt: key put: anObject ] 
-		ifFalse: [ 
-			page hasRoom 
-				ifTrue: [ iterator currentPage addItem: (key -> anObject) ]
-				ifFalse: [ 
-					newPage := self splitPage: iterator forKey: key.
-					((page biggestKey < key)
-						ifTrue: [ newPage ]
-						ifFalse: [ page ])
-							addItem: (key -> anObject).
-							nil ] ]
+	^ self newIterator 
+		basicAt: key 
+		put: anObject 
 ]
 
 { #category : #enumerating }
