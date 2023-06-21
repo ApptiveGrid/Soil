@@ -125,16 +125,14 @@ Soil >> initializeFilesystem [
 			yourself.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tools }
 Soil >> inspectionJournal [
 	<inspectorPresentationOrder: 2000 title: 'journal'>
-	<ignoreNotImplementedSelectors: #(inspectionContent)>
-
 
 	^ self journal inspectionContent
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tools }
 Soil >> inspectionParameters [
 	<inspectorPresentationOrder: 2100 title: 'parameters'>
 
