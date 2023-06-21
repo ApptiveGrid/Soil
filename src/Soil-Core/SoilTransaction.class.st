@@ -571,6 +571,13 @@ SoilTransaction >> serializeObjects [
 		index := index + 1 ]
 ]
 
+{ #category : #initialization }
+SoilTransaction >> setWriteVersion: anInteger [ 
+	"This is only used for replaying a journal and such 
+	where a transaction does not get set up properly"
+	writeVersion := anInteger 
+]
+
 { #category : #accessing }
 SoilTransaction >> soil [
 	^ soil
