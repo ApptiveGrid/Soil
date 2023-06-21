@@ -76,7 +76,7 @@ SoilObjectId >> asSoilObjectProxy [
 
 { #category : #testing }
 SoilObjectId >> hasSameSegment: aSegment andIndex: anIndex [ 
-	^ (segment = aSegment) & (index = anIndex) 
+	^ (segment = aSegment) and: [ index = anIndex ]
 ]
 
 { #category : #comparing }
@@ -115,7 +115,7 @@ SoilObjectId >> isObjectId [
 
 { #category : #testing }
 SoilObjectId >> isRemoved [ 
-	^ (segment = 0) & (index = 0)
+	^ (segment = 0) and: [index = 0]
 ]
 
 { #category : #testing }

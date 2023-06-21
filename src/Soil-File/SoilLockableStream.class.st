@@ -150,7 +150,7 @@ SoilLockableStream >> unlockFrom: from to: to for: lockContext [
 	| lock |
 	lock := locks 
 		detect: [ :each | 
-			(each from = from) & (each to = to) & (each context = lockContext) ]
+			(each from = from) and: [ (each to = to) and: [ each context = lockContext ] ] ]
 		ifNone: [ NotFound signal: 'cannot find lock' ].
 	lock release.
 	locks remove: lock
