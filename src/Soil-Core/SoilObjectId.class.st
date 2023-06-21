@@ -81,6 +81,9 @@ SoilObjectId >> hasSameSegment: aSegment andIndex: anIndex [
 
 { #category : #comparing }
 SoilObjectId >> hash [ 
+	"if an index is 0 we fall back to identityHash in order to
+	make two uninitialized objectIds distinct"
+	(index = 0) ifTrue: [ ^ self identityHash ].
 	^ segment hash bitXor: index hash
 ]
 
@@ -98,12 +101,6 @@ SoilObjectId >> index: anInteger [
 SoilObjectId >> initialize [ 
 	super initialize.
 	segment := 1
-]
-
-{ #category : #initialization }
-SoilObjectId >> initializeIndex: objectRepository [ 
-	(index = 0) ifFalse: [ ^ self ].
-	index := (objectRepository segmentAt: segment) allocateNextIndex 
 ]
 
 { #category : #testing }

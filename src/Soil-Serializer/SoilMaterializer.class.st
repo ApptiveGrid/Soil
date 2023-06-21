@@ -81,7 +81,7 @@ SoilMaterializer >> nextBehaviorDescription [
 	(behaviorIndex = 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
 	objectId := externalObjectRegistry 
 				behaviorDescriptionWithIndex: behaviorIndex.
-	^ transaction behaviorDescriptionWithIndex: objectId asSoilObjectId andVersion: objectId version
+	^ transaction behaviorDescriptionWithObjectId: objectId asSoilObjectId andVersion: objectId version
 ]
 
 { #category : #reading }
@@ -189,19 +189,6 @@ SoilMaterializer >> nextMessage: aClass [
 	^ message
 		setSelector: self nextSoilObject arguments: self nextSoilObject;
 		yourself
-]
-
-{ #category : #reading }
-SoilMaterializer >> nextMessageSend: aClass [
-
-	| messageSend |
-	messageSend := aClass new.
-	self registerObject: messageSend.
-	^ messageSend
-		  receiver: self nextSoilObject;
-		  selector: self nextSoilObject;
-		  arguments: self nextSoilObject;
-		  yourself
 ]
 
 { #category : #reading }

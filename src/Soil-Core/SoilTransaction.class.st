@@ -52,11 +52,6 @@ SoilTransaction >> addClusterObject: anObject [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilTransaction >> allocateObjectId: aSOObjectId [ 
-	aSOObjectId initializeIndex: self objectRepository 
-]
-
 { #category : #accessing }
 SoilTransaction >> atObjectId: objectId putObject: anObject [
 	| record |
@@ -118,14 +113,14 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 ]
 
 { #category : #'as yet unclassified' }
-SoilTransaction >> behaviorDescriptionWithIndex: index andVersion: version [ 
+SoilTransaction >> behaviorDescriptionWithObjectId: objectId andVersion: version [ 
 	idMap 
-		detect: [ :each | each objectId = index ]
-		ifFound: [ :record | 
+		at: objectId
+		ifPresent: [ :record | 
 			(record object version = version)
 				ifTrue: [ ^ record object ] ].
 
-	^ self behaviorRegistry behaviorDescriptionWithIndex: index index andVersion: version transaction: self
+	^ self behaviorRegistry behaviorDescriptionWithIndex: objectId index andVersion: version transaction: self
 ]
 
 { #category : #accessing }
@@ -144,7 +139,8 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 { #category : #accessing }
 SoilTransaction >> buildJournal [
 	journal := soil newTransactionJournalFor: writeVersion.
-	journal addEntry: (SoilNewTransactionEntry new 
+	journal addEntry: (SoilNewTransactionEntry new
+		readVersion: readVersion; 
 		transactionId: writeVersion;
 		createdAt: createdAt).
 	"create entries for all new objects and new object versions"
@@ -270,7 +266,7 @@ SoilTransaction >> indexes [
 { #category : #initialization }
 SoilTransaction >> initialize [ 
 	super initialize.
-	idMap := IdentityDictionary new.
+	idMap := Dictionary new.
 	objectMap := IdentityDictionary new.
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
@@ -435,9 +431,9 @@ SoilTransaction >> newSerializer [
 { #category : #accessing }
 SoilTransaction >> objectAt: anObjectId ifAbsent: aBlock [
 	idMap 
-		detect: [ :each | each objectId = anObjectId ]
-		ifFound: [ :record | ^ record object ]
-		ifNone: [ aBlock value ]
+		at: anObjectId 
+		ifPresent: [ :record | ^ record object ]
+		ifAbsent: [ aBlock value ]
 ]
 
 { #category : #testing }
@@ -469,8 +465,8 @@ SoilTransaction >> objectWithId: objectId [
 		SoilTransactionAlreadyAborted signal: 'this transaction has already been aborted' ].
 
 	idMap 
-		detect: [ :each | each objectId = objectId ]
-		ifFound: [ :record | ^ record object ].
+		at: objectId
+		ifPresent: [ :record | ^ record object ].
 
 	^ (self recordWithId: objectId)
 		ifNotNil: [ :record |

@@ -62,6 +62,13 @@ SoilBackupVisitor >> target: aSoil [
 	target := aSoil
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBackupVisitor >> visitMetaSegment: aSoilMetaSegment [ 
+	self visit: aSoilMetaSegment indexManager.
+	self copyIndexAt: #identifier segment: 0. 
+	^ aSoilMetaSegment  
+]
+
 { #category : #visiting }
 SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [ 
 	self process: SoilObjectId root.

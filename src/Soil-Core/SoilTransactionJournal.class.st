@@ -13,6 +13,11 @@ SoilTransactionJournal class >> soilTransientInstVars [
 	^ #( transaction )
 ]
 
+{ #category : #visiting }
+SoilTransactionJournal >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitTransactionJournal: self
+]
+
 { #category : #adding }
 SoilTransactionJournal >> addEntries: aCollection [ 
 	aCollection do: [ :each | self addEntry: each ]
@@ -36,6 +41,11 @@ SoilTransactionJournal >> checkpoint: aTransaction [
 	self addEntry: entry.
 	entry writeOn: stream.
 	stream flush
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransactionJournal >> checkpointedAt [
+	^ entries last checkpointedAt 
 ]
 
 { #category : #'initialize-release' }
@@ -62,6 +72,16 @@ SoilTransactionJournal >> createOn: aFileReference [
 		deleteIfAbsent: []; 
 		ensureCreateFile;
 		binaryWriteStream 
+]
+
+{ #category : #accessing }
+SoilTransactionJournal >> createdAt [
+	^ entries first createdAt
+]
+
+{ #category : #accessing }
+SoilTransactionJournal >> duration [
+	^ (self checkpointedAt - self createdAt) asMilliSeconds  
 ]
 
 { #category : #accessing }
@@ -132,6 +152,11 @@ SoilTransactionJournal >> readAll [
 ]
 
 { #category : #accessing }
+SoilTransactionJournal >> readVersion [
+	^ entries first readVersion
+]
+
+{ #category : #accessing }
 SoilTransactionJournal >> size [ 
 	^ entries size
 ]
@@ -141,4 +166,9 @@ SoilTransactionJournal >> write [
 	entries do: [ :each | each writeOn: stream ].
 	stream 
 		flush
+]
+
+{ #category : #writing }
+SoilTransactionJournal >> writeVersion [
+	^ entries first transactionId
 ]

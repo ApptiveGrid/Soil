@@ -79,7 +79,7 @@ SoilParameterFile >> databaseVersionSize [
 { #category : #initialization }
 SoilParameterFile >> initializeStart [
 	self databaseFormatVersion: 1.
-	self databaseVersion: 1.
+	self databaseVersion: 0.
 	self applicationVersion: 1
 ]
 
