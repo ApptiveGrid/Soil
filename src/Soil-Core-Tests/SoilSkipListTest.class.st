@@ -308,3 +308,24 @@ SoilSkipListTest >> testSize [
 	self assert: skipList pages size equals: 2.
 	self assert: skipList size equals: capacity + 1.
 ]
+
+{ #category : #tests }
+SoilSkipListTest >> testSplitLastPage [	
+	| headerCapacity itemCapacity |
+	"fill the header page"
+	headerCapacity := skipList headerPage itemCapacity.
+	1 to: headerCapacity do: [ :n |
+		skipList at: n put: n ].
+	self assert: skipList pages size equals:  1.
+	"trigger page split and check it happened"
+	skipList at: headerCapacity + 1 put: 0.
+	self assert: skipList pages size equals:  2.
+	"fill second page til the end"
+	itemCapacity := (skipList pageAt: 2) itemCapacity.
+	headerCapacity + 2 to: headerCapacity + itemCapacity do: [ :n |
+		skipList at: n put: n ].
+	self assert: skipList pages size equals:  2.
+	"another page split which should be appending"
+	skipList at: 3000 put: 3000.
+	
+]
