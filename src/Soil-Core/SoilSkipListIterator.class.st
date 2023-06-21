@@ -20,8 +20,21 @@ SoilSkipListIterator >> at: aKeyObject ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilSkipListIterator >> at: aKeyObject put: anObject [
-	| key  newPage itemIndex |
+	| key |
 	key := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
+	^ self 
+		basicAt: key 
+		put: anObject
+]
+
+{ #category : #accessing }
+SoilSkipListIterator >> atLevel: key put: anObject [
+	levels at: key put: anObject 
+]
+
+{ #category : #accessing }
+SoilSkipListIterator >> basicAt: key put: anObject [
+	| newPage itemIndex |
 	self 
 		findPageFor: key 
 		startingAt: index headerPage.
@@ -40,11 +53,6 @@ SoilSkipListIterator >> at: aKeyObject put: anObject [
 						ifFalse: [ currentPage ])
 							addItem: (key -> anObject).
 							nil ] ]
-]
-
-{ #category : #accessing }
-SoilSkipListIterator >> atLevel: key put: anObject [
-	levels at: key put: anObject 
 ]
 
 { #category : #private }
