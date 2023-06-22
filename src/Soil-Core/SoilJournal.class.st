@@ -2,8 +2,8 @@ Class {
 	#name : #SoilJournal,
 	#superclass : #Object,
 	#instVars : [
-		'path',
-		'soil'
+		'soil',
+		'transactionJournals'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -15,8 +15,29 @@ SoilJournal >> acceptSoil: aSoilVisitor [
 
 { #category : #accessing }
 SoilJournal >> at: anInteger [ 
-	^ SoilTransactionJournal new 
-		on: path / anInteger asString , #journal
+	^ transactionJournals 
+		at: anInteger 
+		ifAbsentPut: [ self loadTransactionJournalWithId: anInteger ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> buildTransactionJournals [
+	| files journals |
+	self path exists ifFalse: [ ^ #() ].
+	files := self path childrenMatching: '*.journal'.
+	journals := Dictionary new.
+	(files sorted: [:a :b | a withoutExtension basename asNumber < b withoutExtension basename asNumber]) do: [ :each | | j |
+		j := (SoilTransactionJournal new on: each)
+			index: each withoutExtension basename asNumber;
+			readAll.
+		journals at: j id put: j ].
+	^ journals
+]
+
+{ #category : #copying }
+SoilJournal >> copyFrom: start to: end [ 
+	^ self class new 
+		transactionJournals: (self transactionJournals copyFrom: start to: end)
 ]
 
 { #category : #enumerating }
@@ -28,10 +49,16 @@ SoilJournal >> do: aBlock [
 { #category : #'as yet unclassified' }
 SoilJournal >> importEntry: aSoilTransactionJournal [ 
 	| id local |
-	id := aSoilTransactionJournal id.
-	local := soil newTransactionJournalFor: id.
+	id := aSoilTransactionJournal index.
+	local := soil journal newTransactionJournalFor: id.
 	local addEntries: aSoilTransactionJournal entries.
 	local write
+]
+
+{ #category : #initialization }
+SoilJournal >> initialize [ 
+	super initialize.
+	transactionJournals := Dictionary new
 ]
 
 { #category : #'as yet unclassified' }
@@ -61,8 +88,33 @@ SoilJournal >> inspectionContent [
 ]
 
 { #category : #accessing }
-SoilJournal >> path: aFileReference [ 
-	path := aFileReference 
+SoilJournal >> lastIndex [
+	^ self transactionJournals last index
+]
+
+{ #category : #accessing }
+SoilJournal >> loadTransactionJournalWithId: anInteger [
+	^ SoilTransactionJournal new 
+		on: self path / anInteger asString , #journal;
+		index: anInteger;
+		readAll
+]
+
+{ #category : #'instance creation' }
+SoilJournal >> newTransactionJournalFor: anInteger [ 
+	| journal |
+	journal := SoilTransactionJournal new 
+		createOn: (self transactionJournalPathFor: anInteger);
+		index: anInteger .
+	transactionJournals 
+		at: anInteger
+		put: journal.
+	^ journal
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> path [
+	^ soil path / #journal
 ]
 
 { #category : #accessing }
@@ -71,11 +123,18 @@ SoilJournal >> soil: aSoil [
 ]
 
 { #category : #'as yet unclassified' }
+SoilJournal >> transactionJournalPathFor: anInteger [
+	^ self path / anInteger asString , #journal
+]
+
+{ #category : #'as yet unclassified' }
 SoilJournal >> transactionJournals [
-	| files |
-	path exists ifFalse: [ ^ #() ].
-	files := path childrenMatching: '*.journal'.
-	^ (files sorted: [:a :b | a withoutExtension basename asNumber > b withoutExtension basename asNumber]) collect: [ :each | 
-		(SoilTransactionJournal new on: each)
-			readAll ]
+	transactionJournals ifNil: [ 
+		transactionJournals := self buildTransactionJournals ].
+	^ transactionJournals sorted: [ :a :b | a index < b index ]
+]
+
+{ #category : #accessing }
+SoilJournal >> transactionJournals: aCollection [ 
+	transactionJournals := aCollection
 ]
