@@ -56,6 +56,34 @@ SoilBackupTest >> testBackupWithIndex [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testBackupWithIndexRemoval [
+	| tx backup tx2 dict object |
+	"removed keys in indexes get objectId 0:0. On backup time we only
+	need to copy the non-removed"
+	dict := SoilSkipListDictionary new 
+		keySize: 8;
+		maxLevel: 16.
+	dict at: #foo put: (SoilTestNestedObject new label: #indexed).
+	dict at: #bar put: (SoilTestNestedObject new label: #bar).
+	object := SoilTestClusterRoot new 
+		nested: dict.
+	tx := soil newTransaction.
+	tx root: dict.
+	tx commit.
+	tx2 := soil newTransaction.
+	tx2 root removeKey: #bar.
+	tx2 commit.
+	soil backupTo: self backupPath.
+	backup := Soil new 
+		path: self backupPath;
+		open.
+	[tx2 := backup newTransaction.
+	self assert: (tx2 root at: #foo) label equals: #indexed ]
+		ensure: [ backup close ].
+	
+]
+
+{ #category : #tests }
 SoilBackupTest >> testSimpleBackup [ 
 	| tx backup tx2 |
 	soil settings
