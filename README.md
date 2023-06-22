@@ -10,7 +10,7 @@ First, load it in Pharo 10 or 11 with Metacello:
 
 ```smalltalk
 Metacello new 
-	repository: 'github://ApptiveGrid/Soil:development/src';
+	repository: 'github://ApptiveGrid/Soil:main/src';
 	baseline: 'Soil';
 	load.
 ```
