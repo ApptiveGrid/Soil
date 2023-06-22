@@ -15,6 +15,7 @@ SoilBackupVisitor >> backup: aSoil [
 	| objectId |
 	source := aSoil.
 	self visit: source.
+	
 	[ toBeProcessed isEmpty ] whileFalse: [  
 		objectId := toBeProcessed  removeFirst.
 		self visit: (source objectRepository at: objectId) ].
@@ -26,17 +27,25 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	| sourceSegment sourceIndex targetSegment targetIndex iterator assoc |
 	
 	sourceSegment := source objectRepository segmentAt: segmentId.
-	sourceIndex := sourceSegment indexManager loadIndexWithId: indexId ifNone: [ self halt ].
+	sourceIndex := sourceSegment indexManager 
+		loadIndexWithId: indexId 
+		ifNone: [ Error signal: 'cannot find index with id ', indexId printString ].
 	
+	"create an index of same kind and configuration in the target database"
 	targetSegment := target objectRepository segmentAt: segmentId.
-	targetIndex := targetSegment indexManager createIndexWithId: indexId class: sourceIndex class.
+	targetIndex := targetSegment indexManager 
+		createIndexWithId: indexId 
+		class: sourceIndex class.
 	targetIndex initializeParametersFrom: sourceIndex. 
 	
+	"copy all values to the new index"
 	iterator := sourceIndex newIterator.
 	[ (assoc := iterator nextAssociation) isNil  ] whileFalse: [  
-		targetIndex 
-			basicAt: assoc key put: assoc value.
-		self process: assoc value ].
+		"only copy keys that have a value that is not removed"
+		assoc value isRemoved ifFalse: [ 
+			targetIndex basicAt: assoc key put: assoc value.
+			"recurse further into the values of the index"
+			self process: assoc value ] ].
 	targetIndex
 		flush; 
 		close.
@@ -51,6 +60,7 @@ SoilBackupVisitor >> initialize [
 
 { #category : #accessing }
 SoilBackupVisitor >> process: aSoilObjectId [ 
+	"don't continue if the objectId is the behavior description meta object"
 	((aSoilObjectId segment = 0) and: [ aSoilObjectId index = 2 ]) ifTrue: [ ^ self ].
 	(seen includes: aSoilObjectId) ifTrue: [ ^ self ].
 	seen add: aSoilObjectId.
@@ -72,7 +82,6 @@ SoilBackupVisitor >> visitMetaSegment: aSoilMetaSegment [
 { #category : #visiting }
 SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [ 
 	self process: SoilObjectId root.
-
 	super visitObjectSegment: aSoilObjectSegment.
 ]
 
