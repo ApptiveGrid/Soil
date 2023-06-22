@@ -45,7 +45,7 @@ SoilSkipListPage >> associationAt: anInteger [
 SoilSkipListPage >> associationAt: key ifAbsent: aBlock [
 	^ items 
 		detect: [:each | each key = key ] 
-		ifNone: [ aBlock value ]
+		ifNone: aBlock
 ]
 
 { #category : #'as yet unclassified' }
@@ -343,14 +343,14 @@ SoilSkipListPage >> split: newPage [
 SoilSkipListPage >> valueAt: anInteger [ 
 	^ self 
 		valueAt: anInteger 
-		ifAbsent: [ nil ]
+		ifAbsent: nil
 ]
 
 { #category : #accessing }
-SoilSkipListPage >> valueAt: key ifAbsent: aBlock [ 
+SoilSkipListPage >> valueAt: anInteger ifAbsent: aBlock [
 	^ (self 
-		associationAt: key
-		ifAbsent: [ ^ aBlock value ]) value
+		associationAt: anInteger
+		ifAbsent: aBlock) value
 ]
 
 { #category : #accessing }

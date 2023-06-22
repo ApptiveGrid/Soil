@@ -15,7 +15,7 @@ SoilSkipListIterator >> at: aKeyObject ifAbsent: aBlock [
 		startingAt: index headerPage.
 	^ currentPage 
 		valueAt: currentKey
-		ifAbsent: [ aBlock value ]
+		ifAbsent: aBlock 
 ]
 
 { #category : #accessing }

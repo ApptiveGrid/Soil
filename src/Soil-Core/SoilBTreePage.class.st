@@ -36,7 +36,7 @@ SoilBTreePage >> associationAt: anInteger [
 SoilBTreePage >> associationAt: anInteger ifAbsent: aBlock [
 	^ items 
 		detect: [:each | each key = anInteger ] 
-		ifNone: [ aBlock value ]
+		ifNone: aBlock
 ]
 
 { #category : #accessing }
@@ -191,14 +191,14 @@ SoilBTreePage >> split: newPage [
 SoilBTreePage >> valueAt: anInteger [ 
 	^ self 
 		valueAt: anInteger 
-		ifAbsent: [ nil ]
+		ifAbsent: nil 
 ]
 
 { #category : #accessing }
 SoilBTreePage >> valueAt: anInteger ifAbsent: aBlock [
 	^ (self 
 		associationAt: anInteger
-		ifAbsent: [ ^ aBlock value ]) value
+		ifAbsent: aBlock) value
 ]
 
 { #category : #writing }
