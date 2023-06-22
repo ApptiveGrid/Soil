@@ -92,11 +92,6 @@ SoilSkipList >> pageClass [
 ]
 
 { #category : #accessing }
-SoilSkipList >> pages [
-	^ self store pages
-]
-
-{ #category : #accessing }
 SoilSkipList >> path [
 
 	^ path

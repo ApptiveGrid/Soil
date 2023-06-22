@@ -269,6 +269,40 @@ SoilSkipListTest >> testMorePages [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testOverflowCopyOnWriteAppending [
+	
+	| page capacity copyOnWrite |
+	copyOnWrite := skipList asCopyOnWrite.
+	capacity := copyOnWrite firstPage itemCapacity.
+	1 to: capacity do: [ :n | 
+		copyOnWrite at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	self assert: copyOnWrite pages size equals: 1.
+	copyOnWrite at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: copyOnWrite pages size equals: 2.
+	page := copyOnWrite pageAt: 2.
+	self assert: page numberOfItems equals: 1.
+	self assert: page items first key equals: 254.
+	self assert: page items last key asByteArray equals: #[ 254 ]
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testOverflowCopyOnWriteSplitting [
+	
+	| page capacity copyOnWrite |
+	copyOnWrite := skipList asCopyOnWrite.
+	capacity := copyOnWrite firstPage itemCapacity.
+	1 to: capacity * 2 by: 2 do: [ :n | 
+		copyOnWrite at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	self assert: copyOnWrite pages size equals: 1.
+	copyOnWrite at: 2 floor put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: copyOnWrite pages size equals: 2.
+	page := copyOnWrite pageAt: 2.
+	self assert: page numberOfItems equals: 126.
+	self assert: page items first key equals: 255.
+	self assert: page items last key asByteArray equals: #[ 1 249 ]
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testPageAddFirst [
 	
 	| page |

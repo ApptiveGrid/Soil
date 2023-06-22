@@ -12,6 +12,11 @@ SoilCopyOnWriteSkipList >> isRegistered [
 	^ wrappedSkipList isRegistered
 ]
 
+{ #category : #'instance creation' }
+SoilCopyOnWriteSkipList >> newPage [ 
+	^ wrappedSkipList newPage
+]
+
 { #category : #converting }
 SoilCopyOnWriteSkipList >> thePersistentInstance [
 	^ wrappedSkipList
