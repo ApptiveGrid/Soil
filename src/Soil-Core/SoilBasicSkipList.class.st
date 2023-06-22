@@ -137,6 +137,11 @@ SoilBasicSkipList >> pageSize [
 	^ 4 * 1024
 ]
 
+{ #category : #accessing }
+SoilBasicSkipList >> pages [
+	^ self store pages
+]
+
 { #category : #removing }
 SoilBasicSkipList >> removeKey: key [ 
 	^ self
