@@ -30,7 +30,7 @@ SoilJournal >> buildTransactionJournals [
 		j := (SoilTransactionJournal new on: each)
 			index: each withoutExtension basename asNumber;
 			readAll.
-		journals at: j id put: j ].
+		journals at: j index put: j ].
 	^ journals
 ]
 
@@ -106,7 +106,7 @@ SoilJournal >> newTransactionJournalFor: anInteger [
 	journal := SoilTransactionJournal new 
 		createOn: (self transactionJournalPathFor: anInteger);
 		index: anInteger .
-	transactionJournals 
+	self transactionJournals 
 		at: anInteger
 		put: journal.
 	^ journal
@@ -129,9 +129,9 @@ SoilJournal >> transactionJournalPathFor: anInteger [
 
 { #category : #'as yet unclassified' }
 SoilJournal >> transactionJournals [
-	transactionJournals ifNil: [ 
+	transactionJournals ifEmpty: [ 
 		transactionJournals := self buildTransactionJournals ].
-	^ transactionJournals sorted: [ :a :b | a index < b index ]
+	^ transactionJournals "sorted: [ :a :b | a index < b index ]"
 ]
 
 { #category : #accessing }
