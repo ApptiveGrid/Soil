@@ -103,25 +103,6 @@ SoilSkipListDictionary >> basicAt: aString ifAbsent: aBlock [
 	
 ]
 
-{ #category : #'as yet unclassified' }
-SoilSkipListDictionary >> basicAt: key put: objectId [
-	| iterator |
-	transaction ifNotNil: [
-		transaction markDirty: self.
-		iterator := self index newIterator.
-		(iterator basicAt: key put: objectId)
-			ifNotNil: [ :value |
-				oldValues 
-					at: key
-					ifAbsentPut: objectId ].
-		"if there has been a prior removal of the key this new
-		addition invalidates it"
-		removedValues removeKey: key ifAbsent: [  ]. 
-		^ newValues at: key put: objectId  ].
-	newValues at: key put: objectId.
-
-]
-
 { #category : #accessing }
 SoilSkipListDictionary >> binaryKey: aString [
 	^ (aString asSkipListKeyOfSize: self index keySize) asInteger
