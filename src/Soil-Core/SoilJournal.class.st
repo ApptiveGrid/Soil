@@ -37,7 +37,7 @@ SoilJournal >> buildTransactionJournals [
 { #category : #copying }
 SoilJournal >> copyFrom: start to: end [ 
 	^ self class new 
-		transactionJournals: (self transactionJournals copyFrom: start to: end)
+		transactionJournals: (self transactionJournals select: [:each | each index between: start and: end])
 ]
 
 { #category : #enumerating }
@@ -68,8 +68,8 @@ SoilJournal >> inspectionContent [
 	^ SpTablePresenter new
 		items: (self transactionJournals);
 		addColumn: (SpStringTableColumn new 
-			title: 'id';
-			evaluated: #id;
+			title: 'index';
+			evaluated: #index;
 			width: 50);
 		addColumn: (SpStringTableColumn new 
 			title: #read;
@@ -89,7 +89,7 @@ SoilJournal >> inspectionContent [
 
 { #category : #accessing }
 SoilJournal >> lastIndex [
-	^ self transactionJournals last index
+	^ (self transactionJournals values sorted: [:a :b | a index < b index ]) last index
 ]
 
 { #category : #accessing }

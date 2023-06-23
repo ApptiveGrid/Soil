@@ -116,7 +116,7 @@ SoilJournalTest >> testReplicationToNonEmptyDatabase [
 		initializeFilesystem.
 	copy replayJournal: (soil journal copyFrom: 1 to: 3).
 	self assert: copy databaseVersion equals: 3.
-	self assert: copy objectRepository metaSegment lastObjectIndex equals: 6.
+	self assert: copy objectRepository metaSegment lastObjectIndex equals: 5.
 	self assert: copy objectRepository firstSegment lastObjectIndex equals: 4.
 	copy replayJournal: soil journal.
 	self assert: soil journal lastIndex equals: copy journal lastIndex.

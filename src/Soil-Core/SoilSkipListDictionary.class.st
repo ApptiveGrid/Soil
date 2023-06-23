@@ -37,13 +37,19 @@ SoilSkipListDictionary >> at: key ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilSkipListDictionary >> at: key put: anObject [
-	| objectId binKey |
+	| objectId iterator |
 	^ transaction 
 		ifNotNil: [
 			objectId := transaction makeRoot: anObject.
-			binKey := (key asSkipListKeyOfSize: index keySize) asInteger.
-			(self basicAt: binKey put: objectId)
-				ifNotNil: [ :value | oldValues at: binKey ifAbsentPut: objectId ].	
+			"binKey := (key asSkipListKeyOfSize: index keySize) asInteger."
+			transaction markDirty: self.
+			iterator := self index newIterator.
+			(iterator at: key put: objectId) ifNotNil: [ :value |
+				oldValues 
+					at: key
+					ifAbsentPut: objectId ].
+		"if there has been a prior removal of the key this new
+		addition invalidates it"
 			removedValues removeKey: key ifAbsent: [  ].
 			newValues at: key put: objectId. ]
 		ifNil: [ 
@@ -114,6 +120,11 @@ SoilSkipListDictionary >> basicAt: key put: objectId [
 		^ newValues at: key put: objectId  ].
 	newValues at: key put: objectId.
 
+]
+
+{ #category : #accessing }
+SoilSkipListDictionary >> binaryKey: aString [
+	^ (aString asSkipListKeyOfSize: self index keySize) asInteger
 ]
 
 { #category : #enumerating }
@@ -236,7 +247,7 @@ SoilSkipListDictionary >> journalEntries [
 			transactionId: transaction writeVersion;
 			segment: segment;
 			id: id;
-			key: key;
+			key: (self binaryKey: key);
 			value: value;
 			oldValue: (oldValues at: key ifAbsent: [nil ])) ].
 	removedValues keysAndValuesDo: [ :key :value |
@@ -244,7 +255,7 @@ SoilSkipListDictionary >> journalEntries [
 			transactionId: transaction writeVersion;
 			segment: segment;
 			id: id;
-			key: key; 
+			key: (self binaryKey: key); 
 			oldValue: value) ].
 	^ entries
 ]
