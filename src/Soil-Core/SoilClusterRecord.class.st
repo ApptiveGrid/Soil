@@ -149,8 +149,8 @@ SoilClusterRecord >> registerIndexId: aString [
 
 { #category : #accessing }
 SoilClusterRecord >> resetPreviousVersion [
-	previousVersionPosition := 0.
-	version := 1
+	previousVersionPosition := 0
+
 ]
 
 { #category : #accessing }
