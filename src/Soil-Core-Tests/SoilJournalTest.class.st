@@ -57,6 +57,20 @@ SoilJournalTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilJournalTest >> testConsistency [
+	| txn |
+	10 timesRepeat: [ 
+		txn := soil newTransaction.
+		txn root: Object new.
+		txn commit ].
+	self 
+		shouldnt: [
+			SoilJournalConsistencyVisitor new 
+				visit: soil ]
+		raise: Error
+]
+
+{ #category : #tests }
 SoilJournalTest >> testNewRootObject [
 	| tx journal |
 	tx := soil newTransaction.

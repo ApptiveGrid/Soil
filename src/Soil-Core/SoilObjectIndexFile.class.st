@@ -52,9 +52,9 @@ SoilObjectIndexFile >> initializeStart [
 
 { #category : #accessing }
 SoilObjectIndexFile >> lastObjectIndex [
-	
-	stream position: self headerSize.
-	^ (stream next: self objectIndexSize) asInteger
+	^ semaphore critical: [  
+		stream position: self headerSize.
+		(stream next: self objectIndexSize) asInteger ]
 ]
 
 { #category : #accessing }
