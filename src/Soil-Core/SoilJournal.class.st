@@ -58,9 +58,10 @@ SoilJournal >> do: aBlock [
 SoilJournal >> importEntry: aSoilTransactionJournal [ 
 	| id local |
 	id := aSoilTransactionJournal index.
-	local := soil journal newTransactionJournalFor: id.
+	local := self newTransactionJournalFor: id.
 	local addEntries: aSoilTransactionJournal entries.
-	local write
+	local write.
+	self addTransactionJournal: local
 ]
 
 { #category : #initialization }
@@ -97,12 +98,16 @@ SoilJournal >> inspectionContent [
 
 { #category : #accessing }
 SoilJournal >> lastIndex [
-	^ (self transactionJournals values sorted: [:a :b | a index < b index ]) last index
+	^ self lastTransactionJournal 
+		ifNotNil: [ :journal | journal index ]
+		ifNil: [ 0 ]
 ]
 
 { #category : #accessing }
 SoilJournal >> lastTransactionJournal [
-	^ self transactionJournals last
+	^ self transactionJournals 
+		ifNotEmpty: [ :journals | journals last ]
+		ifEmpty: [ nil ]
 ]
 
 { #category : #accessing }
