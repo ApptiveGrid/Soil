@@ -2,6 +2,7 @@ Class {
 	#name : #SoilTransactionJournal,
 	#superclass : #Object,
 	#instVars : [
+		'index',
 		'stream',
 		'entries'
 	],
@@ -31,6 +32,30 @@ SoilTransactionJournal >> addEntry: aJournalEntry [
 { #category : #'as yet unclassified' }
 SoilTransactionJournal >> anyEntrySatisfy: aBlock [
 	^ entries anySatisfy: aBlock
+]
+
+{ #category : #converting }
+SoilTransactionJournal >> asSortedJournal [
+| first last middle sorted |
+	"Current treatment of new values keeps values in a dictionary loosing order. This 
+	helper method sorts the dictionary keys for index access in a way that the appending
+	page case can be used"
+	first := OrderedCollection new.
+	last := OrderedCollection new.
+	middle := OrderedCollection new.
+	entries do: [ :entry |
+		({ SoilNewTransactionEntry . SoilNewBehaviorEntry . SoilNewObjectEntry . SoilNewObjectVersionEntry . SoilNewSkipListIndexEntry } includes:  entry class) ifTrue: [ 
+			first add: entry ]  .
+		({ SoilUpdateDatabaseVersion . SoilUpdateSegmentIndexEntry . SoilNewCheckpointEntry } includes:  entry class) ifTrue: [ 
+			last add: entry ].
+		({ SoilAddKeyEntry  . SoilRemoveKeyEntry } includes:  entry class) ifTrue: [ 
+			middle add: entry ] ].
+	middle := middle sorted: [ :a :b | a key < b key ].
+	sorted := first, middle, last.
+	(sorted size = entries size) ifFalse: [ self halt ].
+	^ self copy 
+		entries: sorted;
+		yourself
 ]
 
 { #category : #'as yet unclassified' }
@@ -91,13 +116,25 @@ SoilTransactionJournal >> entries [
 ]
 
 { #category : #accessing }
+SoilTransactionJournal >> entries: aCollection [ 
+	entries := aCollection
+]
+
+{ #category : #accessing }
 SoilTransactionJournal >> entryAt: anInteger [ 
 	^ entries at: anInteger 
 ]
 
 { #category : #accessing }
-SoilTransactionJournal >> id [
-	^ (stream wrappedStream name asFileReference withoutExtension basename) asInteger
+SoilTransactionJournal >> index [
+
+	^ index
+]
+
+{ #category : #accessing }
+SoilTransactionJournal >> index: anObject [
+
+	index := anObject
 ]
 
 { #category : #initialization }
@@ -141,6 +178,14 @@ SoilTransactionJournal >> on: aFileReference [
 { #category : #accessing }
 SoilTransactionJournal >> path: aFileReference [ 
 	self shouldBeImplemented.
+]
+
+{ #category : #printing }
+SoilTransactionJournal >> printOn: aStream [ 
+	super printOn: aStream.
+	aStream 
+		<< ' ' << index printString 
+	
 ]
 
 { #category : #'as yet unclassified' }

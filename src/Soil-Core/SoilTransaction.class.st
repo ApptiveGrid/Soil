@@ -138,7 +138,7 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 
 { #category : #accessing }
 SoilTransaction >> buildJournal [
-	journal := soil newTransactionJournalFor: writeVersion.
+	journal := soil journal newTransactionJournalFor: writeVersion.
 	journal addEntry: (SoilNewTransactionEntry new
 		readVersion: readVersion; 
 		transactionId: writeVersion;
@@ -332,7 +332,7 @@ SoilTransaction >> journalEntriesFor: key inIndex: aSoilIndex startingAt: anInte
 	entries := OrderedCollection new.
 	transactionId := anInteger.
 	[ transactionId > readVersion ] whileTrue: [  
-		journal := (soil journal at: transactionId) readAll.
+		journal := (soil journal at: transactionId).
 		journal entries do: [ :each | 
 			((each class = SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
 				(each key = key) ifTrue: [ 

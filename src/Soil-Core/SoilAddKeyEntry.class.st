@@ -59,6 +59,11 @@ SoilAddKeyEntry >> oldValue: anObject [
 	oldValue := anObject
 ]
 
+{ #category : #printing }
+SoilAddKeyEntry >> printOn: aStream [ 
+	aStream << 'add key: ' << key printString << ' to index ' << id printString
+]
+
 { #category : #writing }
 SoilAddKeyEntry >> readFrom: aStream [ 
 	| idSize |
