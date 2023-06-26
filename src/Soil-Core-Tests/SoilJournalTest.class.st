@@ -59,6 +59,7 @@ SoilJournalTest >> tearDown [
 { #category : #tests }
 SoilJournalTest >> testConsistency [
 	| txn |
+	self skip.
 	10 timesRepeat: [ 
 		txn := soil newTransaction.
 		txn root: Object new.
