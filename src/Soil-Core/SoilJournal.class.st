@@ -26,6 +26,7 @@ SoilJournal >> addTransactionJournal: aSoilTransactionJournal [
 
 { #category : #'as yet unclassified' }
 SoilJournal >> archiveFile: aFileReference [ 
+	self archivePath ensureCreateDirectory.
 	aFileReference moveTo: (self archivePath / aFileReference basename)
 ]
 

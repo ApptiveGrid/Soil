@@ -89,7 +89,7 @@ SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [
 SoilBackupVisitor >> visitParameters: aSoilParameterFile [ 
 	target settings 
 		databaseFormatVersion: aSoilParameterFile databaseFormatVersion;
-		databaseVersion: 1;
+		databaseVersion: aSoilParameterFile databaseVersion;
 		applicationVersion: aSoilParameterFile applicationVersion
 ]
 
@@ -100,6 +100,7 @@ SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersio
 		behaviorDescriptions: aSoilPersistentClusterVersion behaviorDescriptions;
 		references: aSoilPersistentClusterVersion references;
 		bytes: aSoilPersistentClusterVersion bytes;
+		version: aSoilPersistentClusterVersion version;
 		resetPreviousVersion.
 	target objectRepository 
 		at: backupCluster objectId
