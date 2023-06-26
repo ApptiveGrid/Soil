@@ -203,11 +203,13 @@ SoilTransaction >> checkpoint [
 		that will be written so we lock all of the segments heap files for appending"
 		lastObjectIndexes keys do: [ :segment |
 			locks add: (segment lockAppendingFor: self) ].
-		self buildJournal
+		journal := self buildJournal.
+		journal
 			write;
 			commitIn: self;
 			checkpoint: self; 
-			close ]
+			close.
+		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ]
 
 ]

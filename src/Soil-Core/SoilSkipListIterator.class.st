@@ -50,11 +50,11 @@ SoilSkipListIterator >> basicAt: key put: anObject [
 					nil ]
 				ifFalse: [ 
 					newPage := index splitPage: self forKey: key.
-					((currentPage biggestKey < key)
+					currentPage := (currentPage biggestKey < key)
 						ifTrue: [ newPage ]
-						ifFalse: [ currentPage ])
-							addItem: (key -> anObject).
-							nil ] ]
+						ifFalse: [ currentPage ].
+					currentPage addItem: (key -> anObject).
+					nil ] ]
 ]
 
 { #category : #private }

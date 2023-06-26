@@ -8,6 +8,11 @@ Class {
 	#category : #'Soil-Core-Tests'
 }
 
+{ #category : #helper }
+SoilJournalTest class >> classUnderTest [ 
+	^ SoilJournal 
+]
+
 { #category : #'as yet unclassified' }
 SoilJournalTest >> fillDatabase [ 
 	| tx dict |
@@ -59,7 +64,6 @@ SoilJournalTest >> tearDown [
 { #category : #tests }
 SoilJournalTest >> testConsistency [
 	| txn |
-	self skip.
 	10 timesRepeat: [ 
 		txn := soil newTransaction.
 		txn root: Object new.

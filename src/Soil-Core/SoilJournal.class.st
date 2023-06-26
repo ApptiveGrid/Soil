@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'soil',
-		'transactionJournals'
+		'transactionJournals',
+		'indexOffset'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -13,25 +14,32 @@ SoilJournal >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitJournal: self
 ]
 
+{ #category : #adding }
+SoilJournal >> addTransactionJournal: aSoilTransactionJournal [ 
+	self verifyNextJournalIndex: aSoilTransactionJournal index.	
+	transactionJournals addLast: aSoilTransactionJournal 
+]
+
 { #category : #accessing }
 SoilJournal >> at: anInteger [ 
-	^ transactionJournals 
-		at: anInteger 
+	^ self transactionJournals 
+		at: anInteger - indexOffset
 		ifAbsentPut: [ self loadTransactionJournalWithId: anInteger ]
 ]
 
 { #category : #'as yet unclassified' }
 SoilJournal >> buildTransactionJournals [
 	| files journals |
-	self path exists ifFalse: [ ^ #() ].
+	self path exists ifFalse: [ ^ OrderedCollection new ].
 	files := self path childrenMatching: '*.journal'.
-	journals := Dictionary new.
-	(files sorted: [:a :b | a withoutExtension basename asNumber < b withoutExtension basename asNumber]) do: [ :each | | j |
-		j := (SoilTransactionJournal new on: each)
+	journals := OrderedCollection new.
+	(files sorted: [:a :b | a withoutExtension basename asNumber < b withoutExtension basename asNumber]) do: [ :each | | jrnl |
+		jrnl := (SoilTransactionJournal new on: each)
 			index: each withoutExtension basename asNumber;
 			readAll.
-		journals at: j index put: j ].
-	^ journals
+		journals addLast: jrnl ].
+	(journals class = OrderedCollection) ifFalse: [ self halt ]. 
+	^ journals 
 ]
 
 { #category : #copying }
@@ -50,15 +58,16 @@ SoilJournal >> do: aBlock [
 SoilJournal >> importEntry: aSoilTransactionJournal [ 
 	| id local |
 	id := aSoilTransactionJournal index.
-	local := soil journal newTransactionJournalFor: id.
+	local := self newTransactionJournalFor: id.
 	local addEntries: aSoilTransactionJournal entries.
-	local write
+	local write.
+	self addTransactionJournal: local
 ]
 
 { #category : #initialization }
 SoilJournal >> initialize [ 
 	super initialize.
-	transactionJournals := Dictionary new
+	indexOffset := 0
 ]
 
 { #category : #'as yet unclassified' }
@@ -89,7 +98,16 @@ SoilJournal >> inspectionContent [
 
 { #category : #accessing }
 SoilJournal >> lastIndex [
-	^ (self transactionJournals values sorted: [:a :b | a index < b index ]) last index
+	^ self lastTransactionJournal 
+		ifNotNil: [ :journal | journal index ]
+		ifNil: [ 0 ]
+]
+
+{ #category : #accessing }
+SoilJournal >> lastTransactionJournal [
+	^ self transactionJournals 
+		ifNotEmpty: [ :journals | journals last ]
+		ifEmpty: [ nil ]
 ]
 
 { #category : #accessing }
@@ -103,12 +121,10 @@ SoilJournal >> loadTransactionJournalWithId: anInteger [
 { #category : #'instance creation' }
 SoilJournal >> newTransactionJournalFor: anInteger [ 
 	| journal |
+	self verifyNextJournalIndex: anInteger.
 	journal := SoilTransactionJournal new 
 		createOn: (self transactionJournalPathFor: anInteger);
 		index: anInteger .
-	self transactionJournals 
-		at: anInteger
-		put: journal.
 	^ journal
 ]
 
@@ -129,12 +145,23 @@ SoilJournal >> transactionJournalPathFor: anInteger [
 
 { #category : #'as yet unclassified' }
 SoilJournal >> transactionJournals [
-	transactionJournals ifEmpty: [ 
+	^ transactionJournals ifNil: [ 
 		transactionJournals := self buildTransactionJournals ].
-	^ transactionJournals "sorted: [ :a :b | a index < b index ]"
 ]
 
 { #category : #accessing }
 SoilJournal >> transactionJournals: aCollection [ 
 	transactionJournals := aCollection
+]
+
+{ #category : #adding }
+SoilJournal >> verifyNextJournalIndex: index [ 
+	"transaction journals have a strict sequence in the same way the
+	databaseVersion has. So we check that this assumption is kept"
+	self transactionJournals 
+		ifNotEmpty: [ 
+			((self lastTransactionJournal index + 1) = index)
+				ifFalse: [ Error signal: 'journal index mismatch' ] ]
+		ifEmpty: [ ^ self ].
+	
 ]

@@ -254,9 +254,9 @@ Soil >> replayJournal: aSoilJournal [
 	databaseVersion := self databaseVersion.
 	journals := aSoilJournal transactionJournals reject: [:each | each index <= databaseVersion ].
 	tx := self newTransaction.
-	(journals values sorted: [:a :b| a index < b index]) do: [ :j |
+	journals do: [ :j |
 		tx setWriteVersion: j index.
-		j commitIn: tx.
+		j asSortedJournal commitIn: tx.
 		self journal importEntry: j ].
 	tx commit.
 

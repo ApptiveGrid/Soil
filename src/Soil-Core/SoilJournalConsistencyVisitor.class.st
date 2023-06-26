@@ -50,12 +50,6 @@ SoilJournalConsistencyVisitor >> verifyObjectIndexes: aSoilTransactionJournal [
 ]
 
 { #category : #visiting }
-SoilJournalConsistencyVisitor >> visitJournal: aSoilJournal [ 
-	self visitAll: aSoilJournal transactionJournals reverse.
-	^ aSoilJournal 
-]
-
-{ #category : #visiting }
 SoilJournalConsistencyVisitor >> visitTransactionJournal: aSoilTransactionJournal [ 
 	self verifyDatabaseVersion: aSoilTransactionJournal.
 	self verifyObjectIndexes: aSoilTransactionJournal.

@@ -34,6 +34,30 @@ SoilTransactionJournal >> anyEntrySatisfy: aBlock [
 	^ entries anySatisfy: aBlock
 ]
 
+{ #category : #converting }
+SoilTransactionJournal >> asSortedJournal [
+| first last middle sorted |
+	"Current treatment of new values keeps values in a dictionary loosing order. This 
+	helper method sorts the dictionary keys for index access in a way that the appending
+	page case can be used"
+	first := OrderedCollection new.
+	last := OrderedCollection new.
+	middle := OrderedCollection new.
+	entries do: [ :entry |
+		({ SoilNewTransactionEntry . SoilNewBehaviorEntry . SoilNewObjectEntry . SoilNewObjectVersionEntry . SoilNewSkipListIndexEntry } includes:  entry class) ifTrue: [ 
+			first add: entry ]  .
+		({ SoilUpdateDatabaseVersion . SoilUpdateSegmentIndexEntry . SoilNewCheckpointEntry } includes:  entry class) ifTrue: [ 
+			last add: entry ].
+		({ SoilAddKeyEntry  . SoilRemoveKeyEntry } includes:  entry class) ifTrue: [ 
+			middle add: entry ] ].
+	middle := middle sorted: [ :a :b | a key < b key ].
+	sorted := first, middle, last.
+	(sorted size = entries size) ifFalse: [ self halt ].
+	^ self copy 
+		entries: sorted;
+		yourself
+]
+
 { #category : #'as yet unclassified' }
 SoilTransactionJournal >> checkpoint: aTransaction [
 	| entry |
@@ -89,6 +113,11 @@ SoilTransactionJournal >> duration [
 { #category : #accessing }
 SoilTransactionJournal >> entries [
 	^ entries
+]
+
+{ #category : #accessing }
+SoilTransactionJournal >> entries: aCollection [ 
+	entries := aCollection
 ]
 
 { #category : #accessing }
