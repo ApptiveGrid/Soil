@@ -256,7 +256,7 @@ Soil >> replayJournal: aSoilJournal [
 	tx := self newTransaction.
 	(journals values sorted: [:a :b| a index < b index]) do: [ :j |
 		tx setWriteVersion: j index.
-		j commitIn: tx.
+		j asSortedJournal commitIn: tx.
 		self journal importEntry: j ].
 	tx commit.
 
