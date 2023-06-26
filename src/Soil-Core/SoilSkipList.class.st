@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #visiting }
+SoilSkipList >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitSkipList: self
+]
+
 { #category : #converting }
 SoilSkipList >> asCopyOnWrite [
 	^ SoilCopyOnWriteSkipList new
