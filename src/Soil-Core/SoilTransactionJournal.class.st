@@ -92,6 +92,11 @@ SoilTransactionJournal >> entries [
 ]
 
 { #category : #accessing }
+SoilTransactionJournal >> entries: aCollection [ 
+	entries := aCollection
+]
+
+{ #category : #accessing }
 SoilTransactionJournal >> entryAt: anInteger [ 
 	^ entries at: anInteger 
 ]

@@ -99,11 +99,11 @@ SoilSkipListPage >> initialize [
 ]
 
 { #category : #initialization }
-SoilSkipListPage >> initializeLevel: anInteger [
+SoilSkipListPage >> initializeLevel: maxLevel [
 	| promote level |
 	level := 1. 
 	promote := true.
-	[ (level < anInteger) and: [ promote ] ] whileTrue: [ 
+	[ (level < maxLevel) and: [ promote ] ] whileTrue: [ 
 		level := level + 1.
 		promote := self class random next > 0.5 ].
 	right := Array new: level withAll: 0. 
@@ -241,11 +241,6 @@ SoilSkipListPage >> level [
 ]
 
 { #category : #accessing }
-SoilSkipListPage >> level: anInteger [ 
-	right := Array new: anInteger withAll: 0
-]
-
-{ #category : #accessing }
 SoilSkipListPage >> numberOfItems [
 	^ items size 
 ]
@@ -281,7 +276,7 @@ SoilSkipListPage >> readLastTransactionFrom: aStream [
 SoilSkipListPage >> readLevelsFrom: aStream [ 
 	| level |
 	level := aStream next asInteger.
-	right := Array new: level. 
+	right := Array new: level withAll: 0. 
 	1 to: level do: [ :n |
 		right at: n put: (aStream next: self rightSize) asInteger ]
 ]
@@ -299,7 +294,8 @@ SoilSkipListPage >> rightAt: anInteger [
 
 { #category : #accessing }
 SoilSkipListPage >> rightAt: anInteger put: anObject [ 
-	self right at: anInteger put: anObject
+	self right at: anInteger put: anObject.
+	dirty := true
 ]
 
 { #category : #writing }
@@ -312,11 +308,6 @@ SoilSkipListPage >> rightSize [
 { #category : #accessing }
 SoilSkipListPage >> setItems: aCollection [ 
 	items := aCollection
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> setRight: aCollection [ 
-	right := aCollection 
 ]
 
 { #category : #private }
@@ -335,6 +326,7 @@ SoilSkipListPage >> split: newPage [
 	middle := (items size / 2) ceiling.
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.
+	dirty := true.
 	^ newPage
 	
 ]
