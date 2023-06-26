@@ -285,7 +285,7 @@ SoilSkipListDictionary >> newIndexInstance [
 
 { #category : #'as yet unclassified' }
 SoilSkipListDictionary >> nextAfter: key [  
-	| currentPage iterator |
+	| iterator |
 	iterator := self index newIterator 
 		find: key asInteger;
 		yourself.
