@@ -8,6 +8,11 @@ Class {
 	#category : #'Soil-Core-Tests'
 }
 
+{ #category : #helper }
+SoilJournalTest class >> classUnderTest [ 
+	^ SoilJournal 
+]
+
 { #category : #'as yet unclassified' }
 SoilJournalTest >> fillDatabase [ 
 	| tx dict |
