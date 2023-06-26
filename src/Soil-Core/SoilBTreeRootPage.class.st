@@ -16,20 +16,20 @@ SoilBTreeRootPage >> initialize [
 ]
 
 { #category : #accessing }
-SoilBTreeRootPage >> insert: anItem into: aBtree [
+SoilBTreeRootPage >> insert: anItem into: anIterator [
 	| indexPage newPage indexItem newIndexPage1 newIndexPage2 |
 		
-	indexPage := self findPageFor: anItem key with: aBtree.
+	indexPage := self findPageFor: anItem key with: anIterator index.
 	indexPage ifNil: [ ^nil ]. "nothing to do"
-	newPage := indexPage insert: anItem into: aBtree.
+	newPage := indexPage insert: anItem into: anIterator.
 	newPage ifNil: [ ^nil ]. "nothing to do"
 	
 	indexItem := newPage smallestKey -> newPage index.
 	"if the insert resulted in a split, we have to update the index, which might habe to split, too"
 	self hasRoom ifTrue: [ self addItem: indexItem . ^ nil ].
-	newIndexPage1 := aBtree splitIndexPage: self.
+	newIndexPage1 := anIterator index splitIndexPage: self.
 	"we are the root index page, thus we have to create another index page and move items there"
-	newIndexPage2 := aBtree newIndexPageFromRoot: self.
+	newIndexPage2 := anIterator index newIndexPageFromRoot: self.
 	
 	"here now add entries for newIndexPage1 and newIndexPage2 to self"
 	self addItem: newIndexPage1 smallestKey -> newIndexPage1 index.

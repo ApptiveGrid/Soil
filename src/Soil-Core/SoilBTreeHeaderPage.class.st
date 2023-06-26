@@ -45,7 +45,9 @@ SoilBTreeHeaderPage >> readFrom: aStream [
 SoilBTreeHeaderPage >> readHeaderFrom: aStream [
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
-	lastPageIndex :=(aStream next: 2) asInteger 
+	lastPageIndex :=(aStream next: 2) asInteger.
+	self readLastTransactionFrom: aStream
+
 	
 ]
 
@@ -58,7 +60,8 @@ SoilBTreeHeaderPage >> writeOn: aStream [
 		nextPutAll: (next asByteArrayOfSize: self pointerSize);
 		nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
-		nextPutAll: (lastPageIndex asByteArrayOfSize: 2).
+		nextPutAll: (lastPageIndex asByteArrayOfSize: 2);
+		nextPutAll: (lastTransaction asByteArrayOfSize: 8).
 		
 	self 
 		writeItemsOn: aStream

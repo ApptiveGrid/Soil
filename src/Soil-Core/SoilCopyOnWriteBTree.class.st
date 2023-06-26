@@ -12,7 +12,7 @@ SoilCopyOnWriteBTree >> isRegistered [
 	^ wrappedBTree isRegistered
 ]
 
-{ #category : #testing }
+{ #category : #converting }
 SoilCopyOnWriteBTree >> thePersistentInstance [
 	^ wrappedBTree
 ]
@@ -26,5 +26,6 @@ SoilCopyOnWriteBTree >> wrappedBTree [
 { #category : #accessing }
 SoilCopyOnWriteBTree >> wrappedBTree: anObject [
 
-	wrappedBTree := anObject
+	wrappedBTree := anObject.
+	self store: wrappedBTree store asCopyOnWriteStore 
 ]
