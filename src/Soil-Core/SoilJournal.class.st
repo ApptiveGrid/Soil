@@ -31,6 +31,7 @@ SoilJournal >> archiveFile: aFileReference [
 
 { #category : #adding }
 SoilJournal >> archiveJournal: aTransactionJournal [ 
+	self ensureArchivePath.
 	self archiveFile: (self transactionJournalPathFor: aTransactionJournal index)
 ]
 
@@ -171,7 +172,6 @@ SoilJournal >> readTransactionJournalFiles [
 	journalFiles := files sorted: [:a :b | 
 		a withoutExtension basename asNumber < b withoutExtension basename asNumber].
 	(journalFiles size > self numberofJournalsToKeep) ifTrue: [ 
-		self ensureArchivePath.
 		(journalFiles copyFrom: 1 to: (journalFiles size - self numberofJournalsToKeep)) do: [ :file |
 			self archiveFile: file.
 			journalFiles remove: file ] ].
