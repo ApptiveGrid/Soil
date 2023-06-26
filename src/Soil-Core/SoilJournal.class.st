@@ -161,7 +161,8 @@ SoilJournal >> verifyNextJournalIndex: index [
 	self transactionJournals 
 		ifNotEmpty: [ 
 			((self lastTransactionJournal index + 1) = index)
-				ifFalse: [ Error signal: 'journal index mismatch' ] ]
+				ifFalse: [ 
+					Transcript show: ('journal index is not valid: current last index is ', self lastTransactionJournal index printString, ', no index to be added is ', index printString); cr ] ]
 		ifEmpty: [ ^ self ].
 	
 ]
