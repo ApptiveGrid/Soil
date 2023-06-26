@@ -44,15 +44,19 @@ SoilBTreeDataPage >> initialize [
 ]
 
 { #category : #accessing }
-SoilBTreeDataPage >> insert: anItem into: aBtree [
-	| newPage |
-	self hasRoom ifTrue: [ self addItem: anItem. ^ nil ].
+SoilBTreeDataPage >> insert: anItem into: anIterator [
+	| newPage choosenPage |
+	self hasRoom ifTrue: [ anIterator currentPage: self. self addItem: anItem. ^ nil ].
 	
 	"No room, we have to split"	
-	newPage := aBtree splitPage: self.
+	newPage := anIterator index splitPage: self.
+	
+	choosenPage := 
 	((self biggestKey < anItem key)
 						ifTrue: [ newPage ]
-						ifFalse: [ self ]) addItem: anItem.
+						ifFalse: [ self ]).
+	choosenPage addItem: anItem.
+	anIterator currentPage: choosenPage.
 	^newPage 
 
 
@@ -61,6 +65,23 @@ SoilBTreeDataPage >> insert: anItem into: aBtree [
 { #category : #testing }
 SoilBTreeDataPage >> isLastPage [
 	^ next == 0
+]
+
+{ #category : #accessing }
+SoilBTreeDataPage >> itemAt: anInteger ifAbsent: aBlock [
+	^ items 
+		findBinaryIndex: [ :each |  anInteger - each key ] 
+		do: [:ind | items at: ind ]
+		ifNone: [ aBlock value ]
+]
+
+{ #category : #accessing }
+SoilBTreeDataPage >> itemAt: key put: anObject [ 
+	| removedItem |
+	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
+	items add: (key -> anObject).
+	dirty := true.
+	^ removedItem
 ]
 
 { #category : #accessing }

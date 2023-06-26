@@ -28,3 +28,8 @@ SoilBTree >> path: aStringOrFileReference [
 
 	path := aStringOrFileReference asFileReference 
 ]
+
+{ #category : #converting }
+SoilBTree >> thePersistentInstance [
+	^ self
+]

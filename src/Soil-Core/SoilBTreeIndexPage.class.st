@@ -36,17 +36,17 @@ SoilBTreeIndexPage >> headerSize [
 ]
 
 { #category : #accessing }
-SoilBTreeIndexPage >> insert: anItem into: aBtree [
+SoilBTreeIndexPage >> insert: anItem into: anIterator [
 	| indexPage newPage indexItem newIndexPage  |
-	indexPage := self findPageFor: anItem key with: aBtree.
+	indexPage := self findPageFor: anItem key with: anIterator index.
 	indexPage ifNil: [ ^nil ]. "nothing to do"
-	newPage := indexPage insert: anItem into: aBtree.
+	newPage := indexPage insert: anItem into: anIterator.
 	newPage ifNil: [ ^nil ]. "nothing to do"
 	
 	indexItem := newPage smallestKey -> newPage index.
 	"if the insert resulted in a split, we have to update the index, which might habe to split, too"
 	self hasRoom ifTrue: [ self addItem: indexItem . ^ nil ].
-	newIndexPage := aBtree splitIndexPage: self.				
+	newIndexPage := anIterator index splitIndexPage: self.				
 	((newIndexPage smallestKey <= anItem key) 
 		ifTrue: [ newIndexPage ] 
 		ifFalse: [ self ]) addItem: indexItem.

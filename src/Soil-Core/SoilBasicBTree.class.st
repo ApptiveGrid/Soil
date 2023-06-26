@@ -31,9 +31,10 @@ SoilBasicBTree >> at: anObject ifAbsent: aBlock [
 { #category : #accessing }
 SoilBasicBTree >> at: aKeyObject put: anObject [
 
-	| key |
-	key := (aKeyObject asSkipListKeyOfSize: self keySize) asInteger.
-	self rootPage insert: key -> anObject into: self.
+	self newIterator 
+		at: aKeyObject 
+		put: anObject.
+
 ]
 
 { #category : #'initialize-release' }
@@ -62,6 +63,11 @@ SoilBasicBTree >> first: anInteger [
 			ifNotNil: [ :value | col add: value ]
 			ifNil: [ ^ col ]].
 	^ col
+]
+
+{ #category : #accessing }
+SoilBasicBTree >> flush [
+	self store flush
 ]
 
 { #category : #accessing }
@@ -104,6 +110,11 @@ SoilBasicBTree >> keySize: anInteger [
 { #category : #accessing }
 SoilBasicBTree >> last [
 	^ self newIterator last
+]
+
+{ #category : #accessing }
+SoilBasicBTree >> maxLevel: anIntegeer [
+	"ignored, this allows to switch SkiList and BTree easily"
 ]
 
 { #category : #'instance creation' }
@@ -245,6 +256,17 @@ SoilBasicBTree >> splitPage: page [
 SoilBasicBTree >> store [
 	^ store ifNil: [ 
 		store := self newFileStore ]
+]
+
+{ #category : #accessing }
+SoilBasicBTree >> store: anObject [
+	anObject index: self.
+	store := anObject
+]
+
+{ #category : #converting }
+SoilBasicBTree >> thePersistentInstance [
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }

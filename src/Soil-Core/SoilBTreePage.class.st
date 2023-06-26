@@ -3,7 +3,8 @@ Class {
 	#superclass : #SoilIndexPage,
 	#instVars : [
 		'items',
-		'keySize'
+		'keySize',
+		'lastTransaction'
 	],
 	#category : #'Soil-Core-Index-BTree'
 }
@@ -75,6 +76,7 @@ SoilBTreePage >> indexOfKey: anInteger [
 SoilBTreePage >> initialize [ 
 	super initialize.
 	items := SortedCollection new.
+	lastTransaction := 0.
 	dirty := true
 ]
 
@@ -86,6 +88,11 @@ SoilBTreePage >> insert: anItem into: aBtree [
 { #category : #testing }
 SoilBTreePage >> isEmpty [
 	^ items isEmpty 
+]
+
+{ #category : #testing }
+SoilBTreePage >> isOlderThan: aVersionNumber [ 
+	^ lastTransaction <= aVersionNumber 
 ]
 
 { #category : #'as yet unclassified' }
@@ -146,6 +153,16 @@ SoilBTreePage >> keySize: anInteger [
 ]
 
 { #category : #accessing }
+SoilBTreePage >> lastTransaction [
+	^ lastTransaction
+]
+
+{ #category : #accessing }
+SoilBTreePage >> lastTransaction: anInteger [ 
+	lastTransaction := anInteger
+]
+
+{ #category : #accessing }
 SoilBTreePage >> numberOfItems [
 	^ items size
 ]
@@ -156,12 +173,23 @@ SoilBTreePage >> pointerSize [
 ]
 
 { #category : #reading }
+SoilBTreePage >> readFrom: aStream [ 
+	super readFrom: aStream.
+	self readLastTransactionFrom: aStream
+]
+
+{ #category : #reading }
 SoilBTreePage >> readItemsFrom: aStream [ 
 	| numberOfItems |
 	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
 	items := SortedCollection new: numberOfItems.
 	numberOfItems timesRepeat: [ 
 		items add: (aStream next: self keySize) asInteger -> (aStream next: self valueSize) ]
+]
+
+{ #category : #writing }
+SoilBTreePage >> readLastTransactionFrom: aStream [ 
+	lastTransaction := (aStream next: 8) asInteger.
 ]
 
 { #category : #initialization }
@@ -199,6 +227,12 @@ SoilBTreePage >> valueAt: anInteger ifAbsent: aBlock [
 	^ (self 
 		associationAt: anInteger
 		ifAbsent: aBlock) value
+]
+
+{ #category : #writing }
+SoilBTreePage >> writeHeaderOn: aStream [ 
+	super writeHeaderOn: aStream.
+	aStream nextPutAll: (lastTransaction asByteArrayOfSize: 8)
 ]
 
 { #category : #writing }
