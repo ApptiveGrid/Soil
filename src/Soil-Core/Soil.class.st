@@ -58,11 +58,6 @@ Soil >> behaviorRegistry [
 	^ behaviorRegistry
 ]
 
-{ #category : #'as yet unclassified' }
-Soil >> buildTransactionJournalPath: anInteger [
-	^ self path / #journal / anInteger asString , #journal
-]
-
 { #category : #'initialize-release' }
 Soil >> close [
 	objectRepository ifNotNil: [ 
@@ -145,8 +140,7 @@ Soil >> inspectionParameters [
 Soil >> journal [
 	^ journal ifNil: [ 
 		journal := SoilJournal new
-			soil: self;
-			path: self path / #journal ] 
+			soil: self ] 
 ]
 
 { #category : #'as yet unclassified' }
@@ -184,12 +178,6 @@ Soil >> newTransaction [
 		readVersion: self databaseVersion;
 		start;
 		yourself
-]
-
-{ #category : #'instance creation' }
-Soil >> newTransactionJournalFor: anInteger [ 
-	^ SoilTransactionJournal new 
-		createOn: (self buildTransactionJournalPath: anInteger)
 ]
 
 { #category : #accessing }
@@ -262,9 +250,12 @@ Soil >> renameClassNamed: oldName to: newName [
 
 { #category : #'as yet unclassified' }
 Soil >> replayJournal: aSoilJournal [ 
-	| tx |
-	tx := self newTransaction setWriteVersion: 1.
-	aSoilJournal transactionJournals reverse do: [ :j |
+	| tx journals databaseVersion |
+	databaseVersion := self databaseVersion.
+	journals := aSoilJournal transactionJournals reject: [:each | each index <= databaseVersion ].
+	tx := self newTransaction.
+	(journals values sorted: [:a :b| a index < b index]) do: [ :j |
+		tx setWriteVersion: j index.
 		j commitIn: tx.
 		self journal importEntry: j ].
 	tx commit.

@@ -2,6 +2,7 @@ Class {
 	#name : #SoilTransactionJournal,
 	#superclass : #Object,
 	#instVars : [
+		'index',
 		'stream',
 		'entries'
 	],
@@ -96,8 +97,15 @@ SoilTransactionJournal >> entryAt: anInteger [
 ]
 
 { #category : #accessing }
-SoilTransactionJournal >> id [
-	^ (stream wrappedStream name asFileReference withoutExtension basename) asInteger
+SoilTransactionJournal >> index [
+
+	^ index
+]
+
+{ #category : #accessing }
+SoilTransactionJournal >> index: anObject [
+
+	index := anObject
 ]
 
 { #category : #initialization }
@@ -141,6 +149,14 @@ SoilTransactionJournal >> on: aFileReference [
 { #category : #accessing }
 SoilTransactionJournal >> path: aFileReference [ 
 	self shouldBeImplemented.
+]
+
+{ #category : #printing }
+SoilTransactionJournal >> printOn: aStream [ 
+	super printOn: aStream.
+	aStream 
+		<< ' ' << index printString 
+	
 ]
 
 { #category : #'as yet unclassified' }
