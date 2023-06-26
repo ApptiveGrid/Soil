@@ -235,6 +235,13 @@ SoilTransaction >> continue [
 		objectMap at: record object put: persistentRecord.
 		idMap at: record objectId put: persistentRecord ].
 	recordsToCommit := nil.
+	self flag: #todo.
+	"we change the readVersion here so we can read back the 
+	objects we've just changed. But we do not check if all the
+	not-updated objects are still at a current state. So there 
+	can be objects that are out-of-date. Reading will read old 
+	state and writing to them will make the transaction commit 
+	fail because then there is a concurrent modification"
 	readVersion := writeVersion.
 	writeVersion := nil.
 	journal := nil
