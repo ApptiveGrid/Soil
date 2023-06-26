@@ -17,7 +17,27 @@ SoilJournal >> acceptSoil: aSoilVisitor [
 { #category : #adding }
 SoilJournal >> addTransactionJournal: aSoilTransactionJournal [ 
 	self verifyNextJournalIndex: aSoilTransactionJournal index.	
-	transactionJournals addLast: aSoilTransactionJournal 
+	transactionJournals addLast: aSoilTransactionJournal.
+	[ transactionJournals size <= self numberofJournalsToKeep ]  whileFalse: [ 
+		self archiveJournal: transactionJournals removeFirst ].
+	indexOffset := transactionJournals first index - 1.
+
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> archiveFile: aFileReference [ 
+	aFileReference moveTo: (self archivePath / aFileReference basename)
+]
+
+{ #category : #adding }
+SoilJournal >> archiveJournal: aTransactionJournal [ 
+	self ensureArchivePath.
+	self archiveFile: (self transactionJournalPathFor: aTransactionJournal index)
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> archivePath [ 
+	^ self path / #archive
 ]
 
 { #category : #accessing }
@@ -29,17 +49,13 @@ SoilJournal >> at: anInteger [
 
 { #category : #'as yet unclassified' }
 SoilJournal >> buildTransactionJournals [
-	| files journals |
-	self path exists ifFalse: [ ^ OrderedCollection new ].
-	files := self path childrenMatching: '*.journal'.
-	journals := OrderedCollection new.
-	(files sorted: [:a :b | a withoutExtension basename asNumber < b withoutExtension basename asNumber]) do: [ :each | | jrnl |
-		jrnl := (SoilTransactionJournal new on: each)
-			index: each withoutExtension basename asNumber;
-			readAll.
-		journals addLast: jrnl ].
-	(journals class = OrderedCollection) ifFalse: [ self halt ]. 
-	^ journals 
+	transactionJournals := OrderedCollection new.
+	self readTransactionJournalFiles do: [ :each |
+		self addTransactionJournal: (
+			(SoilTransactionJournal new on: each)
+				index: each withoutExtension basename asNumber;
+				readAll;
+				close) ]
 ]
 
 { #category : #copying }
@@ -55,12 +71,18 @@ SoilJournal >> do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SoilJournal >> ensureArchivePath [
+	self archivePath ensureCreateDirectory 
+]
+
+{ #category : #'as yet unclassified' }
 SoilJournal >> importEntry: aSoilTransactionJournal [ 
 	| id local |
 	id := aSoilTransactionJournal index.
-	local := self newTransactionJournalFor: id.
-	local addEntries: aSoilTransactionJournal entries.
-	local write.
+	local := (self newTransactionJournalFor: id)
+		addEntries: aSoilTransactionJournal entries;
+		write;
+		close.
 	self addTransactionJournal: local
 ]
 
@@ -68,6 +90,12 @@ SoilJournal >> importEntry: aSoilTransactionJournal [
 SoilJournal >> initialize [ 
 	super initialize.
 	indexOffset := 0
+]
+
+{ #category : #initialization }
+SoilJournal >> initializeFilesystem [
+	self path ensureCreateDirectory.
+	transactionJournals := OrderedCollection new
 ]
 
 { #category : #'as yet unclassified' }
@@ -129,8 +157,32 @@ SoilJournal >> newTransactionJournalFor: anInteger [
 ]
 
 { #category : #'as yet unclassified' }
+SoilJournal >> numberofJournalsToKeep [ 
+	^ 20
+]
+
+{ #category : #'instance creation' }
+SoilJournal >> open [ 
+	self buildTransactionJournals 
+]
+
+{ #category : #'as yet unclassified' }
 SoilJournal >> path [
 	^ soil path / #journal
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> readTransactionJournalFiles [
+	| files journalFiles |
+	self path exists ifFalse: [ ^ OrderedCollection new ].
+	files := self path childrenMatching: '*.journal'.
+	journalFiles := files sorted: [:a :b | 
+		a withoutExtension basename asNumber < b withoutExtension basename asNumber].
+	(journalFiles size > self numberofJournalsToKeep) ifTrue: [ 
+		(journalFiles copyFrom: 1 to: (journalFiles size - self numberofJournalsToKeep)) do: [ :file |
+			self archiveFile: file.
+			journalFiles remove: file ] ].
+	^ journalFiles 
 ]
 
 { #category : #accessing }
@@ -138,8 +190,8 @@ SoilJournal >> soil: aSoil [
 	soil := aSoil
 ]
 
-{ #category : #'as yet unclassified' }
-SoilJournal >> transactionJournalPathFor: anInteger [
+{ #category : #accessing }
+SoilJournal >> transactionJournalPathFor: anInteger [ 
 	^ self path / anInteger asString , #journal
 ]
 

@@ -115,9 +115,13 @@ Soil >> initializeFilesystem [
 		initializeFilesystem;
 		yourself.
 	behaviorRegistry := SoilBehaviorRegistry new
-			soil: self;
-			initializeFilesystem;
-			yourself.
+		soil: self;
+		initializeFilesystem;
+		yourself.
+	journal := SoilJournal new
+		soil: self;
+		initializeFilesystem;
+		yourself
 ]
 
 { #category : #'as yet unclassified' }
@@ -138,9 +142,7 @@ Soil >> inspectionParameters [
 
 { #category : #accessing }
 Soil >> journal [
-	^ journal ifNil: [ 
-		journal := SoilJournal new
-			soil: self ] 
+	^ journal 
 ]
 
 { #category : #'as yet unclassified' }
@@ -199,6 +201,10 @@ Soil >> open [
 			soil: self;
 			open;
 			yourself.
+	journal := SoilJournal new
+		soil: self;
+		open;
+		yourself
 
 	
 ]
