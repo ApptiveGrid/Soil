@@ -92,6 +92,12 @@ SoilJournal >> initialize [
 	indexOffset := 0
 ]
 
+{ #category : #initialization }
+SoilJournal >> initializeFilesystem [
+	self path ensureCreateDirectory.
+	transactionJournals := OrderedCollection new
+]
+
 { #category : #'as yet unclassified' }
 SoilJournal >> inspectionContent [
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>

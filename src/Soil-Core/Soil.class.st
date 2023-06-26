@@ -115,9 +115,13 @@ Soil >> initializeFilesystem [
 		initializeFilesystem;
 		yourself.
 	behaviorRegistry := SoilBehaviorRegistry new
-			soil: self;
-			initializeFilesystem;
-			yourself.
+		soil: self;
+		initializeFilesystem;
+		yourself.
+	journal := SoilJournal new
+		soil: self;
+		initializeFilesystem;
+		yourself
 ]
 
 { #category : #'as yet unclassified' }
