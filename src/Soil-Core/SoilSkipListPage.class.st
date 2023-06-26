@@ -196,7 +196,7 @@ SoilSkipListPage >> keyOrClosestAfter: key [
 	self lastKey < key ifTrue: [ ^ nil ].
 	^ items 
 		findBinaryIndex: [ :each | key - each key ] 
-		do: [ :e | e key] 
+		do: [ :e | (items at: e) key] 
 		ifNone: [ :a :b | 
 			(items at: (b min: items size)) key ]
 ]
