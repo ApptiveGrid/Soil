@@ -79,9 +79,10 @@ SoilJournal >> ensureArchivePath [
 SoilJournal >> importEntry: aSoilTransactionJournal [ 
 	| id local |
 	id := aSoilTransactionJournal index.
-	local := self newTransactionJournalFor: id.
-	local addEntries: aSoilTransactionJournal entries.
-	local write.
+	local := (self newTransactionJournalFor: id)
+		addEntries: aSoilTransactionJournal entries;
+		write;
+		close.
 	self addTransactionJournal: local
 ]
 
