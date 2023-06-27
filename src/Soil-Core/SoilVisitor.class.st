@@ -34,6 +34,11 @@ SoilVisitor >> visitMetaSegment: aSoilMetaSegment [
 ]
 
 { #category : #visiting }
+SoilVisitor >> visitObjectId: aSoilObjectId [ 
+	^ aSoilObjectId 
+]
+
+{ #category : #visiting }
 SoilVisitor >> visitObjectRepository: aSoilObjectRepository [ 
 	self visitAll: aSoilObjectRepository allSegments.
 	^ aSoilObjectRepository 
@@ -41,9 +46,16 @@ SoilVisitor >> visitObjectRepository: aSoilObjectRepository [
 
 { #category : #visiting }
 SoilVisitor >> visitObjectSegment: aSoilObjectSegment [ 
+	(aSoilObjectSegment id = 1) ifTrue: [ 
+		self visit: (aSoilObjectSegment at: 1) ].
 	self visit: aSoilObjectSegment indexManager.
 
 	^ aSoilObjectSegment 
+]
+
+{ #category : #visiting }
+SoilVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [ 
+	
 ]
 
 { #category : #visiting }
@@ -53,7 +65,20 @@ SoilVisitor >> visitParameters: aSoilParameterFile [
 
 { #category : #visiting }
 SoilVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
+	| soil |
+	aSoilPersistentClusterVersion references do: [ :reference |
+		self visit: reference ].
+	aSoilPersistentClusterVersion indexIds do:[ :indexId |
+		self halt.
+		self visit: ((soil objectRepository segmentAt: aSoilPersistentClusterVersion  segment) indexAt: indexId)  ].
 	^ aSoilPersistentClusterVersion 
+]
+
+{ #category : #visiting }
+SoilVisitor >> visitSkipList: aSoilSkipList [ 
+	"aSoilSkipList newIterator do: [ :each |
+		self visit: each ]."
+	self visit: aSoilSkipList store.
 ]
 
 { #category : #visiting }

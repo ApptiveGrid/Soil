@@ -52,6 +52,11 @@ SoilObjectId >> = anObjectId [
 		index = anObjectId index ]
 ]
 
+{ #category : #visiting }
+SoilObjectId >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitObjectId: self
+]
+
 { #category : #converting }
 SoilObjectId >> asByteArray [
 	^ (segment asByteArrayOfSize: 2), (index asByteArrayOfSize: 6)

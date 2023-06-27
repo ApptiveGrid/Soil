@@ -8,6 +8,11 @@ Class {
 	#category : #'Soil-Core-Index-Common'
 }
 
+{ #category : #visiting }
+SoilPagedFileIndexStore >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitPagedFileIndexStore: self
+]
+
 { #category : #converting }
 SoilPagedFileIndexStore >> asCopyOnWriteStore [
 	^ SoilCopyOnWriteIndexStore new 
