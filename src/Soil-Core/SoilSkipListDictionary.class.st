@@ -75,7 +75,7 @@ SoilSkipListDictionary >> basicAt: aString ifAbsent: aBlock [
 	key := (aString asSkipListKeyOfSize: self index keySize) asInteger.
 	iterator := self index newIterator.
 	value := iterator at: aString ifAbsent: [ aBlock value ].
-	value isRemoved ifFalse: [  
+	value isRemoved ifTrue: [  
 		^ (iterator currentPage isOlderThan: transaction readVersion) 
 			ifTrue: [ aBlock value ] 
 			ifFalse: [
