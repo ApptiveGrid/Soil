@@ -248,6 +248,24 @@ SoilSkipListTest >> testIteratorFindAndNext [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testIteratorFirstWithSingleRemovedItem [ 
+	| iterator |
+	iterator := skipList newIterator.
+	iterator at: #foo put: #bar.
+	iterator removeKey: #foo.
+	self assert: iterator firstAssociation equals: nil
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testIteratorLastWithSingleRemovedItem [ 
+	| iterator |
+	iterator := skipList newIterator.
+	iterator at: #foo put: #bar.
+	iterator removeKey: #foo.
+	self assert: iterator lastAssociation equals: nil
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testLast [
 	
 	| capacity |
