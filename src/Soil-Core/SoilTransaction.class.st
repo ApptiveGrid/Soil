@@ -252,6 +252,23 @@ SoilTransaction >> dirtyObjects [
 	^ (idMap select: [ :each | each hasChanged ]) collect: #object
 ]
 
+{ #category : #'as yet unclassified' }
+SoilTransaction >> findObject: aBlock [ 
+	"scan all records in the database where the materialized object matches 
+	the condition in aBlock. Return the object of the record instead"
+	^ (self findRecord: [:record | aBlock value: (record materializeObject; object) ]) object
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransaction >> findRecord: aBlock [ 
+	"scan all connected records in the database until one matches 
+	the condition in aBlock"
+	 ^ SoilFindRecordVisitor new 
+		find: aBlock 
+		in: self;
+		object
+]
+
 { #category : #testing }
 SoilTransaction >> hasModifications [ 
 	^ self dirtyObjects notEmpty
