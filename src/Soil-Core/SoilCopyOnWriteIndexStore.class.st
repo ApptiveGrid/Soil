@@ -20,8 +20,8 @@ SoilCopyOnWriteIndexStore >> isCopyOnWrite [
 { #category : #accessing }
 SoilCopyOnWriteIndexStore >> pageFaultAt: anInteger [ 
 	| page |
-	page := wrappedStore pageAt: anInteger.
-	pages at: anInteger put: page copy.
+	page := (wrappedStore pageAt: anInteger) copy.
+	pages at: anInteger put: page.
 	^ page 
 ]
 

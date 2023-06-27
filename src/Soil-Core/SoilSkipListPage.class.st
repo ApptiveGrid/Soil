@@ -248,7 +248,8 @@ SoilSkipListPage >> numberOfItems [
 { #category : #copying }
 SoilSkipListPage >> postCopy [ 
 	super postCopy.
-	items := items copy
+	items := items copy.
+	right := right copy
 ]
 
 { #category : #'instance creation' }
