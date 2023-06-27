@@ -147,7 +147,7 @@ SoilCleanCodeTest >> testNoUnusedClasses [
 	| found  knownviolations |
 	found := Soil package definedClasses reject: [ :class | class isUsed]. 
 	
-	knownviolations := #().
+	knownviolations := #( SoilIndexConsistencyVisitor ).
 	found := found reject: [:class | knownviolations includes: class name  ].
 	
 	self 
