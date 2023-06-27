@@ -224,6 +224,7 @@ SoilSkipListDictionary >> journalEntries [
 			keySize: index keySize;
 			valueSize: index valueSize) ].
 	newValues keysAndValuesDo: [ :key :value |
+		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
 		entries add: (SoilAddKeyEntry new 
 			transactionId: transaction writeVersion;
 			segment: segment;
@@ -276,11 +277,6 @@ SoilSkipListDictionary >> loadFrom: aFileReference [
 SoilSkipListDictionary >> maxLevel: anInteger [ 
 	index maxLevel: anInteger.
 
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipListDictionary >> newIndexInstance [
-	self halt.
 ]
 
 { #category : #'as yet unclassified' }
