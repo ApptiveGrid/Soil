@@ -60,9 +60,10 @@ SoilIndexIterator >> firstAssociation [
 	"if we get back a key that has been marked removed 
 	we iterate until we find one that hasn't been 
 	removed"
-	[ item value isRemoved ] whileTrue: [ 
+	[ item notNil and: [ item value isRemoved ] ] whileTrue: [ 
 		item := self nextAssociation ].
-	currentKey := item key.
+	currentKey := item 
+		ifNotNil: [ item key ].
 	^ item
 ]
 
@@ -78,10 +79,16 @@ SoilIndexIterator >> last [
 
 { #category : #accessing }
 SoilIndexIterator >> lastAssociation [
+	self flag: #todo.
+	"this does not work if the last item has been removed. 
+	Going back is not easy in a skip list"
 	^ self lastPage lastItem  "sets currentPage"
-		ifNotNil: [: item | 
-			currentKey := item key.
-			item ]
+		ifNotNil: [: assoc | 
+			assoc value isRemoved 
+				ifTrue: [ nil ]
+				ifFalse: [ 
+					currentKey := assoc key.
+					assoc ] ]
 ]
 
 { #category : #accessing }

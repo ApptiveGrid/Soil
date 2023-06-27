@@ -75,7 +75,7 @@ SoilSkipListDictionary >> basicAt: aString ifAbsent: aBlock [
 	key := (aString asSkipListKeyOfSize: self index keySize) asInteger.
 	iterator := self index newIterator.
 	value := iterator at: aString ifAbsent: [ aBlock value ].
-	value isInitialized ifFalse: [  
+	value isRemoved ifFalse: [  
 		^ (iterator currentPage isOlderThan: transaction readVersion) 
 			ifTrue: [ aBlock value ] 
 			ifFalse: [
@@ -224,6 +224,7 @@ SoilSkipListDictionary >> journalEntries [
 			keySize: index keySize;
 			valueSize: index valueSize) ].
 	newValues keysAndValuesDo: [ :key :value |
+		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
 		entries add: (SoilAddKeyEntry new 
 			transactionId: transaction writeVersion;
 			segment: segment;
@@ -279,11 +280,6 @@ SoilSkipListDictionary >> maxLevel: anInteger [
 ]
 
 { #category : #'as yet unclassified' }
-SoilSkipListDictionary >> newIndexInstance [
-	self halt.
-]
-
-{ #category : #'as yet unclassified' }
 SoilSkipListDictionary >> nextAfter: key [  
 	| iterator |
 	iterator := self index newIterator 
@@ -334,7 +330,7 @@ SoilSkipListDictionary >> removeKey: key ifAbsent: aBlock [
 			removedValues 
 				at: key 
 				put: v asSoilObjectId.
-			iterator at: key put: (SoilObjectId segment: 0 index: 0) ]
+			iterator removeKey: key ]
 		ifNil: [ 
 			removedValues 
 				at: key

@@ -155,6 +155,13 @@ SoilSkipListIterator >> printOn: aStream [
 	aStream << 'path: ' << levels asString
 ]
 
+{ #category : #removing }
+SoilSkipListIterator >> removeKey: key [ 
+	^ self 
+		at: key 
+		put: (SoilObjectId segment: 0 index: 0)
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipListIterator >> updateCurrentTransaction: anInteger [ 
 	currentPage lastTransaction: anInteger
