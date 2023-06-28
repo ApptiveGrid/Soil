@@ -22,9 +22,9 @@ SoilJournal >> addTransactionJournal: aSoilTransactionJournal [
 		transactionJournals addLast: aSoilTransactionJournal.
 		[ transactionJournals size <= self numberofJournalsToKeep ]  whileFalse: [ 
 			[  
-			Transcript crShow: ('transaction journal ids before:', (transactionJournals collect: #index)).
+			Transcript crShow: ('transaction journal ids before:', (transactionJournals collect: #index) printString).
 			self archiveJournal: transactionJournals removeFirst.
-			Transcript crShow: ('transaction journal ids after:', (transactionJournals collect: #index)).
+			Transcript crShow: ('transaction journal ids after:', (transactionJournals collect: #index) printString).
 			Transcript crShow: ('new index offset will be: ', transactionJournals first index printString) ]
 			on: Error do: [ :e | "ignore for now" ] ].
 		indexOffset := transactionJournals first index - 1 ]
