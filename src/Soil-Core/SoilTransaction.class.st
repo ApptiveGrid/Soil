@@ -185,9 +185,11 @@ SoilTransaction >> checkpoint [
 	"serialize objects and collect all to be written records. This can be done without 
 	resources that need locking. This reduces time needed for locking"
 	self prepareRecordsForCommit.
+	"if there are no records to commit we can just return and don't allocate any
+	resources"
+	recordsToCommit ifEmpty: [ ^ self ].
 	"only one transactions is allowed at a time. We use the critical block of the database
 	to avoid parallel committing"
-	recordsToCommit ifEmpty: [ ^ self ].
 	soil critical: [ 
 	"enter lock phase. Acquire lock on global databaseVersion which centrally locks
 	the database for commiting until this checkpoint is done. The ensure block is needed
@@ -197,18 +199,20 @@ SoilTransaction >> checkpoint [
 		writeVersion := self buildWriteVersion.
 		"lock all records in the segment and check indexes for out of date versions"
 		self acquireLocksAndDetectWriteSkew.
-		"convert the records into journal entries, write the journal to disk and then
-		execute the journal on the database"
-		"lastObjectIndex contains all version number updates, so these are the segments
-		that will be written so we lock all of the segments heap files for appending"
+		"lastObjectIndexes contains the highest allocated index number per segment. We
+		lock all positions in order to update the index numbers in the database."
 		lastObjectIndexes keys do: [ :segment |
 			locks add: (segment lockAppendingFor: self) ].
+		"convert the records into journal entries, write the journal to disk and then
+		execute the journal on the database"
 		journal := self buildJournal.
 		journal
 			write;
 			commitIn: self;
 			checkpoint: self; 
 			close.
+		"add the journal to the database wide journal so other transaction can access
+		it to resolve older state"
 		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ]
 
