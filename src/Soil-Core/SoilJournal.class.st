@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'soil',
 		'transactionJournals',
-		'indexOffset'
+		'indexOffset',
+		'semaphore'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -16,11 +17,12 @@ SoilJournal >> acceptSoil: aSoilVisitor [
 
 { #category : #adding }
 SoilJournal >> addTransactionJournal: aSoilTransactionJournal [ 
-	self verifyNextJournalIndex: aSoilTransactionJournal index.	
-	transactionJournals addLast: aSoilTransactionJournal.
-	[ transactionJournals size <= self numberofJournalsToKeep ]  whileFalse: [ 
-		self archiveJournal: transactionJournals removeFirst ].
-	indexOffset := transactionJournals first index - 1.
+	semaphore critical: [  
+		self verifyNextJournalIndex: aSoilTransactionJournal index.	
+		transactionJournals addLast: aSoilTransactionJournal.
+		[ transactionJournals size <= self numberofJournalsToKeep ]  whileFalse: [ 
+			self archiveJournal: transactionJournals removeFirst ].
+		indexOffset := transactionJournals first index - 1 ]
 
 ]
 
@@ -43,14 +45,14 @@ SoilJournal >> archivePath [
 
 { #category : #accessing }
 SoilJournal >> at: anInteger [ 
-	^ self transactionJournals 
-		at: anInteger - indexOffset
-		ifAbsentPut: [ self loadTransactionJournalWithId: anInteger ]
+	^ semaphore critical: [
+		transactionJournals 
+			at: anInteger - indexOffset
+			ifAbsentPut: [ self loadTransactionJournalWithId: anInteger ] ]
 ]
 
 { #category : #'as yet unclassified' }
 SoilJournal >> buildTransactionJournals [
-	transactionJournals := OrderedCollection new.
 	self readTransactionJournalFiles do: [ :each |
 		self addTransactionJournal: (
 			(SoilTransactionJournal new on: each)
@@ -67,8 +69,8 @@ SoilJournal >> copyFrom: start to: end [
 
 { #category : #enumerating }
 SoilJournal >> do: aBlock [ 
-	self transactionJournals do: aBlock
-	
+	semaphore critical: [  
+		transactionJournals do: aBlock ]	
 ]
 
 { #category : #'as yet unclassified' }
@@ -90,13 +92,15 @@ SoilJournal >> importEntry: aSoilTransactionJournal [
 { #category : #initialization }
 SoilJournal >> initialize [ 
 	super initialize.
+	transactionJournals := OrderedCollection new.
+	semaphore := Semaphore forMutualExclusion.
 	indexOffset := 0
 ]
 
 { #category : #initialization }
 SoilJournal >> initializeFilesystem [
 	self path ensureCreateDirectory.
-	transactionJournals := OrderedCollection new
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -126,17 +130,10 @@ SoilJournal >> inspectionContent [
 ]
 
 { #category : #accessing }
-SoilJournal >> lastIndex [
-	^ self lastTransactionJournal 
-		ifNotNil: [ :journal | journal index ]
-		ifNil: [ 0 ]
-]
-
-{ #category : #accessing }
 SoilJournal >> lastTransactionJournal [
-	^ self transactionJournals 
+	^ transactionJournals 
 		ifNotEmpty: [ :journals | journals last ]
-		ifEmpty: [ nil ]
+		ifEmpty: [ nil ] 
 ]
 
 { #category : #accessing }
@@ -149,12 +146,11 @@ SoilJournal >> loadTransactionJournalWithId: anInteger [
 
 { #category : #'instance creation' }
 SoilJournal >> newTransactionJournalFor: anInteger [ 
-	| journal |
-	self verifyNextJournalIndex: anInteger.
-	journal := SoilTransactionJournal new 
-		createOn: (self transactionJournalPathFor: anInteger);
-		index: anInteger .
-	^ journal
+	^ semaphore critical: [  
+		self verifyNextJournalIndex: anInteger.
+		SoilTransactionJournal new 
+			createOn: (self transactionJournalPathFor: anInteger);
+			index: anInteger ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -198,8 +194,7 @@ SoilJournal >> transactionJournalPathFor: anInteger [
 
 { #category : #'as yet unclassified' }
 SoilJournal >> transactionJournals [
-	^ transactionJournals ifNil: [ 
-		transactionJournals := self buildTransactionJournals ].
+	^ transactionJournals
 ]
 
 { #category : #accessing }
@@ -211,11 +206,10 @@ SoilJournal >> transactionJournals: aCollection [
 SoilJournal >> verifyNextJournalIndex: index [ 
 	"transaction journals have a strict sequence in the same way the
 	databaseVersion has. So we check that this assumption is kept"
-	self transactionJournals 
+	transactionJournals 
 		ifNotEmpty: [ 
 			((self lastTransactionJournal index + 1) = index)
 				ifFalse: [ 
 					Transcript show: ('journal index is not valid: current last index is ', self lastTransactionJournal index printString, ', no index to be added is ', index printString); cr ] ]
-		ifEmpty: [ ^ self ].
-	
+		ifEmpty: [ ^ self ]
 ]
