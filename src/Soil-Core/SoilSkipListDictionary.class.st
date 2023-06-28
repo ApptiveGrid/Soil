@@ -285,7 +285,7 @@ SoilSkipListDictionary >> nextAfter: key [
 	iterator := self index newIterator 
 		find: key asInteger;
 		yourself.
-	^ iterator nextAssociation 
+	^ iterator nextPresentAssociation 
 		ifNotNil: [ :assoc |
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 ]
