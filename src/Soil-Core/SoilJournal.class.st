@@ -32,6 +32,12 @@ SoilJournal >> addTransactionJournal: aSoilTransactionJournal [
 ]
 
 { #category : #'as yet unclassified' }
+SoilJournal >> allTransactionJournals [
+	^ ((self transactionJournalFilesIn: self archivePath) , (self transactionJournalFilesIn: self path))
+		collect: [ :file | self readTransactionJournalFile: file ]
+]
+
+{ #category : #'as yet unclassified' }
 SoilJournal >> archiveFile: aFileReference [ 
 	self archivePath ensureCreateDirectory.
 	aFileReference moveTo: (self archivePath / aFileReference basename)
@@ -58,17 +64,15 @@ SoilJournal >> at: anInteger [
 
 { #category : #'as yet unclassified' }
 SoilJournal >> buildTransactionJournals [
-	self readTransactionJournalFiles do: [ :each |
+	self transactionJournalFiles do: [ :each |
 		self addTransactionJournal: (
-			(SoilTransactionJournal new on: each)
-				index: each withoutExtension basename asNumber;
-				readAll;
-				close) ]
+			self readTransactionJournalFile: each) ]
 ]
 
 { #category : #copying }
 SoilJournal >> copyFrom: start to: end [ 
 	^ self class new 
+		soil: soil;
 		transactionJournals: (self transactionJournals select: [:each | each index between: start and: end])
 ]
 
@@ -174,12 +178,22 @@ SoilJournal >> path [
 ]
 
 { #category : #'as yet unclassified' }
-SoilJournal >> readTransactionJournalFiles [
-	| files journalFiles |
-	self path exists ifFalse: [ ^ OrderedCollection new ].
-	files := self path childrenMatching: '*.journal'.
-	journalFiles := files sorted: [:a :b | 
-		a withoutExtension basename asNumber < b withoutExtension basename asNumber].
+SoilJournal >> readTransactionJournalFile: aFileReference [ 
+	^ (SoilTransactionJournal new on: aFileReference)
+		index: aFileReference withoutExtension basename asNumber;
+		readAll;
+		close
+]
+
+{ #category : #accessing }
+SoilJournal >> soil: aSoil [ 
+	soil := aSoil
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> transactionJournalFiles [
+	| journalFiles |
+	journalFiles := self transactionJournalFilesIn: self path. 
 	(journalFiles size > self numberofJournalsToKeep) ifTrue: [ 
 		(journalFiles copyFrom: 1 to: (journalFiles size - self numberofJournalsToKeep)) do: [ :file |
 			self archiveFile: file.
@@ -187,9 +201,15 @@ SoilJournal >> readTransactionJournalFiles [
 	^ journalFiles 
 ]
 
-{ #category : #accessing }
-SoilJournal >> soil: aSoil [ 
-	soil := aSoil
+{ #category : #'as yet unclassified' }
+SoilJournal >> transactionJournalFilesIn: aStringOrFileReference [
+	| files journalFiles path |
+	path := aStringOrFileReference asFileReference.
+	path  exists ifFalse: [ ^ OrderedCollection new ].
+	files := path childrenMatching: '*.journal'.
+	journalFiles := files sorted: [:a :b | 
+		a withoutExtension basename asNumber < b withoutExtension basename asNumber].
+	^ journalFiles 
 ]
 
 { #category : #accessing }
