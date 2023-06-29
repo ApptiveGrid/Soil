@@ -89,13 +89,24 @@ SoilSkipListIterator >> index: aSoilSkipList [
 
 { #category : #accessing }
 SoilSkipListIterator >> lastPage [
-	| maxLevel pageNumber |
-	maxLevel := "self index maxLevel."1.
-	"there is a bug with right being 0 for pages other then the last"
+	| level pageNumber |
+	"we start searching at the hights possible speed lane"
+	level := index maxLevel.
+	"we start on page #1 that has a right array of size maxLevel"
 	currentPage := index headerPage.
-	[ (pageNumber := currentPage rightAt: maxLevel) isZero ] whileFalse: [ 
-		currentPage := self pageAt: pageNumber ].
-	^currentPage
+	[ level >= 1 ] whileTrue: [  
+		"we scan right as long as we get right page indexes which are larger
+		than zero"
+		[ (pageNumber := currentPage rightAt: level) isZero ] whileFalse: [ 
+			currentPage := self pageAt: pageNumber.
+			"if we encounter the last page before reaching level 1 we can 
+			short cut the scan"
+			currentPage isLastPage ifTrue: [ ^ currentPage ] ].
+		"scanning on the current level stopped, drop down one level to 
+		continue"
+		level := level - 1.
+	].
+	^	currentPage
 ]
 
 { #category : #accessing }
