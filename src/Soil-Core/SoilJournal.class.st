@@ -67,6 +67,7 @@ SoilJournal >> buildTransactionJournals [
 { #category : #copying }
 SoilJournal >> copyFrom: start to: end [ 
 	^ self class new 
+		soil: soil;
 		transactionJournals: (self transactionJournals select: [:each | each index between: start and: end])
 ]
 
