@@ -44,7 +44,7 @@ SoilTransactionJournal >> asSortedJournal [
 	last := OrderedCollection new.
 	middle := OrderedCollection new.
 	entries do: [ :entry |
-		({ SoilNewTransactionEntry . SoilNewBehaviorEntry . SoilNewObjectEntry . SoilNewObjectVersionEntry . SoilNewSkipListIndexEntry } includes:  entry class) ifTrue: [ 
+		({ SoilNewTransactionEntry . SoilNewBehaviorEntry . SoilNewObjectEntry . SoilNewObjectVersionEntry . SoilNewSkipListIndexEntry . SoilNewBTreeListIndexEntry } includes:  entry class) ifTrue: [ 
 			first add: entry ]  .
 		({ SoilUpdateDatabaseVersion . SoilUpdateSegmentIndexEntry . SoilNewCheckpointEntry } includes:  entry class) ifTrue: [ 
 			last add: entry ].

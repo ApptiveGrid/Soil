@@ -21,8 +21,10 @@ SoilBTreePage class >> pageCode [
 ]
 
 { #category : #adding }
-SoilBTreePage >> addItem: anAssociation [ 
-	items add: anAssociation.
+SoilBTreePage >> addItem: anAssociation [
+	(items anySatisfy: [ :item | item key = anAssociation key ])
+		ifFalse: [ items add: anAssociation ]
+		ifTrue:  [ self itemAt: anAssociation key put: anAssociation value ].
 	dirty := true
 ]
 
@@ -170,6 +172,12 @@ SoilBTreePage >> numberOfItems [
 { #category : #accessing }
 SoilBTreePage >> pointerSize [
 	^ 2
+]
+
+{ #category : #copying }
+SoilBTreePage >> postCopy [ 
+	super postCopy.
+	items := items copy.
 ]
 
 { #category : #reading }
