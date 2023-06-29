@@ -111,6 +111,11 @@ SoilBasicSkipList >> last [
 ]
 
 { #category : #accessing }
+SoilBasicSkipList >> lastPage [
+	^ self newIterator lastPage
+]
+
+{ #category : #accessing }
 SoilBasicSkipList >> maxLevel [
 
 	^ self headerPage maxLevel
