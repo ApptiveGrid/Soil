@@ -458,6 +458,9 @@ SoilTransaction >> newSerializer [
 
 { #category : #accessing }
 SoilTransaction >> objectAt: anObjectId ifAbsent: aBlock [
+	idMap ifNil: [ 
+		SoilTransactionAlreadyAborted signal: 'this transaction has already been aborted' ].
+
 	idMap 
 		at: anObjectId 
 		ifPresent: [ :record | ^ record object ]
