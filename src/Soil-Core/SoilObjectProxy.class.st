@@ -9,6 +9,12 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #converting }
+SoilObjectProxy >> asUnresolvedProxy [ 
+	^ SoilUnresolvedProxy new
+		objectId: objectId 
+]
+
 { #category : #'reflective operations' }
 SoilObjectProxy >> doesNotUnderstand: aMessage [ 
 	^ aMessage sendTo: self soilRealObject
