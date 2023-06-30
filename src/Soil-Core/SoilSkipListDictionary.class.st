@@ -146,7 +146,8 @@ SoilSkipListDictionary >> first: anInteger [
 
 { #category : #accesing }
 SoilSkipListDictionary >> firstAssociation [
-	self index isRegistered ifFalse: [ 
+	self index isRegistered ifFalse: [
+		newValues ifEmpty: [ ^nil ].
 		^ newValues at: (newValues keyAtIndex: 1) ].
 	^ index newIterator firstAssociation ifNotNil: [ :assoc | 
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
