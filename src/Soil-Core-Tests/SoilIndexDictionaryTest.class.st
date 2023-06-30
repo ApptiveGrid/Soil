@@ -157,6 +157,28 @@ SoilIndexDictionaryTest >> testFirst [
 ]
 
 { #category : #tests }
+SoilIndexDictionaryTest >> testFirstWithSingleRemovedItem [ 
+	
+	dict at: #foo put: #bar.
+	dict removeKey: #foo.
+	self assert: dict firstAssociation equals: nil
+]
+
+{ #category : #tests }
+SoilIndexDictionaryTest >> testFirstWithTransaction [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #foo put: #one.
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"and test first"
+	self assert: tx2 root first equals: #one
+
+]
+
+{ #category : #tests }
 SoilIndexDictionaryTest >> testIsEmpty [
 	self assert: dict isEmpty.
 	dict at: #foo put: #bar.
@@ -169,6 +191,13 @@ SoilIndexDictionaryTest >> testLast [
 	dict at: #foo2 put: #bar2.
 
 	self assert: dict last equals: #bar2
+]
+
+{ #category : #tests }
+SoilIndexDictionaryTest >> testLastWithSingleRemovedItem [ 
+	dict at: #foo put: #bar.
+	dict removeKey: #foo.
+	self assert: dict lastAssociation equals: nil
 ]
 
 { #category : #tests }
