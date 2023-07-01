@@ -169,7 +169,9 @@ SoilIndexDictionaryTest >> testFirstWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: #foo put: #one.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	self assert: dict first equals: #one.
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
@@ -198,6 +200,21 @@ SoilIndexDictionaryTest >> testLastWithSingleRemovedItem [
 	dict at: #foo put: #bar.
 	dict removeKey: #foo.
 	self assert: dict lastAssociation equals: nil
+]
+
+{ #category : #tests }
+SoilIndexDictionaryTest >> testLastWithTransaction [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	"self assert: dict last equals: #two."
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"and test last"
+	self assert: tx2 root last equals: #two
 ]
 
 { #category : #tests }

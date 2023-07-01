@@ -250,19 +250,17 @@ SoilSkipListDictionary >> keySize: anInteger [
 
 { #category : #accessing }
 SoilSkipListDictionary >> last [
-	| assoc |
 	^ transaction 
-		ifNotNil: [  
-			assoc := self index newIterator lastAssociation.
-			assoc ifNil: [ ^ nil ].
-			assoc value isRemoved ifTrue: [ ^ nil ].
-			assoc key -> (transaction proxyForObjectId: assoc value asSoilObjectId) ]
+		ifNotNil: [ self proxyFromByteArray: self index last ]
 		ifNil: [ newValues associations last value ]
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> lastAssociation [
-	^ self index newIterator lastAssociation ifNotNil: [ :assoc | 
+	self index isRegistered ifFalse: [
+		newValues ifEmpty: [ ^nil ].
+		^ newValues at: (newValues keyAtIndex: newValues size) ].
+	^ index newIterator lastAssociation ifNotNil: [ :assoc | 
 		assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
 ]
