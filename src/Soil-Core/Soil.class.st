@@ -80,12 +80,14 @@ Soil >> critical: aBlock [
 
 { #category : #accessing }
 Soil >> databaseVersion [
-	^ settings databaseVersion
+	"avoid concurrent reading of the stream"
+	^ semaphore critical: [settings databaseVersion]
 ]
 
 { #category : #accessing }
 Soil >> databaseVersion: anInteger [ 
-	settings databaseVersion: anInteger
+	"avoid concurrent writing of the stream"
+	semaphore critical: [settings databaseVersion: anInteger]
 ]
 
 { #category : #'as yet unclassified' }
