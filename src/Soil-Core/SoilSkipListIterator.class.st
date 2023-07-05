@@ -161,16 +161,6 @@ SoilSkipListIterator >> nextKeyCloseTo: key [
 			currentKey := nextKey ]
 ]
 
-{ #category : #accessing }
-SoilSkipListIterator >> nextPresentAssociation [
-	| assoc |
-	"lookup next association by leaving out the removed keys"
-	assoc := self nextAssociation.
-	[ assoc notNil and: [ assoc value isRemoved ] ] whileTrue: [ 
-		assoc := self nextAssociation ].
-	^ assoc
-]
-
 { #category : #printing }
 SoilSkipListIterator >> printOn: aStream [ 
 	aStream << 'path: ' << levels asString

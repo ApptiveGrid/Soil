@@ -107,6 +107,16 @@ SoilIndexIterator >> nextAssociation [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> nextPresentAssociation [
+	| assoc |
+	"lookup next association by leaving out the removed keys"
+	assoc := self nextAssociation.
+	[ assoc notNil and: [ assoc value isRemoved ] ] whileTrue: [ 
+		assoc := self nextAssociation ].
+	^ assoc
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> pageAt: anInteger [
 	^ index store pageAt: anInteger
 ]
