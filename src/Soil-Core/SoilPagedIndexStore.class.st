@@ -11,6 +11,7 @@ Class {
 
 { #category : #testing }
 SoilPagedIndexStore class >> isAbstract [
+	<ignoreForCoverage>
 	^ self == SoilPagedIndexStore
 ]
 

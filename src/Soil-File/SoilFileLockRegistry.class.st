@@ -27,7 +27,7 @@ SoilFileLockRegistry class >> initialize [
 	self reset
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilFileLockRegistry class >> numberOfRegistries [
 	^ registries size
 ]
@@ -61,7 +61,7 @@ SoilFileLockRegistry >> initialize [
 	semaphore := Semaphore forMutualExclusion
 ]
 
-{ #category : #accessing }
+{ #category : #locking }
 SoilFileLockRegistry >> lockFrom: from to: to for: currentLockingObject [ 
 	^ self addLock: (SoilRangeLock from: from to: to context: currentLockingObject)
 ]
@@ -95,7 +95,7 @@ SoilFileLockRegistry >> removeLock: aSORangeLock [
 		locks remove: aSORangeLock ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #locking }
 SoilFileLockRegistry >> unlockFrom: from to: to for: contextObject [ 
 	| lock |
 	^ semaphore critical: [  

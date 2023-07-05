@@ -27,13 +27,13 @@ SoilRangeLock class >> from: from to: to context: lockContext [
 		context: lockContext 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilRangeLock >> conflictsFrom: aFrom to: aTo context: contextObject [ 
 	"conflicts if ranges overlap but only for different contexts"
 	^ (self intersectsFrom: aFrom to: aTo) and: [ context ~~ contextObject ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilRangeLock >> conflictsWith: aSORangeLock [ 
 	^ aSORangeLock conflictsFrom: from to: to context: context
 ]
@@ -62,7 +62,7 @@ SoilRangeLock >> from: anObject [
 	from := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilRangeLock >> intersectsFrom: otherFrom to: otherTo [ 
 	"other range is before"
 	(otherTo < from) ifTrue: [ ^ false ].
@@ -77,13 +77,13 @@ SoilRangeLock >> isFrom: aFrom to: aTo for: contextObject [
 	^ from = aFrom and: [ to = aTo and: [ context = contextObject ] ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #locking }
 SoilRangeLock >> lockInMemory: aLockRegistry [ 
 	aLockRegistry addLock: self 
 	 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #locking }
 SoilRangeLock >> lockOn: aStream [ 
 	stream := aStream wrappedStream.
 	stream lockAt: from length: to - from 
