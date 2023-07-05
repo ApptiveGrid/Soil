@@ -182,16 +182,6 @@ SoilMaterializer >> nextInternalReference [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextMessage: aClass [ 
-	| message |
-	message := aClass new.
-	self registerObject: message.
-	^ message
-		setSelector: self nextSoilObject arguments: self nextSoilObject;
-		yourself
-]
-
-{ #category : #reading }
 SoilMaterializer >> nextOrderedCollection: aClass [ 
 		| size collection |
 	size := self  nextLengthEncodedInteger.
