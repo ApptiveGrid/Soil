@@ -157,11 +157,19 @@ SoilIndexDictionaryTest >> testFirst [
 ]
 
 { #category : #tests }
-SoilIndexDictionaryTest >> testFirstWithSingleRemovedItem [ 
+SoilIndexDictionaryTest >> testFirstAssociationWithSingleRemovedItem [ 
 	
 	dict at: #foo put: #bar.
 	dict removeKey: #foo.
 	self assert: dict firstAssociation equals: nil
+]
+
+{ #category : #tests }
+SoilIndexDictionaryTest >> testFirstWithSingleRemovedItem [ 
+	
+	dict at: #foo put: #bar.
+	dict removeKey: #foo.
+	self assert: dict first equals: nil
 ]
 
 { #category : #tests }
@@ -196,10 +204,17 @@ SoilIndexDictionaryTest >> testLast [
 ]
 
 { #category : #tests }
-SoilIndexDictionaryTest >> testLastWithSingleRemovedItem [ 
+SoilIndexDictionaryTest >> testLastAssociationWithSingleRemovedItem [ 
 	dict at: #foo put: #bar.
 	dict removeKey: #foo.
 	self assert: dict lastAssociation equals: nil
+]
+
+{ #category : #tests }
+SoilIndexDictionaryTest >> testLastWithSingleRemovedItem [ 
+	dict at: #foo put: #bar.
+	dict removeKey: #foo.
+	self assert: dict last equals: nil
 ]
 
 { #category : #tests }

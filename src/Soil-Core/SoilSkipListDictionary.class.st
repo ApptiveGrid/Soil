@@ -131,8 +131,10 @@ SoilSkipListDictionary >> do: aBlock [
 { #category : #accessing }
 SoilSkipListDictionary >> first [
 	^ transaction 
-		ifNotNil: [ self proxyFromByteArray: self index first ]
-		ifNil: [ newValues associations first value ]
+		ifNotNil: [ self proxyFromByteArray: self index newIterator first ]
+		ifNil: [ 
+			"associations is sorted"
+			newValues associations ifNotEmpty: [:nv | nv first value ] ifEmpty: nil]
 ]
 
 { #category : #accessing }
@@ -144,14 +146,16 @@ SoilSkipListDictionary >> first: anInteger [
 		ifNil: [ (newValues associations first: anInteger) collect: #value ]  
 ]
 
-{ #category : #accesing }
+{ #category : #accessing }
 SoilSkipListDictionary >> firstAssociation [
-	self index isRegistered ifFalse: [
-		newValues ifEmpty: [ ^nil ].
-		^ newValues at: (newValues keyAtIndex: 1) ].
-	^ index newIterator firstAssociation ifNotNil: [ :assoc | 
-			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
+	^ transaction
+		  ifNotNil: [
+			  index newIterator firstAssociation ifNotNil: [ :assoc |
+				  assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ] ]
+		  ifNil: [ 
+			"associations is sorted" 
+			newValues associations ifNotEmpty: [:nv | nv first ] ifEmpty: nil]
 ]
 
 { #category : #'as yet unclassified' }
@@ -251,18 +255,22 @@ SoilSkipListDictionary >> keySize: anInteger [
 { #category : #accessing }
 SoilSkipListDictionary >> last [
 	^ transaction 
-		ifNotNil: [ self proxyFromByteArray: self index last ]
-		ifNil: [ newValues associations last value ]
+		ifNotNil: [ self proxyFromByteArray: self index newIterator last ]
+		ifNil: [ 
+			"associations is sorted"
+			newValues associations ifNotEmpty: [:nv | nv last value ] ifEmpty: nil ]
 ]
 
 { #category : #accessing }
 SoilSkipListDictionary >> lastAssociation [
-	self index isRegistered ifFalse: [
-		newValues ifEmpty: [ ^nil ].
-		^ newValues at: (newValues keyAtIndex: newValues size) ].
-	^ index newIterator lastAssociation ifNotNil: [ :assoc | 
-		assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 
+	^ transaction
+		  ifNotNil: [
+			  index newIterator lastAssociation ifNotNil: [ :assoc |
+				  assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ] ]
+		  ifNil: [ 
+			"associations is sorted" 
+			newValues associations ifNotEmpty: [:nv | nv last ] ifEmpty: nil ]
 ]
 
 { #category : #private }
