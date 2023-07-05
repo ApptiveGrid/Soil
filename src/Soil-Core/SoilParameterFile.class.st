@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'soil',
 		'databaseFormatVersion',
-		'applicationVersion'
+		'applicationVersion',
+		'semaphore'
 	],
 	#category : #'Soil-Core-Files'
 }
@@ -16,18 +17,20 @@ SoilParameterFile >> acceptSoil: aSoilVisitor [
 
 { #category : #accessing }
 SoilParameterFile >> applicationVersion [
-	^ applicationVersion ifNil: [ 
-		stream position: self headerSize + self databaseFormatVersionSize + self databaseVersionSize.
-		applicationVersion := (stream next: self applicationVersionSize) asInteger ]
+	^ semaphore critical: [  
+		applicationVersion ifNil: [ 
+			stream position: self headerSize + self databaseFormatVersionSize + self databaseVersionSize.
+			applicationVersion := (stream next: self applicationVersionSize) asInteger ] ]
 ]
 
 { #category : #accessing }
 SoilParameterFile >> applicationVersion: anInteger [
-	self stream 
-		position: self headerSize + self databaseFormatVersionSize + self databaseVersionSize;
-		nextPutAll: (anInteger asByteArrayOfSize: self applicationVersionSize);
-		flush.
-	applicationVersion := anInteger 
+	semaphore critical: [  
+		self stream 
+			position: self headerSize + self databaseFormatVersionSize + self databaseVersionSize;
+			nextPutAll: (anInteger asByteArrayOfSize: self applicationVersionSize);
+			flush.
+		applicationVersion := anInteger ]
 ]
 
 { #category : #accessing }
@@ -37,18 +40,20 @@ SoilParameterFile >> applicationVersionSize [
 
 { #category : #accessing }
 SoilParameterFile >> databaseFormatVersion [
-	^ databaseFormatVersion ifNil: [ 
-		stream position: self headerSize.
-		databaseFormatVersion := (stream next: self databaseFormatVersionSize) asInteger ]
+	^ semaphore critical: [ 
+		databaseFormatVersion ifNil: [ 
+			stream position: self headerSize.
+			databaseFormatVersion := (stream next: self databaseFormatVersionSize) asInteger ] ]
 ]
 
 { #category : #accessing }
 SoilParameterFile >> databaseFormatVersion: anInteger [
-	self stream 
-		position: self headerSize;
-		nextPutAll: (anInteger asByteArrayOfSize: self databaseFormatVersionSize);
-		flush.
-	databaseFormatVersion := anInteger 
+	semaphore critical: [   
+		self stream 
+			position: self headerSize;
+			nextPutAll: (anInteger asByteArrayOfSize: self databaseFormatVersionSize);
+			flush.
+		databaseFormatVersion := anInteger ]
 ]
 
 { #category : #accessing }
@@ -58,22 +63,29 @@ SoilParameterFile >> databaseFormatVersionSize [
 
 { #category : #accessing }
 SoilParameterFile >> databaseVersion [
-	stream position: self headerSize + self databaseFormatVersionSize.
-	^ (stream next: self databaseVersionSize) asInteger
-	
+	^ semaphore critical: [  
+		stream position: self headerSize + self databaseFormatVersionSize.
+		(stream next: self databaseVersionSize) asInteger ]
 ]
 
 { #category : #accessing }
 SoilParameterFile >> databaseVersion: anInteger [
-	self stream 
-		position: self headerSize + self databaseFormatVersionSize;
-		nextPutAll: (anInteger asByteArrayOfSize: self databaseVersionSize);
-		flush
+	semaphore critical: [  
+		self stream 
+			position: self headerSize + self databaseFormatVersionSize;
+			nextPutAll: (anInteger asByteArrayOfSize: self databaseVersionSize);
+			flush ]
 ]
 
 { #category : #accessing }
 SoilParameterFile >> databaseVersionSize [
 	^ 8
+]
+
+{ #category : #initialization }
+SoilParameterFile >> initialize [ 
+	super initialize.
+	semaphore := Semaphore forMutualExclusion 
 ]
 
 { #category : #initialization }
