@@ -18,7 +18,7 @@ SoilLockableStream class >> path: aStringOrFileReference [
 		yourself
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'open/close' }
 SoilLockableStream >> close [
 	self releaseAllLocks.
 	fileStream ifNotNil: [  

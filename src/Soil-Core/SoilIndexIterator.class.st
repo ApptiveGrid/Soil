@@ -12,7 +12,7 @@ Class {
 
 { #category : #testing }
 SoilIndexIterator class >> isAbstract [
-
+	<ignoreForCoverage>
 	^ self == SoilIndexIterator
 ]
 
