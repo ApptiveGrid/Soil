@@ -278,7 +278,7 @@ SoilSkipListDictionary >> maxLevel: anInteger [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilSkipListDictionary >> nextAfter: key [  
 	| iterator |
 	iterator := self index newIterator 
