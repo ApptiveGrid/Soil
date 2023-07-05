@@ -21,12 +21,10 @@ SoilJournal >> addTransactionJournal: aSoilTransactionJournal [
 		self verifyNextJournalIndex: aSoilTransactionJournal index.	
 		transactionJournals addLast: aSoilTransactionJournal.
 		[ transactionJournals size <= self numberofJournalsToKeep ]  whileFalse: [ 
-			[  
 			Transcript crShow: ('transaction journal ids before:', (transactionJournals collect: #index) printString).
 			self archiveJournal: transactionJournals removeFirst.
 			Transcript crShow: ('transaction journal ids after:', (transactionJournals collect: #index) printString).
-			Transcript crShow: ('new index offset will be: ', transactionJournals first index printString) ]
-			on: Error do: [ :e | "ignore for now" ] ].
+			Transcript crShow: ('new index offset will be: ', transactionJournals first index printString) ].
 		indexOffset := transactionJournals first index - 1 ]
 
 ]
@@ -45,8 +43,9 @@ SoilJournal >> archiveFile: aFileReference [
 
 { #category : #adding }
 SoilJournal >> archiveJournal: aTransactionJournal [ 
-	self ensureArchivePath.
-	self archiveFile: (self transactionJournalPathFor: aTransactionJournal index)
+	[ 	self ensureArchivePath.
+		self archiveFile: (self transactionJournalPathFor: aTransactionJournal index) ]
+		on: Error do: [ :e | "ignore for now" ]
 ]
 
 { #category : #'as yet unclassified' }
