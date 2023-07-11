@@ -50,6 +50,41 @@ SoilTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilTest >> testCheckpointEmptyRecordsToCommit [
+	| tx root skipList obj items |
+	tx := soil newTransaction.
+	root := SoilPersistentDictionary new.
+	"N.B. Having the skip list at the root, did not trigger the error"
+	tx makeRoot: root.
+	tx root: root.
+	tx checkpointAndContinue.
+
+	skipList := SoilSkipListDictionary new keySize: 32; maxLevel: 8; yourself.
+	tx makeRoot: skipList.
+	tx root at: 123 put: skipList.
+
+	obj := SoilTestClass1 new one: #oneA; yourself.
+	tx makeRoot: obj.
+	skipList at: 'aaa' asByteArray put: obj.
+
+	obj := SoilTestClass1 new one: #oneB; yourself.
+	tx makeRoot: obj.
+	skipList at: 'bbb' asByteArray put: obj.
+
+	tx checkpointAndContinue.
+
+	self
+		shouldnt: [
+			"Doesn't always trigger error. Try more repeats, if don't see the error"
+			5 timesRepeat: [
+				skipList := tx root at: 123.
+				"N.B. Have to actually pull in the proxy object to trigger error"
+				items := skipList values collect: [ :each | each one ].
+				tx checkpointAndContinue ] ]
+		raise: Error
+]
+
+{ #category : #tests }
 SoilTest >> testIncompatibleDatabaseFormatVersion [ 
 	soil settings databaseFormatVersion: 2.
 	soil close.
