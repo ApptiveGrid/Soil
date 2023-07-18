@@ -234,6 +234,7 @@ SoilTransaction >> commit [
 
 { #category : #actions }
 SoilTransaction >> continue [
+	recordsToCommit ifEmpty: [ ^ self ].
 	recordsToCommit do: [ :record | | persistentRecord |
 		persistentRecord := record asPersistentClusterVersion.
 		objectMap at: record object put: persistentRecord.
