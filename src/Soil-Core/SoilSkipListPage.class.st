@@ -151,9 +151,10 @@ SoilSkipListPage >> itemAt: key put: anObject [
 ]
 
 { #category : #accessing }
-SoilSkipListPage >> itemBefore: key [ 
+SoilSkipListPage >> itemBefore: key [
+
 	| item |
-	item := items at: key ifAbsent: nil.
+	item := items at: key ifAbsent: [ ^ nil ].
 	^ items before: item ifAbsent: nil
 ]
 
