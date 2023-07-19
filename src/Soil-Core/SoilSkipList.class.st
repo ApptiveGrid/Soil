@@ -121,11 +121,6 @@ SoilSkipList >> thePersistentInstance [
 ]
 
 { #category : #writing }
-SoilSkipList >> writeHeaderPage [
-	self store writeHeaderPage
-]
-
-{ #category : #writing }
 SoilSkipList >> writePages [
 	self store flushPages
 ]

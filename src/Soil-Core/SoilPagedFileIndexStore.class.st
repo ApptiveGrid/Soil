@@ -127,16 +127,9 @@ SoilPagedFileIndexStore >> stream [
 ]
 
 { #category : #writing }
-SoilPagedFileIndexStore >> writeHeaderPage [
-	streamSemaphore critical: [  
-		self stream position: 0.
-		self headerPage writeOn: self stream ]
-]
-
-{ #category : #writing }
 SoilPagedFileIndexStore >> writePage: aPage [ 
-	| pagePosition |
 	streamSemaphore critical: [  
+		| pagePosition |
 		pagePosition := self positionOfPageIndex: aPage index.  
 		stream position: pagePosition.
 		aPage writeOn: stream.
