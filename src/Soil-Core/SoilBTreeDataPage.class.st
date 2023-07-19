@@ -85,14 +85,17 @@ SoilBTreeDataPage >> itemAt: key put: anObject [
 ]
 
 { #category : #accessing }
+SoilBTreeDataPage >> itemBefore: key [
+
+	| item |
+	item := items at: key ifAbsent: [ ^ nil ].
+	^ items before: item ifAbsent: nil
+]
+
+{ #category : #accessing }
 SoilBTreeDataPage >> lastItem [
-	| item maxKey |
-	items ifEmpty: [ ^ nil ].
-	maxKey := (2 raisedTo: (keySize * 8)) - 1. 
-	item := items last.
-	^ (item key = maxKey)
-		ifTrue: [ items at: items size - 1 ]
-		ifFalse: [ item ] 
+
+	^ items ifEmpty: [ nil ] ifNotEmpty: [ :itms | itms last ]
 ]
 
 { #category : #accessing }

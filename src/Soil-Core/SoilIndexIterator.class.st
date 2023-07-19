@@ -79,16 +79,20 @@ SoilIndexIterator >> last [
 
 { #category : #accessing }
 SoilIndexIterator >> lastAssociation [
-	self flag: #todo.
-	"this does not work if the last item has been removed. 
-	Going back is not easy in a skip list"
-	^ self lastPage lastItem  "sets currentPage"
-		ifNotNil: [: assoc | 
-			assoc value isRemoved 
-				ifTrue: [ nil ]
-				ifFalse: [ 
-					currentKey := assoc key.
-					assoc ] ]
+	| lastPage item |
+	lastPage := self lastPage.
+	item := lastPage lastItem.  "sets currentPage"
+	
+	"if the last value is removed, take the one before"
+	[item notNil and: [ item value isRemoved ]] whileTrue: [  
+		item := lastPage itemBefore: item key].
+	
+	self flag: #TODO.
+	"if we did not find it in the last page, we need to check the page before"
+	item ifNil: [ ^nil ].	
+	currentKey := item key.
+	^ item 
+	
 ]
 
 { #category : #accessing }
