@@ -150,6 +150,13 @@ SoilSkipListPage >> itemAt: key put: anObject [
 	^ removedItem
 ]
 
+{ #category : #accessing }
+SoilSkipListPage >> itemBefore: key [ 
+	| item |
+	item := items at: key ifAbsent: nil.
+	^ items before: item ifAbsent: nil
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipListPage >> itemCapacity [
 	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
@@ -214,8 +221,8 @@ SoilSkipListPage >> keySize: anInteger [
 
 { #category : #accessing }
 SoilSkipListPage >> lastItem [
-	items ifEmpty: [ ^ nil ].
-	^ items last
+
+	^ items ifEmpty: [ nil ] ifNotEmpty: [ :itms | itms last ]
 ]
 
 { #category : #accessing }

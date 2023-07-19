@@ -233,6 +233,22 @@ SoilIndexDictionaryTest >> testLastWithTransaction [
 ]
 
 { #category : #tests }
+SoilIndexDictionaryTest >> testLastWithTransactionRemoveLast [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	"self assert: dict last equals: #two."
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	tx2 root removeKey: 2.
+	"and test last"
+	self assert: tx2 root last equals: #one
+]
+
+{ #category : #tests }
 SoilIndexDictionaryTest >> testNextAfterWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
