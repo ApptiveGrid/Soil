@@ -249,6 +249,14 @@ SoilIndexDictionaryTest >> testLastWithTransactionRemoveLast [
 ]
 
 { #category : #tests }
+SoilIndexDictionaryTest >> testNextAfter [
+	dict at: 1 put: #bar.
+	dict at: 2 put: #bar2.
+
+	self assert:( dict nextAfter: 1) equals: #bar2
+]
+
+{ #category : #tests }
 SoilIndexDictionaryTest >> testNextAfterWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.

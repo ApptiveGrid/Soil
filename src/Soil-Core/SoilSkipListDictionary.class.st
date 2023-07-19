@@ -289,6 +289,12 @@ SoilSkipListDictionary >> maxLevel: anInteger [
 { #category : #accessing }
 SoilSkipListDictionary >> nextAfter: key [  
 	| iterator |
+	transaction ifNil: [ 
+		| newValueSorted |
+		self flag: #TODO. "need to sort in key order"
+		newValueSorted := newValues associations.
+		^ (newValueSorted after: (newValues associationAt: key)) value  ].
+
 	iterator := self index newIterator 
 		find: key asInteger;
 		yourself.
