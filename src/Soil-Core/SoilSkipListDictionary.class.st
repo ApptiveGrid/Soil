@@ -358,7 +358,7 @@ SoilSkipListDictionary >> restoreValue: value forKey: key iterator: iterator [
 { #category : #accessing }
 SoilSkipListDictionary >> second [
 	^ transaction 
-		ifNotNil: [ index newIterator first; next ]
+		ifNotNil: [ self proxyFromByteArray: (index newIterator first; next) ]
 		ifNil: [ newValues associations second value ]
 ]
 
