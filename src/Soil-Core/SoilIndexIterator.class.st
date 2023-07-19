@@ -87,7 +87,8 @@ SoilIndexIterator >> lastAssociation [
 	[item notNil and: [ item value isRemoved ]] whileTrue: [  
 		item := lastPage itemBefore: item key].
 	
-	"if we did not find it in the last page, it does not exist"
+	self flag: #TODO.
+	"if we did not find it in the last page, we need to check the page before"
 	item ifNil: [ ^nil ].	
 	currentKey := item key.
 	^ item 
