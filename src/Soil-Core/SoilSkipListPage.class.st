@@ -48,7 +48,7 @@ SoilSkipListPage >> associationAt: key ifAbsent: aBlock [
 		ifNone: aBlock
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilSkipListPage >> biggestKey [
 	^ self isLastPage 
 		ifTrue: [ (2 raisedTo: (keySize * 8)) - 1 ]
@@ -124,7 +124,7 @@ SoilSkipListPage >> isOlderThan: aVersionNumber [
 	^ lastTransaction <= aVersionNumber 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilSkipListPage >> itemAfter: key [ 
 	| i item |
 	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
@@ -158,7 +158,7 @@ SoilSkipListPage >> itemBefore: key [
 	^ items before: item ifAbsent: nil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilSkipListPage >> itemCapacity [
 	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
 ]
@@ -324,12 +324,12 @@ SoilSkipListPage >> sizeInBytes [
 	^ self headerSize + (items size * (self keySize + self valueSize))
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilSkipListPage >> smallestKey [
 	^ items first key
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilSkipListPage >> split: newPage [
 	| middle |
 	middle := (items size / 2) ceiling.

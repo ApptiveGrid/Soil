@@ -81,8 +81,3 @@ SoilBTreeIterator >> nextAssociation [
 				^ currentPage firstItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
 	Error signal: 'shouldnt happen'
 ]
-
-{ #category : #'as yet unclassified' }
-SoilBTreeIterator >> updateCurrentTransaction: anInteger [ 
-	currentPage lastTransaction: anInteger
-]

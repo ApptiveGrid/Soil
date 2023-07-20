@@ -19,7 +19,7 @@ SoilSkipList >> asCopyOnWrite [
 		yourself 
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'opening/closing' }
 SoilSkipList >> close [
 	self store close
 ]
@@ -86,7 +86,7 @@ SoilSkipList >> newPage [
 		yourself
 ]
 
-{ #category : #opening }
+{ #category : #'opening/closing' }
 SoilSkipList >> open [
 	self store open
 ]

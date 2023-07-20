@@ -95,7 +95,7 @@ SoilParameterFile >> initializeStart [
 	self applicationVersion: 1
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #inspector }
 SoilParameterFile >> inspectionParameters [
 	<inspectorPresentationOrder: 1000 title: 'soil parameters'>
 
@@ -109,7 +109,7 @@ SoilParameterFile >> inspectionParameters [
 			addColumn: (SpStringTableColumn evaluated: [:each | self perform: each asSymbol ]))
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #locking }
 SoilParameterFile >> lockDatabaseVersionFor: lockContext [
 	^ stream 
 		lockFrom: self headerSize
@@ -124,7 +124,7 @@ SoilParameterFile >> open [
 		ifFalse: [ SoilIncompatibleDatabaseFormat signal: 'database format version ', Soil databaseFormatVersion asString, ' does not match persisted database format version ', self databaseFormatVersion asString] 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilParameterFile >> parameterNames [
 	^ #( databaseFormatVersion databaseVersion applicationVersion ) 
 ]

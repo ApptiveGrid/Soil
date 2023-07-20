@@ -35,7 +35,7 @@ SoilNewBehaviorEntry >> context [
 	^ objectId 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilNewBehaviorEntry >> effect [
 	^ identifier 
 ]

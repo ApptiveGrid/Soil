@@ -55,7 +55,7 @@ SoilSkipListHeaderPage >> maxLevel: anInteger [
 	right := Array new: anInteger withAll: 0 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilSkipListHeaderPage >> nextPageIndex [
 	lastPageIndex := lastPageIndex + 1.
 	dirty := true.
@@ -79,7 +79,7 @@ SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	lastPageIndex :=(aStream next: 4) asInteger 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilSkipListHeaderPage >> smallestKey [ 
 	^ 0
 ]
