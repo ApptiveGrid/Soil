@@ -184,7 +184,8 @@ SoilIndexDictionaryTest >> testFirstWithTransaction [
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"and test first"
-	self assert: tx2 root first equals: #one
+	self assert: tx2 root first equals: #one. 
+	self assert: (tx2 root first: 2) second equals: #two
 
 ]
 

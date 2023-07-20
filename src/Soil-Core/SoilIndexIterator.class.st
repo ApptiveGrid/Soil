@@ -106,6 +106,17 @@ SoilIndexIterator >> next [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> next: anInteger [
+	| result |
+	result := OrderedCollection new: anInteger.
+	anInteger timesRepeat: [
+		| next |
+		next := self next ifNil: [ ^ result].
+		result add: next ].
+	^ result
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> nextAssociation [
 	^ self subclassResponsibility
 ]
