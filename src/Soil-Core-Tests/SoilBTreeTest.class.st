@@ -198,6 +198,37 @@ SoilBTreeTest >> testIsEmpty [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testIteratorFindAndNext [
+	
+	| capacity iterator value |
+	capacity := btree headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		btree at: n put: (n asByteArrayOfSize: 8) ].
+	self assert: btree pages size equals: 4.
+	iterator := btree newIterator.
+	value := iterator
+		find: 222;
+		next.
+	self assert: value equals: (223 asByteArrayOfSize: 8)
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testIteratorFindAndNext2 [
+	
+	| capacity iterator values |
+	capacity := btree headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		btree at: n put: (n asByteArrayOfSize: 8) ].
+	self assert: btree pages size equals: 4.
+	iterator := btree newIterator.
+	values := iterator
+		find: 222;
+		next: 3.
+	self assert: values size equals: 3.
+	self assert: values asArray equals: {(223 asByteArrayOfSize: 8). (224 asByteArrayOfSize: 8). (225 asByteArrayOfSize: 8)}
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testIteratorFirst [
 	
 	| capacity first |
