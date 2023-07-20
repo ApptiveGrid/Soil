@@ -19,7 +19,7 @@ SoilAddKeyEntry >> address [
 	^ key asByteArray asString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #committing }
 SoilAddKeyEntry >> commitIn: transaction [ 
 	| index |
 	index := transaction indexAt: id segment: segment.
@@ -34,7 +34,7 @@ SoilAddKeyEntry >> context [
 	^ id 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilAddKeyEntry >> effect [
 	^ key -> value 
 ]

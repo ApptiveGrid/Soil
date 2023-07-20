@@ -133,3 +133,8 @@ SoilIndexIterator >> size [
 	self do: [ :each | sum := sum + 1 ].
 	^ sum
 ]
+
+{ #category : #transactions }
+SoilIndexIterator >> updateCurrentTransaction: anInteger [ 
+	currentPage lastTransaction: anInteger
+]

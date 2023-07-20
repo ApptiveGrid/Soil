@@ -18,7 +18,7 @@ SoilRemoveKeyEntry >> address [
 	^ key asByteArray asString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #committing }
 SoilRemoveKeyEntry >> commitIn: transaction [ 
 	(transaction indexAt: id segment: segment) newIterator 
 		at: key put: (SoilObjectId segment: 0 index: 0);

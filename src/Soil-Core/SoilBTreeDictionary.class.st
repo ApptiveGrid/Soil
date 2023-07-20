@@ -16,7 +16,7 @@ SoilBTreeDictionary >> initialize [
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #journal }
 SoilBTreeDictionary >> journalEntries [
 	| entries segment |
 	entries := OrderedCollection new.

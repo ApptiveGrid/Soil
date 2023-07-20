@@ -34,27 +34,22 @@ SoilSkipListIterator >> atLevel: key put: anObject [
 
 { #category : #accessing }
 SoilSkipListIterator >> basicAt: key put: anObject [
-	| newPage itemIndex |
-	self 
-		findPageFor: key 
-		startingAt: index headerPage.
+
+	|itemIndex |
+	self findPageFor: key startingAt: index headerPage.
 	itemIndex := currentPage indexOfKey: key.
 	"as an optimization we return the prior value stored in the list. If
 	there was none we return nil"
-	^ (itemIndex > 0)
-		ifTrue: [ currentPage itemAt: key put: anObject ] 
-		ifFalse: [ 
-			currentPage hasRoom 
-				ifTrue: [ 
-					currentPage addItem: (key -> anObject).
-					nil ]
-				ifFalse: [ 
-					newPage := index splitPage: self forKey: key.
-					currentPage := (currentPage biggestKey < key)
-						ifTrue: [ newPage ]
-						ifFalse: [ currentPage ].
-					currentPage addItem: (key -> anObject).
-					nil ] ]
+	^ itemIndex > 0
+		  ifTrue: [ currentPage itemAt: key put: anObject ]
+		  ifFalse: [
+			  currentPage hasRoom ifFalse: [  | newPage |
+				  newPage := index splitPage: self forKey: key.
+				  currentPage := currentPage biggestKey < key
+					                 ifTrue: [ newPage ]
+					                 ifFalse: [ currentPage ] ].
+			  currentPage addItem: key -> anObject.
+			  nil ]
 ]
 
 { #category : #private }
@@ -171,9 +166,4 @@ SoilSkipListIterator >> removeKey: key [
 	^ self 
 		at: key 
 		put: (SoilObjectId segment: 0 index: 0)
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipListIterator >> updateCurrentTransaction: anInteger [ 
-	currentPage lastTransaction: anInteger
 ]

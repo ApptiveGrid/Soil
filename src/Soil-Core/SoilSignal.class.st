@@ -30,7 +30,7 @@ SoilSignal class >> startUp [
 	IdCounter := 0
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SoilSignal >> emit: aString [ 
 	message := aString.
 	self emit

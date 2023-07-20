@@ -26,7 +26,7 @@ SoilNewObjectEntry >> bytes: aCollection [
 	bytes := aCollection
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #committing }
 SoilNewObjectEntry >> commitIn: transaction [ 
 	position := transaction objectRepository  
 		at: objectId 
@@ -45,7 +45,7 @@ SoilNewObjectEntry >> context [
 	^ objectId
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #committing }
 SoilNewObjectEntry >> effect [ 
 	^ 'position: ', position asString
 ]

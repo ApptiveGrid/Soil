@@ -34,7 +34,7 @@ SoilUpdateSegmentIndexEntry >> context [
 	^ 'segment #', segmentId asString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilUpdateSegmentIndexEntry >> effect [
 	^ index
 ]

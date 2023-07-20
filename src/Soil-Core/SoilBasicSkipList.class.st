@@ -79,7 +79,7 @@ SoilBasicSkipList >> firstPage [
 	^ self store pageAt: 1
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilBasicSkipList >> headerPage [
 	^ self store headerPage
 ]
@@ -172,7 +172,7 @@ SoilBasicSkipList >> size [
 	^ self newIterator size 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 	| newPage page |
 	page := aIterator currentPage.
@@ -209,7 +209,7 @@ SoilBasicSkipList >> store: anObject [
 	store := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #converting }
 SoilBasicSkipList >> thePersistentInstance [
 	^ self subclassResponsibility
 ]

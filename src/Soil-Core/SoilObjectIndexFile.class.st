@@ -7,7 +7,7 @@ Class {
 	#category : #'Soil-Core-Files'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SoilObjectIndexFile >> allocateNewIndex [
 	| lastIndex |
 	lastIndex := self lastObjectIndex + 1.
@@ -66,7 +66,7 @@ SoilObjectIndexFile >> lastObjectIndex: anInteger [
 			flush ]
 ]
 
-{ #category : #lockgin }
+{ #category : #locking }
 SoilObjectIndexFile >> lockLastObjectIndexFor: lockContext [ 
 	^ semaphore critical: [  
 		stream 
@@ -75,7 +75,7 @@ SoilObjectIndexFile >> lockLastObjectIndexFor: lockContext [
 			for: lockContext ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #locking }
 SoilObjectIndexFile >> lockObjectId: aSOObjectId for: lockContext [
 	^ semaphore critical: [  
 		stream 

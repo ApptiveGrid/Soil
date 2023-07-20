@@ -33,7 +33,7 @@ SoilUpdateDatabaseVersion >> context [
 	^ #global
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilUpdateDatabaseVersion >> effect [ 
 	^ version 
 ]
