@@ -27,7 +27,7 @@ SoilVisitor >> visitJournal: aSoilJournal [
 	^ aSoilJournal 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visiting }
 SoilVisitor >> visitMetaSegment: aSoilMetaSegment [ 
 	self visit: aSoilMetaSegment indexManager.
 	^ aSoilMetaSegment 

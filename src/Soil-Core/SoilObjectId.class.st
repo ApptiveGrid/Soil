@@ -155,7 +155,7 @@ SoilObjectId >> setIndex: anInteger [
 	index := anInteger 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #writing }
 SoilObjectId >> writeOn: aStream [ 
 	"for now fix the segment id to be the 16 upper bits and the index 
 	be 48 lower bits"

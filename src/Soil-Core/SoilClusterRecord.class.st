@@ -34,7 +34,7 @@ SoilClusterRecord >> behaviorDescriptionAt: anInteger [
 	^ behaviorDescriptions at: anInteger 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilClusterRecord >> behaviorDescriptions [
 	^ behaviorDescriptions
 ]
@@ -141,7 +141,7 @@ SoilClusterRecord >> references: aCollection [
 	references := aCollection
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilClusterRecord >> registerIndexId: aString [ 
 	(indexIds includes: aString) ifFalse: [ 
 		indexIds add: aString ]

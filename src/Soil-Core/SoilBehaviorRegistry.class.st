@@ -16,7 +16,7 @@ SoilBehaviorRegistry >> addSpecialObjects [
 		put: SoilBehaviorDescription metaId
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 SoilBehaviorRegistry >> behaviorDescriptionWithIndex: behaviorIndex andVersion: version transaction: transaction [
 	| versionsOfBehavior |
 
@@ -29,7 +29,7 @@ SoilBehaviorRegistry >> behaviorDescriptionWithIndex: behaviorIndex andVersion: 
 		ifNone: [(SoilObjectNotFound new segment: 0; index: behaviorIndex) signal]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction: transaction [
 	| objectId chain offset |
 	objectId := self 
@@ -43,7 +43,7 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction
 	^ chain copyFrom: 1 to: offset
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'open/close' }
 SoilBehaviorRegistry >> close [
 	index close
 ]
@@ -80,7 +80,7 @@ SoilBehaviorRegistry >> initializeFilesystem [
 	index writePages
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 SoilBehaviorRegistry >> loadHistoryForBehaviorWithIndex: objectIndex transaction: transaction [
 	|  records chain |
 
@@ -115,7 +115,7 @@ SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 		yourself
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'open/close' }
 SoilBehaviorRegistry >> open [ 
 	index ifNotNil: [ index close ].
 	index :=  SoilSkipList new 

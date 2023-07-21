@@ -111,14 +111,14 @@ SoilNewClusterVersion >> initialize [
 	externalObjects := SoilObjectTable new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SoilNewClusterVersion >> initializeObjectIdsIn: aSOTransaction [ 
 	"assign indexes to all not yet initialized object records"
 	((references copyWithFirst: objectId) reject: #isInitialized) do: [ :oid |
 		aSOTransaction initializeObjectId: oid ]
 ]
 
-{ #category : #'public/accessing' }
+{ #category : #accessing }
 SoilNewClusterVersion >> lockIndex [
 	^ transaction lockObjectId: objectId
 ]

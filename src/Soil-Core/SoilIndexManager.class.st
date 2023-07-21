@@ -36,7 +36,7 @@ SoilIndexManager >> at: indexId ifAbsent: aBlock [
 		
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilIndexManager >> at: indexId put: aSoilIndex [
 	^ semaphore critical: [  
 		indexes 
@@ -44,13 +44,13 @@ SoilIndexManager >> at: indexId put: aSoilIndex [
 			put: aSoilIndex thePersistentInstance ]
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'open/close' }
 SoilIndexManager >> close [
 	semaphore critical: [  
 		indexes values do: #close ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilIndexManager >> createIndexWithId: indexId class: aClass [ 
 	^ aClass new 
 		path: (self pathFor: indexId);
@@ -70,7 +70,7 @@ SoilIndexManager >> initializeFilesystem [
 	self path ensureCreateDirectory 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilIndexManager >> loadIndexWithId: indexId ifNone: aBlock [
 	| path |
 	path := self path / indexId , #index.
@@ -82,7 +82,7 @@ SoilIndexManager >> loadIndexWithId: indexId ifNone: aBlock [
 		ifFalse: [ aBlock value ]
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'open/close' }
 SoilIndexManager >> open [
 	
 ]
