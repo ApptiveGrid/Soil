@@ -108,6 +108,9 @@ SoilIndexIterator >> next [
 { #category : #accessing }
 SoilIndexIterator >> nextAssociation [
 	| item |
+	"preliminary support for nextKey. This is useful when iterating via #next 
+	in order not jump over the first search key. nextKey implies the currentPage
+	is on the right spot"
 	nextKey ifNotNil: [ 
 		item := currentPage 
 			itemAt: nextKey 
@@ -115,7 +118,7 @@ SoilIndexIterator >> nextAssociation [
 		nextKey := nil.
 		^ item ].
 	currentPage ifNil: [ 
-		currentPage := index headerPage.
+		currentPage := index store headerPage.
 		currentKey := nil ].
 	[ currentPage isNil ] whileFalse: [  
 		item := currentKey 
@@ -125,8 +128,8 @@ SoilIndexIterator >> nextAssociation [
 						currentKey := i key. 
 						^ i ]
 					ifNil: [ 
-						(currentPage next == 0) ifTrue: [ ^ nil ].
-						currentPage := self pageAt: currentPage next.
+						(currentPage next = 0) ifTrue: [ ^ nil ].
+						currentPage := index store pageAt: currentPage next.
 						currentKey := nil ] ]
 			ifNil: [
 				currentPage isEmpty ifTrue: [ ^ nil ].
