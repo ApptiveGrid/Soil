@@ -58,7 +58,7 @@ Soil >> behaviorRegistry [
 	^ behaviorRegistry
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'opening/closing' }
 Soil >> close [
 	objectRepository ifNotNil: [ 
 		objectRepository close ].
@@ -88,7 +88,7 @@ Soil >> databaseVersion: anInteger [
 	settings databaseVersion: anInteger
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #public }
 Soil >> destroy [
 	path exists ifFalse: [ ^ self ].
 	path children do: #deleteAll.
@@ -124,7 +124,7 @@ Soil >> initializeFilesystem [
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #inspector }
 Soil >> inspectionJournal [
 	<inspectorPresentationOrder: 2000 title: 'journal'>
 	<ignoreNotImplementedSelectors: #(inspectionContent)>
@@ -133,7 +133,7 @@ Soil >> inspectionJournal [
 	^ self journal inspectionContent
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #inspector }
 Soil >> inspectionParameters [
 	<inspectorPresentationOrder: 2100 title: 'parameters'>
 
@@ -145,12 +145,12 @@ Soil >> journal [
 	^ journal 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #locking }
 Soil >> lockDatabaseVersionFor: lockContext [ 
 	^ settings lockDatabaseVersionFor: lockContext 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #locking }
 Soil >> lockableStream [
 	^ self lockableStreamClass new
 ]
@@ -187,7 +187,7 @@ Soil >> objectRepository [
 	^ objectRepository
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'opening/closing' }
 Soil >> open [
 	('open soil database at ', path asString) soilEmit.
 	settings := SoilParameterFile new
@@ -254,7 +254,7 @@ Soil >> renameClassNamed: oldName to: newName [
 	transaction commit
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #journal }
 Soil >> replayJournal: aSoilJournal [ 
 	| tx journals databaseVersion |
 	databaseVersion := self databaseVersion.

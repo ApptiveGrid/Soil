@@ -47,7 +47,7 @@ SoilBTreePage >> biggestKey [
 	^ items last key
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilBTreePage >> find: aKey with: aBTree [ 
 	^ self subclassResponsibility
 ]
@@ -82,7 +82,7 @@ SoilBTreePage >> initialize [
 	dirty := true
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilBTreePage >> insert: anItem into: aBtree [ 
 	^ self subclassResponsibility
 ]
@@ -97,7 +97,7 @@ SoilBTreePage >> isOlderThan: aVersionNumber [
 	^ lastTransaction <= aVersionNumber 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilBTreePage >> itemAfter: key [ 
 	| i item |
 	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
