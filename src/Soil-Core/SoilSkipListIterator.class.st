@@ -19,15 +19,6 @@ SoilSkipListIterator >> at: aKeyObject ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
-SoilSkipListIterator >> at: aKeyObject put: anObject [
-	| key |
-	key := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
-	^ self 
-		basicAt: key 
-		put: anObject
-]
-
-{ #category : #accessing }
 SoilSkipListIterator >> atLevel: key put: anObject [
 	levels at: key put: anObject 
 ]

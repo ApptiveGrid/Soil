@@ -23,6 +23,20 @@ SoilIndexIterator class >> on: aSoilIndex [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [ 
+	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> at: aKeyObject put: anObject [
+	| key |
+	key := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
+	^ self 
+		basicAt: key 
+		put: anObject
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> currentPage [
 
 	^ currentPage

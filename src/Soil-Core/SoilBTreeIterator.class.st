@@ -11,15 +11,6 @@ SoilBTreeIterator >> at: aKeyObject ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
-SoilBTreeIterator >> at: aKeyObject put: anObject [
-	| key |
-	key := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
-	^ self 
-		basicAt: key 
-		put: anObject
-]
-
-{ #category : #accessing }
 SoilBTreeIterator >> basicAt: key put: anObject [
 	index rootPage insert: key -> anObject into: self.
 	^anObject
