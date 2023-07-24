@@ -138,8 +138,7 @@ SoilIndexedDictionary >> first [
 	^ transaction 
 		ifNotNil: [ self proxyFromByteArray: self index newIterator first ]
 		ifNil: [ 
-			"associations is sorted"
-			newValues associations ifNotEmpty: [:nv | nv first value ] ifEmpty: nil]
+			self newValuesSortedByKeyOrder ifNotEmpty: [:nv | nv first value ] ifEmpty: nil]
 ]
 
 { #category : #accessing }
@@ -148,7 +147,7 @@ SoilIndexedDictionary >> first: anInteger [
 		ifNotNil: [ 
 			(self index first: anInteger) 
 				collect: [ :each | self proxyFromByteArray: each ] ]
-		ifNil: [ (newValues associations first: anInteger) collect: #value ]  
+		ifNil: [ (self newValuesSortedByKeyOrder first: anInteger) collect: #value ]  
 ]
 
 { #category : #accessing }
@@ -158,9 +157,8 @@ SoilIndexedDictionary >> firstAssociation [
 		  ifNotNil: [
 			  index newIterator firstAssociation ifNotNil: [ :assoc |
 				  assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ] ]
-		  ifNil: [ 
-			"associations is sorted" 
-			newValues associations ifNotEmpty: [:nv | nv first ] ifEmpty: nil]
+		  ifNil: [
+			self newValuesSortedByKeyOrder ifNotEmpty: [:nv | nv first ] ifEmpty: nil]
 ]
 
 { #category : #'as yet unclassified' }
@@ -227,8 +225,7 @@ SoilIndexedDictionary >> last [
 	^ transaction 
 		ifNotNil: [ self proxyFromByteArray: self index newIterator last ]
 		ifNil: [ 
-			"associations is sorted"
-			newValues associations ifNotEmpty: [:nv | nv last value ] ifEmpty: nil ]
+			self newValuesSortedByKeyOrder ifNotEmpty: [:nv | nv last value ] ifEmpty: nil ]
 ]
 
 { #category : #accessing }
@@ -239,8 +236,7 @@ SoilIndexedDictionary >> lastAssociation [
 			  index newIterator lastAssociation ifNotNil: [ :assoc |
 				  assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ] ]
 		  ifNil: [ 
-			"associations is sorted" 
-			newValues associations ifNotEmpty: [:nv | nv last ] ifEmpty: nil ]
+			self newValuesSortedByKeyOrder ifNotEmpty: [:nv | nv last ] ifEmpty: nil ]
 ]
 
 { #category : #private }
@@ -257,12 +253,19 @@ SoilIndexedDictionary >> maxLevel: anInteger [
 ]
 
 { #category : #accessing }
+SoilIndexedDictionary >> newValuesSortedByKeyOrder [
+
+	^ newValues associations sort: [ :a :b |
+		(a key asSkipListKeyOfSize: self index keySize) asInteger 
+		< (b key asSkipListKeyOfSize: self index keySize) asInteger ]
+]
+
+{ #category : #accessing }
 SoilIndexedDictionary >> nextAfter: key [  
 	| iterator |
 	transaction ifNil: [ 
 		| newValueSorted |
-		self flag: #TODO. "need to sort in key order"
-		newValueSorted := newValues associations.
+		newValueSorted := self newValuesSortedByKeyOrder.
 		^ (newValueSorted after: (newValues associationAt: key)) value  ].
 
 	iterator := self index newIterator 
@@ -343,7 +346,7 @@ SoilIndexedDictionary >> restoreValue: value forKey: key iterator: iterator [
 SoilIndexedDictionary >> second [
 	^ transaction 
 		ifNotNil: [ self proxyFromByteArray: (index newIterator first; next) ]
-		ifNil: [ newValues associations second value ]
+		ifNil: [ self newValuesSortedByKeyOrder second value ]
 ]
 
 { #category : #accessing }
