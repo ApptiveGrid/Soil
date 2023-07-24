@@ -23,6 +23,20 @@ SoilIndexIterator class >> on: aSoilIndex [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [ 
+	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> at: aKeyObject put: anObject [
+	| key |
+	key := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
+	^ self 
+		basicAt: key 
+		put: anObject
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> currentPage [
 
 	^ currentPage
@@ -118,7 +132,34 @@ SoilIndexIterator >> next: anInteger [
 
 { #category : #accessing }
 SoilIndexIterator >> nextAssociation [
-	^ self subclassResponsibility
+	| item |
+	"preliminary support for nextKey. This is useful when iterating via #next 
+	in order not jump over the first search key. nextKey implies the currentPage
+	is on the right spot"
+	nextKey ifNotNil: [ 
+		item := currentPage 
+			itemAt: nextKey 
+			ifAbsent: [ Error signal: 'shoulndt be possible' ].
+		nextKey := nil.
+		^ item ].
+	currentPage ifNil: [ 
+		currentPage := index store headerPage.
+		currentKey := nil ].
+	[ currentPage isNil ] whileFalse: [  
+		item := currentKey 
+			ifNotNil: [  
+				(currentPage itemAfter: currentKey)
+					ifNotNil: [ :i | 
+						currentKey := i key. 
+						^ i ]
+					ifNil: [ 
+						(currentPage next = 0) ifTrue: [ ^ nil ].
+						currentPage := index store pageAt: currentPage next.
+						currentKey := nil ] ]
+			ifNil: [
+				currentPage isEmpty ifTrue: [ ^ nil ].
+				^ currentPage firstItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
+	Error signal: 'shouldnt happen'
 ]
 
 { #category : #accessing }

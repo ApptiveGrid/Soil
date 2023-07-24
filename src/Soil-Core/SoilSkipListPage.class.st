@@ -249,6 +249,11 @@ SoilSkipListPage >> level [
 ]
 
 { #category : #accessing }
+SoilSkipListPage >> next [
+	^ self rightAt: 1
+]
+
+{ #category : #accessing }
 SoilSkipListPage >> numberOfItems [
 	^ items size 
 ]
