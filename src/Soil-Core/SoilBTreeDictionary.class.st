@@ -5,12 +5,8 @@ Class {
 }
 
 { #category : #initialization }
-SoilBTreeDictionary >> initialize [ 
-	newValues := OrderedDictionary new.
-	oldValues := Dictionary new.
-	removedValues := OrderedDictionary new.
-	id := UUID new asString36.
-	index := SoilBTree new
+SoilBTreeDictionary >> createIndex [ 
+	^ SoilBTree new
 		initializeHeaderPage;
 		valueSize: 8;
 		yourself
