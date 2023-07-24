@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilIndexedDictionaryTest,
+	#name : #SoilIndexDictionaryTest,
 	#superclass : #ParametrizedTestCase,
 	#instVars : [
 		'soil',
@@ -10,7 +10,7 @@ Class {
 }
 
 { #category : #tests }
-SoilIndexedDictionaryTest class >> testParameters [
+SoilIndexDictionaryTest class >> testParameters [
 	^ ParametrizedTestMatrix new
 		addCase: { #classToTest -> SoilBTreeDictionary };
 		addCase: { #classToTest -> SoilSkipListDictionary };
@@ -18,24 +18,24 @@ SoilIndexedDictionaryTest class >> testParameters [
 ]
 
 { #category : #accessing }
-SoilIndexedDictionaryTest >> classToTest [
+SoilIndexDictionaryTest >> classToTest [
 
 	^ classToTest
 ]
 
 { #category : #accessing }
-SoilIndexedDictionaryTest >> classToTest: anObject [
+SoilIndexDictionaryTest >> classToTest: anObject [
 
 	classToTest := anObject
 ]
 
 { #category : #accessing }
-SoilIndexedDictionaryTest >> path [ 
+SoilIndexDictionaryTest >> path [ 
 	^ 'soil-tests'
 ]
 
 { #category : #running }
-SoilIndexedDictionaryTest >> setUp [ 
+SoilIndexDictionaryTest >> setUp [ 
 	super setUp.
 	soil := Soil path: self path.
 	soil 
@@ -48,14 +48,14 @@ SoilIndexedDictionaryTest >> setUp [
 ]
 
 { #category : #running }
-SoilIndexedDictionaryTest >> tearDown [ 
+SoilIndexDictionaryTest >> tearDown [ 
 	soil ifNotNil: [ 
 		soil close ].
 	super tearDown.
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testAddAndRemoveExistingList [
+SoilIndexDictionaryTest >> testAddAndRemoveExistingList [
 	| tx tx2 tx3 |
 	"create skip list dictionary with a key ..."
 	"... and persist it"
@@ -75,7 +75,7 @@ SoilIndexedDictionaryTest >> testAddAndRemoveExistingList [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testAddAndRemoveOnNewList [
+SoilIndexDictionaryTest >> testAddAndRemoveOnNewList [
   	self 
 		shouldnt: [ dict at: #foo put: #bar ]
 		raise: Error.
@@ -85,7 +85,7 @@ SoilIndexedDictionaryTest >> testAddAndRemoveOnNewList [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testAddToExistingEmptyList [
+SoilIndexDictionaryTest >> testAddToExistingEmptyList [
 	| tx tx2 tx3 tx4 |
 	"create emtpy skip list dictionary ..."
 	"... and persist it"
@@ -112,7 +112,7 @@ SoilIndexedDictionaryTest >> testAddToExistingEmptyList [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testAddToExistingNonEmptyList [
+SoilIndexDictionaryTest >> testAddToExistingNonEmptyList [
 	|  tx tx2 tx3 tx4 |
 	"create skip list dictionary with a key ..."
 	"... and persist it"
@@ -140,7 +140,7 @@ SoilIndexedDictionaryTest >> testAddToExistingNonEmptyList [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testAddToNewList [
+SoilIndexDictionaryTest >> testAddToNewList [
   	self 
 		shouldnt: [ dict at: #foo put: #bar ]
 		raise: Error.
@@ -148,7 +148,7 @@ SoilIndexedDictionaryTest >> testAddToNewList [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testFirst [
+SoilIndexDictionaryTest >> testFirst [
 	dict at: #foo put: #bar.
 	dict at: #foo2 put: #bar2.
 
@@ -157,7 +157,7 @@ SoilIndexedDictionaryTest >> testFirst [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testFirstAssociationWithSingleRemovedItem [ 
+SoilIndexDictionaryTest >> testFirstAssociationWithSingleRemovedItem [ 
 	
 	dict at: #foo put: #bar.
 	dict removeKey: #foo.
@@ -165,7 +165,7 @@ SoilIndexedDictionaryTest >> testFirstAssociationWithSingleRemovedItem [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testFirstWithSingleRemovedItem [ 
+SoilIndexDictionaryTest >> testFirstWithSingleRemovedItem [ 
 	
 	dict at: #foo put: #bar.
 	dict removeKey: #foo.
@@ -173,7 +173,7 @@ SoilIndexedDictionaryTest >> testFirstWithSingleRemovedItem [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testFirstWithTransaction [
+SoilIndexDictionaryTest >> testFirstWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
@@ -190,14 +190,14 @@ SoilIndexedDictionaryTest >> testFirstWithTransaction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testIsEmpty [
+SoilIndexDictionaryTest >> testIsEmpty [
 	self assert: dict isEmpty.
 	dict at: #foo put: #bar.
 	self deny: dict isEmpty
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testLast [
+SoilIndexDictionaryTest >> testLast [
 	dict at: #foo put: #bar.
 	dict at: #foo2 put: #bar2.
 
@@ -205,21 +205,21 @@ SoilIndexedDictionaryTest >> testLast [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testLastAssociationWithSingleRemovedItem [ 
+SoilIndexDictionaryTest >> testLastAssociationWithSingleRemovedItem [ 
 	dict at: #foo put: #bar.
 	dict removeKey: #foo.
 	self assert: dict lastAssociation equals: nil
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testLastWithSingleRemovedItem [ 
+SoilIndexDictionaryTest >> testLastWithSingleRemovedItem [ 
 	dict at: #foo put: #bar.
 	dict removeKey: #foo.
 	self assert: dict last equals: nil
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testLastWithTransaction [
+SoilIndexDictionaryTest >> testLastWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
@@ -234,7 +234,7 @@ SoilIndexedDictionaryTest >> testLastWithTransaction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testLastWithTransactionRemoveLast [
+SoilIndexDictionaryTest >> testLastWithTransactionRemoveLast [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
@@ -250,7 +250,7 @@ SoilIndexedDictionaryTest >> testLastWithTransactionRemoveLast [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testNextAfter [
+SoilIndexDictionaryTest >> testNextAfter [
 	dict at: 1 put: #bar.
 	dict at: 2 put: #bar2.
 
@@ -258,7 +258,7 @@ SoilIndexedDictionaryTest >> testNextAfter [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testNextAfterWithTransaction [
+SoilIndexDictionaryTest >> testNextAfterWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
@@ -273,7 +273,7 @@ SoilIndexedDictionaryTest >> testNextAfterWithTransaction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testSecond [
+SoilIndexDictionaryTest >> testSecond [
 	dict at: #foo put: #bar.
 	dict at: #foo2 put: #bar2.
 
@@ -281,7 +281,7 @@ SoilIndexedDictionaryTest >> testSecond [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testSize [
+SoilIndexDictionaryTest >> testSize [
 	dict at: #foo put: #bar.
 	dict at: #foo2 put: #bar2.
 
@@ -289,7 +289,7 @@ SoilIndexedDictionaryTest >> testSize [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testValues [
+SoilIndexDictionaryTest >> testValues [
 	dict at: #foo put: #bar.
 	dict at: #foo2 put: #bar2.
 
