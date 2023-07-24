@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilIndexDictionary,
+	#name : #SoilIndexedDictionary,
 	#superclass : #Object,
 	#instVars : [
 		'id',
@@ -13,12 +13,12 @@ Class {
 }
 
 { #category : #accessing }
-SoilIndexDictionary class >> soilTransientInstVars [ 
+SoilIndexedDictionary class >> soilTransientInstVars [ 
 	^ #( index transaction newValues removedValues )
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> at: key [ 
+SoilIndexedDictionary >> at: key [ 
 	^ self 
 		at: key
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
@@ -26,7 +26,7 @@ SoilIndexDictionary >> at: key [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> at: key ifAbsent: aBlock [
+SoilIndexedDictionary >> at: key ifAbsent: aBlock [
 	| objectId |
 	^ transaction 
 		ifNotNil: [  
@@ -36,7 +36,7 @@ SoilIndexDictionary >> at: key ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> at: key put: anObject [
+SoilIndexedDictionary >> at: key put: anObject [
 	| objectId iterator |
 	^ transaction 
 		ifNotNil: [
@@ -57,7 +57,7 @@ SoilIndexDictionary >> at: key put: anObject [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> atIndex: anInteger [
+SoilIndexedDictionary >> atIndex: anInteger [
 	^ transaction 
 		ifNotNil: [  
 			(self index atIndex: anInteger)
@@ -70,7 +70,7 @@ SoilIndexDictionary >> atIndex: anInteger [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> basicAt: aString ifAbsent: aBlock [ 
+SoilIndexedDictionary >> basicAt: aString ifAbsent: aBlock [ 
 	| iterator value key |
 	key := (aString asSkipListKeyOfSize: self index keySize) asInteger.
 	iterator := self index newIterator.
@@ -104,12 +104,12 @@ SoilIndexDictionary >> basicAt: aString ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> binaryKey: aString [
+SoilIndexedDictionary >> binaryKey: aString [
 	^ (aString asSkipListKeyOfSize: self index keySize) asInteger
 ]
 
 { #category : #enumerating }
-SoilIndexDictionary >> do: aBlock [
+SoilIndexedDictionary >> do: aBlock [
 
 	| iterator assoc |
 	transaction
@@ -129,7 +129,7 @@ SoilIndexDictionary >> do: aBlock [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> first [
+SoilIndexedDictionary >> first [
 	^ transaction 
 		ifNotNil: [ self proxyFromByteArray: self index newIterator first ]
 		ifNil: [ 
@@ -138,7 +138,7 @@ SoilIndexDictionary >> first [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> first: anInteger [ 
+SoilIndexedDictionary >> first: anInteger [ 
 	^ transaction 
 		ifNotNil: [ 
 			(self index first: anInteger) 
@@ -147,7 +147,7 @@ SoilIndexDictionary >> first: anInteger [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> firstAssociation [
+SoilIndexedDictionary >> firstAssociation [
 
 	^ transaction
 		  ifNotNil: [
@@ -159,7 +159,7 @@ SoilIndexDictionary >> firstAssociation [
 ]
 
 { #category : #'as yet unclassified' }
-SoilIndexDictionary >> historicValueAt: key iterator: iterator ifAbsent: absentBlock [ 
+SoilIndexedDictionary >> historicValueAt: key iterator: iterator ifAbsent: absentBlock [ 
 	"a removed value will return ObjectId 0:0"
 	
 	^ (iterator currentPage isOlderThan: transaction readVersion) 
@@ -182,17 +182,17 @@ SoilIndexDictionary >> historicValueAt: key iterator: iterator ifAbsent: absentB
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> id [
+SoilIndexedDictionary >> id [
 	^ id
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> index [
+SoilIndexedDictionary >> index [
 	^ index
 ]
 
 { #category : #initialization }
-SoilIndexDictionary >> initialize [ 
+SoilIndexedDictionary >> initialize [ 
 	super initialize.
 	newValues := OrderedDictionary new.
 	oldValues := Dictionary new.
@@ -205,18 +205,18 @@ SoilIndexDictionary >> initialize [
 ]
 
 { #category : #testing }
-SoilIndexDictionary >> isEmpty [
+SoilIndexedDictionary >> isEmpty [
 	newValues ifNotEmpty: [ ^ false ].
 	^ self index isEmpty
 ]
 
 { #category : #testing }
-SoilIndexDictionary >> isRegistered [
+SoilIndexedDictionary >> isRegistered [
 	^ index isRegistered 
 ]
 
 { #category : #'as yet unclassified' }
-SoilIndexDictionary >> journalEntries [
+SoilIndexedDictionary >> journalEntries [
 	| entries segment |
 	entries := OrderedCollection new.
 	segment := (transaction objectIdOf: self) segment.
@@ -248,12 +248,12 @@ SoilIndexDictionary >> journalEntries [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> keySize: anInteger [ 
+SoilIndexedDictionary >> keySize: anInteger [ 
 	index keySize: anInteger 
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> last [
+SoilIndexedDictionary >> last [
 	^ transaction 
 		ifNotNil: [ self proxyFromByteArray: self index newIterator last ]
 		ifNil: [ 
@@ -262,7 +262,7 @@ SoilIndexDictionary >> last [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> lastAssociation [
+SoilIndexedDictionary >> lastAssociation [
 
 	^ transaction
 		  ifNotNil: [
@@ -274,20 +274,20 @@ SoilIndexDictionary >> lastAssociation [
 ]
 
 { #category : #private }
-SoilIndexDictionary >> loadFrom: aFileReference [ 
+SoilIndexedDictionary >> loadFrom: aFileReference [ 
 	^ SoilSkipList new 
 		path: aFileReference;
 		open
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> maxLevel: anInteger [ 
+SoilIndexedDictionary >> maxLevel: anInteger [ 
 	index maxLevel: anInteger.
 
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> nextAfter: key [  
+SoilIndexedDictionary >> nextAfter: key [  
 	| iterator |
 	transaction ifNil: [ 
 		| newValueSorted |
@@ -304,33 +304,33 @@ SoilIndexDictionary >> nextAfter: key [
 ]
 
 { #category : #'as yet unclassified' }
-SoilIndexDictionary >> prepareNewValues [
+SoilIndexedDictionary >> prepareNewValues [
 	newValues copy keysAndValuesDo: [ :key :object |
 		object isObjectId ifFalse: [
 			newValues at: key put: (transaction makeRoot: object) ] ]
 ]
 
 { #category : #printing }
-SoilIndexDictionary >> printOn: aStream [ 
+SoilIndexedDictionary >> printOn: aStream [ 
 	super printOn: aStream.
 	aStream << ' id=' << id asString
 ]
 
 { #category : #enumerating }
-SoilIndexDictionary >> proxyFromByteArray: aByteArray [
+SoilIndexedDictionary >> proxyFromByteArray: aByteArray [
 	
 	^ transaction proxyForObjectId: aByteArray asSoilObjectId
 ]
 
 { #category : #removing }
-SoilIndexDictionary >> removeKey: key [
+SoilIndexedDictionary >> removeKey: key [
 	^ self 
 		removeKey: key 
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #removing }
-SoilIndexDictionary >> removeKey: key ifAbsent: aBlock [
+SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 	| iterator v |
 	^ transaction 
 		ifNotNil: [ 
@@ -351,7 +351,7 @@ SoilIndexDictionary >> removeKey: key ifAbsent: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SoilIndexDictionary >> restoreValue: value forKey: key iterator: iterator [ 
+SoilIndexedDictionary >> restoreValue: value forKey: key iterator: iterator [ 
 	"restore a value that has been removed by a later 
 	transaction"
 	^ value isRemoved 
@@ -370,21 +370,21 @@ SoilIndexDictionary >> restoreValue: value forKey: key iterator: iterator [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> second [
+SoilIndexedDictionary >> second [
 	^ transaction 
 		ifNotNil: [ self proxyFromByteArray: (index newIterator first; next) ]
 		ifNil: [ newValues associations second value ]
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> size [ 
+SoilIndexedDictionary >> size [ 
 	^ transaction 
 		ifNotNil: [ self index size ]
 		ifNil: [ newValues size ]
 ]
 
 { #category : #'as yet unclassified' }
-SoilIndexDictionary >> soilBasicSerialize: aSerializer [ 
+SoilIndexedDictionary >> soilBasicSerialize: aSerializer [ 
 	transaction ifNil: [ 
 		transaction := aSerializer transaction.
 		self prepareNewValues ].
@@ -393,7 +393,7 @@ SoilIndexDictionary >> soilBasicSerialize: aSerializer [
 ]
 
 { #category : #'as yet unclassified' }
-SoilIndexDictionary >> soilClusterRootIn: aTransaction [
+SoilIndexedDictionary >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
 	newValues copy keysAndValuesDo: [ :key :object | | obj |
@@ -408,7 +408,7 @@ SoilIndexDictionary >> soilClusterRootIn: aTransaction [
 ]
 
 { #category : #'as yet unclassified' }
-SoilIndexDictionary >> soilLoadedIn: aTransaction [
+SoilIndexedDictionary >> soilLoadedIn: aTransaction [
 	transaction := aTransaction.
 	"when being materialized newValues is not initialized so we do it here"
 	newValues := Dictionary new.
@@ -417,7 +417,7 @@ SoilIndexDictionary >> soilLoadedIn: aTransaction [
 ]
 
 { #category : #'as yet unclassified' }
-SoilIndexDictionary >> soilMaterialized: aMaterializer [
+SoilIndexedDictionary >> soilMaterialized: aMaterializer [
 	"connect the global index at materialization time when we
 	know the cluster root which defines the location of the index.
 	Store a copy-on-write version so all changes are per transaction"
@@ -425,7 +425,7 @@ SoilIndexDictionary >> soilMaterialized: aMaterializer [
 ]
 
 { #category : #accessing }
-SoilIndexDictionary >> values [
+SoilIndexedDictionary >> values [
 	| col |
 	col := OrderedCollection new.
 	self do: [ :each | col add: each ].

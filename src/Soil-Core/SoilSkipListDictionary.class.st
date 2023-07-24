@@ -1,5 +1,5 @@
 Class {
 	#name : #SoilSkipListDictionary,
-	#superclass : #SoilIndexDictionary,
+	#superclass : #SoilIndexedDictionary,
 	#category : #'Soil-Core-Index-SkipList'
 }

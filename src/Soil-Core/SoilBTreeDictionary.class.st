@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilBTreeDictionary,
-	#superclass : #SoilIndexDictionary,
+	#superclass : #SoilIndexedDictionary,
 	#category : #'Soil-Core-Index-BTree'
 }
 
