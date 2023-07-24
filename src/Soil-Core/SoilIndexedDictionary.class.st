@@ -108,6 +108,11 @@ SoilIndexedDictionary >> binaryKey: aString [
 	^ (aString asSkipListKeyOfSize: self index keySize) asInteger
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndexedDictionary >> createIndex [
+	^ self subclassResponsibility
+]
+
 { #category : #enumerating }
 SoilIndexedDictionary >> do: aBlock [
 
@@ -198,10 +203,7 @@ SoilIndexedDictionary >> initialize [
 	oldValues := Dictionary new.
 	removedValues := OrderedDictionary new.
 	id := UUID new asString36.
-	index := SoilSkipList new
-		initializeHeaderPage;
-		valueSize: 8;
-		yourself
+	index := self createIndex.
 ]
 
 { #category : #testing }
@@ -213,38 +215,6 @@ SoilIndexedDictionary >> isEmpty [
 { #category : #testing }
 SoilIndexedDictionary >> isRegistered [
 	^ index isRegistered 
-]
-
-{ #category : #'as yet unclassified' }
-SoilIndexedDictionary >> journalEntries [
-	| entries segment |
-	entries := OrderedCollection new.
-	segment := (transaction objectIdOf: self) segment.
-	self isRegistered ifFalse: [
-		entries add: (SoilNewSkipListIndexEntry new 
-			transactionId: transaction writeVersion;
-			segment: segment;
-			id: id;
-			maxLevel: index maxLevel;
-			keySize: index keySize;
-			valueSize: index valueSize) ].
-	newValues keysAndValuesDo: [ :key :value |
-		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
-		entries add: (SoilAddKeyEntry new 
-			transactionId: transaction writeVersion;
-			segment: segment;
-			id: id;
-			key: (self binaryKey: key);
-			value: value;
-			oldValue: (oldValues at: key ifAbsent: [nil ])) ].
-	removedValues keysAndValuesDo: [ :key :value |
-		entries add: (SoilRemoveKeyEntry new 
-			transactionId: transaction writeVersion;
-			segment: segment;
-			id: id;
-			key: (self binaryKey: key); 
-			oldValue: value) ].
-	^ entries
 ]
 
 { #category : #accessing }
