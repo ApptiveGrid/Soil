@@ -149,8 +149,9 @@ SoilIndexDictionaryTest >> testAddToNewList [
 
 { #category : #tests }
 SoilIndexDictionaryTest >> testFirst [
-	dict at: #foo put: #bar.
 	dict at: #foo2 put: #bar2.
+	dict at: #foo put: #bar.
+	
 
 	self assert: dict first equals: #bar.
 	self assert: (dict first: 1) first equals: #bar.
@@ -177,8 +178,8 @@ SoilIndexDictionaryTest >> testFirstWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
+	dict at: #foo2 put: #two.
+	dict at: #foo put: #one.
 	self assert: dict first equals: #one.
 	tx commit.
 	"open a second transaction ..."
