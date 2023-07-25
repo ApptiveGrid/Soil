@@ -12,6 +12,12 @@ Class {
 	#category : #'Soil-Core-Index-Common'
 }
 
+{ #category : #testing }
+SoilIndexedDictionary class >> isAbstract [
+
+	^ self == SoilIndexedDictionary
+]
+
 { #category : #accessing }
 SoilIndexedDictionary class >> soilTransientInstVars [ 
 	^ #( index transaction newValues removedValues )
@@ -108,7 +114,7 @@ SoilIndexedDictionary >> binaryKey: aString [
 	^ (aString asSkipListKeyOfSize: self index keySize) asInteger
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SoilIndexedDictionary >> createIndex [
 	^ self subclassResponsibility
 ]
@@ -161,7 +167,7 @@ SoilIndexedDictionary >> firstAssociation [
 			self newValuesSortedByKeyOrder ifNotEmpty: [:nv | nv first ] ifEmpty: nil]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilIndexedDictionary >> historicValueAt: key iterator: iterator ifAbsent: absentBlock [ 
 	"a removed value will return ObjectId 0:0"
 	
@@ -276,7 +282,7 @@ SoilIndexedDictionary >> nextAfter: key [
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilIndexedDictionary >> prepareNewValues [
 	newValues copy keysAndValuesDo: [ :key :object |
 		object isObjectId ifFalse: [
@@ -323,7 +329,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 				put: (newValues removeKey: key ifAbsent: [ ^ aBlock value ]) ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilIndexedDictionary >> restoreValue: value forKey: key iterator: iterator [ 
 	"restore a value that has been removed by a later 
 	transaction"
@@ -356,7 +362,7 @@ SoilIndexedDictionary >> size [
 		ifNil: [ newValues size ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #serializing }
 SoilIndexedDictionary >> soilBasicSerialize: aSerializer [ 
 	transaction ifNil: [ 
 		transaction := aSerializer transaction.
@@ -365,7 +371,7 @@ SoilIndexedDictionary >> soilBasicSerialize: aSerializer [
 	aSerializer registerIndexId: id.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #serializing }
 SoilIndexedDictionary >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
@@ -380,7 +386,7 @@ SoilIndexedDictionary >> soilClusterRootIn: aTransaction [
 	transaction markDirty: self
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #serializing }
 SoilIndexedDictionary >> soilLoadedIn: aTransaction [
 	transaction := aTransaction.
 	"when being materialized newValues is not initialized so we do it here"
@@ -389,7 +395,7 @@ SoilIndexedDictionary >> soilLoadedIn: aTransaction [
 	oldValues := Dictionary new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #serializing }
 SoilIndexedDictionary >> soilMaterialized: aMaterializer [
 	"connect the global index at materialization time when we
 	know the cluster root which defines the location of the index.
