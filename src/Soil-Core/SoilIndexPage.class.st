@@ -9,8 +9,14 @@ Class {
 	#classInstVars : [
 		'random'
 	],
-	#category : #'Soil-Core-Index-SkipList'
+	#category : #'Soil-Core-Index-Common'
 }
+
+{ #category : #testing }
+SoilIndexPage class >> isAbstract [
+
+	^ self == SoilIndexPage
+]
 
 { #category : #accessing }
 SoilIndexPage class >> pageCode [ 
