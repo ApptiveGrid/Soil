@@ -154,7 +154,7 @@ SoilSkipListPage >> itemAt: key put: anObject [
 SoilSkipListPage >> itemBefore: key [
 
 	| item |
-	item := items at: key ifAbsent: [ ^ nil ].
+	item := items findBinary: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
 	^ items before: item ifAbsent: nil
 ]
 
