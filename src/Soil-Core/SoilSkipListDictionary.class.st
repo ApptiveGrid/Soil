@@ -35,7 +35,7 @@ SoilSkipListDictionary >> journalEntries [
 			value: value;
 			oldValue: (oldValues at: key ifAbsent: [nil ])) ].
 	removedValues keysAndValuesDo: [ :key :value |
-		self halt.
+		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
 		entries add: (SoilRemoveKeyEntry new 
 			transactionId: transaction writeVersion;
 			segment: segment;
