@@ -44,6 +44,11 @@ SoilUpdateSegmentIndexEntry >> index: anInteger [
 	index := anInteger 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilUpdateSegmentIndexEntry >> objectIds [
+	^ {  }
+]
+
 { #category : #printing }
 SoilUpdateSegmentIndexEntry >> printOn: aStream [ 
 	super printOn: aStream.

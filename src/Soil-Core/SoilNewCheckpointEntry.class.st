@@ -44,6 +44,11 @@ SoilNewCheckpointEntry >> initialize [
 	checkpointedAt := DateAndTime now
 ]
 
+{ #category : #'as yet unclassified' }
+SoilNewCheckpointEntry >> objectIds [
+	^ {  }
+]
+
 { #category : #'instance creation' }
 SoilNewCheckpointEntry >> readFrom: aStream [ 
 	super readFrom: aStream.
