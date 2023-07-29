@@ -135,7 +135,7 @@ SoilIndexedDictionary >> do: aBlock [
 		ifNil: [ 
 			newValues values do: [ :each | 
 				aBlock value: (each isObjectId
-						 ifTrue: [ transaction objectWithId: each ]
+						 ifTrue: [ transaction proxyForObjectId: each ]
 						 ifFalse: [ each ]) ] ]
 ]
 

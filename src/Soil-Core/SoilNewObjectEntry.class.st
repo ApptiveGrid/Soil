@@ -60,6 +60,11 @@ SoilNewObjectEntry >> objectId: aSOObjectId [
 	objectId := aSOObjectId
 ]
 
+{ #category : #'as yet unclassified' }
+SoilNewObjectEntry >> objectIds [
+	^ { objectId }
+]
+
 { #category : #printing }
 SoilNewObjectEntry >> printOn: aStream [ 
 	super printOn: aStream.

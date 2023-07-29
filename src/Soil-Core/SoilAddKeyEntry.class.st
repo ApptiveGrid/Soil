@@ -49,6 +49,11 @@ SoilAddKeyEntry >> key: aString [
 	key := aString 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilAddKeyEntry >> objectIds [
+	^ { value }
+]
+
 { #category : #accessing }
 SoilAddKeyEntry >> oldValue [
 	^ oldValue

@@ -55,6 +55,11 @@ SoilNewBehaviorEntry >> objectId: aSoilObjectId [
 	objectId := aSoilObjectId 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilNewBehaviorEntry >> objectIds [
+	^ { objectId  }
+]
+
 { #category : #printing }
 SoilNewBehaviorEntry >> printOn: aStream [ 
 	super printOn: aStream.

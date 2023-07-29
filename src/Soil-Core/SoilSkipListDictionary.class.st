@@ -35,6 +35,7 @@ SoilSkipListDictionary >> journalEntries [
 			value: value;
 			oldValue: (oldValues at: key ifAbsent: [nil ])) ].
 	removedValues keysAndValuesDo: [ :key :value |
+		self halt.
 		entries add: (SoilRemoveKeyEntry new 
 			transactionId: transaction writeVersion;
 			segment: segment;

@@ -548,6 +548,7 @@ SoilTransaction >> readVersion: anInteger [
 
 { #category : #'as yet unclassified' }
 SoilTransaction >> recordWithId: objectId [
+	(objectId isInitialized) ifFalse: [ SoilIndexOutOfRange signal: 'object id ', objectId printString, ' needs index greater than zero' ].
 	^ self objectRepository 
 		at: objectId 
 		version: readVersion

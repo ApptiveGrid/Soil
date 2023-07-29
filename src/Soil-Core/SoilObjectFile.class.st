@@ -2,14 +2,14 @@ Class {
 	#name : #SoilObjectFile,
 	#superclass : #SoilSegmentFile,
 	#instVars : [
-		'semaphore'
+		'mutex'
 	],
 	#category : #'Soil-Core-Files'
 }
 
 { #category : #'as yet unclassified' }
 SoilObjectFile >> appendBytes: aCollection [ 
-	semaphore critical: [  
+	mutex critical: [  
 		stream position: stream size.
 		stream nextPutAll: aCollection.
 		stream flush ]
@@ -18,7 +18,7 @@ SoilObjectFile >> appendBytes: aCollection [
 { #category : #accessing }
 SoilObjectFile >> atPosition: anInteger [ 
 	| clusterVersion |
-	^ semaphore critical: [ 
+	^ mutex critical: [ 
 		stream position: anInteger.
 		clusterVersion := SoilPersistentClusterVersion readFrom: stream.
 		(clusterVersion position = anInteger) ifFalse: [ 
@@ -28,7 +28,7 @@ SoilObjectFile >> atPosition: anInteger [
 
 { #category : #accessing }
 SoilObjectFile >> basicAtPosition: anInteger length: length [
-	^ semaphore critical: [ 
+	^ mutex critical: [ 
 		stream position: anInteger.
 		stream next: length ]
 ]
@@ -36,7 +36,8 @@ SoilObjectFile >> basicAtPosition: anInteger length: length [
 { #category : #initialization }
 SoilObjectFile >> initialize [
 	super initialize.
-	semaphore := Semaphore forMutualExclusion 
+	"Use mutex for now as we experience debugging problems with the semaphore"
+	mutex := Mutex new
 ]
 
 { #category : #initialization }

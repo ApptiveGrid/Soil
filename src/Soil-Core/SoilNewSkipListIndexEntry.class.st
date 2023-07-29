@@ -49,6 +49,11 @@ SoilNewSkipListIndexEntry >> maxLevel: anInteger [
 	maxLevel := anInteger
 ]
 
+{ #category : #'as yet unclassified' }
+SoilNewSkipListIndexEntry >> objectIds [
+	^ {  }
+]
+
 { #category : #'instance creation' }
 SoilNewSkipListIndexEntry >> readFrom: aStream [ 
 	| idSize |

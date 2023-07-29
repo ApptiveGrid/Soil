@@ -42,6 +42,11 @@ SoilNewTransactionEntry >> objectId [
 	^ nil
 ]
 
+{ #category : #'as yet unclassified' }
+SoilNewTransactionEntry >> objectIds [
+	^ {  }
+]
+
 { #category : #'instance creation' }
 SoilNewTransactionEntry >> readFrom: aStream [ 
 	super readFrom: aStream.

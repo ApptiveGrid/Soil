@@ -2,7 +2,7 @@ Class {
 	#name : #SoilObjectIndexFile,
 	#superclass : #SoilSegmentFile,
 	#instVars : [
-		'semaphore'
+		'mutex'
 	],
 	#category : #'Soil-Core-Files'
 }
@@ -17,7 +17,7 @@ SoilObjectIndexFile >> allocateNewIndex [
 
 { #category : #accessing }
 SoilObjectIndexFile >> at: index [ 
-	^ semaphore critical: [  
+	^ mutex critical: [  
 		stream position: (self indexPositionAt: index).
 		(stream next: 8) asInteger ]
 ]
@@ -25,7 +25,7 @@ SoilObjectIndexFile >> at: index [
 { #category : #accessing }
 SoilObjectIndexFile >> at: index putPosition: position [ 
 	(position > 0) ifFalse: [ SoilIndexOutOfRange signal: 'object index needs to be larger than zero' ].
-	semaphore critical: [  
+	mutex critical: [  
 		stream position: (self indexPositionAt: index).
 		stream  nextPutAll: (position asByteArrayOfSize: self objectIndexSize).
 		stream flush ]
@@ -40,7 +40,8 @@ SoilObjectIndexFile >> indexPositionAt: anInteger [
 { #category : #initialization }
 SoilObjectIndexFile >> initialize [ 
 	super initialize.
-	semaphore := Semaphore forMutualExclusion 
+	"Use mutex for now as we experience debugging problems with the semaphore"
+	mutex := Mutex new
 ]
 
 { #category : #initialization }
@@ -52,14 +53,14 @@ SoilObjectIndexFile >> initializeStart [
 
 { #category : #accessing }
 SoilObjectIndexFile >> lastObjectIndex [
-	^ semaphore critical: [  
+	^ mutex critical: [  
 		stream position: self headerSize.
 		(stream next: self objectIndexSize) asInteger ]
 ]
 
 { #category : #accessing }
 SoilObjectIndexFile >> lastObjectIndex: anInteger [ 
-	semaphore critical: [  
+	mutex critical: [  
 		stream 
 			position: self headerSize;
 			nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
@@ -68,7 +69,7 @@ SoilObjectIndexFile >> lastObjectIndex: anInteger [
 
 { #category : #locking }
 SoilObjectIndexFile >> lockLastObjectIndexFor: lockContext [ 
-	^ semaphore critical: [  
+	^ mutex critical: [  
 		stream 
 			lockFrom: self headerSize 
 			length: self objectIndexSize
@@ -77,7 +78,7 @@ SoilObjectIndexFile >> lockLastObjectIndexFor: lockContext [
 
 { #category : #locking }
 SoilObjectIndexFile >> lockObjectId: aSOObjectId for: lockContext [
-	^ semaphore critical: [  
+	^ mutex critical: [  
 		stream 
 			lockFrom: (self indexPositionAt: aSOObjectId index) 
 			length: self objectIndexSize  
@@ -101,7 +102,7 @@ SoilObjectIndexFile >> path [
 
 { #category : #accessing }
 SoilObjectIndexFile >> positionAt: anInteger [ 
-	^ semaphore critical: [  
+	^ mutex critical: [  
 		stream position: (self indexPositionAt: anInteger).
 		(stream next: self objectIndexSize) asInteger ]
 ]

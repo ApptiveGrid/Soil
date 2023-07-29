@@ -30,9 +30,34 @@ SoilJournal >> addTransactionJournal: aSoilTransactionJournal [
 ]
 
 { #category : #'as yet unclassified' }
+SoilJournal >> allHavingEntriesMatching: aBlock [
+	| result |
+	result := OrderedCollection new.
+	self allTransactionJournalsDo: [ :journal |
+		(journal entries anySatisfy: aBlock) ifTrue: [ 
+			result add: journal ]].
+	^ result
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> allHavingEntriesWithObjectId: aSoilObjectId [
+	^ self allHavingEntriesMatching: [ :each | 
+		each objectIds includes: aSoilObjectId ].
+]
+
+{ #category : #'as yet unclassified' }
 SoilJournal >> allTransactionJournals [
-	^ ((self transactionJournalFilesIn: self archivePath) , (self transactionJournalFilesIn: self path))
-		collect: [ :file | self readTransactionJournalFile: file ]
+	| all |
+	all := OrderedCollection new.
+	self allTransactionJournalsDo: [ :transactionJournal | all add: transactionJournal ].
+	^ all
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> allTransactionJournalsDo: aBlock [
+	((self transactionJournalFilesIn: self archivePath) , (self transactionJournalFilesIn: self path))
+		do: [ :file | 
+			aBlock value: (self readTransactionJournalFile: file) ]
 ]
 
 { #category : #'as yet unclassified' }

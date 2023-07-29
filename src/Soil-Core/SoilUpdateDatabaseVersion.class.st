@@ -38,6 +38,11 @@ SoilUpdateDatabaseVersion >> effect [
 	^ version 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilUpdateDatabaseVersion >> objectIds [
+	^ { }
+]
+
 { #category : #accessing }
 SoilUpdateDatabaseVersion >> oldValue [ 
 	^ previousVersion 
