@@ -25,6 +25,11 @@ SoilClusterRecord class >> readFrom: aStream [
 { #category : #'instance creation' }
 SoilClusterRecord >> addReference: reference [
 	references detect: [ :each | each = reference ] ifFound: [ Error signal: 'reference already there' ].
+	self basicAddReference: reference 
+]
+
+{ #category : #'instance creation' }
+SoilClusterRecord >> basicAddReference: reference [
 	references add: reference 
 ]
 
