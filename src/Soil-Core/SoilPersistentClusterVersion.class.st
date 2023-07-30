@@ -107,7 +107,9 @@ SoilPersistentClusterVersion >> readFrom: stream [
 	"references"
 	numberOfReferences := materializer nextLengthEncodedInteger.
 	references := OrderedCollection new: numberOfReferences.
-	1 to: numberOfReferences do: [:n | self addReference: (SoilObjectId readFrom: stream)]. 
+	1 to: numberOfReferences do: [:n | 
+		"reading without guard"
+		self basicAddReference: (SoilObjectId readFrom: stream)]. 
 	"indexes"
 	numberOfIndexIds := materializer nextLengthEncodedInteger.
 	indexIds := OrderedCollection new: numberOfIndexIds.
