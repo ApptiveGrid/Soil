@@ -143,6 +143,13 @@ SoilTransaction >> buildJournal [
 		readVersion: readVersion; 
 		transactionId: writeVersion;
 		createdAt: createdAt).
+	"add entries for updating the last index of each modified 
+	segment"
+	lastObjectIndexes keysAndValuesDo: [ :segment :index |
+		journal addEntry: (SoilUpdateSegmentIndexEntry new 
+			transactionId: self writeVersion;
+			segment: segment;
+			index: index value) ].
 	"create entries for all new objects and new object versions"
 	recordsToCommit do: [ :record | 
 		record version: writeVersion.
@@ -155,13 +162,6 @@ SoilTransaction >> buildJournal [
 			transactionId: self writeVersion;
 			identifier: description value behaviorIdentifier;
 			objectId: description objectId) ].
-	"add entries for updating the last index of each modified 
-	segment"
-	lastObjectIndexes keysAndValuesDo: [ :segment :index |
-		journal addEntry: (SoilUpdateSegmentIndexEntry new 
-			transactionId: self writeVersion;
-			segment: segment;
-			index: index value) ].
 	"update the global database version"
 	journal addEntry: (SoilUpdateDatabaseVersion new 
 		transactionId: self writeVersion;
@@ -207,6 +207,7 @@ SoilTransaction >> checkpoint [
 		execute the journal on the database"
 		journal := self buildJournal.
 		journal
+			validateIn: self;
 			write;
 			commitIn: self;
 			checkpoint: self; 

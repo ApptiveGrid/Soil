@@ -2,7 +2,8 @@ Class {
 	#name : #SoilObjectIndexFile,
 	#superclass : #SoilSegmentFile,
 	#instVars : [
-		'mutex'
+		'mutex',
+		'currentLastObjectIndex'
 	],
 	#category : #'Soil-Core-Files'
 }
@@ -46,6 +47,7 @@ SoilObjectIndexFile >> initialize [
 
 { #category : #initialization }
 SoilObjectIndexFile >> initializeStart [
+	currentLastObjectIndex := 0.
 	self lastObjectIndex: 1.
 	"intialize the slot for the root object"
 	self at: 1 putPosition: 1.
@@ -60,11 +62,20 @@ SoilObjectIndexFile >> lastObjectIndex [
 
 { #category : #accessing }
 SoilObjectIndexFile >> lastObjectIndex: anInteger [ 
-	mutex critical: [  
+	mutex critical: [
+		"we memory track object indexes to ensure the index 
+		is only growing and not fully rely on the stream 
+		being up-to-date"
+		(currentLastObjectIndex < anInteger) ifFalse: [ 
+			Error signal: 'object indexes can only grow' ]. 
+		"last resort check if object index on disk is also
+		valid"
+		self validateLastObjectIndex: anInteger.
 		stream 
 			position: self headerSize;
 			nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
-			flush ]
+			flush.
+		currentLastObjectIndex := anInteger ]
 ]
 
 { #category : #locking }
@@ -95,6 +106,12 @@ SoilObjectIndexFile >> objectIndexSize [
 	^ 8
 ]
 
+{ #category : #'instance creation' }
+SoilObjectIndexFile >> open [ 
+	super open.
+	currentLastObjectIndex := self lastObjectIndex
+]
+
 { #category : #accessing }
 SoilObjectIndexFile >> path [
 	^ segment path / #index
@@ -110,4 +127,9 @@ SoilObjectIndexFile >> positionAt: anInteger [
 { #category : #accessing }
 SoilObjectIndexFile >> prefix [ 
 	^ 'SOIL|OBJECT INDEX' asByteArray
+]
+
+{ #category : #validating }
+SoilObjectIndexFile >> validateLastObjectIndex: anInteger [ 
+	self lastObjectIndex < anInteger 
 ]

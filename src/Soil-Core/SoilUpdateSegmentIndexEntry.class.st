@@ -71,6 +71,12 @@ SoilUpdateSegmentIndexEntry >> segment: aSoilObjectSegment [
 	segmentId := aSoilObjectSegment id
 ]
 
+{ #category : #validating }
+SoilUpdateSegmentIndexEntry >> validateIn: aSoilTransaction [ 
+	 (aSoilTransaction segmentAt: segmentId) 
+		validateLastObjectIndex: index 
+]
+
 { #category : #accessing }
 SoilUpdateSegmentIndexEntry >> value [ 
 	^ index 

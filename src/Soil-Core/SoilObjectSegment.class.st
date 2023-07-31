@@ -226,3 +226,8 @@ SoilObjectSegment >> soil [
 SoilObjectSegment >> soil: aSoil [ 
 	soil := aSoil
 ]
+
+{ #category : #validating }
+SoilObjectSegment >> validateLastObjectIndex: anInteger [ 
+	indexFile validateLastObjectIndex: anInteger
+]
