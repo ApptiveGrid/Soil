@@ -33,10 +33,10 @@ SoilObjectFileTest >> testWriteAndReadFirstObject [
 	newIndex := SoilObjectIndexFile new 
 		stream: (ReadWriteStream with: bytes);
 		readHeader.
-	newIndex lastObjectIndex: 1.
+	newIndex lastObjectIndex: 2.
 	newIndex at: 1 putPosition: 1000.
 	n2 := SoilObjectIndexFile new 
 		stream: (ReadWriteStream with: bytes);
 		readHeader.
-	self assert: n2 lastObjectIndex equals: 1
+	self assert: n2 lastObjectIndex equals: 2
 ]

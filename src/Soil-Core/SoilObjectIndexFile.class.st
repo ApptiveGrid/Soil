@@ -56,8 +56,8 @@ SoilObjectIndexFile >> initialize [
 
 { #category : #initialization }
 SoilObjectIndexFile >> initializeStart [
-	currentLastObjectIndex := 0.
-	self basicLastObjectIndex: 0.
+	currentLastObjectIndex := 1.
+	self basicLastObjectIndex: 1.
 	"intialize the slot for the root object"
 	self at: 1 putPosition: 1.
 ]
