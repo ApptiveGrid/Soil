@@ -62,12 +62,12 @@ SoilObjectIndexFile >> lastObjectIndex [
 
 { #category : #accessing }
 SoilObjectIndexFile >> lastObjectIndex: anInteger [ 
+	"we memory track object indexes to ensure the index 
+	is only growing and not fully rely on the stream 
+	being up-to-date"
+	(currentLastObjectIndex < anInteger) ifFalse: [ 
+		SoilInvalidSegmentIndex signal: 'segment indexes can only grow' ]. 
 	mutex critical: [
-		"we memory track object indexes to ensure the index 
-		is only growing and not fully rely on the stream 
-		being up-to-date"
-		(currentLastObjectIndex < anInteger) ifFalse: [ 
-			Error signal: 'object indexes can only grow' ]. 
 		"last resort check if object index on disk is also
 		valid"
 		self validateLastObjectIndex: anInteger.
@@ -129,7 +129,14 @@ SoilObjectIndexFile >> prefix [
 	^ 'SOIL|OBJECT INDEX' asByteArray
 ]
 
+{ #category : #'private - decoding' }
+SoilObjectIndexFile >> readHeader [ 
+	super readHeader.
+	currentLastObjectIndex := 0
+]
+
 { #category : #validating }
 SoilObjectIndexFile >> validateLastObjectIndex: anInteger [ 
-	self lastObjectIndex < anInteger 
+	(self lastObjectIndex < anInteger) ifFalse: [ 
+		SoilInvalidSegmentIndex signal: 'segment indexes can only grow' ] 
 ]

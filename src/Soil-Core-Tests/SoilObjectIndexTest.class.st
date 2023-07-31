@@ -5,9 +5,18 @@ Class {
 }
 
 { #category : #tests }
+SoilObjectIndexTest >> streamContents: aBlock [ 
+	| stream |
+	stream := ReadWriteStream on: ByteArray new.
+	aBlock value: stream.
+	^ stream contents.
+
+]
+
+{ #category : #tests }
 SoilObjectIndexTest >> testInitializeOnStream [
 	| index bytes prefix |
-	bytes := ByteArray streamContents: [ :stream |
+	bytes := self streamContents: [ :stream |
 		index := SoilObjectIndexFile new stream: stream.
 		index initializeFilesystem ].
 	self assert: bytes size equals: index headerSize + index objectIndexSize +8 .
@@ -18,7 +27,7 @@ SoilObjectIndexTest >> testInitializeOnStream [
 { #category : #tests }
 SoilObjectIndexTest >> testWriteAndReadFirstObject [
 	| index bytes newIndex n2 |
-	bytes := ByteArray streamContents: [ :stream |
+	bytes := self streamContents: [ :stream |
 		index := SoilObjectIndexFile new stream: stream.
 		index initializeFilesystem ].
 	newIndex := SoilObjectIndexFile new 

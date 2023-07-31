@@ -4,6 +4,15 @@ Class {
 	#category : #'Soil-Core-Tests'
 }
 
+{ #category : #'instance creation' }
+SoilObjectFileTest >> streamContents: aBlock [ 
+	| stream |
+	stream := ReadWriteStream on: ByteArray new.
+	aBlock value: stream.
+	^ stream contents.
+
+]
+
 { #category : #tests }
 SoilObjectFileTest >> testInitializeOnStream [
 	| index bytes prefix |
@@ -18,7 +27,7 @@ SoilObjectFileTest >> testInitializeOnStream [
 { #category : #tests }
 SoilObjectFileTest >> testWriteAndReadFirstObject [
 	| index bytes newIndex n2 |
-	bytes := ByteArray streamContents: [ :stream |
+	bytes := self streamContents: [ :stream |
 		index := SoilObjectIndexFile new stream: stream.
 		index initializeFilesystem ].
 	newIndex := SoilObjectIndexFile new 
