@@ -33,6 +33,15 @@ SoilObjectIndexFile >> at: index putPosition: position [
 ]
 
 { #category : #accessing }
+SoilObjectIndexFile >> basicLastObjectIndex: anInteger [ 
+	mutex critical: [
+		stream 
+			position: self headerSize;
+			nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
+			flush ]
+]
+
+{ #category : #accessing }
 SoilObjectIndexFile >> indexPositionAt: anInteger [ 
 	(anInteger > 0) ifFalse: [ SoilIndexOutOfRange signal: 'object index needs to be larger than zero' ].
 	^ self headerSize + self objectIndexSize + (anInteger - 1 * self objectIndexSize)
@@ -48,7 +57,7 @@ SoilObjectIndexFile >> initialize [
 { #category : #initialization }
 SoilObjectIndexFile >> initializeStart [
 	currentLastObjectIndex := 0.
-	self lastObjectIndex: 1.
+	self basicLastObjectIndex: 0.
 	"intialize the slot for the root object"
 	self at: 1 putPosition: 1.
 ]
@@ -62,20 +71,14 @@ SoilObjectIndexFile >> lastObjectIndex [
 
 { #category : #accessing }
 SoilObjectIndexFile >> lastObjectIndex: anInteger [ 
-	"we memory track object indexes to ensure the index 
-	is only growing and not fully rely on the stream 
-	being up-to-date"
+	"we memory track object indexes to ensure the index is only 
+	growing and not fully rely on the stream being up-to-date"
 	(currentLastObjectIndex < anInteger) ifFalse: [ 
 		SoilInvalidSegmentIndex signal: 'segment indexes can only grow' ]. 
-	mutex critical: [
-		"last resort check if object index on disk is also
-		valid"
-		self validateLastObjectIndex: anInteger.
-		stream 
-			position: self headerSize;
-			nextPutAll: (anInteger asByteArrayOfSize: self objectIndexSize);
-			flush.
-		currentLastObjectIndex := anInteger ]
+	"last resort check if object index on disk is also valid"
+	self validateLastObjectIndex: anInteger.
+	self basicLastObjectIndex: anInteger.
+	currentLastObjectIndex := anInteger 
 ]
 
 { #category : #locking }
@@ -137,6 +140,8 @@ SoilObjectIndexFile >> readHeader [
 
 { #category : #validating }
 SoilObjectIndexFile >> validateLastObjectIndex: anInteger [ 
-	(self lastObjectIndex < anInteger) ifFalse: [ 
-		SoilInvalidSegmentIndex signal: 'segment indexes can only grow' ] 
+	| fileIndex |
+	fileIndex := self lastObjectIndex.
+	(fileIndex < anInteger) ifFalse: [ 
+		SoilInvalidSegmentIndex signal: 'segment indexes can only grow. ', anInteger printString, ' is smaller than the on-disk index ', fileIndex printString ] 
 ]
