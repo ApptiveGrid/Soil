@@ -207,6 +207,11 @@ SoilTransactionJournal >> size [
 	^ entries size
 ]
 
+{ #category : #validating }
+SoilTransactionJournal >> validateIn: aSoilTransaction [ 
+	entries do: [ :each | each validateIn: aSoilTransaction ]
+]
+
 { #category : #writing }
 SoilTransactionJournal >> write [ 
 	entries do: [ :each | each writeOn: stream ].

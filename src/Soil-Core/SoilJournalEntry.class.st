@@ -37,6 +37,11 @@ SoilJournalEntry >> transactionId: anObject [
 	transactionId := anObject
 ]
 
+{ #category : #validating }
+SoilJournalEntry >> validateIn: aSoilTransaction [ 
+	
+]
+
 { #category : #writing }
 SoilJournalEntry >> writeOn: aStream [ 
 	aStream 
