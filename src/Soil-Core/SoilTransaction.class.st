@@ -250,7 +250,8 @@ SoilTransaction >> continue [
 	fail because then there is a concurrent modification"
 	readVersion := writeVersion.
 	writeVersion := nil.
-	journal := nil
+	journal := nil.
+	lastObjectIndexes := nil
 ]
 
 { #category : #aborting }
