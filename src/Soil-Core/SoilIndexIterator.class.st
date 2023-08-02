@@ -163,6 +163,20 @@ SoilIndexIterator >> nextAssociation [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> nextAssociationWithPresentValue [
+	| next |
+	next := self nextAssociation.
+	[ next notNil and: [ next value isRemoved ] ] whileTrue: [ 
+		next := self nextAssociation ].
+	^ next 
+]
+
+{ #category : #'as yet unclassified' }
+SoilIndexIterator >> nextPresent [ 
+	^ self nextAssociationWithPresentValue value
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> nextPresentAssociation [
 	| assoc |
 	"lookup next association by leaving out the removed keys"

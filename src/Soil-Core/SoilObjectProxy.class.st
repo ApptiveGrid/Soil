@@ -105,6 +105,12 @@ SoilObjectProxy >> theNonSoilProxy [
 ]
 
 { #category : #accessing }
+SoilObjectProxy >> transaction [
+
+	^ transaction
+]
+
+{ #category : #accessing }
 SoilObjectProxy >> transaction: aTransaction [ 
 	transaction := aTransaction 
 ]

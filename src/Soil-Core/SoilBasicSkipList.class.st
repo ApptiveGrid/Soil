@@ -68,7 +68,7 @@ SoilBasicSkipList >> first: anInteger [
 	iterator := self newIterator.
 	col := OrderedCollection new.
 	anInteger timesRepeat: [ 
-		(iterator next)
+		(iterator nextPresent)
 			ifNotNil: [ :value | col add: value ]
 			ifNil: [ ^ col ]].
 	^ col
