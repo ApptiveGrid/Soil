@@ -156,36 +156,32 @@ SoilNewClusterVersion >> serializeObject [
 
 { #category : #serializing }
 SoilNewClusterVersion >> serializeOn: stream [
-	| serializer |
 	bytes ifNil: [ self serializeObject ].
-	self flag: #todo.
-	serializer := SoilBasicSerializer new stream: stream.
-
-	serializer 
+	stream 
 		nextPutLengthEncodedInteger: version;
 		nextPutLengthEncodedInteger: previousVersionPosition.
 	"behavior descriptions"
-	serializer
+	stream
 		nextPutLengthEncodedInteger: behaviorDescriptions size.
 	behaviorDescriptions do: [ :behavior |
-		serializer 
+		stream 
 			nextPutLengthEncodedInteger: behavior objectId index;
 			nextPutLengthEncodedInteger: behavior version ].
 	"references"
-	serializer nextPutLengthEncodedInteger: references size.
+	stream nextPutLengthEncodedInteger: references size.
 	references do: [ :ref |
 		"do not write zero index, try to allocate a new index before"
 		(ref index = 0) ifTrue: [ 
 			SoilObjectIdNotInitialized signal: 'index should not be zero' ].
 		ref writeOn: stream ].
 	"indexes"
-	serializer nextPutLengthEncodedInteger: indexIds size.
+	stream nextPutLengthEncodedInteger: indexIds size.
 	indexIds do: [ :indexId |
 		stream 
 			nextPut: indexId size;
 			nextPutAll: indexId asByteArray].
 	"object in bytes"
-	serializer nextPutLengthEncodedInteger: bytes size.
+	stream nextPutLengthEncodedInteger: bytes size.
 	stream nextPutAll: bytes .
 ]
 
