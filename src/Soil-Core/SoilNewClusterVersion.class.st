@@ -156,9 +156,7 @@ SoilNewClusterVersion >> serializeObject [
 
 { #category : #serializing }
 SoilNewClusterVersion >> serializeOn: stream [
-	| serializer |
 	bytes ifNil: [ self serializeObject ].
-	self flag: #todo.
 	stream 
 		nextPutLengthEncodedInteger: version;
 		nextPutLengthEncodedInteger: previousVersionPosition.
