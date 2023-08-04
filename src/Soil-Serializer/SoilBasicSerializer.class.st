@@ -108,10 +108,7 @@ SoilBasicSerializer >> nextPutLengthEncodedInteger: anInteger [
 	"store length of integer encoded in a way that the presence of a
 	most significant bit indicates that the next byte is part of
 	the value"
-	anInteger < 128 ifTrue: [ ^ self nextPutByte: anInteger ].
-	self
-		nextPutByte: ((anInteger bitAnd: 127) bitOr: 128);
-		nextPutLengthEncodedInteger: (anInteger bitShift: -7)
+	stream nextPutLengthEncodedInteger: anInteger 
 ]
 
 { #category : #writing }

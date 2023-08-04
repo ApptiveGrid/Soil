@@ -1,7 +1,7 @@
-Extension { #name : #ZnBufferedWriteStream }
+Extension { #name : #BinaryFileStream }
 
-{ #category : #'*Soil-File' }
-ZnBufferedWriteStream >> nextPutLengthEncodedInteger: anInteger [ 
+{ #category : #'*Soil-Serializer' }
+BinaryFileStream >> nextPutLengthEncodedInteger: anInteger [ 
 	"store length of integer encoded in a way that the presence of a
 	most significant bit indicates that the next byte is part of
 	the value"
