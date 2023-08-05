@@ -193,7 +193,7 @@ SoilJournal >> numberofJournalsToKeep [
 
 { #category : #'instance creation' }
 SoilJournal >> open [ 
-	self buildTransactionJournals 
+	
 ]
 
 { #category : #'as yet unclassified' }
