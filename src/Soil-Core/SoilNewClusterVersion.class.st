@@ -194,6 +194,6 @@ SoilNewClusterVersion >> shouldBeCommitted [
 SoilNewClusterVersion >> validateReadVersion [
 	"a new object record cannot conflict as the record is not on disk"
 	(previousVersionPosition = 0) ifTrue: [ ^ self ].
-	(previousVersionPosition = (transaction objectRepository positionOf: objectId)) ifFalse: [ 
+	(previousVersionPosition = (transaction objectRepository heapPositionOf: objectId)) ifFalse: [ 
 		SoilObjectHasConcurrentChange signal: 'object id: ', objectId asString, ' has been changed by another transaction']
 ]
