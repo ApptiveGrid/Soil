@@ -15,29 +15,11 @@ SoilObjectRepository >> acceptSoil: aSoilVisitor [
 ]
 
 { #category : #adding }
-SoilObjectRepository >> addFirstSegment [
-	| segment |
-	segment := SoilObjectSegment new id: 1.
-	self addNewSegment: segment.
-	"skip using index 1 because that is the root object"
-	segment allocateNextIndex 
-]
-
-{ #category : #adding }
-SoilObjectRepository >> addMetaSegment [
-	^ metaSegment := (SoilMetaSegment new id: 0) 
-		objectRepository: self;
-		initializeFilesystem;
-		"skip first index as this is the meta behavior description"
-		allocateNextIndex;
-		yourself
-]
-
-{ #category : #adding }
 SoilObjectRepository >> addNewSegment [
 	^ self addNewSegment: (SoilObjectSegment new 
 			id: self segments size + 1;
-			objectRepository: self)
+			objectRepository: self;
+			yourself)
 ]
 
 { #category : #adding }
@@ -97,12 +79,29 @@ SoilObjectRepository >> firstSegment [
 	^ segments first
 ]
 
+{ #category : #accessing }
+SoilObjectRepository >> heapPositionOf: anObjectId [ 
+	^ (self segmentAt: anObjectId segment)
+		heapPositionAt: anObjectId index  
+]
+
 { #category : #initialization }
 SoilObjectRepository >> initializeFilesystem [
+	| firstSegment |
 	(soil path / #segments) ensureCreateDirectory.
 	segments := OrderedCollection new.
-	self addMetaSegment.
-	self addFirstSegment
+	metaSegment := (SoilMetaSegment new id: 0) 
+		objectRepository: self;
+		initializeFilesystem;
+		"skip first index as this is the meta behavior description"
+		allocateNextIndex;
+		yourself.
+	firstSegment := self newSegment 
+		id: 1;
+		yourself.
+	self addNewSegment: firstSegment.
+	"skip using index 1 because that is the root object"
+	firstSegment allocateNextIndex 
 ]
 
 { #category : #initialization }
@@ -119,12 +118,16 @@ SoilObjectRepository >> loadSegments [
 			objectRepository: self.
 		segmentId isZero 
 			ifTrue: [ 
-				metaSegment := self newMetaSegment ]
+				metaSegment := self newMetaSegment
+					open;
+					yourself ]
 			ifFalse: [ 
 				segments 
 					at: segmentId 
 					put: (self newSegment 
-						id: segmentId) ] ].
+						id: segmentId;
+						open;
+						yourself) ] ].
 	^ segments
 	
 ]
@@ -163,12 +166,6 @@ SoilObjectRepository >> newSegment [
 	^ SoilObjectSegment new 
 		objectRepository: self;
 		yourself
-]
-
-{ #category : #accessing }
-SoilObjectRepository >> positionOf: anObjectId [ 
-	^ (self segmentAt: anObjectId segment)
-		indexFile positionAt: anObjectId index  
 ]
 
 { #category : #accessing }

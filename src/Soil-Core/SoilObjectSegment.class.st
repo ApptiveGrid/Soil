@@ -20,7 +20,7 @@ SoilObjectSegment >> acceptSoil: aSoilVisitor [
 { #category : #adding }
 SoilObjectSegment >> addNewRaw: aByteArray [ 
 	| objectIndex |
-	objectIndex := self indexFile nextIndex.
+	objectIndex := indexFile nextIndex.
 	self 
 		at: objectIndex 
 		putBytes: aByteArray.
@@ -34,30 +34,30 @@ SoilObjectSegment >> allVersionsAt: index [
 	versions := OrderedCollection new.
 	versions add: obj.
 	[ obj previousVersionPosition isZero ] whileFalse: [ 
-		obj := self objectFile atPosition: obj previousVersionPosition.
+		obj := objectFile atPosition: obj previousVersionPosition.
 		versions add: obj ].
 	^ versions
 ]
 
 { #category : #'as yet unclassified' }
 SoilObjectSegment >> allocateNextIndex [
-	^ self indexFile allocateNewIndex
+	^ indexFile allocateNewIndex
 ]
 
 { #category : #accessing }
 SoilObjectSegment >> at: anInteger [ 
 	| position |
-	position := self indexFile positionAt: anInteger.
-	^ (self objectFile atPosition: position) ifNotNil: [ :record | 
+	position := indexFile positionAt: anInteger.
+	^ (objectFile atPosition: position) ifNotNil: [ :record | 
 		record objectId: (SoilObjectId segment: id index: anInteger) ]
 ]
 
 { #category : #accessing }
 SoilObjectSegment >> at: anInteger putBytes: bytes [ 
 	| position |
-	position := self objectFile size.
+	position := objectFile size.
 	objectFile appendBytes: bytes.
-	self indexFile at: anInteger putPosition: position.
+	indexFile at: anInteger putPosition: position.
 	^ position
 ]
 
@@ -67,15 +67,15 @@ SoilObjectSegment >> at: index version: version [
 	record := self at: index.
 	[ record version <= version ] whileFalse: [ 
 		record hasPreviousVersion ifFalse: [ ^ nil ].
-		record := self objectFile atPosition: record previousVersionPosition ].
+		record := objectFile atPosition: record previousVersionPosition ].
 	^ record
 ]
 
 { #category : #accessing }
 SoilObjectSegment >> basicAt: anInteger length:  length [
 	| position |
-	position := self indexFile positionAt: anInteger.
-	^ self objectFile basicAtPosition: position length: length
+	position := indexFile positionAt: anInteger.
+	^ objectFile basicAtPosition: position length: length
 ]
 
 { #category : #'initialize-release' }
@@ -86,6 +86,11 @@ SoilObjectSegment >> close [
 		objectFile close ].
 	indexManager ifNotNil: [ 
 		indexManager close ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilObjectSegment >> heapPositionAt: anInteger [ 
+	^ indexFile positionAt: anInteger
 ]
 
 { #category : #accessing }
@@ -121,14 +126,6 @@ SoilObjectSegment >> indexAt: indexId put: aSoilIndex [
 ]
 
 { #category : #accessing }
-SoilObjectSegment >> indexFile [
-	^ indexFile ifNil: [
-		indexFile := SoilObjectIndexFile new 
-			segment: self;
-			open ]
-]
-
-{ #category : #accessing }
 SoilObjectSegment >> indexFile: aSOObjectIndexFile [ 
 	indexFile := aSOObjectIndexFile
 ]
@@ -145,14 +142,12 @@ SoilObjectSegment >> indexManager [
 { #category : #initialization }
 SoilObjectSegment >> initializeFilesystem [
 	self path ensureCreateDirectory.
-	SoilObjectFile new
+	objectFile := SoilObjectFile new
 		segment: self;
-		initializeFilesystem;
-		close.
-	SoilObjectIndexFile new
+		initializeFilesystem.
+	indexFile := SoilObjectIndexFile new
 		segment: self;
-		initializeFilesystem;
-		close.
+		initializeFilesystem.
 	SoilIndexManager new 
 		segment: self;
 		initializeFilesystem;
@@ -161,7 +156,7 @@ SoilObjectSegment >> initializeFilesystem [
 
 { #category : #accessing }
 SoilObjectSegment >> lastObjectIndex [ 
-	^ self indexFile lastObjectIndex
+	^ indexFile lastObjectIndex
 ]
 
 { #category : #accessing }
@@ -171,30 +166,22 @@ SoilObjectSegment >> lastObjectIndex: anInteger [
 
 { #category : #locking }
 SoilObjectSegment >> lockAppendingFor: lockContext [
-	^ self objectFile lockAppendingFor: lockContext
+	^ objectFile lockAppendingFor: lockContext
 ]
 
 { #category : #accessing }
 SoilObjectSegment >> lockLastObjectIndexFor: lockContext [ 
-	^ self indexFile lockLastObjectIndexFor: lockContext 
+	^ indexFile lockLastObjectIndexFor: lockContext 
 ]
 
 { #category : #'as yet unclassified' }
 SoilObjectSegment >> lockObjectId: aSOObjectId for: lockContext [ 
-	^ self indexFile lockObjectId: aSOObjectId for: lockContext 
+	^ indexFile lockObjectId: aSOObjectId for: lockContext 
 ]
 
 { #category : #ids }
 SoilObjectSegment >> newObjectId [
 	^ SoilObjectId segment: id index: 0 
-]
-
-{ #category : #accessing }
-SoilObjectSegment >> objectFile [
-	^ objectFile ifNil: [ 
-		objectFile := SoilObjectFile new
-			segment: self;
-			open ]
 ]
 
 { #category : #accessing }
@@ -205,6 +192,16 @@ SoilObjectSegment >> objectFile: aSOObjectFile [
 { #category : #accessing }
 SoilObjectSegment >> objectRepository: aSOObjectRepository [ 
 	objectRepository := aSOObjectRepository 
+]
+
+{ #category : #'instance creation' }
+SoilObjectSegment >> open [ 
+	indexFile := SoilObjectIndexFile new 
+			segment: self;
+			open.
+	objectFile := SoilObjectFile new
+			segment: self;
+			open
 ]
 
 { #category : #accessing }
