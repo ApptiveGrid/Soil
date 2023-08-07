@@ -50,6 +50,26 @@ SoilTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilTest >> testCachedSegment [
+	| txn |
+	soil setup cacheObjectRecords: 100.
+	txn := soil newTransaction.
+	txn root: SoilPersistentDictionary new.
+	1 to: 10 do: [ :n | | v |
+		v := n asString.
+		txn makeRoot: v.
+		txn root at: n asString put: v ].
+	txn commit.
+	self assert: (soil objectRepository firstSegment cache instVarNamed: #statistics) hitRatio equals: 0.
+	1 to: 10 do: [ :n | | tx |
+		tx := soil newTransaction.
+		tx root at: 10 atRandom asString.
+		tx abort ].
+	self assert: (soil objectRepository firstSegment cache instVarNamed: #statistics) hitRatio equals: 1.
+
+]
+
+{ #category : #tests }
 SoilTest >> testCheckpointEmptyRecordsToCommit [
 	| tx root skipList obj items |
 	tx := soil newTransaction.
