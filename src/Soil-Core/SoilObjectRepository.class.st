@@ -68,6 +68,16 @@ SoilObjectRepository >> at: objectid version: version [
 		ifNotNil: [ :record | record objectId: objectid ]
 ]
 
+{ #category : #accessing }
+SoilObjectRepository >> cacheSegmentAt: index upTo: limit [ 
+	(index = 0) 
+		ifTrue: [ metaSegment := metaSegment asCachedSegment weight: limit ]
+		ifFalse: [  
+			segments 	
+				at: index 
+				put: ((segments at: index) asCachedSegment weight: limit) ]
+]
+
 { #category : #'opening/closing' }
 SoilObjectRepository >> close [
 	metaSegment close.
@@ -90,8 +100,7 @@ SoilObjectRepository >> initializeFilesystem [
 	| firstSegment |
 	(soil path / #segments) ensureCreateDirectory.
 	segments := OrderedCollection new.
-	metaSegment := (SoilMetaSegment new id: 0) 
-		objectRepository: self;
+	metaSegment := self newMetaSegment
 		initializeFilesystem;
 		"skip first index as this is the meta behavior description"
 		allocateNextIndex;
@@ -150,7 +159,7 @@ SoilObjectRepository >> newMetaObjectId [
 
 { #category : #'instance creation' }
 SoilObjectRepository >> newMetaSegment [ 
-	^ SoilMetaSegment new 
+	^ SoilObjectSegment new 
 		objectRepository: self;
 		id: 0;
 		yourself

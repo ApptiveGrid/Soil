@@ -14,7 +14,9 @@ Class {
 
 { #category : #visiting }
 SoilObjectSegment >> acceptSoil: aSoilVisitor [ 
-	^ aSoilVisitor visitObjectSegment: self
+	^ self isMeta 
+		ifTrue: [ aSoilVisitor visitMetaSegment: self ]
+		ifFalse: [ aSoilVisitor visitObjectSegment: self ]
 ]
 
 { #category : #adding }
@@ -42,6 +44,12 @@ SoilObjectSegment >> allVersionsAt: index [
 { #category : #'as yet unclassified' }
 SoilObjectSegment >> allocateNextIndex [
 	^ indexFile allocateNewIndex
+]
+
+{ #category : #converting }
+SoilObjectSegment >> asCachedSegment [
+	^ (self as: SoilCachedObjectSegment)
+		resetCache
 ]
 
 { #category : #accessing }
@@ -152,6 +160,11 @@ SoilObjectSegment >> initializeFilesystem [
 		segment: self;
 		initializeFilesystem;
 		close
+]
+
+{ #category : #testing }
+SoilObjectSegment >> isMeta [ 
+	^ id = 0
 ]
 
 { #category : #accessing }
