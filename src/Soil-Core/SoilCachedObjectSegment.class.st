@@ -40,13 +40,13 @@ SoilCachedObjectSegment >> cache [
 { #category : #initialization }
 SoilCachedObjectSegment >> initialize [ 
 	super initialize.
-	self halt.
-	cache := LRUCache new
+	self resetCache 
 ]
 
 { #category : #initialization }
 SoilCachedObjectSegment >> resetCache [
 	cache := LRUCache new
+		beThreadSafe  
 ]
 
 { #category : #accessing }
