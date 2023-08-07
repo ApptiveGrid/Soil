@@ -273,3 +273,9 @@ Soil >> settings [
 
 	^ settings
 ]
+
+{ #category : #accessing }
+Soil >> setup [
+	^ SoilSetup new 
+		soil: self 
+]

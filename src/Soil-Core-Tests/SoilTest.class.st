@@ -188,6 +188,24 @@ SoilTest >> testSerializingToSavedRoot [
 ]
 
 { #category : #tests }
+SoilTest >> testSetupMetaRecords [ 
+	soil setup 
+		cacheMetaRecords: 100.
+	self assert: soil objectRepository metaSegment class equals: SoilCachedObjectSegment.
+	self assert: (soil objectRepository metaSegment cache instVarNamed: #weight) maximum equals: 100.
+	self assert: soil objectRepository firstSegment class equals: SoilObjectSegment 
+]
+
+{ #category : #tests }
+SoilTest >> testSetupObjectRecords [ 
+	soil setup 
+		cacheObjectRecords: 1000.
+	self assert: soil objectRepository firstSegment class equals: SoilCachedObjectSegment.
+	self assert: (soil objectRepository firstSegment cache instVarNamed: #weight) maximum equals: 1000.
+	self assert: soil objectRepository metaSegment class equals: SoilObjectSegment 
+]
+
+{ #category : #tests }
 SoilTest >> testUpdatingPersistentObject [
 	| tx updateTx persistedRoot readTx root3 |
 	tx := soil newTransaction.
