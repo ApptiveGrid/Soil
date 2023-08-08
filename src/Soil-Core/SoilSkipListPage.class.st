@@ -38,7 +38,7 @@ SoilSkipListPage >> addItem: anAssociation [
 SoilSkipListPage >> associationAt: anInteger [ 
 	^ self 
 		associationAt: anInteger 
-		ifAbsent: [ nil ]
+		ifAbsent: nil
 ]
 
 { #category : #accessing }
@@ -59,7 +59,7 @@ SoilSkipListPage >> biggestKey [
 SoilSkipListPage >> firstItem [
 	^ items 
 		ifNotEmpty: [ items first ]
-		ifEmpty: [ nil ]
+		ifEmpty: nil
 ]
 
 { #category : #testing }
@@ -138,7 +138,7 @@ SoilSkipListPage >> itemAt: anInteger ifAbsent: aBlock [
 	^ items 
 		findBinaryIndex: [ :each |  anInteger - each key ] 
 		do: [:ind | items at: ind ]
-		ifNone: [ aBlock value ]
+		ifNone: aBlock 
 ]
 
 { #category : #accessing }
@@ -223,14 +223,14 @@ SoilSkipListPage >> keySize: anInteger [
 { #category : #accessing }
 SoilSkipListPage >> lastItem [
 
-	^ items ifEmpty: [ nil ] ifNotEmpty: [ :itms | itms last ]
+	^ items ifEmpty: nil ifNotEmpty: [ :itms | itms last ]
 ]
 
 { #category : #accessing }
 SoilSkipListPage >> lastKey [
 	^ items 
 		ifNotEmpty: [ items last key ]
-		ifEmpty: [ nil ]
+		ifEmpty: nil
 ]
 
 { #category : #accessing }

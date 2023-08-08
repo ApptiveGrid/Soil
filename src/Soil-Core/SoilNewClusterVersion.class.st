@@ -70,7 +70,7 @@ SoilNewClusterVersion >> indexOfBehaviorDescription: aBehavior [
 	(aBehavior = SoilBehaviorDescription) ifTrue: [ ^ 0 ]. 
 	index := behaviorDescriptions 
 		detectIndex: [ :each | each behaviorIdentifier = aBehavior name ]
-		ifNone: [ 0 ].
+		ifNone: 0.
 	(index > 0) ifTrue: [ ^ index ].
 	behaviorDescriptions add: (transaction behaviorDescriptionFor: aBehavior).
 	^ behaviorDescriptions size

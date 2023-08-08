@@ -76,7 +76,7 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 	current we can return it"
 	objectId := soil behaviorRegistry
 		nameAt: aClass soilBehaviorIdentifier
-		ifAbsent: [ nil ].
+		ifAbsent: nil.
 		
 	objectId ifNotNil: [ 
 		behaviorDescription := (objectId index = 2)
@@ -343,7 +343,7 @@ SoilTransaction >> isRoot: anObject [
 	"this is surely not true but a shortcut for now"
 	^ (objectMap 
 		at: anObject theNonSoilProxy 
-		ifAbsent: [ nil ]) notNil
+		ifAbsent: nil) notNil
 ]
 
 { #category : #testing }
@@ -467,7 +467,7 @@ SoilTransaction >> objectAt: anObjectId ifAbsent: aBlock [
 	idMap 
 		at: anObjectId 
 		ifPresent: [ :record | ^ record object ]
-		ifAbsent: [ aBlock value ]
+		ifAbsent: aBlock 
 ]
 
 { #category : #testing }

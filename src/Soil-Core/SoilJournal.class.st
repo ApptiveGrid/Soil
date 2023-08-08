@@ -166,7 +166,7 @@ SoilJournal >> inspectionContent [
 SoilJournal >> lastTransactionJournal [
 	^ transactionJournals 
 		ifNotEmpty: [ :journals | journals last ]
-		ifEmpty: [ nil ] 
+		ifEmpty: nil
 ]
 
 { #category : #accessing }

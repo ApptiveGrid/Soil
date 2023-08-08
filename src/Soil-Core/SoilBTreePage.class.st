@@ -32,7 +32,7 @@ SoilBTreePage >> addItem: anAssociation [
 SoilBTreePage >> associationAt: anInteger [ 
 	^ self
 		associationAt: anInteger 
-		ifAbsent: [ nil ]
+		ifAbsent: nil
 ]
 
 { #category : #accessing }
