@@ -32,7 +32,7 @@ SoilIndexManager >> at: indexId ifAbsent: aBlock [
 			ifAbsentPut: [ 
 				self 
 					loadIndexWithId: indexId 
-					ifNone: [ aBlock value ] ] ]
+					ifNone: aBlock  ] ]
 		
 ]
 

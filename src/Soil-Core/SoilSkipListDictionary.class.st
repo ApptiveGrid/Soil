@@ -12,7 +12,7 @@ SoilSkipListDictionary >> createIndex [
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #journal }
 SoilSkipListDictionary >> journalEntries [
 	| entries segment |
 	entries := OrderedCollection new.
@@ -33,7 +33,7 @@ SoilSkipListDictionary >> journalEntries [
 			id: id;
 			key: (self binaryKey: key);
 			value: value;
-			oldValue: (oldValues at: key ifAbsent: [nil ])) ].
+			oldValue: (oldValues at: key ifAbsent: nil)) ].
 	removedValues keysAndValuesDo: [ :key :value |
 		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
 		entries add: (SoilRemoveKeyEntry new 

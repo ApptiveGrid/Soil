@@ -72,7 +72,7 @@ SoilBTreeDataPage >> itemAt: anInteger ifAbsent: aBlock [
 	^ items 
 		findBinaryIndex: [ :each |  anInteger - each key ] 
 		do: [:ind | items at: ind ]
-		ifNone: [ aBlock value ]
+		ifNone: aBlock 
 ]
 
 { #category : #accessing }
@@ -95,7 +95,7 @@ SoilBTreeDataPage >> itemBefore: key [
 { #category : #accessing }
 SoilBTreeDataPage >> lastItem [
 
-	^ items ifEmpty: [ nil ] ifNotEmpty: [ :itms | itms last ]
+	^ items ifEmpty: nil ifNotEmpty: [ :itms | itms last ]
 ]
 
 { #category : #accessing }

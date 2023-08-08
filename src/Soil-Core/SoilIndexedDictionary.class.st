@@ -43,9 +43,9 @@ SoilIndexedDictionary >> at: key ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexedDictionary >> at: key put: anObject [
-	| objectId iterator |
 	^ transaction 
-		ifNotNil: [
+		ifNotNil: [ 
+			| objectId iterator |
 			objectId := transaction makeRoot: anObject.
 			"binKey := (key asSkipListKeyOfSize: index keySize) asInteger."
 			transaction markDirty: self.
@@ -56,7 +56,7 @@ SoilIndexedDictionary >> at: key put: anObject [
 					ifAbsentPut: objectId ].
 		"if there has been a prior removal of the key this new
 		addition invalidates it"
-			removedValues removeKey: key ifAbsent: [  ].
+			removedValues removeKey: key ifAbsent: nil.
 			newValues at: key put: objectId. ]
 		ifNil: [ 
 			newValues at: key put: anObject ]
@@ -71,7 +71,7 @@ SoilIndexedDictionary >> atIndex: anInteger [
 					transaction 
 						objectId: bytes asSoilObjectId
 						ifVisible: [:objectId | (objectId asSoilObjectProxy) transaction: transaction ]
-						ifHidden: [ nil ] ] ]
+						ifHidden: nil ] ]
 		ifNil: [ (newValues associations at: anInteger) value  ]
 ]
 
@@ -80,7 +80,7 @@ SoilIndexedDictionary >> basicAt: aString ifAbsent: aBlock [
 	| iterator value key |
 	key := (aString asSkipListKeyOfSize: self index keySize) asInteger.
 	iterator := self index newIterator.
-	value := iterator at: aString ifAbsent: [ aBlock value ].
+	value := iterator at: aString ifAbsent: aBlock.
 	value isRemoved ifTrue: [  
 		^ (iterator currentPage isOlderThan: transaction readVersion) 
 			ifTrue: [ aBlock value ] 
@@ -122,9 +122,9 @@ SoilIndexedDictionary >> createIndex [
 { #category : #enumerating }
 SoilIndexedDictionary >> do: aBlock [
 
-	| iterator assoc |
 	transaction
 		ifNotNil: [ 
+			| iterator assoc |
 			iterator := self index newIterator.
 			[ (assoc := iterator nextAssociation) notNil ] whileTrue: [ 
 				(self
@@ -133,7 +133,7 @@ SoilIndexedDictionary >> do: aBlock [
 					 iterator: iterator) ifNotNil: [ :objectId | 
 					aBlock value: (transaction proxyForObjectId: objectId) ] ] ]
 		ifNil: [ 
-			newValues values do: [ :each | 
+			newValues valuesDo: [ :each | 
 				aBlock value: (each isObjectId
 						 ifTrue: [ transaction proxyForObjectId: each ]
 						 ifFalse: [ each ]) ] ]
@@ -186,7 +186,7 @@ SoilIndexedDictionary >> historicValueAt: key iterator: iterator ifAbsent: absen
 				inIndex: index 
 				startingAt: iterator currentPage lastTransaction)
 					ifNotEmpty: [:entries | entries last oldValue ]
-					ifEmpty: [ absentBlock value ] ]
+					ifEmpty: absentBlock ]
 	
 ]
 
@@ -315,7 +315,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 		ifNotNil: [ 
 			"remove from newValues as there could be a new at:put: on that
 			key but removing the key will remove the value again"
-			newValues removeKey: key ifAbsent: [ ].
+			newValues removeKey: key ifAbsent: nil.
 			transaction markDirty: self.
 			iterator := self index newIterator.
 			v := iterator at: key ifAbsent: [ Error signal ].

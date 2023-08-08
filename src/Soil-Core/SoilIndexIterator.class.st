@@ -171,7 +171,7 @@ SoilIndexIterator >> nextAssociationWithPresentValue [
 	^ next 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilIndexIterator >> nextPresent [ 
 	^ self nextAssociationWithPresentValue value
 ]
