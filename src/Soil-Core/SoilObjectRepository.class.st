@@ -110,7 +110,7 @@ SoilObjectRepository >> initializeFilesystem [
 		yourself.
 	self addNewSegment: firstSegment.
 	"initialize last index with 1 which is the placeholder for the 
-	roo object"
+	root object"
 	firstSegment lastObjectIndex: 1.
 ]
 
