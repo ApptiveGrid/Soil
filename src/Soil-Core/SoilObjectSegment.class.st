@@ -41,11 +41,6 @@ SoilObjectSegment >> allVersionsAt: index [
 	^ versions
 ]
 
-{ #category : #'as yet unclassified' }
-SoilObjectSegment >> allocateNextIndex [
-	^ indexFile allocateNewIndex
-]
-
 { #category : #converting }
 SoilObjectSegment >> asCachedSegment [
 	^ (self as: SoilCachedObjectSegment)

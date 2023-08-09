@@ -102,15 +102,16 @@ SoilObjectRepository >> initializeFilesystem [
 	segments := OrderedCollection new.
 	metaSegment := self newMetaSegment
 		initializeFilesystem;
-		"skip first index as this is the meta behavior description"
-		allocateNextIndex;
+		"initialize last index with 2 which is the meta description"
+		lastObjectIndex: 2;
 		yourself.
 	firstSegment := self newSegment 
 		id: 1;
 		yourself.
 	self addNewSegment: firstSegment.
-	"skip using index 1 because that is the root object"
-	firstSegment allocateNextIndex 
+	"initialize last index with 1 which is the placeholder for the 
+	root object"
+	firstSegment lastObjectIndex: 1.
 ]
 
 { #category : #initialization }
