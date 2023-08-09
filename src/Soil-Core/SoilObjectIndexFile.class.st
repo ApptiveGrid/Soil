@@ -8,14 +8,6 @@ Class {
 	#category : #'Soil-Core-Files'
 }
 
-{ #category : #initialization }
-SoilObjectIndexFile >> allocateNewIndex [
-	| lastIndex |
-	lastIndex := self lastObjectIndex + 1.
-	self lastObjectIndex: lastIndex.
-	^ lastIndex
-]
-
 { #category : #accessing }
 SoilObjectIndexFile >> at: index [ 
 	^ mutex critical: [  
@@ -56,8 +48,9 @@ SoilObjectIndexFile >> initialize [
 
 { #category : #initialization }
 SoilObjectIndexFile >> initializeStart [
-	currentLastObjectIndex := 1.
-	self basicLastObjectIndex: 1.
+	"just initialize the indexes with zero to be present"
+	currentLastObjectIndex := 0.
+	self basicLastObjectIndex: 0.
 	"intialize the slot for the root object"
 	self at: 1 putPosition: 1.
 ]
