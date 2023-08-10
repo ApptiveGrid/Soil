@@ -15,6 +15,11 @@ SoilJournalEntry class >> withTypeCode: anInteger [
 ]
 
 { #category : #accessing }
+SoilJournalEntry >> container [
+	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
 SoilJournalEntry >> oldValue [
 	^ nil
 ]

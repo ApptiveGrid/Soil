@@ -77,7 +77,7 @@ SoilLockableStream >> lockFrom: from to: to for: lockContext [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SoilLockableStream >> lockOnlyInImage [
 	imageLocked := true.
 	fileLocked := false.

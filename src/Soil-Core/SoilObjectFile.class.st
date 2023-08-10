@@ -1,13 +1,10 @@
 Class {
 	#name : #SoilObjectFile,
 	#superclass : #SoilSegmentFile,
-	#instVars : [
-		'mutex'
-	],
 	#category : #'Soil-Core-Files'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #writing }
 SoilObjectFile >> appendBytes: aCollection [ 
 	mutex critical: [  
 		stream position: stream size.

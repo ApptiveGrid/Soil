@@ -2,7 +2,6 @@ Class {
 	#name : #SoilObjectIndexFile,
 	#superclass : #SoilSegmentFile,
 	#instVars : [
-		'mutex',
 		'currentLastObjectIndex'
 	],
 	#category : #'Soil-Core-Files'

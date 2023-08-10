@@ -212,8 +212,7 @@ SoilIndexedDictionary >> initialize [
 
 { #category : #testing }
 SoilIndexedDictionary >> isEmpty [
-	newValues ifNotEmpty: [ ^ false ].
-	^ self index isEmpty
+	^ newValues isEmpty and: [ self index isEmpty ]
 ]
 
 { #category : #testing }
