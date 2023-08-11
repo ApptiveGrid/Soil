@@ -7,6 +7,12 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #testing }
+SoilBasicSkipList class >> isAbstract [
+	<ignoreForCoverage>
+	^ self == SoilBasicSkipList
+]
+
 { #category : #private }
 SoilBasicSkipList >> at: key [ 
 	^ self 
@@ -130,6 +136,11 @@ SoilBasicSkipList >> maxLevel: anInteger [
 { #category : #'public/accessing' }
 SoilBasicSkipList >> newIterator [ 
 	^ SoilSkipListIterator on: self 
+]
+
+{ #category : #'instance creation' }
+SoilBasicSkipList >> newPage [
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }

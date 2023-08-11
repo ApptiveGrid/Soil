@@ -30,7 +30,7 @@ SoilRangeLock class >> from: from to: to context: lockContext [
 { #category : #testing }
 SoilRangeLock >> conflictsFrom: aFrom to: aTo context: contextObject [ 
 	"conflicts if ranges overlap but only for different contexts"
-	^ (self intersectsFrom: aFrom to: aTo) and: [ context ~~ contextObject ]
+	^  context ~~ contextObject and: [ self intersectsFrom: aFrom to: aTo]
 ]
 
 { #category : #testing }

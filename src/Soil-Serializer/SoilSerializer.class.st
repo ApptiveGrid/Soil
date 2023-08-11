@@ -160,7 +160,7 @@ SoilSerializer >> notSupportedError: anObject [
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #registry }
 SoilSerializer >> registerIndexId: aString [ 
 	externalObjectRegistry registerIndexId: aString
 ]

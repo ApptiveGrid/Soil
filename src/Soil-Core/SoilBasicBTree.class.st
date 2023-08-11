@@ -37,7 +37,7 @@ SoilBasicBTree >> at: aKeyObject put: anObject [
 
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'open/close' }
 SoilBasicBTree >> close [
 	self store close
 ]
@@ -173,7 +173,7 @@ SoilBasicBTree >> newRootPage [
 		pageSize: self pageSize
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'open/close' }
 SoilBasicBTree >> open [
 	self store open
 ]

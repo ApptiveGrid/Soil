@@ -16,7 +16,7 @@ SoilObjectTable >> add: anObject [
 
 { #category : #api }
 SoilObjectTable >> identityIndexOf: anObject [
-	 ^ table at: anObject ifAbsent: [ 0 ]
+	 ^ table at: anObject ifAbsent: 0
 ]
 
 { #category : #initialization }

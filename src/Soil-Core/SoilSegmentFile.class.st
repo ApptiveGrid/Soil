@@ -2,7 +2,8 @@ Class {
 	#name : #SoilSegmentFile,
 	#superclass : #SoilBinaryFile,
 	#instVars : [
-		'segment'
+		'segment',
+		'mutex'
 	],
 	#category : #'Soil-Core-Files'
 }
