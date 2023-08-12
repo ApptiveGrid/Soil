@@ -29,6 +29,7 @@ SoilTransaction >> abort [
 
 { #category : #accessing }
 SoilTransaction >> acquireLocksAndDetectWriteSkew [
+	self resetLastObjectIndexes.
 	"first iterate over all records to acquire locks and check for concurrent 
 	writes. Might be changed later to rely on the journal in case of accident"
 	recordsToCommit do: [ :record |
@@ -38,6 +39,9 @@ SoilTransaction >> acquireLocksAndDetectWriteSkew [
 		as each version relates to a unique position"
 		locks add: record lockIndex.
 		record validateReadVersion ].
+	"idMap is keyed by objectIds which could have changed by now so we rehash in order
+	not to miss lookups"
+	idMap rehash.
 ]
 
 { #category : #adding }
@@ -103,7 +107,6 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 			behaviorDescription := (SoilBehaviorDescription for: aClass)
 				beFirstVersion;
 				objectId: self newMetaObjectId.
-			self initializeObjectId: behaviorDescription objectId.
 			self atObjectId: behaviorDescription objectId putObject: behaviorDescription. ].
 	
 	behaviorDescriptions
@@ -310,7 +313,6 @@ SoilTransaction >> initializeObjectId: anObjectId [
 	anObjectId isInitialized ifTrue: [ SoilObjectIdAlreadyInitialized signal: 'object id is already initialized: ', anObjectId asString ].
 	segment := self objectRepository segmentAt: anObjectId segment.
 	"maintain last object indexes per segment"
-	lastObjectIndexes ifNil: [ lastObjectIndexes := Dictionary new ].
 	assoc := lastObjectIndexes 
 		at: segment 
 		ifAbsentPut: [ 
@@ -513,8 +515,7 @@ SoilTransaction >> objectWithId: objectId [
 ]
 
 { #category : #accessing }
-SoilTransaction >> prepareRecordsForCommit [.
-	lastObjectIndexes ifNil: [ lastObjectIndexes := Dictionary new ].
+SoilTransaction >> prepareRecordsForCommit [
 	"select all dirty/new records and convert them to new version records"
 	recordsToCommit := idMap values asOrderedCollection 
 		select: [:each | each value shouldBeCommitted ]
@@ -570,6 +571,11 @@ SoilTransaction >> recordsToCommit [
 SoilTransaction >> releaseLocks [
 	locks do: [ :lock | lock release ].
 	locks := OrderedCollection new
+]
+
+{ #category : #accessing }
+SoilTransaction >> resetLastObjectIndexes [
+	lastObjectIndexes := Dictionary new
 ]
 
 { #category : #accessing }

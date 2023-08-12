@@ -114,7 +114,8 @@ SoilNewClusterVersion >> initialize [
 { #category : #initialization }
 SoilNewClusterVersion >> initializeObjectIdsIn: aSOTransaction [ 
 	"assign indexes to all not yet initialized object records"
-	((references copyWithFirst: objectId) reject: #isInitialized) do: [ :oid |
+	objectId ifNotNil: [ objectId isInitialized ifFalse: [ aSOTransaction initializeObjectId: objectId ] ].
+	((references, (behaviorDescriptions collect: #objectId)) reject: #isInitialized) do: [ :oid |
 		aSOTransaction initializeObjectId: oid ]
 ]
 

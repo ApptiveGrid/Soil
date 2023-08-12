@@ -30,11 +30,15 @@ SoilSerializationTest >> newSerializer [
 
 { #category : #'tests-layouts' }
 SoilSerializationTest >> serializeToBytes: object [
-	| bytes |
-	bytes := transaction newClusterVersion
+	| bytes record |
+	record := transaction newClusterVersion
 		version: 1;
 		object: object;
-		serialize.
+		serializeObject;
+		yourself.
+	transaction resetLastObjectIndexes.
+	record initializeObjectIdsIn: transaction.
+	bytes := record serialize.
 	transaction commit.
 	transaction := soil newTransaction.
 	^ bytes
