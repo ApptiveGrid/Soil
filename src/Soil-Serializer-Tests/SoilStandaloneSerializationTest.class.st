@@ -1,9 +1,8 @@
 Class {
-	#name : #SoilSerializationTest,
+	#name : #SoilStandaloneSerializationTest,
 	#superclass : #TestCase,
 	#instVars : [
-		'soil',
-		'transaction'
+		'soil'
 	],
 	#pools : [
 		'SoilTypeCodes'
@@ -11,45 +10,30 @@ Class {
 	#category : #'Soil-Serializer-Tests'
 }
 
-{ #category : #'tests-layouts' }
-SoilSerializationTest >> materializeFromBytes: aByteArray [
-	^ (transaction newPersistentClusterVersion 
-		readFrom: aByteArray readStream)
-		materializeObject  object
-]
-
-{ #category : #'instance creation' }
-SoilSerializationTest >> newMaterializer [
-	^ transaction newMaterializer
-]
-
-{ #category : #'instance creation' }
-SoilSerializationTest >> newSerializer [ 
-	^ transaction newSerializer
-]
-
-{ #category : #'tests-layouts' }
-SoilSerializationTest >> serializeToBytes: object [
-	| bytes |
-	bytes := transaction newClusterVersion
-		version: 1;
-		object: object;
-		serialize.
-	transaction commit.
-	transaction := soil newTransaction.
-	^ bytes
-]
-
 { #category : #running }
-SoilSerializationTest >> setUp [
+SoilStandaloneSerializationTest >> setUp [
 	super setUp.
 	SoilTypeCodes initialize.
-	soil := (Soil path: 'soil-tests') destroy; initializeFilesystem.
-	transaction := soil newTransaction
+
+]
+
+{ #category : #'tests-layouts' }
+SoilStandaloneSerializationTest >> testSerializationByteLayout [
+	| object serialized materialized |
+	"We use SocketAddress as an exampe of a class with a ByteLayout but not specially encoded"
+	object := #[127 0 0 1] asSocketAddress.
+	
+	self assert: object class classLayout class equals: ByteLayout.
+	serialized := object soilSerializeToBytes.
+
+	materialized := serialized soilMaterialize.
+	self assert: materialized equals: object.
+	self assert: materialized class equals: SocketAddress.
+	self assert: materialized class classLayout class equals: ByteLayout.
 ]
 
 { #category : #'test-blocks' }
-SoilSerializationTest >> testSerializationCleanBlockClosure [
+SoilStandaloneSerializationTest >> testSerializationCleanBlockClosure [
 	<compilerOptions: #(+ optionCleanBlockClosure)>
 	| object serialized  materialized |
 	(SystemVersion current major >= 11) ifFalse: [ self skip ].
@@ -63,7 +47,7 @@ SoilSerializationTest >> testSerializationCleanBlockClosure [
 ]
 
 { #category : #'tests-layouts' }
-SoilSerializationTest >> testSerializationCompiledMethodLayout [
+SoilStandaloneSerializationTest >> testSerializationCompiledMethodLayout [
 
 	| object serialized materialized |
 	"We use CompiledMethod as an exampe of a class with a CompiledMethodLayout"
@@ -85,7 +69,7 @@ SoilSerializationTest >> testSerializationCompiledMethodLayout [
 ]
 
 { #category : #'tests-layouts' }
-SoilSerializationTest >> testSerializationCompiledMethodLayoutCompiledBlock [
+SoilStandaloneSerializationTest >> testSerializationCompiledMethodLayoutCompiledBlock [
 	| object serialized materialized |
 	(SystemVersion current major >= 11) ifFalse: [ self skip ].
  	"This tests CompiledBlock. we use a clean block for now"
@@ -103,7 +87,7 @@ SoilSerializationTest >> testSerializationCompiledMethodLayoutCompiledBlock [
 ]
 
 { #category : #'test-blocks' }
-SoilSerializationTest >> testSerializationConstantBlockClosure [
+SoilStandaloneSerializationTest >> testSerializationConstantBlockClosure [
 	| object serialized  materialized |
 	(SystemVersion current major >= 11) ifFalse: [ self skip ].
 	object := [1].
@@ -117,11 +101,56 @@ SoilSerializationTest >> testSerializationConstantBlockClosure [
 	self assert: materialized outerCode isNil
 ]
 
+{ #category : #'tests-layouts' }
+SoilStandaloneSerializationTest >> testSerializationDoubleByteLayout [
+	| object serialized materialized |
+	"We use DoubleByteArray as an exampe of a class with a DoubleByteLayout but not specially encoded"
+	object := DoubleByteArray newFrom: #(10 20 30 40).
+	
+	self assert: object class classLayout class equals: DoubleByteLayout.
+	serialized := object soilSerializeToBytes.
+
+	materialized := serialized soilMaterialize.
+	self assert: materialized equals: object.
+	self assert: materialized class equals: DoubleByteArray.
+	self assert: materialized class classLayout class equals: DoubleByteLayout.
+]
+
+{ #category : #'tests-layouts' }
+SoilStandaloneSerializationTest >> testSerializationDoubleWordLayout [
+	| object serialized materialized |
+	"We use DoubleWordArray as an exampe of a class with a DoubleWordLayout but not specially encoded"
+	object := DoubleWordArray newFrom: #(10 20 30 40).
+	
+	self assert: object class classLayout class equals: DoubleWordLayout.
+	serialized := object soilSerializeToBytes.
+
+	materialized := serialized soilMaterialize.
+	self assert: materialized equals: object.
+	self assert: materialized class equals: DoubleWordArray.
+	self assert: materialized class classLayout class equals: DoubleWordLayout.
+]
+
+{ #category : #'tests-layouts' }
+SoilStandaloneSerializationTest >> testSerializationFixedLayout [
+	| object serialized materialized |
+	"We use Point as an exampe of a class with a FixedLayout but not specially encoded"
+	object := 4@3.
+	
+	self assert: object class classLayout class equals: FixedLayout.
+	serialized := object soilSerializeToBytes .
+
+	materialized := serialized soilMaterialize.
+	self assert: materialized equals: object.
+	self assert: materialized class equals: Point.
+	self assert: materialized class classLayout class equals: FixedLayout.
+]
+
 { #category : #tests }
-SoilSerializationTest >> testSerializationObject [
+SoilStandaloneSerializationTest >> testSerializationObject [
 	| object serialized materialized |
 	object := Object new.
-	serialized := object soilSerializeToBytes.
+	serialized := object soilSerializeIncomplete.
 	self assert: serialized equals:  #[1 0 1 3 1 0 0 2 1 1].
 	self assert: (serialized at: 5) equals: TypeCodeObject.
 
@@ -130,14 +159,14 @@ SoilSerializationTest >> testSerializationObject [
 ]
 
 { #category : #'tests-twice' }
-SoilSerializationTest >> testSerializationObjectEqualTwice [
+SoilStandaloneSerializationTest >> testSerializationObjectEqualTwice [
 	| object array serialized materialized |
 
 	"try to serialize an object that references two objects that are equal"
 	object := 'test'.
 	array := {object. object copy}.
 
-	serialized := self serializeToBytes: array.
+	serialized := array soilSerializeToBytes.
 
 	"First the Array"
 	self assert: (serialized at: 7) equals: TypeCodeArray.
@@ -154,7 +183,7 @@ SoilSerializationTest >> testSerializationObjectEqualTwice [
 ]
 
 { #category : #'tests-twice' }
-SoilSerializationTest >> testSerializationObjectTwice [
+SoilStandaloneSerializationTest >> testSerializationObjectTwice [
 	| object array serialized materialized |
 	
 	"try to serialize an object that references twice one simple object"
@@ -177,7 +206,7 @@ SoilSerializationTest >> testSerializationObjectTwice [
 ]
 
 { #category : #tests }
-SoilSerializationTest >> testSerializationObjectWithTransient [
+SoilStandaloneSerializationTest >> testSerializationObjectWithTransient [
 	| object serialized materialized |
 	object := SoilTestClassWithTransient new.
 	object one: 1; two: 2; three: 3.
@@ -189,7 +218,7 @@ SoilSerializationTest >> testSerializationObjectWithTransient [
 ]
 
 { #category : #'tests-hashed' }
-SoilSerializationTest >> testSerializationSet [
+SoilStandaloneSerializationTest >> testSerializationSet [
 	"Set uses the hash to find elements, this might be identity, which changes"
 
 	| set object2 serialized materialized |
@@ -197,8 +226,8 @@ SoilSerializationTest >> testSerializationSet [
 	object2 := SoilTestClass1 new.
 	set add: object2.
 
-	serialized := self serializeToBytes: set.
-	materialized := self  materializeFromBytes: serialized.
+	serialized := set soilSerializeToBytes.
+	materialized := serialized soilMaterialize.
 	"rehashing fixes the Set but how to do?"
 	"materialized rehash."
 	self deny: materialized anyOne identicalTo: set.
@@ -206,22 +235,22 @@ SoilSerializationTest >> testSerializationSet [
 ]
 
 { #category : #'tests-encoded-subclasses' }
-SoilSerializationTest >> testSerializationSortedCollection [
+SoilStandaloneSerializationTest >> testSerializationSortedCollection [
 	"SortedCollection is a subclass of OrderedCollection, make sure it works"
 
 	| object serialized materialized |
 	object := SortedCollection new.
-	serialized := self serializeToBytes: object.
+	serialized := object soilSerializeToBytes.
 	
 	"this is NOT serialized using TypeCodeOrderedCollection"
 	self deny: (serialized at: 1) equals: TypeCodeOrderedCollection.
 
-	materialized := self materializeFromBytes: serialized.
+	materialized := serialized soilMaterialize.
 	self assert: materialized equals: object
 ]
 
 { #category : #tests }
-SoilSerializationTest >> testSerializationSortedCollectionWithSortBlock [
+SoilStandaloneSerializationTest >> testSerializationSortedCollectionWithSortBlock [
 	"SortedCollection ixs a subclass of OrderedCollection, make sure it works"
 	<compilerOptions: #(+ optionCleanBlockClosure)>
 
@@ -240,24 +269,24 @@ SoilSerializationTest >> testSerializationSortedCollectionWithSortBlock [
 ]
 
 { #category : #'tests-encoded-subclasses' }
-SoilSerializationTest >> testSerializationTTLAssociation [
+SoilStandaloneSerializationTest >> testSerializationTTLAssociation [
 	"TTLAssociation is a subclass of Association, make sure it works"
 
 	| object serialized materialized |
 	object := TTLAssociation key: #t value: 1.
-	serialized := object soilSerializeIncomplete.
+	serialized := self serializeToBytes: object.
 	
 	"this is NOT serialized using TypeCodeAssociation"
 	self deny: (serialized at: 1) equals: TypeCodeAssociation.
 
-	materialized := serialized soilMaterialize.
+	materialized := self materializeFromBytes: serialized.
 	self assert: materialized class equals: object class.
 	self assert: materialized equals: object
 
 ]
 
 { #category : #'tests-encoded-subclasses' }
-SoilSerializationTest >> testSerializationUUID [
+SoilStandaloneSerializationTest >> testSerializationUUID [
 	"UUID is a subclass of ByteArray, make sure it works"
 
 	| object serialized materialized |
@@ -276,7 +305,7 @@ SoilSerializationTest >> testSerializationUUID [
 ]
 
 { #category : #'tests-layouts' }
-SoilSerializationTest >> testSerializationVariableLayout [
+SoilStandaloneSerializationTest >> testSerializationVariableLayout [
 	| object serialized materialized |
 	"All Immediate classes are specially encoded, to have a test for every layout"
 	object := Path root.
@@ -291,7 +320,7 @@ SoilSerializationTest >> testSerializationVariableLayout [
 ]
 
 { #category : #'tests-encoded-subclasses' }
-SoilSerializationTest >> testSerializationWeakArray [
+SoilStandaloneSerializationTest >> testSerializationWeakArray [
 	"WeakArray is a subclass of Array, make sure it works"
 
 	| object serialized materialized |
@@ -306,7 +335,7 @@ SoilSerializationTest >> testSerializationWeakArray [
 ]
 
 { #category : #'tests-layouts' }
-SoilSerializationTest >> testSerializationWeakLayout [
+SoilStandaloneSerializationTest >> testSerializationWeakLayout [
 	| object serialized materialized |
 	"We use WeakArray as an exampe of a class with a WeakLayout"
 	object := WeakArray with: 'String'.
@@ -321,7 +350,7 @@ SoilSerializationTest >> testSerializationWeakLayout [
 ]
 
 { #category : #'tests-layouts' }
-SoilSerializationTest >> testSerializationWordLayout [
+SoilStandaloneSerializationTest >> testSerializationWordLayout [
 	| object serialized materialized |
 	"We use IntegerArray as an exampe of a class with a WordLayout but not specially encoded"
 	object := IntegerArray new: 5 withAll: 2.
