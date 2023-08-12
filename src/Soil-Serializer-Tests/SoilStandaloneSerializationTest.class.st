@@ -297,7 +297,7 @@ SoilStandaloneSerializationTest >> testSerializationUUID [
 	self deny: (serialized at: 1) equals: TypeCodeByteArray.
 	
 	self 
-		assert: ((serialized = #[1 4 85 85 73 68 1 1 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206]) or: (serialized = #[1 0 1 3 1 0 0 20 1 1 19 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206])).
+		assert: ((serialized = #[1 4 85 85 73 68 1 1 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206]) or: (serialized = #[1 4 85 85 73 68 1 1 19 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206])).
 
 
 	materialized := serialized soilMaterialize.
