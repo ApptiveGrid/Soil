@@ -24,7 +24,7 @@ SoilStandaloneSerializationTest >> testSerializationByteLayout [
 	object := #[127 0 0 1] asSocketAddress.
 	
 	self assert: object class classLayout class equals: ByteLayout.
-	serialized := object soilSerializeToBytes.
+	serialized := object soilSerialize.
 
 	materialized := serialized soilMaterialize.
 	self assert: materialized equals: object.
@@ -108,7 +108,7 @@ SoilStandaloneSerializationTest >> testSerializationDoubleByteLayout [
 	object := DoubleByteArray newFrom: #(10 20 30 40).
 	
 	self assert: object class classLayout class equals: DoubleByteLayout.
-	serialized := object soilSerializeToBytes.
+	serialized := object soilSerialize.
 
 	materialized := serialized soilMaterialize.
 	self assert: materialized equals: object.
@@ -123,7 +123,7 @@ SoilStandaloneSerializationTest >> testSerializationDoubleWordLayout [
 	object := DoubleWordArray newFrom: #(10 20 30 40).
 	
 	self assert: object class classLayout class equals: DoubleWordLayout.
-	serialized := object soilSerializeToBytes.
+	serialized := object soilSerialize.
 
 	materialized := serialized soilMaterialize.
 	self assert: materialized equals: object.
@@ -138,7 +138,7 @@ SoilStandaloneSerializationTest >> testSerializationFixedLayout [
 	object := 4@3.
 	
 	self assert: object class classLayout class equals: FixedLayout.
-	serialized := object soilSerializeToBytes .
+	serialized := object soilSerialize .
 
 	materialized := serialized soilMaterialize.
 	self assert: materialized equals: object.
@@ -150,9 +150,9 @@ SoilStandaloneSerializationTest >> testSerializationFixedLayout [
 SoilStandaloneSerializationTest >> testSerializationObject [
 	| object serialized materialized |
 	object := Object new.
-	serialized := object soilSerializeIncomplete.
-	self assert: serialized equals:  #[1 0 1 3 1 0 0 2 1 1].
-	self assert: (serialized at: 5) equals: TypeCodeObject.
+	serialized := object soilSerialize.
+	self assert: serialized equals:  #[1 6 79 98 106 101 99 116 1 1].
+	self assert: (serialized at: 9) equals: TypeCodeObject.
 
 	materialized := serialized soilMaterialize.
 	self assert: materialized class equals: Object
@@ -166,13 +166,13 @@ SoilStandaloneSerializationTest >> testSerializationObjectEqualTwice [
 	object := 'test'.
 	array := {object. object copy}.
 
-	serialized := array soilSerializeToBytes.
+	serialized := array soilSerialize.
 
 	"First the Array"
-	self assert: (serialized at: 7) equals: TypeCodeArray.
+	self assert: (serialized at: 2) equals: TypeCodeArray.
 	"array of size 2"
-	self assert: (serialized at: 8) equals: 2.
-	materialized := self materializeFromBytes: serialized.
+	self assert: (serialized at: 3) equals: 2.
+	materialized := serialized soilMaterialize.
 	self deny: array first identicalTo: array second.
 	self assert:  array first equals: array second.
 	"we do store the two strings correctly"
@@ -190,7 +190,7 @@ SoilStandaloneSerializationTest >> testSerializationObjectTwice [
 	object := Object new.
 	array := {object . object}.
 
-	serialized := self serializeToBytes: array.
+	serialized := array soilSerialize.
 	
 	"First the Array"
 	self assert: (serialized at: 9) equals: TypeCodeArray.
@@ -199,7 +199,7 @@ SoilStandaloneSerializationTest >> testSerializationObjectTwice [
 	"here the object ist stored (not tested)"
 	"Then we get a reference to the second instance"
 	self assert: (serialized at: 13) equals: TypeCodeInternalReference.
-	materialized := self materializeFromBytes: serialized.
+	materialized := serialized soilMaterialize.
 	self assert: array first identicalTo: array second.
 	"identity is preserved"
 	self assert: materialized first identicalTo: materialized second.
@@ -210,8 +210,8 @@ SoilStandaloneSerializationTest >> testSerializationObjectWithTransient [
 	| object serialized materialized |
 	object := SoilTestClassWithTransient new.
 	object one: 1; two: 2; three: 3.
-	serialized := self serializeToBytes: object.
-	materialized := self materializeFromBytes: serialized.
+	serialized := object soilSerialize.
+	materialized := serialized soilMaterialize.
 	self assert: materialized one equals: 1.
 	self assert: materialized two isNil.
 	self assert: materialized three equals: 3
@@ -226,7 +226,7 @@ SoilStandaloneSerializationTest >> testSerializationSet [
 	object2 := SoilTestClass1 new.
 	set add: object2.
 
-	serialized := set soilSerializeToBytes.
+	serialized := set soilSerialize.
 	materialized := serialized soilMaterialize.
 	"rehashing fixes the Set but how to do?"
 	"materialized rehash."
@@ -240,7 +240,7 @@ SoilStandaloneSerializationTest >> testSerializationSortedCollection [
 
 	| object serialized materialized |
 	object := SortedCollection new.
-	serialized := object soilSerializeToBytes.
+	serialized := object soilSerialize.
 	
 	"this is NOT serialized using TypeCodeOrderedCollection"
 	self deny: (serialized at: 1) equals: TypeCodeOrderedCollection.
@@ -257,7 +257,7 @@ SoilStandaloneSerializationTest >> testSerializationSortedCollectionWithSortBloc
 	| object serialized materialized |
 	(SystemVersion current major == 11) ifFalse: [ self skip ].
 	object := SortedCollection new sortBlock: [ :a :b | a > b ].
-	serialized := self serializeToBytes: object.
+	serialized := object soilSerialize.
 	
 	"this is NOT serialized using TypeCodeOrderedCollection"
 	self deny: (serialized at: 1) equals: TypeCodeOrderedCollection.
@@ -274,12 +274,12 @@ SoilStandaloneSerializationTest >> testSerializationTTLAssociation [
 
 	| object serialized materialized |
 	object := TTLAssociation key: #t value: 1.
-	serialized := self serializeToBytes: object.
+	serialized := object soilSerialize.
 	
 	"this is NOT serialized using TypeCodeAssociation"
 	self deny: (serialized at: 1) equals: TypeCodeAssociation.
 
-	materialized := self materializeFromBytes: serialized.
+	materialized := serialized soilMaterialize.
 	self assert: materialized class equals: object class.
 	self assert: materialized equals: object
 
@@ -291,16 +291,16 @@ SoilStandaloneSerializationTest >> testSerializationUUID [
 
 	| object serialized materialized |
 	object := UUID fromString: 'e42b03f8-3e9a-0d00-862e-bf1701b4bbce'.
-	serialized := self serializeToBytes: object.
+	serialized := object soilSerialize.
 	
 	"this is NOT serialized using TypeCodeByteArray"
 	self deny: (serialized at: 1) equals: TypeCodeByteArray.
 	
 	self 
-		assert: ((serialized = #[1 0 1 3 1 0 0 19 1 1 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206]) or: (serialized = #[1 0 1 3 1 0 0 20 1 1 19 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206])).
+		assert: ((serialized = #[1 4 85 85 73 68 1 1 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206]) or: (serialized = #[1 0 1 3 1 0 0 20 1 1 19 16 228 43 3 248 62 154 13 0 134 46 191 23 1 180 187 206])).
 
 
-	materialized := self materializeFromBytes: serialized.
+	materialized := serialized soilMaterialize.
 	self assert: materialized equals: object
 ]
 
@@ -311,9 +311,9 @@ SoilStandaloneSerializationTest >> testSerializationVariableLayout [
 	object := Path root.
 	
 	self assert: object class classLayout class equals: VariableLayout.
-	serialized := self  serializeToBytes: object.
+	serialized := object soilSerialize.
 
-	materialized := self materializeFromBytes: serialized.
+	materialized := serialized soilMaterialize.
 	self assert: materialized equals: object.
 	self assert: materialized class equals: AbsolutePath.
 	self assert: materialized class classLayout class equals: VariableLayout.
@@ -325,12 +325,12 @@ SoilStandaloneSerializationTest >> testSerializationWeakArray [
 
 	| object serialized materialized |
 	object := WeakArray new.
-	serialized := self serializeToBytes: object.
+	serialized := object soilSerialize.
 	
 	"this is NOT serialized using TypeCodeArray"
 	self deny: (serialized at: 1) equals: TypeCodeArray.
 
-	materialized := self materializeFromBytes: serialized.
+	materialized := serialized soilMaterialize.
 	self assert: materialized equals: object
 ]
 
@@ -341,9 +341,9 @@ SoilStandaloneSerializationTest >> testSerializationWeakLayout [
 	object := WeakArray with: 'String'.
 	
 	self assert: object class classLayout class equals: WeakLayout.
-	serialized := self serializeToBytes: object.
+	serialized := object soilSerialize.
 
-	materialized := self  materializeFromBytes: serialized.
+	materialized := serialized soilMaterialize.
 	self assert: materialized equals: object.
 	self assert: materialized class equals: WeakArray.
 	self assert: materialized class classLayout class equals: WeakLayout.
@@ -356,9 +356,9 @@ SoilStandaloneSerializationTest >> testSerializationWordLayout [
 	object := IntegerArray new: 5 withAll: 2.
 	
 	self assert: object class classLayout class equals: WordLayout.
-	serialized := self serializeToBytes: object.
+	serialized := object soilSerialize.
 
-	materialized := self materializeFromBytes: serialized.
+	materialized := serialized soilMaterialize.
 	self assert: materialized equals: object.
 	self assert: materialized class equals: IntegerArray.
 	self assert: materialized class classLayout class equals: WordLayout.

@@ -121,11 +121,11 @@ SoilSerializationTest >> testSerializationConstantBlockClosure [
 SoilSerializationTest >> testSerializationObject [
 	| object serialized materialized |
 	object := Object new.
-	serialized := object soilSerializeToBytes.
+	serialized := self serializeToBytes: object.
 	self assert: serialized equals:  #[1 0 1 3 1 0 0 2 1 1].
 	self assert: (serialized at: 5) equals: TypeCodeObject.
 
-	materialized := serialized soilMaterialize.
+	materialized := self materializeFromBytes: serialized.
 	self assert: materialized class equals: Object
 ]
 
@@ -245,12 +245,12 @@ SoilSerializationTest >> testSerializationTTLAssociation [
 
 	| object serialized materialized |
 	object := TTLAssociation key: #t value: 1.
-	serialized := object soilSerializeIncomplete.
+	serialized := self serializeToBytes: object.
 	
 	"this is NOT serialized using TypeCodeAssociation"
 	self deny: (serialized at: 1) equals: TypeCodeAssociation.
 
-	materialized := serialized soilMaterialize.
+	materialized := self materializeFromBytes: serialized.
 	self assert: materialized class equals: object class.
 	self assert: materialized equals: object
 

@@ -29,7 +29,6 @@ SoilStandaloneObjectRegistry >> behaviorDescriptionWithObjectId: aSoilObjectId a
 { #category : #accessing }
 SoilStandaloneObjectRegistry >> indexOfBehaviorDescription: aClass [ 
 	| index |
-	classes ifNil: [ classes := OrderedCollection new ].
 	(classes includes: aClass) 
 		ifTrue: [ index := classes indexOf: aClass ]
 		ifFalse: [ 
@@ -40,7 +39,13 @@ SoilStandaloneObjectRegistry >> indexOfBehaviorDescription: aClass [
 
 { #category : #accessing }
 SoilStandaloneObjectRegistry >> indexOfExternalReference: aCollection [ 
-	Error signal: 'standalone serializer does not handle external references'
+	^ 0
+]
+
+{ #category : #initialization }
+SoilStandaloneObjectRegistry >> initialize [ 
+	super initialize.
+	classes := OrderedCollection new
 ]
 
 { #category : #'instance creation' }
