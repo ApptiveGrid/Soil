@@ -39,8 +39,8 @@ SoilStandaloneSerializationTest >> testSerializationCleanBlockClosure [
 	(SystemVersion current major >= 11) ifFalse: [ self skip ].
 	object := [1+2].
 	
-	serialized := self serializeToBytes: object.
-	materialized := self materializeFromBytes: serialized.
+	serialized := object soilSerialize.
+	materialized := serialized soilMaterialize.
 	self assert: materialized class equals: CleanBlockClosure.
 	"and we can execute it!"
 	self assert: materialized value equals: 3
@@ -57,8 +57,8 @@ SoilStandaloneSerializationTest >> testSerializationCompiledMethodLayout [
 	self
 		assert: object class classLayout class
 		equals: CompiledMethodLayout.
-	serialized := self serializeToBytes: object.
-	materialized := self materializeFromBytes: serialized.
+	serialized := object soilSerialize.
+	materialized := serialized soilMaterialize.
 
 	self assert: materialized bytecodes equals: object bytecodes.
 	self assert: materialized literals equals: object literals.
@@ -76,9 +76,9 @@ SoilStandaloneSerializationTest >> testSerializationCompiledMethodLayoutCompiled
  	object := [1+2 "clean block"] compiledBlock.
 
  	self assert: object class classLayout class equals: CompiledMethodLayout.
- 	serialized := self serializeToBytes: object.
+ 	serialized := object soilSerialize.
 
- 	materialized := self materializeFromBytes: serialized.
+ 	materialized := serialized soilMaterialize.
 
  	"for #= we need equal outercode to be the same, too"
 	self assert: materialized bytecodes equals: object bytecodes.
@@ -92,8 +92,8 @@ SoilStandaloneSerializationTest >> testSerializationConstantBlockClosure [
 	(SystemVersion current major >= 11) ifFalse: [ self skip ].
 	object := [1].
 	
-	serialized := self serializeToBytes: object.
-	materialized := self materializeFromBytes: serialized.
+	serialized := object soilSerialize.
+	materialized := serialized soilMaterialize.
 	self assert: materialized class name equals: #ConstantBlockClosure.
 	"and we can execute it!"
 	self assert: materialized value equals: 1.
@@ -262,7 +262,7 @@ SoilStandaloneSerializationTest >> testSerializationSortedCollectionWithSortBloc
 	"this is NOT serialized using TypeCodeOrderedCollection"
 	self deny: (serialized at: 1) equals: TypeCodeOrderedCollection.
 
-	materialized := self materializeFromBytes: serialized.
+	materialized := serialized soilMaterialize.
 	self assert: materialized class equals: object class.
 	"not yet equal as the blocks have wrong outerCode, but ok for execution"
 	self assert: materialized sortBlock compiledBlock bytecodes equals: object sortBlock compiledBlock bytecodes.	
