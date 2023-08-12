@@ -39,6 +39,11 @@ SoilClusterRecord >> behaviorDescriptionAt: anInteger [
 	^ behaviorDescriptions at: anInteger 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilClusterRecord >> behaviorDescriptionWithObjectId: aSoilObjectId andVersion: anInteger [ 
+	^ transaction behaviorDescriptionWithObjectId: aSoilObjectId andVersion: anInteger 
+]
+
 { #category : #accessing }
 SoilClusterRecord >> behaviorDescriptions [
 	^ behaviorDescriptions
@@ -167,6 +172,12 @@ SoilClusterRecord >> segment [
 SoilClusterRecord >> serialize [
 	^ ByteArray streamContents: [ :stream |
 		self serializeOn: stream ]
+				
+]
+
+{ #category : #serializing }
+SoilClusterRecord >> serializeOn: stream [
+	self subclassResponsibility 
 				
 ]
 

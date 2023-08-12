@@ -7,6 +7,16 @@ ByteArray >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Serializer' }
+ByteArray >> soilMaterialize [
+	| stream registry a |
+	stream := self readStream.
+	registry := SoilStandaloneObjectRegistry readFrom: stream.
+	^ SoilMaterializer new 
+		externalObjectRegistry: registry;
+		materializeFromBytes: stream upToEnd
+]
+
+{ #category : #'*Soil-Serializer' }
 ByteArray class >> soilMaterialize: deserializer [
 
 	^ deserializer nextByteArray: self

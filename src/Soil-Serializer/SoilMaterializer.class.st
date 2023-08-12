@@ -80,8 +80,8 @@ SoilMaterializer >> nextBehaviorDescription [
 	behaviorIndex := self nextLengthEncodedInteger.
 	(behaviorIndex = 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
 	objectId := externalObjectRegistry 
-				behaviorDescriptionWithIndex: behaviorIndex.
-	^ transaction behaviorDescriptionWithObjectId: objectId asSoilObjectId andVersion: objectId version
+				behaviorDescriptionAt: behaviorIndex.
+	^ externalObjectRegistry behaviorDescriptionWithObjectId: objectId asSoilObjectId andVersion: objectId version
 ]
 
 { #category : #reading }

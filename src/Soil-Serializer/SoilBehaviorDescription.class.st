@@ -34,6 +34,11 @@ SoilBehaviorDescription class >> soilTransientInstVars [
 	^ #( objectId ) 
 ]
 
+{ #category : #converting }
+SoilBehaviorDescription >> asSoilObjectId [
+	^ objectId 
+]
+
 { #category : #'object creation' }
 SoilBehaviorDescription >> basicNew [
 	^ self compatibilityCheckObject: self objectClass basicNew
