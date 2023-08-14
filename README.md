@@ -6,7 +6,7 @@ Soil is a playground for exploring and learning OO database technology. It aims 
 
 ## Loading
 
-First, load it in Pharo 10 or 11 with Metacello:
+Load it in Pharo 10/11/12 with Metacello:
 
 ```smalltalk
 Metacello new 
@@ -14,6 +14,7 @@ Metacello new
 	baseline: 'Soil';
 	load.
 ```
+Note: For now, WIN is not supported.
 
 Soil is still in very early ramp up stage but we are working towards a milestone that can be used for very simple stuff. The up-to-date list of milestones you can find in [milestones](https://github.com/ApptiveGrid/Soil/milestones?direction=desc&sort=completeness&state=open).
 
