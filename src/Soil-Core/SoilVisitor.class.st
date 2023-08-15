@@ -4,6 +4,12 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #testing }
+SoilVisitor class >> isAbstract [
+	<ignoreForCoverage>
+	^ self == SoilVisitor
+]
+
 { #category : #visiting }
 SoilVisitor >> visit: anObject [ 
 	^ anObject acceptSoil: self 

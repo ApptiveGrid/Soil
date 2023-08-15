@@ -10,7 +10,7 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilBackupVisitor >> backup: aSoil [ 
 	| objectId |
 	source := aSoil.
@@ -67,12 +67,12 @@ SoilBackupVisitor >> process: aSoilObjectId [
 	toBeProcessed add: aSoilObjectId  
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilBackupVisitor >> target: aSoil [ 
 	target := aSoil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visiting }
 SoilBackupVisitor >> visitMetaSegment: aSoilMetaSegment [ 
 	self visit: aSoilMetaSegment indexManager.
 	self copyIndexAt: #identifier segment: 0. 
@@ -93,7 +93,7 @@ SoilBackupVisitor >> visitParameters: aSoilParameterFile [
 		applicationVersion: aSoilParameterFile applicationVersion
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #visiting }
 SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	| backupCluster |
 	backupCluster := aSoilPersistentClusterVersion copy

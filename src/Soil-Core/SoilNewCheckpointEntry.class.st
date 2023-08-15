@@ -44,7 +44,7 @@ SoilNewCheckpointEntry >> initialize [
 	checkpointedAt := DateAndTime now
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilNewCheckpointEntry >> objectIds [
 	^ {  }
 ]

@@ -55,7 +55,7 @@ SoilNewBehaviorEntry >> objectId: aSoilObjectId [
 	objectId := aSoilObjectId 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilNewBehaviorEntry >> objectIds [
 	^ { objectId  }
 ]

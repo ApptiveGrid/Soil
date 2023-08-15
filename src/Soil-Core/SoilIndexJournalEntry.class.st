@@ -8,6 +8,12 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
+{ #category : #testing }
+SoilIndexJournalEntry class >> isAbstract [
+	<ignoreForCoverage>
+	^ self == SoilIndexJournalEntry
+]
+
 { #category : #'accessing - defaults' }
 SoilIndexJournalEntry class >> journalTypeCode [
 	^ 0

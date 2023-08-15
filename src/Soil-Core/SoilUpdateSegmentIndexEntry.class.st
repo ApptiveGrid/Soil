@@ -44,7 +44,7 @@ SoilUpdateSegmentIndexEntry >> index: anInteger [
 	index := anInteger 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilUpdateSegmentIndexEntry >> objectIds [
 	^ {  }
 ]

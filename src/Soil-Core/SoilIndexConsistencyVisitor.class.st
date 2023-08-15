@@ -8,7 +8,7 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
-{ #category : #validation }
+{ #category : #api }
 SoilIndexConsistencyVisitor >> check: aSoil [ 
 	soil := aSoil.
 	self visit: aSoil

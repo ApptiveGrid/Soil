@@ -8,6 +8,12 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
+{ #category : #testing }
+SoilNewIndexEntry class >> isAbstract [
+	<ignoreForCoverage>
+	^ self == SoilNewIndexEntry
+]
+
 { #category : #accessing }
 SoilNewIndexEntry >> keySize [
 

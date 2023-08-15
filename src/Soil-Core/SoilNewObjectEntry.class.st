@@ -60,7 +60,7 @@ SoilNewObjectEntry >> objectId: aSOObjectId [
 	objectId := aSOObjectId
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilNewObjectEntry >> objectIds [
 	^ { objectId }
 ]

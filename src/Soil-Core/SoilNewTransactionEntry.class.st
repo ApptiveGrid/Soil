@@ -42,7 +42,7 @@ SoilNewTransactionEntry >> objectId [
 	^ nil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilNewTransactionEntry >> objectIds [
 	^ {  }
 ]

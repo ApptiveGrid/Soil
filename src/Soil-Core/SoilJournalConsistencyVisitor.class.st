@@ -14,7 +14,7 @@ SoilJournalConsistencyVisitor >> initialize [
 	segments := Dictionary new
 ]
 
-{ #category : #visiting }
+{ #category : #api }
 SoilJournalConsistencyVisitor >> verifyDatabaseVersion: aSoilTransactionJournal [ 
 	| entry |
 	"the second last entry is the update of the database version"
@@ -30,7 +30,7 @@ SoilJournalConsistencyVisitor >> verifyDatabaseVersion: aSoilTransactionJournal 
 	databaseVersion := entry value
 ]
 
-{ #category : #visiting }
+{ #category : #api }
 SoilJournalConsistencyVisitor >> verifyObjectIndexes: aSoilTransactionJournal [ 
 	| entries oldIndex newIndex |
 	"the second last entry is the update of the database version"
