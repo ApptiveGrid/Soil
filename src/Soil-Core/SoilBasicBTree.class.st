@@ -7,6 +7,12 @@ Class {
 	#category : #'Soil-Core-Index-BTree'
 }
 
+{ #category : #testing }
+SoilBasicBTree class >> isAbstract [
+	<ignoreForCoverage>
+	^ self == SoilBasicBTree
+]
+
 { #category : #converting }
 SoilBasicBTree >> asCopyOnWrite [
 	^ SoilCopyOnWriteBTree new
@@ -93,6 +99,11 @@ SoilBasicBTree >> initializeHeaderPage [
 { #category : #testing }
 SoilBasicBTree >> isEmpty [
 	^ self store headerPage hasItems not
+]
+
+{ #category : #testing }
+SoilBasicBTree >> isRegistered [
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }

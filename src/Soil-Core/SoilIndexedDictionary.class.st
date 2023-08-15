@@ -14,7 +14,7 @@ Class {
 
 { #category : #testing }
 SoilIndexedDictionary class >> isAbstract [
-
+	<ignoreForCoverage>
 	^ self == SoilIndexedDictionary
 ]
 

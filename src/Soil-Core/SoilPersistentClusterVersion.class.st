@@ -2,8 +2,7 @@ Class {
 	#name : #SoilPersistentClusterVersion,
 	#superclass : #SoilClusterRecord,
 	#instVars : [
-		'changed',
-		'position'
+		'changed'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -67,11 +66,6 @@ SoilPersistentClusterVersion >> newMaterializer [
 { #category : #accessing }
 SoilPersistentClusterVersion >> position [
 	^ position 
-]
-
-{ #category : #accessing }
-SoilPersistentClusterVersion >> position: anInteger [ 
-	position := anInteger
 ]
 
 { #category : #printing }

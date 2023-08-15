@@ -14,7 +14,7 @@ Class {
 
 { #category : #testing }
 SoilIndexPage class >> isAbstract [
-
+	<ignoreForCoverage>
 	^ self == SoilIndexPage
 ]
 

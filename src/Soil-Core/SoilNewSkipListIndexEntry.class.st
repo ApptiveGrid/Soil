@@ -49,7 +49,7 @@ SoilNewSkipListIndexEntry >> maxLevel: anInteger [
 	maxLevel := anInteger
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilNewSkipListIndexEntry >> objectIds [
 	^ {  }
 ]

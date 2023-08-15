@@ -74,7 +74,7 @@ SoilTransactionJournal >> checkpointedAt [
 	^ entries last checkpointedAt 
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'open/close' }
 SoilTransactionJournal >> close [ 
 	stream ifNotNil: [ stream close ]
 ]
@@ -143,7 +143,7 @@ SoilTransactionJournal >> initialize [
 	entries := OrderedCollection new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tools }
 SoilTransactionJournal >> inspectionEntries [
 	<inspectorPresentationOrder: 0 title: 'journal entries'>
 

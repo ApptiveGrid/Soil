@@ -11,7 +11,8 @@ Class {
 		'previousVersionPosition',
 		'version',
 		'behaviorDescriptions',
-		'indexIds'
+		'indexIds',
+		'position'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -28,9 +29,19 @@ SoilClusterRecord >> addReference: reference [
 	self basicAddReference: reference 
 ]
 
+{ #category : #testing }
+SoilClusterRecord >> asNewClusterVersion [
+	^ self subclassResponsibility
+]
+
 { #category : #'instance creation' }
 SoilClusterRecord >> basicAddReference: reference [
 	references add: reference 
+]
+
+{ #category : #'as yet unclassified' }
+SoilClusterRecord >> beChanged [
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
@@ -39,7 +50,7 @@ SoilClusterRecord >> behaviorDescriptionAt: anInteger [
 	^ behaviorDescriptions at: anInteger 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'queries - behaviors' }
 SoilClusterRecord >> behaviorDescriptionWithObjectId: aSoilObjectId andVersion: anInteger [ 
 	^ transaction behaviorDescriptionWithObjectId: aSoilObjectId andVersion: anInteger 
 ]
@@ -65,9 +76,14 @@ SoilClusterRecord >> bytes: anObject [
 	bytes := anObject
 ]
 
-{ #category : #asserting }
+{ #category : #accessing }
 SoilClusterRecord >> committed [ 
 	committed := true
+]
+
+{ #category : #testing }
+SoilClusterRecord >> hasChanged [
+	^ self subclassResponsibility
 ]
 
 { #category : #testing }
@@ -117,6 +133,11 @@ SoilClusterRecord >> objectId [
 SoilClusterRecord >> objectId: aSOObjectId [ 
 	
 	objectId := aSOObjectId 
+]
+
+{ #category : #accessing }
+SoilClusterRecord >> position: anInteger [ 
+	position := anInteger
 ]
 
 { #category : #accessing }
@@ -179,6 +200,11 @@ SoilClusterRecord >> serialize [
 SoilClusterRecord >> serializeOn: stream [
 	self subclassResponsibility 
 				
+]
+
+{ #category : #testing }
+SoilClusterRecord >> shouldBeCommitted [
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }

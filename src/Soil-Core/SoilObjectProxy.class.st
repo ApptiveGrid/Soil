@@ -58,7 +58,7 @@ SoilObjectProxy >> objectId: anObject [
 	objectId := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #soil }
 SoilObjectProxy >> objectIsNotLoaded [
 
 	"a present object is loaded"
@@ -83,7 +83,7 @@ SoilObjectProxy >> printString [
 	^ String streamContents: [ :s | self printOn: s ] limitedTo: 1000 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #soil }
 SoilObjectProxy >> soilLoadedIn: aTransaction [ 
 	transaction := aTransaction  
 ]
@@ -94,12 +94,12 @@ SoilObjectProxy >> soilRealObject [
 		object := transaction objectWithId: objectId ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #soil }
 SoilObjectProxy >> soilSerialize: aSerializer [ 
 	^ self soilRealObject soilSerialize: aSerializer 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #soil }
 SoilObjectProxy >> theNonSoilProxy [ 
 	^ self soilRealObject
 ]

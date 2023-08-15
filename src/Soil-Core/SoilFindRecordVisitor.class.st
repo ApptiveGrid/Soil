@@ -11,7 +11,7 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilFindRecordVisitor >> find: aBlock in: aSoilTransaction [ 
 	transaction := aSoilTransaction. 
 	soil := aSoilTransaction soil.

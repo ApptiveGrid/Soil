@@ -41,7 +41,7 @@ SoilRemoveKeyEntry >> key: aString [
 	key := aString 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilRemoveKeyEntry >> objectIds [
 	^ { oldValue }
 ]

@@ -7,7 +7,13 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
+SoilJournalEntry class >> isAbstract [
+	<ignoreForCoverage>
+	^ self == SoilJournalEntry
+]
+
+{ #category : #'instance creation' }
 SoilJournalEntry class >> withTypeCode: anInteger [ 
 	^ self allSubclasses 
 		detect: [ :each | each journalTypeCode = anInteger ]

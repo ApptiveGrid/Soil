@@ -29,7 +29,7 @@ SoilObjectSegment >> addNewRaw: aByteArray [
 	^ objectIndex 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilObjectSegment >> allVersionsAt: index [ 
 	| obj versions |
 	obj := self at: index.
@@ -81,7 +81,7 @@ SoilObjectSegment >> basicAt: anInteger length:  length [
 	^ objectFile basicAtPosition: position length: length
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'open/close' }
 SoilObjectSegment >> close [
 	indexFile ifNotNil: [ 
 		indexFile close ].
@@ -91,7 +91,7 @@ SoilObjectSegment >> close [
 		indexManager close ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilObjectSegment >> heapPositionAt: anInteger [ 
 	^ indexFile positionAt: anInteger
 ]
@@ -122,7 +122,7 @@ SoilObjectSegment >> indexAt: indexId ifAbsent: aBlock [
 		ifAbsent: aBlock
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilObjectSegment >> indexAt: indexId put: aSoilIndex [
 
 	^ self indexManager at: indexId put: aSoilIndex
@@ -182,7 +182,7 @@ SoilObjectSegment >> lockLastObjectIndexFor: lockContext [
 	^ indexFile lockLastObjectIndexFor: lockContext 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilObjectSegment >> lockObjectId: aSOObjectId for: lockContext [ 
 	^ indexFile lockObjectId: aSOObjectId for: lockContext 
 ]
@@ -202,7 +202,7 @@ SoilObjectSegment >> objectRepository: aSOObjectRepository [
 	objectRepository := aSOObjectRepository 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'open/close' }
 SoilObjectSegment >> open [ 
 	indexFile := SoilObjectIndexFile new 
 			segment: self;

@@ -204,7 +204,7 @@ SoilTransaction >> checkpoint [
 		self acquireLocksAndDetectWriteSkew.
 		"lastObjectIndexes contains the highest allocated index number per segment. We
 		lock all positions in order to update the index numbers in the database."
-		lastObjectIndexes keys do: [ :segment |
+		lastObjectIndexes keysDo: [ :segment |
 			locks add: (segment lockAppendingFor: self) ].
 		"convert the records into journal entries, write the journal to disk and then
 		execute the journal on the database"

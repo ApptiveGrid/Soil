@@ -73,7 +73,7 @@ SoilJournal >> archiveJournal: aTransactionJournal [
 		on: Error do: [ :e | "ignore for now" ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilJournal >> archivePath [ 
 	^ self path / #archive
 ]
@@ -136,7 +136,7 @@ SoilJournal >> initializeFilesystem [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tools }
 SoilJournal >> inspectionContent [
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 
@@ -186,7 +186,7 @@ SoilJournal >> newTransactionJournalFor: anInteger [
 			index: anInteger ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilJournal >> numberofJournalsToKeep [ 
 	^ 20
 ]
@@ -196,7 +196,7 @@ SoilJournal >> open [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilJournal >> path [
 	^ soil path / #journal
 ]

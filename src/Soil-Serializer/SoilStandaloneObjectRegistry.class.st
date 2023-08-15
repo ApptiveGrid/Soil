@@ -13,7 +13,7 @@ SoilStandaloneObjectRegistry class >> readFrom: aStream [
 		readFrom: aStream
 ]
 
-{ #category : #accessing }
+{ #category : #query }
 SoilStandaloneObjectRegistry >> behaviorDescriptionAt: anInteger [ 
 	^ (SoilBehaviorDescription for: (classes at: anInteger))
 		objectId: (SoilObjectId segment: 0 index: anInteger); 
@@ -21,12 +21,12 @@ SoilStandaloneObjectRegistry >> behaviorDescriptionAt: anInteger [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #query }
 SoilStandaloneObjectRegistry >> behaviorDescriptionWithObjectId: aSoilObjectId andVersion: version [
 	^ SoilBehaviorDescription for: (classes at: aSoilObjectId index)
 ]
 
-{ #category : #accessing }
+{ #category : #query }
 SoilStandaloneObjectRegistry >> indexOfBehaviorDescription: aClass [ 
 	| index |
 	(classes includes: aClass) 
@@ -37,7 +37,7 @@ SoilStandaloneObjectRegistry >> indexOfBehaviorDescription: aClass [
 	^ index
 ]
 
-{ #category : #accessing }
+{ #category : #query }
 SoilStandaloneObjectRegistry >> indexOfExternalReference: aCollection [ 
 	^ 0
 ]

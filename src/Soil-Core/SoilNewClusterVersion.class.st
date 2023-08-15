@@ -3,8 +3,7 @@ Class {
 	#superclass : #SoilClusterRecord,
 	#instVars : [
 		'externalObjects',
-		'previousVersionRecord',
-		'position'
+		'previousVersionRecord'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -122,11 +121,6 @@ SoilNewClusterVersion >> initializeObjectIdsIn: aSOTransaction [
 { #category : #accessing }
 SoilNewClusterVersion >> lockIndex [
 	^ transaction lockObjectId: objectId
-]
-
-{ #category : #accessing }
-SoilNewClusterVersion >> position: anInteger [ 
-	position := anInteger
 ]
 
 { #category : #accessing }
