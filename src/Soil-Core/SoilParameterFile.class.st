@@ -5,7 +5,8 @@ Class {
 		'soil',
 		'databaseFormatVersion',
 		'applicationVersion',
-		'semaphore'
+		'semaphore',
+		'currentDatabaseVersion'
 	],
 	#category : #'Soil-Core-Files'
 }
@@ -36,6 +37,16 @@ SoilParameterFile >> applicationVersion: anInteger [
 { #category : #accessing }
 SoilParameterFile >> applicationVersionSize [
 	^ 8
+]
+
+{ #category : #'as yet unclassified' }
+SoilParameterFile >> basicDatabaseVersion: anInteger [
+	semaphore critical: [
+		currentDatabaseVersion := anInteger.  
+		self stream 
+			position: self headerSize + self databaseFormatVersionSize;
+			nextPutAll: (anInteger asByteArrayOfSize: self databaseVersionSize);
+			flush ]
 ]
 
 { #category : #accessing }
@@ -70,11 +81,11 @@ SoilParameterFile >> databaseVersion [
 
 { #category : #accessing }
 SoilParameterFile >> databaseVersion: anInteger [
-	semaphore critical: [  
-		self stream 
-			position: self headerSize + self databaseFormatVersionSize;
-			nextPutAll: (anInteger asByteArrayOfSize: self databaseVersionSize);
-			flush ]
+	(currentDatabaseVersion < anInteger) ifFalse: [ 
+		SoilInvalidDatabaseVersion signal: 'database version can only grow' ]. 
+	(self databaseVersion < anInteger) ifFalse: [ 
+		SoilInvalidDatabaseVersion signal: 'database version on disk is larger than in memory' ].
+	self basicDatabaseVersion: anInteger
 ]
 
 { #category : #accessing }
@@ -85,13 +96,14 @@ SoilParameterFile >> databaseVersionSize [
 { #category : #initialization }
 SoilParameterFile >> initialize [ 
 	super initialize.
-	semaphore := Semaphore forMutualExclusion 
+	semaphore := Semaphore forMutualExclusion.
+	currentDatabaseVersion := 0
 ]
 
 { #category : #initialization }
 SoilParameterFile >> initializeStart [
 	self databaseFormatVersion: 1.
-	self databaseVersion: 0.
+	self basicDatabaseVersion: 0.
 	self applicationVersion: 1
 ]
 
@@ -121,7 +133,8 @@ SoilParameterFile >> lockDatabaseVersionFor: lockContext [
 SoilParameterFile >> open [ 
 	super open.
 	(Soil databaseFormatVersion = self databaseFormatVersion)	
-		ifFalse: [ SoilIncompatibleDatabaseFormat signal: 'database format version ', Soil databaseFormatVersion asString, ' does not match persisted database format version ', self databaseFormatVersion asString] 
+		ifFalse: [ SoilIncompatibleDatabaseFormat signal: 'database format version ', Soil databaseFormatVersion asString, ' does not match persisted database format version ', self databaseFormatVersion asString ].
+	currentDatabaseVersion := self databaseVersion  
 ]
 
 { #category : #accessing }
