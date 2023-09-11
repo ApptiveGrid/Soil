@@ -2,7 +2,9 @@ Class {
 	#name : #SoilSkipList,
 	#superclass : #SoilBasicSkipList,
 	#instVars : [
-		'path'
+		'path',
+		'valueSize',
+		'keySize'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -62,6 +64,18 @@ SoilSkipList >> isRegistered [
 	^ path notNil
 ]
 
+{ #category : #accessing }
+SoilSkipList >> keySize [
+	^ keySize ifNil: [
+		keySize := super keySize ]
+]
+
+{ #category : #accessing }
+SoilSkipList >> keySize: anInteger [
+	super keySize: anInteger.
+	keySize := anInteger
+]
+
 { #category : #'instance creation' }
 SoilSkipList >> newFileStore [
 	^ SoilPagedFileIndexStore new
@@ -118,6 +132,19 @@ SoilSkipList >> readPageFrom: aStream [
 SoilSkipList >> thePersistentInstance [
 	^ self
 	
+]
+
+{ #category : #accessing }
+SoilSkipList >> valueSize [
+	"^ 8"
+	^ valueSize ifNil: [ 
+		valueSize := super valueSize ]
+]
+
+{ #category : #accessing }
+SoilSkipList >> valueSize: anInteger [ 
+	super valueSize: anInteger.
+	valueSize := anInteger
 ]
 
 { #category : #writing }
