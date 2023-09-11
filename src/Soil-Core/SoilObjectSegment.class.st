@@ -135,11 +135,7 @@ SoilObjectSegment >> indexFile: aSOObjectIndexFile [
 
 { #category : #accessing }
 SoilObjectSegment >> indexManager [ 
-	^ indexManager ifNil: [ 
-		indexManager := SoilIndexManager new 
-			segment: self;
-			open;
-			yourself ]
+	^ indexManager
 ]
 
 { #category : #initialization }
@@ -151,7 +147,7 @@ SoilObjectSegment >> initializeFilesystem [
 	indexFile := SoilObjectIndexFile new
 		segment: self;
 		initializeFilesystem.
-	SoilIndexManager new 
+	indexManager := SoilIndexManager new 
 		segment: self;
 		initializeFilesystem;
 		close
@@ -208,6 +204,9 @@ SoilObjectSegment >> open [
 			segment: self;
 			open.
 	objectFile := SoilObjectFile new
+			segment: self;
+			open.
+	indexManager := SoilIndexManager new 
 			segment: self;
 			open
 ]
