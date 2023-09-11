@@ -12,6 +12,12 @@ SoilCopyOnWriteIndexStore >> flush [
 	^ wrappedStore flush
 ]
 
+{ #category : #accessing }
+SoilCopyOnWriteIndexStore >> flushCachedPages [ 
+	super flushCachedPages.
+	wrappedStore flushCachedPages 
+]
+
 { #category : #testing }
 SoilCopyOnWriteIndexStore >> isCopyOnWrite [ 
 	^ true

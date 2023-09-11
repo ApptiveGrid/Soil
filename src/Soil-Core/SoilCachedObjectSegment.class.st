@@ -37,6 +37,11 @@ SoilCachedObjectSegment >> cache [
 	^ cache
 ]
 
+{ #category : #accessing }
+SoilCachedObjectSegment >> flushCachedObjectRecords [
+	cache removeAll
+]
+
 { #category : #initialization }
 SoilCachedObjectSegment >> initialize [ 
 	super initialize.

@@ -21,6 +21,11 @@ SoilPagedIndexStore >> flush [
 ]
 
 { #category : #accessing }
+SoilPagedIndexStore >> flushCachedPages [
+	pages removeAll
+]
+
+{ #category : #accessing }
 SoilPagedIndexStore >> headerPage [
 	^ self pageAt: 1
 ]

@@ -92,6 +92,16 @@ SoilObjectSegment >> close [
 ]
 
 { #category : #accessing }
+SoilObjectSegment >> flushCachedObjectRecords [
+	
+]
+
+{ #category : #flushing }
+SoilObjectSegment >> flushIndexes [
+	indexManager flushIndexes
+]
+
+{ #category : #accessing }
 SoilObjectSegment >> heapPositionAt: anInteger [ 
 	^ indexFile positionAt: anInteger
 ]

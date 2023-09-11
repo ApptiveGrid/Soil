@@ -24,8 +24,35 @@ SoilObjectRepositoryTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilObjectRepositoryTest >> testCacheObjectRecords [
+	| txn root segment |
+	soil objectRepository cacheSegmentAt: 1 upTo: 1000. 
+	txn := soil newTransaction.
+	root := txn root: Object new.
+	txn commit.
+	segment := soil objectRepository segmentAt: 1.
+	self assert: segment class equals: SoilCachedObjectSegment.
+	self assert: segment cache size equals: 1
+]
+
+{ #category : #tests }
 SoilObjectRepositoryTest >> testFirstSegment [ 
 	self assert: soil objectRepository firstSegment id equals: 1
+]
+
+{ #category : #tests }
+SoilObjectRepositoryTest >> testFlushCachedObjectRecords [
+	| txn root segment |
+	soil objectRepository cacheSegmentAt: 1 upTo: 1000. 
+	txn := soil newTransaction.
+	root := txn root: Object new.
+	txn commit.
+	segment := soil objectRepository segmentAt: 1.
+	self assert: segment class equals: SoilCachedObjectSegment.
+	self assert: segment cache size equals: 1.
+	segment flushCachedObjectRecords.
+	self assert: segment cache size equals: 0.
+	
 ]
 
 { #category : #tests }

@@ -191,6 +191,12 @@ SoilObjectRepository >> segments [
 		segments := self loadSegments ]
 ]
 
+{ #category : #enumerating }
+SoilObjectRepository >> segmentsDo: aBlock [ 
+	aBlock value: metaSegment.
+	segments do: aBlock
+]
+
 { #category : #accessing }
 SoilObjectRepository >> soil [
 	^ soil
