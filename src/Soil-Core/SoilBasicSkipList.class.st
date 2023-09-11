@@ -86,6 +86,11 @@ SoilBasicSkipList >> firstPage [
 ]
 
 { #category : #accessing }
+SoilBasicSkipList >> flushCachedPages [
+	store flushCachedPages
+]
+
+{ #category : #accessing }
 SoilBasicSkipList >> headerPage [
 	^ self store headerPage
 ]

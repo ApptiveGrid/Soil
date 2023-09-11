@@ -35,6 +35,25 @@ SoilSetup >> defaultCacheRecordsSize [
 	^ 1000
 ]
 
+{ #category : #flushing }
+SoilSetup >> flushCachedIndexes [
+	soil objectRepository segmentsDo: [ :segment |
+		segment flushIndexes ]
+]
+
+{ #category : #accessing }
+SoilSetup >> flushCachedObjectRecords [
+	soil objectRepository segmentsDo: [ :segment |
+		segment flushCachedObjectRecords ]
+]
+
+{ #category : #accessing }
+SoilSetup >> flushCaches [ 
+	self 
+		flushCachedObjectRecords;
+		flushCachedIndexes
+]
+
 { #category : #accessing }
 SoilSetup >> soil: aSoil [ 
 	soil := aSoil
