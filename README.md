@@ -23,7 +23,7 @@ Soil is still in very early ramp up stage but we are working towards a milestone
 If you want to watch more closely what we are at have a look at the [project board](https://github.com/orgs/ApptiveGrid/projects/2)
 
 **NEWS** 
-
-Soil got the second prize in the [2023 ESUG Innovation Technology Awards](https://esug.github.io/2023-Conference/awardsSubmissions.html) !
+- Slides from the ESUG2023 talk: [Dowdload PDF](http://www.esug.org/data/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf)
+- Soil got the second prize in the [2023 ESUG Innovation Technology Awards](https://esug.github.io/2023-Conference/awardsSubmissions.html) !
 
 ![esug medal](https://esug.github.io/2022-Conference/esugAwards2ndSilverRoundMedal.png)
