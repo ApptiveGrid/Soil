@@ -13,7 +13,7 @@ SoilBinaryFile class >> isAbstract [
 	^ self == SoilBinaryFile
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'open/close' }
 SoilBinaryFile >> close [
 	stream ifNotNil: [ 
 		stream close ]
@@ -49,7 +49,7 @@ SoilBinaryFile >> lockAppendingFor: lockContext [
 	^ stream lockAppendingFor: lockContext 
 ]
 
-{ #category : #accessing }
+{ #category : #'open/close' }
 SoilBinaryFile >> open [
 	stream := self soil lockableStream initializePath: self path
 ]

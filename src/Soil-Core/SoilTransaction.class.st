@@ -259,7 +259,7 @@ SoilTransaction >> continue [
 
 { #category : #aborting }
 SoilTransaction >> dirtyObjects [
-	^ (idMap select: [ :each | each hasChanged ]) collect: #object
+	^ idMap select: [ :each | each hasChanged ] thenCollect: #object
 ]
 
 { #category : #'as yet unclassified' }

@@ -22,12 +22,12 @@ SoilPersistentClusterVersion >> asNewClusterVersion [
 		previousVersionRecord: self
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilPersistentClusterVersion >> beChanged [
 	changed := true
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilPersistentClusterVersion >> behaviorDescriptionWithIndex: anInteger [ 
 	(anInteger = 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
 	^ behaviorDescriptions at: anInteger 
@@ -50,7 +50,7 @@ SoilPersistentClusterVersion >> initialize [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilPersistentClusterVersion >> materializeObject [
 	object := self newMaterializer 
 		stream: bytes readStream;
