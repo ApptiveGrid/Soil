@@ -175,7 +175,12 @@ Soil >> newSerializer [
 
 { #category : #transactions }
 Soil >> newTransaction [
-	^ SoilTransaction new 
+	^ self newTransaction: self transactionClass
+]
+
+{ #category : #transactions }
+Soil >> newTransaction: aClass [
+	^ aClass new 
 		soil: self;
 		readVersion: self databaseVersion;
 		start;
@@ -278,4 +283,9 @@ Soil >> settings [
 Soil >> setup [
 	^ SoilSetup new 
 		soil: self 
+]
+
+{ #category : #transactions }
+Soil >> transactionClass [
+	^ SoilTransaction 
 ]
