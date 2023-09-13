@@ -330,11 +330,6 @@ SoilTransaction >> isAborted [
 ]
 
 { #category : #testing }
-SoilTransaction >> isChanged [
-	^ self hasModifications 
-]
-
-{ #category : #testing }
 SoilTransaction >> isPersistent: anObject [
 	^ self isRoot: anObject
 ]

@@ -91,7 +91,7 @@ SoilTransactionTest >> testRootObjectModifies [
 	tx := soil newTransaction.
 	tx root: obj.
 	self assert: tx hasModifications.
-	self assert: tx isChanged.
+	self assert: tx hasModifications.
 	self assert: (tx isRoot: obj).
 	self assert: (tx isPersistent: obj)
 	 
