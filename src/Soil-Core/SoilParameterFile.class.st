@@ -39,7 +39,7 @@ SoilParameterFile >> applicationVersionSize [
 	^ 8
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilParameterFile >> basicDatabaseVersion: anInteger [
 	semaphore critical: [
 		currentDatabaseVersion := anInteger.  
@@ -129,7 +129,7 @@ SoilParameterFile >> lockDatabaseVersionFor: lockContext [
 		for: lockContext 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'open/close' }
 SoilParameterFile >> open [ 
 	super open.
 	(Soil databaseFormatVersion = self databaseFormatVersion)	

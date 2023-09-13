@@ -39,7 +39,7 @@ SoilClusterRecord >> basicAddReference: reference [
 	references add: reference 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilClusterRecord >> beChanged [
 	^ self subclassResponsibility
 ]

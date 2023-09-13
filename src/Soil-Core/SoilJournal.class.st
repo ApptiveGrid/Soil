@@ -29,7 +29,7 @@ SoilJournal >> addTransactionJournal: aSoilTransactionJournal [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 SoilJournal >> allHavingEntriesMatching: aBlock [
 	| result |
 	result := OrderedCollection new.
@@ -39,13 +39,13 @@ SoilJournal >> allHavingEntriesMatching: aBlock [
 	^ result
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 SoilJournal >> allHavingEntriesWithObjectId: aSoilObjectId [
 	^ self allHavingEntriesMatching: [ :each | 
 		each objectIds includes: aSoilObjectId ].
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 SoilJournal >> allTransactionJournals [
 	| all |
 	all := OrderedCollection new.
@@ -53,14 +53,14 @@ SoilJournal >> allTransactionJournals [
 	^ all
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #enumerating }
 SoilJournal >> allTransactionJournalsDo: aBlock [
 	((self transactionJournalFilesIn: self archivePath) , (self transactionJournalFilesIn: self path))
 		do: [ :file | 
 			aBlock value: (self readTransactionJournalFile: file) ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilJournal >> archiveFile: aFileReference [ 
 	self archivePath ensureCreateDirectory.
 	aFileReference moveTo: (self archivePath / aFileReference basename)
@@ -106,7 +106,7 @@ SoilJournal >> do: aBlock [
 		transactionJournals do: aBlock ]	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilJournal >> ensureArchivePath [
 	self archivePath ensureCreateDirectory 
 ]
@@ -214,7 +214,7 @@ SoilJournal >> soil: aSoil [
 	soil := aSoil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 SoilJournal >> transactionJournalFiles [
 	| journalFiles |
 	journalFiles := self transactionJournalFilesIn: self path. 
@@ -225,7 +225,7 @@ SoilJournal >> transactionJournalFiles [
 	^ journalFiles 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 SoilJournal >> transactionJournalFilesIn: aStringOrFileReference [
 	| files journalFiles path |
 	path := aStringOrFileReference asFileReference.
@@ -241,7 +241,7 @@ SoilJournal >> transactionJournalPathFor: anInteger [
 	^ self path / anInteger asString , #journal
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilJournal >> transactionJournals [
 	^ transactionJournals
 ]

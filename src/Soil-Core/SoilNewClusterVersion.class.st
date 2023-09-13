@@ -53,7 +53,7 @@ SoilNewClusterVersion >> asPersistentClusterVersion [
 		 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilNewClusterVersion >> beChanged [
 	"nothing to be done"
 ]
