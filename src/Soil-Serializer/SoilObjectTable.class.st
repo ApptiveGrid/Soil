@@ -20,13 +20,6 @@ SoilObjectTable >> identityIndexOf: anObject [
 ]
 
 { #category : #initialization }
-SoilObjectTable >> ifEmpty: aBlock [
-	^ self isEmpty
-		ifTrue: [ aBlock value ]
-		ifFalse: [ self ]
-]
-
-{ #category : #initialization }
 SoilObjectTable >> initialize [
 	table := IdentityDictionary new
 ]
