@@ -30,12 +30,3 @@ SoilObjectTableTest >> testIdenityIndexOf [
 	self assert: (table identityIndexOf: 'Hello') equals: 1.
 	self assert: (table identityIndexOf: '2') equals: 0.
 ]
-
-{ #category : #tests }
-SoilObjectTableTest >> testIfEmpty [
-	| table |
-	table := SoilObjectTable new.
-	table ifEmpty: [ self assert: true ].
-	table add: 'Hello'.
-	table ifEmpty: [ self assert: false ].
-]

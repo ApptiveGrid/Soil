@@ -190,7 +190,7 @@ SoilTransaction >> checkpoint [
 	self prepareRecordsForCommit.
 	"if there are no records to commit we can just return and don't allocate any
 	resources"
-	recordsToCommit ifEmpty: [ ^ self ].
+	recordsToCommit isEmpty ifTrue: [ ^ self ].
 	"only one transactions is allowed at a time. We use the critical block of the database
 	to avoid parallel committing"
 	soil critical: [ 
@@ -238,7 +238,7 @@ SoilTransaction >> commit [
 
 { #category : #actions }
 SoilTransaction >> continue [
-	recordsToCommit ifEmpty: [ ^ self ].
+	recordsToCommit isEmpty ifTrue: [ ^ self ].
 	recordsToCommit do: [ :record | | persistentRecord |
 		persistentRecord := record asPersistentClusterVersion.
 		objectMap at: record object put: persistentRecord.
