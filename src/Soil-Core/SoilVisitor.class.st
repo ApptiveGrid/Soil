@@ -73,8 +73,6 @@ SoilVisitor >> visitParameters: aSoilParameterFile [
 SoilVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	aSoilPersistentClusterVersion references do: [ :reference |
 		self visit: reference ].
-	"aSoilPersistentClusterVersion indexIds do:[ :indexId |
-		self visit: ((soil objectRepository segmentAt: aSoilPersistentClusterVersion  segment) indexAt: indexId)  ]."
 	^ aSoilPersistentClusterVersion 
 ]
 

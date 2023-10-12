@@ -105,6 +105,22 @@ SoilTest >> testCheckpointEmptyRecordsToCommit [
 ]
 
 { #category : #tests }
+SoilTest >> testFindRecordWithIndex [ 
+	| tx skipList rec |
+	tx := soil newTransaction.
+	skipList := SoilSkipListDictionary new 
+		maxLevel: 16;
+		keySize: 10.
+	tx root: { Dictionary new 
+		at: #skipList put: skipList;
+		yourself }.
+	tx makeRoot: skipList.
+	tx commit.
+	rec := soil findRecord: [ :record | record usesIndexId: skipList id ].
+	self assert: (rec indexIds includes: skipList id)
+]
+
+{ #category : #tests }
 SoilTest >> testIncompatibleDatabaseFormatVersion [ 
 	soil settings databaseFormatVersion: 2.
 	soil close.

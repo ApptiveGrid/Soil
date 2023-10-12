@@ -1,12 +1,10 @@
 Class {
 	#name : #SoilFindRecordVisitor,
-	#superclass : #SoilVisitor,
+	#superclass : #SoilTransactionalVisitor,
 	#instVars : [
 		'seen',
-		'soil',
 		'condition',
-		'object',
-		'transaction'
+		'object'
 	],
 	#category : #'Soil-Core-Model'
 }

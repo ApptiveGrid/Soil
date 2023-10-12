@@ -1,8 +1,7 @@
 Class {
 	#name : #SoilIndexConsistencyVisitor,
-	#superclass : #SoilVisitor,
+	#superclass : #SoilInstanceVisitor,
 	#instVars : [
-		'soil',
 		'seen'
 	],
 	#category : #'Soil-Core-Model'
@@ -36,13 +35,4 @@ SoilIndexConsistencyVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStor
 		page := aSoilPagedFileIndexStore pageAt: pageIndex.
 		(page right allSatisfy: #isZero) ifTrue: [ 
 			(page index = numberOfPages)  ifFalse: [ self halt ] ] ]
-]
-
-{ #category : #visiting }
-SoilIndexConsistencyVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
-	aSoilPersistentClusterVersion references do: [ :reference |
-		self visit: reference ].
-	aSoilPersistentClusterVersion indexIds do:[ :indexId |
-		self visit: ((soil objectRepository segmentAt: aSoilPersistentClusterVersion  segment) indexAt: indexId)  ].
-	^ aSoilPersistentClusterVersion 
 ]
