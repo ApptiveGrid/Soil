@@ -148,13 +148,39 @@ SoilIndexedDictionaryTest >> testAddToNewList [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testAt [
+	dict at: #foo2 put: #bar2.
+	dict at: #foo put: #bar.
+	
+	self assert: (dict at: #foo2) equals: #bar2.
+	self should: [dict at: #ff] raise: KeyNotFound
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testAtIndex [
+	dict at: #foo2 put: #bar2.
+	dict at: #foo put: #bar.
+	
+	self assert: (dict atIndex: 1) equals: #bar2
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testFirst [
 	dict at: #foo2 put: #bar2.
 	dict at: #foo put: #bar.
 	
-
+	"first in key order"
 	self assert: dict first equals: #bar.
 	self assert: (dict first: 1) first equals: #bar.
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testFirstAssociation [
+	dict at: #foo2 put: #bar2.
+	dict at: #foo put: #bar.
+	
+	"firstAssocation in key order"
+	self assert: dict firstAssociation equals: #foo->#bar.
 ]
 
 { #category : #tests }
@@ -163,6 +189,22 @@ SoilIndexedDictionaryTest >> testFirstAssociationWithSingleRemovedItem [
 	dict at: #foo put: #bar.
 	dict removeKey: #foo.
 	self assert: dict firstAssociation equals: nil
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testFirstAssociationWithTransaction [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	"self assert: dict last equals: #two."
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"and test last"
+	self assert: tx2 root firstAssociation equals: 1->#one.
+
 ]
 
 { #category : #tests }
@@ -199,10 +241,20 @@ SoilIndexedDictionaryTest >> testIsEmpty [
 
 { #category : #tests }
 SoilIndexedDictionaryTest >> testLast [
-	dict at: #foo put: #bar.
 	dict at: #foo2 put: #bar2.
-
+	dict at: #foo put: #bar.
+	
+	"last in key order"
 	self assert: dict last equals: #bar2
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testLastAssociation [
+	dict at: #foo2 put: #bar2.
+	dict at: #foo put: #bar.
+	
+	"last association in key order"
+	self assert: dict lastAssociation equals:  #foo2->#bar2
 ]
 
 { #category : #tests }
@@ -210,6 +262,22 @@ SoilIndexedDictionaryTest >> testLastAssociationWithSingleRemovedItem [
 	dict at: #foo put: #bar.
 	dict removeKey: #foo.
 	self assert: dict lastAssociation equals: nil
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testLastAssociationWithTransaction [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 2 put: #two.
+	dict at: 1 put: #one.
+	
+	"self assert: dict last equals: #two."
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"and test last, not: key order"
+	self assert: tx2 root lastAssociation equals: 2->#two
 ]
 
 { #category : #tests }
@@ -224,13 +292,14 @@ SoilIndexedDictionaryTest >> testLastWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
 	dict at: 2 put: #two.
+	dict at: 1 put: #one.
+
 	"self assert: dict last equals: #two."
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
-	"and test last"
+	"and test last, note: keyorder"
 	self assert: tx2 root last equals: #two
 ]
 
@@ -274,6 +343,17 @@ SoilIndexedDictionaryTest >> testNextAfterWithTransaction [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testRemoveKey [
+	dict at: #foo put: #bar.
+	dict at: #foo2 put: #bar2.
+	
+	dict removeKey: #foo.
+	self assert: dict size equals: 1.
+	
+	self should: [ dict removeKey: #blah ] raise: KeyNotFound
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testSecond [
 	dict at: #foo put: #bar.
 	dict at: #foo2 put: #bar2.
@@ -282,11 +362,41 @@ SoilIndexedDictionaryTest >> testSecond [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testSecondWithTransaction [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	"self assert: dict last equals: #two."
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"and test last"
+	self assert: tx2 root second equals: #two
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testSize [
 	dict at: #foo put: #bar.
 	dict at: #foo2 put: #bar2.
 
 	self assert: dict size equals: 2
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testSizeWithTransaction [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	"self assert: dict last equals: #two."
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"and test last"
+	self assert: tx2 root size equals: 2
 ]
 
 { #category : #tests }

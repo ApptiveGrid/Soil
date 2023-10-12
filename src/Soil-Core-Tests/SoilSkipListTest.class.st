@@ -226,6 +226,15 @@ SoilSkipListTest >> testFirst [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testFirstArgLargerThenSize [
+
+	1 to: 4 do: [ :n |
+		skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	self assert: skipList pages size equals: 1.
+	self assert: (skipList first: 5) size equals: 4
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testIsEmpty [
 	self assert: skipList isEmpty.
 	skipList at: 1 put: #[1 2].
@@ -384,6 +393,8 @@ SoilSkipListTest >> testRemoveKey [
 	self should: [ skipList at: 20  ] raise: KeyNotFound.
 	skipList at: 20 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: (skipList at: 20) equals: #[ 1 2 3 4 5 6 7 8 ].
+	
+	self should: [ skipList removeKey: capacity + 1 ] raise: KeyNotFound
 ]
 
 { #category : #tests }
