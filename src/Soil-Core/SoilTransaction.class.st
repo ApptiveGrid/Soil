@@ -266,7 +266,7 @@ SoilTransaction >> dirtyObjects [
 SoilTransaction >> findObject: aBlock [ 
 	"scan all records in the database where the materialized object matches 
 	the condition in aBlock. Return the object of the record instead"
-	^ (self findRecord: [:record | aBlock value: (record materializeObject; object) ]) object
+	^ (self findRecord: [:record | aBlock value: record materializeObject ]) object
 ]
 
 { #category : #'as yet unclassified' }
@@ -415,7 +415,8 @@ SoilTransaction >> markDirty: anObject [
 SoilTransaction >> materializeRecord: record [
 	^ record
 		transaction: self;
-		materializeObject
+		materializeObject;
+		yourself
 ]
 
 { #category : #'instance creation' }

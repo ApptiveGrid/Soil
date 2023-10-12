@@ -91,8 +91,7 @@ SoilBehaviorRegistry >> loadHistoryForBehaviorWithIndex: objectIndex transaction
 	chain := records collect: [ :record |
 		record
 			transaction: transaction;
-			materializeObject;
-			object  ].
+			materializeObject  ].
 
 	versions
 		at: objectIndex
