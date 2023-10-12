@@ -55,7 +55,8 @@ SoilPersistentClusterVersion >> materializeObject [
 	object := self newMaterializer 
 		stream: bytes readStream;
 		externalObjectRegistry: self;
-		materialize
+		materialize.
+	^ object
 ]
 
 { #category : #'instance creation' }

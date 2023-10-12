@@ -95,6 +95,14 @@ Soil >> destroy [
 	path delete
 ]
 
+{ #category : #'as yet unclassified' }
+Soil >> findRecord: aBlock [ 
+	| tx |
+	tx := self newTransaction.
+	^ [ tx findRecord: aBlock ]
+		ensure: [ tx abort ]
+]
+
 { #category : #initialization }
 Soil >> initialize [ 
 	super initialize.

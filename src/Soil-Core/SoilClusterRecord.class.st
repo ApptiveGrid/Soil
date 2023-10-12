@@ -217,6 +217,11 @@ SoilClusterRecord >> transaction: aSOTransaction [
 	transaction := aSOTransaction 
 ]
 
+{ #category : #testing }
+SoilClusterRecord >> usesIndexId: aString [ 
+	^ indexIds includes: aString
+]
+
 { #category : #accessing }
 SoilClusterRecord >> version [
 

@@ -15,7 +15,7 @@ Class {
 SoilSerializationTest >> materializeFromBytes: aByteArray [
 	^ (transaction newPersistentClusterVersion 
 		readFrom: aByteArray readStream)
-		materializeObject  object
+		materializeObject 
 ]
 
 { #category : #'instance creation' }
