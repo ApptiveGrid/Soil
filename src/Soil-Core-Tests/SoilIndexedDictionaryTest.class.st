@@ -165,6 +165,34 @@ SoilIndexedDictionaryTest >> testAtIndex [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"and test atIndex:"
+	self assert: (tx2 root atIndex: 1) equals: #one
+
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testDo [
+	| counter |
+	dict at: #foo2 put: #bar2.
+	dict at: #foo put: #bar.
+	
+	counter := 0.
+	dict do: [ :each |
+		self assert: (each beginsWith: 'bar').
+		counter := counter + 1].
+	self assert: counter equals: 2
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testFirst [
 	dict at: #foo2 put: #bar2.
 	dict at: #foo put: #bar.
@@ -351,6 +379,34 @@ SoilIndexedDictionaryTest >> testRemoveKey [
 	self assert: dict size equals: 1.
 	
 	self should: [ dict removeKey: #blah ] raise: KeyNotFound
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
+
+
+	| tx tx2 tag |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	"self assert: dict last equals: #two."
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"remove the key"
+	tx2 root removeKey: 2.
+	self assert: tx2 root size equals: 1.
+	"remove again to test absent case"
+	tag := false.
+	tx2 root removeKey: 3 ifAbsent: [ tag := true ].
+	self assert: tag.
+	"remove again to test absent case with already removed key"
+	tag := false.
+	tx2 root removeKey: 2 ifAbsent: [ tag := true ].
+	self assert: tag.
+	
+
 ]
 
 { #category : #tests }

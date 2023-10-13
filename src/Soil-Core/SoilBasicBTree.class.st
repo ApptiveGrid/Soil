@@ -43,6 +43,16 @@ SoilBasicBTree >> at: aKeyObject put: anObject [
 
 ]
 
+{ #category : #accessing }
+SoilBasicBTree >> atIndex: anInteger [
+	| current iterator |
+	iterator := self newIterator.
+	current := iterator first.
+	2 to: anInteger do: [ :idx |
+		current := iterator next ].
+	^ current value
+]
+
 { #category : #'open/close' }
 SoilBasicBTree >> close [
 	self store close
