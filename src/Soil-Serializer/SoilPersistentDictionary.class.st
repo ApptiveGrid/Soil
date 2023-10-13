@@ -113,9 +113,16 @@ SoilPersistentDictionary >> postCopy [
 ]
 
 { #category : #forwarded }
-SoilPersistentDictionary >> removeKey: anObject [
+SoilPersistentDictionary >> removeKey: key [
+	^ self 
+		removeKey: key 
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
+]
+
+{ #category : #forwarded }
+SoilPersistentDictionary >> removeKey: anObject ifAbsent: aBlock [
 	| return |
-	return := dict removeKey: anObject.
+	return := dict removeKey: anObject ifAbsent: aBlock.
 	transaction markDirty: self.
 	^return
 ]
