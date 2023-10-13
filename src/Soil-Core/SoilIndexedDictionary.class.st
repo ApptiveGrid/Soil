@@ -314,7 +314,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 			newValues removeKey: key ifAbsent: nil.
 			transaction markDirty: self.
 			iterator := self index newIterator.
-			v := iterator at: key.
+			v := iterator at: key ifAbsent: [^ aBlock value ].
 			removedValues 
 				at: key 
 				put: v asSoilObjectId.

@@ -23,6 +23,11 @@ SoilIndexIterator class >> on: aSoilIndex [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> at: aKeyObject [
+	^ self at: aKeyObject ifAbsent: [ KeyNotFound signalFor: aKeyObject in: self  ] 
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [ 
 	^ self subclassResponsibility
 ]
