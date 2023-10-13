@@ -386,6 +386,10 @@ SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 	tag := false.
 	tx2 root removeKey: 3 ifAbsent: [ tag := true ].
 	self assert: tag.
+	"remove again to test absent case with already removed key"
+	tag := false.
+	tx2 root removeKey: 2 ifAbsent: [ tag := true ].
+	self assert: tag.
 	
 
 ]
