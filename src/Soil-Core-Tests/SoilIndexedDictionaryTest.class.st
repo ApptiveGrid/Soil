@@ -165,6 +165,21 @@ SoilIndexedDictionaryTest >> testAtIndex [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"and test atIndex:"
+	self assert: (tx2 root atIndex: 1) equals: #one
+
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testDo [
 	| counter |
 	dict at: #foo2 put: #bar2.
