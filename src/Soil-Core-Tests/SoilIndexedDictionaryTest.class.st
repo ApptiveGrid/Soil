@@ -165,6 +165,19 @@ SoilIndexedDictionaryTest >> testAtIndex [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testDo [
+	| counter |
+	dict at: #foo2 put: #bar2.
+	dict at: #foo put: #bar.
+	
+	counter := 0.
+	dict do: [ :each |
+		self assert: (each beginsWith: 'bar').
+		counter := counter + 1].
+	self assert: counter equals: 2
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testFirst [
 	dict at: #foo2 put: #bar2.
 	dict at: #foo put: #bar.

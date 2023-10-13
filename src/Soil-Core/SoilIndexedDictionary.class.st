@@ -133,10 +133,7 @@ SoilIndexedDictionary >> do: aBlock [
 					 iterator: iterator) ifNotNil: [ :objectId | 
 					aBlock value: (transaction proxyForObjectId: objectId) ] ] ]
 		ifNil: [ 
-			newValues valuesDo: [ :each | 
-				aBlock value: (each isObjectId
-						 ifTrue: [ transaction proxyForObjectId: each ]
-						 ifFalse: [ each ]) ] ]
+			newValues valuesDo: [ :each | aBlock value: each ] ]
 ]
 
 { #category : #accessing }
@@ -317,7 +314,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 			newValues removeKey: key ifAbsent: nil.
 			transaction markDirty: self.
 			iterator := self index newIterator.
-			v := iterator at: key ifAbsent: [ Error signal ].
+			v := iterator at: key.
 			removedValues 
 				at: key 
 				put: v asSoilObjectId.
