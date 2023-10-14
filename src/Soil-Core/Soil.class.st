@@ -132,6 +132,7 @@ Soil >> initializeFilesystem [
 		initializeFilesystem;
 		yourself.
 	notificationHandler := SoilNotificationHandler new
+		soil: self
 ]
 
 { #category : #inspector }
@@ -202,8 +203,7 @@ Soil >> newTransaction: aClass [
 
 { #category : #accessing }
 Soil >> notificationHandler [ 
-	^ notificationHandler ifNil: [ 
-		notificationHandler := SoilNotificationHandler new ]
+	^ notificationHandler
 ]
 
 { #category : #accessing }
@@ -236,6 +236,7 @@ Soil >> open [
 		open;
 		yourself.
 	notificationHandler := SoilNotificationHandler new
+		soil: self
 	
 ]
 

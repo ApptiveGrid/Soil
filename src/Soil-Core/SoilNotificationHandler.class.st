@@ -1,6 +1,9 @@
 Class {
 	#name : #SoilNotificationHandler,
 	#superclass : #Object,
+	#instVars : [
+		'soil'
+	],
 	#category : #'Soil-Core-Model'
 }
 
@@ -20,6 +23,12 @@ SoilNotificationHandler >> objectMaterialized: aSoilBehaviorDescription [
 { #category : #counting }
 SoilNotificationHandler >> objectSerialized: anObject [ 
 
+]
+
+{ #category : #accessing }
+SoilNotificationHandler >> soil: anObject [
+
+	soil := anObject
 ]
 
 { #category : #events }
