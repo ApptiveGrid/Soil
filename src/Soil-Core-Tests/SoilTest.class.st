@@ -144,6 +144,18 @@ SoilTest >> testInitializeDatabaseFailsIfExisting [
 ]
 
 { #category : #tests }
+SoilTest >> testMetrics [
+	| tx metrics |
+	soil notificationHandler: SoilMetrics new.
+	tx := soil newTransaction.
+	tx root: self simpleGraph.
+	tx commit.
+	metrics := soil notificationHandler.
+	self assert: metrics transactionsCreated equals: 1.
+	self assert: metrics transactionsCommittedWrite equals: 1
+]
+
+{ #category : #tests }
 SoilTest >> testSerializingClassDescription [
 	| obj bytes obj2 stream transaction |
 	self skip.

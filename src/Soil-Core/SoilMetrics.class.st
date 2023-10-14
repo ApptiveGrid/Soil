@@ -24,6 +24,18 @@ SoilMetrics >> clusterWritten: aCollection [
 	clustersWritten := clustersWritten + 1
 ]
 
+{ #category : #accessing }
+SoilMetrics >> clustersRead [
+
+	^ clustersRead
+]
+
+{ #category : #accessing }
+SoilMetrics >> clustersWritten [
+
+	^ clustersWritten
+]
+
 { #category : #initialization }
 SoilMetrics >> initialize [ 
 	super initialize.
@@ -47,6 +59,18 @@ SoilMetrics >> objectSerialized: aString [
 	objectsSerialized := objectsSerialized + 1
 ]
 
+{ #category : #accessing }
+SoilMetrics >> objectsMaterialized [
+
+	^ objectsMaterialized
+]
+
+{ #category : #accessing }
+SoilMetrics >> objectsSerialized [
+
+	^ objectsSerialized
+]
+
 { #category : #counting }
 SoilMetrics >> transactionCommitted: aSoilTransaction [ 
 	aSoilTransaction hasModifications 
@@ -55,6 +79,33 @@ SoilMetrics >> transactionCommitted: aSoilTransaction [
 ]
 
 { #category : #'as yet unclassified' }
+SoilMetrics >> transactionCommittedWrite [
+	self shouldBeImplemented.
+]
+
+{ #category : #'as yet unclassified' }
 SoilMetrics >> transactionCreated: aSoilTransaction [ 
 	transactionsCreated := transactionsCreated + 1
+]
+
+{ #category : #accessing }
+SoilMetrics >> transactionsAborted [
+
+	^ transactionsAborted
+]
+
+{ #category : #accessing }
+SoilMetrics >> transactionsCommittedReadOnly [
+
+	^ transactionsCommittedReadOnly
+]
+
+{ #category : #accessing }
+SoilMetrics >> transactionsCommittedWrite [
+	^ transactionsCommittedWrite
+]
+
+{ #category : #accessing }
+SoilMetrics >> transactionsCreated [
+	^ transactionsCreated
 ]
