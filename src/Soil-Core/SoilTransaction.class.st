@@ -20,11 +20,10 @@ Class {
 
 { #category : #aborting }
 SoilTransaction >> abort [
-	recordsToCommit := nil.
-	behaviorDescriptions := nil.
-	soil := nil.
-	idMap := nil.
-	objectMap := nil
+	soil ifNotNil: [  
+		soil notificationHandler transactionAborted: self ].
+	self basicAbort.
+
 ]
 
 { #category : #accessing }
@@ -66,6 +65,15 @@ SoilTransaction >> atObjectId: objectId putObject: anObject [
 	idMap at: objectId put: record.
 	objectMap at: anObject put: record.
 	recordsToCommit ifNotNil: [ recordsToCommit add: record ]
+]
+
+{ #category : #aborting }
+SoilTransaction >> basicAbort [
+	recordsToCommit := nil.
+	behaviorDescriptions := nil.
+	soil := nil.
+	idMap := nil.
+	objectMap := nil
 ]
 
 { #category : #public }
@@ -190,7 +198,9 @@ SoilTransaction >> checkpoint [
 	self prepareRecordsForCommit.
 	"if there are no records to commit we can just return and don't allocate any
 	resources"
-	recordsToCommit isEmpty ifTrue: [ ^ self ].
+	recordsToCommit isEmpty ifTrue: [ 
+		soil notificationHandler transactionCommitted: self.
+		^ self ].
 	"only one transactions is allowed at a time. We use the critical block of the database
 	to avoid parallel committing"
 	soil critical: [ 
@@ -218,7 +228,8 @@ SoilTransaction >> checkpoint [
 		"add the journal to the database wide journal so other transaction can access
 		it to resolve older state"
 		soil journal addTransactionJournal: journal ]
-				ensure: [self releaseLocks ] ]
+				ensure: [self releaseLocks ] ].
+		soil notificationHandler transactionCommitted: self
 
 ]
 
@@ -233,7 +244,7 @@ SoilTransaction >> checkpointAndContinue [
 SoilTransaction >> commit [
 	self 
 		checkpoint;
-		abort
+		basicAbort
 ]
 
 { #category : #actions }

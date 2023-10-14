@@ -7,7 +7,8 @@ Class {
 		'behaviorRegistry',
 		'semaphore',
 		'settings',
-		'journal'
+		'journal',
+		'notificationHandler'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -129,7 +130,8 @@ Soil >> initializeFilesystem [
 	journal := SoilJournal new
 		soil: self;
 		initializeFilesystem;
-		yourself
+		yourself.
+	notificationHandler := SoilNotificationHandler new
 ]
 
 { #category : #inspector }
@@ -188,11 +190,26 @@ Soil >> newTransaction [
 
 { #category : #transactions }
 Soil >> newTransaction: aClass [
-	^ aClass new 
+	| txn |
+	txn := aClass new 
 		soil: self;
 		readVersion: self databaseVersion;
 		start;
-		yourself
+		yourself.
+	notificationHandler transactionCreated: txn.
+	^ txn
+]
+
+{ #category : #accessing }
+Soil >> notificationHandler [ 
+	^ notificationHandler ifNil: [ 
+		notificationHandler := SoilNotificationHandler new ]
+]
+
+{ #category : #accessing }
+Soil >> notificationHandler: anObject [
+
+	^ notificationHandler := anObject
 ]
 
 { #category : #accessing }
@@ -217,8 +234,8 @@ Soil >> open [
 	journal := SoilJournal new
 		soil: self;
 		open;
-		yourself
-
+		yourself.
+	notificationHandler := SoilNotificationHandler new
 	
 ]
 

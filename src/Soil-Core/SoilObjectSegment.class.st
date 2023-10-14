@@ -3,7 +3,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'id',
-		'soil',
 		'objectRepository',
 		'indexFile',
 		'objectFile',
@@ -52,7 +51,9 @@ SoilObjectSegment >> at: anInteger [
 	| position |
 	position := indexFile positionAt: anInteger.
 	^ (objectFile atPosition: position) ifNotNil: [ :record | 
-		record objectId: (SoilObjectId segment: id index: anInteger) ]
+		record objectId: (SoilObjectId segment: id index: anInteger).
+		self soil notificationHandler clusterRead: record.
+		record ]
 ]
 
 { #category : #accessing }
@@ -61,6 +62,8 @@ SoilObjectSegment >> at: anInteger putBytes: bytes [
 	position := objectFile size.
 	objectFile appendBytes: bytes.
 	indexFile at: anInteger putPosition: position.
+	objectRepository ifNotNil: [  
+		objectRepository soil notificationHandler clusterWritten: bytes ].
 	^ position
 ]
 
@@ -234,11 +237,6 @@ SoilObjectSegment >> printOn: aStream [
 { #category : #accessing }
 SoilObjectSegment >> soil [
 	^ objectRepository soil
-]
-
-{ #category : #accessing }
-SoilObjectSegment >> soil: aSoil [ 
-	soil := aSoil
 ]
 
 { #category : #validating }

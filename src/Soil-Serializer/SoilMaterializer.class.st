@@ -217,6 +217,8 @@ SoilMaterializer >> nextSoilObject [
 
 { #category : #registry }
 SoilMaterializer >> registerObject: anObject [
+	soil ifNotNil: [  
+		soil notificationHandler objectMaterialized: anObject ].
 	objects add: anObject 
 ]
 
