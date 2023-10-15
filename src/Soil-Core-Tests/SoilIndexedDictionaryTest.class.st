@@ -212,6 +212,13 @@ SoilIndexedDictionaryTest >> testDoWithTransAction [
 	self assert: counter equals: 2.
 	
 	tx2 root removeKey: 1.
+	
+	counter := 0.
+	tx2 root  do: [ :each |
+		self assert: (each beginsWith: 'bar').
+		counter := counter + 1].
+	self assert: counter equals: 1.
+	
 	tx2 commit.
 	"in tx1 the key is not removed, do: correcty uses the restorValue"
 	counter := 0.
