@@ -193,6 +193,44 @@ SoilIndexedDictionaryTest >> testDo [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testDoWithTransAction [
+	| tx tx1 tx2 counter |
+	
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #bar1.
+	dict at: 2 put: #bar2.
+	tx commit.
+	"open a second transaction ..."
+	tx1 := soil newTransaction.
+	tx2 := soil newTransaction.
+
+	counter := 0.
+	tx2 root  do: [ :each |
+		self assert: (each beginsWith: 'bar').
+		counter := counter + 1].
+	self assert: counter equals: 2.
+	
+	tx2 root removeKey: 1.
+	
+	counter := 0.
+	tx2 root  do: [ :each |
+		self assert: (each beginsWith: 'bar').
+		counter := counter + 1].
+	self assert: counter equals: 1.
+	
+	tx2 commit.
+	"in tx1 the key is not removed, do: correcty uses the restorValue"
+	counter := 0.
+	tx1 root  do: [ :each |
+		self assert: (each beginsWith: 'bar').
+		counter := counter + 1].
+	self assert: counter equals: 2
+	
+	
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testFirst [
 	dict at: #foo2 put: #bar2.
 	dict at: #foo put: #bar.
@@ -407,6 +445,28 @@ SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 	self assert: tag.
 	
 
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
+
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	tx commit.
+	"we create two transactions"
+	tx := soil newTransaction.
+	tx2 := soil newTransaction.
+	"remove the key"
+	tx2 root removeKey: 2.
+	tx2 commit.
+	"check that we can still see in the first tr"
+	self assert: (tx root at: 2) equals: #two.
+	"but removeKey: does not see it, to be fixed"
+	self flag: #TODO.
+	"tx root removeKey: 2"
 ]
 
 { #category : #tests }
