@@ -56,11 +56,29 @@ SoilMetrics >> metaRecordCacheHits [
 ]
 
 { #category : #'as yet unclassified' }
+SoilMetrics >> metaRecordCacheMaximumSize [
+	| metaSegment |
+	metaSegment := soil objectRepository metaSegment.
+	^ (metaSegment isKindOf: SoilCachedObjectSegment)
+		ifTrue: [ (metaSegment cache instVarNamed: #weight) maximum ]
+		ifFalse: 0
+]
+
+{ #category : #'as yet unclassified' }
 SoilMetrics >> metaRecordCacheMisses [
 	| metaSegment |
 	metaSegment := soil objectRepository metaSegment.
 	^ (metaSegment isKindOf: SoilCachedObjectSegment)
 		ifTrue: [ metaSegment cache misses ]
+		ifFalse: 0
+]
+
+{ #category : #'as yet unclassified' }
+SoilMetrics >> metaRecordCacheSize [
+	| metaSegment |
+	metaSegment := soil objectRepository metaSegment.
+	^ (metaSegment isKindOf: SoilCachedObjectSegment)
+		ifTrue: [ metaSegment cache size ]
 		ifFalse: 0
 ]
 
@@ -95,10 +113,26 @@ SoilMetrics >> objectRecordCacheHits [
 ]
 
 { #category : #'as yet unclassified' }
+SoilMetrics >> objectRecordCacheMaximumSize [
+	^ self cachedSegments 
+		ifNotEmpty: [:segments | (segments collect: [ :each | (each cache instVarNamed: #weight) maximum ]) average ]
+		ifEmpty: 0
+	
+]
+
+{ #category : #'as yet unclassified' }
 SoilMetrics >> objectRecordCacheMisses [
 	^ self cachedSegments 
 		ifNotEmpty: [:segments | segments sum: [ :each | each cache misses ] ]
 		ifEmpty: 0
+]
+
+{ #category : #'as yet unclassified' }
+SoilMetrics >> objectRecordCacheSize [
+	^ self cachedSegments 
+		ifNotEmpty: [:segments | (segments collect: [ :each | each cache size ]) average ]
+		ifEmpty: 0
+	
 ]
 
 { #category : #accessing }
