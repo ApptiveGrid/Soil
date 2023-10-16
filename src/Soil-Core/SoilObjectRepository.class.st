@@ -54,10 +54,12 @@ SoilObjectRepository >> at: objectid [
 
 { #category : #accessing }
 SoilObjectRepository >> at: objectId put: bytes [ 
-	| segment |
+	| segment position |
 	(objectId index = 0) ifTrue: [ Error signal: 'objectId is not initialized when trying to store' ].
 	segment := self segmentAt: objectId segment.
-	^ segment at: objectId index putBytes: bytes	
+	position := segment at: objectId index putBytes: bytes.
+	soil notificationHandler recordWritten: objectId.
+	^ position
 ]
 
 { #category : #accessing }

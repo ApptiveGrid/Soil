@@ -8,20 +8,20 @@ Class {
 }
 
 { #category : #counting }
-SoilNotificationHandler >> clusterRead: aSoilCluster [
-]
-
-{ #category : #counting }
-SoilNotificationHandler >> clusterWritten: aSoilCluster [
-
-]
-
-{ #category : #counting }
 SoilNotificationHandler >> objectMaterialized: aSoilBehaviorDescription [
 ]
 
 { #category : #counting }
 SoilNotificationHandler >> objectSerialized: anObject [ 
+
+]
+
+{ #category : #counting }
+SoilNotificationHandler >> recordRead: aSoilCluster [
+]
+
+{ #category : #counting }
+SoilNotificationHandler >> recordWritten: aSoilCluster [
 
 ]
 

@@ -18,16 +18,6 @@ SoilObjectSegment >> acceptSoil: aSoilVisitor [
 		ifFalse: [ aSoilVisitor visitObjectSegment: self ]
 ]
 
-{ #category : #adding }
-SoilObjectSegment >> addNewRaw: aByteArray [ 
-	| objectIndex |
-	objectIndex := indexFile nextIndex.
-	self 
-		at: objectIndex 
-		putBytes: aByteArray.
-	^ objectIndex 
-]
-
 { #category : #accessing }
 SoilObjectSegment >> allVersionsAt: index [ 
 	| obj versions |
@@ -52,7 +42,7 @@ SoilObjectSegment >> at: anInteger [
 	position := indexFile positionAt: anInteger.
 	^ (objectFile atPosition: position) ifNotNil: [ :record | 
 		record objectId: (SoilObjectId segment: id index: anInteger).
-		self soil notificationHandler clusterRead: record.
+		self soil notificationHandler recordRead: record.
 		record ]
 ]
 
@@ -62,8 +52,6 @@ SoilObjectSegment >> at: anInteger putBytes: bytes [
 	position := objectFile size.
 	objectFile appendBytes: bytes.
 	indexFile at: anInteger putPosition: position.
-	objectRepository ifNotNil: [  
-		objectRepository soil notificationHandler clusterWritten: bytes ].
 	^ position
 ]
 

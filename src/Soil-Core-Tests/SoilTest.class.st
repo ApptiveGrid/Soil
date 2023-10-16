@@ -144,15 +144,81 @@ SoilTest >> testInitializeDatabaseFailsIfExisting [
 ]
 
 { #category : #tests }
-SoilTest >> testMetrics [
-	| tx metrics |
+SoilTest >> testMetricsUncached [
+	| tx metrics txn2 |
 	soil notificationHandler: SoilMetrics new.
 	tx := soil newTransaction.
 	tx root: self simpleGraph.
 	tx commit.
 	metrics := soil notificationHandler.
 	self assert: metrics transactionsCreated equals: 1.
-	self assert: metrics transactionsCommittedWrite equals: 1
+	self assert: metrics transactionsCommittedWrite equals: 1.
+	self assert: metrics transactionsCommittedReadOnly equals: 0.
+	self assert: metrics objectRecordsRead equals: 0.
+	self assert: metrics objectRecordCacheHits equals: 0.
+	self assert: metrics objectRecordsWritten equals: 1.
+	self assert: metrics metaRecordsRead equals: 0.
+	self assert: metrics metaRecordsWritten equals: 3.
+	txn2 := soil newTransaction.
+	txn2 root.
+	txn2 commit.
+	self assert: metrics transactionsCreated equals: 2.
+	self assert: metrics transactionsCommittedWrite equals: 1.
+	self assert: metrics transactionsCommittedReadOnly equals: 1.
+	self assert: metrics objectRecordsRead equals: 1.
+	self assert: metrics objectRecordCacheHits equals: 0.
+	self assert: metrics objectRecordCacheHitRatio equals: 0.
+	self assert: metrics objectRecordsWritten equals: 1.
+	self assert: metrics metaRecordsRead equals: 3.
+	self assert: metrics metaRecordCacheHits equals: 0.
+	self assert: metrics metaRecordsWritten equals: 3.
+	self assert: metrics metaRecordCacheHitRatio equals: 0.
+
+
+]
+
+{ #category : #tests }
+SoilTest >> testMetricsWithRecordCache [
+	| tx metrics txn2 |
+	soil setup cacheRecords.
+	soil notificationHandler: SoilMetrics new.
+	tx := soil newTransaction.
+	tx root: self simpleGraph.
+	tx commit.
+	metrics := soil notificationHandler.
+	self assert: metrics transactionsCreated equals: 1.
+	self assert: metrics transactionsCommittedWrite equals: 1.
+	self assert: metrics transactionsCommittedReadOnly equals: 0.
+	self assert: metrics objectRecordsRead equals: 0.
+	self assert: metrics objectRecordCacheHits equals: 0.
+	self assert: metrics objectRecordCacheMisses equals: 0.
+	self assert: metrics objectRecordCacheHitRatio equals: 0.
+	self assert: metrics objectRecordsWritten equals: 1.
+	self assert: metrics metaRecordsRead equals: 0.
+	self assert: metrics metaRecordsWritten equals: 3.
+	txn2 := soil newTransaction.
+	txn2 root.
+	txn2 commit.
+	self assert: metrics transactionsCreated equals: 2.
+	self assert: metrics transactionsCommittedWrite equals: 1.
+	self assert: metrics transactionsCommittedReadOnly equals: 1.
+	"written clusters are cached so there should be no reads"
+	self assert: metrics objectRecordsRead equals: 0.
+	"instead there is one record read for the root"
+	self assert: metrics objectRecordCacheHits equals: 1.
+	self assert: metrics objectRecordCacheMisses equals: 0.
+	self assert: metrics objectRecordCacheHitRatio equals: 1.
+
+	self assert: metrics objectRecordsWritten equals: 1.
+	"written clusters are cached so there should be no reads"
+	self assert: metrics metaRecordsRead equals: 0.
+	"instead the meta cache should have three hits (three classes in root)"
+	self assert: metrics metaRecordCacheHits equals: 3.
+	self assert: metrics metaRecordCacheMisses equals: 0.
+	self assert: metrics metaRecordCacheHitRatio equals: 1.
+	self assert: metrics metaRecordsWritten equals: 3.
+
+
 ]
 
 { #category : #tests }

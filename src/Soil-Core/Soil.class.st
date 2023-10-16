@@ -209,7 +209,9 @@ Soil >> notificationHandler [
 { #category : #accessing }
 Soil >> notificationHandler: anObject [
 
-	^ notificationHandler := anObject
+	notificationHandler := anObject
+		soil: self;
+		yourself
 ]
 
 { #category : #accessing }

@@ -114,6 +114,11 @@ SoilObjectId >> isInitialized [
 ]
 
 { #category : #testing }
+SoilObjectId >> isMeta [ 
+	^ segment = 0
+]
+
+{ #category : #testing }
 SoilObjectId >> isObjectId [ 
 	^ true
 ]

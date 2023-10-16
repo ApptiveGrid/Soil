@@ -24,6 +24,23 @@ SoilObjectRepositoryTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilObjectRepositoryTest >> testCacheObjectRecordMetrics [
+	| txn root segment metrics txn2 |
+	soil notificationHandler: SoilMetrics new.
+	soil objectRepository cacheSegmentAt: 1 upTo: 1000. 
+	txn := soil newTransaction.
+	root := txn root: Object new.
+	txn commit.
+	txn2 := soil newTransaction.
+	txn2 root.
+	txn2 abort.
+	segment := soil objectRepository segmentAt: 1.
+	metrics := soil notificationHandler.
+	self assert: metrics objectRecordCacheHits equals: 1.
+	self assert: metrics objectRecordCacheHitRatio equals: 1
+]
+
+{ #category : #tests }
 SoilObjectRepositoryTest >> testCacheObjectRecords [
 	| txn root segment |
 	soil objectRepository cacheSegmentAt: 1 upTo: 1000. 
