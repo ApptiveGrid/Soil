@@ -8,7 +8,6 @@ Class {
 		'transactionsCommittedReadOnly',
 		'transactionsCommittedWrite',
 		'transactionsAborted',
-		'meatClustersRead',
 		'metaRecordsRead',
 		'metaRecordsWritten',
 		'objectRecordsRead',
