@@ -25,9 +25,10 @@ SoilObjectSegmentTest >> newMemorySegment [
 
 { #category : #tests }
 SoilObjectSegmentTest >> testStoreObject [ 
-	| segment id obj |
+	| segment obj newIndex |
 	segment := self newMemorySegment.
-	id := segment addNewRaw: #[ 1 2 3 ].
-	obj := (segment basicAt: id length: 3).
+	newIndex := segment lastObjectIndex + 2.
+	segment at: newIndex putBytes: #[ 1 2 3 ].
+	obj := (segment basicAt: newIndex length: 3).
 	self assert: obj equals: #[ 1 2 3 ]
 ]
