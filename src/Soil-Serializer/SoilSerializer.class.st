@@ -191,6 +191,8 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 			self nextPutExternalReference: externalIndex ]
 		ifFalse: [
 			objectIdTable add: anObject.
+			soil ifNotNil: [  
+				soil notificationHandler objectSerialized: anObject ].
 			aBlock value ]
 ]
 
