@@ -142,6 +142,11 @@ SoilMetrics >> recordWritten: anObjectId [
 		ifFalse: [ objectRecordsWritten := objectRecordsWritten + 1 ]
 ]
 
+{ #category : #'as yet unclassified' }
+SoilMetrics >> transactionAborted: aSoilTransaction [ 
+	transactionsAborted := transactionsAborted + 1
+]
+
 { #category : #counting }
 SoilMetrics >> transactionCommitted: aSoilTransaction [ 
 	aSoilTransaction hasModifications 
