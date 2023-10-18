@@ -314,7 +314,10 @@ SoilIndexedDictionaryTest >> testIsEmpty [
 	tx2 root removeKey: 1.
 	self assert: tx2 root size equals: 0.
 	self assert: tx2 root isEmpty.
-	tx2 commit
+	tx2 commit.
+	"still not empty in t1"
+	self assert: tx1 root size equals: 1.
+	self deny: tx1 root isEmpty.
 ]
 
 { #category : #tests }
