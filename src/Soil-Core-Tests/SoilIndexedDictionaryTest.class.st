@@ -180,6 +180,24 @@ SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testConcurrentIsEmpty [ 
+	| tx1 tx2 tx3 |
+	tx1 := soil newTransaction.
+	tx1 root: (dict
+		at: #one put: #onevalue;
+		yourself).
+	tx1 commit.
+	tx2 := soil newTransaction.
+	"After creating tx2 we open a concurrent transaction and add a key to 
+	the dictionary which should be invisible to tx2"
+	tx3 := soil newTransaction.
+	tx3 root removeKey: #one.
+	tx3 commit.
+	self assert: tx2 root size equals: 0.
+	self assert: tx2 root isEmpty.
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testDo [
 	| counter |
 	dict at: #foo2 put: #bar2.
