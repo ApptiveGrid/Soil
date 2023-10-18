@@ -300,9 +300,21 @@ SoilIndexedDictionaryTest >> testFirstWithTransaction [
 
 { #category : #tests }
 SoilIndexedDictionaryTest >> testIsEmpty [
-	self assert: dict isEmpty.
-	dict at: #foo put: #bar.
-	self deny: dict isEmpty
+	| tx tx1 tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	tx commit.
+	"open a second transaction ..."
+	tx1 := soil newTransaction.
+	"and test isEmpty"
+	self deny: tx1 root isEmpty.
+	
+	tx2 := soil newTransaction.
+	tx2 root removeKey: 1.
+	self assert: tx2 root size equals: 0.
+	self assert: tx2 root isEmpty.
+	tx2 commit
 ]
 
 { #category : #tests }
