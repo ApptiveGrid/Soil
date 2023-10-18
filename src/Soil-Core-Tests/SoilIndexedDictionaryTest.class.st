@@ -299,6 +299,42 @@ SoilIndexedDictionaryTest >> testFirstWithTransaction [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testIndexCreation [ 
+	| tx obj1 obj2 |
+	tx := soil newTransaction.
+	obj1 := Object new.
+	tx makeRoot: obj1.
+	obj2 := Object new.
+	tx makeRoot: obj2.
+	tx root: dict.
+	dict 
+		at: #foo put: obj1;
+		at: #boo put: obj2.
+	tx commit
+
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testIndexCreationAndRead [
+	| tx obj1 obj2 tx2 |
+	tx := soil newTransaction.
+	obj1 := SoilTestClusterRoot new nested: 'object1'.
+	tx makeRoot: obj1.
+	obj2 := SoilTestClusterRoot new nested: 'object2'.
+	tx makeRoot: obj2.
+	tx root: dict.
+	dict 
+		at: #foo put: obj1;
+		at: #boo put: obj2.
+	tx commit.
+	tx2 := soil newTransaction.
+	self assert: (tx2 root at: #foo) nested equals: 'object1'.
+	self assert: (tx2 root at: #boo) nested equals: 'object2'
+
+
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testIsEmpty [
 	| tx tx1 tx2 |
 	tx := soil newTransaction.
