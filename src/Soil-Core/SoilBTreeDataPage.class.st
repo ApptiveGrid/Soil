@@ -28,7 +28,7 @@ SoilBTreeDataPage >> find: aKey with: aBTree [
 
 { #category : #testing }
 SoilBTreeDataPage >> hasItems [
-	^ items notEmpty
+	^ (items reject: [ :each | each value isRemoved ]) notEmpty
 ]
 
 { #category : #utilities }

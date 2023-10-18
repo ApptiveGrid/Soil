@@ -180,6 +180,24 @@ SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testConcurrentIsEmpty [ 
+	| tx1 tx2 tx3 |
+	tx1 := soil newTransaction.
+	tx1 root: (dict
+		at: #one put: #onevalue;
+		yourself).
+	tx1 commit.
+	tx2 := soil newTransaction.
+	"After creating tx2 we open a concurrent transaction and add a key to 
+	the dictionary which should be invisible to tx2"
+	tx3 := soil newTransaction.
+	tx3 root removeKey: #one.
+	tx3 commit.
+	self assert: tx2 root size equals: 0.
+	self assert: tx2 root isEmpty.
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testDo [
 	| counter |
 	dict at: #foo2 put: #bar2.
@@ -299,10 +317,61 @@ SoilIndexedDictionaryTest >> testFirstWithTransaction [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testIndexCreation [ 
+	| tx obj1 obj2 |
+	tx := soil newTransaction.
+	obj1 := Object new.
+	tx makeRoot: obj1.
+	obj2 := Object new.
+	tx makeRoot: obj2.
+	tx root: dict.
+	dict 
+		at: #foo put: obj1;
+		at: #boo put: obj2.
+	tx commit
+
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testIndexCreationAndRead [
+	| tx obj1 obj2 tx2 |
+	tx := soil newTransaction.
+	obj1 := SoilTestClusterRoot new nested: 'object1'.
+	tx makeRoot: obj1.
+	obj2 := SoilTestClusterRoot new nested: 'object2'.
+	tx makeRoot: obj2.
+	tx root: dict.
+	dict 
+		at: #foo put: obj1;
+		at: #boo put: obj2.
+	tx commit.
+	tx2 := soil newTransaction.
+	self assert: (tx2 root at: #foo) nested equals: 'object1'.
+	self assert: (tx2 root at: #boo) nested equals: 'object2'
+
+
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testIsEmpty [
-	self assert: dict isEmpty.
-	dict at: #foo put: #bar.
-	self deny: dict isEmpty
+	| tx tx1 tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	tx commit.
+	"open a second transaction ..."
+	tx1 := soil newTransaction.
+	"and test isEmpty"
+	self deny: tx1 root isEmpty.
+	
+	tx2 := soil newTransaction.
+	tx2 root removeKey: 1.
+	self assert: tx2 root size equals: 0.
+	self assert: tx2 root isEmpty.
+	tx2 commit.
+	"still not empty in t1"
+	self assert: tx1 root size equals: 1.
+	self deny: tx1 root isEmpty.
 ]
 
 { #category : #tests }
