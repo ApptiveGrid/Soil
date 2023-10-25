@@ -6,7 +6,7 @@ Soil is a playground for exploring and learning OO database technology. It aims 
 
 ## Loading
 
-Load it in 64bit Pharo 10/11/12 with Metacello:
+Load it in 64bit Pharo 11/12 with Metacello:
 
 ```smalltalk
 Metacello new 
