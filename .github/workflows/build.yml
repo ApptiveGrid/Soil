@@ -17,7 +17,7 @@ jobs:
   build:
     strategy:
       matrix:
-        pharoversion: [ Pharo64-12, Pharo64-11, Pharo64-10 ]
+        pharoversion: [ Pharo64-12, Pharo64-11 ]
     name: ${{ matrix.pharoversion }}
     runs-on: ubuntu-latest
     steps:
