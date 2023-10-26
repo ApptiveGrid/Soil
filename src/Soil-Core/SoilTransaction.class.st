@@ -195,6 +195,7 @@ SoilTransaction >> buildWriteVersion [
 SoilTransaction >> checkpoint [
 	"serialize objects and collect all to be written records. This can be done without 
 	resources that need locking. This reduces time needed for locking"
+	| checkpointLSN checkpointEntry |
 	self prepareRecordsForCommit.
 	"if there are no records to commit we can just return and don't allocate any
 	resources"
@@ -219,15 +220,15 @@ SoilTransaction >> checkpoint [
 		"convert the records into journal entries, write the journal to disk and then
 		execute the journal on the database"
 		journal := self buildJournal.
-		journal
-			validateIn: self;
-			write;
-			commitIn: self;
-			checkpoint: self; 
-			close.
+		journal validateIn: self.
+		soil journal writeTransactionLog: journal.
+		journal commitIn: self.
+		checkpointEntry := journal checkpoint: self.
 		"add the journal to the database wide journal so other transaction can access
 		it to resolve older state"
-		soil journal addTransactionJournal: journal ]
+		soil journal addTransactionJournal: journal.
+		checkpointLSN := soil journal writeCheckpoint: checkpointEntry.
+		soil settings checkpoint: checkpointLSN ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
 

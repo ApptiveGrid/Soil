@@ -41,7 +41,7 @@ SoilBinaryFile >> initializeHeader [
 
 { #category : #initialization }
 SoilBinaryFile >> initializeStart [
-	self subclassResponsibility 
+
 ]
 
 { #category : #locking }

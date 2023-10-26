@@ -38,12 +38,27 @@ SoilLogSequenceNumber >> fileOffset [
 
 { #category : #accessing }
 SoilLogSequenceNumber >> filename [
-	^ (self fileNumber printStringBase: 16 length: 10 padded:  true) asLowercase 
+	^ self filename: self fileNumber 
+]
+
+{ #category : #accessing }
+SoilLogSequenceNumber >> filename: aNumber [ 
+	^ (aNumber printStringBase: 16 length: 10 padded:  true) asLowercase 
 ]
 
 { #category : #'as yet unclassified' }
 SoilLogSequenceNumber >> hexOffset [ 
 	^ (self fileOffset printStringBase: 16 length: 6 padded: true) asLowercase 
+]
+
+{ #category : #testing }
+SoilLogSequenceNumber >> isInitial [
+	^ value = 0
+]
+
+{ #category : #'as yet unclassified' }
+SoilLogSequenceNumber >> nextFilename [
+	^ self filename: self fileNumber + 1
 ]
 
 { #category : #printing }
@@ -53,6 +68,11 @@ SoilLogSequenceNumber >> printOn: aStream [
 		<< self filename
 		<< '-'
 		<< self hexOffset 
+]
+
+{ #category : #evaluating }
+SoilLogSequenceNumber >> value [ 
+	^ value
 ]
 
 { #category : #accessing }

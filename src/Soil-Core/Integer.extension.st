@@ -1,6 +1,11 @@
 Extension { #name : #Integer }
 
 { #category : #'*Soil-Core' }
+Integer >> asLogSequenceNumber [ 
+	^ SoilLogSequenceNumber value: self
+]
+
+{ #category : #'*Soil-Core' }
 Integer >> asSkipListKeyOfSize: keySize [ 
 	^ self asByteArrayOfSize: keySize 
 ]

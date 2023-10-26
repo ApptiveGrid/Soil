@@ -5,7 +5,8 @@ Class {
 		'soil',
 		'transactionJournals',
 		'indexOffset',
-		'semaphore'
+		'semaphore',
+		'currentSegmentFile'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -17,15 +18,10 @@ SoilJournal >> acceptSoil: aSoilVisitor [
 
 { #category : #adding }
 SoilJournal >> addTransactionJournal: aSoilTransactionJournal [ 
+	| currentLSN segmentFile |
 	semaphore critical: [  
 		self verifyNextJournalIndex: aSoilTransactionJournal index.	
-		transactionJournals addLast: aSoilTransactionJournal.
-		[ transactionJournals size <= self numberofJournalsToKeep ]  whileFalse: [ 
-			Transcript crShow: ('transaction journal ids before:', (transactionJournals collect: #index) printString).
-			self archiveJournal: transactionJournals removeFirst.
-			Transcript crShow: ('transaction journal ids after:', (transactionJournals collect: #index) printString).
-			Transcript crShow: ('new index offset will be: ', transactionJournals first index printString) ].
-		indexOffset := transactionJournals first index - 1 ]
+		transactionJournals at: aSoilTransactionJournal index put: aSoilTransactionJournal  ]
 
 ]
 
@@ -55,9 +51,15 @@ SoilJournal >> allTransactionJournals [
 
 { #category : #enumerating }
 SoilJournal >> allTransactionJournalsDo: aBlock [
-	((self transactionJournalFilesIn: self archivePath) , (self transactionJournalFilesIn: self path))
-		do: [ :file | 
-			aBlock value: (self readTransactionJournalFile: file) ]
+	self halt.
+]
+
+{ #category : #writing }
+SoilJournal >> append: aSoilTransactionJournal [ 
+	^ semaphore critical: [  
+		self verifyNextJournalIndex: aSoilTransactionJournal index.	
+		self segmentFileForWriting writeTransactionLog: aSoilTransactionJournal ]
+
 ]
 
 { #category : #accessing }
@@ -66,31 +68,9 @@ SoilJournal >> archiveFile: aFileReference [
 	aFileReference moveTo: (self archivePath / aFileReference basename)
 ]
 
-{ #category : #adding }
-SoilJournal >> archiveJournal: aTransactionJournal [ 
-	[ 	self ensureArchivePath.
-		self archiveFile: (self transactionJournalPathFor: aTransactionJournal index) ]
-		on: Error do: [ :e | "ignore for now" ]
-]
-
 { #category : #accessing }
 SoilJournal >> archivePath [ 
 	^ self path / #archive
-]
-
-{ #category : #accessing }
-SoilJournal >> at: anInteger [ 
-	^ semaphore critical: [
-		transactionJournals 
-			at: anInteger - indexOffset
-			ifAbsentPut: [ self loadTransactionJournalWithId: anInteger ] ]
-]
-
-{ #category : #'as yet unclassified' }
-SoilJournal >> buildTransactionJournals [
-	self transactionJournalFiles do: [ :each |
-		self addTransactionJournal: (
-			self readTransactionJournalFile: each) ]
 ]
 
 { #category : #copying }
@@ -98,6 +78,24 @@ SoilJournal >> copyFrom: start to: end [
 	^ self class new 
 		soil: soil;
 		transactionJournals: (self transactionJournals select: [:each | each index between: start and: end])
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> createSegmentFile: filename [
+	(self path / filename) ensureCreateFile.
+	^ (self openSegmentFile: filename)
+		initializeFilesystem;
+		yourself
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> currentSegmentFile [
+	| currentLSN |
+	^ currentSegmentFile ifNil: [  
+		currentLSN := soil settings checkpoint.
+		currentSegmentFile := (currentLSN isInitial) 
+			ifTrue: [ self createSegmentFile: currentLSN filename ]
+			ifFalse: [ self openSegmentFile: currentLSN filename ] ]
 ]
 
 { #category : #enumerating }
@@ -125,8 +123,8 @@ SoilJournal >> importEntry: aSoilTransactionJournal [
 { #category : #initialization }
 SoilJournal >> initialize [ 
 	super initialize.
-	transactionJournals := OrderedCollection new.
-	semaphore := Semaphore forMutualExclusion.
+	transactionJournals := LRUCache new maximumWeight: 20.
+	semaphore := Mutex new.
 	indexOffset := 0
 ]
 
@@ -165,16 +163,8 @@ SoilJournal >> inspectionContent [
 { #category : #accessing }
 SoilJournal >> lastTransactionJournal [
 	^ transactionJournals 
-		ifNotEmpty: [ :journals | journals last ]
+		ifNotEmpty: [ :journals | journals at: journals keys max ]
 		ifEmpty: nil
-]
-
-{ #category : #accessing }
-SoilJournal >> loadTransactionJournalWithId: anInteger [
-	^ SoilTransactionJournal new 
-		on: self path / anInteger asString , #journal;
-		index: anInteger;
-		readAll
 ]
 
 { #category : #'instance creation' }
@@ -182,18 +172,19 @@ SoilJournal >> newTransactionJournalFor: anInteger [
 	^ semaphore critical: [  
 		self verifyNextJournalIndex: anInteger.
 		SoilTransactionJournal new 
-			createOn: (self transactionJournalPathFor: anInteger);
 			index: anInteger ]
-]
-
-{ #category : #accessing }
-SoilJournal >> numberofJournalsToKeep [ 
-	^ 20
 ]
 
 { #category : #'instance creation' }
 SoilJournal >> open [ 
 	
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> openSegmentFile: filename [ 
+	^ (SoilJournalSegmentFile path: self path / filename )
+		open;
+		yourself
 ]
 
 { #category : #accessing }
@@ -202,11 +193,15 @@ SoilJournal >> path [
 ]
 
 { #category : #'as yet unclassified' }
-SoilJournal >> readTransactionJournalFile: aFileReference [ 
-	^ (SoilTransactionJournal new on: aFileReference)
-		index: aFileReference withoutExtension basename asNumber;
-		readAll;
-		close
+SoilJournal >> segmentFileForWriting [
+	| segmentFile nextFilename |
+	segmentFile := self currentSegmentFile.
+	^ currentSegmentFile hasSpace 
+		ifTrue: [ currentSegmentFile ]
+		ifFalse: [ 
+			nextFilename := currentSegmentFile currentLogSequenceNumber nextFilename.
+			currentSegmentFile close.
+			currentSegmentFile := self createSegmentFile: nextFilename ]
 ]
 
 { #category : #accessing }
@@ -214,35 +209,9 @@ SoilJournal >> soil: aSoil [
 	soil := aSoil
 ]
 
-{ #category : #queries }
-SoilJournal >> transactionJournalFiles [
-	| journalFiles |
-	journalFiles := self transactionJournalFilesIn: self path. 
-	(journalFiles size > self numberofJournalsToKeep) ifTrue: [ 
-		(journalFiles copyFrom: 1 to: (journalFiles size - self numberofJournalsToKeep)) do: [ :file |
-			self archiveFile: file.
-			journalFiles remove: file ] ].
-	^ journalFiles 
-]
-
-{ #category : #queries }
-SoilJournal >> transactionJournalFilesIn: aStringOrFileReference [
-	| files journalFiles path |
-	path := aStringOrFileReference asFileReference.
-	path  exists ifFalse: [ ^ OrderedCollection new ].
-	files := path childrenMatching: '*.journal'.
-	journalFiles := files sorted: [:a :b | 
-		a withoutExtension basename asNumber < b withoutExtension basename asNumber].
-	^ journalFiles 
-]
-
-{ #category : #accessing }
-SoilJournal >> transactionJournalPathFor: anInteger [ 
-	^ self path / anInteger asString , #journal
-]
-
 { #category : #accessing }
 SoilJournal >> transactionJournals [
+self halt.
 	^ transactionJournals
 ]
 
@@ -255,10 +224,25 @@ SoilJournal >> transactionJournals: aCollection [
 SoilJournal >> verifyNextJournalIndex: index [ 
 	"transaction journals have a strict sequence in the same way the
 	databaseVersion has. So we check that this assumption is kept"
-	transactionJournals 
+	"transactionJournals 
 		ifNotEmpty: [ 
 			((self lastTransactionJournal index + 1) = index)
 				ifFalse: [ 
 					Transcript show: ('journal index is not valid: current last index is ', self lastTransactionJournal index printString, ', no index to be added is ', index printString); cr ] ]
-		ifEmpty: [ ^ self ]
+		ifEmpty: [ ^ self ]"
+]
+
+{ #category : #writing }
+SoilJournal >> writeCheckpoint: aSoilNewCheckpointEntry [ 
+	^ currentSegmentFile 
+		writeCheckpointEntry: aSoilNewCheckpointEntry;
+		currentLogSequenceNumber 
+]
+
+{ #category : #writing }
+SoilJournal >> writeTransactionLog: aSoilTransactionJournal [ 
+	^ semaphore critical: [  
+		self verifyNextJournalIndex: aSoilTransactionJournal index.	
+		self segmentFileForWriting writeTransactionLog: aSoilTransactionJournal ]
+
 ]

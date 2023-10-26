@@ -3,7 +3,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'index',
-		'stream',
 		'entries'
 	],
 	#category : #'Soil-Core-Model'
@@ -64,9 +63,8 @@ SoilTransactionJournal >> checkpoint: aTransaction [
 	entry := SoilNewCheckpointEntry new 
 		transactionId: aTransaction writeVersion.
 	self addEntry: entry.
-	entry writeOn: stream.
-	stream flush.
 	entry commitIn: aTransaction.
+	^ entry
 ]
 
 { #category : #'as yet unclassified' }
@@ -74,30 +72,9 @@ SoilTransactionJournal >> checkpointedAt [
 	^ entries last checkpointedAt 
 ]
 
-{ #category : #'open/close' }
-SoilTransactionJournal >> close [ 
-	stream ifNotNil: [ stream close ]
-]
-
 { #category : #committing }
 SoilTransactionJournal >> commitIn: aTransaction [ 
 	entries do: [ :each | each commitIn: aTransaction ]
-]
-
-{ #category : #'instance creation' }
-SoilTransactionJournal >> create [
-	stream := self path 
-		deleteIfAbsent: []; 
-		ensureCreateFile;
-		binaryWriteStream 
-]
-
-{ #category : #'instance creation' }
-SoilTransactionJournal >> createOn: aFileReference [
-	stream := aFileReference 
-		deleteIfAbsent: []; 
-		ensureCreateFile;
-		binaryWriteStream 
 ]
 
 { #category : #accessing }
@@ -170,11 +147,6 @@ SoilTransactionJournal >> inspectionEntries [
 			addColumn: (SpStringTableColumn evaluated: [:each | each oldValue ]))
 ]
 
-{ #category : #'instance creation' }
-SoilTransactionJournal >> on: aFileReference [
-	stream := aFileReference binaryReadStream 
-]
-
 { #category : #accessing }
 SoilTransactionJournal >> path: aFileReference [ 
 	self shouldBeImplemented.
@@ -213,9 +185,9 @@ SoilTransactionJournal >> validateIn: aSoilTransaction [
 ]
 
 { #category : #writing }
-SoilTransactionJournal >> write [ 
-	entries do: [ :each | each writeOn: stream ].
-	stream 
+SoilTransactionJournal >> writeOn: aStream [ 
+	entries do: [ :each | each writeOn: aStream ].
+	aStream 
 		flush
 ]
 
