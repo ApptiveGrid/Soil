@@ -36,16 +36,6 @@ SoilLogSequenceNumber >> fileOffset [
 	^ value bitAnd: 16rFFFFFF
 ]
 
-{ #category : #accessing }
-SoilLogSequenceNumber >> filename [
-	^ self filename: self fileNumber 
-]
-
-{ #category : #accessing }
-SoilLogSequenceNumber >> filename: aNumber [ 
-	^ (aNumber printStringBase: 16 length: 10 padded:  true) asLowercase 
-]
-
 { #category : #'as yet unclassified' }
 SoilLogSequenceNumber >> hexOffset [ 
 	^ (self fileOffset printStringBase: 16 length: 6 padded: true) asLowercase 

@@ -8,7 +8,7 @@ Class {
 		'cachedUnitsOfWork',
 		'currentFragmentFile'
 	],
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Core-Journal'
 }
 
 { #category : #visting }
@@ -53,14 +53,6 @@ SoilJournal >> allUnitsOfWorkDo: aBlock [
 	self halt.
 ]
 
-{ #category : #writing }
-SoilJournal >> append: aSoilTransactionJournal [ 
-	^ semaphore critical: [  
-		self verifyNextJournalIndex: aSoilTransactionJournal index.	
-		self fragmentFileForWriting writeUnitOfWork: aSoilTransactionJournal ]
-
-]
-
 { #category : #accessing }
 SoilJournal >> cachedUnitsOfWork [
 	^ cachedUnitsOfWork
@@ -88,12 +80,13 @@ SoilJournal >> createFragmentFile: filename [
 
 { #category : #'as yet unclassified' }
 SoilJournal >> currentFragmentFile [
-	| currentLSN |
+	| currentLSN filename |
 	^ currentFragmentFile ifNil: [  
 		currentLSN := soil settings checkpoint.
+		filename := self filenameFrom: currentLSN fileNumber.
 		currentFragmentFile := (currentLSN isInitial) 
-			ifTrue: [ self createFragmentFile: currentLSN filename ]
-			ifFalse: [ self openFragmentFile: currentLSN filename ] ]
+			ifTrue: [ self createFragmentFile: filename ]
+			ifFalse: [ self openFragmentFile: filename ] ]
 ]
 
 { #category : #enumerating }
@@ -103,16 +96,25 @@ SoilJournal >> do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
+SoilJournal >> fileNumberFrom: aString [ 
+	^ (ByteArray readHexFrom: aString) asInteger
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> filenameFrom: anInteger [ 
+	^ (anInteger printStringBase: 16 length: 10 padded: true) asLowercase 
+]
+
+{ #category : #'as yet unclassified' }
 SoilJournal >> fragmentFileForWriting [
-	| segmentFile nextFilename |
+	| segmentFile nextFileNumber |
 	segmentFile := self currentFragmentFile.
 	^ currentFragmentFile hasSpace 
 		ifTrue: [ currentFragmentFile ]
 		ifFalse: [ 
-			nextFilename := currentFragmentFile currentLogSequenceNumber nextFilename.
-			('next filename: ', nextFilename asString) apptiveEmit.
+			nextFileNumber := (self fileNumberFrom: currentFragmentFile filename).
 			currentFragmentFile close.
-			currentFragmentFile := self createFragmentFile: nextFilename ]
+			currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber + 1) ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -163,6 +165,13 @@ SoilJournal >> inspectionContent [
 			title: #firstTransaction;
 			evaluated: #firstTransaction;
 			width: 50)"
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> lastIndex [
+	^ self lastUnitOfWork 
+		ifNotNil: [ :journal | journal index ]
+		ifNil: [ 0 ]
 ]
 
 { #category : #accessing }

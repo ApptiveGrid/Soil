@@ -19,7 +19,6 @@ SoilLogSequenceNumberTest >> testCreation [
 SoilLogSequenceNumberTest >> testStringValues [
 	| lsn |
 	lsn := SoilLogSequenceNumber value: ((16 bitShift: 24) bitOr: 32).
-	self assert: lsn filename equals: '0000000010'.
 	self assert: lsn hexOffset equals: '000020'.
 
 ]

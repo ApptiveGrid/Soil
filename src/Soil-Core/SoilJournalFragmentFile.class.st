@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'path'
 	],
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Core-Journal'
 }
 
 { #category : #accessing }
@@ -57,7 +57,9 @@ SoilJournalFragmentFile >> filename [
 
 { #category : #testing }
 SoilJournalFragmentFile >> hasSpace [
-	^ stream position < (2 raisedTo: 24) 
+	"a fragment file when writing to it must be smaller be with a 
+	file size of 24 bit = 16MB"
+	^ stream position < (2 raisedTo: 24)
 ]
 
 { #category : #initialization }
@@ -142,8 +144,8 @@ SoilJournalFragmentFile >> writeCheckpointEntry: aSoilNewCheckpointEntry [
 ]
 
 { #category : #writing }
-SoilJournalFragmentFile >> writeUnitOfWork: aSoilTransactionJournal [
+SoilJournalFragmentFile >> writeUnitOfWork: aSoilUnitOfWork [
 	stream setToEnd.
-	aSoilTransactionJournal writeOn: stream.
+	aSoilUnitOfWork writeOn: stream.
 	stream flush
 ]

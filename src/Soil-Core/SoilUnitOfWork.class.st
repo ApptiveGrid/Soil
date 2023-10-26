@@ -171,7 +171,7 @@ SoilUnitOfWork >> printOn: aStream [
 SoilUnitOfWork >> readFrom: aStream [ 
 	| pageCode entry size |
 	index := (aStream next: 8) asInteger.
-	size := (aStream next: 3) asInteger + 1.
+	size := (aStream next: 3) asInteger.
 	(1 to: size) do: [ :n | 
 		pageCode := aStream next asInteger.
 		entry := (SoilJournalEntry withTypeCode: pageCode) new.
@@ -196,7 +196,9 @@ SoilUnitOfWork >> validateIn: aSoilTransaction [
 { #category : #writing }
 SoilUnitOfWork >> writeOn: aStream [
 	aStream nextPutAll: (index asByteArrayOfSize: 8).
-	aStream nextPutAll: (entries size asByteArrayOfSize: 3).
+	"write the size of entries. The size is increased by one for the
+	checkpoint entry that will be written at the end."
+	aStream nextPutAll: (entries size asByteArrayOfSize: 3) + 1.
 	entries do: [ :each | each writeOn: aStream ].
 	aStream 
 		flush
