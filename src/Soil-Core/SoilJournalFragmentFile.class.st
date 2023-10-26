@@ -51,7 +51,7 @@ SoilJournalFragmentFile >> path: aFileReference [
 
 { #category : #utilities }
 SoilJournalFragmentFile >> prefix [
-	^ 'SOIL|SEGMENT FILE' asByteArray
+	^ 'SOIL|JOURNAL FRAGMENT' asByteArray
 ]
 
 { #category : #printing }
