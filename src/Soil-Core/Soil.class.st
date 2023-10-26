@@ -291,7 +291,7 @@ Soil >> renameClassNamed: oldName to: newName [
 Soil >> replayJournal: aSoilJournal [ 
 	| tx journals databaseVersion |
 	databaseVersion := self databaseVersion.
-	journals := aSoilJournal unitsOfWork reject: [:each | each index <= databaseVersion ].
+	journals := aSoilJournal cachedUnitsOfWork reject: [:each | each index <= databaseVersion ].
 	tx := self newTransaction.
 	journals do: [ :j |
 		tx setWriteVersion: j index.

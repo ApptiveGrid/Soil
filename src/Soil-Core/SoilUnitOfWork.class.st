@@ -8,6 +8,13 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #'instance creation' }
+SoilUnitOfWork class >> readFrom: aStream [ 
+	^ self new 
+		readFrom: aStream;
+		yourself
+]
+
 { #category : #accessing }
 SoilUnitOfWork class >> soilTransientInstVars [ 
 	^ #( transaction )
@@ -161,12 +168,14 @@ SoilUnitOfWork >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-SoilUnitOfWork >> readAll [
-	| pageCode entry |
-	[ stream atEnd ] whileFalse: [ 
-		pageCode := stream next asInteger.
+SoilUnitOfWork >> readFrom: aStream [ 
+	| pageCode entry size |
+	index := (aStream next: 8) asInteger.
+	size := (aStream next: 3) asInteger + 1.
+	(1 to: size) do: [ :n | 
+		pageCode := aStream next asInteger.
 		entry := (SoilJournalEntry withTypeCode: pageCode) new.
-		entries add: (entry readFrom: stream) ].
+		entries add: (entry readFrom: aStream) ]
 ]
 
 { #category : #accessing }
@@ -185,7 +194,9 @@ SoilUnitOfWork >> validateIn: aSoilTransaction [
 ]
 
 { #category : #writing }
-SoilUnitOfWork >> writeOn: aStream [ 
+SoilUnitOfWork >> writeOn: aStream [
+	aStream nextPutAll: (index asByteArrayOfSize: 8).
+	aStream nextPutAll: (entries size asByteArrayOfSize: 3).
 	entries do: [ :each | each writeOn: aStream ].
 	aStream 
 		flush

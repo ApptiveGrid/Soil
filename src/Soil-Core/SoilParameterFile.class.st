@@ -176,7 +176,7 @@ SoilParameterFile >> open [
 
 { #category : #accessing }
 SoilParameterFile >> parameterNames [
-	^ #( databaseFormatVersion databaseVersion applicationVersion ) 
+	^ #( databaseFormatVersion databaseVersion applicationVersion checkpoint ) 
 ]
 
 { #category : #accessing }

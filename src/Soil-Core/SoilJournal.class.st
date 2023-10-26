@@ -5,8 +5,8 @@ Class {
 		'soil',
 		'indexOffset',
 		'semaphore',
-		'currentSegmentFile',
-		'unitsOfWork'
+		'cachedUnitsOfWork',
+		'currentFragmentFile'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -20,7 +20,7 @@ SoilJournal >> acceptSoil: aSoilVisitor [
 SoilJournal >> addUnitOfWork: aSoilUnitOfWork [ 
 	semaphore critical: [  
 		self verifyNextJournalIndex: aSoilUnitOfWork index.	
-		unitsOfWork at: aSoilUnitOfWork index put: aSoilUnitOfWork  ]
+		cachedUnitsOfWork at: aSoilUnitOfWork index put: aSoilUnitOfWork  ]
 
 ]
 
@@ -61,11 +61,21 @@ SoilJournal >> append: aSoilTransactionJournal [
 
 ]
 
+{ #category : #accessing }
+SoilJournal >> cachedUnitsOfWork [
+	^ cachedUnitsOfWork
+]
+
+{ #category : #accessing }
+SoilJournal >> cachedUnitsOfWork: aCollection [ 
+	cachedUnitsOfWork := aCollection
+]
+
 { #category : #copying }
 SoilJournal >> copyFrom: start to: end [ 
 	^ self class new 
 		soil: soil;
-		unitsOfWork: (self unitsOfWork select: [:each | each index between: start and: end])
+		cachedUnitsOfWork: (self cachedUnitsOfWork select: [:each | each index between: start and: end])
 ]
 
 { #category : #'as yet unclassified' }
@@ -79,9 +89,9 @@ SoilJournal >> createFragmentFile: filename [
 { #category : #'as yet unclassified' }
 SoilJournal >> currentFragmentFile [
 	| currentLSN |
-	^ currentSegmentFile ifNil: [  
+	^ currentFragmentFile ifNil: [  
 		currentLSN := soil settings checkpoint.
-		currentSegmentFile := (currentLSN isInitial) 
+		currentFragmentFile := (currentLSN isInitial) 
 			ifTrue: [ self createFragmentFile: currentLSN filename ]
 			ifFalse: [ self openFragmentFile: currentLSN filename ] ]
 ]
@@ -89,19 +99,25 @@ SoilJournal >> currentFragmentFile [
 { #category : #enumerating }
 SoilJournal >> do: aBlock [ 
 	semaphore critical: [  
-		unitsOfWork do: aBlock ]	
+		cachedUnitsOfWork do: aBlock ]	
 ]
 
 { #category : #'as yet unclassified' }
 SoilJournal >> fragmentFileForWriting [
 	| segmentFile nextFilename |
 	segmentFile := self currentFragmentFile.
-	^ currentSegmentFile hasSpace 
-		ifTrue: [ currentSegmentFile ]
+	^ currentFragmentFile hasSpace 
+		ifTrue: [ currentFragmentFile ]
 		ifFalse: [ 
-			nextFilename := currentSegmentFile currentLogSequenceNumber nextFilename.
-			currentSegmentFile close.
-			currentSegmentFile := self createFragmentFile: nextFilename ]
+			nextFilename := currentFragmentFile currentLogSequenceNumber nextFilename.
+			('next filename: ', nextFilename asString) apptiveEmit.
+			currentFragmentFile close.
+			currentFragmentFile := self createFragmentFile: nextFilename ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournal >> fragmentFiles [
+	^ self path children sorted reverse collect: [ :each | SoilJournalFragmentFile path: each ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -118,7 +134,7 @@ SoilJournal >> importEntry: aSoilTransactionJournal [
 { #category : #initialization }
 SoilJournal >> initialize [ 
 	super initialize.
-	unitsOfWork := LRUCache new maximumWeight: 20.
+	cachedUnitsOfWork := LRUCache new maximumWeight: 20.
 	semaphore := Mutex new.
 	indexOffset := 0
 ]
@@ -134,30 +150,24 @@ SoilJournal >> inspectionContent [
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 
 	^ SpTablePresenter new
-		items: (self unitsOfWork);
+		items: (self fragmentFiles);
 		addColumn: (SpStringTableColumn new 
-			title: 'index';
-			evaluated: #index;
-			width: 50);
-		addColumn: (SpStringTableColumn new 
-			title: #read;
-			evaluated: #readVersion;
-			width: 50);
-		addColumn: (SpStringTableColumn new 
-			title: #duration;
-			evaluated: #duration;
-			width: 50);
+			title: 'filename';
+			evaluated: #filename;
+			width: 80);
 		addColumn: (SpStringTableColumn new 
 			title: #created;
-			evaluated: #createdAt);
-		addColumn: (SpStringTableColumn new
-			title: #checkpoint;
-			evaluated: #checkpointedAt)
+			evaluated: #created;
+			width: 50)";
+		addColumn: (SpStringTableColumn new 
+			title: #firstTransaction;
+			evaluated: #firstTransaction;
+			width: 50)"
 ]
 
 { #category : #accessing }
 SoilJournal >> lastUnitOfWork [
-	^ unitsOfWork 
+	^ cachedUnitsOfWork 
 		ifNotEmpty: [ :journals | journals at: journals keys max ]
 		ifEmpty: nil
 ]
@@ -192,15 +202,9 @@ SoilJournal >> soil: aSoil [
 	soil := aSoil
 ]
 
-{ #category : #accessing }
-SoilJournal >> unitsOfWork [
-self halt.
-	^ unitsOfWork
-]
-
-{ #category : #accessing }
-SoilJournal >> unitsOfWork: aCollection [ 
-	unitsOfWork := aCollection
+{ #category : #'as yet unclassified' }
+SoilJournal >> unitsOfWork [ 
+	^ self path children
 ]
 
 { #category : #adding }
@@ -217,7 +221,7 @@ SoilJournal >> verifyNextJournalIndex: index [
 
 { #category : #writing }
 SoilJournal >> writeCheckpoint: aSoilNewCheckpointEntry [ 
-	^ currentSegmentFile 
+	^ currentFragmentFile 
 		writeCheckpointEntry: aSoilNewCheckpointEntry;
 		currentLogSequenceNumber 
 ]

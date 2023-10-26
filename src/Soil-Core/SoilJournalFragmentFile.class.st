@@ -24,14 +24,71 @@ SoilJournalFragmentFile >> create [
 
 ]
 
+{ #category : #accessing }
+SoilJournalFragmentFile >> created [
+	self stream position: self headerSize.
+	^ DateAndTime fromUnixTime: (stream next: self createdSize) asInteger
+]
+
+{ #category : #initialization }
+SoilJournalFragmentFile >> created: aDateandTime [
+	| timestamp |
+	timestamp := aDateandTime asUnixTime.
+	stream 
+		position: self headerSize;
+		nextPutAll: (timestamp asByteArrayOfSize: self createdSize);
+		flush
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournalFragmentFile >> createdSize [
+	^ 6
+]
+
 { #category : #'as yet unclassified' }
 SoilJournalFragmentFile >> currentLogSequenceNumber [ 
-	^ SoilLogSequenceNumber fileNumber: path pathSegments last asInteger offset: stream position 
+	^ SoilLogSequenceNumber fileNumber: (ByteArray readHexFrom: path pathSegments last) asInteger offset: stream position 
+]
+
+{ #category : #accessing }
+SoilJournalFragmentFile >> filename [ 
+	^ self path basename
 ]
 
 { #category : #testing }
 SoilJournalFragmentFile >> hasSpace [
-	^ stream position < "(2 raisedTo: 24)" 128
+	^ stream position < (2 raisedTo: 24) 
+]
+
+{ #category : #initialization }
+SoilJournalFragmentFile >> initializeStart [ 
+	self created: DateAndTime now
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournalFragmentFile >> inspectionUnitsOfWork [
+	<inspectorPresentationOrder: 0 title: 'units of work'>
+
+	^ SpTablePresenter new
+		items: (self unitsOfWork reversed);
+		addColumn: (SpCompositeTableColumn new
+			title: '#';
+			width: 30;
+			addColumn: (SpStringTableColumn evaluated: [:each | each index ]));
+		addColumn: (SpStringTableColumn new 
+			title: #read;
+			evaluated: #readVersion;
+			width: 50);
+		addColumn: (SpStringTableColumn new 
+			title: #duration;
+			evaluated: #duration;
+			width: 50);
+		addColumn: (SpStringTableColumn new 
+			title: #created;
+			evaluated: #createdAt);
+		addColumn: (SpStringTableColumn new
+			title: #checkpoint;
+			evaluated: #checkpointedAt)
 ]
 
 { #category : #'instance creation' }
@@ -66,8 +123,19 @@ SoilJournalFragmentFile >> soil [
 	self halt
 ]
 
+{ #category : #'as yet unclassified' }
+SoilJournalFragmentFile >> unitsOfWork [
+	| unitsOfWork |
+	stream position: self headerSize + 6.
+	unitsOfWork := OrderedCollection new.
+	[ stream atEnd ] whileFalse: [  
+		unitsOfWork add: (SoilUnitOfWork readFrom: stream underlyingStream) ].
+	^ unitsOfWork
+]
+
 { #category : #writing }
 SoilJournalFragmentFile >> writeCheckpointEntry: aSoilNewCheckpointEntry [ 
+	stream setToEnd.
 	aSoilNewCheckpointEntry writeOn: stream.
 	stream flush
 
@@ -75,6 +143,7 @@ SoilJournalFragmentFile >> writeCheckpointEntry: aSoilNewCheckpointEntry [
 
 { #category : #writing }
 SoilJournalFragmentFile >> writeUnitOfWork: aSoilTransactionJournal [
+	stream setToEnd.
 	aSoilTransactionJournal writeOn: stream.
 	stream flush
 ]
