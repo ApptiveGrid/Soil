@@ -13,6 +13,11 @@ SoilJournalFragmentFile class >> path: aFileReference [
 		path: aFileReference 
 ]
 
+{ #category : #visiting }
+SoilJournalFragmentFile >> acceptSoil: aSoilVisitor [ 
+	aSoilVisitor visitJournalFragmentFile: self
+]
+
 { #category : #'initialize-release' }
 SoilJournalFragmentFile >> close [
 	stream close
@@ -128,7 +133,7 @@ SoilJournalFragmentFile >> soil [
 { #category : #'as yet unclassified' }
 SoilJournalFragmentFile >> unitsOfWork [
 	| unitsOfWork |
-	stream position: self headerSize + 6.
+	self stream position: self headerSize + 6.
 	unitsOfWork := OrderedCollection new.
 	[ stream atEnd ] whileFalse: [  
 		unitsOfWork add: (SoilUnitOfWork readFrom: stream underlyingStream) ].
