@@ -46,6 +46,11 @@ SoilLogSequenceNumber >> hexOffset [
 	^ (self fileOffset printStringBase: 16 length: 6 padded: true) asLowercase 
 ]
 
+{ #category : #testing }
+SoilLogSequenceNumber >> isInitial [
+	^ value = 0
+]
+
 { #category : #printing }
 SoilLogSequenceNumber >> printOn: aStream [ 
 	aStream 
@@ -53,6 +58,11 @@ SoilLogSequenceNumber >> printOn: aStream [
 		<< self filename
 		<< '-'
 		<< self hexOffset 
+]
+
+{ #category : #evaluating }
+SoilLogSequenceNumber >> value [ 
+	^ value
 ]
 
 { #category : #accessing }
