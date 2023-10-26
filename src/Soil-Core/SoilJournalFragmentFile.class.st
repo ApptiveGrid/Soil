@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilJournalSegmentFile,
+	#name : #SoilJournalFragmentFile,
 	#superclass : #SoilBinaryFile,
 	#instVars : [
 		'path'
@@ -8,73 +8,73 @@ Class {
 }
 
 { #category : #accessing }
-SoilJournalSegmentFile class >> path: aFileReference [ 
+SoilJournalFragmentFile class >> path: aFileReference [ 
 	^ self new 
 		path: aFileReference 
 ]
 
 { #category : #'initialize-release' }
-SoilJournalSegmentFile >> close [
+SoilJournalFragmentFile >> close [
 	stream close
 ]
 
 { #category : #'instance creation' }
-SoilJournalSegmentFile >> create [
+SoilJournalFragmentFile >> create [
 	path ensureCreateFile
 
 ]
 
 { #category : #'as yet unclassified' }
-SoilJournalSegmentFile >> currentLogSequenceNumber [ 
+SoilJournalFragmentFile >> currentLogSequenceNumber [ 
 	^ SoilLogSequenceNumber fileNumber: path pathSegments last asInteger offset: stream position 
 ]
 
 { #category : #testing }
-SoilJournalSegmentFile >> hasSpace [
+SoilJournalFragmentFile >> hasSpace [
 	^ stream position < "(2 raisedTo: 24)" 128
 ]
 
 { #category : #'instance creation' }
-SoilJournalSegmentFile >> open [
+SoilJournalFragmentFile >> open [
 	stream := path binaryReadWriteStream 
 ]
 
 { #category : #accessing }
-SoilJournalSegmentFile >> path [
+SoilJournalFragmentFile >> path [
 	^ path
 ]
 
 { #category : #accessing }
-SoilJournalSegmentFile >> path: aFileReference [ 
+SoilJournalFragmentFile >> path: aFileReference [ 
 	path := aFileReference 
 ]
 
 { #category : #utilities }
-SoilJournalSegmentFile >> prefix [
+SoilJournalFragmentFile >> prefix [
 	^ 'SOIL|SEGMENT FILE' asByteArray
 ]
 
 { #category : #printing }
-SoilJournalSegmentFile >> printOn: aStream [ 
+SoilJournalFragmentFile >> printOn: aStream [ 
 	aStream 
 		<< 'journal segment file: '
 		<< path asString
 ]
 
 { #category : #accessing }
-SoilJournalSegmentFile >> soil [ 
+SoilJournalFragmentFile >> soil [ 
 	self halt
 ]
 
 { #category : #writing }
-SoilJournalSegmentFile >> writeCheckpointEntry: aSoilNewCheckpointEntry [ 
+SoilJournalFragmentFile >> writeCheckpointEntry: aSoilNewCheckpointEntry [ 
 	aSoilNewCheckpointEntry writeOn: stream.
 	stream flush
 
 ]
 
 { #category : #writing }
-SoilJournalSegmentFile >> writeTransactionLog: aSoilTransactionJournal [
+SoilJournalFragmentFile >> writeTransactionJournal: aSoilTransactionJournal [
 	aSoilTransactionJournal writeOn: stream.
 	stream flush
 ]

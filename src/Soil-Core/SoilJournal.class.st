@@ -58,19 +58,8 @@ SoilJournal >> allTransactionJournalsDo: aBlock [
 SoilJournal >> append: aSoilTransactionJournal [ 
 	^ semaphore critical: [  
 		self verifyNextJournalIndex: aSoilTransactionJournal index.	
-		self segmentFileForWriting writeTransactionLog: aSoilTransactionJournal ]
+		self fragmentFileForWriting writeTransactionJournal: aSoilTransactionJournal ]
 
-]
-
-{ #category : #accessing }
-SoilJournal >> archiveFile: aFileReference [ 
-	self archivePath ensureCreateDirectory.
-	aFileReference moveTo: (self archivePath / aFileReference basename)
-]
-
-{ #category : #accessing }
-SoilJournal >> archivePath [ 
-	^ self path / #archive
 ]
 
 { #category : #copying }
@@ -81,21 +70,21 @@ SoilJournal >> copyFrom: start to: end [
 ]
 
 { #category : #'as yet unclassified' }
-SoilJournal >> createSegmentFile: filename [
+SoilJournal >> createFragmentFile: filename [
 	(self path / filename) ensureCreateFile.
-	^ (self openSegmentFile: filename)
+	^ (self openFragmentFile: filename)
 		initializeFilesystem;
 		yourself
 ]
 
 { #category : #'as yet unclassified' }
-SoilJournal >> currentSegmentFile [
+SoilJournal >> currentFragmentFile [
 	| currentLSN |
 	^ currentSegmentFile ifNil: [  
 		currentLSN := soil settings checkpoint.
 		currentSegmentFile := (currentLSN isInitial) 
-			ifTrue: [ self createSegmentFile: currentLSN filename ]
-			ifFalse: [ self openSegmentFile: currentLSN filename ] ]
+			ifTrue: [ self createFragmentFile: currentLSN filename ]
+			ifFalse: [ self openFragmentFile: currentLSN filename ] ]
 ]
 
 { #category : #enumerating }
@@ -104,9 +93,16 @@ SoilJournal >> do: aBlock [
 		transactionJournals do: aBlock ]	
 ]
 
-{ #category : #accessing }
-SoilJournal >> ensureArchivePath [
-	self archivePath ensureCreateDirectory 
+{ #category : #'as yet unclassified' }
+SoilJournal >> fragmentFileForWriting [
+	| segmentFile nextFilename |
+	segmentFile := self currentFragmentFile.
+	^ currentSegmentFile hasSpace 
+		ifTrue: [ currentSegmentFile ]
+		ifFalse: [ 
+			nextFilename := currentSegmentFile currentLogSequenceNumber nextFilename.
+			currentSegmentFile close.
+			currentSegmentFile := self createFragmentFile: nextFilename ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -124,7 +120,7 @@ SoilJournal >> importEntry: aSoilTransactionJournal [
 SoilJournal >> initialize [ 
 	super initialize.
 	transactionJournals := LRUCache new maximumWeight: 20.
-	semaphore := Semaphore forMutualExclusion.
+	semaphore := Mutex new.
 	indexOffset := 0
 ]
 
@@ -181,8 +177,8 @@ SoilJournal >> open [
 ]
 
 { #category : #'as yet unclassified' }
-SoilJournal >> openSegmentFile: filename [ 
-	^ (SoilJournalSegmentFile path: self path / filename )
+SoilJournal >> openFragmentFile: filename [ 
+	^ (SoilJournalFragmentFile path: self path / filename )
 		open;
 		yourself
 ]
@@ -190,30 +186,6 @@ SoilJournal >> openSegmentFile: filename [
 { #category : #accessing }
 SoilJournal >> path [
 	^ soil path / #journal
-]
-
-{ #category : #'as yet unclassified' }
-SoilJournal >> segmentFileAt: logSequenceNumber [
-	^ (logSequenceNumber isInitial) 
-		ifTrue: [ 
-			(SoilJournalSegmentFile path: self path / logSequenceNumber filename)
-				create;
-				open;
-				yourself ] 
-		ifFalse: [ 
-			self halt. ]
-]
-
-{ #category : #'as yet unclassified' }
-SoilJournal >> segmentFileForWriting [
-	| segmentFile nextFilename |
-	segmentFile := self currentSegmentFile.
-	^ currentSegmentFile hasSpace 
-		ifTrue: [ currentSegmentFile ]
-		ifFalse: [ 
-			nextFilename := currentSegmentFile currentLogSequenceNumber nextFilename.
-			currentSegmentFile close.
-			currentSegmentFile := self createSegmentFile: nextFilename ]
 ]
 
 { #category : #accessing }
@@ -252,9 +224,9 @@ SoilJournal >> writeCheckpoint: aSoilNewCheckpointEntry [
 ]
 
 { #category : #writing }
-SoilJournal >> writeTransactionLog: aSoilTransactionJournal [ 
+SoilJournal >> writeTransactionJournal: aSoilTransactionJournal [ 
 	^ semaphore critical: [  
 		self verifyNextJournalIndex: aSoilTransactionJournal index.	
-		self segmentFileForWriting writeTransactionLog: aSoilTransactionJournal ]
+		self fragmentFileForWriting writeTransactionJournal: aSoilTransactionJournal ]
 
 ]
