@@ -3,10 +3,10 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'soil',
-		'transactionJournals',
 		'indexOffset',
 		'semaphore',
-		'currentSegmentFile'
+		'currentSegmentFile',
+		'unitsOfWork'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -17,11 +17,10 @@ SoilJournal >> acceptSoil: aSoilVisitor [
 ]
 
 { #category : #adding }
-SoilJournal >> addTransactionJournal: aSoilTransactionJournal [ 
-	| currentLSN segmentFile |
+SoilJournal >> addUnitOfWork: aSoilUnitOfWork [ 
 	semaphore critical: [  
-		self verifyNextJournalIndex: aSoilTransactionJournal index.	
-		transactionJournals at: aSoilTransactionJournal index put: aSoilTransactionJournal  ]
+		self verifyNextJournalIndex: aSoilUnitOfWork index.	
+		unitsOfWork at: aSoilUnitOfWork index put: aSoilUnitOfWork  ]
 
 ]
 
@@ -29,7 +28,7 @@ SoilJournal >> addTransactionJournal: aSoilTransactionJournal [
 SoilJournal >> allHavingEntriesMatching: aBlock [
 	| result |
 	result := OrderedCollection new.
-	self allTransactionJournalsDo: [ :journal |
+	self allUnitsOfWorkDo: [ :journal |
 		(journal entries anySatisfy: aBlock) ifTrue: [ 
 			result add: journal ]].
 	^ result
@@ -42,15 +41,15 @@ SoilJournal >> allHavingEntriesWithObjectId: aSoilObjectId [
 ]
 
 { #category : #queries }
-SoilJournal >> allTransactionJournals [
+SoilJournal >> allUnitsOfWork [
 	| all |
 	all := OrderedCollection new.
-	self allTransactionJournalsDo: [ :transactionJournal | all add: transactionJournal ].
+	self allUnitsOfWorkDo: [ :transactionJournal | all add: transactionJournal ].
 	^ all
 ]
 
 { #category : #enumerating }
-SoilJournal >> allTransactionJournalsDo: aBlock [
+SoilJournal >> allUnitsOfWorkDo: aBlock [
 	self halt.
 ]
 
@@ -58,7 +57,7 @@ SoilJournal >> allTransactionJournalsDo: aBlock [
 SoilJournal >> append: aSoilTransactionJournal [ 
 	^ semaphore critical: [  
 		self verifyNextJournalIndex: aSoilTransactionJournal index.	
-		self fragmentFileForWriting writeTransactionJournal: aSoilTransactionJournal ]
+		self fragmentFileForWriting writeUnitOfWork: aSoilTransactionJournal ]
 
 ]
 
@@ -66,7 +65,7 @@ SoilJournal >> append: aSoilTransactionJournal [
 SoilJournal >> copyFrom: start to: end [ 
 	^ self class new 
 		soil: soil;
-		transactionJournals: (self transactionJournals select: [:each | each index between: start and: end])
+		unitsOfWork: (self unitsOfWork select: [:each | each index between: start and: end])
 ]
 
 { #category : #'as yet unclassified' }
@@ -90,7 +89,7 @@ SoilJournal >> currentFragmentFile [
 { #category : #enumerating }
 SoilJournal >> do: aBlock [ 
 	semaphore critical: [  
-		transactionJournals do: aBlock ]	
+		unitsOfWork do: aBlock ]	
 ]
 
 { #category : #'as yet unclassified' }
@@ -109,17 +108,17 @@ SoilJournal >> fragmentFileForWriting [
 SoilJournal >> importEntry: aSoilTransactionJournal [ 
 	| id local |
 	id := aSoilTransactionJournal index.
-	local := (self newTransactionJournalFor: id)
+	local := (self newUnitOfWorkFor: id)
 		addEntries: aSoilTransactionJournal entries;
 		write;
 		close.
-	self addTransactionJournal: local
+	self addUnitOfWork: local
 ]
 
 { #category : #initialization }
 SoilJournal >> initialize [ 
 	super initialize.
-	transactionJournals := LRUCache new maximumWeight: 20.
+	unitsOfWork := LRUCache new maximumWeight: 20.
 	semaphore := Mutex new.
 	indexOffset := 0
 ]
@@ -135,7 +134,7 @@ SoilJournal >> inspectionContent [
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 
 	^ SpTablePresenter new
-		items: (self transactionJournals);
+		items: (self unitsOfWork);
 		addColumn: (SpStringTableColumn new 
 			title: 'index';
 			evaluated: #index;
@@ -157,17 +156,17 @@ SoilJournal >> inspectionContent [
 ]
 
 { #category : #accessing }
-SoilJournal >> lastTransactionJournal [
-	^ transactionJournals 
+SoilJournal >> lastUnitOfWork [
+	^ unitsOfWork 
 		ifNotEmpty: [ :journals | journals at: journals keys max ]
 		ifEmpty: nil
 ]
 
 { #category : #'instance creation' }
-SoilJournal >> newTransactionJournalFor: anInteger [ 
+SoilJournal >> newUnitOfWorkFor: anInteger [ 
 	^ semaphore critical: [  
 		self verifyNextJournalIndex: anInteger.
-		SoilTransactionJournal new 
+		SoilUnitOfWork new 
 			index: anInteger ]
 ]
 
@@ -194,14 +193,14 @@ SoilJournal >> soil: aSoil [
 ]
 
 { #category : #accessing }
-SoilJournal >> transactionJournals [
+SoilJournal >> unitsOfWork [
 self halt.
-	^ transactionJournals
+	^ unitsOfWork
 ]
 
 { #category : #accessing }
-SoilJournal >> transactionJournals: aCollection [ 
-	transactionJournals := aCollection
+SoilJournal >> unitsOfWork: aCollection [ 
+	unitsOfWork := aCollection
 ]
 
 { #category : #adding }
@@ -224,9 +223,9 @@ SoilJournal >> writeCheckpoint: aSoilNewCheckpointEntry [
 ]
 
 { #category : #writing }
-SoilJournal >> writeTransactionJournal: aSoilTransactionJournal [ 
+SoilJournal >> writeUnitOfWork: aSoilUnitOfWork [ 
 	^ semaphore critical: [  
-		self verifyNextJournalIndex: aSoilTransactionJournal index.	
-		self fragmentFileForWriting writeTransactionJournal: aSoilTransactionJournal ]
+		self verifyNextJournalIndex: aSoilUnitOfWork index.	
+		self fragmentFileForWriting writeUnitOfWork: aSoilUnitOfWork ]
 
 ]

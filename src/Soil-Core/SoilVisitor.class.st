@@ -29,7 +29,7 @@ SoilVisitor >> visitIndexManager: aSoilIndexManager [
 
 { #category : #visiting }
 SoilVisitor >> visitJournal: aSoilJournal [ 
-	self visitAll: aSoilJournal transactionJournals.
+	self visitAll: aSoilJournal unitsOfWork.
 	^ aSoilJournal 
 ]
 
@@ -92,6 +92,6 @@ SoilVisitor >> visitSoil: aSoil [
 ]
 
 { #category : #visiting }
-SoilVisitor >> visitTransactionJournal: aSoilTransactionJournal [ 
+SoilVisitor >> visitUnitOfWork: aSoilTransactionJournal [ 
 	^ aSoilTransactionJournal 
 ]

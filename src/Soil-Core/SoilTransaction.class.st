@@ -149,7 +149,7 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 
 { #category : #accessing }
 SoilTransaction >> buildJournal [
-	journal := soil journal newTransactionJournalFor: writeVersion.
+	journal := soil journal newUnitOfWorkFor: writeVersion.
 	journal addEntry: (SoilNewTransactionEntry new
 		readVersion: readVersion; 
 		transactionId: writeVersion;
@@ -221,12 +221,12 @@ SoilTransaction >> checkpoint [
 		execute the journal on the database"
 		journal := self buildJournal.
 		journal validateIn: self.
-		soil journal writeTransactionJournal: journal.
+		soil journal writeUnitOfWork: journal.
 		journal commitIn: self.
 		checkpointEntry := journal checkpoint: self.
 		"add the journal to the database wide journal so other transaction can access
 		it to resolve older state"
-		soil journal addTransactionJournal: journal.
+		soil journal addUnitOfWork: journal.
 		checkpointLSN := soil journal writeCheckpoint: checkpointEntry.
 		soil settings checkpoint: checkpointLSN ]
 				ensure: [self releaseLocks ] ].

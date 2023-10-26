@@ -74,7 +74,7 @@ SoilJournalFragmentFile >> writeCheckpointEntry: aSoilNewCheckpointEntry [
 ]
 
 { #category : #writing }
-SoilJournalFragmentFile >> writeTransactionJournal: aSoilTransactionJournal [
+SoilJournalFragmentFile >> writeUnitOfWork: aSoilTransactionJournal [
 	aSoilTransactionJournal writeOn: stream.
 	stream flush
 ]
