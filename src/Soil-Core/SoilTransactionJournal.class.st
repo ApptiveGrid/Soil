@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilUnitOfWork,
+	#name : #SoilTransactionJournal,
 	#superclass : #Object,
 	#instVars : [
 		'index',
@@ -9,39 +9,39 @@ Class {
 }
 
 { #category : #'instance creation' }
-SoilUnitOfWork class >> readFrom: aStream [ 
+SoilTransactionJournal class >> readFrom: aStream [ 
 	^ self new 
 		readFrom: aStream;
 		yourself
 ]
 
 { #category : #accessing }
-SoilUnitOfWork class >> soilTransientInstVars [ 
+SoilTransactionJournal class >> soilTransientInstVars [ 
 	^ #( transaction )
 ]
 
 { #category : #visiting }
-SoilUnitOfWork >> acceptSoil: aSoilVisitor [ 
+SoilTransactionJournal >> acceptSoil: aSoilVisitor [ 
 	^ aSoilVisitor visitUnitOfWork: self
 ]
 
 { #category : #adding }
-SoilUnitOfWork >> addEntries: aCollection [ 
+SoilTransactionJournal >> addEntries: aCollection [ 
 	aCollection do: [ :each | self addEntry: each ]
 ]
 
 { #category : #adding }
-SoilUnitOfWork >> addEntry: aJournalEntry [
+SoilTransactionJournal >> addEntry: aJournalEntry [
 	entries add: aJournalEntry 
 ]
 
 { #category : #'as yet unclassified' }
-SoilUnitOfWork >> anyEntrySatisfy: aBlock [
+SoilTransactionJournal >> anyEntrySatisfy: aBlock [
 	^ entries anySatisfy: aBlock
 ]
 
 { #category : #converting }
-SoilUnitOfWork >> asSortedJournal [
+SoilTransactionJournal >> asSortedJournal [
 | first last middle sorted |
 	"Current treatment of new values keeps values in a dictionary loosing order. This 
 	helper method sorts the dictionary keys for index access in a way that the appending
@@ -65,7 +65,7 @@ SoilUnitOfWork >> asSortedJournal [
 ]
 
 { #category : #'as yet unclassified' }
-SoilUnitOfWork >> checkpoint: aTransaction [
+SoilTransactionJournal >> checkpoint: aTransaction [
 	| entry |
 	entry := SoilNewCheckpointEntry new 
 		transactionId: aTransaction writeVersion.
@@ -75,60 +75,60 @@ SoilUnitOfWork >> checkpoint: aTransaction [
 ]
 
 { #category : #'as yet unclassified' }
-SoilUnitOfWork >> checkpointedAt [
+SoilTransactionJournal >> checkpointedAt [
 	^ entries last checkpointedAt 
 ]
 
 { #category : #committing }
-SoilUnitOfWork >> commitIn: aTransaction [ 
+SoilTransactionJournal >> commitIn: aTransaction [ 
 	entries do: [ :each | each commitIn: aTransaction ]
 ]
 
 { #category : #accessing }
-SoilUnitOfWork >> createdAt [
+SoilTransactionJournal >> createdAt [
 	^ entries first createdAt
 ]
 
 { #category : #accessing }
-SoilUnitOfWork >> duration [
+SoilTransactionJournal >> duration [
 	^ (self checkpointedAt - self createdAt) asMilliSeconds  
 ]
 
 { #category : #accessing }
-SoilUnitOfWork >> entries [
+SoilTransactionJournal >> entries [
 	^ entries
 ]
 
 { #category : #accessing }
-SoilUnitOfWork >> entries: aCollection [ 
+SoilTransactionJournal >> entries: aCollection [ 
 	entries := aCollection
 ]
 
 { #category : #accessing }
-SoilUnitOfWork >> entryAt: anInteger [ 
+SoilTransactionJournal >> entryAt: anInteger [ 
 	^ entries at: anInteger 
 ]
 
 { #category : #accessing }
-SoilUnitOfWork >> index [
+SoilTransactionJournal >> index [
 
 	^ index
 ]
 
 { #category : #accessing }
-SoilUnitOfWork >> index: anObject [
+SoilTransactionJournal >> index: anObject [
 
 	index := anObject
 ]
 
 { #category : #initialization }
-SoilUnitOfWork >> initialize [ 
+SoilTransactionJournal >> initialize [ 
 	super initialize.
 	entries := OrderedCollection new
 ]
 
 { #category : #tools }
-SoilUnitOfWork >> inspectionEntries [
+SoilTransactionJournal >> inspectionEntries [
 	<inspectorPresentationOrder: 0 title: 'journal entries'>
 
 	^ SpTablePresenter new
@@ -155,12 +155,12 @@ SoilUnitOfWork >> inspectionEntries [
 ]
 
 { #category : #accessing }
-SoilUnitOfWork >> path: aFileReference [ 
+SoilTransactionJournal >> path: aFileReference [ 
 	self shouldBeImplemented.
 ]
 
 { #category : #printing }
-SoilUnitOfWork >> printOn: aStream [ 
+SoilTransactionJournal >> printOn: aStream [ 
 	super printOn: aStream.
 	aStream 
 		<< ' ' << index printString 
@@ -168,7 +168,7 @@ SoilUnitOfWork >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-SoilUnitOfWork >> readFrom: aStream [ 
+SoilTransactionJournal >> readFrom: aStream [ 
 	| pageCode entry size |
 	index := (aStream next: 8) asInteger.
 	size := (aStream next: 3) asInteger.
@@ -179,22 +179,22 @@ SoilUnitOfWork >> readFrom: aStream [
 ]
 
 { #category : #accessing }
-SoilUnitOfWork >> readVersion [
+SoilTransactionJournal >> readVersion [
 	^ entries first readVersion
 ]
 
 { #category : #accessing }
-SoilUnitOfWork >> size [ 
+SoilTransactionJournal >> size [ 
 	^ entries size
 ]
 
 { #category : #validating }
-SoilUnitOfWork >> validateIn: aSoilTransaction [ 
+SoilTransactionJournal >> validateIn: aSoilTransaction [ 
 	entries do: [ :each | each validateIn: aSoilTransaction ]
 ]
 
 { #category : #writing }
-SoilUnitOfWork >> writeOn: aStream [
+SoilTransactionJournal >> writeOn: aStream [
 	aStream nextPutAll: (index asByteArrayOfSize: 8).
 	"write the size of entries. The size is increased by one for the
 	checkpoint entry that will be written at the end."
@@ -205,6 +205,6 @@ SoilUnitOfWork >> writeOn: aStream [
 ]
 
 { #category : #writing }
-SoilUnitOfWork >> writeVersion [
+SoilTransactionJournal >> writeVersion [
 	^ entries first transactionId
 ]

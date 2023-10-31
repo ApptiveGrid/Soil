@@ -35,7 +35,7 @@ SoilVisitor >> visitJournal: aSoilJournal [
 
 { #category : #visiting }
 SoilVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
-	self visitAll: aSoilJournalFragmentFile unitsOfWork.
+	self visitAll: aSoilJournalFragmentFile fragmentFiles.
 	^ aSoilJournalFragmentFile 
 ]
 

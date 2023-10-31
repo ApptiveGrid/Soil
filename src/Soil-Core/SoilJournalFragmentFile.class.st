@@ -77,7 +77,7 @@ SoilJournalFragmentFile >> inspectionUnitsOfWork [
 	<inspectorPresentationOrder: 0 title: 'units of work'>
 
 	^ SpTablePresenter new
-		items: (self unitsOfWork reversed);
+		items: (self fragmentFiles);
 		addColumn: (SpCompositeTableColumn new
 			title: '#';
 			width: 30;
@@ -136,7 +136,7 @@ SoilJournalFragmentFile >> unitsOfWork [
 	self stream position: self headerSize + 6.
 	unitsOfWork := OrderedCollection new.
 	[ stream atEnd ] whileFalse: [  
-		unitsOfWork add: (SoilUnitOfWork readFrom: stream underlyingStream) ].
+		unitsOfWork add: (SoilTransactionJournal readFrom: stream underlyingStream) ].
 	^ unitsOfWork
 ]
 
@@ -149,7 +149,7 @@ SoilJournalFragmentFile >> writeCheckpointEntry: aSoilNewCheckpointEntry [
 ]
 
 { #category : #writing }
-SoilJournalFragmentFile >> writeUnitOfWork: aSoilUnitOfWork [
+SoilJournalFragmentFile >> writeTransactionJournal: aSoilUnitOfWork [
 	stream setToEnd.
 	aSoilUnitOfWork writeOn: stream.
 	stream flush
