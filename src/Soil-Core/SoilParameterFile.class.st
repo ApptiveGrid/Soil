@@ -20,7 +20,7 @@ SoilParameterFile >> acceptSoil: aSoilVisitor [
 SoilParameterFile >> applicationVersion [
 	^ semaphore critical: [  
 		applicationVersion ifNil: [ 
-			stream position: self headerSize + self databaseFormatVersionSize + self databaseVersionSize.
+			stream position: self applicationVersionPosition.
 			applicationVersion := (stream next: self applicationVersionSize) asInteger ] ]
 ]
 
@@ -28,10 +28,15 @@ SoilParameterFile >> applicationVersion [
 SoilParameterFile >> applicationVersion: anInteger [
 	semaphore critical: [  
 		self stream 
-			position: self headerSize + self databaseFormatVersionSize + self databaseVersionSize;
+			position: self applicationVersionPosition;
 			nextPutAll: (anInteger asByteArrayOfSize: self applicationVersionSize);
 			flush.
 		applicationVersion := anInteger ]
+]
+
+{ #category : #accessing }
+SoilParameterFile >> applicationVersionPosition [
+	^ self databaseVersionPosition + self databaseVersionSize
 ]
 
 { #category : #accessing }
@@ -44,9 +49,36 @@ SoilParameterFile >> basicDatabaseVersion: anInteger [
 	semaphore critical: [
 		currentDatabaseVersion := anInteger.  
 		self stream 
-			position: self headerSize + self databaseFormatVersionSize;
+			position: self databaseVersionPosition;
 			nextPutAll: (anInteger asByteArrayOfSize: self databaseVersionSize);
 			flush ]
+]
+
+{ #category : #accessing }
+SoilParameterFile >> checkpoint [
+	^ semaphore critical: [  
+		self stream 
+			position: self checkpointPosition.
+		(stream next: self checkpointPositionSize) asInteger asLogSequenceNumber ]
+]
+
+{ #category : #accessing }
+SoilParameterFile >> checkpoint: anInteger [
+	semaphore critical: [  
+		self stream 
+			position: self checkpointPosition;
+			nextPutAll: (anInteger value asByteArrayOfSize: self checkpointPositionSize);
+			flush ]
+]
+
+{ #category : #accessing }
+SoilParameterFile >> checkpointPosition [
+	^ self applicationVersionPosition + self applicationVersionSize
+]
+
+{ #category : #accessing }
+SoilParameterFile >> checkpointPositionSize [
+	^ 8
 ]
 
 { #category : #accessing }
@@ -75,7 +107,7 @@ SoilParameterFile >> databaseFormatVersionSize [
 { #category : #accessing }
 SoilParameterFile >> databaseVersion [
 	^ semaphore critical: [  
-		stream position: self headerSize + self databaseFormatVersionSize.
+		stream position: self databaseVersionPosition.
 		(stream next: self databaseVersionSize) asInteger ]
 ]
 
@@ -86,6 +118,11 @@ SoilParameterFile >> databaseVersion: anInteger [
 	(self databaseVersion < anInteger) ifFalse: [ 
 		SoilInvalidDatabaseVersion signal: 'database version on disk is larger than in memory' ].
 	self basicDatabaseVersion: anInteger
+]
+
+{ #category : #accessing }
+SoilParameterFile >> databaseVersionPosition [
+	^ self headerSize + self databaseFormatVersionSize
 ]
 
 { #category : #accessing }
@@ -139,7 +176,7 @@ SoilParameterFile >> open [
 
 { #category : #accessing }
 SoilParameterFile >> parameterNames [
-	^ #( databaseFormatVersion databaseVersion applicationVersion ) 
+	^ #( databaseFormatVersion databaseVersion applicationVersion checkpoint ) 
 ]
 
 { #category : #accessing }

@@ -18,6 +18,11 @@ SoilLockableStream class >> path: aStringOrFileReference [
 		yourself
 ]
 
+{ #category : #accessing }
+SoilLockableStream >> atEnd [
+	^ fileStream atEnd
+]
+
 { #category : #'open/close' }
 SoilLockableStream >> close [
 	self releaseAllLocks.
@@ -142,6 +147,11 @@ SoilLockableStream >> releaseAllLocks [
 { #category : #accessing }
 SoilLockableStream >> size [ 
 	^ fileStream size
+]
+
+{ #category : #'as yet unclassified' }
+SoilLockableStream >> underlyingStream [ 
+	^ fileStream 
 ]
 
 { #category : #locking }

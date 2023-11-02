@@ -3,11 +3,17 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'index',
-		'stream',
 		'entries'
 	],
 	#category : #'Soil-Core-Model'
 }
+
+{ #category : #'instance creation' }
+SoilTransactionJournal class >> readFrom: aStream [ 
+	^ self new 
+		readFrom: aStream;
+		yourself
+]
 
 { #category : #accessing }
 SoilTransactionJournal class >> soilTransientInstVars [ 
@@ -16,7 +22,7 @@ SoilTransactionJournal class >> soilTransientInstVars [
 
 { #category : #visiting }
 SoilTransactionJournal >> acceptSoil: aSoilVisitor [ 
-	^ aSoilVisitor visitTransactionJournal: self
+	^ aSoilVisitor visitUnitOfWork: self
 ]
 
 { #category : #adding }
@@ -64,9 +70,8 @@ SoilTransactionJournal >> checkpoint: aTransaction [
 	entry := SoilNewCheckpointEntry new 
 		transactionId: aTransaction writeVersion.
 	self addEntry: entry.
-	entry writeOn: stream.
-	stream flush.
 	entry commitIn: aTransaction.
+	^ entry
 ]
 
 { #category : #'as yet unclassified' }
@@ -74,30 +79,9 @@ SoilTransactionJournal >> checkpointedAt [
 	^ entries last checkpointedAt 
 ]
 
-{ #category : #'open/close' }
-SoilTransactionJournal >> close [ 
-	stream ifNotNil: [ stream close ]
-]
-
 { #category : #committing }
 SoilTransactionJournal >> commitIn: aTransaction [ 
 	entries do: [ :each | each commitIn: aTransaction ]
-]
-
-{ #category : #'instance creation' }
-SoilTransactionJournal >> create [
-	stream := self path 
-		deleteIfAbsent: []; 
-		ensureCreateFile;
-		binaryWriteStream 
-]
-
-{ #category : #'instance creation' }
-SoilTransactionJournal >> createOn: aFileReference [
-	stream := aFileReference 
-		deleteIfAbsent: []; 
-		ensureCreateFile;
-		binaryWriteStream 
 ]
 
 { #category : #accessing }
@@ -170,11 +154,6 @@ SoilTransactionJournal >> inspectionEntries [
 			addColumn: (SpStringTableColumn evaluated: [:each | each oldValue ]))
 ]
 
-{ #category : #'instance creation' }
-SoilTransactionJournal >> on: aFileReference [
-	stream := aFileReference binaryReadStream 
-]
-
 { #category : #accessing }
 SoilTransactionJournal >> path: aFileReference [ 
 	self shouldBeImplemented.
@@ -189,12 +168,14 @@ SoilTransactionJournal >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-SoilTransactionJournal >> readAll [
-	| pageCode entry |
-	[ stream atEnd ] whileFalse: [ 
-		pageCode := stream next asInteger.
+SoilTransactionJournal >> readFrom: aStream [ 
+	| pageCode entry size |
+	index := (aStream next: 8) asInteger.
+	size := (aStream next: 3) asInteger.
+	(1 to: size) do: [ :n | 
+		pageCode := aStream next asInteger.
 		entry := (SoilJournalEntry withTypeCode: pageCode) new.
-		entries add: (entry readFrom: stream) ].
+		entries add: (entry readFrom: aStream) ]
 ]
 
 { #category : #accessing }
@@ -213,9 +194,13 @@ SoilTransactionJournal >> validateIn: aSoilTransaction [
 ]
 
 { #category : #writing }
-SoilTransactionJournal >> write [ 
-	entries do: [ :each | each writeOn: stream ].
-	stream 
+SoilTransactionJournal >> writeOn: aStream [
+	aStream nextPutAll: (index asByteArrayOfSize: 8).
+	"write the size of entries. The size is increased by one for the
+	checkpoint entry that will be written at the end."
+	aStream nextPutAll: ((entries size + 1) asByteArrayOfSize: 3).
+	entries do: [ :each | each writeOn: aStream ].
+	aStream 
 		flush
 ]
 

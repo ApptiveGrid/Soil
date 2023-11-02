@@ -10,7 +10,7 @@ Class {
 
 { #category : #helper }
 SoilJournalTest class >> classUnderTest [ 
-	^ SoilJournal 
+	^ SoilDatabaseJournal 
 ]
 
 { #category : #'as yet unclassified' }
