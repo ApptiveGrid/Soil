@@ -66,13 +66,7 @@ SoilJournalFragmentFile >> filename [
 SoilJournalFragmentFile >> firstTransactionId [
 	self stream position: self headerSize + 6.
 
-	^ (stream next: 8) asInteger
-]
-
-{ #category : #'as yet unclassified' }
-SoilJournalFragmentFile >> firstTransactionJournal [
-	self stream position: self headerSize + 6.
-	^ SoilTransactionJournal readFrom: stream underlyingStream
+	^ SoilJournalEntry readTransactionIdFrom: stream
 ]
 
 { #category : #testing }
