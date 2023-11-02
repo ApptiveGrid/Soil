@@ -41,7 +41,7 @@ SoilJournalEntry >> container [
 ]
 
 { #category : #testing }
-SoilJournalEntry >> isEnd [
+SoilJournalEntry >> isEndEntry [
 	^ false
 ]
 

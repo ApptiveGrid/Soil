@@ -150,7 +150,7 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 { #category : #accessing }
 SoilTransaction >> buildJournal [
 	journal := soil journal newTransactionJournalForId: writeVersion.
-	journal addEntry: (SoilNewTransactionEntry new
+	journal addEntry: (SoilBeginTransactionEntry new
 		readVersion: readVersion; 
 		transactionId: writeVersion;
 		createdAt: createdAt).

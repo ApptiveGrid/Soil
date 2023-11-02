@@ -50,9 +50,9 @@ SoilTransactionJournal >> asSortedJournal [
 	last := OrderedCollection new.
 	middle := OrderedCollection new.
 	entries do: [ :entry |
-		({ SoilNewTransactionEntry . SoilNewBehaviorEntry . SoilNewObjectEntry . SoilNewObjectVersionEntry . SoilNewSkipListIndexEntry . SoilNewBTreeListIndexEntry } includes:  entry class) ifTrue: [ 
+		({ SoilBeginTransactionEntry . SoilNewBehaviorEntry . SoilNewObjectEntry . SoilNewObjectVersionEntry . SoilNewSkipListIndexEntry . SoilNewBTreeListIndexEntry } includes:  entry class) ifTrue: [ 
 			first add: entry ]  .
-		({ SoilUpdateDatabaseVersion . SoilUpdateSegmentIndexEntry . SoilNewCheckpointEntry } includes:  entry class) ifTrue: [ 
+		({ SoilUpdateDatabaseVersion . SoilUpdateSegmentIndexEntry . SoilEndTransactionEntry } includes:  entry class) ifTrue: [ 
 			last add: entry ].
 		({ SoilAddKeyEntry  . SoilRemoveKeyEntry } includes:  entry class) ifTrue: [ 
 			middle add: entry ] ].
@@ -67,7 +67,7 @@ SoilTransactionJournal >> asSortedJournal [
 { #category : #'as yet unclassified' }
 SoilTransactionJournal >> checkpoint: aTransaction [
 	| entry |
-	entry := SoilNewCheckpointEntry new 
+	entry := SoilEndTransactionEntry new 
 		transactionId: aTransaction writeVersion.
 	self addEntry: entry.
 	entry commitIn: aTransaction.
@@ -178,7 +178,7 @@ SoilTransactionJournal >> readFrom: aStream [
 					ifFalse: [ Error signal: 'transaction changed without checkpoint record' ] ]
 			ifNil: [ index := entry transactionId ].
 		entries add: entry.
-		entry isEnd ifTrue: [ ^ self ] ]
+		entry isEndEntry ifTrue: [ ^ self ] ]
 ]
 
 { #category : #accessing }
