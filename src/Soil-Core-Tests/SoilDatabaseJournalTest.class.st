@@ -63,7 +63,7 @@ SoilDatabaseJournalTest >> tearDown [
 
 { #category : #tests }
 SoilDatabaseJournalTest >> testReplicationToEmptyDatabase [
-	| copy tx |
+	| tx |
 	self fillDatabase. 
 	copy := (Soil path: 'soil-replay')
 		destroy;

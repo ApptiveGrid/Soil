@@ -150,7 +150,7 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 { #category : #accessing }
 SoilTransaction >> buildJournal [
 	journal := soil journal newTransactionJournalForId: writeVersion.
-	journal addEntry: (SoilNewTransactionEntry new
+	journal addEntry: (SoilBeginTransactionEntry new
 		readVersion: readVersion; 
 		transactionId: writeVersion;
 		createdAt: createdAt).
@@ -221,7 +221,7 @@ SoilTransaction >> checkpoint [
 		execute the journal on the database"
 		journal := self buildJournal.
 		journal validateIn: self.
-		soil journal writeIncompleteTransactionJournal: journal.
+		soil journal writeTransactionJournal: journal.
 		journal commitIn: self.
 		checkpointEntry := journal checkpoint: self.
 		"add the journal to the database wide journal so other transaction can access

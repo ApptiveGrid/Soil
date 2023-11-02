@@ -50,9 +50,9 @@ SoilTransactionJournal >> asSortedJournal [
 	last := OrderedCollection new.
 	middle := OrderedCollection new.
 	entries do: [ :entry |
-		({ SoilNewTransactionEntry . SoilNewBehaviorEntry . SoilNewObjectEntry . SoilNewObjectVersionEntry . SoilNewSkipListIndexEntry . SoilNewBTreeListIndexEntry } includes:  entry class) ifTrue: [ 
+		({ SoilBeginTransactionEntry . SoilNewBehaviorEntry . SoilNewObjectEntry . SoilNewObjectVersionEntry . SoilNewSkipListIndexEntry . SoilNewBTreeListIndexEntry } includes:  entry class) ifTrue: [ 
 			first add: entry ]  .
-		({ SoilUpdateDatabaseVersion . SoilUpdateSegmentIndexEntry . SoilNewCheckpointEntry } includes:  entry class) ifTrue: [ 
+		({ SoilUpdateDatabaseVersion . SoilUpdateSegmentIndexEntry . SoilEndTransactionEntry } includes:  entry class) ifTrue: [ 
 			last add: entry ].
 		({ SoilAddKeyEntry  . SoilRemoveKeyEntry } includes:  entry class) ifTrue: [ 
 			middle add: entry ] ].
@@ -67,7 +67,7 @@ SoilTransactionJournal >> asSortedJournal [
 { #category : #'as yet unclassified' }
 SoilTransactionJournal >> checkpoint: aTransaction [
 	| entry |
-	entry := SoilNewCheckpointEntry new 
+	entry := SoilEndTransactionEntry new 
 		transactionId: aTransaction writeVersion.
 	self addEntry: entry.
 	entry commitIn: aTransaction.
@@ -169,13 +169,16 @@ SoilTransactionJournal >> printOn: aStream [
 
 { #category : #'as yet unclassified' }
 SoilTransactionJournal >> readFrom: aStream [ 
-	| pageCode entry size |
-	index := (aStream next: 8) asInteger.
-	size := (aStream next: 3) asInteger.
-	(1 to: size) do: [ :n | 
-		pageCode := aStream next asInteger.
-		entry := (SoilJournalEntry withTypeCode: pageCode) new.
-		entries add: (entry readFrom: aStream) ]
+	| entry |
+	[ aStream atEnd ] whileFalse: [
+		entry := SoilJournalEntry readFrom: aStream.
+		index 
+			ifNotNil: [ 
+				(index = entry transactionId) 
+					ifFalse: [ Error signal: 'transaction changed without checkpoint record' ] ]
+			ifNil: [ index := entry transactionId ].
+		entries add: entry.
+		entry isEndEntry ifTrue: [ ^ self ] ]
 ]
 
 { #category : #accessing }
@@ -194,20 +197,7 @@ SoilTransactionJournal >> validateIn: aSoilTransaction [
 ]
 
 { #category : #writing }
-SoilTransactionJournal >> writeIncompleteOn: aStream [
-	aStream nextPutAll: (index asByteArrayOfSize: 8).
-	"write the size of entries. The size is increased by one for the
-	checkpoint entry that will be written at the end."
-	aStream nextPutAll: ((entries size + 1) asByteArrayOfSize: 3).
-	entries do: [ :each | each writeOn: aStream ].
-	aStream 
-		flush
-]
-
-{ #category : #writing }
 SoilTransactionJournal >> writeOn: aStream [
-	aStream nextPutAll: (index asByteArrayOfSize: 8).
-	aStream nextPutAll: (entries size asByteArrayOfSize: 3).
 	entries do: [ :each | each writeOn: aStream ].
 	aStream 
 		flush

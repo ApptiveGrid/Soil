@@ -165,14 +165,6 @@ SoilPersistentDatabaseJournal >> writeCheckpointEntry: aSoilNewCheckpointEntry [
 ]
 
 { #category : #writing }
-SoilPersistentDatabaseJournal >> writeIncompleteTransactionJournal: aSoilTransactionJournal [ 
-	^ semaphore critical: [  
-		self verifyNextJournalIndex: aSoilTransactionJournal index.	
-		self fragmentFileForWriting writeIncompleteTransactionJournal: aSoilTransactionJournal ]
-
-]
-
-{ #category : #writing }
 SoilPersistentDatabaseJournal >> writeTransactionJournal: aSoilTransactionJournal [ 
 	^ semaphore critical: [  
 		self verifyNextJournalIndex: aSoilTransactionJournal index.	

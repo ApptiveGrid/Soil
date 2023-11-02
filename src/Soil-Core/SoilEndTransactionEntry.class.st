@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilNewCheckpointEntry,
+	#name : #SoilEndTransactionEntry,
 	#superclass : #SoilJournalEntry,
 	#instVars : [
 		'checkpointedAt'
@@ -8,22 +8,22 @@ Class {
 }
 
 { #category : #'accessing - defaults' }
-SoilNewCheckpointEntry class >> journalTypeCode [ 
+SoilEndTransactionEntry class >> journalTypeCode [ 
 	^ 9
 ]
 
 { #category : #accessing }
-SoilNewCheckpointEntry >> address [
+SoilEndTransactionEntry >> address [
 	^ ''
 ]
 
 { #category : #accessing }
-SoilNewCheckpointEntry >> checkpointedAt [
+SoilEndTransactionEntry >> checkpointedAt [
 	^ checkpointedAt
 ]
 
 { #category : #committing }
-SoilNewCheckpointEntry >> commitIn: aTransaction [
+SoilEndTransactionEntry >> commitIn: aTransaction [
 	"make sure behavior registry gets flushed at the end of 
 	a transaction"
 	aTransaction behaviorRegistry flush.
@@ -34,34 +34,39 @@ SoilNewCheckpointEntry >> commitIn: aTransaction [
 ]
 
 { #category : #accessing }
-SoilNewCheckpointEntry >> container [
+SoilEndTransactionEntry >> container [
 	^ #soil
 ]
 
 { #category : #initialization }
-SoilNewCheckpointEntry >> initialize [ 
+SoilEndTransactionEntry >> initialize [ 
 	super initialize.
 	checkpointedAt := DateAndTime now
 ]
 
+{ #category : #testing }
+SoilEndTransactionEntry >> isEndEntry [
+	^ true
+]
+
 { #category : #accessing }
-SoilNewCheckpointEntry >> objectIds [
+SoilEndTransactionEntry >> objectIds [
 	^ {  }
 ]
 
 { #category : #'instance creation' }
-SoilNewCheckpointEntry >> readFrom: aStream [ 
+SoilEndTransactionEntry >> readFrom: aStream [ 
 	super readFrom: aStream.
 	checkpointedAt := (DateAndTime epoch + ((aStream nextLengthEncodedInteger) asInteger / 1000) milliSeconds) asLocal
 ]
 
 { #category : #accessing }
-SoilNewCheckpointEntry >> value [ 
+SoilEndTransactionEntry >> value [ 
 	^ checkpointedAt 
 ]
 
 { #category : #writing }
-SoilNewCheckpointEntry >> writeOn: aStream [ 
+SoilEndTransactionEntry >> writeOn: aStream [ 
 	| timestamp |
 	super writeOn: aStream.
 	

@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilNewTransactionEntry,
+	#name : #SoilBeginTransactionEntry,
 	#superclass : #SoilJournalEntry,
 	#instVars : [
 		'createdAt',
@@ -9,69 +9,69 @@ Class {
 }
 
 { #category : #'accessing - defaults' }
-SoilNewTransactionEntry class >> journalTypeCode [ 
+SoilBeginTransactionEntry class >> journalTypeCode [ 
 	^ 8
 ]
 
 { #category : #accessing }
-SoilNewTransactionEntry >> address [
+SoilBeginTransactionEntry >> address [
 	^ ''
 ]
 
 { #category : #committing }
-SoilNewTransactionEntry >> commitIn: aTransaction [ 
+SoilBeginTransactionEntry >> commitIn: aTransaction [ 
 ]
 
 { #category : #accessing }
-SoilNewTransactionEntry >> container [
+SoilBeginTransactionEntry >> container [
 	^ #soil
 ]
 
 { #category : #accessing }
-SoilNewTransactionEntry >> createdAt [
+SoilBeginTransactionEntry >> createdAt [
 	^ createdAt
 ]
 
 { #category : #accessing }
-SoilNewTransactionEntry >> createdAt: aDateAndTime [ 
+SoilBeginTransactionEntry >> createdAt: aDateAndTime [ 
 	createdAt := aDateAndTime 
 ]
 
 { #category : #accessing }
-SoilNewTransactionEntry >> objectId [
+SoilBeginTransactionEntry >> objectId [
 	^ nil
 ]
 
 { #category : #accessing }
-SoilNewTransactionEntry >> objectIds [
+SoilBeginTransactionEntry >> objectIds [
 	^ {  }
 ]
 
 { #category : #'instance creation' }
-SoilNewTransactionEntry >> readFrom: aStream [ 
+SoilBeginTransactionEntry >> readFrom: aStream [ 
 	super readFrom: aStream.
 	createdAt := (DateAndTime epoch + ((aStream nextLengthEncodedInteger) / 1000) milliSeconds) asLocal
 ]
 
 { #category : #accessing }
-SoilNewTransactionEntry >> readVersion [
+SoilBeginTransactionEntry >> readVersion [
 
 	^ readVersion
 ]
 
 { #category : #accessing }
-SoilNewTransactionEntry >> readVersion: anObject [
+SoilBeginTransactionEntry >> readVersion: anObject [
 
 	readVersion := anObject
 ]
 
 { #category : #accessing }
-SoilNewTransactionEntry >> value [ 
+SoilBeginTransactionEntry >> value [ 
 	^ createdAt 
 ]
 
 { #category : #writing }
-SoilNewTransactionEntry >> writeOn: aStream [ 
+SoilBeginTransactionEntry >> writeOn: aStream [ 
 	| timestamp |
 	super writeOn: aStream.
 	
