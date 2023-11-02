@@ -23,19 +23,19 @@ SoilVisitor >> visitAll: aCollection [
 ]
 
 { #category : #visiting }
-SoilVisitor >> visitIndexManager: aSoilIndexManager [ 
-	^ aSoilIndexManager 
-]
-
-{ #category : #visiting }
-SoilVisitor >> visitJournal: aSoilJournal [ 
+SoilVisitor >> visitDatabaseJournal: aSoilJournal [ 
 	self visitAll: aSoilJournal fragmentFiles.
 	^ aSoilJournal 
 ]
 
 { #category : #visiting }
+SoilVisitor >> visitIndexManager: aSoilIndexManager [ 
+	^ aSoilIndexManager 
+]
+
+{ #category : #visiting }
 SoilVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
-	self visitAll: aSoilJournalFragmentFile fragmentFiles.
+	self visitAll: aSoilJournalFragmentFile transactionJournals.
 	^ aSoilJournalFragmentFile 
 ]
 

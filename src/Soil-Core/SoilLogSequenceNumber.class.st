@@ -55,7 +55,7 @@ SoilLogSequenceNumber >> nextFilename [
 SoilLogSequenceNumber >> printOn: aStream [ 
 	aStream 
 		<< 'LSN: ' 
-		<< self filename
+		<< self fileNumber asString
 		<< '-'
 		<< self hexOffset 
 ]
