@@ -88,7 +88,7 @@ SoilJournalFragmentFile >> inspectionTransactionJournals [
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 
 	^ SpTablePresenter new
-		items: (self fragmentFiles);
+		items: (self transactionJournals);
 		addColumn: (SpCompositeTableColumn new
 			title: '#';
 			width: 30;

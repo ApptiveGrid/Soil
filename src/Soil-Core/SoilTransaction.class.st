@@ -620,6 +620,8 @@ SoilTransaction >> serializeObjects [
 SoilTransaction >> setWriteVersion: anInteger [ 
 	"This is only used for replaying a journal and such 
 	where a transaction does not get set up properly"
+	(anInteger > readVersion) ifFalse: [ 
+		SoilInvalidWriteVersion signal: 'write version ', anInteger asString , ' is not greater than read version ', readVersion asString ]. 
 	writeVersion := anInteger 
 ]
 
