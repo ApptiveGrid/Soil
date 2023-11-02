@@ -75,3 +75,16 @@ SoilDatabaseJournal >> transactionJournals: anObject [
 
 	transactionJournals := anObject
 ]
+
+{ #category : #adding }
+SoilDatabaseJournal >> verifyNextJournalIndex: index [ 
+	"transaction journals have a strict sequence in the same way the
+	databaseVersion has. So we check that this assumption is kept"
+	transactionJournals isEmpty 
+		ifTrue: [ ^ self ]
+		ifFalse: [ 
+			((self lastTransactionJournal index + 1) = index)
+				ifFalse: [ 
+					Transcript show: ('journal index is not valid: current last index is ', self lastTransactionJournal index printString, ', no index to be added is ', index printString); cr ] ]
+		
+]
