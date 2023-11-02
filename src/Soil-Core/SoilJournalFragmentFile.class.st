@@ -64,7 +64,9 @@ SoilJournalFragmentFile >> filename [
 
 { #category : #accessing }
 SoilJournalFragmentFile >> firstTransactionId [
-	^ self firstTransactionJournal index
+	self stream position: self headerSize + 6.
+
+	^ (stream next: 8) asInteger
 ]
 
 { #category : #'as yet unclassified' }
@@ -154,13 +156,6 @@ SoilJournalFragmentFile >> writeCheckpointEntry: aSoilNewCheckpointEntry [
 	aSoilNewCheckpointEntry writeOn: stream.
 	stream flush
 
-]
-
-{ #category : #writing }
-SoilJournalFragmentFile >> writeIncompleteTransactionJournal: aTransactionJournal [
-	stream setToEnd.
-	aTransactionJournal writeIncompleteOn: stream.
-	stream flush
 ]
 
 { #category : #writing }

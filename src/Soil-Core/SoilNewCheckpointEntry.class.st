@@ -44,6 +44,11 @@ SoilNewCheckpointEntry >> initialize [
 	checkpointedAt := DateAndTime now
 ]
 
+{ #category : #testing }
+SoilNewCheckpointEntry >> isEnd [
+	^ true
+]
+
 { #category : #accessing }
 SoilNewCheckpointEntry >> objectIds [
 	^ {  }

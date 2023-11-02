@@ -221,7 +221,7 @@ SoilTransaction >> checkpoint [
 		execute the journal on the database"
 		journal := self buildJournal.
 		journal validateIn: self.
-		soil journal writeIncompleteTransactionJournal: journal.
+		soil journal writeTransactionJournal: journal.
 		journal commitIn: self.
 		checkpointEntry := journal checkpoint: self.
 		"add the journal to the database wide journal so other transaction can access
