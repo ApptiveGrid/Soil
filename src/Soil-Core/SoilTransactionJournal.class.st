@@ -194,11 +194,20 @@ SoilTransactionJournal >> validateIn: aSoilTransaction [
 ]
 
 { #category : #writing }
-SoilTransactionJournal >> writeOn: aStream [
+SoilTransactionJournal >> writeIncompleteOn: aStream [
 	aStream nextPutAll: (index asByteArrayOfSize: 8).
 	"write the size of entries. The size is increased by one for the
 	checkpoint entry that will be written at the end."
 	aStream nextPutAll: ((entries size + 1) asByteArrayOfSize: 3).
+	entries do: [ :each | each writeOn: aStream ].
+	aStream 
+		flush
+]
+
+{ #category : #writing }
+SoilTransactionJournal >> writeOn: aStream [
+	aStream nextPutAll: (index asByteArrayOfSize: 8).
+	aStream nextPutAll: (entries size asByteArrayOfSize: 3).
 	entries do: [ :each | each writeOn: aStream ].
 	aStream 
 		flush

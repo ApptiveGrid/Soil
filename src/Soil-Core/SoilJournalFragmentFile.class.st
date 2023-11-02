@@ -60,6 +60,17 @@ SoilJournalFragmentFile >> filename [
 	^ self path basename
 ]
 
+{ #category : #accessing }
+SoilJournalFragmentFile >> firstTransactionId [
+	^ self firstTransactionJournal index
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournalFragmentFile >> firstTransactionJournal [
+	self stream position: self headerSize + 6.
+	^ SoilTransactionJournal readFrom: stream underlyingStream
+]
+
 { #category : #testing }
 SoilJournalFragmentFile >> hasSpace [
 	"a fragment file when writing to it must be smaller be with a 
@@ -73,8 +84,8 @@ SoilJournalFragmentFile >> initializeStart [
 ]
 
 { #category : #'as yet unclassified' }
-SoilJournalFragmentFile >> inspectionUnitsOfWork [
-	<inspectorPresentationOrder: 0 title: 'units of work'>
+SoilJournalFragmentFile >> inspectionTransactionJournals [
+	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 
 	^ SpTablePresenter new
 		items: (self fragmentFiles);
@@ -131,13 +142,13 @@ SoilJournalFragmentFile >> soil [
 ]
 
 { #category : #'as yet unclassified' }
-SoilJournalFragmentFile >> unitsOfWork [
-	| unitsOfWork |
+SoilJournalFragmentFile >> transactionJournals [
+	| transactionJournals |
 	self stream position: self headerSize + 6.
-	unitsOfWork := OrderedCollection new.
+	transactionJournals := OrderedCollection new.
 	[ stream atEnd ] whileFalse: [  
-		unitsOfWork add: (SoilTransactionJournal readFrom: stream underlyingStream) ].
-	^ unitsOfWork
+		transactionJournals add: (SoilTransactionJournal readFrom: stream underlyingStream) ].
+	^ transactionJournals
 ]
 
 { #category : #writing }
@@ -149,8 +160,15 @@ SoilJournalFragmentFile >> writeCheckpointEntry: aSoilNewCheckpointEntry [
 ]
 
 { #category : #writing }
-SoilJournalFragmentFile >> writeTransactionJournal: aSoilUnitOfWork [
+SoilJournalFragmentFile >> writeIncompleteTransactionJournal: aTransactionJournal [
 	stream setToEnd.
-	aSoilUnitOfWork writeOn: stream.
+	aTransactionJournal writeIncompleteOn: stream.
+	stream flush
+]
+
+{ #category : #writing }
+SoilJournalFragmentFile >> writeTransactionJournal: aTransactionJournal [
+	stream setToEnd.
+	aTransactionJournal writeOn: stream.
 	stream flush
 ]

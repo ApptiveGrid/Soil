@@ -221,7 +221,7 @@ SoilTransaction >> checkpoint [
 		execute the journal on the database"
 		journal := self buildJournal.
 		journal validateIn: self.
-		soil journal writeTransactionJournal: journal.
+		soil journal writeIncompleteTransactionJournal: journal.
 		journal commitIn: self.
 		checkpointEntry := journal checkpoint: self.
 		"add the journal to the database wide journal so other transaction can access
@@ -374,7 +374,7 @@ SoilTransaction >> journalEntriesFor: key inIndex: aSoilIndex startingAt: anInte
 	entries := OrderedCollection new.
 	transactionId := anInteger.
 	[ transactionId > readVersion ] whileTrue: [  
-		journal := (soil journal at: transactionId).
+		journal := (soil journal transactionJournalAt: transactionId).
 		journal entries do: [ :each | 
 			((each class = SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
 				(each key = key) ifTrue: [ 

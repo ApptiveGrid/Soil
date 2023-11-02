@@ -37,11 +37,6 @@ SoilObjectFile >> initialize [
 	mutex := Mutex new
 ]
 
-{ #category : #initialization }
-SoilObjectFile >> initializeStart [
-
-]
-
 { #category : #accessing }
 SoilObjectFile >> path [
 	^ segment path / #objects
