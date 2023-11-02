@@ -52,7 +52,9 @@ SoilJournalFragmentFile >> createdSize [
 
 { #category : #'as yet unclassified' }
 SoilJournalFragmentFile >> currentLogSequenceNumber [ 
-	^ SoilLogSequenceNumber fileNumber: (ByteArray readHexFrom: path pathSegments last) asInteger offset: stream position 
+	^ SoilLogSequenceNumber 
+		fileNumber: (ByteArray readHexFrom: path pathSegments last) asInteger 
+		offset: stream position 
 ]
 
 { #category : #accessing }
@@ -134,11 +136,6 @@ SoilJournalFragmentFile >> printOn: aStream [
 	aStream 
 		<< 'journal segment file: '
 		<< path asString
-]
-
-{ #category : #accessing }
-SoilJournalFragmentFile >> soil [ 
-	self halt
 ]
 
 { #category : #'as yet unclassified' }

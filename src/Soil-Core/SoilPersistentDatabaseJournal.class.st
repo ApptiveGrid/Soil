@@ -148,12 +148,13 @@ SoilPersistentDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock
 SoilPersistentDatabaseJournal >> verifyNextJournalIndex: index [ 
 	"transaction journals have a strict sequence in the same way the
 	databaseVersion has. So we check that this assumption is kept"
-	"transactionJournals 
-		ifNotEmpty: [ 
+	transactionJournals isEmpty 
+		ifTrue: [ ^ self ]
+		ifFalse: [ 
 			((self lastTransactionJournal index + 1) = index)
 				ifFalse: [ 
 					Transcript show: ('journal index is not valid: current last index is ', self lastTransactionJournal index printString, ', no index to be added is ', index printString); cr ] ]
-		ifEmpty: [ ^ self ]"
+		
 ]
 
 { #category : #writing }
@@ -164,17 +165,17 @@ SoilPersistentDatabaseJournal >> writeCheckpointEntry: aSoilNewCheckpointEntry [
 ]
 
 { #category : #writing }
-SoilPersistentDatabaseJournal >> writeIncompleteTransactionJournal: aSoilUnitOfWork [ 
+SoilPersistentDatabaseJournal >> writeIncompleteTransactionJournal: aSoilTransactionJournal [ 
 	^ semaphore critical: [  
-		self verifyNextJournalIndex: aSoilUnitOfWork index.	
-		self fragmentFileForWriting writeIncompleteTransactionJournal: aSoilUnitOfWork ]
+		self verifyNextJournalIndex: aSoilTransactionJournal index.	
+		self fragmentFileForWriting writeIncompleteTransactionJournal: aSoilTransactionJournal ]
 
 ]
 
 { #category : #writing }
-SoilPersistentDatabaseJournal >> writeTransactionJournal: aSoilUnitOfWork [ 
+SoilPersistentDatabaseJournal >> writeTransactionJournal: aSoilTransactionJournal [ 
 	^ semaphore critical: [  
-		self verifyNextJournalIndex: aSoilUnitOfWork index.	
-		self fragmentFileForWriting writeTransactionJournal: aSoilUnitOfWork ]
+		self verifyNextJournalIndex: aSoilTransactionJournal index.	
+		self fragmentFileForWriting writeTransactionJournal: aSoilTransactionJournal ]
 
 ]
