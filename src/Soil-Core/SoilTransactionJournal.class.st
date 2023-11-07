@@ -52,7 +52,7 @@ SoilTransactionJournal >> asSortedJournal [
 	entries do: [ :entry |
 		({ SoilBeginTransactionEntry . SoilNewBehaviorEntry . SoilNewObjectEntry . SoilNewObjectVersionEntry . SoilNewSkipListIndexEntry . SoilNewBTreeListIndexEntry } includes:  entry class) ifTrue: [ 
 			first add: entry ]  .
-		({ SoilUpdateDatabaseVersion . SoilUpdateSegmentIndexEntry . SoilEndTransactionEntry } includes:  entry class) ifTrue: [ 
+		({ SoilUpdateDatabaseVersion . SoilUpdateSegmentIndexEntry . SoilCommitTransactionEntry } includes:  entry class) ifTrue: [ 
 			last add: entry ].
 		({ SoilAddKeyEntry  . SoilRemoveKeyEntry } includes:  entry class) ifTrue: [ 
 			middle add: entry ] ].
@@ -67,21 +67,20 @@ SoilTransactionJournal >> asSortedJournal [
 { #category : #'as yet unclassified' }
 SoilTransactionJournal >> checkpoint: aTransaction [
 	| entry |
-	entry := SoilEndTransactionEntry new 
-		transactionId: aTransaction writeVersion.
-	self addEntry: entry.
+	entry := SoilCheckpointEntry new.
 	entry commitIn: aTransaction.
+	aTransaction soil journal writeCheckpointEntry: entry.
 	^ entry
-]
-
-{ #category : #'as yet unclassified' }
-SoilTransactionJournal >> checkpointedAt [
-	^ entries last checkpointedAt 
 ]
 
 { #category : #committing }
 SoilTransactionJournal >> commitIn: aTransaction [ 
 	entries do: [ :each | each commitIn: aTransaction ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransactionJournal >> committedAt [
+	^ entries last committedAt 
 ]
 
 { #category : #accessing }
@@ -91,7 +90,7 @@ SoilTransactionJournal >> createdAt [
 
 { #category : #accessing }
 SoilTransactionJournal >> duration [
-	^ (self checkpointedAt - self createdAt) asMilliSeconds  
+	^ (self committedAt - self createdAt) asMilliSeconds  
 ]
 
 { #category : #accessing }
@@ -178,7 +177,7 @@ SoilTransactionJournal >> readFrom: aStream [
 					ifFalse: [ Error signal: 'transaction changed without checkpoint record' ] ]
 			ifNil: [ index := entry transactionId ].
 		entries add: entry.
-		entry isEndEntry ifTrue: [ ^ self ] ]
+		entry isCommitEntry ifTrue: [ ^ self ] ]
 ]
 
 { #category : #accessing }
