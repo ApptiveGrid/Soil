@@ -19,10 +19,10 @@ SoilRemoveKeyEntry >> address [
 ]
 
 { #category : #committing }
-SoilRemoveKeyEntry >> commitIn: transaction [ 
-	(transaction indexAt: id segment: segment) newIterator 
+SoilRemoveKeyEntry >> commitIn: soil [ 
+	((soil objectRepository segmentAt: segment) indexAt: id) newIterator 
 		at: key put: (SoilObjectId segment: 0 index: 0);
-		updateCurrentTransaction: transaction writeVersion 
+		updateCurrentTransaction: transactionId 
 ]
 
 { #category : #accessing }

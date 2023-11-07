@@ -289,17 +289,14 @@ Soil >> renameClassNamed: oldName to: newName [
 
 { #category : #journal }
 Soil >> replayJournal: aSoilJournal [ 
-	| tx journals databaseVersion |
+	| journals databaseVersion |
 	databaseVersion := self databaseVersion.
 	journals := aSoilJournal 
 		transactionJournalsStartingAt: databaseVersion + 1
 		do: [:tj | 
 			(tj index > databaseVersion) ifTrue: [  
-				tx := self newTransaction.
-				tx setWriteVersion: tj index.
-				tj asSortedJournal commitIn: tx.
-				self journal importEntry: tj.
-				tx commit ] ]
+				tj asSortedJournal commitIn: self.
+				self journal importEntry: tj ] ]
 ]
 
 { #category : #accessing }

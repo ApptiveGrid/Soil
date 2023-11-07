@@ -58,9 +58,20 @@ SoilIndexManager >> createIndexWithId: indexId class: aClass [
 		initializeHeaderPage
 ]
 
+{ #category : #accessing }
+SoilIndexManager >> flush [
+	self indexes do: #flush
+]
+
 { #category : #flushing }
 SoilIndexManager >> flushIndexes [
 	indexes do: #flushCachedPages
+]
+
+{ #category : #accessing }
+SoilIndexManager >> indexes [
+
+	^ indexes
 ]
 
 { #category : #initialization }
