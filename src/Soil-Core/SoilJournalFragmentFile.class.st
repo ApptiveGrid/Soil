@@ -150,16 +150,9 @@ SoilJournalFragmentFile >> transactionJournals [
 ]
 
 { #category : #writing }
-SoilJournalFragmentFile >> writeCheckpointEntry: aSoilNewCheckpointEntry [ 
+SoilJournalFragmentFile >> writeEntry: aSoilJournalEntry [ 
 	stream setToEnd.
-	aSoilNewCheckpointEntry writeOn: stream.
+	aSoilJournalEntry writeOn: stream.
 	stream flush
 
-]
-
-{ #category : #writing }
-SoilJournalFragmentFile >> writeTransactionJournal: aTransactionJournal [
-	stream setToEnd.
-	aTransactionJournal writeOn: stream.
-	stream flush
 ]
