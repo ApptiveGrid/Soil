@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilNewBehaviorEntry,
-	#superclass : #SoilJournalEntry,
+	#superclass : #SoilTransactionJournalEntry,
 	#instVars : [
 		'identifier',
 		'objectId'

@@ -66,7 +66,7 @@ SoilJournalFragmentFile >> filename [
 SoilJournalFragmentFile >> firstTransactionId [
 	self stream position: self headerSize + 6.
 
-	^ SoilJournalEntry readTransactionIdFrom: stream
+	^ SoilTransactionJournalEntry readTransactionIdFrom: stream
 ]
 
 { #category : #testing }
@@ -103,8 +103,8 @@ SoilJournalFragmentFile >> inspectionTransactionJournals [
 			title: #created;
 			evaluated: #createdAt);
 		addColumn: (SpStringTableColumn new
-			title: #checkpoint;
-			evaluated: #checkpointedAt)
+			title: #commit;
+			evaluated: #committedAt)
 ]
 
 { #category : #'instance creation' }
@@ -136,12 +136,17 @@ SoilJournalFragmentFile >> printOn: aStream [
 
 { #category : #'as yet unclassified' }
 SoilJournalFragmentFile >> transactionJournals [
-	| transactionJournals |
+	| transactionJournals entry |
 	self stream position: self headerSize + 6.
-	transactionJournals := OrderedCollection new.
+	transactionJournals := OrderedDictionary new.
 	[ stream atEnd ] whileFalse: [  
-		transactionJournals add: (SoilTransactionJournal readFrom: stream underlyingStream) ].
-	^ transactionJournals
+		entry := SoilJournalEntry readFrom: stream underlyingStream.
+		entry isTransactionEntry ifTrue: [ 
+			(transactionJournals 
+				at: entry transactionId
+				ifAbsentPut: [ SoilTransactionJournal new index: entry transactionId ])
+					addEntry: entry ] ].
+	^ transactionJournals values
 ]
 
 { #category : #writing }

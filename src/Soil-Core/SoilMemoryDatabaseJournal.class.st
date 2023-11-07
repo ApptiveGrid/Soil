@@ -32,8 +32,8 @@ SoilMemoryDatabaseJournal >> inspectionTransactionJournals [
 			title: #created;
 			evaluated: #createdAt);
 		addColumn: (SpStringTableColumn new
-			title: #checkpoint;
-			evaluated: #checkpointedAt)
+			title: #commit;
+			evaluated: #committedAt)
 ]
 
 { #category : #accessing }

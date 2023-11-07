@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilUpdateDatabaseVersion,
-	#superclass : #SoilJournalEntry,
+	#superclass : #SoilTransactionJournalEntry,
 	#instVars : [
 		'version',
 		'previousVersion'

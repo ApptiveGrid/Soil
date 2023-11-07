@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilBeginTransactionEntry,
-	#superclass : #SoilJournalEntry,
+	#superclass : #SoilTransactionJournalEntry,
 	#instVars : [
 		'createdAt',
 		'readVersion'

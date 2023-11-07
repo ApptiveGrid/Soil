@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilIndexJournalEntry,
-	#superclass : #SoilJournalEntry,
+	#superclass : #SoilTransactionJournalEntry,
 	#instVars : [
 		'segment',
 		'id'

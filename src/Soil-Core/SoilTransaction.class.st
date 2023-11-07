@@ -178,6 +178,10 @@ SoilTransaction >> buildJournal [
 		transactionId: self writeVersion;
 		version: writeVersion;
 		previousVersion: readVersion).
+	journal addEntry: (SoilCommitTransactionEntry new 
+		transactionId: self writeVersion;
+		committedAt: DateAndTime now;
+		yourself).
 	^ journal
 ]
 

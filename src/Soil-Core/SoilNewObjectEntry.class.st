@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilNewObjectEntry,
-	#superclass : #SoilJournalEntry,
+	#superclass : #SoilTransactionJournalEntry,
 	#instVars : [
 		'objectId',
 		'bytes',

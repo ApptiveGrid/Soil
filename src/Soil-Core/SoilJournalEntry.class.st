@@ -1,11 +1,19 @@
 Class {
 	#name : #SoilJournalEntry,
 	#superclass : #Object,
-	#instVars : [
-		'transactionId'
-	],
 	#category : #'Soil-Core-Journal'
 }
+
+{ #category : #'as yet unclassified' }
+SoilJournalEntry class >> allMapped [ 
+	| map |
+	map := Dictionary new.
+	(self allSubclasses reject: #isAbstract) do: [ :cls | 
+		 map 
+			at: cls journalTypeCode 
+			put: cls ].
+	^ map
+]
 
 { #category : #testing }
 SoilJournalEntry class >> isAbstract [
@@ -15,66 +23,31 @@ SoilJournalEntry class >> isAbstract [
 
 { #category : #'instance creation' }
 SoilJournalEntry class >> readFrom: aStream [ 
-	| transactionId |
-	transactionId := self readTransactionIdFrom: aStream.
 	^ (self withTypeCode: aStream next asInteger) new 
-		transactionId: transactionId;
 		readFrom: aStream;
 		yourself
 ]
 
 { #category : #'instance creation' }
-SoilJournalEntry class >> readTransactionIdFrom: aStream [ 
-	^ (aStream next: 8) asInteger
-]
-
-{ #category : #'instance creation' }
 SoilJournalEntry class >> withTypeCode: anInteger [ 
-	^ self allSubclasses 
+	^ (self allSubclasses reject: #isAbstract)
 		detect: [ :each | each journalTypeCode = anInteger ]
 		ifNone: [ Error signal: 'cannot find class for journal type code ', anInteger asString ]
 ]
 
-{ #category : #accessing }
-SoilJournalEntry >> container [
-	^ self subclassResponsibility
-]
-
 { #category : #testing }
-SoilJournalEntry >> isEndEntry [
+SoilJournalEntry >> isTransactionEntry [ 
 	^ false
 ]
 
-{ #category : #accessing }
-SoilJournalEntry >> oldValue [
-	^ nil
-]
-
-{ #category : #writing }
+{ #category : #'instance creation' }
 SoilJournalEntry >> readFrom: aStream [ 
-	"skip because the transaction id and type code are already read"
-]
+	"skip because the type code is already read"
 
-{ #category : #accessing }
-SoilJournalEntry >> transactionId [
-
-	^ transactionId
-]
-
-{ #category : #accessing }
-SoilJournalEntry >> transactionId: anObject [
-
-	transactionId := anObject
-]
-
-{ #category : #validating }
-SoilJournalEntry >> validateIn: aSoilTransaction [ 
-	
 ]
 
 { #category : #writing }
 SoilJournalEntry >> writeOn: aStream [ 
 	aStream 
-		nextPutAll: (transactionId asByteArrayOfSize: 8);
 		nextPut: self class journalTypeCode
 ]
