@@ -145,18 +145,20 @@ SoilPersistentDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock
 ]
 
 { #category : #writing }
-SoilPersistentDatabaseJournal >> writeCheckpointEntry: aSoilNewCheckpointEntry [
+SoilPersistentDatabaseJournal >> writeEntry: aSoilNewCheckpointEntry [
 	"we use the current file to write the end transaction entry in order
 	not to split a transaction journal."
 	^ currentFragmentFile 
-		writeCheckpointEntry: aSoilNewCheckpointEntry;
-		currentLogSequenceNumber 
+		writeEntry: aSoilNewCheckpointEntry;
+		currentLogSequenceNumber
 ]
 
 { #category : #writing }
 SoilPersistentDatabaseJournal >> writeTransactionJournal: aSoilTransactionJournal [ 
+	| file |
 	^ semaphore critical: [  
 		self verifyNextJournalIndex: aSoilTransactionJournal index.	
-		self fragmentFileForWriting writeTransactionJournal: aSoilTransactionJournal ]
-
+		file := self fragmentFileForWriting.
+		aSoilTransactionJournal entries do: [ :entry |
+			file writeEntry: entry ] ]
 ]

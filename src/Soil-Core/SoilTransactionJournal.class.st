@@ -69,7 +69,7 @@ SoilTransactionJournal >> checkpoint: aTransaction [
 	| entry |
 	entry := SoilCheckpointEntry new.
 	entry commitIn: aTransaction.
-	aTransaction soil journal writeCheckpointEntry: entry.
+	aTransaction soil journal writeEntry: entry.
 	^ entry
 ]
 

@@ -231,7 +231,7 @@ SoilTransaction >> checkpoint [
 		"add the journal to the database wide journal so other transaction can access
 		it to resolve older state"
 		soil journal addTransactionJournal: journal.
-		checkpointLSN := soil journal writeCheckpointEntry: checkpointEntry.
+		checkpointLSN := soil journal writeEntry: checkpointEntry.
 		soil settings checkpoint: checkpointLSN ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
