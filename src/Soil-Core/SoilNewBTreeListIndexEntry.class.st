@@ -5,10 +5,10 @@ Class {
 }
 
 { #category : #committing }
-SoilNewBTreeListIndexEntry >> commitIn: aSoilTransaction [
+SoilNewBTreeListIndexEntry >> commitIn: soil [
 
 	| index indexManager |
-	indexManager := (aSoilTransaction segmentAt: segment) indexManager.
+	indexManager := (soil objectRepository segmentAt: segment) indexManager.
 	index := SoilBTree new
 		path: (indexManager pathFor: id);
 		initializeFilesystem;

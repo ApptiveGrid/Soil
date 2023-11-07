@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilNewCheckpointEntry,
+	#name : #SoilCheckpointEntry,
 	#superclass : #SoilJournalEntry,
 	#instVars : [
 		'checkpointedAt'
@@ -8,60 +8,61 @@ Class {
 }
 
 { #category : #'accessing - defaults' }
-SoilNewCheckpointEntry class >> journalTypeCode [ 
-	^ 9
+SoilCheckpointEntry class >> journalTypeCode [ 
+	^ 11
 ]
 
 { #category : #accessing }
-SoilNewCheckpointEntry >> address [
+SoilCheckpointEntry >> address [
 	^ ''
 ]
 
 { #category : #accessing }
-SoilNewCheckpointEntry >> checkpointedAt [
+SoilCheckpointEntry >> checkpointedAt [
 	^ checkpointedAt
 ]
 
 { #category : #committing }
-SoilNewCheckpointEntry >> commitIn: aTransaction [
+SoilCheckpointEntry >> commitIn: soil [
 	"make sure behavior registry gets flushed at the end of 
 	a transaction"
-	aTransaction behaviorRegistry flush.
+	soil behaviorRegistry flush.
 	"as indexes are just created and keys/values being added,
 	we need to flush sometime and the checkpoint time is good
 	for this"
-	aTransaction indexes do: #flush.
+	soil objectRepository segments do: [ :segment |
+		segment indexManager flush ]
 ]
 
 { #category : #accessing }
-SoilNewCheckpointEntry >> container [
+SoilCheckpointEntry >> container [
 	^ #soil
 ]
 
 { #category : #initialization }
-SoilNewCheckpointEntry >> initialize [ 
+SoilCheckpointEntry >> initialize [ 
 	super initialize.
 	checkpointedAt := DateAndTime now
 ]
 
 { #category : #accessing }
-SoilNewCheckpointEntry >> objectIds [
+SoilCheckpointEntry >> objectIds [
 	^ {  }
 ]
 
 { #category : #'instance creation' }
-SoilNewCheckpointEntry >> readFrom: aStream [ 
+SoilCheckpointEntry >> readFrom: aStream [ 
 	super readFrom: aStream.
 	checkpointedAt := (DateAndTime epoch + ((aStream nextLengthEncodedInteger) asInteger / 1000) milliSeconds) asLocal
 ]
 
 { #category : #accessing }
-SoilNewCheckpointEntry >> value [ 
+SoilCheckpointEntry >> value [ 
 	^ checkpointedAt 
 ]
 
 { #category : #writing }
-SoilNewCheckpointEntry >> writeOn: aStream [ 
+SoilCheckpointEntry >> writeOn: aStream [ 
 	| timestamp |
 	super writeOn: aStream.
 	

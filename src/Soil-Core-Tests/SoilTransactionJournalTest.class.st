@@ -1,20 +1,19 @@
 Class {
-	#name : #SoilJournalTest,
+	#name : #SoilTransactionJournalTest,
 	#superclass : #TestCase,
 	#instVars : [
-		'soil',
-		'copy'
+		'soil'
 	],
 	#category : #'Soil-Core-Tests'
 }
 
 { #category : #helper }
-SoilJournalTest class >> classUnderTest [ 
-	^ SoilJournal 
+SoilTransactionJournalTest class >> classUnderTest [ 
+	^ SoilPersistentDatabaseJournal 
 ]
 
 { #category : #'as yet unclassified' }
-SoilJournalTest >> fillDatabase [ 
+SoilTransactionJournalTest >> fillDatabase [ 
 	| tx dict |
 	tx := soil newTransaction.
 	tx root: SoilTestClusterRoot new.
@@ -45,7 +44,7 @@ SoilJournalTest >> fillDatabase [
 ]
 
 { #category : #initialization }
-SoilJournalTest >> setUp [ 
+SoilTransactionJournalTest >> setUp [ 
 	super setUp.
 	soil := (Soil path: 'soil-tests')
 		destroy;
@@ -53,16 +52,14 @@ SoilJournalTest >> setUp [
 ]
 
 { #category : #running }
-SoilJournalTest >> tearDown [ 
+SoilTransactionJournalTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
-		soil close ].
-	copy ifNotNil: [ 
-		copy close ]
+		soil close ]
 ]
 
 { #category : #tests }
-SoilJournalTest >> testConsistency [
+SoilTransactionJournalTest >> testConsistency [
 	| txn |
 	10 timesRepeat: [ 
 		txn := soil newTransaction.
@@ -76,7 +73,7 @@ SoilJournalTest >> testConsistency [
 ]
 
 { #category : #tests }
-SoilJournalTest >> testNewRootObject [
+SoilTransactionJournalTest >> testNewRootObject [
 	| tx journal |
 	tx := soil newTransaction.
 	tx root: SoilTestClusterRoot new.
@@ -93,7 +90,7 @@ SoilJournalTest >> testNewRootObject [
 ]
 
 { #category : #tests }
-SoilJournalTest >> testNewRootSkipList [
+SoilTransactionJournalTest >> testNewRootSkipList [
 	| tx journal |
 	tx := soil newTransaction.
 	tx root: (SoilSkipListDictionary new
@@ -112,44 +109,7 @@ SoilJournalTest >> testNewRootSkipList [
 ]
 
 { #category : #tests }
-SoilJournalTest >> testReplicationToEmptyDatabase [
-	| copy tx |
-	self fillDatabase. 
-	copy := (Soil path: 'soil-replay')
-		destroy;
-		initializeFilesystem.
-	copy replayJournal: soil journal.
-	tx := copy newTransaction.
-	self assert: soil databaseVersion equals: copy databaseVersion.
-	self assert: soil objectRepository metaSegment lastObjectIndex equals: copy objectRepository metaSegment lastObjectIndex.
-	self assert: soil objectRepository firstSegment lastObjectIndex equals: copy objectRepository firstSegment lastObjectIndex.
-	self assert: soil journal lastIndex equals: copy journal lastIndex
-]
-
-{ #category : #tests }
-SoilJournalTest >> testReplicationToNonEmptyDatabase [
-	| tx |
-	self fillDatabase. 
-	copy := (Soil path: 'soil-replay')
-		destroy;
-		initializeFilesystem.
-	copy replayJournal: (soil journal copyFrom: 1 to: 3).
-	self assert: copy databaseVersion equals: 3.
-	self assert: copy objectRepository metaSegment lastObjectIndex equals: 5.
-	self assert: copy objectRepository firstSegment lastObjectIndex equals: 3.
-	copy replayJournal: soil journal.
-	self assert: soil journal lastIndex equals: copy journal lastIndex.
-	self assert: soil databaseVersion equals: copy databaseVersion.
-	self assert: soil objectRepository metaSegment lastObjectIndex equals: copy objectRepository metaSegment lastObjectIndex.
-	self assert: soil objectRepository firstSegment lastObjectIndex equals: copy objectRepository firstSegment lastObjectIndex.
-	self assert: soil journal lastIndex equals: copy journal lastIndex.
-	tx := soil newTransaction.
-	self assert: (tx root nested at: #foo) label equals: #newLabel.	
-	tx abort.
-]
-
-{ #category : #tests }
-SoilJournalTest >> testRootObjectUpdate [
+SoilTransactionJournalTest >> testRootObjectUpdate [
 	| tx tx2 journal |
 	tx := soil newTransaction.
 	tx root: SoilTestClusterRoot new.
@@ -166,7 +126,7 @@ SoilJournalTest >> testRootObjectUpdate [
 ]
 
 { #category : #tests }
-SoilJournalTest >> testRootObjectUpdateClusterObject [
+SoilTransactionJournalTest >> testRootObjectUpdateClusterObject [
 	| tx tx2 journal object |
 	tx := soil newTransaction.
 	tx root: SoilTestClusterRoot new.
@@ -188,7 +148,7 @@ SoilJournalTest >> testRootObjectUpdateClusterObject [
 ]
 
 { #category : #tests }
-SoilJournalTest >> testRootObjectUpdateClusterPrimitive [
+SoilTransactionJournalTest >> testRootObjectUpdateClusterPrimitive [
 	| tx tx2 journal string |
 	tx := soil newTransaction.
 	tx root: SoilTestClusterRoot new.

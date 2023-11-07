@@ -18,10 +18,10 @@ SoilNewSkipListIndexEntry >> address [
 ]
 
 { #category : #committing }
-SoilNewSkipListIndexEntry >> commitIn: aSoilTransaction [
+SoilNewSkipListIndexEntry >> commitIn: soil [
 
 	| index indexManager |
-	indexManager := (aSoilTransaction segmentAt: segment) indexManager.
+	indexManager := (soil objectRepository segmentAt: segment) indexManager.
 	index := SoilSkipList new
 		path: (indexManager pathFor: id);
 		initializeFilesystem;

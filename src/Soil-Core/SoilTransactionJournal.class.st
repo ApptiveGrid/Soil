@@ -3,11 +3,17 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'index',
-		'stream',
 		'entries'
 	],
 	#category : #'Soil-Core-Model'
 }
+
+{ #category : #'instance creation' }
+SoilTransactionJournal class >> readFrom: aStream [ 
+	^ self new 
+		readFrom: aStream;
+		yourself
+]
 
 { #category : #accessing }
 SoilTransactionJournal class >> soilTransientInstVars [ 
@@ -16,7 +22,7 @@ SoilTransactionJournal class >> soilTransientInstVars [
 
 { #category : #visiting }
 SoilTransactionJournal >> acceptSoil: aSoilVisitor [ 
-	^ aSoilVisitor visitTransactionJournal: self
+	^ aSoilVisitor visitUnitOfWork: self
 ]
 
 { #category : #adding }
@@ -44,9 +50,9 @@ SoilTransactionJournal >> asSortedJournal [
 	last := OrderedCollection new.
 	middle := OrderedCollection new.
 	entries do: [ :entry |
-		({ SoilNewTransactionEntry . SoilNewBehaviorEntry . SoilNewObjectEntry . SoilNewObjectVersionEntry . SoilNewSkipListIndexEntry . SoilNewBTreeListIndexEntry } includes:  entry class) ifTrue: [ 
+		({ SoilBeginTransactionEntry . SoilNewBehaviorEntry . SoilNewObjectEntry . SoilNewObjectVersionEntry . SoilNewSkipListIndexEntry . SoilNewBTreeListIndexEntry } includes:  entry class) ifTrue: [ 
 			first add: entry ]  .
-		({ SoilUpdateDatabaseVersion . SoilUpdateSegmentIndexEntry . SoilNewCheckpointEntry } includes:  entry class) ifTrue: [ 
+		({ SoilUpdateDatabaseVersion . SoilUpdateSegmentIndexEntry . SoilCommitTransactionEntry } includes:  entry class) ifTrue: [ 
 			last add: entry ].
 		({ SoilAddKeyEntry  . SoilRemoveKeyEntry } includes:  entry class) ifTrue: [ 
 			middle add: entry ] ].
@@ -59,45 +65,22 @@ SoilTransactionJournal >> asSortedJournal [
 ]
 
 { #category : #'as yet unclassified' }
-SoilTransactionJournal >> checkpoint: aTransaction [
+SoilTransactionJournal >> checkpoint: soil [
 	| entry |
-	entry := SoilNewCheckpointEntry new 
-		transactionId: aTransaction writeVersion.
-	self addEntry: entry.
-	entry writeOn: stream.
-	stream flush.
-	entry commitIn: aTransaction.
-]
-
-{ #category : #'as yet unclassified' }
-SoilTransactionJournal >> checkpointedAt [
-	^ entries last checkpointedAt 
-]
-
-{ #category : #'open/close' }
-SoilTransactionJournal >> close [ 
-	stream ifNotNil: [ stream close ]
+	entry := SoilCheckpointEntry new.
+	entry commitIn: soil.
+	soil journal writeEntry: entry.
+	^ entry
 ]
 
 { #category : #committing }
-SoilTransactionJournal >> commitIn: aTransaction [ 
-	entries do: [ :each | each commitIn: aTransaction ]
+SoilTransactionJournal >> commitIn: soil [ 
+	entries do: [ :each | each commitIn: soil ]
 ]
 
-{ #category : #'instance creation' }
-SoilTransactionJournal >> create [
-	stream := self path 
-		deleteIfAbsent: []; 
-		ensureCreateFile;
-		binaryWriteStream 
-]
-
-{ #category : #'instance creation' }
-SoilTransactionJournal >> createOn: aFileReference [
-	stream := aFileReference 
-		deleteIfAbsent: []; 
-		ensureCreateFile;
-		binaryWriteStream 
+{ #category : #'as yet unclassified' }
+SoilTransactionJournal >> committedAt [
+	^ entries last committedAt 
 ]
 
 { #category : #accessing }
@@ -107,7 +90,7 @@ SoilTransactionJournal >> createdAt [
 
 { #category : #accessing }
 SoilTransactionJournal >> duration [
-	^ (self checkpointedAt - self createdAt) asMilliSeconds  
+	^ (self committedAt - self createdAt) asMilliSeconds  
 ]
 
 { #category : #accessing }
@@ -170,11 +153,6 @@ SoilTransactionJournal >> inspectionEntries [
 			addColumn: (SpStringTableColumn evaluated: [:each | each oldValue ]))
 ]
 
-{ #category : #'instance creation' }
-SoilTransactionJournal >> on: aFileReference [
-	stream := aFileReference binaryReadStream 
-]
-
 { #category : #accessing }
 SoilTransactionJournal >> path: aFileReference [ 
 	self shouldBeImplemented.
@@ -189,12 +167,17 @@ SoilTransactionJournal >> printOn: aStream [
 ]
 
 { #category : #'as yet unclassified' }
-SoilTransactionJournal >> readAll [
-	| pageCode entry |
-	[ stream atEnd ] whileFalse: [ 
-		pageCode := stream next asInteger.
-		entry := (SoilJournalEntry withTypeCode: pageCode) new.
-		entries add: (entry readFrom: stream) ].
+SoilTransactionJournal >> readFrom: aStream [ 
+	| entry |
+	[ aStream atEnd ] whileFalse: [
+		entry := SoilJournalEntry readFrom: aStream.
+		index 
+			ifNotNil: [ 
+				(index = entry transactionId) 
+					ifFalse: [ Error signal: 'transaction changed without checkpoint record' ] ]
+			ifNil: [ index := entry transactionId ].
+		entries add: entry.
+		entry isCommitEntry ifTrue: [ ^ self ] ]
 ]
 
 { #category : #accessing }
@@ -213,9 +196,9 @@ SoilTransactionJournal >> validateIn: aSoilTransaction [
 ]
 
 { #category : #writing }
-SoilTransactionJournal >> write [ 
-	entries do: [ :each | each writeOn: stream ].
-	stream 
+SoilTransactionJournal >> writeOn: aStream [
+	entries do: [ :each | each writeOn: aStream ].
+	aStream 
 		flush
 ]
 

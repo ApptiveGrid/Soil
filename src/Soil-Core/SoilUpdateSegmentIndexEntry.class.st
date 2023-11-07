@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilUpdateSegmentIndexEntry,
-	#superclass : #SoilJournalEntry,
+	#superclass : #SoilTransactionJournalEntry,
 	#instVars : [
 		'segmentId',
 		'index'
@@ -19,8 +19,8 @@ SoilUpdateSegmentIndexEntry >> address [
 ]
 
 { #category : #committing }
-SoilUpdateSegmentIndexEntry >> commitIn: aSoilTransaction [ 
-	(aSoilTransaction segmentAt: segmentId) 
+SoilUpdateSegmentIndexEntry >> commitIn: soil [ 
+	(soil objectRepository segmentAt: segmentId) 
 		lastObjectIndex: index value
 ]
 

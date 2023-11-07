@@ -149,8 +149,8 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 
 { #category : #accessing }
 SoilTransaction >> buildJournal [
-	journal := soil journal newTransactionJournalFor: writeVersion.
-	journal addEntry: (SoilNewTransactionEntry new
+	journal := soil journal newTransactionJournalForId: writeVersion.
+	journal addEntry: (SoilBeginTransactionEntry new
 		readVersion: readVersion; 
 		transactionId: writeVersion;
 		createdAt: createdAt).
@@ -178,6 +178,10 @@ SoilTransaction >> buildJournal [
 		transactionId: self writeVersion;
 		version: writeVersion;
 		previousVersion: readVersion).
+	journal addEntry: (SoilCommitTransactionEntry new 
+		transactionId: self writeVersion;
+		committedAt: DateAndTime now;
+		yourself).
 	^ journal
 ]
 
@@ -195,6 +199,7 @@ SoilTransaction >> buildWriteVersion [
 SoilTransaction >> checkpoint [
 	"serialize objects and collect all to be written records. This can be done without 
 	resources that need locking. This reduces time needed for locking"
+	| checkpointLSN checkpointEntry |
 	self prepareRecordsForCommit.
 	"if there are no records to commit we can just return and don't allocate any
 	resources"
@@ -219,15 +224,15 @@ SoilTransaction >> checkpoint [
 		"convert the records into journal entries, write the journal to disk and then
 		execute the journal on the database"
 		journal := self buildJournal.
-		journal
-			validateIn: self;
-			write;
-			commitIn: self;
-			checkpoint: self; 
-			close.
+		journal validateIn: self.
+		soil journal writeTransactionJournal: journal.
+		journal commitIn: soil.
+		checkpointEntry := journal checkpoint: soil.
 		"add the journal to the database wide journal so other transaction can access
 		it to resolve older state"
-		soil journal addTransactionJournal: journal ]
+		soil journal addTransactionJournal: journal.
+		checkpointLSN := soil journal writeEntry: checkpointEntry.
+		soil settings checkpoint: checkpointLSN ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
 
@@ -373,7 +378,7 @@ SoilTransaction >> journalEntriesFor: key inIndex: aSoilIndex startingAt: anInte
 	entries := OrderedCollection new.
 	transactionId := anInteger.
 	[ transactionId > readVersion ] whileTrue: [  
-		journal := (soil journal at: transactionId).
+		journal := (soil journal transactionJournalAt: transactionId).
 		journal entries do: [ :each | 
 			((each class = SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
 				(each key = key) ifTrue: [ 
@@ -619,6 +624,8 @@ SoilTransaction >> serializeObjects [
 SoilTransaction >> setWriteVersion: anInteger [ 
 	"This is only used for replaying a journal and such 
 	where a transaction does not get set up properly"
+	(anInteger > readVersion) ifFalse: [ 
+		SoilInvalidWriteVersion signal: 'write version ', anInteger asString , ' is not greater than read version ', readVersion asString ]. 
 	writeVersion := anInteger 
 ]
 

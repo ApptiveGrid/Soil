@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilNewObjectEntry,
-	#superclass : #SoilJournalEntry,
+	#superclass : #SoilTransactionJournalEntry,
 	#instVars : [
 		'objectId',
 		'bytes',
@@ -27,8 +27,8 @@ SoilNewObjectEntry >> bytes: aCollection [
 ]
 
 { #category : #committing }
-SoilNewObjectEntry >> commitIn: transaction [ 
-	position := transaction objectRepository  
+SoilNewObjectEntry >> commitIn: soil [ 
+	position := soil objectRepository  
 		at: objectId 
 		put: bytes.
 	record ifNotNil: [ 

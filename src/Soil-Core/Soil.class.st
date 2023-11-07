@@ -127,7 +127,7 @@ Soil >> initializeFilesystem [
 		soil: self;
 		initializeFilesystem;
 		yourself.
-	journal := SoilJournal new
+	journal := SoilPersistentDatabaseJournal new
 		soil: self;
 		initializeFilesystem;
 		yourself.
@@ -233,7 +233,7 @@ Soil >> open [
 			soil: self;
 			open;
 			yourself.
-	journal := SoilJournal new
+	journal := SoilPersistentDatabaseJournal new
 		soil: self;
 		open;
 		yourself.
@@ -289,16 +289,14 @@ Soil >> renameClassNamed: oldName to: newName [
 
 { #category : #journal }
 Soil >> replayJournal: aSoilJournal [ 
-	| tx journals databaseVersion |
+	| journals databaseVersion |
 	databaseVersion := self databaseVersion.
-	journals := aSoilJournal transactionJournals reject: [:each | each index <= databaseVersion ].
-	tx := self newTransaction.
-	journals do: [ :j |
-		tx setWriteVersion: j index.
-		j asSortedJournal commitIn: tx.
-		self journal importEntry: j ].
-	tx commit.
-
+	journals := aSoilJournal 
+		transactionJournalsStartingAt: databaseVersion + 1
+		do: [:tj | 
+			(tj index > databaseVersion) ifTrue: [  
+				tj asSortedJournal commitIn: self.
+				self journal importEntry: tj ] ]
 ]
 
 { #category : #accessing }
