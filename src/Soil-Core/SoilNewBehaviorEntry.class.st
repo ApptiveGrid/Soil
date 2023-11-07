@@ -19,8 +19,8 @@ SoilNewBehaviorEntry >> address [
 ]
 
 { #category : #commiting }
-SoilNewBehaviorEntry >> commitIn: aSoilTransaction [ 
-	aSoilTransaction behaviorRegistry 
+SoilNewBehaviorEntry >> commitIn: soil [ 
+	soil behaviorRegistry 
 		nameAt: identifier  
 		put: objectId 
 ]

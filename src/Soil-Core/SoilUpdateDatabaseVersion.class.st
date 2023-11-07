@@ -19,8 +19,8 @@ SoilUpdateDatabaseVersion >> address [
 ]
 
 { #category : #committing }
-SoilUpdateDatabaseVersion >> commitIn: aSoilTransaction [ 
-	aSoilTransaction soil databaseVersion: version
+SoilUpdateDatabaseVersion >> commitIn: soil [ 
+	soil databaseVersion: version
 ]
 
 { #category : #accessing }

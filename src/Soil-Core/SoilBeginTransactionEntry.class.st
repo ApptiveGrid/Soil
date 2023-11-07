@@ -19,7 +19,7 @@ SoilBeginTransactionEntry >> address [
 ]
 
 { #category : #committing }
-SoilBeginTransactionEntry >> commitIn: aTransaction [ 
+SoilBeginTransactionEntry >> commitIn: soil [ 
 ]
 
 { #category : #accessing }

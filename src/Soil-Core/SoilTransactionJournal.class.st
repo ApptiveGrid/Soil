@@ -65,17 +65,17 @@ SoilTransactionJournal >> asSortedJournal [
 ]
 
 { #category : #'as yet unclassified' }
-SoilTransactionJournal >> checkpoint: aTransaction [
+SoilTransactionJournal >> checkpoint: soil [
 	| entry |
 	entry := SoilCheckpointEntry new.
-	entry commitIn: aTransaction.
-	aTransaction soil journal writeEntry: entry.
+	entry commitIn: soil.
+	soil journal writeEntry: entry.
 	^ entry
 ]
 
 { #category : #committing }
-SoilTransactionJournal >> commitIn: aTransaction [ 
-	entries do: [ :each | each commitIn: aTransaction ]
+SoilTransactionJournal >> commitIn: soil [ 
+	entries do: [ :each | each commitIn: soil ]
 ]
 
 { #category : #'as yet unclassified' }
