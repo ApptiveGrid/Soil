@@ -13,6 +13,11 @@ SoilJournalFragmentFile class >> path: aFileReference [
 		path: aFileReference 
 ]
 
+{ #category : #versions }
+SoilJournalFragmentFile class >> version [ 
+	^ 1
+]
+
 { #category : #visiting }
 SoilJournalFragmentFile >> acceptSoil: aSoilVisitor [ 
 	aSoilVisitor visitJournalFragmentFile: self
@@ -26,23 +31,17 @@ SoilJournalFragmentFile >> close [
 { #category : #'instance creation' }
 SoilJournalFragmentFile >> create [
 	path ensureCreateFile
-
 ]
 
 { #category : #accessing }
 SoilJournalFragmentFile >> created [
-	self stream position: self headerSize.
+	self stream position: self createdPosition.
 	^ DateAndTime fromUnixTime: (stream next: self createdSize) asInteger
 ]
 
-{ #category : #initialization }
-SoilJournalFragmentFile >> created: aDateandTime [
-	| timestamp |
-	timestamp := aDateandTime asUnixTime.
-	stream 
-		position: self headerSize;
-		nextPutAll: (timestamp asByteArrayOfSize: self createdSize);
-		flush
+{ #category : #accessing }
+SoilJournalFragmentFile >> createdPosition [
+	^ self versionPosition + self versionSize 
 ]
 
 { #category : #'as yet unclassified' }
@@ -77,8 +76,26 @@ SoilJournalFragmentFile >> hasSpace [
 ]
 
 { #category : #initialization }
+SoilJournalFragmentFile >> initializeCreated [
+	| timestamp |
+	timestamp := DateAndTime now asUnixTime.
+	stream 
+		position: self headerSize;
+		nextPutAll: (timestamp asByteArrayOfSize: self createdSize);
+		flush
+]
+
+{ #category : #initialization }
 SoilJournalFragmentFile >> initializeStart [ 
-	self created: DateAndTime now
+	self initializeVersion.
+	self initializeCreated 
+]
+
+{ #category : #initialization }
+SoilJournalFragmentFile >> initializeVersion [ 
+	self stream position: self versionPosition.
+	stream next: self class version.
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -147,6 +164,22 @@ SoilJournalFragmentFile >> transactionJournals [
 				ifAbsentPut: [ SoilTransactionJournal new index: entry transactionId ])
 					addEntry: entry ] ].
 	^ transactionJournals values
+]
+
+{ #category : #accessing }
+SoilJournalFragmentFile >> version [
+	self stream position: self versionPosition.
+	^ stream next asInteger
+]
+
+{ #category : #versions }
+SoilJournalFragmentFile >> versionPosition [ 
+	^ self headerSize
+]
+
+{ #category : #versions }
+SoilJournalFragmentFile >> versionSize [ 
+	^ 1
 ]
 
 { #category : #writing }
