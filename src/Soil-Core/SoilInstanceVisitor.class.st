@@ -28,7 +28,7 @@ SoilInstanceVisitor >> soil: anObject [
 
 { #category : #visiting }
 SoilInstanceVisitor >> visitObjectId: aSoilObjectId [ 
-	"(seen includes: aSoilObjectId) ifTrue: [ ^ aSoilObjectId ]."
+	(seen includes: aSoilObjectId) ifTrue: [ ^ aSoilObjectId ].
 	seen add: aSoilObjectId.
 	self visit: (soil objectRepository at: aSoilObjectId).
 	^ aSoilObjectId 
