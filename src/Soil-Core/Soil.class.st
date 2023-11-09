@@ -293,10 +293,16 @@ Soil >> replayJournal: aSoilJournal [
 	databaseVersion := self databaseVersion.
 	journals := aSoilJournal 
 		transactionJournalsStartingAt: databaseVersion + 1
-		do: [:tj | 
-			(tj index > databaseVersion) ifTrue: [  
-				tj asSortedJournal commitIn: self.
-				self journal importEntry: tj ] ]
+		do: [:tj | self replayTransactionJournal: tj ]
+]
+
+{ #category : #journal }
+Soil >> replayTransactionJournal: aSoilTransactionJournal [ 
+	| databaseVersion |
+	databaseVersion := self databaseVersion.
+	"(aSoilTransactionJournal index > databaseVersion) ifTrue: [  "
+		"aSoilTransactionJournal asSortedJournal commitIn: self."
+		self journal importEntry: aSoilTransactionJournal "] "
 ]
 
 { #category : #accessing }

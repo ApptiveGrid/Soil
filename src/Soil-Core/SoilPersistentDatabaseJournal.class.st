@@ -16,6 +16,31 @@ SoilPersistentDatabaseJournal >> addTransactionJournal: aTransactionJournal [
 
 ]
 
+{ #category : #writing }
+SoilPersistentDatabaseJournal >> appendEntry: aSoilNewCheckpointEntry [
+	"append the entry to the current file in order not to split 
+	the transaction journal. Remember the postion where the 
+	entry is stored and return"
+	| entryLSN |
+	entryLSN := currentFragmentFile currentLogSequenceNumber.
+	currentFragmentFile appendEntry: aSoilNewCheckpointEntry.
+	^ entryLSN
+		
+]
+
+{ #category : #accessing }
+SoilPersistentDatabaseJournal >> checkpoint [ 
+	| entry checkpointLSN |
+	entry := SoilCheckpointEntry new.
+	entry commitIn: soil.
+	"write the checkpoint entry in the journal and get 
+	the position of that entry in the file"
+	checkpointLSN := self writeEntry: entry.
+	"set the checkpoint position so it can be read back"
+	soil settings checkpoint: checkpointLSN.
+	^ entry
+]
+
 { #category : #'as yet unclassified' }
 SoilPersistentDatabaseJournal >> createFragmentFile: filename [
 	(self path / filename) ensureCreateFile.
@@ -65,7 +90,7 @@ SoilPersistentDatabaseJournal >> fragmentFileForWriting [
 
 { #category : #'as yet unclassified' }
 SoilPersistentDatabaseJournal >> fragmentFiles [
-	^ self path children sorted reverse collect: [ :each | SoilJournalFragmentFile path: each ]
+	^ self path files sorted reverse collect: [ :each | SoilJournalFragmentFile path: each ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -146,11 +171,15 @@ SoilPersistentDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock
 
 { #category : #writing }
 SoilPersistentDatabaseJournal >> writeEntry: aSoilNewCheckpointEntry [
-	"we use the current file to write the end transaction entry in order
-	not to split a transaction journal."
-	^ currentFragmentFile 
-		writeEntry: aSoilNewCheckpointEntry;
-		currentLogSequenceNumber
+	"write entry to fragment file. If the size of the fragment file
+	is exceeded a new one will taken to write the entry. Return the 
+	position of the entry being written"
+	| entryLSN file |
+	file := self currentFragmentFile.
+	entryLSN := file currentLogSequenceNumber.
+	file appendEntry: aSoilNewCheckpointEntry.
+	^ entryLSN
+		
 ]
 
 { #category : #writing }
@@ -160,5 +189,5 @@ SoilPersistentDatabaseJournal >> writeTransactionJournal: aSoilTransactionJourna
 		self verifyNextJournalIndex: aSoilTransactionJournal index.	
 		file := self fragmentFileForWriting.
 		aSoilTransactionJournal entries do: [ :entry |
-			file writeEntry: entry ] ]
+			file appendEntry: entry ] ]
 ]

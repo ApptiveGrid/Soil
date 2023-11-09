@@ -1,9 +1,6 @@
 Class {
 	#name : #SoilIndexConsistencyVisitor,
 	#superclass : #SoilInstanceVisitor,
-	#instVars : [
-		'seen'
-	],
 	#category : #'Soil-Core-Model'
 }
 
@@ -11,20 +8,6 @@ Class {
 SoilIndexConsistencyVisitor >> check: aSoil [ 
 	soil := aSoil.
 	self visit: aSoil
-]
-
-{ #category : #initialization }
-SoilIndexConsistencyVisitor >> initialize [ 
-	super initialize.
-	seen := Set new.
-]
-
-{ #category : #visiting }
-SoilIndexConsistencyVisitor >> visitObjectId: aSoilObjectId [ 
-	(seen includes: aSoilObjectId) ifTrue: [ ^ aSoilObjectId ].
-	seen add: aSoilObjectId.
-	self visit: (soil objectRepository at: aSoilObjectId).
-	^ aSoilObjectId 
 ]
 
 { #category : #visiting }

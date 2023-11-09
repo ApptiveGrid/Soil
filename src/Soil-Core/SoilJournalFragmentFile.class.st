@@ -14,13 +14,24 @@ SoilJournalFragmentFile class >> path: aFileReference [
 ]
 
 { #category : #versions }
-SoilJournalFragmentFile class >> version [ 
+SoilJournalFragmentFile class >> version [
 	^ 1
 ]
 
 { #category : #visiting }
 SoilJournalFragmentFile >> acceptSoil: aSoilVisitor [ 
 	aSoilVisitor visitJournalFragmentFile: self
+]
+
+{ #category : #writing }
+SoilJournalFragmentFile >> appendEntry: aSoilJournalEntry [ 
+	| position |
+	stream setToEnd.
+	position := stream position.
+	aSoilJournalEntry writeOn: stream.
+	stream flush.
+	^ position
+
 ]
 
 { #category : #'initialize-release' }
@@ -57,6 +68,11 @@ SoilJournalFragmentFile >> currentLogSequenceNumber [
 ]
 
 { #category : #accessing }
+SoilJournalFragmentFile >> dataPosition [
+	^ self createdPosition + self createdSize 
+]
+
+{ #category : #accessing }
 SoilJournalFragmentFile >> filename [ 
 	^ self path basename
 ]
@@ -80,7 +96,7 @@ SoilJournalFragmentFile >> initializeCreated [
 	| timestamp |
 	timestamp := DateAndTime now asUnixTime.
 	stream 
-		position: self headerSize;
+		position: self createdPosition;
 		nextPutAll: (timestamp asByteArrayOfSize: self createdSize);
 		flush
 ]
@@ -93,7 +109,7 @@ SoilJournalFragmentFile >> initializeStart [
 
 { #category : #initialization }
 SoilJournalFragmentFile >> initializeVersion [ 
-	self stream position: self versionPosition.
+	self stream position: self headerSize.
 	stream next: self class version.
 
 ]
@@ -136,6 +152,7 @@ SoilJournalFragmentFile >> path [
 
 { #category : #accessing }
 SoilJournalFragmentFile >> path: aFileReference [ 
+	aFileReference  isDirectory ifTrue: [ self halt ].
 	path := aFileReference 
 ]
 
@@ -154,7 +171,7 @@ SoilJournalFragmentFile >> printOn: aStream [
 { #category : #'as yet unclassified' }
 SoilJournalFragmentFile >> transactionJournals [
 	| transactionJournals entry |
-	self stream position: self headerSize + 6.
+	self stream position: self dataPosition.
 	transactionJournals := OrderedDictionary new.
 	[ stream atEnd ] whileFalse: [  
 		entry := SoilJournalEntry readFrom: stream underlyingStream.
@@ -173,19 +190,11 @@ SoilJournalFragmentFile >> version [
 ]
 
 { #category : #versions }
-SoilJournalFragmentFile >> versionPosition [ 
-	^ self headerSize
+SoilJournalFragmentFile >> versionPosition [
+	^ self headerSize 
 ]
 
 { #category : #versions }
-SoilJournalFragmentFile >> versionSize [ 
+SoilJournalFragmentFile >> versionSize [
 	^ 1
-]
-
-{ #category : #writing }
-SoilJournalFragmentFile >> writeEntry: aSoilJournalEntry [ 
-	stream setToEnd.
-	aSoilJournalEntry writeOn: stream.
-	stream flush
-
 ]
