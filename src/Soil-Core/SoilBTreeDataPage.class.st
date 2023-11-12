@@ -13,13 +13,6 @@ SoilBTreeDataPage class >> pageCode [
 	^ 4
 ]
 
-{ #category : #accessing }
-SoilBTreeDataPage >> biggestKey [
-	^ self isLastPage 
-		ifTrue: [ (2 raisedTo: (keySize * 8)) - 1 ]
-		ifFalse: [ items last key ]
-]
-
 { #category : #private }
 SoilBTreeDataPage >> find: aKey with: aBTree [
 	^ self
@@ -44,22 +37,22 @@ SoilBTreeDataPage >> initialize [
 ]
 
 { #category : #accessing }
-SoilBTreeDataPage >> insert: anItem into: anIterator [
-	| newPage choosenPage |
-	self hasRoom ifTrue: [ anIterator currentPage: self. self addItem: anItem. ^ nil ].
-	
-	"No room, we have to split"	
-	newPage := anIterator index splitPage: self.
-	
-	choosenPage := 
-	((self biggestKey < anItem key)
+SoilBTreeDataPage >> insertItem: anItem for: iterator [
+
+	| newPage pageWithItem return |
+
+	return := SoilBTreeReturnWrapper new returnValue: ((self associationAt: anItem key ifAbsent: nil) ifNotNil: [:item | item value]).
+	self addItem: anItem.
+	self hasRoom ifTrue: [  iterator currentPage: self. ^ return ].
+	"We have to split"
+	newPage := iterator index splitPage: self.
+	"newPage is the one with the small values"
+	pageWithItem := ((self smallestKey > anItem key)
 						ifTrue: [ newPage ]
 						ifFalse: [ self ]).
-	choosenPage addItem: anItem.
-	anIterator currentPage: choosenPage.
-	^newPage 
-
-
+	iterator currentPage: pageWithItem.
+	"we need to add the new page to the index above"
+	^ return indexEntry: (newPage smallestKey -> newPage index)
 ]
 
 { #category : #testing }

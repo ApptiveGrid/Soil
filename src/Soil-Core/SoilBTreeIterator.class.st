@@ -12,8 +12,10 @@ SoilBTreeIterator >> at: aKeyObject ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilBTreeIterator >> basicAt: key put: anObject [
-	index rootPage insert: key -> anObject into: self.
-	^anObject
+	| posiblePrioValue |
+	posiblePrioValue := index rootPage insertItem: (key -> anObject) for: self.
+	"as an optimization we return the prior value stored in the list. If there was none we return nil"
+	^ posiblePrioValue returnValue
 ]
 
 { #category : #private }
