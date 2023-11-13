@@ -2,7 +2,6 @@ Class {
 	#name : #SoilFindRecordVisitor,
 	#superclass : #SoilTransactionalVisitor,
 	#instVars : [
-		'seen',
 		'condition',
 		'object'
 	],
@@ -17,12 +16,6 @@ SoilFindRecordVisitor >> find: aBlock in: aSoilTransaction [
 	self visit: soil
 ]
 
-{ #category : #initialization }
-SoilFindRecordVisitor >> initialize [ 
-	super initialize.
-	seen := Set new.
-]
-
 { #category : #accessing }
 SoilFindRecordVisitor >> object [
 	^ object
@@ -31,10 +24,7 @@ SoilFindRecordVisitor >> object [
 { #category : #visiting }
 SoilFindRecordVisitor >> visitObjectId: aSoilObjectId [ 
 	object ifNotNil: [ ^ self ].
-	(seen includes: aSoilObjectId) ifTrue: [ ^ aSoilObjectId ].
-	seen add: aSoilObjectId.
-	self visit: (soil objectRepository at: aSoilObjectId).
-	^ aSoilObjectId 
+	^ super visitObjectId: aSoilObjectId 
 ]
 
 { #category : #visiting }

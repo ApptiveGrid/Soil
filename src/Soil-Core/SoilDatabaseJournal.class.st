@@ -38,11 +38,6 @@ SoilDatabaseJournal >> do: aBlock [
 ]
 
 { #category : #'as yet unclassified' }
-SoilDatabaseJournal >> importEntry: aSoilTransactionJournal [ 
-	self addTransactionJournal: aSoilTransactionJournal
-]
-
-{ #category : #'as yet unclassified' }
 SoilDatabaseJournal >> lastIndex [
 	^ self lastTransactionJournal 
 		ifNotNil: [ :journal | journal index ]

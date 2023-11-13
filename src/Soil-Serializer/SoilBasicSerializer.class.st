@@ -121,7 +121,7 @@ SoilBasicSerializer >> nextPutScaledDecimal: aNumber [
 	"we know that numerator, denominator and scale are SmallIntegers"
 	self
 		nextPutByte: TypeCodeScaledDecimal;
-		nextPutLengthEncodedInteger: aNumber numerator;
+		nextPutInteger: aNumber numerator;
 		nextPutLengthEncodedInteger: aNumber denominator;
 		nextPutLengthEncodedInteger: aNumber scale 
 ]

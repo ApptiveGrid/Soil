@@ -52,7 +52,12 @@ SoilPersistentClusterVersion >> initialize [
 
 { #category : #accessing }
 SoilPersistentClusterVersion >> materializeObject [
-	object := self newMaterializer 
+	^ self materializeObjectUsing: self newMaterializer 
+]
+
+{ #category : #accessing }
+SoilPersistentClusterVersion >> materializeObjectUsing: aMaterializer [
+	object := aMaterializer 
 		stream: bytes readStream;
 		externalObjectRegistry: self;
 		materialize.
