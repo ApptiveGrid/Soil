@@ -36,7 +36,6 @@ SoilStandaloneSerializationTest >> testSerializationByteLayout [
 SoilStandaloneSerializationTest >> testSerializationCleanBlockClosure [
 	<compilerOptions: #(+ optionCleanBlockClosure)>
 	| object serialized  materialized |
-	(SystemVersion current major >= 11) ifFalse: [ self skip ].
 	object := [1+2].
 	
 	serialized := object soilSerialize.
@@ -51,7 +50,6 @@ SoilStandaloneSerializationTest >> testSerializationCompiledMethodLayout [
 
 	| object serialized materialized |
 	"We use CompiledMethod as an exampe of a class with a CompiledMethodLayout"
-	(SystemVersion current major >= 11) ifFalse: [ self skip ].
 	object := (OrderedCollection >> #do:) copy.
 
 	self
@@ -71,7 +69,6 @@ SoilStandaloneSerializationTest >> testSerializationCompiledMethodLayout [
 { #category : #'tests-layouts' }
 SoilStandaloneSerializationTest >> testSerializationCompiledMethodLayoutCompiledBlock [
 	| object serialized materialized |
-	(SystemVersion current major >= 11) ifFalse: [ self skip ].
  	"This tests CompiledBlock. we use a clean block for now"
  	object := [1+2 "clean block"] compiledBlock.
 
@@ -89,7 +86,6 @@ SoilStandaloneSerializationTest >> testSerializationCompiledMethodLayoutCompiled
 { #category : #'test-blocks' }
 SoilStandaloneSerializationTest >> testSerializationConstantBlockClosure [
 	| object serialized  materialized |
-	(SystemVersion current major >= 11) ifFalse: [ self skip ].
 	object := [1].
 	
 	serialized := object soilSerialize.
@@ -255,7 +251,6 @@ SoilStandaloneSerializationTest >> testSerializationSortedCollectionWithSortBloc
 	<compilerOptions: #(+ optionCleanBlockClosure)>
 
 	| object serialized materialized |
-	(SystemVersion current major == 11) ifFalse: [ self skip ].
 	object := SortedCollection new sortBlock: [ :a :b | a > b ].
 	serialized := object soilSerialize.
 	

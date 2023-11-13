@@ -13,9 +13,25 @@ SoilJournalFragmentFile class >> path: aFileReference [
 		path: aFileReference 
 ]
 
+{ #category : #versions }
+SoilJournalFragmentFile class >> version [
+	^ 1
+]
+
 { #category : #visiting }
 SoilJournalFragmentFile >> acceptSoil: aSoilVisitor [ 
 	aSoilVisitor visitJournalFragmentFile: self
+]
+
+{ #category : #writing }
+SoilJournalFragmentFile >> appendEntry: aSoilJournalEntry [ 
+	| position |
+	stream setToEnd.
+	position := stream position.
+	aSoilJournalEntry writeOn: stream.
+	stream flush.
+	^ position
+
 ]
 
 { #category : #'initialize-release' }
@@ -26,23 +42,17 @@ SoilJournalFragmentFile >> close [
 { #category : #'instance creation' }
 SoilJournalFragmentFile >> create [
 	path ensureCreateFile
-
 ]
 
 { #category : #accessing }
 SoilJournalFragmentFile >> created [
-	self stream position: self headerSize.
+	self stream position: self createdPosition.
 	^ DateAndTime fromUnixTime: (stream next: self createdSize) asInteger
 ]
 
-{ #category : #initialization }
-SoilJournalFragmentFile >> created: aDateandTime [
-	| timestamp |
-	timestamp := aDateandTime asUnixTime.
-	stream 
-		position: self headerSize;
-		nextPutAll: (timestamp asByteArrayOfSize: self createdSize);
-		flush
+{ #category : #accessing }
+SoilJournalFragmentFile >> createdPosition [
+	^ self versionPosition + self versionSize 
 ]
 
 { #category : #'as yet unclassified' }
@@ -58,13 +68,18 @@ SoilJournalFragmentFile >> currentLogSequenceNumber [
 ]
 
 { #category : #accessing }
+SoilJournalFragmentFile >> dataPosition [
+	^ self createdPosition + self createdSize 
+]
+
+{ #category : #accessing }
 SoilJournalFragmentFile >> filename [ 
 	^ self path basename
 ]
 
 { #category : #accessing }
 SoilJournalFragmentFile >> firstTransactionId [
-	self stream position: self headerSize + 6.
+	self stream position: self dataPosition.
 
 	^ SoilTransactionJournalEntry readTransactionIdFrom: stream
 ]
@@ -77,8 +92,26 @@ SoilJournalFragmentFile >> hasSpace [
 ]
 
 { #category : #initialization }
+SoilJournalFragmentFile >> initializeCreated [
+	| timestamp |
+	timestamp := DateAndTime now asUnixTime.
+	stream 
+		position: self createdPosition;
+		nextPutAll: (timestamp asByteArrayOfSize: self createdSize);
+		flush
+]
+
+{ #category : #initialization }
 SoilJournalFragmentFile >> initializeStart [ 
-	self created: DateAndTime now
+	self initializeVersion.
+	self initializeCreated 
+]
+
+{ #category : #initialization }
+SoilJournalFragmentFile >> initializeVersion [ 
+	self stream position: self headerSize.
+	stream next: self class version.
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -119,6 +152,7 @@ SoilJournalFragmentFile >> path [
 
 { #category : #accessing }
 SoilJournalFragmentFile >> path: aFileReference [ 
+	aFileReference  isDirectory ifTrue: [ self halt ].
 	path := aFileReference 
 ]
 
@@ -137,7 +171,7 @@ SoilJournalFragmentFile >> printOn: aStream [
 { #category : #'as yet unclassified' }
 SoilJournalFragmentFile >> transactionJournals [
 	| transactionJournals entry |
-	self stream position: self headerSize + 6.
+	self stream position: self dataPosition.
 	transactionJournals := OrderedDictionary new.
 	[ stream atEnd ] whileFalse: [  
 		entry := SoilJournalEntry readFrom: stream underlyingStream.
@@ -149,10 +183,18 @@ SoilJournalFragmentFile >> transactionJournals [
 	^ transactionJournals values
 ]
 
-{ #category : #writing }
-SoilJournalFragmentFile >> writeEntry: aSoilJournalEntry [ 
-	stream setToEnd.
-	aSoilJournalEntry writeOn: stream.
-	stream flush
+{ #category : #accessing }
+SoilJournalFragmentFile >> version [
+	self stream position: self versionPosition.
+	^ stream next asInteger
+]
 
+{ #category : #versions }
+SoilJournalFragmentFile >> versionPosition [
+	^ self headerSize 
+]
+
+{ #category : #versions }
+SoilJournalFragmentFile >> versionSize [
+	^ 1
 ]

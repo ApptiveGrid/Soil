@@ -98,6 +98,6 @@ SoilVisitor >> visitSoil: aSoil [
 ]
 
 { #category : #visiting }
-SoilVisitor >> visitUnitOfWork: aSoilTransactionJournal [ 
+SoilVisitor >> visitTransactionJournal: aSoilTransactionJournal [ 
 	^ aSoilTransactionJournal 
 ]

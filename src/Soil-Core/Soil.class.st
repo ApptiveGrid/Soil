@@ -8,7 +8,9 @@ Class {
 		'semaphore',
 		'settings',
 		'journal',
-		'notificationHandler'
+		'notificationHandler',
+		'serializerClass',
+		'materializerClass'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -87,6 +89,16 @@ Soil >> databaseVersion [
 { #category : #accessing }
 Soil >> databaseVersion: anInteger [ 
 	settings databaseVersion: anInteger
+]
+
+{ #category : #'instance creation' }
+Soil >> defaultMaterializerClass [
+	^ SoilMaterializer
+]
+
+{ #category : #'instance creation' }
+Soil >> defaultSerializerClass [
+	^ SoilSerializer
 ]
 
 { #category : #public }
@@ -172,16 +184,28 @@ Soil >> lockableStreamClass [
 ]
 
 { #category : #'instance creation' }
+Soil >> materializerClass [
+	^ materializerClass ifNil: [ self defaultMaterializerClass ]
+]
+
+{ #category : #accessing }
+Soil >> materializerClass: anObject [
+
+	materializerClass := anObject
+]
+
+{ #category : #'instance creation' }
 Soil >> newMaterializer [
-	^ SoilMaterializer new 
+	^ self materializerClass new
 		soil: self;
 		yourself
 ]
 
 { #category : #'instance creation' }
 Soil >> newSerializer [
-	^ SoilSerializer new 
-		soil: self 
+	^ self serializerClass new
+		soil: self;
+		yourself
 ]
 
 { #category : #transactions }
@@ -293,10 +317,27 @@ Soil >> replayJournal: aSoilJournal [
 	databaseVersion := self databaseVersion.
 	journals := aSoilJournal 
 		transactionJournalsStartingAt: databaseVersion + 1
-		do: [:tj | 
-			(tj index > databaseVersion) ifTrue: [  
-				tj asSortedJournal commitIn: self.
-				self journal importEntry: tj ] ]
+		do: [:tj | self replayTransactionJournal: tj ]
+]
+
+{ #category : #journal }
+Soil >> replayTransactionJournal: aSoilTransactionJournal [
+	| databaseVersion |
+	databaseVersion := self databaseVersion.
+	(aSoilTransactionJournal index > databaseVersion) ifTrue: [ 
+		aSoilTransactionJournal asSortedJournal commitIn: self.
+		self journal importTransactionJournal: aSoilTransactionJournal ]
+]
+
+{ #category : #'instance creation' }
+Soil >> serializerClass [
+	^ serializerClass ifNil: [ self defaultSerializerClass ]
+]
+
+{ #category : #accessing }
+Soil >> serializerClass: anObject [
+
+	serializerClass := anObject
 ]
 
 { #category : #accessing }

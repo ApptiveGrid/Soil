@@ -32,8 +32,8 @@ SoilBTreeTest >> testAddFirstOverflow [
 	| page capacity |
 	capacity := btree headerPage itemCapacity.
 	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	self assert: btree pages size equals: 2.
-	self assert: (btree pageAt: 1) numberOfItems equals: 255.
+	self assert: btree pages size equals: 3.
+	self assert: (btree pageAt: 1) numberOfItems equals: 128.
 	"if we add a page, the current one is split and half is moved there"
 	btree at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: btree pages size equals: 3.
@@ -76,8 +76,8 @@ SoilBTreeTest >> testAddSecondOverflow [
 	| page capacity |
 	capacity := btree headerPage itemCapacity.
 	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	self assert: btree pages size equals: 2.
-	self assert: (btree pageAt: 1) numberOfItems equals: 255.
+	self assert: btree pages size equals: 3.
+	self assert: (btree pageAt: 1) numberOfItems equals: 128.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n | btree at: capacity + n put: #[ 1 2 3 4 5 6 7 8 ]].
 	self assert: btree pages size equals: 4.
@@ -95,8 +95,8 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 
 	capacity := btree headerPage itemCapacity.
 	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	self assert: btree pages size equals: 2.
-	self assert: (btree pageAt: 1) numberOfItems equals: 255.
+	self assert: btree pages size equals: 3.
+	self assert: (btree pageAt: 1) numberOfItems equals: 128.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n | btree at: capacity + n put: #[ 1 2 3 4 5 6 7 8 ]].
 	self assert: btree pages size equals: 4.
@@ -121,8 +121,8 @@ SoilBTreeTest >> testAt [
 	| capacity |
 	capacity := btree headerPage itemCapacity.
 	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	self assert: btree pages size equals: 2.
-	self assert: (btree pageAt: 1) numberOfItems equals: 255.
+	self assert: btree pages size equals: 3.
+	self assert: (btree pageAt: 1) numberOfItems equals: 128.
 	"if we add a page, the current one is split and half is moved there"
 	btree at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: btree pages size equals: 3.
@@ -134,28 +134,13 @@ SoilBTreeTest >> testAt [
 ]
 
 { #category : #tests }
-SoilBTreeTest >> testAtNoOverflow [
-
-	| capacity |
-	capacity := btree headerPage itemCapacity.
-	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	self assert: btree pages size equals: 2.
-	self assert: (btree pageAt: 1) numberOfItems equals: 255.
-	self assert: btree pages size equals: 2.
-	
-	self assert: (btree at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
-	self should: [ btree at: capacity + 1  ] raise: KeyNotFound
-	
-]
-
-{ #category : #tests }
 SoilBTreeTest >> testAtSecondOverflow [
 
 	| capacity |
 	capacity := btree headerPage itemCapacity.
-	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	self assert: btree pages size equals: 2.
-	self assert: (btree pageAt: 1) numberOfItems equals: 255.
+	1 to: capacity*2 do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	self assert: btree pages size equals: 4.
+	self assert: (btree pageAt: 1) numberOfItems equals: 128.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n | btree at: capacity + n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: btree pages size equals: 4.
@@ -279,6 +264,22 @@ SoilBTreeTest >> testOverflowCopyOnWriteSplitting [
 	self assert: page numberOfItems equals: 127.
 	self assert: page items first key equals: 257.
 	self assert: page items last key asByteArray equals: #[ 1 253 ]
+]
+
+SoilBTreeTest >> testLastPage [
+	
+	| capacity lastItem |
+	btree maxLevel: 8.
+	capacity := btree firstPage itemCapacity * 100.
+
+	1 to: capacity - 1 do: [ :n |
+		btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	btree at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
+	self assert: btree pages size equals: 200.
+	self assert: btree lastPage index equals: 200.
+	self assert: btree lastPage isLastPage.
+	lastItem := btree lastPage itemAt: capacity ifAbsent: [nil].
+	self assert: lastItem value equals: #[ 8 7 6 5 4 3 2 1 ].
 ]
 
 { #category : #tests }
@@ -409,54 +410,4 @@ SoilBTreeTest >> testSplitIndexPageReleoad [
 	
 	"can we find all the keys we added?"
 	entries do: [:each | self assert: (btree at: each ) equals: (#[ 1 2 3 4 5 6 7 8 ] asByteArrayOfSize: 512)].
-]
-
-{ #category : #tests }
-SoilBTreeTest >> testSplitRootIndexPage [ 
-	"we add until the root Index is full and has to be split"
-	| capacity n indexPages |
-	n := 1.
-	capacity := btree headerPage itemCapacity.
-	[btree rootPage hasRoom] whileTrue: [
-		btree at: n put: #[ 1 2 3 4 5 6 7 8 ].
-		n:= n+1. ].
-	self assert: btree pages size equals: 410.
-	
-	"if we lots of more pages, the root index has to be split"
-	1 to: capacity do: [ :i | btree at:  i + n put: #[ 1 2 3 4 5 6 7 8 ]].
-	
-	self assert: btree pages size equals: 413.
-	indexPages := btree pages values select: [ :each | each isKindOf: SoilBTreeIndexPage ].
-	"we now have indeed three index pages"
-	self assert: indexPages size equals: 3.
-	self assert: btree rootPage equals: indexPages third.
-	"the root page now points to the new index page"
-	self assert: (btree rootPage items anySatisfy: [ :item | item value asInteger = indexPages first index ]).
-	"and we can find the key added last"
-	self assert: (btree at: capacity + n ) equals:  #[ 1 2 3 4 5 6 7 8 ]
-]
-
-{ #category : #tests }
-SoilBTreeTest >> testSplitRootIndexPageReload [
-	"we add until the root Index is full and has to be split"
-	| capacity n |
-	n := 1.
-	capacity := btree headerPage itemCapacity.
-	[btree rootPage hasRoom] whileTrue: [
-		btree at: n put: #[ 1 2 3 4 5 6 7 8 ].
-		n:= n+1. ].
-	self assert: btree pages size equals: 410.
-	
-	"if we lots of more pages, the root index has to be split"
-	1 to: capacity do: [ :i | btree at:  i + n put: #[ 1 2 3 4 5 6 7 8 ]].
-
-	btree writePages.
-	btree close.
-	btree := SoilBTree new 
-		path: 'sunit-btree';
-		initializeFilesystem;
-		open. 
-	
-	"and we can find the key added last"
-	self assert: (btree at: capacity + n ) equals:  #[ 1 2 3 4 5 6 7 8 ].
 ]

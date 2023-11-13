@@ -180,6 +180,50 @@ SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testConcurrentAddKey [ 
+	| tx1 tx2 tx3 |
+	tx1 := soil newTransaction.
+	tx1 root: (dict
+		at: #one put: #onevalue;
+		yourself).
+	tx1 commit.
+	tx2 := soil newTransaction.
+	"After creating tx2 we open a concurrent transaction and add a key to 
+	the dictionary which should be invisible to tx2"
+	tx3 := soil newTransaction.
+	tx3 root
+		at: #two put: #twovalue.
+	tx3 commit.
+	self assert: (tx2 root at: #one) equals: #onevalue.
+	self assert: (tx2 root at: #two ifAbsent: [ #notfound ]) equals: #notfound
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testConcurrentDo [
+	| tx1 tx2 tx3 col |
+	tx1 := soil newTransaction.
+	tx1 root: (dict
+		at: #one put: #onevalue;
+		at: #two put: #twovalue;
+		at: #three put: #threevalue;
+		at: #four put: #fourvalue;
+		yourself).
+	tx1 commit.
+	tx2 := soil newTransaction.
+	"After creating tx2 we open a concurrent transaction and add a key to 
+	the dictionary which should be invisible to tx2"
+	tx3 := soil newTransaction.
+	tx3 root
+		at: #five put: #fivevalue.
+	tx3 commit.
+	col := OrderedCollection new.
+	tx2 root do: [ :each |
+		col add: each ].
+	self assert: col size equals: 4.
+	self assert: (col noneSatisfy: [:each | each = #fiveValue ])
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testConcurrentIsEmpty [ 
 	| tx1 tx2 tx3 |
 	tx1 := soil newTransaction.
@@ -195,6 +239,25 @@ SoilIndexedDictionaryTest >> testConcurrentIsEmpty [
 	tx3 commit.
 	self assert: tx2 root size equals: 0.
 	self assert: tx2 root isEmpty.
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testConcurrentRemoveKey [ 
+	| tx1 tx2 tx3 |
+	tx1 := soil newTransaction.
+	tx1 root: (dict
+		at: #one put: #onevalue;
+		yourself).
+	tx1 commit.
+	tx2 := soil newTransaction.
+	"After creating tx2 we open a concurrent transaction and remove a key to 
+	the dictionary which should still be visible to tx2"
+	tx3 := soil newTransaction.
+	tx3 root
+		removeKey: #one.
+	tx3 commit.
+	self assert: (tx2 root at: #one) equals: #onevalue.
+
 ]
 
 { #category : #tests }

@@ -22,7 +22,7 @@ SoilTransactionJournal class >> soilTransientInstVars [
 
 { #category : #visiting }
 SoilTransactionJournal >> acceptSoil: aSoilVisitor [ 
-	^ aSoilVisitor visitUnitOfWork: self
+	^ aSoilVisitor visitTransactionJournal: self
 ]
 
 { #category : #adding }
@@ -62,15 +62,6 @@ SoilTransactionJournal >> asSortedJournal [
 	^ self copy 
 		entries: sorted;
 		yourself
-]
-
-{ #category : #'as yet unclassified' }
-SoilTransactionJournal >> checkpoint: soil [
-	| entry |
-	entry := SoilCheckpointEntry new.
-	entry commitIn: soil.
-	soil journal writeEntry: entry.
-	^ entry
 ]
 
 { #category : #committing }

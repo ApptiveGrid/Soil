@@ -11,17 +11,18 @@ SoilBTreeIndexPage class >> pageCode [
 
 { #category : #private }
 SoilBTreeIndexPage >> find: aKey with: aBTree [
-	| page |
-	page := self findPageFor: aKey with: aBTree.
+	| item page |
+	item := self findKey: aKey.
+	page := aBTree pageAt: item value.
 	^ page find: aKey with: aBTree
 ]
 
 { #category : #searching }
-SoilBTreeIndexPage >> findPageFor: aKey with: aBTree [
+SoilBTreeIndexPage >> findKey: aKey [
 	items
 		reverseDo: [ :each |
 			each key <= aKey 
-				ifTrue: [ ^ aBTree pageAt: each value ] ].
+				ifTrue: [ ^ each ] ].
 	^nil
 ]
 
@@ -35,22 +36,32 @@ SoilBTreeIndexPage >> headerSize [
 	^ self indexSize
 ]
 
-{ #category : #accessing }
-SoilBTreeIndexPage >> insert: anItem into: anIterator [
-	| indexPage newPage indexItem newIndexPage  |
-	indexPage := self findPageFor: anItem key with: anIterator index.
-	indexPage ifNil: [ ^nil ]. "nothing to do"
-	newPage := indexPage insert: anItem into: anIterator.
-	newPage ifNil: [ ^nil ]. "nothing to do"
+{ #category : #searching }
+SoilBTreeIndexPage >> insertItem: item for: iterator [
+	| foundItem return newPage  |
 	
-	indexItem := newPage smallestKey -> newPage index.
-	"if the insert resulted in a split, we have to update the index, which might habe to split, too"
-	self hasRoom ifTrue: [ self addItem: indexItem . ^ nil ].
-	newIndexPage := anIterator index splitIndexPage: self.				
-	((newIndexPage smallestKey <= anItem key) 
-		ifTrue: [ newIndexPage ] 
-		ifFalse: [ self ]) addItem: indexItem.
-	^newIndexPage
+	foundItem := self findKey: item key.
+	
+	return := (iterator index pageAt: foundItem value) insertItem: item for: iterator.
+	return indexEntryNeeded ifFalse: [  ^ return ].
+	
+	"We need to add to this index page"
+	self addItem: return indexEntry.
+	self hasRoom ifTrue: [  ^ return indexEntry: nil].
+		
+	"no space, we have to split"
+	newPage := iterator index splitIndexPage: self.
+	"we need to add the new page to the index above"
+	^ return indexEntry: (newPage smallestKey -> newPage index)
+]
+
+{ #category : #accessing }
+SoilBTreeIndexPage >> itemAt: key put: anObject [ 
+	| removedItem |
+	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
+	items add: (key -> anObject).
+	dirty := true.
+	^ removedItem
 ]
 
 { #category : #printing }

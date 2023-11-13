@@ -15,32 +15,28 @@ SoilBTreeRootPage >> initialize [
 	self addItem: 0 -> 1 "headPage id"
 ]
 
-{ #category : #accessing }
-SoilBTreeRootPage >> insert: anItem into: anIterator [
-	| indexPage newPage indexItem newIndexPage1 newIndexPage2 |
-		
-	indexPage := self findPageFor: anItem key with: anIterator index.
-	indexPage ifNil: [ ^nil ]. "nothing to do"
-	newPage := indexPage insert: anItem into: anIterator.
-	newPage ifNil: [ ^nil ]. "nothing to do"
+{ #category : #searching }
+SoilBTreeRootPage >> insertItem: item for: iterator [
+	| foundItem return newIndexPage1 newIndexPage2 |
 	
-	indexItem := newPage smallestKey -> newPage index.
-	"if the insert resulted in a split, we have to update the index, which might habe to split, too"
-	self hasRoom ifTrue: [ self addItem: indexItem . ^ nil ].
-	newIndexPage1 := anIterator index splitIndexPage: self.
+	foundItem := self findKey: item key.
+
+	return := (iterator index pageAt: foundItem value) insertItem: item for: iterator.
+	return indexEntryNeeded ifFalse: [  ^ return ].
+	"We need to add to this index page"
+	
+	self addItem: return indexEntry.
+	self hasRoom ifTrue: [  ^ return indexEntry: nil].
+	"No space, we have to split"
+
 	"we are the root index page, thus we have to create another index page and move items there"
-	newIndexPage2 := anIterator index newIndexPageFromRoot: self.
+	newIndexPage1 := iterator index newIndexPageFromRoot: self.
+	newIndexPage2 := iterator index splitIndexPage: newIndexPage1.
 	
 	"here now add entries for newIndexPage1 and newIndexPage2 to self"
 	self addItem: newIndexPage1 smallestKey -> newIndexPage1 index.
 	self addItem: newIndexPage2 smallestKey -> newIndexPage2 index.
-	
-	"and add the indexItem to one of the two"
-	((newIndexPage1 smallestKey <= anItem key) 
-		ifTrue: [ newIndexPage1 ] 
-		ifFalse: [ newIndexPage2 ]) addItem: indexItem.
-
-	^nil
+	^ return
 ]
 
 { #category : #printing }
