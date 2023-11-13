@@ -82,6 +82,11 @@ SoilBasicBTree >> first: anInteger [
 ]
 
 { #category : #accessing }
+SoilBasicBTree >> firstPage [
+	^ self headerPage
+]
+
+{ #category : #accessing }
 SoilBasicBTree >> flush [
 	self store flush
 ]
@@ -131,6 +136,11 @@ SoilBasicBTree >> keySize: anInteger [
 { #category : #accessing }
 SoilBasicBTree >> last [
 	^ self newIterator last
+]
+
+{ #category : #accessing }
+SoilBasicBTree >> lastPage [
+	^ self newIterator lastPage
 ]
 
 { #category : #accessing }
