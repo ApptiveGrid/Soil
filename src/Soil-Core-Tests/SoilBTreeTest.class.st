@@ -267,7 +267,7 @@ SoilBTreeTest >> testLast [
 { #category : #tests }
 SoilBTreeTest >> testLastPage [
 	
-	| capacity |
+	| capacity lastItem |
 	btree maxLevel: 8.
 	capacity := btree firstPage itemCapacity * 100.
 
@@ -275,7 +275,11 @@ SoilBTreeTest >> testLastPage [
 		btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	btree at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
 	self assert: btree pages size equals: 200.
-	self assert: btree lastPage index equals: 200
+	self assert: btree lastPage index equals: 200.
+	self assert: btree lastPage isLastPage.
+	lastItem := btree lastPage itemAt: capacity ifAbsent: [nil].
+	self assert: lastItem value equals: #[ 8 7 6 5 4 3 2 1 ].
+	
 ]
 
 { #category : #tests }
