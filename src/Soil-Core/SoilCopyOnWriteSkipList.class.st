@@ -23,6 +23,12 @@ SoilCopyOnWriteSkipList >> thePersistentInstance [
 ]
 
 { #category : #converting }
+SoilCopyOnWriteSkipList >> wrappedIndex [
+
+	^ self wrappedSkipList
+]
+
+{ #category : #converting }
 SoilCopyOnWriteSkipList >> wrappedSkipList [
 	^ wrappedSkipList
 ]

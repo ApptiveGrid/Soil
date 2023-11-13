@@ -34,3 +34,9 @@ SoilCopyOnWriteBTree >> wrappedBTree: anObject [
 	wrappedBTree := anObject.
 	self store: wrappedBTree store asCopyOnWriteStore 
 ]
+
+{ #category : #accessing }
+SoilCopyOnWriteBTree >> wrappedIndex [
+
+	^ self wrappedBTree
+]

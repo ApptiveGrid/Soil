@@ -327,7 +327,9 @@ SoilIndexedDictionaryTest >> testFlushIndexPages [
 	tx commit.
 	txn1 := soil newTransaction.
 	root1 := txn1 root.
-	self assert: root1 index wrappedBTree pages size equals: 3.
+	(dict index isKindOf: SoilSkipList)
+		ifTrue: [ self assert: root1 index wrappedIndex pages size equals: 2]
+		ifFalse: [self assert: root1 index wrappedIndex pages size equals: 3].
 	root1 index flushCachedPages.
 	self assert: root1 index pages size equals: 0.
 	txn1 abort.
@@ -335,7 +337,7 @@ SoilIndexedDictionaryTest >> testFlushIndexPages [
 	txn2 := soil newTransaction.
 	root2 := txn2 root.
 	self assert: root2 index pages size equals: 0.
-	self assert: root2 index wrappedBTree pages size equals: 0.
+	self assert: root2 index wrappedIndex pages size equals: 0.
 	self assert: (root2 at: '56') equals: '56'.
 	txn2 abort
 ]
