@@ -163,25 +163,6 @@ SoilBasicSkipList >> pages [
 	^ self store pages
 ]
 
-{ #category : #removing }
-SoilBasicSkipList >> removeKey: key [ 
-	^ self
-		removeKey: key 
-		ifAbsent: [ KeyNotFound signalFor: key in: self ]
-]
-
-{ #category : #removing }
-SoilBasicSkipList >> removeKey: aString ifAbsent: aBlock [
-	| page index key |
-	key := (aString asSkipListKeyOfSize: self keySize) asInteger.
-	page := self newIterator 
-		find: key;
-		currentPage.
-	^ ((index := page indexOfKey: key) > 0) 
-		ifTrue: [ (page itemRemoveIndex: index) value ]
-		ifFalse: [ aBlock value ]
-]
-
 { #category : #accessing }
 SoilBasicSkipList >> size [
 	"We iterate over all elements to get the size. Slow!"

@@ -380,24 +380,6 @@ SoilSkipListTest >> testPageAddFirst [
 ]
 
 { #category : #tests }
-SoilSkipListTest >> testRemoveKey [
-
-	| capacity |
-	capacity := skipList headerPage itemCapacity.
-	1 to: capacity do: [ :n | skipList at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	
-	skipList removeKey: 20.
-	
-	self assert: (skipList at: 1) equals: #[ 1 2 3 4 5 6 7 8 ].
-	self assert: (skipList at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
-	self should: [ skipList at: 20  ] raise: KeyNotFound.
-	skipList at: 20 put: #[ 1 2 3 4 5 6 7 8 ].
-	self assert: (skipList at: 20) equals: #[ 1 2 3 4 5 6 7 8 ].
-	
-	self should: [ skipList removeKey: capacity + 1 ] raise: KeyNotFound
-]
-
-{ #category : #tests }
 SoilSkipListTest >> testSize [
 	
 	| capacity |
