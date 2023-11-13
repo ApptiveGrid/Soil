@@ -168,17 +168,8 @@ SoilIndexIterator >> nextAssociation [
 ]
 
 { #category : #accessing }
-SoilIndexIterator >> nextAssociationWithPresentValue [
-	| next |
-	next := self nextAssociation.
-	[ next notNil and: [ next value isRemoved ] ] whileTrue: [ 
-		next := self nextAssociation ].
-	^ next 
-]
-
-{ #category : #accessing }
 SoilIndexIterator >> nextPresent [ 
-	^ self nextAssociationWithPresentValue value
+	^ self nextPresentAssociation value
 ]
 
 { #category : #accessing }
