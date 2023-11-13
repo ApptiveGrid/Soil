@@ -25,19 +25,21 @@ SoilBTreeDictionary >> journalEntries [
 			keySize: index keySize;
 			valueSize: index valueSize) ].
 	newValues keysAndValuesDo: [ :key :value |
+		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
 		entries add: (SoilAddKeyEntry new 
 			transactionId: transaction writeVersion;
 			segment: segment;
 			id: id;
-			key: key;
+			key: (self binaryKey: key);
 			value: value;
-			oldValue: (oldValues at: key ifAbsent: [nil ])) ].
+			oldValue: (oldValues at: key ifAbsent: nil)) ].
 	removedValues keysAndValuesDo: [ :key :value |
+		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
 		entries add: (SoilRemoveKeyEntry new 
 			transactionId: transaction writeVersion;
 			segment: segment;
 			id: id;
-			key: key; 
+			key: (self binaryKey: key); 
 			oldValue: value) ].
 	^ entries
 ]

@@ -42,11 +42,6 @@ SoilBTreePage >> associationAt: anInteger ifAbsent: aBlock [
 		ifNone: aBlock
 ]
 
-{ #category : #accessing }
-SoilBTreePage >> biggestKey [
-	^ items last key
-]
-
 { #category : #private }
 SoilBTreePage >> find: aKey with: aBTree [ 
 	^ self subclassResponsibility
@@ -80,11 +75,6 @@ SoilBTreePage >> initialize [
 	items := SortedCollection new.
 	lastTransaction := 0.
 	dirty := true
-]
-
-{ #category : #private }
-SoilBTreePage >> insert: anItem into: aBtree [ 
-	^ self subclassResponsibility
 ]
 
 { #category : #testing }
@@ -219,7 +209,6 @@ SoilBTreePage >> split: newPage [
 	middle := (items size / 2) ceiling.
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.
-	
 	^ newPage
 ]
 
