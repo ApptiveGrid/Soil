@@ -16,12 +16,6 @@ SoilFindRecordVisitor >> find: aBlock in: aSoilTransaction [
 	self visit: soil
 ]
 
-{ #category : #initialization }
-SoilFindRecordVisitor >> initialize [ 
-	super initialize.
-	seen := Set new.
-]
-
 { #category : #accessing }
 SoilFindRecordVisitor >> object [
 	^ object

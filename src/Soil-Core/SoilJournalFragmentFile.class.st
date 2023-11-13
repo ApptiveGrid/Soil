@@ -79,7 +79,7 @@ SoilJournalFragmentFile >> filename [
 
 { #category : #accessing }
 SoilJournalFragmentFile >> firstTransactionId [
-	self stream position: self headerSize + 6.
+	self stream position: self dataPosition.
 
 	^ SoilTransactionJournalEntry readTransactionIdFrom: stream
 ]
