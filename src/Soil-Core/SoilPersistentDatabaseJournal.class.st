@@ -94,9 +94,9 @@ SoilPersistentDatabaseJournal >> fragmentFiles [
 ]
 
 { #category : #'as yet unclassified' }
-SoilPersistentDatabaseJournal >> importEntry: aSoilTransactionJournal [ 
+SoilPersistentDatabaseJournal >> importTransactionJournal: aSoilTransactionJournal [ 
 	self writeTransactionJournal: aSoilTransactionJournal.
-	super importEntry: aSoilTransactionJournal
+	self addTransactionJournal: aSoilTransactionJournal
 ]
 
 { #category : #initialization }

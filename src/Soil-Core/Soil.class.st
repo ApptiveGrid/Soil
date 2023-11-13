@@ -321,12 +321,12 @@ Soil >> replayJournal: aSoilJournal [
 ]
 
 { #category : #journal }
-Soil >> replayTransactionJournal: aSoilTransactionJournal [ 
+Soil >> replayTransactionJournal: aSoilTransactionJournal [
 	| databaseVersion |
 	databaseVersion := self databaseVersion.
-	"(aSoilTransactionJournal index > databaseVersion) ifTrue: [  "
-		"aSoilTransactionJournal asSortedJournal commitIn: self."
-		self journal importEntry: aSoilTransactionJournal "] "
+	(aSoilTransactionJournal index > databaseVersion) ifTrue: [ 
+		aSoilTransactionJournal asSortedJournal commitIn: self.
+		self journal importTransactionJournal: aSoilTransactionJournal ]
 ]
 
 { #category : #'instance creation' }
