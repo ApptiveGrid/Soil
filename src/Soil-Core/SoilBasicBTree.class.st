@@ -87,6 +87,11 @@ SoilBasicBTree >> flush [
 ]
 
 { #category : #accessing }
+SoilBasicBTree >> flushCachedPages [
+	store flushCachedPages
+]
+
+{ #category : #accessing }
 SoilBasicBTree >> headerPage [
 	^ self store headerPage
 ]

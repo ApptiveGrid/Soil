@@ -12,6 +12,11 @@ SoilCopyOnWriteBTree >> isRegistered [
 	^ wrappedBTree isRegistered
 ]
 
+{ #category : #'instance creation' }
+SoilCopyOnWriteBTree >> newPage [ 
+	^ wrappedBTree newPage
+]
+
 { #category : #converting }
 SoilCopyOnWriteBTree >> thePersistentInstance [
 	^ wrappedBTree

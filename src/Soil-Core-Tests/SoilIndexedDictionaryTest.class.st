@@ -317,6 +317,30 @@ SoilIndexedDictionaryTest >> testFirstWithTransaction [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testFlushIndexPages [
+	| tx  capacity txn2 txn1 root1 root2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	capacity := (dict index pageAt: 1) itemCapacity.
+	1 to: capacity + 1 do: [ :n | 
+		dict at: n asString put: n asString ].
+	tx commit.
+	txn1 := soil newTransaction.
+	root1 := txn1 root.
+	self assert: root1 index wrappedBTree pages size equals: 3.
+	root1 index flushCachedPages.
+	self assert: root1 index pages size equals: 0.
+	txn1 abort.
+
+	txn2 := soil newTransaction.
+	root2 := txn2 root.
+	self assert: root2 index pages size equals: 0.
+	self assert: root2 index wrappedBTree pages size equals: 0.
+	self assert: (root2 at: '56') equals: '56'.
+	txn2 abort
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testIndexCreation [ 
 	| tx obj1 obj2 |
 	tx := soil newTransaction.
