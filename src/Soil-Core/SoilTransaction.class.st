@@ -575,6 +575,14 @@ SoilTransaction >> recordsToCommit [
 	^ recordsToCommit
 ]
 
+{ #category : #accessing }
+SoilTransaction >> registerRecord: record [
+	record objectId ifNil: [ Error signal: 'register record needs an objectId' ].
+	record object ifNil: [ Error signal: 'register record needs an object' ].
+	idMap at: record objectId put: record.
+	objectMap at: record object put: record
+]
+
 { #category : #'as yet unclassified' }
 SoilTransaction >> releaseLocks [
 	locks do: [ :lock | lock release ].

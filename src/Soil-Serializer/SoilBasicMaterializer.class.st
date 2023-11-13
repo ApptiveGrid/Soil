@@ -104,7 +104,7 @@ SoilBasicMaterializer >> nextScaledDecimal: aClass [
 
 	| scaledDecimal |
 	scaledDecimal := aClass new
-		                 setNumerator: self nextLengthEncodedInteger
+		                 setNumerator: self nextSoilObject
 		                 denominator: self nextLengthEncodedInteger
 		                 scale: self nextLengthEncodedInteger.
 	self registerObject: scaledDecimal.

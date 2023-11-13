@@ -35,6 +35,18 @@ SoilInstanceVisitor >> visitObjectId: aSoilObjectId [
 ]
 
 { #category : #visiting }
+SoilInstanceVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [ 
+	| numberOfPages |
+	numberOfPages := aSoilPagedFileIndexStore headerPage lastPageIndex.
+	1 to: numberOfPages do: [ :pageIndex | | page |
+		page := aSoilPagedFileIndexStore pageAt: pageIndex.
+		page items do: [ :item |
+			item value isRemoved ifFalse: [ 
+				self visit: item value ] ] ].
+	^ aSoilPagedFileIndexStore 
+]
+
+{ #category : #visiting }
 SoilInstanceVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	super visitPersistentClusterVersion: aSoilPersistentClusterVersion.
 	aSoilPersistentClusterVersion indexIds do:[ :indexId |
