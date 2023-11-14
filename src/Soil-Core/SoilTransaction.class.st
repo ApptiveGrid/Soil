@@ -269,6 +269,11 @@ SoilTransaction >> continue [
 	lastObjectIndexes := nil
 ]
 
+{ #category : #accessing }
+SoilTransaction >> database [
+	^ soil
+]
+
 { #category : #aborting }
 SoilTransaction >> dirtyObjects [
 	^ idMap select: [ :each | each hasChanged ] thenCollect: #object
