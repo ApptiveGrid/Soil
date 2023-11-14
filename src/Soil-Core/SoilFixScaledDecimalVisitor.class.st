@@ -5,7 +5,7 @@ Class {
 }
 
 { #category : #visiting }
-SoilFixScaledDecimalVisitor >> visitPersistentClusterVersion: aPersistentClusterVersion [ 
+SoilFixScaledDecimalVisitor >> processClusterVersion: aPersistentClusterVersion [ 
 	| object materializer |
 	"use a materializer that can read the legacy format of a 
 	scaled decimal"
@@ -19,6 +19,5 @@ SoilFixScaledDecimalVisitor >> visitPersistentClusterVersion: aPersistentCluster
 			object to the transaction in order to mark it dirty" 
 			transaction 
 				registerRecord: aPersistentClusterVersion;
-				markDirty: object.  ].
-	super visitPersistentClusterVersion: aPersistentClusterVersion.
+				markDirty: object.  ]
 ]

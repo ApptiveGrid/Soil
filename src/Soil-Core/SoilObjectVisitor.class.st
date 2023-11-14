@@ -4,6 +4,14 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #visiting }
+SoilObjectVisitor >> processClusterVersion: aPersistentClusterVersion [ 
+	"materialize object in cluster version and process it"
+	self processObject: (aPersistentClusterVersion
+			transaction: transaction;
+			materializeObject)
+]
+
 { #category : #private }
 SoilObjectVisitor >> processObject: anObject [
 
@@ -15,8 +23,6 @@ SoilObjectVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [
 
 { #category : #visiting }
 SoilObjectVisitor >> visitPersistentClusterVersion: aPersistentClusterVersion [ 
-	self processObject: (aPersistentClusterVersion
-			transaction: transaction;
-			materializeObject).
+	self processClusterVersion: aPersistentClusterVersion.
 	super visitPersistentClusterVersion: aPersistentClusterVersion.
 ]
