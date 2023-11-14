@@ -12,6 +12,11 @@ SoilCopyOnWriteBTree >> isRegistered [
 	^ wrappedBTree isRegistered
 ]
 
+{ #category : #'instance creation' }
+SoilCopyOnWriteBTree >> newPage [ 
+	^ wrappedBTree newPage
+]
+
 { #category : #converting }
 SoilCopyOnWriteBTree >> thePersistentInstance [
 	^ wrappedBTree
@@ -28,4 +33,10 @@ SoilCopyOnWriteBTree >> wrappedBTree: anObject [
 
 	wrappedBTree := anObject.
 	self store: wrappedBTree store asCopyOnWriteStore 
+]
+
+{ #category : #accessing }
+SoilCopyOnWriteBTree >> wrappedIndex [
+
+	^ self wrappedBTree
 ]

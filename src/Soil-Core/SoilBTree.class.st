@@ -2,7 +2,9 @@ Class {
 	#name : #SoilBTree,
 	#superclass : #SoilBasicBTree,
 	#instVars : [
-		'path'
+		'path',
+		'keySize',
+		'valueSize'
 	],
 	#category : #'Soil-Core-Index-BTree'
 }
@@ -15,6 +17,18 @@ SoilBTree >> destroy [
 { #category : #testing }
 SoilBTree >> isRegistered [
 	^ path notNil
+]
+
+{ #category : #accessing }
+SoilBTree >> keySize [
+	^ keySize ifNil: [
+		keySize := super keySize ]
+]
+
+{ #category : #accessing }
+SoilBTree >> keySize: anInteger [
+	super keySize: anInteger.
+	keySize := anInteger
 ]
 
 { #category : #accessing }
@@ -32,4 +46,16 @@ SoilBTree >> path: aStringOrFileReference [
 { #category : #converting }
 SoilBTree >> thePersistentInstance [
 	^ self
+]
+
+{ #category : #accessing }
+SoilBTree >> valueSize [
+	^ valueSize ifNil: [ 
+		valueSize := super valueSize ]
+]
+
+{ #category : #accessing }
+SoilBTree >> valueSize: anInteger [ 
+	super valueSize: anInteger.
+	valueSize := anInteger
 ]
