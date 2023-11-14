@@ -91,6 +91,11 @@ SoilClusterRecord >> hasPreviousVersion [
 	^ previousVersionPosition > 0 
 ]
 
+{ #category : #testing }
+SoilClusterRecord >> includesReference: aSoilObjectId [ 
+	^ references includes: aSoilObjectId 
+]
+
 { #category : #accessing }
 SoilClusterRecord >> indexAt: indexId [ 
 	"resolve the index in the segment of the cluster root"
