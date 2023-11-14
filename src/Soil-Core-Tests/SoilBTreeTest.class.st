@@ -274,9 +274,8 @@ SoilBTreeTest >> testOverflowCopyOnWriteSplitting [
 	capacity := copyOnWrite headerPage itemCapacity.
 	1 to: capacity * 2 by: 2 do: [ :n | 
 		copyOnWrite at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
-	self assert: copyOnWrite pages size equals: 2.
-	copyOnWrite at: 2 floor put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: copyOnWrite pages size equals: 3.
+
 	page := copyOnWrite pageAt: 3.
 	self assert: page numberOfItems equals: 127.
 	self assert: page items first key equals: 257.

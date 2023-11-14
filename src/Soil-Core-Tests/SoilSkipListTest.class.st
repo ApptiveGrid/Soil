@@ -362,7 +362,7 @@ SoilSkipListTest >> testOverflowCopyOnWriteSplitting [
 	1 to: capacity * 2 by: 2 do: [ :n | 
 		copyOnWrite at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: copyOnWrite pages size equals: 1.
-	copyOnWrite at: 2 floor put: #[ 1 2 3 4 5 6 7 8 ].
+	copyOnWrite at: 2 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: copyOnWrite pages size equals: 2.
 	page := copyOnWrite pageAt: 2.
 	self assert: page numberOfItems equals: 126.
