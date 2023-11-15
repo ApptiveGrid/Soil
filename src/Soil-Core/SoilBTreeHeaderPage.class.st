@@ -12,6 +12,15 @@ SoilBTreeHeaderPage class >> pageCode [
 	^ 3
 ]
 
+{ #category : #utilities }
+SoilBTreeHeaderPage >> headerSize [
+	^ super headerSize  
+		+ 2 "valueSize"
+		+ 2 "keySize"
+		+ self pointerSize "lastPageIndex"
+		
+]
+
 { #category : #accessing }
 SoilBTreeHeaderPage >> lastPageIndex: anObject [
 	lastPageIndex := anObject.
@@ -34,35 +43,19 @@ SoilBTreeHeaderPage >> printOn: aStream [
 SoilBTreeHeaderPage >> readFrom: aStream [ 
 	dirty := false.
 	"we do not read the pageCode, that was done before"
-	self readIndexFrom: aStream.
+	self readLastTransactionFrom: aStream.
 	self readNextFrom: aStream.
-	self readHeaderFrom: aStream.
-
+	keySize := (aStream next: 2) asInteger.
+	valueSize := (aStream next: 2) asInteger.
+	lastPageIndex :=(aStream next: self pointerSize) asInteger.
 	self readItemsFrom: aStream
 ]
 
-{ #category : #'initialize-release' }
-SoilBTreeHeaderPage >> readHeaderFrom: aStream [
-	keySize := (aStream next: 2) asInteger.
-	valueSize := (aStream next: 2) asInteger.
-	lastPageIndex :=(aStream next: 2) asInteger.
-	self readLastTransactionFrom: aStream
-
-	
-]
-
 { #category : #writing }
-SoilBTreeHeaderPage >> writeOn: aStream [ 
-	dirty := false.
-	aStream 
-		nextPut: self class pageCode;
-		nextPutAll: (index asByteArrayOfSize: self indexSize);
-		nextPutAll: (next asByteArrayOfSize: self pointerSize);
+SoilBTreeHeaderPage >> writeHeaderOn: aStream [ 
+	super writeHeaderOn: aStream.
+	aStream
 		nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
-		nextPutAll: (lastPageIndex asByteArrayOfSize: 2);
-		nextPutAll: (lastTransaction asByteArrayOfSize: 8).
-		
-	self 
-		writeItemsOn: aStream
+		nextPutAll: (lastPageIndex asByteArrayOfSize: self pointerSize)
 ]

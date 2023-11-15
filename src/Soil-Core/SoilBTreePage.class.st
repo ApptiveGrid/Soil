@@ -59,7 +59,7 @@ SoilBTreePage >> hasRoom [
 
 { #category : #utilities }
 SoilBTreePage >> headerSize [
-	self subclassResponsibility
+	^ super headerSize + 8 "last transaction number"
 ]
 
 { #category : #accessing }
@@ -161,7 +161,8 @@ SoilBTreePage >> numberOfItems [
 
 { #category : #accessing }
 SoilBTreePage >> pointerSize [
-	^ 2
+	"this is the size in bytes used to point to other pages"
+	^ 4
 ]
 
 { #category : #copying }
@@ -226,6 +227,11 @@ SoilBTreePage >> valueAt: anInteger ifAbsent: aBlock [
 		ifAbsent: aBlock) value
 ]
 
+{ #category : #accessing }
+SoilBTreePage >> valueSize [
+	^ self subclassResponsibility
+]
+
 { #category : #writing }
 SoilBTreePage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
@@ -240,4 +246,10 @@ SoilBTreePage >> writeItemsOn: aStream [
 		aStream 
 			nextPutAll: (assoc key asByteArrayOfSize: self keySize);
 			nextPutAll: (assoc value asByteArrayOfSize: self valueSize)]
+]
+
+{ #category : #writing }
+SoilBTreePage >> writeOn: aStream [ 
+	super writeOn: aStream.
+	self writeItemsOn: aStream
 ]

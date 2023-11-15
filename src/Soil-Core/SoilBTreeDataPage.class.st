@@ -26,7 +26,9 @@ SoilBTreeDataPage >> hasItems [
 
 { #category : #utilities }
 SoilBTreeDataPage >> headerSize [
-	^ self indexSize + self pointerSize
+	^ super headerSize  
+		+ self pointerSize "next"
+		+ 2 "items size"
 ]
 
 { #category : #initialization }
@@ -131,15 +133,8 @@ SoilBTreeDataPage >> valueSize: anInteger [
 ]
 
 { #category : #'reading-writing' }
-SoilBTreeDataPage >> writeNextOn: aStream [
+SoilBTreeDataPage >> writeHeaderOn: aStream [ 
+	super writeHeaderOn: aStream.
 	aStream
 		nextPutAll: (next asByteArrayOfSize: self pointerSize)
-]
-
-{ #category : #'reading-writing' }
-SoilBTreeDataPage >> writeOn: aStream [ 
-	super writeOn: aStream.
-	self 
-		writeNextOn: aStream;
-		writeItemsOn: aStream
 ]
