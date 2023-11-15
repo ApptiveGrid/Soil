@@ -33,7 +33,8 @@ SoilBTreeIndexPage >> hasRoom [
 
 { #category : #utilities }
 SoilBTreeIndexPage >> headerSize [
-	^ self indexSize
+	^ super headerSize  
+		+ 2 "items size"
 ]
 
 { #category : #searching }
@@ -86,23 +87,12 @@ SoilBTreeIndexPage >> readItemsFrom: aStream [
 ]
 
 { #category : #accessing }
+SoilBTreeIndexPage >> valueSize [
+	"our values are indexes of other pages"
+	^ self pointerSize
+]
+
+{ #category : #accessing }
 SoilBTreeIndexPage >> valueSize: anInteger [
 	"ignore, not used, the index pages store the pageID as the value, size is static defined in #pointerSize"
-]
-
-{ #category : #'reading-writing' }
-SoilBTreeIndexPage >> writeItemsOn: aStream [ 
-
-	aStream
-		nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
-	items do: [ :assoc |
-		aStream 
-			nextPutAll: (assoc key asByteArrayOfSize: self keySize);
-			nextPutAll: (assoc value asByteArrayOfSize: self pointerSize)]
-]
-
-{ #category : #'reading-writing' }
-SoilBTreeIndexPage >> writeOn: aStream [ 
-	super writeOn: aStream.
-	self writeItemsOn: aStream
 ]

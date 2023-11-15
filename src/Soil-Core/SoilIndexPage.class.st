@@ -55,11 +55,6 @@ SoilIndexPage >> index: anInteger [
 	index := anInteger
 ]
 
-{ #category : #writing }
-SoilIndexPage >> indexSize [
-	^ 2
-]
-
 { #category : #testing }
 SoilIndexPage >> isDirty [
 	^ dirty 
@@ -96,15 +91,6 @@ SoilIndexPage >> printOn: aStream [
 SoilIndexPage >> readFrom: aStream [ 
 	dirty := false.
 	"we do not read the pageCode here as it was read already"
-]
-
-{ #category : #writing }
-SoilIndexPage >> readIndexFrom: aStream [ 
-	self flag: #todo.
-	"index should be determined at read time depending on the stream.
-	we let the dummy read here for compatibility"
-	"index :=" (aStream next: self indexSize) asInteger.
-
 ]
 
 { #category : #writing }

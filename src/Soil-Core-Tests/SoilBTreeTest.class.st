@@ -33,14 +33,14 @@ SoilBTreeTest >> testAddFirstOverflow [
 	capacity := btree headerPage itemCapacity.
 	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: btree pages size equals: 3.
-	self assert: (btree pageAt: 1) numberOfItems equals: 128.
+	self assert: (btree pageAt: 1) numberOfItems equals: 127.
 	"if we add a page, the current one is split and half is moved there"
 	btree at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: btree pages size equals: 3.
 	page := btree pageAt: 3.
 	self assert: page numberOfItems equals: 128.
-	self assert: page items first key equals: 129.
-	self assert: page items last key asByteArray equals: #[ 1 0 ].
+	self assert: page items first key equals: 128.
+	self assert: page items last key asByteArray equals: #[ 255 ].
 	"check that the next pointer is correct after split"
 	self assert: (btree pageAt:((btree headerPage) next)) identicalTo: (btree pageAt: 3)
 ]
@@ -77,13 +77,13 @@ SoilBTreeTest >> testAddSecondOverflow [
 	capacity := btree headerPage itemCapacity.
 	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: btree pages size equals: 3.
-	self assert: (btree pageAt: 1) numberOfItems equals: 128.
+	self assert: (btree pageAt: 1) numberOfItems equals: 127.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n | btree at: capacity + n put: #[ 1 2 3 4 5 6 7 8 ]].
 	self assert: btree pages size equals: 4.
 	page := btree pageAt: 4.
-	self assert: page numberOfItems equals: 254.
-	self assert: page items first key equals: 257.
+	self assert: page numberOfItems equals: 253.
+	self assert: page items first key equals: 256.
 	"check that the next pointer is correct after split"
 	self assert: ((btree headerPage nextPageIn: btree) nextPageIn: btree) identicalTo: (btree pageAt: 4).
 	btree writePages.
@@ -96,13 +96,13 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 	capacity := btree headerPage itemCapacity.
 	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: btree pages size equals: 3.
-	self assert: (btree pageAt: 1) numberOfItems equals: 128.
+	self assert: (btree pageAt: 1) numberOfItems equals: 127.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n | btree at: capacity + n put: #[ 1 2 3 4 5 6 7 8 ]].
 	self assert: btree pages size equals: 4.
 	page := btree pageAt: 4.
-	self assert: page numberOfItems equals: 254.
-	self assert: page items first key equals: 257.
+	self assert: page numberOfItems equals: 253.
+	self assert: page items first key equals: 256.
 	"check that the next pointer is correct after split"
 	self assert: ((btree headerPage nextPageIn: btree) nextPageIn: btree) identicalTo: (btree pageAt: 4).
 
@@ -122,7 +122,7 @@ SoilBTreeTest >> testAt [
 	capacity := btree headerPage itemCapacity.
 	1 to: capacity do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: btree pages size equals: 3.
-	self assert: (btree pageAt: 1) numberOfItems equals: 128.
+	self assert: (btree pageAt: 1) numberOfItems equals: 127.
 	"if we add a page, the current one is split and half is moved there"
 	btree at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: btree pages size equals: 3.
@@ -140,7 +140,7 @@ SoilBTreeTest >> testAtSecondOverflow [
 	capacity := btree headerPage itemCapacity.
 	1 to: capacity*2 do: [ :n | btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: btree pages size equals: 4.
-	self assert: (btree pageAt: 1) numberOfItems equals: 128.
+	self assert: (btree pageAt: 1) numberOfItems equals: 127.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n | btree at: capacity + n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: btree pages size equals: 4.
@@ -259,8 +259,8 @@ SoilBTreeTest >> testLastPage [
 	1 to: capacity - 1 do: [ :n |
 		btree at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	btree at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
-	self assert: btree pages size equals: 200.
-	self assert: btree lastPage index equals: 200.
+	self assert: btree pages size equals: 199.
+	self assert: btree lastPage index equals: 199.
 	self assert: btree lastPage isLastPage.
 	lastItem := btree lastPage itemAt: capacity ifAbsent: [nil].
 	self assert: lastItem value equals: #[ 8 7 6 5 4 3 2 1 ].
@@ -278,8 +278,8 @@ SoilBTreeTest >> testOverflowCopyOnWriteSplitting [
 
 	page := copyOnWrite pageAt: 3.
 	self assert: page numberOfItems equals: 127.
-	self assert: page items first key equals: 257.
-	self assert: page items last key asByteArray equals: #[ 1 253 ]
+	self assert: page items first key equals: 255.
+	self assert: page items last key asByteArray equals: #[1 251]
 ]
 
 { #category : #tests }
