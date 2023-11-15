@@ -17,7 +17,7 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 { #category : #converting }
 SoilSkipList >> asCopyOnWrite [
 	^ SoilCopyOnWriteSkipList new
-		wrappedSkipList: self;
+		wrapped: self;
 		yourself 
 ]
 

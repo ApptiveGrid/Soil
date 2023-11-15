@@ -2,41 +2,35 @@ Class {
 	#name : #SoilCopyOnWriteBTree,
 	#superclass : #SoilBasicBTree,
 	#instVars : [
-		'wrappedBTree'
+		'wrapped'
 	],
 	#category : #'Soil-Core-Index-BTree'
 }
 
 { #category : #testing }
 SoilCopyOnWriteBTree >> isRegistered [
-	^ wrappedBTree isRegistered
+	^ wrapped isRegistered
 ]
 
 { #category : #'instance creation' }
 SoilCopyOnWriteBTree >> newPage [ 
-	^ wrappedBTree newPage
+	^ wrapped newPage
 ]
 
 { #category : #converting }
 SoilCopyOnWriteBTree >> thePersistentInstance [
-	^ wrappedBTree
+	^ wrapped
 ]
 
 { #category : #accessing }
-SoilCopyOnWriteBTree >> wrappedBTree [
+SoilCopyOnWriteBTree >> wrapped [
 
-	^ wrappedBTree
+	^ wrapped
 ]
 
 { #category : #accessing }
-SoilCopyOnWriteBTree >> wrappedBTree: anObject [
+SoilCopyOnWriteBTree >> wrapped: anObject [
 
-	wrappedBTree := anObject.
-	self store: wrappedBTree store asCopyOnWriteStore 
-]
-
-{ #category : #accessing }
-SoilCopyOnWriteBTree >> wrappedIndex [
-
-	^ self wrappedBTree
+	wrapped := anObject.
+	self store: wrapped store asCopyOnWriteStore 
 ]

@@ -2,40 +2,34 @@ Class {
 	#name : #SoilCopyOnWriteSkipList,
 	#superclass : #SoilBasicSkipList,
 	#instVars : [
-		'wrappedSkipList'
+		'wrapped'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
 { #category : #testing }
 SoilCopyOnWriteSkipList >> isRegistered [
-	^ wrappedSkipList isRegistered
+	^ wrapped isRegistered
 ]
 
 { #category : #'instance creation' }
 SoilCopyOnWriteSkipList >> newPage [ 
-	^ wrappedSkipList newPage
+	^ wrapped newPage
 ]
 
 { #category : #converting }
 SoilCopyOnWriteSkipList >> thePersistentInstance [
-	^ wrappedSkipList
+	^ wrapped
 ]
 
 { #category : #converting }
-SoilCopyOnWriteSkipList >> wrappedIndex [
-
-	^ self wrappedSkipList
-]
-
-{ #category : #converting }
-SoilCopyOnWriteSkipList >> wrappedSkipList [
-	^ wrappedSkipList
+SoilCopyOnWriteSkipList >> wrapped [
+	^ wrapped
 ]
 
 { #category : #accessing }
-SoilCopyOnWriteSkipList >> wrappedSkipList: anObject [
+SoilCopyOnWriteSkipList >> wrapped: anObject [
 
-	wrappedSkipList := anObject.
-	self store: wrappedSkipList store asCopyOnWriteStore 
+	wrapped := anObject.
+	self store: wrapped store asCopyOnWriteStore 
 ]

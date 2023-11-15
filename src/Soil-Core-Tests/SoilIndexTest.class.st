@@ -36,7 +36,7 @@ SoilIndexTest >> testFlushIndexPages [
 	tx commit.
 	txn1 := soil newTransaction.
 	root1 := txn1 root.
-	self assert: root1 index wrappedSkipList pages size equals: 2.
+	self assert: root1 index wrapped pages size equals: 2.
 	root1 index flushCachedPages.
 	self assert: root1 index pages size equals: 0.
 	txn1 abort.
@@ -44,7 +44,7 @@ SoilIndexTest >> testFlushIndexPages [
 	txn2 := soil newTransaction.
 	root2 := txn2 root.
 	self assert: root2 index pages size equals: 0.
-	self assert: root2 index wrappedSkipList pages size equals: 0.
+	self assert: root2 index wrapped pages size equals: 0.
 	self assert: (root2 at: '56') equals: '56'.
 	txn2 abort
  

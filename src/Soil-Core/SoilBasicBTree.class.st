@@ -16,7 +16,7 @@ SoilBasicBTree class >> isAbstract [
 { #category : #converting }
 SoilBasicBTree >> asCopyOnWrite [
 	^ SoilCopyOnWriteBTree new
-		wrappedBTree: self;
+		wrapped: self;
 		yourself 
 ]
 
