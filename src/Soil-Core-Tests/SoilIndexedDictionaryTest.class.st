@@ -622,9 +622,11 @@ SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 	tx2 commit.
 	"check that we can still see in the first tr"
 	self assert: (tx root at: 2) equals: #two.
-	"but removeKey: does not see it, to be fixed"
-	self flag: #TODO.
-	"tx root removeKey: 2"
+	"but removeKey: does not see it, we can remove it without error"
+	tx root removeKey: 2 ifAbsent: [ self fail ].
+	self assert: tx root size equals: 1.
+	"but commiting it will fail, as we have commited the remove in t2"
+	self should: [tx commit] raise: SoilObjectHasConcurrentChange
 ]
 
 { #category : #tests }
