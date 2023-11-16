@@ -84,9 +84,7 @@ SoilVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [
 
 { #category : #visiting }
 SoilVisitor >> visitSkipList: aSoilSkipList [ 
-	"aSoilSkipList newIterator do: [ :each |
-		self visit: each ]."
-	self visit: aSoilSkipList store.
+	self visit: aSoilSkipList store
 ]
 
 { #category : #visiting }

@@ -174,7 +174,7 @@ SoilJournalFragmentFile >> transactionJournals [
 	self stream position: self dataPosition.
 	transactionJournals := OrderedDictionary new.
 	[ stream atEnd ] whileFalse: [  
-		entry := SoilJournalEntry readFrom: stream underlyingStream.
+		entry := SoilJournalEntry readFrom: stream.
 		entry isTransactionEntry ifTrue: [ 
 			(transactionJournals 
 				at: entry transactionId

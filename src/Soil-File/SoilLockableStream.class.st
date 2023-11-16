@@ -103,6 +103,14 @@ SoilLockableStream >> next: anInteger [
 	^ fileStream next: anInteger 
 ]
 
+{ #category : #'reading - basic' }
+SoilLockableStream >> nextLengthEncodedInteger [
+	| value |
+	value := self next.
+	(value < 128) ifTrue: [ ^ value ].
+	^ (self nextLengthEncodedInteger bitShift: 7) bitOr: (value bitAnd: 127)
+]
+
 { #category : #writing }
 SoilLockableStream >> nextPut: anInteger [ 
 	fileStream nextPut: anInteger
@@ -147,11 +155,6 @@ SoilLockableStream >> releaseAllLocks [
 { #category : #accessing }
 SoilLockableStream >> size [ 
 	^ fileStream size
-]
-
-{ #category : #'as yet unclassified' }
-SoilLockableStream >> underlyingStream [ 
-	^ fileStream 
 ]
 
 { #category : #locking }

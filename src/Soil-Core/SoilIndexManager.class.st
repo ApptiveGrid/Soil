@@ -68,6 +68,11 @@ SoilIndexManager >> flushIndexes [
 	indexes do: #flushCachedPages
 ]
 
+{ #category : #testing }
+SoilIndexManager >> hasIndexId: aString [ 
+	^ (self pathFor: aString) exists
+]
+
 { #category : #accessing }
 SoilIndexManager >> indexes [
 
