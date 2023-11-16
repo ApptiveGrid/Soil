@@ -157,6 +157,11 @@ SoilPersistentDatabaseJournal >> path [
 	^ soil path / #journal
 ]
 
+{ #category : #initialization }
+SoilPersistentDatabaseJournal >> resetFragmentFile [
+	currentFragmentFile := nil
+]
+
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock [ 
 	| fragmentFiles fileIndex |
