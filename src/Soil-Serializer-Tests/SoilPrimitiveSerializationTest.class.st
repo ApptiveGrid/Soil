@@ -513,7 +513,7 @@ SoilPrimitiveSerializationTest >> testSerializationScaledDecimal [
 	serialized := SoilSerializer serializeToBytes: object.
 	
 	self assert: (serialized at: 1) equals: TypeCodeScaledDecimal.
-	self assert: serialized equals: #[9 5 10 1 2].
+	self assert: serialized equals: #[9 10 1 2].
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized class equals: ScaledDecimal.
 	self assert: materialized equals: object
