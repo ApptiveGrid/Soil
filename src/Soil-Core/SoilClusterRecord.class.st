@@ -81,6 +81,14 @@ SoilClusterRecord >> committed [
 	committed := true
 ]
 
+{ #category : #'as yet unclassified' }
+SoilClusterRecord >> findReferencesTo [
+	^ SoilReferenceFinder new
+		soil: transaction database;
+		find: objectId;
+		records
+]
+
 { #category : #testing }
 SoilClusterRecord >> hasChanged [
 	^ self subclassResponsibility

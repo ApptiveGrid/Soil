@@ -119,7 +119,7 @@ SoilJournalFragmentFile >> inspectionTransactionJournals [
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 
 	^ SpTablePresenter new
-		items: (self transactionJournals);
+		items: (self transactionJournals reverse);
 		addColumn: (SpCompositeTableColumn new
 			title: '#';
 			width: 30;

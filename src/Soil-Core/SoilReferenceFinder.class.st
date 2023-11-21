@@ -26,6 +26,12 @@ SoilReferenceFinder >> objects [
 		transaction objectWithId: ref objectId ]
 ]
 
+{ #category : #accessing }
+SoilReferenceFinder >> records [
+	^ references collect: [ :ref |
+		transaction recordWithId: ref objectId ]
+]
+
 { #category : #visiting }
 SoilReferenceFinder >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
 ]
