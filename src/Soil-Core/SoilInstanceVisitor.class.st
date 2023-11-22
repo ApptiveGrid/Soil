@@ -14,6 +14,11 @@ SoilInstanceVisitor >> initialize [
 	seen := Set new.  
 ]
 
+{ #category : #visiting }
+SoilInstanceVisitor >> processIndexId: indexId segment: aSegment [  
+	self visit: (aSegment indexAt: indexId)
+]
+
 { #category : #accessing }
 SoilInstanceVisitor >> soil [
 
@@ -50,6 +55,8 @@ SoilInstanceVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [
 SoilInstanceVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	super visitPersistentClusterVersion: aSoilPersistentClusterVersion.
 	aSoilPersistentClusterVersion indexIds do:[ :indexId |
-		self visit: ((soil objectRepository segmentAt: aSoilPersistentClusterVersion segment) indexAt: indexId)  ].
+		self 
+			processIndexId: indexId 
+			segment: (soil objectRepository segmentAt: aSoilPersistentClusterVersion segment) ].
 	^ aSoilPersistentClusterVersion 
 ]

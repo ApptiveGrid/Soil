@@ -71,11 +71,6 @@ Soil >> close [
 		settings close ]
 ]
 
-{ #category : #public }
-Soil >> createBackupOn: aPath [ 
-	self backupTo: aPath
-]
-
 { #category : #initialization }
 Soil >> critical: aBlock [ 
 	semaphore critical: aBlock
