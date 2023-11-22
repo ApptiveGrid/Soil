@@ -29,7 +29,7 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	sourceSegment := source objectRepository segmentAt: segmentId.
 	sourceIndex := sourceSegment indexManager 
 		loadIndexWithId: indexId 
-		ifNone: [ Error signal: 'cannot find index with id ', indexId printString ].
+		ifNone: [ ^ self indexNotFound: indexId ].
 	
 	"create an index of same kind and configuration in the target database"
 	targetSegment := target objectRepository segmentAt: segmentId.
@@ -49,6 +49,11 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	targetIndex
 		flush; 
 		close.
+]
+
+{ #category : #visiting }
+SoilBackupVisitor >> indexNotFound: indexId [ 
+	 Error signal: 'cannot find index with id ', indexId printString
 ]
 
 { #category : #initialization }

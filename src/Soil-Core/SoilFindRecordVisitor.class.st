@@ -33,9 +33,7 @@ SoilFindRecordVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVe
 	aSoilPersistentClusterVersion transaction: transaction.
 	(condition value: aSoilPersistentClusterVersion) ifTrue: [ 
 		object := aSoilPersistentClusterVersion  ].
-	aSoilPersistentClusterVersion references do: [ :reference |
-		self visit: reference ].
-	aSoilPersistentClusterVersion indexIds do:[ :indexId |
-		self visit: ((soil objectRepository segmentAt: aSoilPersistentClusterVersion  segment) indexAt: indexId)  ].
+	super visitPersistentClusterVersion: aSoilPersistentClusterVersion.
+	^ aSoilPersistentClusterVersion 
 
 ]

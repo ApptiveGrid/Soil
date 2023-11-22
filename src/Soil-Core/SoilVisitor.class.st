@@ -11,6 +11,11 @@ SoilVisitor class >> isAbstract [
 ]
 
 { #category : #visiting }
+SoilVisitor >> processReference: reference [
+	self visit: reference
+]
+
+{ #category : #visiting }
 SoilVisitor >> visit: anObject [ 
 	^ anObject acceptSoil: self 
 	
@@ -77,8 +82,8 @@ SoilVisitor >> visitParameters: aSoilParameterFile [
 
 { #category : #visiting }
 SoilVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
-	aSoilPersistentClusterVersion references do: [ :reference |
-		self visit: reference ].
+	aSoilPersistentClusterVersion references 
+		do: [ :reference | self processReference: reference ].
 	^ aSoilPersistentClusterVersion 
 ]
 
