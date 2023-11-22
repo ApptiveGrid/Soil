@@ -72,6 +72,12 @@ SoilJournalFragmentFile >> dataPosition [
 	^ self createdPosition + self createdSize 
 ]
 
+{ #category : #searching }
+SoilJournalFragmentFile >> entriesMatching: aBlock [
+	^ self transactionJournals flatCollect: [ :journal |
+		journal entriesMatching: aBlock ]
+]
+
 { #category : #accessing }
 SoilJournalFragmentFile >> filename [ 
 	^ self path basename

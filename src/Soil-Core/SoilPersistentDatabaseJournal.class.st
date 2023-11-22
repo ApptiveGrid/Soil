@@ -66,6 +66,12 @@ SoilPersistentDatabaseJournal >> do: aBlock [
 		transactionJournals do: aBlock ]	
 ]
 
+{ #category : #searching }
+SoilPersistentDatabaseJournal >> entriesMatching: aBlock [
+	^ self fragmentFiles flatCollect: [ :file |
+		file entriesMatching: aBlock  ]
+]
+
 { #category : #'as yet unclassified' }
 SoilPersistentDatabaseJournal >> fileNumberFrom: aString [ 
 	^ (ByteArray readHexFrom: aString) asInteger
