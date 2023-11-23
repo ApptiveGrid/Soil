@@ -94,6 +94,11 @@ SoilTransactionJournal >> entries: aCollection [
 	entries := aCollection
 ]
 
+{ #category : #searching }
+SoilTransactionJournal >> entriesMatching: aBlock [
+	^ entries select: aBlock
+]
+
 { #category : #accessing }
 SoilTransactionJournal >> entryAt: anInteger [ 
 	^ entries at: anInteger 

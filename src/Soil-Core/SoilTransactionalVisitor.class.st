@@ -7,6 +7,14 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #visiting }
+SoilTransactionalVisitor >> scan: aSoil [
+	soil := aSoil.
+	transaction := soil newTransaction.
+	[ self visit: aSoil ]
+		ensure: [ transaction abort ] 
+]
+
 { #category : #accessing }
 SoilTransactionalVisitor >> transaction [
 
