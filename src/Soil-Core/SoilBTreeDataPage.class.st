@@ -19,11 +19,6 @@ SoilBTreeDataPage >> find: aKey with: aBTree [
 
 ]
 
-{ #category : #testing }
-SoilBTreeDataPage >> hasItems [
-	^ (items reject: [ :each | each value isRemoved ]) notEmpty
-]
-
 { #category : #utilities }
 SoilBTreeDataPage >> headerSize [
 	^ super headerSize  
@@ -85,12 +80,6 @@ SoilBTreeDataPage >> itemBefore: key [
 	| item |
 	item := items at: key ifAbsent: [ ^ nil ].
 	^ items before: item ifAbsent: nil
-]
-
-{ #category : #accessing }
-SoilBTreeDataPage >> lastItem [
-
-	^ items ifEmpty: nil ifNotEmpty: [ :itms | itms last ]
 ]
 
 { #category : #accessing }

@@ -49,7 +49,8 @@ SoilBTreePage >> find: aKey with: aBTree [
 
 { #category : #accessing }
 SoilBTreePage >> firstItem [
-	^ items first
+
+	^ items isNotEmpty ifTrue: [ items first ]
 ]
 
 { #category : #testing }
@@ -142,6 +143,12 @@ SoilBTreePage >> keySize [
 { #category : #accessing }
 SoilBTreePage >> keySize: anInteger [ 
 	keySize := anInteger
+]
+
+{ #category : #accessing }
+SoilBTreePage >> lastItem [
+
+	^ items isNotEmpty ifTrue: [ items last ]
 ]
 
 { #category : #accessing }

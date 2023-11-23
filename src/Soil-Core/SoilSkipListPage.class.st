@@ -57,14 +57,8 @@ SoilSkipListPage >> biggestKey [
 
 { #category : #accessing }
 SoilSkipListPage >> firstItem [
-	^ items 
-		ifNotEmpty: [ items first ]
-		ifEmpty: nil
-]
 
-{ #category : #testing }
-SoilSkipListPage >> hasItems [
-	^ (items reject: [ :each | each value isRemoved ]) notEmpty
+	^ items isNotEmpty ifTrue: [ items first ]
 ]
 
 { #category : #testing }
@@ -223,14 +217,13 @@ SoilSkipListPage >> keySize: anInteger [
 { #category : #accessing }
 SoilSkipListPage >> lastItem [
 
-	^ items ifEmpty: nil ifNotEmpty: [ :itms | itms last ]
+	^ items isNotEmpty ifTrue: [ items last ]
 ]
 
 { #category : #accessing }
 SoilSkipListPage >> lastKey [
-	^ items 
-		ifNotEmpty: [ items last key ]
-		ifEmpty: nil
+
+	^ items isNotEmpty ifTrue: [ items last key ]
 ]
 
 { #category : #accessing }
