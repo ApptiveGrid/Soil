@@ -97,7 +97,7 @@ SoilBasicSkipList >> headerPage [
 
 { #category : #testing }
 SoilBasicSkipList >> isEmpty [
-	^ self store headerPage hasItems not
+	^ self store headerPage isEmpty
 ]
 
 { #category : #testing }

@@ -209,7 +209,10 @@ SoilIndexedDictionary >> initialize [
 
 { #category : #testing }
 SoilIndexedDictionary >> isEmpty [
-	^ newValues isEmpty and: [ self index isEmpty ]
+	^ newValues isEmpty and: [ self index isEmpty 
+		or: [
+		"all items might be removed"
+		(self index firstPage items allSatisfy: [ :each | each value isRemoved ])]]
 ]
 
 { #category : #testing }
@@ -326,9 +329,8 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 ]
 
 { #category : #private }
-SoilIndexedDictionary >> restoreValue: value forKey: key iterator: iterator [ 
-	"restore a value that has been removed by a later 
-	transaction"
+SoilIndexedDictionary >> restoreValue: value forKey: key iterator: iterator [
+	"restore a value that has been removed by a later transaction"
 	^ value isRemoved 
 		ifTrue: [
 			self 

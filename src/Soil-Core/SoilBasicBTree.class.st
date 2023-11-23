@@ -118,7 +118,7 @@ SoilBasicBTree >> initializeHeaderPage [
 
 { #category : #testing }
 SoilBasicBTree >> isEmpty [
-	^ self store headerPage hasItems not
+	^ self store headerPage isEmpty
 ]
 
 { #category : #testing }
