@@ -23,6 +23,7 @@ SoilObjectVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [
 
 { #category : #visiting }
 SoilObjectVisitor >> visitPersistentClusterVersion: aPersistentClusterVersion [ 
-	self processClusterVersion: aPersistentClusterVersion.
 	super visitPersistentClusterVersion: aPersistentClusterVersion.
+	self processClusterVersion: aPersistentClusterVersion.
+
 ]
