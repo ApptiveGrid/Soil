@@ -47,8 +47,6 @@ SoilIndexedDictionary >> at: key put: anObject [
 		ifNotNil: [ 
 			| objectId iterator |
 			objectId := transaction makeRoot: anObject.
-			"binKey := (key asSkipListKeyOfSize: index keySize) asInteger."
-			transaction markDirty: self.
 			iterator := self index newIterator.
 			(iterator at: key put: objectId) ifNotNil: [ :value |
 				oldValues 
@@ -59,6 +57,7 @@ SoilIndexedDictionary >> at: key put: anObject [
 			removedValues removeKey: key ifAbsent: nil.
 			newValues at: key put: objectId. ]
 		ifNil: [ 
+			self halt.
 			newValues at: key put: anObject ]
 ]
 
