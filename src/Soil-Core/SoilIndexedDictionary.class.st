@@ -20,7 +20,7 @@ SoilIndexedDictionary class >> isAbstract [
 
 { #category : #accessing }
 SoilIndexedDictionary class >> soilTransientInstVars [ 
-	^ #( index transaction newValues removedValues )
+	^ #( index transaction newValues removedValues oldValues)
 ]
 
 { #category : #accessing }
@@ -315,7 +315,6 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 			"remove from newValues as there could be a new at:put: on that
 			key but removing the key will remove the value again"
 			newValues removeKey: key ifAbsent: nil.
-			transaction markDirty: self.
 			iterator := self index newIterator.
 			v := self basicAt: key ifAbsent: [^ aBlock value].
 			removedValues 

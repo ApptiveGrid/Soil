@@ -404,11 +404,6 @@ SoilTransaction >> makeNewVersion: classDescription [
 ]
 
 { #category : #'as yet unclassified' }
-SoilTransaction >> makePersistent: anObject [ 
-	^ self makeRoot: anObject 
-]
-
-{ #category : #'as yet unclassified' }
 SoilTransaction >> makeRoot: anObject [ 
 	| objectId |
 	objectId := self addClusterObject: anObject theNonSoilProxy.
