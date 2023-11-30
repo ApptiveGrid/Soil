@@ -13,7 +13,8 @@ Class {
 		'lastObjectIndexes',
 		'journal',
 		'indexes',
-		'createdAt'
+		'createdAt',
+		'postProcess'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -166,6 +167,8 @@ SoilTransaction >> buildJournal [
 		record version: writeVersion.
 		journal addEntries: (record asJournalEntry do: [:each | each transactionId: writeVersion ]).
 		record committed  ].
+	postProcess do: [ :record | 
+		journal addEntries: (record object journalEntries: record)  ].
 	"for all new objects with a new behavior we create an entry to
 	add the behavior"
 	behaviorDescriptions do: [ :description |
@@ -202,7 +205,7 @@ SoilTransaction >> checkpoint [
 	self prepareRecordsForCommit.
 	"if there are no records to commit we can just return and don't allocate any
 	resources"
-	recordsToCommit isEmpty ifTrue: [ 
+	(recordsToCommit isEmpty and: [postProcess isEmpty ]) ifTrue: [ 
 		soil notificationHandler transactionCommitted: self.
 		^ self ].
 	"only one transactions is allowed at a time. We use the critical block of the database
@@ -321,7 +324,8 @@ SoilTransaction >> initialize [
 	objectMap := IdentityDictionary new.
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
-	indexes := Dictionary new
+	indexes := Dictionary new.
+	postProcess := OrderedCollection new
 ]
 
 { #category : #'as yet unclassified' }
@@ -525,9 +529,12 @@ SoilTransaction >> objectWithId: objectId [
 { #category : #accessing }
 SoilTransaction >> prepareRecordsForCommit [
 	"select all dirty/new records and convert them to new version records"
-	recordsToCommit := idMap values asOrderedCollection 
-		select: [:each | each value shouldBeCommitted ]
-			thenCollect: [:each | each asNewClusterVersion ].
+	recordsToCommit := OrderedCollection new.
+	idMap values do: [ :record |
+		record shouldBeCommitted ifTrue: [ 
+			recordsToCommit add: record asNewClusterVersion ].
+		record hasPostProcessObject ifTrue: [ 
+			postProcess add: record ] ].
 	"serialize initial records. While serializing there can be new records 
 	popping up (an object not registered yet in the transaction but is a
 	cluster root"

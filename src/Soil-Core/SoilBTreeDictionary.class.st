@@ -43,3 +43,28 @@ SoilBTreeDictionary >> journalEntries [
 			oldValue: value) ].
 	^ entries
 ]
+
+{ #category : #journal }
+SoilBTreeDictionary >> journalEntries: record [ 
+	| entries segment |
+	entries := OrderedCollection new.
+	segment := record objectId segment.
+	newValues keysAndValuesDo: [ :key :value |
+		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
+		entries add: (SoilAddKeyEntry new 
+			transactionId: transaction writeVersion;
+			segment: segment;
+			id: id;
+			key: (self binaryKey: key);
+			value: value;
+			oldValue: (oldValues at: key ifAbsent: nil)) ].
+	removedValues keysAndValuesDo: [ :key :value |
+		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
+		entries add: (SoilRemoveKeyEntry new 
+			transactionId: transaction writeVersion;
+			segment: segment;
+			id: id;
+			key: (self binaryKey: key); 
+			oldValue: value) ].
+	^ entries
+]

@@ -12,8 +12,8 @@ Class {
 { #category : #tests }
 SoilIndexedDictionaryTest class >> testParameters [
 	^ ParametrizedTestMatrix new
-		addCase: { #classToTest -> SoilBTreeDictionary };
 		addCase: { #classToTest -> SoilSkipListDictionary };
+		addCase: { #classToTest -> SoilBTreeDictionary };
 		yourself
 ]
 

@@ -47,6 +47,7 @@ SoilIndexedDictionary >> at: key put: anObject [
 		ifNotNil: [ 
 			| objectId iterator |
 			objectId := transaction makeRoot: anObject.
+			"binKey := (key asSkipListKeyOfSize: index keySize) asInteger."
 			iterator := self index newIterator.
 			(iterator at: key put: objectId) ifNotNil: [ :value |
 				oldValues 
@@ -57,7 +58,6 @@ SoilIndexedDictionary >> at: key put: anObject [
 			removedValues removeKey: key ifAbsent: nil.
 			newValues at: key put: objectId. ]
 		ifNil: [ 
-			self halt.
 			newValues at: key put: anObject ]
 ]
 
@@ -254,6 +254,11 @@ SoilIndexedDictionary >> loadFrom: aFileReference [
 SoilIndexedDictionary >> maxLevel: anInteger [ 
 	index maxLevel: anInteger.
 
+]
+
+{ #category : #testing }
+SoilIndexedDictionary >> needsPostProcessing [
+	^ newValues notNil or: [ removedValues notNil ]
 ]
 
 { #category : #accessing }

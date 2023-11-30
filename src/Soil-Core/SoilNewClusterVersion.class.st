@@ -63,6 +63,11 @@ SoilNewClusterVersion >> hasChanged [
 	^ true
 ]
 
+{ #category : #testing }
+SoilNewClusterVersion >> hasPostProcessObject [
+	^ false
+]
+
 { #category : #accessing }
 SoilNewClusterVersion >> indexOfBehaviorDescription: aBehavior [
 	| index |

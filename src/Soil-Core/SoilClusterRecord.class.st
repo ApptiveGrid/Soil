@@ -95,6 +95,11 @@ SoilClusterRecord >> hasChanged [
 ]
 
 { #category : #testing }
+SoilClusterRecord >> hasPostProcessObject [
+	^ object needsPostProcessing
+]
+
+{ #category : #testing }
 SoilClusterRecord >> hasPreviousVersion [
 	^ previousVersionPosition > 0 
 ]
