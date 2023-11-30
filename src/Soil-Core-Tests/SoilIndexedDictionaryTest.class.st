@@ -238,7 +238,7 @@ SoilIndexedDictionaryTest >> testConcurrentIsEmpty [
 	tx3 root removeKey: #one.
 	tx3 commit.
 	self assert: tx2 root size equals: 0.
-	self deny: tx2 root isEmpty.
+	self assert: tx2 root isEmpty.
 ]
 
 { #category : #tests }
