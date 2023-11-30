@@ -237,8 +237,11 @@ SoilIndexedDictionaryTest >> testConcurrentIsEmpty [
 	tx3 := soil newTransaction.
 	tx3 root removeKey: #one.
 	tx3 commit.
-	self assert: tx2 root size equals: 0.
-	self assert: tx2 root isEmpty.
+	"invisible: tx2 is still empty"
+	self deny: tx2 root isEmpty.
+	"to fix: size is wrong as it does not restore the value" 
+	self flag: #isRemoved.
+	self assert: tx2 root size equals: 0
 ]
 
 { #category : #tests }
