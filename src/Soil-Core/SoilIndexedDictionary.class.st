@@ -209,19 +209,16 @@ SoilIndexedDictionary >> initialize [
 
 { #category : #testing }
 SoilIndexedDictionary >> isEmpty [
+	| iterator|
+	iterator := self index newIterator.
+	iterator currentPage: self index firstPage.
 	^ newValues isEmpty and: [ self index isEmpty 
 		or: [
-		"all items might be removed"
-		(self index firstPage items allSatisfy: [ :each | each value isRemoved 
-			ifTrue: [ 
-				"we restore to check if there is another value for the current transaction"
-				(self index firstPage isOlderThan: transaction readVersion) 
-					ifTrue: [ true ]
-					ifFalse: [ (transaction 
-					journalEntriesFor: each key 
-					inIndex: index 
-					startingAt: self index firstPage lastTransaction) isEmpty ] ] 
-			ifFalse: [false]] )]].
+		"all items might be removed and not restorable" 
+		(self index firstPage items allSatisfy: [ :each | (self
+					 restoreValue: each value
+					 forKey: each key
+					 iterator: iterator)isNil] )]]
 ]
 
 { #category : #testing }
