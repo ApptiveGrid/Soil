@@ -5,12 +5,6 @@ Class {
 }
 
 { #category : #accessing }
-SoilBTreeIterator >> at: aKeyObject ifAbsent: aBlock [
-	currentKey := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
-	^ self find: currentKey ifAbsent: aBlock
-]
-
-{ #category : #accessing }
 SoilBTreeIterator >> basicAt: key put: anObject [
 	| posiblePrioValue |
 	posiblePrioValue := index rootPage insertItem: (key -> anObject) for: self.
@@ -19,17 +13,9 @@ SoilBTreeIterator >> basicAt: key put: anObject [
 ]
 
 { #category : #private }
-SoilBTreeIterator >> find: key [
+SoilBTreeIterator >> findPageFor: key [
 	currentKey := key.
-	currentPage := index rootPage find: key with: index.
-	^ currentPage valueAt: currentKey
-]
-
-{ #category : #private }
-SoilBTreeIterator >> find: key ifAbsent: aBlock [
-	currentKey := key.
-	currentPage := index rootPage find: key with: index.
-	^ currentPage valueAt: currentKey ifAbsent: aBlock
+	^currentPage := index rootPage find: key with: index
 ]
 
 { #category : #accessing }

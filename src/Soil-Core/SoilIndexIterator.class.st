@@ -27,9 +27,13 @@ SoilIndexIterator >> at: aKeyObject [
 	^ self at: aKeyObject ifAbsent: [ KeyNotFound signalFor: aKeyObject in: self  ] 
 ]
 
-{ #category : #accessing }
-SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [ 
-	^ self subclassResponsibility
+{ #category : #private }
+SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
+	currentKey := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
+	self findPageFor: currentKey.
+	^ currentPage 
+		valueAt: currentKey
+		ifAbsent: aBlock 
 ]
 
 { #category : #accessing }
@@ -61,7 +65,14 @@ SoilIndexIterator >> do: aBlock [
 ]
 
 { #category : #private }
-SoilIndexIterator >> find: key [ 
+SoilIndexIterator >> find: key [
+	currentKey := key.
+	self findPageFor: key.
+	^ currentPage valueAt: currentKey
+]
+
+{ #category : #private }
+SoilIndexIterator >> findPageFor: key [ 
 	^ self subclassResponsibility
 ]
 

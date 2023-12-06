@@ -7,17 +7,6 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #private }
-SoilSkipListIterator >> at: aKeyObject ifAbsent: aBlock [
-	currentKey := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
-	self 
-		findPageFor: currentKey 
-		startingAt: index headerPage.
-	^ currentPage 
-		valueAt: currentKey
-		ifAbsent: aBlock 
-]
-
 { #category : #accessing }
 SoilSkipListIterator >> atLevel: key put: anObject [
 	levels at: key put: anObject 
@@ -27,7 +16,7 @@ SoilSkipListIterator >> atLevel: key put: anObject [
 SoilSkipListIterator >> basicAt: key put: anObject [
 
 	|itemIndex |
-	self findPageFor: key startingAt: index headerPage.
+	self findPageFor: key.
 	itemIndex := currentPage indexOfKey: key.
 	"as an optimization we return the prior value stored in the list. If
 	there was none we return nil"
@@ -44,12 +33,8 @@ SoilSkipListIterator >> basicAt: key put: anObject [
 ]
 
 { #category : #private }
-SoilSkipListIterator >> find: key [
-	currentKey := key.
-	self 
-		findPageFor: key 
-		startingAt: index headerPage.
-	^ currentPage valueAt: currentKey
+SoilSkipListIterator >> findPageFor: key [
+	^ self findPageFor: key startingAt: index headerPage
 ]
 
 { #category : #private }
@@ -105,7 +90,7 @@ SoilSkipListIterator >> nextKeyCloseTo: key [
 
 	| binKey |
 	binKey := (key asSkipListKeyOfSize: index keySize) asInteger.
-	self findPageFor: binKey startingAt: index headerPage.
+	self findPageFor: binKey.
 	nextKey := currentPage keyOrClosestAfter: binKey.
 	nextKey
 		ifNil: [ "if there is no close key found, we position the cursor at the end, so that asking for the next association will return nil" 
