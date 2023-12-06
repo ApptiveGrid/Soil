@@ -95,6 +95,11 @@ SoilClusterRecord >> hasChanged [
 ]
 
 { #category : #testing }
+SoilClusterRecord >> hasIndexUpdates [
+	^ object hasIndexUpdates
+]
+
+{ #category : #testing }
 SoilClusterRecord >> hasPreviousVersion [
 	^ previousVersionPosition > 0 
 ]

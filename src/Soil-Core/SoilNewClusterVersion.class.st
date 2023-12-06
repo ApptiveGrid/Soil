@@ -29,8 +29,6 @@ SoilNewClusterVersion >> asJournalEntry [
 		bytes: self serialize.
 	entries add: objectEntry.
 
-	object journalEntries do: [ :each | entries add: each ].
-	
 	^ entries
 ]
 

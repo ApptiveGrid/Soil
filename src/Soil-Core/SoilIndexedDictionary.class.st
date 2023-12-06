@@ -20,7 +20,7 @@ SoilIndexedDictionary class >> isAbstract [
 
 { #category : #accessing }
 SoilIndexedDictionary class >> soilTransientInstVars [ 
-	^ #( index transaction newValues removedValues )
+	^ #( index transaction newValues removedValues oldValues)
 ]
 
 { #category : #accessing }
@@ -48,7 +48,6 @@ SoilIndexedDictionary >> at: key put: anObject [
 			| objectId iterator |
 			objectId := transaction makeRoot: anObject.
 			"binKey := (key asSkipListKeyOfSize: index keySize) asInteger."
-			transaction markDirty: self.
 			iterator := self index newIterator.
 			(iterator at: key put: objectId) ifNotNil: [ :value |
 				oldValues 
@@ -137,6 +136,12 @@ SoilIndexedDictionary >> firstAssociation [
 				  assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ] ]
 		  ifNil: [
 			self newValuesSortedByKeyOrder ifNotEmpty: [:nv | nv first ] ifEmpty: nil]
+]
+
+{ #category : #testing }
+SoilIndexedDictionary >> hasIndexUpdates [
+	self isRegistered ifFalse: [ ^ true ].
+	^ newValues notEmpty or: [ removedValues notEmpty ]
 ]
 
 { #category : #accessing }
@@ -296,7 +301,6 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 			"remove from newValues as there could be a new at:put: on that
 			key but removing the key will remove the value again"
 			newValues removeKey: key ifAbsent: nil.
-			transaction markDirty: self.
 			iterator := self index newIterator.
 			v := self basicAt: key ifAbsent: [^ aBlock value].
 			removedValues 
