@@ -167,8 +167,8 @@ SoilTransaction >> buildJournal [
 		record version: writeVersion.
 		journal addEntries: (record asJournalEntry do: [:each | each transactionId: writeVersion ]).
 		record committed  ].
-	indexUpdatesToCommit do: [ :record | 
-		journal addEntries: record object journalEntries  ].
+	indexUpdatesToCommit do: [ :object | 
+		journal addEntries: object journalEntries  ].
 	"for all new objects with a new behavior we create an entry to
 	add the behavior"
 	behaviorDescriptions do: [ :description |
@@ -534,7 +534,7 @@ SoilTransaction >> prepareRecordsForCommit [
 		record shouldBeCommitted ifTrue: [ 
 			recordsToCommit add: record asNewClusterVersion ].
 		record hasIndexUpdates ifTrue: [ 
-			indexUpdatesToCommit add: record ] ].
+			indexUpdatesToCommit add: record object ] ].
 	"serialize initial records. While serializing there can be new records 
 	popping up (an object not registered yet in the transaction but is a
 	cluster root"
