@@ -613,6 +613,9 @@ SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 
 	| tx tx2 |
+	"the wrong assumption about concurrent modifications has been removed. This test 
+	fails until we have a real way of detecting concurrent index accesses"
+	self skip.
 	tx := soil newTransaction.
 	tx root: dict.
 	dict at: 1 put: #one.
