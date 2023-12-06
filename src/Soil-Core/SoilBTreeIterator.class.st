@@ -14,7 +14,6 @@ SoilBTreeIterator >> basicAt: key put: anObject [
 
 { #category : #private }
 SoilBTreeIterator >> findPageFor: key [
-	currentKey := key.
 	^currentPage := index rootPage find: key with: index
 ]
 
