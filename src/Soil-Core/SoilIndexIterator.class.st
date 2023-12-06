@@ -28,8 +28,9 @@ SoilIndexIterator >> at: aKeyObject [
 ]
 
 { #category : #accessing }
-SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [ 
-	^ self subclassResponsibility
+SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
+	currentKey := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
+	^self find: currentKey ifAbsent: aBlock
 ]
 
 { #category : #accessing }
@@ -39,6 +40,11 @@ SoilIndexIterator >> at: aKeyObject put: anObject [
 	^ self 
 		basicAt: key 
 		put: anObject
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> basicAt: key put: anObject [
+	self subclassResponsibility
 ]
 
 { #category : #accessing }
@@ -61,7 +67,19 @@ SoilIndexIterator >> do: aBlock [
 ]
 
 { #category : #private }
-SoilIndexIterator >> find: key [ 
+SoilIndexIterator >> find: key [
+	^ self find: key ifAbsent: [ ]
+]
+
+{ #category : #private }
+SoilIndexIterator >> find: key ifAbsent: aBlock [
+	currentKey := key.
+	self findPageFor: key.
+	^ currentPage valueAt: key ifAbsent: aBlock
+]
+
+{ #category : #private }
+SoilIndexIterator >> findPageFor: key [ 
 	^ self subclassResponsibility
 ]
 
