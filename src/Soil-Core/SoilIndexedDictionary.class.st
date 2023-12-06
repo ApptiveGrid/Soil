@@ -209,10 +209,16 @@ SoilIndexedDictionary >> initialize [
 
 { #category : #testing }
 SoilIndexedDictionary >> isEmpty [
+	| iterator|
+	iterator := self index newIterator.
+	iterator currentPage: self index firstPage.
 	^ newValues isEmpty and: [ self index isEmpty 
 		or: [
-		"all items might be removed"
-		(self index firstPage items allSatisfy: [ :each | each value isRemoved ])]]
+		"all items might be removed and not restorable" 
+		(self index firstPage items allSatisfy: [ :each | (self
+					 restoreValue: each value
+					 forKey: each key
+					 iterator: iterator)isNil] )]]
 ]
 
 { #category : #testing }
