@@ -80,32 +80,7 @@ SoilIndexedDictionary >> basicAt: aString ifAbsent: aBlock [
 	key := (aString asSkipListKeyOfSize: self index keySize) asInteger.
 	iterator := self index newIterator.
 	value := iterator at: aString ifAbsent: aBlock.
-	value isRemoved ifTrue: [  
-		^ (iterator currentPage isOlderThan: transaction readVersion) 
-			ifTrue: [ aBlock value ] 
-			ifFalse: [
-				(transaction 
-					journalEntriesFor: key 
-					inIndex: index 
-					startingAt: iterator currentPage lastTransaction)
-						ifNotEmpty: [:entries | 
-							entries last oldValue ]
-						ifEmpty: [ self halt. ] ] ].
-	"if the last modifying transaction of the current page is smaller
-	than ours then we don't need to check for visibility as all objects
-	are visible"
-	^ (iterator currentPage isOlderThan: transaction readVersion)
-		ifTrue: [ value ]
-		ifFalse: [ 
-			(transaction 
-				journalEntriesFor: key 
-				inIndex: index 
-				startingAt: iterator currentPage lastTransaction)
-					ifNotEmpty: [:entries | 
-						entries last oldValue ifNil: [ aBlock value ] ]
-					ifEmpty: [ value ].
-			 ]
-	
+	^ (self restoreValue: value forKey: key iterator: iterator) ifNil: [ aBlock value ]
 ]
 
 { #category : #accessing }
@@ -208,10 +183,16 @@ SoilIndexedDictionary >> initialize [
 
 { #category : #testing }
 SoilIndexedDictionary >> isEmpty [
+	| iterator|
+	iterator := self index newIterator.
+	iterator currentPage: self index firstPage.
 	^ newValues isEmpty and: [ self index isEmpty 
 		or: [
-		"all items might be removed"
-		(self index firstPage items allSatisfy: [ :each | each value isRemoved ])]]
+		"all items might be removed and not restorable" 
+		(self index firstPage items allSatisfy: [ :each | (self
+					 restoreValue: each value
+					 forKey: each key
+					 iterator: iterator)isNil] )]]
 ]
 
 { #category : #testing }
