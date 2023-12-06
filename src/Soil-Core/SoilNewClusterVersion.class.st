@@ -29,8 +29,6 @@ SoilNewClusterVersion >> asJournalEntry [
 		bytes: self serialize.
 	entries add: objectEntry.
 
-	object journalEntries do: [ :each | entries add: each ].
-	
 	^ entries
 ]
 
@@ -61,11 +59,6 @@ SoilNewClusterVersion >> beChanged [
 { #category : #testing }
 SoilNewClusterVersion >> hasChanged [
 	^ true
-]
-
-{ #category : #testing }
-SoilNewClusterVersion >> hasPostProcessObject [
-	^ false
 ]
 
 { #category : #accessing }

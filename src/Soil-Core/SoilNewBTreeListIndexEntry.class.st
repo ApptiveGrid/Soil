@@ -4,6 +4,11 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
+{ #category : #accessing }
+SoilNewBTreeListIndexEntry >> address [
+	^ 'index: ', id printString
+]
+
 { #category : #committing }
 SoilNewBTreeListIndexEntry >> commitIn: soil [
 

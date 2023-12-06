@@ -95,8 +95,8 @@ SoilClusterRecord >> hasChanged [
 ]
 
 { #category : #testing }
-SoilClusterRecord >> hasPostProcessObject [
-	^ object needsPostProcessing
+SoilClusterRecord >> hasIndexUpdates [
+	^ object hasIndexUpdates
 ]
 
 { #category : #testing }

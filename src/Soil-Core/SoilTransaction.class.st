@@ -14,7 +14,7 @@ Class {
 		'journal',
 		'indexes',
 		'createdAt',
-		'postProcess'
+		'indexUpdatesToCommit'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -167,8 +167,8 @@ SoilTransaction >> buildJournal [
 		record version: writeVersion.
 		journal addEntries: (record asJournalEntry do: [:each | each transactionId: writeVersion ]).
 		record committed  ].
-	postProcess do: [ :record | 
-		journal addEntries: (record object journalEntries: record)  ].
+	indexUpdatesToCommit do: [ :record | 
+		journal addEntries: record object journalEntries  ].
 	"for all new objects with a new behavior we create an entry to
 	add the behavior"
 	behaviorDescriptions do: [ :description |
@@ -205,7 +205,7 @@ SoilTransaction >> checkpoint [
 	self prepareRecordsForCommit.
 	"if there are no records to commit we can just return and don't allocate any
 	resources"
-	(recordsToCommit isEmpty and: [postProcess isEmpty ]) ifTrue: [ 
+	(recordsToCommit isEmpty and: [indexUpdatesToCommit isEmpty ]) ifTrue: [ 
 		soil notificationHandler transactionCommitted: self.
 		^ self ].
 	"only one transactions is allowed at a time. We use the critical block of the database
@@ -325,7 +325,7 @@ SoilTransaction >> initialize [
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
 	indexes := Dictionary new.
-	postProcess := OrderedCollection new
+	indexUpdatesToCommit := OrderedCollection new
 ]
 
 { #category : #'as yet unclassified' }
@@ -533,8 +533,8 @@ SoilTransaction >> prepareRecordsForCommit [
 	idMap values do: [ :record |
 		record shouldBeCommitted ifTrue: [ 
 			recordsToCommit add: record asNewClusterVersion ].
-		record hasPostProcessObject ifTrue: [ 
-			postProcess add: record ] ].
+		record hasIndexUpdates ifTrue: [ 
+			indexUpdatesToCommit add: record ] ].
 	"serialize initial records. While serializing there can be new records 
 	popping up (an object not registered yet in the transaction but is a
 	cluster root"

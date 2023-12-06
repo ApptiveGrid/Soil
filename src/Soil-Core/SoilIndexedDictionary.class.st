@@ -138,6 +138,12 @@ SoilIndexedDictionary >> firstAssociation [
 			self newValuesSortedByKeyOrder ifNotEmpty: [:nv | nv first ] ifEmpty: nil]
 ]
 
+{ #category : #testing }
+SoilIndexedDictionary >> hasIndexUpdates [
+	self isRegistered ifFalse: [ ^ true ].
+	^ newValues notEmpty or: [ removedValues notEmpty ]
+]
+
 { #category : #accessing }
 SoilIndexedDictionary >> historicValueAt: key iterator: iterator ifAbsent: absentBlock [ 
 	"a removed value will return ObjectId 0:0"
@@ -235,11 +241,6 @@ SoilIndexedDictionary >> loadFrom: aFileReference [
 SoilIndexedDictionary >> maxLevel: anInteger [ 
 	index maxLevel: anInteger.
 
-]
-
-{ #category : #testing }
-SoilIndexedDictionary >> needsPostProcessing [
-	^ newValues notNil or: [ removedValues notNil ]
 ]
 
 { #category : #accessing }

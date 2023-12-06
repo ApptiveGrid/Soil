@@ -43,11 +43,6 @@ SoilPersistentClusterVersion >> hasChanged [
 	^ changed 
 ]
 
-{ #category : #testing }
-SoilPersistentClusterVersion >> hasPostProcessObject [
-	^ changed = false and: [ object needsPostProcessing ]
-]
-
 { #category : #initialization }
 SoilPersistentClusterVersion >> initialize [ 
 	super initialize.
