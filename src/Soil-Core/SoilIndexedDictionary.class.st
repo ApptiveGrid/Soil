@@ -47,14 +47,12 @@ SoilIndexedDictionary >> at: key put: anObject [
 		ifNotNil: [ 
 			| objectId iterator |
 			objectId := transaction makeRoot: anObject.
-			"binKey := (key asSkipListKeyOfSize: index keySize) asInteger."
 			iterator := self index newIterator.
 			(iterator at: key put: objectId) ifNotNil: [ :value |
 				oldValues 
 					at: key
 					ifAbsentPut: objectId ].
-		"if there has been a prior removal of the key this new
-		addition invalidates it"
+		"if there has been a prior removal of the key this new addition invalidates it"
 			removedValues removeKey: key ifAbsent: nil.
 			newValues at: key put: objectId. ]
 		ifNil: [ 
@@ -306,7 +304,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 			removedValues 
 				at: key 
 				put: v asSoilObjectId.
-			iterator at: key put: (SoilObjectId segment: 0 index: 0) ]
+			iterator removeKey: key ]
 		ifNil: [ 
 			removedValues 
 				at: key

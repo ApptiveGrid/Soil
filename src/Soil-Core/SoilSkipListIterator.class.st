@@ -7,7 +7,7 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #accessing }
+{ #category : #skiplist }
 SoilSkipListIterator >> atLevel: key put: anObject [
 	levels at: key put: anObject 
 ]
@@ -75,7 +75,7 @@ SoilSkipListIterator >> lastPage [
 	^	currentPage
 ]
 
-{ #category : #accessing }
+{ #category : #skiplist }
 SoilSkipListIterator >> levelAt: anInteger [ 
 	^ levels at: anInteger 
 ]
@@ -98,11 +98,4 @@ SoilSkipListIterator >> nextKeyCloseTo: key [
 { #category : #printing }
 SoilSkipListIterator >> printOn: aStream [ 
 	aStream << 'path: ' << levels asString
-]
-
-{ #category : #removing }
-SoilSkipListIterator >> removeKey: key [ 
-	^ self 
-		at: key 
-		put: (SoilObjectId segment: 0 index: 0)
 ]
