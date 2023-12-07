@@ -18,6 +18,11 @@ SoilBTreeIterator >> findPageFor: key [
 ]
 
 { #category : #accessing }
+SoilBTreeIterator >> index [
+	^index
+]
+
+{ #category : #accessing }
 SoilBTreeIterator >> lastPage [
 	| pageNumber |
 	currentPage := index headerPage.
