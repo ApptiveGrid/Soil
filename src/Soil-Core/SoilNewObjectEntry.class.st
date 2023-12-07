@@ -32,7 +32,8 @@ SoilNewObjectEntry >> commitIn: soil [
 		at: objectId 
 		put: bytes.
 	record ifNotNil: [ 
-		record position: position ]
+		record position: position.
+		record := nil ]
 ]
 
 { #category : #accessing }
