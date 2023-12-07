@@ -104,6 +104,11 @@ SoilIndexIterator >> firstAssociation [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> index [
+	^index
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> index: anIndex [ 
 	index := anIndex
 ]
@@ -202,6 +207,13 @@ SoilIndexIterator >> nextPresentAssociation [
 { #category : #accessing }
 SoilIndexIterator >> pageAt: anInteger [
 	^ index store pageAt: anInteger
+]
+
+{ #category : #removing }
+SoilIndexIterator >> removeKey: key [ 
+	^ self 
+		at: key 
+		put: (SoilObjectId segment: 0 index: 0)
 ]
 
 { #category : #accessing }
