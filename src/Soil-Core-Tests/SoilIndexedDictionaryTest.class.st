@@ -239,9 +239,7 @@ SoilIndexedDictionaryTest >> testConcurrentIsEmpty [
 	tx3 commit.
 	"invisible: tx2 still has the key"
 	self deny: tx2 root isEmpty.
-	"to fix: size is wrong as it does not restore the value" 
-	self flag: #isRemoved.
-	self assert: tx2 root size equals: 0
+	self assert: tx2 root size equals: 1
 ]
 
 { #category : #tests }
