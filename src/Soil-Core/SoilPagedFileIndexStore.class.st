@@ -26,6 +26,13 @@ SoilPagedFileIndexStore >> close [
 		stream := nil ]
 ]
 
+{ #category : #accessing }
+SoilPagedFileIndexStore >> ensureStreamIsOpen [
+	stream ifNotNil: [ ^ self ].
+	self open
+		
+]
+
 { #category : #'instance creation' }
 SoilPagedFileIndexStore >> filePageSize [
 	"most OSses use a file page size of 4k today"
@@ -71,9 +78,10 @@ SoilPagedFileIndexStore >> initializeHeaderPage [
 
 { #category : #'open/close' }
 SoilPagedFileIndexStore >> open [
-	self 
-		openStream;
-		readHeaderPage 
+	streamSemaphore critical: [  
+		self 
+			openStream;
+			readHeaderPage ]
 ]
 
 { #category : #'open/close' }
@@ -84,6 +92,7 @@ SoilPagedFileIndexStore >> openStream [
 { #category : #accessing }
 SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	| page |
+	self ensureStreamIsOpen.
 	streamSemaphore critical: [  
 		stream position: (self positionOfPageIndex: anInteger).
 		page := (index readPageFrom: stream) index: anInteger ].
@@ -105,10 +114,9 @@ SoilPagedFileIndexStore >> positionOfPageIndex: anInteger [
 { #category : #writing }
 SoilPagedFileIndexStore >> readHeaderPage [
 	| headerPage |
-	streamSemaphore critical: [  
-		stream position: 0.
-		stream next. "pageCode"
-		headerPage :=  index newHeaderPage readFrom: stream ].
+	stream position: 0.
+	stream next. "pageCode"
+	headerPage :=  index newHeaderPage readFrom: stream.
 	pagesMutex critical: [  
 		pages at: 1 put: headerPage ]
 ]
@@ -128,8 +136,9 @@ SoilPagedFileIndexStore >> stream [
 
 { #category : #writing }
 SoilPagedFileIndexStore >> writePage: aPage [ 
+	| pagePosition |
+	self ensureStreamIsOpen.
 	streamSemaphore critical: [  
-		| pagePosition |
 		pagePosition := self positionOfPageIndex: aPage index.  
 		stream position: pagePosition.
 		aPage writeOn: stream.
