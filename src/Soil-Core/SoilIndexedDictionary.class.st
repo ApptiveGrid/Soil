@@ -282,12 +282,7 @@ SoilIndexedDictionary >> second [
 { #category : #accessing }
 SoilIndexedDictionary >> size [ 
 	^ transaction 
-		ifNotNil: [ 
-			"We should just call size on index, but the do: here can restore values"
-			| sum |
-			sum := 0.
-			self do: [ :each | sum := sum + 1 ].
-			sum ]
+		ifNotNil: [ self index size ]
 		ifNil: [ newValues size ]
 ]
 
