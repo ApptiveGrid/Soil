@@ -74,11 +74,7 @@ SoilIndexedDictionary >> atIndex: anInteger [
 
 { #category : #accessing }
 SoilIndexedDictionary >> basicAt: aString ifAbsent: aBlock [ 
-	| iterator value key |
-	key := (aString asSkipListKeyOfSize: self index keySize) asInteger.
-	iterator := self index newIterator.
-	value := iterator at: aString ifAbsent: aBlock.
-	^ (self restoreValue: value forKey: key iterator: iterator) ifNil: [ aBlock value ]
+	^ self index newIterator at: aString ifAbsent: aBlock
 ]
 
 { #category : #accessing }
@@ -93,17 +89,10 @@ SoilIndexedDictionary >> createIndex [
 
 { #category : #enumerating }
 SoilIndexedDictionary >> do: aBlock [
-
 	transaction
 		ifNotNil: [ 
-			| iterator assoc |
-			iterator := self index newIterator.
-			[ (assoc := iterator nextAssociation) notNil ] whileTrue: [ 
-				(self
-					 restoreValue: assoc value
-					 forKey: assoc key
-					 iterator: iterator) ifNotNil: [ :objectId | 
-					aBlock value: (transaction proxyForObjectId: objectId) ] ] ]
+			self index newIterator do: [ :objectId | 
+					aBlock value: (transaction proxyForObjectId: objectId) ]]
 		ifNil: [ 
 			newValues valuesDo: [ :each | aBlock value: each ] ]
 ]
@@ -143,29 +132,6 @@ SoilIndexedDictionary >> hasIndexUpdates [
 ]
 
 { #category : #accessing }
-SoilIndexedDictionary >> historicValueAt: key iterator: iterator ifAbsent: absentBlock [ 
-	"a removed value will return ObjectId 0:0"
-	
-	^ (iterator currentPage isOlderThan: transaction readVersion) 
-		ifTrue: [ 
-			"all modifications to this page have been done before we
-			started the transaction, so the removal is visibile and 
-			value absent"
-			absentBlock value ] 
-		ifFalse: [
-			"we determine all changes between our transaction and the
-			last one modifying the page. if we get back changes for the
-			key the value of the oldes entry has the value it had before"
-			(transaction 
-				journalEntriesFor: key 
-				inIndex: index 
-				startingAt: iterator currentPage lastTransaction)
-					ifNotEmpty: [:entries | entries last oldValue ]
-					ifEmpty: absentBlock ]
-	
-]
-
-{ #category : #accessing }
 SoilIndexedDictionary >> id [
 	^ id
 ]
@@ -182,7 +148,7 @@ SoilIndexedDictionary >> initialize [
 	oldValues := Dictionary new.
 	removedValues := OrderedDictionary new.
 	id := UUID new asString36.
-	index := self createIndex.
+	index := self createIndex
 ]
 
 { #category : #testing }
@@ -191,12 +157,7 @@ SoilIndexedDictionary >> isEmpty [
 	iterator := self index newIterator.
 	iterator currentPage: self index firstPage.
 	^ newValues isEmpty and: [ self index isEmpty 
-		or: [
-		"all items might be removed and not restorable" 
-		(self index firstPage items allSatisfy: [ :each | (self
-					 restoreValue: each value
-					 forKey: each key
-					 iterator: iterator)isNil] )]]
+		or: [iterator isEmpty]]
 ]
 
 { #category : #testing }
@@ -311,24 +272,6 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 				put: (newValues removeKey: key ifAbsent: [ ^ aBlock value ]) ]
 ]
 
-{ #category : #private }
-SoilIndexedDictionary >> restoreValue: value forKey: key iterator: iterator [
-	"restore a value that has been removed by a later transaction"
-	^ value isRemoved 
-		ifTrue: [
-			self 
-				historicValueAt: key 
-				iterator: iterator 
-				ifAbsent: [ nil ] ]
-		ifFalse: [
-			"restore a value that has been overwritten by a later
-			transaction"   
-			self 
-				historicValueAt: key 
-				iterator: iterator 
-				ifAbsent: [ value ] ]
-]
-
 { #category : #accessing }
 SoilIndexedDictionary >> second [
 	^ transaction 
@@ -361,6 +304,8 @@ SoilIndexedDictionary >> soilBasicSerialize: aSerializer [
 SoilIndexedDictionary >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
+	index soil: (transaction ifNotNil: [:tr | tr soil]);
+			readVersion: (transaction ifNotNil: [:tr | tr readVersion]).
 	newValues copy keysAndValuesDo: [ :key :object | | obj |
 		obj := object isObjectId
 			ifTrue: [ object ] 
@@ -375,6 +320,8 @@ SoilIndexedDictionary >> soilClusterRootIn: aTransaction [
 { #category : #serializing }
 SoilIndexedDictionary >> soilLoadedIn: aTransaction [
 	transaction := aTransaction.
+	index soil: (transaction ifNotNil: [:tr | tr soil]);
+			readVersion: (transaction ifNotNil: [:tr | tr readVersion]).
 	"when being materialized newValues is not initialized so we do it here"
 	newValues := Dictionary new.
 	removedValues := Dictionary new.

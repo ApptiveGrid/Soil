@@ -5,7 +5,9 @@ Class {
 		'index',
 		'currentPage',
 		'currentKey',
-		'nextKey'
+		'nextKey',
+		'soil',
+		'readVersion'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -29,8 +31,10 @@ SoilIndexIterator >> at: aKeyObject [
 
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
+	| foundValue |
 	currentKey := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
-	^self find: currentKey ifAbsent: aBlock
+	foundValue := self find: currentKey ifAbsent: aBlock.
+	^(self restoreValue: foundValue forKey: currentKey) ifNil: [ aBlock value ]
 ]
 
 { #category : #accessing }
@@ -62,8 +66,11 @@ SoilIndexIterator >> currentPage: anObject [
 { #category : #enumerating }
 SoilIndexIterator >> do: aBlock [
 	| item |
-	[ (item := self nextPresent) isNil ] whileFalse: [
-			aBlock value: item ]
+	
+	[ (item := self nextAssociation ) notNil ] whileTrue: [ 
+				(self
+					 restoreValue: item value
+					 forKey: item key) ifNotNil: [:notNil | aBlock value: notNil ]]
 ]
 
 { #category : #private }
@@ -103,6 +110,29 @@ SoilIndexIterator >> firstAssociation [
 	^ item
 ]
 
+{ #category : #private }
+SoilIndexIterator >> historicValueAt: key ifAbsent: absentBlock [ 
+	"a removed value will return ObjectId 0:0"
+	readVersion ifNil: [ ^ absentBlock value ].
+	^ (self currentPage isOlderThan: readVersion) 
+		ifTrue: [ 
+			"all modifications to this page have been done before we
+			started the transaction, so the removal is visibile and 
+			value absent"
+			   absentBlock value ] 
+		ifFalse: [
+			"we determine all changes between our transaction and the
+			last one modifying the page. if we get back changes for the
+			key the value of the oldes entry has the value it had before"
+			(self 
+				journalEntriesFor: key 
+				inIndex: index 
+				startingAt: self currentPage lastTransaction)
+					ifNotEmpty: [:entries | entries last oldValue ]
+					ifEmpty: absentBlock]
+	
+]
+
 { #category : #accessing }
 SoilIndexIterator >> index [
 	^index
@@ -111,6 +141,29 @@ SoilIndexIterator >> index [
 { #category : #accessing }
 SoilIndexIterator >> index: anIndex [ 
 	index := anIndex
+]
+
+{ #category : #testing }
+SoilIndexIterator >> isEmpty [
+	"all items might be removed and not restorable"
+
+	^ self index firstPage items allSatisfy: [ :each |
+		  (self restoreValue: each value forKey: each key) isNil ]
+]
+
+{ #category : #private }
+SoilIndexIterator >> journalEntriesFor: key inIndex: aSoilIndex startingAt: anInteger [ 
+	| transactionId entries |
+	entries := OrderedCollection new.
+	transactionId := anInteger.
+	[ transactionId >  readVersion ] whileTrue: [  
+		( soil journal transactionJournalAt: transactionId) entries do: [ :each | 
+			((each class = SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
+				(each key = key) ifTrue: [ 
+					entries add: each ] ]  ].
+		transactionId := transactionId - 1.
+	].
+   ^ entries
 ]
 
 { #category : #accessing }
@@ -209,11 +262,38 @@ SoilIndexIterator >> pageAt: anInteger [
 	^ index store pageAt: anInteger
 ]
 
+{ #category : #accessing }
+SoilIndexIterator >> readVersion [
+
+	^ readVersion
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> readVersion: anObject [
+
+	readVersion := anObject
+]
+
 { #category : #removing }
 SoilIndexIterator >> removeKey: key [ 
 	^ self 
 		at: key 
 		put: (SoilObjectId segment: 0 index: 0)
+]
+
+{ #category : #private }
+SoilIndexIterator >> restoreValue: value forKey: key [
+	"restore a value that has been removed by a later transaction"
+	^ value isRemoved 
+		ifTrue: [
+			self 
+				historicValueAt: key 
+				ifAbsent: [ nil ] ]
+		ifFalse: [
+			"restore a value that has been overwritten by a later transaction"   
+			self 
+				historicValueAt: key
+				ifAbsent: [ value ] ]
 ]
 
 { #category : #accessing }
@@ -223,6 +303,18 @@ SoilIndexIterator >> size [
 	sum := 0.
 	self do: [ :each | sum := sum + 1 ].
 	^ sum
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> soil [
+
+	^ soil
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> soil: anObject [
+
+	soil := anObject
 ]
 
 { #category : #transactions }

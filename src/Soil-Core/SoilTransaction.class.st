@@ -377,22 +377,6 @@ SoilTransaction >> journal [
 	^ journal
 ]
 
-{ #category : #accessing }
-SoilTransaction >> journalEntriesFor: key inIndex: aSoilIndex startingAt: anInteger [ 
-	| transactionId entries |
-	entries := OrderedCollection new.
-	transactionId := anInteger.
-	[ transactionId > readVersion ] whileTrue: [  
-		(soil journal transactionJournalAt: transactionId) entries do: [ :each | 
-			((each class = SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
-				(each key = key) ifTrue: [ 
-					entries add: each ] ]  ].
-		transactionId := transactionId - 1.
-	].
-   ^ entries
-	
-]
-
 { #category : #'as yet unclassified' }
 SoilTransaction >> lockObjectId: aSOObjectId [ 
 	^ self objectRepository lockObjectId: aSOObjectId for: self

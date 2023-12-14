@@ -9,6 +9,8 @@ SoilSkipListDictionary >> createIndex [
 	^ SoilSkipList new
 		initializeHeaderPage;
 		valueSize: 8;
+		soil: (transaction ifNotNil: [:tr | tr soil]);
+		readVersion: (transaction ifNotNil: [:tr | tr readVersion]);
 		yourself
 ]
 

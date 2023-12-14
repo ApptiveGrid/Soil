@@ -2,7 +2,9 @@ Class {
 	#name : #SoilBasicSkipList,
 	#superclass : #Object,
 	#instVars : [
-		'store'
+		'store',
+		'soil',
+		'readVersion'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -140,7 +142,9 @@ SoilBasicSkipList >> maxLevel: anInteger [
 
 { #category : #'public/accessing' }
 SoilBasicSkipList >> newIterator [ 
-	^ SoilSkipListIterator on: self 
+	^ (SoilSkipListIterator on: self)
+			readVersion: readVersion;
+			soil: soil
 ]
 
 { #category : #'instance creation' }
@@ -161,6 +165,18 @@ SoilBasicSkipList >> pageSize [
 { #category : #accessing }
 SoilBasicSkipList >> pages [
 	^ self store pages
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> readVersion [
+
+	^ readVersion
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> readVersion: anObject [
+
+	readVersion := anObject
 ]
 
 { #category : #removing }
@@ -186,6 +202,18 @@ SoilBasicSkipList >> removeKey: aString ifAbsent: aBlock [
 SoilBasicSkipList >> size [
 	"We iterate over all elements to get the size. Slow!"
 	^ self newIterator size 
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> soil [
+
+	^ soil
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> soil: anObject [
+
+	soil := anObject
 ]
 
 { #category : #private }

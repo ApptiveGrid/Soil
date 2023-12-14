@@ -2,7 +2,9 @@ Class {
 	#name : #SoilBasicBTree,
 	#superclass : #Object,
 	#instVars : [
-		'store'
+		'store',
+		'soil',
+		'readVersion'
 	],
 	#category : #'Soil-Core-Index-BTree'
 }
@@ -189,7 +191,9 @@ SoilBasicBTree >> newIndexPageFromRoot: rootIndexPage [
 
 { #category : #'instance creation' }
 SoilBasicBTree >> newIterator [ 
-	^ SoilBTreeIterator on: self 
+	^ (SoilBTreeIterator on: self)
+			readVersion: readVersion;
+			soil: soil
 ]
 
 { #category : #'instance creation' }
@@ -239,6 +243,18 @@ SoilBasicBTree >> readPageFrom: aStream [
 	^ SoilBTreePage readPageFrom: aStream keySize: self keySize valueSize: self valueSize
 ]
 
+{ #category : #accessing }
+SoilBasicBTree >> readVersion [
+
+	^ readVersion
+]
+
+{ #category : #accessing }
+SoilBasicBTree >> readVersion: anObject [
+
+	readVersion := anObject
+]
+
 { #category : #removing }
 SoilBasicBTree >> removeKey: key [ 
 	^ self
@@ -267,6 +283,18 @@ SoilBasicBTree >> rootPage [
 SoilBasicBTree >> size [
 	"We iterate over all elements to get the size. Slow!"
 	^ self newIterator size 
+]
+
+{ #category : #accessing }
+SoilBasicBTree >> soil [
+
+	^ soil
+]
+
+{ #category : #accessing }
+SoilBasicBTree >> soil: anObject [
+
+	soil := anObject
 ]
 
 { #category : #splitting }
