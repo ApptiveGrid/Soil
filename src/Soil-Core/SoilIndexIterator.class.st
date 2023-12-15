@@ -43,6 +43,15 @@ SoilIndexIterator >> at: aKeyObject put: anObject [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> atIndex: anInteger [
+	| current |
+	current := self first.
+	2 to: anInteger do: [ :idx |
+		current := self next ].
+	^ current value
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> basicAt: key put: anObject [
 	self subclassResponsibility
 ]

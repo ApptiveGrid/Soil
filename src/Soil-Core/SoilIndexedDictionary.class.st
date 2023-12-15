@@ -63,7 +63,7 @@ SoilIndexedDictionary >> at: key put: anObject [
 SoilIndexedDictionary >> atIndex: anInteger [
 	^ transaction 
 		ifNotNil: [  
-			(index atIndex: anInteger)
+			(self newIterator atIndex: anInteger)
 				ifNotNil: [ :bytes |
 					transaction 
 						objectId: bytes asSoilObjectId
