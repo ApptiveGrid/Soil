@@ -36,13 +36,8 @@ SoilBasicSkipList >> at: aKeyObject put: anObject [
 ]
 
 { #category : #accessing }
-SoilBasicSkipList >> atIndex: anInteger [ 
-	| current iterator |
-	iterator := self newIterator.
-	current := iterator first.
-	2 to: anInteger do: [ :idx |
-		current := iterator next ].
-	^ current value
+SoilBasicSkipList >> atIndex: anInteger [
+	^ self newIterator atIndex: anInteger 
 ]
 
 { #category : #accessing }
@@ -69,15 +64,8 @@ SoilBasicSkipList >> first [
 ]
 
 { #category : #accessing }
-SoilBasicSkipList >> first: anInteger [ 
-	| iterator col |
-	iterator := self newIterator.
-	col := OrderedCollection new: anInteger.
-	anInteger timesRepeat: [ 
-		(iterator nextPresent)
-			ifNotNil: [ :value | col add: value ]
-			ifNil: [ ^ col ]].
-	^ col
+SoilBasicSkipList >> first: anInteger [
+	^ self newIterator first: anInteger
 ]
 
 { #category : #accessing }

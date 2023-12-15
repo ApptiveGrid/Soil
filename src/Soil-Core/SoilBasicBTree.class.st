@@ -45,12 +45,7 @@ SoilBasicBTree >> at: aKeyObject put: anObject [
 
 { #category : #accessing }
 SoilBasicBTree >> atIndex: anInteger [
-	| current iterator |
-	iterator := self newIterator.
-	current := iterator first.
-	2 to: anInteger do: [ :idx |
-		current := iterator next ].
-	^ current value
+	^ self newIterator atIndex: anInteger 
 ]
 
 { #category : #'open/close' }
@@ -70,15 +65,8 @@ SoilBasicBTree >> first [
 ]
 
 { #category : #accessing }
-SoilBasicBTree >> first: anInteger [ 
-	| iterator col |
-	iterator := self newIterator.
-	col := OrderedCollection new: anInteger.
-	anInteger timesRepeat: [ 
-		(iterator nextPresent)
-			ifNotNil: [ :value | col add: value ]
-			ifNil: [ ^ col ]].
-	^ col
+SoilBasicBTree >> first: anInteger [
+	^ self newIterator first: anInteger
 ]
 
 { #category : #accessing }
