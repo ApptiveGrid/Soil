@@ -89,6 +89,17 @@ SoilIndexIterator >> first [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> first: anInteger [
+	| result |
+	result := OrderedCollection new: anInteger.
+	anInteger timesRepeat: [
+		| next |
+		next := self nextPresent ifNil: [ ^ result].
+		result add: next ].
+	^ result
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> firstAssociation [ 
 	| item |
 	currentPage := index store headerPage.
