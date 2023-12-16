@@ -21,17 +21,12 @@ SoilSkipList >> asCopyOnWrite [
 		yourself 
 ]
 
-{ #category : #'opening/closing' }
-SoilSkipList >> close [
-	self store close
-]
-
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
 ]
 
-{ #category : #accessing }
+{ #category : #deleting }
 SoilSkipList >> flush [
 	self store flush
 ]
@@ -54,7 +49,7 @@ SoilSkipList >> initializeParametersFrom: aSoilSkipList [
 		valueSize: aSoilSkipList valueSize
 ]
 
-{ #category : #private }
+{ #category : #testing }
 SoilSkipList >> isPersistent [
 	^ path notNil
 ]
@@ -136,7 +131,6 @@ SoilSkipList >> thePersistentInstance [
 
 { #category : #accessing }
 SoilSkipList >> valueSize [
-	"^ 8"
 	^ valueSize ifNil: [ 
 		valueSize := super valueSize ]
 ]
