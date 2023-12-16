@@ -1,8 +1,7 @@
 Class {
 	#name : #SoilBTreePage,
-	#superclass : #SoilIndexPage,
+	#superclass : #SoilIndexItemsPage,
 	#instVars : [
-		'items',
 		'keySize',
 		'lastTransaction'
 	],
@@ -14,12 +13,6 @@ SoilBTreePage class >> indexClass [
 	^ SoilBTree 
 ]
 
-{ #category : #accessing }
-SoilBTreePage class >> pageCode [
-	"abstract"
-	^0
-]
-
 { #category : #adding }
 SoilBTreePage >> addItem: anAssociation [
 	(items anySatisfy: [ :item | item key = anAssociation key ])
@@ -28,29 +21,9 @@ SoilBTreePage >> addItem: anAssociation [
 	dirty := true
 ]
 
-{ #category : #accessing }
-SoilBTreePage >> associationAt: anInteger [ 
-	^ self
-		associationAt: anInteger 
-		ifAbsent: nil
-]
-
-{ #category : #accessing }
-SoilBTreePage >> associationAt: anInteger ifAbsent: aBlock [
-	^ items 
-		detect: [:each | each key = anInteger ] 
-		ifNone: aBlock
-]
-
 { #category : #private }
 SoilBTreePage >> find: aKey with: aBTree [ 
 	^ self subclassResponsibility
-]
-
-{ #category : #accessing }
-SoilBTreePage >> firstItem [
-
-	^ items isNotEmpty ifTrue: [ items first ]
 ]
 
 { #category : #testing }
@@ -58,29 +31,11 @@ SoilBTreePage >> hasRoom [
 	^ self headerSize + ((items size + 1) * (self keySize + self valueSize)) <= self pageSize
 ]
 
-{ #category : #utilities }
-SoilBTreePage >> headerSize [
-	^ super headerSize + 8 "last transaction number"
-]
-
-{ #category : #accessing }
-SoilBTreePage >> indexOfKey: anInteger [ 
-	items withIndexDo: [ :each :idx |
-		(each key = anInteger) ifTrue: [ ^ idx ] ].
-	^ 0
-]
-
 { #category : #initialization }
 SoilBTreePage >> initialize [ 
 	super initialize.
-	items := SortedCollection new.
 	lastTransaction := 0.
 	dirty := true
-]
-
-{ #category : #testing }
-SoilBTreePage >> isEmpty [
-	^ items isEmpty 
 ]
 
 { #category : #testing }
@@ -104,38 +59,6 @@ SoilBTreePage >> itemCapacity [
 ]
 
 { #category : #accessing }
-SoilBTreePage >> itemRemoveAt: key [ 
-	^ self 
-		itemRemoveAt: key 
-		ifAbsent: [ KeyNotFound signalFor: key in: self ]
-]
-
-{ #category : #accessing }
-SoilBTreePage >> itemRemoveAt: anInteger ifAbsent: aBlock [
-	| item |
-	items 
-		findBinaryIndex: [ :each |  anInteger - each key ] 
-		do: [:ind | item := items removeAt: ind ]
-		ifNone: [ ^ aBlock value ].
-	dirty := true.
-	^ item
-]
-
-{ #category : #accessing }
-SoilBTreePage >> itemRemoveIndex: anInteger [
-	| item |
-	item := items at: anInteger.
-	items removeAt: anInteger.
-	dirty := true.
-	^ item
-]
-
-{ #category : #accessing }
-SoilBTreePage >> items [
-	^ items
-]
-
-{ #category : #accessing }
 SoilBTreePage >> keySize [
 	^ keySize
 ]
@@ -143,12 +66,6 @@ SoilBTreePage >> keySize [
 { #category : #accessing }
 SoilBTreePage >> keySize: anInteger [ 
 	keySize := anInteger
-]
-
-{ #category : #accessing }
-SoilBTreePage >> lastItem [
-
-	^ items isNotEmpty ifTrue: [ items last ]
 ]
 
 { #category : #accessing }
@@ -162,20 +79,9 @@ SoilBTreePage >> lastTransaction: anInteger [
 ]
 
 { #category : #accessing }
-SoilBTreePage >> numberOfItems [
-	^ items size
-]
-
-{ #category : #accessing }
 SoilBTreePage >> pointerSize [
 	"this is the size in bytes used to point to other pages"
 	^ 4
-]
-
-{ #category : #copying }
-SoilBTreePage >> postCopy [ 
-	super postCopy.
-	items := items copy.
 ]
 
 { #category : #reading }
@@ -198,16 +104,6 @@ SoilBTreePage >> readLastTransactionFrom: aStream [
 	lastTransaction := (aStream next: 8) asInteger.
 ]
 
-{ #category : #initialization }
-SoilBTreePage >> setItems: aCollection [ 
-	items := aCollection
-]
-
-{ #category : #accessing }
-SoilBTreePage >> smallestKey [
-	^ items first key
-]
-
 { #category : #private }
 SoilBTreePage >> split: newPage [
 	| middle |
@@ -218,20 +114,6 @@ SoilBTreePage >> split: newPage [
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.
 	^ newPage
-]
-
-{ #category : #accessing }
-SoilBTreePage >> valueAt: anInteger [ 
-	^ self 
-		valueAt: anInteger 
-		ifAbsent: nil 
-]
-
-{ #category : #accessing }
-SoilBTreePage >> valueAt: anInteger ifAbsent: aBlock [
-	^ (self 
-		associationAt: anInteger
-		ifAbsent: aBlock) value
 ]
 
 { #category : #accessing }

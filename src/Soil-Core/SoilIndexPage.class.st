@@ -19,8 +19,9 @@ SoilIndexPage class >> isAbstract [
 ]
 
 { #category : #accessing }
-SoilIndexPage class >> pageCode [ 
-	self subclassResponsibility 
+SoilIndexPage class >> pageCode [
+	"abstract"
+	^ 0 
 ]
 
 { #category : #accessing }
