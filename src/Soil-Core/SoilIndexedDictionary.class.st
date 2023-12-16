@@ -64,12 +64,8 @@ SoilIndexedDictionary >> atIndex: anInteger [
 	^ transaction 
 		ifNotNil: [  
 			(self newIterator atIndex: anInteger)
-				ifNotNil: [ :bytes |
-					transaction 
-						objectId: bytes asSoilObjectId
-						ifVisible: [:objectId | (objectId asSoilObjectProxy) transaction: transaction ]
-						ifHidden: nil ] ]
-		ifNil: [ (newValues associations at: anInteger) value  ]
+				ifNotNil: [ :objectId | transaction proxyForObjectId: objectId ]]
+		ifNil: [ (newValues associations at: anInteger) value ]
 ]
 
 { #category : #accessing }

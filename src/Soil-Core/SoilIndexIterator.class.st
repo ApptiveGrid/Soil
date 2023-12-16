@@ -47,7 +47,7 @@ SoilIndexIterator >> atIndex: anInteger [
 	| current |
 	current := self first.
 	2 to: anInteger do: [ :idx |
-		current := self next ].
+		current := self nextPresent ].
 	^ current value
 ]
 

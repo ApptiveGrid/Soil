@@ -364,14 +364,6 @@ SoilTransaction >> isRoot: anObject [
 		ifAbsent: nil) notNil
 ]
 
-{ #category : #testing }
-SoilTransaction >> isVisibleObjectId: aSoilObjectId [ 
-	"not initialized objectIds are private to this transaction
-	and therefor visible"
-	aSoilObjectId isInitialized ifFalse: [ ^ true ].
-	^ (self recordWithId: aSoilObjectId) notNil 
-]
-
 { #category : #accessing }
 SoilTransaction >> journal [
 	^ journal
@@ -465,13 +457,6 @@ SoilTransaction >> objectAt: anObjectId ifAbsent: aBlock [
 		at: anObjectId 
 		ifPresent: [ :record | ^ record object ]
 		ifAbsent: aBlock 
-]
-
-{ #category : #testing }
-SoilTransaction >> objectId: objectId ifVisible: visibleBlock ifHidden: hiddenBlock [ 
-	^ (self isVisibleObjectId: objectId)
-		ifTrue: [ visibleBlock cull: objectId ]
-		ifFalse: [ hiddenBlock cull: objectId ] 
 ]
 
 { #category : #'as yet unclassified' }
