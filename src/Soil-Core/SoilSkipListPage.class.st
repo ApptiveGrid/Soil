@@ -1,9 +1,8 @@
 Class {
 	#name : #SoilSkipListPage,
-	#superclass : #SoilIndexPage,
+	#superclass : #SoilIndexItemsPage,
 	#instVars : [
 		'right',
-		'items',
 		'keySize',
 		'valueSize',
 		'lastTransaction'
@@ -22,12 +21,6 @@ SoilSkipListPage class >> isAbstract [
 	^ self == SoilSkipListPage 
 ]
 
-{ #category : #accessing }
-SoilSkipListPage class >> pageCode [
-	"abstract"
-	^ 0 
-]
-
 { #category : #adding }
 SoilSkipListPage >> addItem: anAssociation [ 
 	items add: anAssociation.
@@ -35,30 +28,10 @@ SoilSkipListPage >> addItem: anAssociation [
 ]
 
 { #category : #accessing }
-SoilSkipListPage >> associationAt: anInteger [ 
-	^ self 
-		associationAt: anInteger 
-		ifAbsent: nil
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> associationAt: key ifAbsent: aBlock [
-	^ items 
-		detect: [:each | each key = key ] 
-		ifNone: aBlock
-]
-
-{ #category : #accessing }
 SoilSkipListPage >> biggestKey [
 	^ self isLastPage 
 		ifTrue: [ (2 raisedTo: (keySize * 8)) - 1 ]
 		ifFalse: [ self lastKey ]
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> firstItem [
-
-	^ items isNotEmpty ifTrue: [ items first ]
 ]
 
 { #category : #testing }
@@ -69,24 +42,9 @@ SoilSkipListPage >> hasRoom [
 	^ used <= (self pageSize - itemSize)
 ]
 
-{ #category : #utilities }
-SoilSkipListPage >> headerSize [
-	^ super headerSize + 8 "last transaction number"
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> indexOfKey: anInteger [ 
-	items withIndexDo: [ :each :idx |
-		(each key = anInteger) ifTrue: [ ^ idx ] ].
-	^ 0
-	
-		
-]
-
 { #category : #initialization }
 SoilSkipListPage >> initialize [ 
 	super initialize.
-	items := SortedCollection new.
 	lastTransaction := 0.
 	dirty := true.
 
@@ -101,11 +59,6 @@ SoilSkipListPage >> initializeLevel: maxLevel [
 		level := level + 1.
 		promote := self class random next > 0.5 ].
 	right := Array new: level withAll: 0. 
-]
-
-{ #category : #testing }
-SoilSkipListPage >> isEmpty [
-	^ items isEmpty 
 ]
 
 { #category : #testing }
@@ -128,14 +81,6 @@ SoilSkipListPage >> itemAfter: key [
 ]
 
 { #category : #accessing }
-SoilSkipListPage >> itemAt: anInteger ifAbsent: aBlock [
-	^ items 
-		findBinaryIndex: [ :each |  anInteger - each key ] 
-		do: [:ind | items at: ind ]
-		ifNone: aBlock 
-]
-
-{ #category : #accessing }
 SoilSkipListPage >> itemAt: key put: anObject [ 
 	| removedItem |
 	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
@@ -155,38 +100,6 @@ SoilSkipListPage >> itemBefore: key [
 { #category : #accessing }
 SoilSkipListPage >> itemCapacity [
 	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> itemRemoveAt: key [ 
-	^ self 
-		itemRemoveAt: key 
-		ifAbsent: [ KeyNotFound signalFor: key in: self ]
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> itemRemoveAt: anInteger ifAbsent: aBlock [
-	| item |
-	items 
-		findBinaryIndex: [ :each |  anInteger - each key ] 
-		do: [:ind | item := items removeAt: ind ]
-		ifNone: [ ^ aBlock value ].
-	dirty := true.
-	^ item
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> itemRemoveIndex: anInteger [
-	| item |
-	item := items at: anInteger.
-	items removeAt: anInteger.
-	dirty := true.
-	^ item
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> items [
-	^ items
 ]
 
 { #category : #accessing }
@@ -215,12 +128,6 @@ SoilSkipListPage >> keySize: anInteger [
 ]
 
 { #category : #accessing }
-SoilSkipListPage >> lastItem [
-
-	^ items isNotEmpty ifTrue: [ items last ]
-]
-
-{ #category : #accessing }
 SoilSkipListPage >> lastKey [
 
 	^ items isNotEmpty ifTrue: [ items last key ]
@@ -246,15 +153,9 @@ SoilSkipListPage >> next [
 	^ self rightAt: 1
 ]
 
-{ #category : #accessing }
-SoilSkipListPage >> numberOfItems [
-	^ items size 
-]
-
 { #category : #copying }
 SoilSkipListPage >> postCopy [ 
 	super postCopy.
-	items := items copy.
 	right := right copy
 ]
 
@@ -312,19 +213,9 @@ SoilSkipListPage >> rightSize [
 	^ 4
 ]
 
-{ #category : #accessing }
-SoilSkipListPage >> setItems: aCollection [ 
-	items := aCollection
-]
-
 { #category : #private }
 SoilSkipListPage >> sizeInBytes [
 	^ self headerSize + (items size * (self keySize + self valueSize))
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> smallestKey [
-	^ items first key
 ]
 
 { #category : #private }
@@ -336,20 +227,6 @@ SoilSkipListPage >> split: newPage [
 	dirty := true.
 	^ newPage
 	
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> valueAt: anInteger [ 
-	^ self 
-		valueAt: anInteger 
-		ifAbsent: nil
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> valueAt: anInteger ifAbsent: aBlock [
-	^ (self 
-		associationAt: anInteger
-		ifAbsent: aBlock) value
 ]
 
 { #category : #accessing }

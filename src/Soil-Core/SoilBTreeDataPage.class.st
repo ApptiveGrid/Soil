@@ -58,14 +58,6 @@ SoilBTreeDataPage >> isLastPage [
 ]
 
 { #category : #accessing }
-SoilBTreeDataPage >> itemAt: anInteger ifAbsent: aBlock [
-	^ items 
-		findBinaryIndex: [ :each |  anInteger - each key ] 
-		do: [:ind | items at: ind ]
-		ifNone: aBlock 
-]
-
-{ #category : #accessing }
 SoilBTreeDataPage >> itemAt: key put: anObject [ 
 	| removedItem |
 	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
