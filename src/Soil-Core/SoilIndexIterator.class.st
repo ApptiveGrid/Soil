@@ -43,6 +43,15 @@ SoilIndexIterator >> at: aKeyObject put: anObject [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> atIndex: anInteger [
+	| current |
+	current := self first.
+	2 to: anInteger do: [ :idx |
+		current := self nextPresent ].
+	^ current value
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> basicAt: key put: anObject [
 	self subclassResponsibility
 ]
@@ -86,6 +95,17 @@ SoilIndexIterator >> findPageFor: key [
 { #category : #accessing }
 SoilIndexIterator >> first [
 	^ self firstAssociation value
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> first: anInteger [
+	| result |
+	result := OrderedCollection new: anInteger.
+	anInteger timesRepeat: [
+		| next |
+		next := self nextPresent ifNil: [ ^ result].
+		result add: next ].
+	^ result
 ]
 
 { #category : #accessing }

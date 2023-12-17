@@ -1,9 +1,6 @@
 Class {
 	#name : #SoilBasicBTree,
-	#superclass : #Object,
-	#instVars : [
-		'store'
-	],
+	#superclass : #SoilIndex,
 	#category : #'Soil-Core-Index-BTree'
 }
 
@@ -21,67 +18,6 @@ SoilBasicBTree >> asCopyOnWrite [
 ]
 
 { #category : #accessing }
-SoilBasicBTree >> at: key [ 
-	^ self 
-		at: key 
-		ifAbsent: [ KeyNotFound signalFor: key in: self  ] 
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> at: anObject ifAbsent: aBlock [
-	^ (self find: anObject) 
-		ifNotNil: [:node | node value ]
-		ifNil: [ aBlock value ] 
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> at: aKeyObject put: anObject [
-
-	self newIterator 
-		at: aKeyObject 
-		put: anObject.
-
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> atIndex: anInteger [
-	| current iterator |
-	iterator := self newIterator.
-	current := iterator first.
-	2 to: anInteger do: [ :idx |
-		current := iterator next ].
-	^ current value
-]
-
-{ #category : #'open/close' }
-SoilBasicBTree >> close [
-	self store close
-]
-
-{ #category : #private }
-SoilBasicBTree >> find: aString [ 
-	^ self newIterator 
-		find: (aString asSkipListKeyOfSize: self keySize) asInteger
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> first [
-	^ self newIterator first
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> first: anInteger [ 
-	| iterator col |
-	iterator := self newIterator.
-	col := OrderedCollection new.
-	anInteger timesRepeat: [ 
-		(iterator nextPresent)
-			ifNotNil: [ :value | col add: value ]
-			ifNil: [ ^ col ]].
-	^ col
-]
-
-{ #category : #accessing }
 SoilBasicBTree >> firstPage [
 	^ self headerPage
 ]
@@ -89,16 +25,6 @@ SoilBasicBTree >> firstPage [
 { #category : #accessing }
 SoilBasicBTree >> flush [
 	self store flush
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> flushCachedPages [
-	store flushCachedPages
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> headerPage [
-	^ self store headerPage
 ]
 
 { #category : #initialization }
@@ -116,36 +42,11 @@ SoilBasicBTree >> initializeHeaderPage [
 	self store pageAt: rootIndexPage index put: rootIndexPage
 ]
 
-{ #category : #testing }
-SoilBasicBTree >> isEmpty [
-	^ self store headerPage isEmpty
-]
-
-{ #category : #testing }
-SoilBasicBTree >> isRegistered [
-	^ self subclassResponsibility
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> keySize [
-	^ self headerPage keySize
-]
-
 { #category : #accessing }
 SoilBasicBTree >> keySize: anInteger [
 	self headerPage keySize: anInteger.
 	"we have to set the keySize of the rootPage, too, as the page gets created before the keySize is known"
 	self rootPage keySize: anInteger
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> last [
-	^ self newIterator last
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> lastPage [
-	^ self newIterator lastPage
 ]
 
 { #category : #accessing }
@@ -214,19 +115,9 @@ SoilBasicBTree >> open [
 	self store open
 ]
 
-{ #category : #accessing }
-SoilBasicBTree >> pageAt: anInteger [ 
-	^ self store pageAt: anInteger 
-]
-
 { #category : #initialization }
 SoilBasicBTree >> pageClass [
 	^ SoilBTreeDataPage
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> pageSize [
-	^ 4 * 1024
 ]
 
 { #category : #accessing }
@@ -237,13 +128,6 @@ SoilBasicBTree >> pages [
 { #category : #'instance creation' }
 SoilBasicBTree >> readPageFrom: aStream [
 	^ SoilBTreePage readPageFrom: aStream keySize: self keySize valueSize: self valueSize
-]
-
-{ #category : #removing }
-SoilBasicBTree >> removeKey: key [ 
-	^ self
-		removeKey: key 
-		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #removing }
@@ -263,12 +147,6 @@ SoilBasicBTree >> rootPage [
 	^ self store pageAt: 2
 ]
 
-{ #category : #accessing }
-SoilBasicBTree >> size [
-	"We iterate over all elements to get the size. Slow!"
-	^ self newIterator size 
-]
-
 { #category : #splitting }
 SoilBasicBTree >> splitIndexPage: page [ 
 	| newPage |
@@ -286,33 +164,6 @@ SoilBasicBTree >> splitPage: page [
 	page next: newPage index.
 	self store pageAt: newPage index put: newPage.
 	^ newPage 
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> store [
-	^ store ifNil: [ 
-		store := self newFileStore ]
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> store: anObject [
-	anObject index: self.
-	store := anObject
-]
-
-{ #category : #converting }
-SoilBasicBTree >> thePersistentInstance [
-	^ self subclassResponsibility
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> valueSize [
-	^ self headerPage valueSize
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> valueSize: anInteger [
-	self headerPage valueSize: anInteger
 ]
 
 { #category : #writing }
