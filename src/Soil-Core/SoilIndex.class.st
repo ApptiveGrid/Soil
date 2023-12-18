@@ -67,6 +67,11 @@ SoilIndex >> first: anInteger [
 ]
 
 { #category : #accessing }
+SoilIndex >> firstPage [
+	^ self headerPage
+]
+
+{ #category : #accessing }
 SoilIndex >> flushCachedPages [
 	store flushCachedPages
 ]
@@ -92,6 +97,12 @@ SoilIndex >> keySize [
 ]
 
 { #category : #accessing }
+SoilIndex >> keySize: anInteger [
+	anInteger isZero ifTrue: [ Error signal: 'keySize cannot be zero yet' ].
+	self headerPage keySize: anInteger
+]
+
+{ #category : #accessing }
 SoilIndex >> last [
 	^ self newIterator last
 ]
@@ -99,6 +110,11 @@ SoilIndex >> last [
 { #category : #accessing }
 SoilIndex >> lastPage [
 	^ self newIterator lastPage
+]
+
+{ #category : #accessing }
+SoilIndex >> maxLevel: anIntegeer [
+	"ignored, this allows to switch SkiList and BTree easily"
 ]
 
 { #category : #'instance creation' }
@@ -124,6 +140,11 @@ SoilIndex >> pageAt: anInteger [
 { #category : #accessing }
 SoilIndex >> pageSize [
 	^ 4 * 1024
+]
+
+{ #category : #accessing }
+SoilIndex >> pages [
+	^ self store pages
 ]
 
 { #category : #removing }

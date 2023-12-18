@@ -11,17 +11,6 @@ SoilBasicSkipList class >> isAbstract [
 ]
 
 { #category : #accessing }
-SoilBasicSkipList >> firstPage [
-	^ self store pageAt: 1
-]
-
-{ #category : #accessing }
-SoilBasicSkipList >> keySize: anInteger [
-	anInteger isZero ifTrue: [ Error signal: 'keySize cannot be zero yet' ].
-	self headerPage keySize: anInteger
-]
-
-{ #category : #accessing }
 SoilBasicSkipList >> maxLevel [
 
 	^ self headerPage maxLevel
@@ -36,11 +25,6 @@ SoilBasicSkipList >> maxLevel: anInteger [
 { #category : #'instance creation' }
 SoilBasicSkipList >> newIterator [ 
 	^ SoilSkipListIterator on: self 
-]
-
-{ #category : #accessing }
-SoilBasicSkipList >> pages [
-	^ self store pages
 ]
 
 { #category : #removing }
