@@ -685,8 +685,8 @@ SoilIndexedDictionaryTest >> testValues [
 	dict at: #foo put: #bar.
 	dict at: #foo2 put: #bar2.
 
-	self assert: (dict values includes: 'bar').
-	self assert: (dict values includes: 'bar2')
+	self assert: (dict values includes: #bar).
+	self assert: (dict values includes: #bar2)
 ]
 
 { #category : #tests }

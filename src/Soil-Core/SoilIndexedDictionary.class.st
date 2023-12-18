@@ -405,8 +405,7 @@ SoilIndexedDictionary >> soilMaterialized: aMaterializer [
 
 { #category : #accessing }
 SoilIndexedDictionary >> values [
-	| col |
-	col := OrderedCollection new.
-	self do: [ :each | col add: each ].
-	^ col
+	^ transaction 
+		ifNotNil: [ self newIterator values collect: [ :each | self proxyFromByteArray: each ]]
+		ifNil: [ self newValuesSortedByKeyOrder collect: [ :each | each value ] ]
 ]
