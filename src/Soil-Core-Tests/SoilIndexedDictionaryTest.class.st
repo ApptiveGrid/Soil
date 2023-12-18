@@ -688,3 +688,20 @@ SoilIndexedDictionaryTest >> testValues [
 	self assert: (dict values includes: 'bar').
 	self assert: (dict values includes: 'bar2')
 ]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testValuesWithTransaction [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	"self assert: dict last equals: #two."
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"and test last"
+	self assert: tx2 root values size equals: 2.
+	self assert: (tx2 root values includes: #one).
+	self assert: (tx2 root values includes: #two)
+]
