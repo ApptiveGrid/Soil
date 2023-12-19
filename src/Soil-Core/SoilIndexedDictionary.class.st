@@ -70,11 +70,7 @@ SoilIndexedDictionary >> atIndex: anInteger [
 
 { #category : #accessing }
 SoilIndexedDictionary >> basicAt: aString ifAbsent: aBlock [ 
-	| iterator value key |
-	key := (aString asSkipListKeyOfSize: index keySize) asInteger.
-	iterator := self newIterator.
-	value := iterator at: aString ifAbsent: aBlock.
-	^ (self restoreValue: value forKey: key iterator: iterator) ifNil: [ aBlock value ]
+	^ self newIterator at: aString ifAbsent: aBlock
 ]
 
 { #category : #accessing }
@@ -92,14 +88,8 @@ SoilIndexedDictionary >> do: aBlock [
 
 	transaction
 		ifNotNil: [ 
-			| iterator assoc |
-			iterator := self newIterator.
-			[ (assoc := iterator nextAssociation) notNil ] whileTrue: [ 
-				(self
-					 restoreValue: assoc value
-					 forKey: assoc key
-					 iterator: iterator) ifNotNil: [ :objectId | 
-					aBlock value: (transaction proxyForObjectId: objectId) ] ] ]
+ 			self newIterator do: [ :objectId | 
+ 					aBlock value: (transaction proxyForObjectId: objectId) ]]
 		ifNil: [ 
 			newValues valuesDo: [ :each | aBlock value: each ] ]
 ]
@@ -138,28 +128,6 @@ SoilIndexedDictionary >> hasIndexUpdates [
 	^ newValues notEmpty or: [ removedValues notEmpty ]
 ]
 
-{ #category : #private }
-SoilIndexedDictionary >> historicValueAt: key iterator: iterator ifAbsent: absentBlock [ 
-	"a removed value will return ObjectId 0:0"
-	
-	^ (iterator currentPage isOlderThan: transaction readVersion) 
-		ifTrue: [ 
-			"all modifications to this page have been done before we
-			started the transaction, so the removal is visibile and 
-			value absent"
-			absentBlock value ] 
-		ifFalse: [
-			"we determine all changes between our transaction and the
-			last one modifying the page. if we get back changes for the
-			key the value of the oldes entry has the value it had before"
-			(self 
-				journalEntriesFor: key 
-				startingAt: iterator currentPage lastTransaction)
-					ifNotEmpty: [:entries | entries last oldValue ]
-					ifEmpty: absentBlock ]
-	
-]
-
 { #category : #accessing }
 SoilIndexedDictionary >> id [
 	^ id
@@ -186,32 +154,12 @@ SoilIndexedDictionary >> isEmpty [
 	iterator := self newIterator.
 	iterator currentPage: index firstPage.
 	^ newValues isEmpty and: [ index isEmpty 
-		or: [
-		"all items might be removed and not restorable" 
-		(index firstPage items allSatisfy: [ :each | (self
-					 restoreValue: each value
-					 forKey: each key
-					 iterator: iterator)isNil] )]]
+		or: [iterator isEmpty]]
 ]
 
 { #category : #testing }
 SoilIndexedDictionary >> isRegistered [
 	^ index isRegistered 
-]
-
-{ #category : #private }
-SoilIndexedDictionary >> journalEntriesFor: key startingAt: anInteger [ 
-	| transactionId entries |
-	entries := OrderedCollection new.
-	transactionId := anInteger.
-	[ transactionId > transaction readVersion ] whileTrue: [  
-		(transaction soil journal transactionJournalAt: transactionId) entries do: [ :each | 
-			((each class = SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
-				(each key = key) ifTrue: [ 
-					entries add: each ] ]  ].
-		transactionId := transactionId - 1.
-	].
-   ^ entries
 ]
 
 { #category : #accessing }
@@ -326,23 +274,6 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 				put: (newValues removeKey: key ifAbsent: [ ^ aBlock value ]) ]
 ]
 
-{ #category : #private }
-SoilIndexedDictionary >> restoreValue: value forKey: key iterator: iterator [
-	"restore a value that has been removed by a later transaction"
-	^ value isRemoved 
-		ifTrue: [
-			self 
-				historicValueAt: key 
-				iterator: iterator 
-				ifAbsent: [ nil ] ]
-		ifFalse: [
-			"restore a value that has been overwritten by a later transaction"   
-			self 
-				historicValueAt: key 
-				iterator: iterator 
-				ifAbsent: [ value ] ]
-]
-
 { #category : #accessing }
 SoilIndexedDictionary >> second [
 	^ transaction 
@@ -353,12 +284,7 @@ SoilIndexedDictionary >> second [
 { #category : #accessing }
 SoilIndexedDictionary >> size [ 
 	^ transaction 
-		ifNotNil: [ 
-			"We should just call size on index, but the do: here can restore values"
-			| sum |
-			sum := 0.
-			self do: [ :each | sum := sum + 1 ].
-			sum ]
+		ifNotNil: [ self newIterator size ]
 		ifNil: [ newValues size ]
 ]
 
