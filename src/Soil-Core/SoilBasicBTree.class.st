@@ -18,11 +18,6 @@ SoilBasicBTree >> asCopyOnWrite [
 ]
 
 { #category : #accessing }
-SoilBasicBTree >> firstPage [
-	^ self headerPage
-]
-
-{ #category : #accessing }
 SoilBasicBTree >> flush [
 	self store flush
 ]
@@ -44,14 +39,9 @@ SoilBasicBTree >> initializeHeaderPage [
 
 { #category : #accessing }
 SoilBasicBTree >> keySize: anInteger [
-	self headerPage keySize: anInteger.
+	super keySize: anInteger.
 	"we have to set the keySize of the rootPage, too, as the page gets created before the keySize is known"
 	self rootPage keySize: anInteger
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> maxLevel: anIntegeer [
-	"ignored, this allows to switch SkiList and BTree easily"
 ]
 
 { #category : #'instance creation' }
@@ -118,11 +108,6 @@ SoilBasicBTree >> open [
 { #category : #initialization }
 SoilBasicBTree >> pageClass [
 	^ SoilBTreeDataPage
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> pages [
-	^ self store pages
 ]
 
 { #category : #'instance creation' }
