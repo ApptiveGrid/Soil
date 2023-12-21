@@ -63,12 +63,3 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 	self store pageAt: newPage index put: newPage.
 	^ newPage 
 ]
-
-{ #category : #enumerating }
-SoilBasicSkipList >> values [ 
-	| values |
-	values := OrderedCollection new.
-	self do: [ :each |
-		values add: each value ].
-	^ values
-]

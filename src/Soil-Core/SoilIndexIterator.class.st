@@ -249,3 +249,12 @@ SoilIndexIterator >> size [
 SoilIndexIterator >> updateCurrentTransaction: anInteger [ 
 	currentPage lastTransaction: anInteger
 ]
+
+{ #category : #enumerating }
+SoilIndexIterator >> values [ 
+	| values |
+	values := OrderedCollection new.
+	self do: [ :each |
+		values add: each value ].
+	^ values
+]

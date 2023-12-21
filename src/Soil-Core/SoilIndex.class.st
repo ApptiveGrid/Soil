@@ -191,3 +191,8 @@ SoilIndex >> valueSize [
 SoilIndex >> valueSize: anInteger [
 	self headerPage valueSize: anInteger
 ]
+
+{ #category : #enumerating }
+SoilIndex >> values [ 
+	^ self newIterator values
+]
