@@ -225,7 +225,7 @@ SoilIndexedDictionary >> nextAfter: key [
 	iterator := self newIterator 
 		find: key asInteger;
 		yourself.
-	^ iterator nextPresentAssociation 
+	^ iterator nextAssociation 
 		ifNotNil: [ :assoc |
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 ]

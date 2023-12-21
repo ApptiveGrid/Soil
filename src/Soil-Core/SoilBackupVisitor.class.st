@@ -40,10 +40,11 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	
 	"copy all values to the new index"
 	iterator := sourceIndex newIterator.
-	[ (assoc := iterator nextPresentAssociation) isNil  ] whileFalse: [  
+	[ (assoc := iterator nextAssociation) isNil  ] whileFalse: [  
+		assoc value isRemoved ifFalse: [ 
 			targetIndex basicAt: assoc key put: assoc value.
 			"recurse further into the values of the index"
-			self process: assoc value ].
+			self process: assoc value ] ].
 	targetIndex
 		flush; 
 		close.
