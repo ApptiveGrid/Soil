@@ -51,13 +51,45 @@ SoilIndexIterator >> atIndex: anInteger [
 	| current |
 	current := self first.
 	2 to: anInteger do: [ :idx |
-		current := self nextPresent ].
+		current := self next ].
 	^ current value
 ]
 
 { #category : #accessing }
 SoilIndexIterator >> basicAt: key put: anObject [
 	self subclassResponsibility
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> basicNextAssociation [
+	| item |
+	"preliminary support for nextKey. This is useful when iterating via #next 
+	in order not jump over the first search key. nextKey implies the currentPage
+	is on the right spot"
+	nextKey ifNotNil: [ 
+		item := currentPage 
+			itemAt: nextKey 
+			ifAbsent: [ Error signal: 'shoulndt be possible' ].
+		nextKey := nil.
+		^ item ].
+	currentPage ifNil: [ 
+		currentPage := index store headerPage.
+		currentKey := nil ].
+	[ currentPage isNil ] whileFalse: [  
+		item := currentKey 
+			ifNotNil: [  
+				(currentPage itemAfter: currentKey)
+					ifNotNil: [ :i | 
+						currentKey := i key. 
+						^ i ]
+					ifNil: [ 
+						(currentPage next = 0) ifTrue: [ ^ nil ].
+						currentPage := index store pageAt: currentPage next.
+						currentKey := nil ] ]
+			ifNil: [
+				currentPage isEmpty ifTrue: [ ^ nil ].
+				^ currentPage firstItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
+	Error signal: 'shouldnt happen'
 ]
 
 { #category : #accessing }
@@ -75,7 +107,7 @@ SoilIndexIterator >> currentPage: anObject [
 { #category : #enumerating }
 SoilIndexIterator >> do: aBlock [
 	| item |
-	[ (item := self nextAssociation ) notNil ] whileTrue: [ 
+	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ 
  				(self
  					 restoreValue: item value
  					 forKey: item key) ifNotNil: [:notNil | aBlock value: notNil ]]
@@ -109,7 +141,7 @@ SoilIndexIterator >> first: anInteger [
 	result := OrderedCollection new: anInteger.
 	anInteger timesRepeat: [
 		| next |
-		next := self nextPresent ifNil: [ ^ result].
+		next := self next ifNil: [ ^ result].
 		result add: next ].
 	^ result
 ]
@@ -229,49 +261,13 @@ SoilIndexIterator >> next: anInteger [
 
 { #category : #accessing }
 SoilIndexIterator >> nextAssociation [
-	| item |
-	"preliminary support for nextKey. This is useful when iterating via #next 
-	in order not jump over the first search key. nextKey implies the currentPage
-	is on the right spot"
-	nextKey ifNotNil: [ 
-		item := currentPage 
-			itemAt: nextKey 
-			ifAbsent: [ Error signal: 'shoulndt be possible' ].
-		nextKey := nil.
-		^ item ].
-	currentPage ifNil: [ 
-		currentPage := index store headerPage.
-		currentKey := nil ].
-	[ currentPage isNil ] whileFalse: [  
-		item := currentKey 
-			ifNotNil: [  
-				(currentPage itemAfter: currentKey)
-					ifNotNil: [ :i | 
-						currentKey := i key. 
-						^ i ]
-					ifNil: [ 
-						(currentPage next = 0) ifTrue: [ ^ nil ].
-						currentPage := index store pageAt: currentPage next.
-						currentKey := nil ] ]
-			ifNil: [
-				currentPage isEmpty ifTrue: [ ^ nil ].
-				^ currentPage firstItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
-	Error signal: 'shouldnt happen'
-]
 
-{ #category : #accessing }
-SoilIndexIterator >> nextPresent [ 
-	^ self nextPresentAssociation value
-]
-
-{ #category : #accessing }
-SoilIndexIterator >> nextPresentAssociation [
-	| assoc |
-	"lookup next association by leaving out the removed keys"
-	assoc := self nextAssociation.
-	[ assoc notNil and: [ assoc value isRemoved ] ] whileTrue: [ 
-		assoc := self nextAssociation ].
-	^ assoc
+	| nextAssociation nextValue key |
+	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
+	nextValue := (self
+ 			restoreValue: nextAssociation value
+ 			forKey: (key := nextAssociation key)).
+	^ nextValue ifNil: [ self nextAssociation ] ifNotNil: [ key -> nextValue ]
 ]
 
 { #category : #accessing }
