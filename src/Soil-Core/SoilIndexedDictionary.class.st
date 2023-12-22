@@ -150,11 +150,8 @@ SoilIndexedDictionary >> initialize [
 
 { #category : #testing }
 SoilIndexedDictionary >> isEmpty [
-	| iterator|
-	iterator := self newIterator.
-	iterator currentPage: index firstPage.
-	^ newValues isEmpty and: [ index isEmpty 
-		or: [iterator isEmpty]]
+	"iterator currentPage: index firstPage."
+	^ newValues isEmpty and: [ self newIterator isEmpty ]
 ]
 
 { #category : #testing }
