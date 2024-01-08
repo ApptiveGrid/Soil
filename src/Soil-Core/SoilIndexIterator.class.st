@@ -194,10 +194,12 @@ SoilIndexIterator >> index: anIndex [
 
 { #category : #testing }
 SoilIndexIterator >> isEmpty [
- 	"all items might be removed and not restorable"
-
- 	^ self index firstPage items allSatisfy: [ :each |
- 		  (self restoreValue: each value forKey: each key) isNil ]
+ 
+	^ index isEmpty or: [  
+		self currentPage: index firstPage.
+		"all items might be removed and not restorable"
+ 		self index firstPage items allSatisfy: [ :each |
+ 		  	(self restoreValue: each value forKey: each key) isNil ]]
 ]
 
 { #category : #private }
