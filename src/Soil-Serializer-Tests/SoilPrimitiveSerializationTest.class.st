@@ -1,18 +1,19 @@
 Class {
-	#name : #SoilPrimitiveSerializationTest,
-	#superclass : #TestCase,
+	#name : 'SoilPrimitiveSerializationTest',
+	#superclass : 'TestCase',
 	#pools : [
 		'SoilTypeCodes'
 	],
-	#category : #'Soil-Serializer-Tests'
+	#category : 'Soil-Serializer-Tests',
+	#package : 'Soil-Serializer-Tests'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 SoilPrimitiveSerializationTest >> newSerializer [ 
 	^ Soil inMemory newSerializer
 ]
 
-{ #category : #helpers }
+{ #category : 'helpers' }
 SoilPrimitiveSerializationTest >> restoreLocalTimeZoneAfter: aBlock [
 
 	| realTimeZone |
@@ -20,13 +21,13 @@ SoilPrimitiveSerializationTest >> restoreLocalTimeZoneAfter: aBlock [
 	aBlock ensure: [ DateAndTime localTimeZone: realTimeZone ].
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilPrimitiveSerializationTest >> setUp [
 	super setUp.
 	SoilTypeCodes initialize
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationArray [
 	| object serialized materialized |
 	object := #(1 2 3 5).
@@ -38,7 +39,7 @@ SoilPrimitiveSerializationTest >> testSerializationArray [
 	self assert: materialized equals: object
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationAssociation [
 	| object serialized materialized |
 	object := 1 -> 2.
@@ -50,7 +51,7 @@ SoilPrimitiveSerializationTest >> testSerializationAssociation [
 	self assert: materialized equals: object
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationBlockClosure [
 	| object serialized  |
 	object := [].
@@ -58,7 +59,7 @@ SoilPrimitiveSerializationTest >> testSerializationBlockClosure [
 	self should: [serialized := SoilSerializer serializeToBytes: object] raise: TestResult error
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64 [
 	| float serialized materialized |
 	float := 2.45227231256843e-45.
@@ -74,7 +75,7 @@ SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64 [
 	self assert: materialized equals: 2.45227231256843e-45
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Infinity [
 	| float serialized materialized |
 	float := Float infinity.
@@ -102,7 +103,7 @@ SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Infinity [
 	self assert: materialized equals: float
 ]
 
-{ #category : #'tests-twice' }
+{ #category : 'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Twice [
 	| float object serialized materialized |
 	
@@ -124,7 +125,7 @@ SoilPrimitiveSerializationTest >> testSerializationBoxedFloat64Twice [
 	self assert: materialized equals: object.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationByteArray [
 	| object serialized materialized |
 	object := #[1 2 3 5].
@@ -136,7 +137,7 @@ SoilPrimitiveSerializationTest >> testSerializationByteArray [
 	self assert: materialized equals: object
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationByteCharacter [
 	| object serialized materialized |
 	object := $a.
@@ -148,7 +149,7 @@ SoilPrimitiveSerializationTest >> testSerializationByteCharacter [
 	self assert: materialized equals: object.
 ]
 
-{ #category : #'tests-twice' }
+{ #category : 'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationByteCharacterTwice [
 	| object character serialized materialized |
 	character := $a.
@@ -168,7 +169,7 @@ SoilPrimitiveSerializationTest >> testSerializationByteCharacterTwice [
 	self assert: materialized equals: object.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationCharacter [
 	| object serialized materialized |
 	object := 16rF600 asCharacter.
@@ -180,7 +181,7 @@ SoilPrimitiveSerializationTest >> testSerializationCharacter [
 	self assert: materialized equals: object.
 ]
 
-{ #category : #'tests-twice' }
+{ #category : 'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationCharacterTwice [
 	| object character serialized materialized |
 
@@ -194,7 +195,7 @@ SoilPrimitiveSerializationTest >> testSerializationCharacterTwice [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationClass [
 	| object serialized materialized |
 	object := Point.
@@ -205,7 +206,7 @@ SoilPrimitiveSerializationTest >> testSerializationClass [
 	self assert: materialized  equals: Point.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationDate [
 	| object serialized materialized |
 	object := Date fromDays: 10.
@@ -217,7 +218,7 @@ SoilPrimitiveSerializationTest >> testSerializationDate [
 	self assert: materialized equals: object
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationDateNegative [
 	| object serialized materialized |
 	object := (DateAndTime year: 1900 month: 1 day: 1 hour: 0 minute: 0 second: 0 offset: 0 hours) asDate.
@@ -229,7 +230,7 @@ SoilPrimitiveSerializationTest >> testSerializationDateNegative [
 	self assert: materialized equals: object
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationDateWithLocalTimeZone [
 	| utc est bst object utc14plus utc545plus utc12minus utc330minus serialized materialized |
 	utc := TimeZone abbreviated: 'UTC'.
@@ -259,7 +260,7 @@ SoilPrimitiveSerializationTest >> testSerializationDateWithLocalTimeZone [
 			self assert: materialized equals: object ] ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationDateWithNegativeOffset [
 	| object serialized materialized |
 	object := (Date fromDays: 10) offset: -5 hours.
@@ -271,7 +272,7 @@ SoilPrimitiveSerializationTest >> testSerializationDateWithNegativeOffset [
 	self assert: (materialized equals: object)
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationDictionary [
 	| object serialized materialized |
 	object := { 1->2 . 3->4 } asDictionary.
@@ -283,13 +284,13 @@ SoilPrimitiveSerializationTest >> testSerializationDictionary [
 	self assert: materialized equals: object
 ]
 
-{ #category : #'tests-layouts' }
+{ #category : 'tests-layouts' }
 SoilPrimitiveSerializationTest >> testSerializationEphemeronLayout [
 	"Emphemeron classes are not yet used (no example in Pharo11), thus we do not support them yet"
 	self flag: #TODO
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationFalse [
 	| object serialized materialized |
 	"Check false"
@@ -301,7 +302,7 @@ SoilPrimitiveSerializationTest >> testSerializationFalse [
 	self deny: materialized
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationFraction [
 	| object serialized materialized |
 	object := 1/2.
@@ -314,7 +315,7 @@ SoilPrimitiveSerializationTest >> testSerializationFraction [
 	self assert: materialized equals: object
 ]
 
-{ #category : #'tests-twice' }
+{ #category : 'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationFractionTwice [
 	| fraction object serialized materialized |
 	fraction := 1/2.
@@ -335,7 +336,7 @@ SoilPrimitiveSerializationTest >> testSerializationFractionTwice [
 	self assert: materialized equals: object
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationIdentityDictionary [
 	| object serialized materialized |
 	object := IdentityDictionary newFrom: { #test->2 . #now->4 }.
@@ -356,7 +357,7 @@ SoilPrimitiveSerializationTest >> testSerializationIdentityDictionary [
 	self assert: materialized equals: object
 ]
 
-{ #category : #'tests-layouts' }
+{ #category : 'tests-layouts' }
 SoilPrimitiveSerializationTest >> testSerializationImmediateLayout [
 	| object serialized materialized |
 	"All Immediate classes are specially encoded, to have a test for every layout, use Character here"
@@ -371,7 +372,7 @@ SoilPrimitiveSerializationTest >> testSerializationImmediateLayout [
 	self assert: materialized class classLayout class equals: ImmediateLayout.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationLargeInteger [
 	| object serialized materialized |
 	
@@ -413,7 +414,7 @@ SoilPrimitiveSerializationTest >> testSerializationLargeInteger [
 	self assert: materialized equals: object
 ]
 
-{ #category : #'tests-twice' }
+{ #category : 'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationLargeIntegerTwice [
 
 	| object integer serialized materialized |
@@ -456,7 +457,7 @@ SoilPrimitiveSerializationTest >> testSerializationLargeIntegerTwice [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationODBPersistentDictionary [
 	| object serialized materialized |
 	self flag: #todo. 
@@ -472,7 +473,7 @@ SoilPrimitiveSerializationTest >> testSerializationODBPersistentDictionary [
 	self assert: materialized equals: object"
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationOrderedCollection [
 	| object serialized materialized |
 	object := #(1 2 3 5) asOrderedCollection.
@@ -484,7 +485,7 @@ SoilPrimitiveSerializationTest >> testSerializationOrderedCollection [
 	self assert: materialized equals: object
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationProcess [
 	| object serialized |
 	object := Processor activeProcess.
@@ -492,7 +493,7 @@ SoilPrimitiveSerializationTest >> testSerializationProcess [
 	self should: [serialized := SoilSerializer serializeToBytes: object] raise: TestResult error
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationProcessSchedulerCode [
 	| object serialized materialized |
 	object := Processor.
@@ -504,7 +505,7 @@ SoilPrimitiveSerializationTest >> testSerializationProcessSchedulerCode [
 	self assert: materialized equals: Processor
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationScaledDecimal [
 	"ScaledDecimal is a subclass of Fraction, make sure it works"
 
@@ -519,7 +520,7 @@ SoilPrimitiveSerializationTest >> testSerializationScaledDecimal [
 	self assert: materialized equals: object
 ]
 
-{ #category : #'tests-twice' }
+{ #category : 'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationScaledDecimalTwice [
 	| scaledDecimal object serialized materialized |
 	
@@ -537,7 +538,7 @@ SoilPrimitiveSerializationTest >> testSerializationScaledDecimalTwice [
 	self assert: materialized equals: object.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationSmallFloat64 [
 	| float serialized materialized |
 	float := 1.11.
@@ -550,7 +551,7 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64 [
 	self assert: materialized identicalTo: float
 ]
 
-{ #category : #'tests-twice' }
+{ #category : 'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationSmallFloat64Twice [
 	| object serialized materialized |
 	
@@ -571,7 +572,7 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64Twice [
 	self assert: materialized second identicalTo: object second.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	| float serialized materialized |
 	
@@ -606,7 +607,7 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	self assert: materialized identicalTo: Float negativeZero.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationString [ 
 	| string serialized materialized |
 	
@@ -641,7 +642,7 @@ SoilPrimitiveSerializationTest >> testSerializationString [
 	self assert: materialized equals: string
 ]
 
-{ #category : #'tests-twice' }
+{ #category : 'tests-twice' }
 SoilPrimitiveSerializationTest >> testSerializationStringTwice [
 	
 	| object serialized materialized |
@@ -694,7 +695,7 @@ SoilPrimitiveSerializationTest >> testSerializationStringTwice [
 	self assert: materialized equals: object.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationSymbol [
 	| object serialized materialized |
 	object := #someSelector.
@@ -706,7 +707,7 @@ SoilPrimitiveSerializationTest >> testSerializationSymbol [
 	self assert: materialized equals: #someSelector
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationSystemDictionary [
 	| object serialized materialized |
 	object := Smalltalk globals.
@@ -719,7 +720,7 @@ SoilPrimitiveSerializationTest >> testSerializationSystemDictionary [
 	self assertCollection: materialized hasSameElements: Smalltalk globals
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationTime [
 	| object serialized materialized |
 	object := Time midnight.
@@ -731,7 +732,7 @@ SoilPrimitiveSerializationTest >> testSerializationTime [
 	self assert: materialized equals: object
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationTrue [
 	| object serialized materialized |
 	object := true.
@@ -743,7 +744,7 @@ SoilPrimitiveSerializationTest >> testSerializationTrue [
 	self assert: materialized.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationUndefindedObject [
 	| object serialized materialized |
 	object := nil.
@@ -755,7 +756,7 @@ SoilPrimitiveSerializationTest >> testSerializationUndefindedObject [
 	self assert: materialized equals: nil
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationWideStringUTF16 [
 
 	| string serialized materialized |
@@ -773,9 +774,12 @@ SoilPrimitiveSerializationTest >> testSerializationWideStringUTF16 [
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: string.
+	
+	"set the encoding back to the default"
+	Soil characterEncoding: #utf8
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationWideStringUTF32 [
 
 	| string serialized materialized |
@@ -793,9 +797,12 @@ SoilPrimitiveSerializationTest >> testSerializationWideStringUTF32 [
 	
 	materialized := SoilMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: string.
+	
+	"set the encoding back to the default"
+	Soil characterEncoding: #utf8
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationWideStringUTF8 [
 	| string serialized materialized |
 	string := String
@@ -814,7 +821,7 @@ SoilPrimitiveSerializationTest >> testSerializationWideStringUTF8 [
 	self assert: materialized equals: string.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPrimitiveSerializationTest >> testSerializationWideSymbol [
 	| symbol serialized materialized |
 	symbol := String
@@ -833,7 +840,7 @@ SoilPrimitiveSerializationTest >> testSerializationWideSymbol [
 	self assert: materialized equals: symbol
 ]
 
-{ #category : #helpers }
+{ #category : 'helpers' }
 SoilPrimitiveSerializationTest >> useTimeZoneInstance: aTimeZone during: aBlock [
 
   self restoreLocalTimeZoneAfter: [ 
