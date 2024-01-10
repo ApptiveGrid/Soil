@@ -95,6 +95,12 @@ SoilSkipList >> newPage [
 		yourself
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipList >> newReIndexer [
+	^ SoilReindexer new 
+		index: self
+]
+
 { #category : #'opening/closing' }
 SoilSkipList >> open [
 	self store open
@@ -115,6 +121,18 @@ SoilSkipList >> path [
 SoilSkipList >> path: aStringOrFileReference [
 
 	path := aStringOrFileReference asFileReference 
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipList >> reIndex [
+	self newReIndexer run
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipList >> reIndexUsing: itemBlock [ 
+	self newReIndexer 
+		itemBlock: itemBlock;
+		run
 ]
 
 { #category : #'instance creation' }

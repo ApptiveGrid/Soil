@@ -17,6 +17,18 @@ SoilCopyOnWriteSkipList >> newPage [
 	^ wrapped newPage
 ]
 
+{ #category : #'as yet unclassified' }
+SoilCopyOnWriteSkipList >> reIndex [
+	wrapped reIndex. 
+	self flushCachedPages 
+]
+
+{ #category : #'as yet unclassified' }
+SoilCopyOnWriteSkipList >> reIndexUsing: itemBlock [
+	wrapped reIndexUsing: itemBlock.
+	self flushCachedPages 
+]
+
 { #category : #converting }
 SoilCopyOnWriteSkipList >> thePersistentInstance [
 	^ wrapped

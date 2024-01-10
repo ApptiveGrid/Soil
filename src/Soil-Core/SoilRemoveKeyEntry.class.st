@@ -21,7 +21,7 @@ SoilRemoveKeyEntry >> address [
 { #category : #committing }
 SoilRemoveKeyEntry >> commitIn: soil [ 
 	((soil objectRepository segmentAt: segment) indexAt: id) newIterator 
-		at: key put: (SoilObjectId segment: 0 index: 0);
+		at: key put: SoilObjectId removed;
 		updateCurrentTransaction: transactionId 
 ]
 

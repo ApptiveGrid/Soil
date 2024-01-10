@@ -42,7 +42,8 @@ SoilIndex >> basicAt: key put: anObject [
 
 { #category : #'open/close' }
 SoilIndex >> close [
-	self store close
+	self store close.
+	store := nil
 ]
 
 { #category : #enumerating }

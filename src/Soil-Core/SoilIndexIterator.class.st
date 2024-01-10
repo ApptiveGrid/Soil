@@ -55,6 +55,13 @@ SoilIndexIterator >> atIndex: anInteger [
 	^ current value
 ]
 
+{ #category : #enumerating }
+SoilIndexIterator >> basicAssociationsDo: aBlock [
+	| item |
+	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ 
+ 		aBlock value: item ] 
+]
+
 { #category : #accessing }
 SoilIndexIterator >> basicAt: key put: anObject [
 	self subclassResponsibility
@@ -293,7 +300,7 @@ SoilIndexIterator >> readVersion: anObject [
 SoilIndexIterator >> removeKey: key [ 
 	^ self 
 		at: key 
-		put: (SoilObjectId segment: 0 index: 0)
+		put: SoilObjectId removed
 ]
 
 { #category : #private }
