@@ -24,8 +24,7 @@ SoilIndexItemsPage >> associationAt: anInteger [
 SoilIndexItemsPage >> associationAt: anInteger ifAbsent: aBlock [
 	^ items 
 		findBinary: [ :each | anInteger - each key] 
-		do: [ :item | item ] 
-		ifNone: aBlock .
+		ifNone: [ aBlock value ].
 ]
 
 { #category : #accessing }
