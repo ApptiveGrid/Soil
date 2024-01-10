@@ -28,6 +28,7 @@ SoilSkipListHeaderPage >> keySize: anInteger [
 	((self lastPageIndex = 1) and: [ items isEmpty ]) ifFalse: [ 
 		keySize ifNotNil: [ Error signal: 'key size has been set already' ] ].
 	super keySize: anInteger.
+	dirty := true
 	
 
 ]
@@ -54,7 +55,8 @@ SoilSkipListHeaderPage >> maxLevel [
 SoilSkipListHeaderPage >> maxLevel: anInteger [
 
 	maxLevel := anInteger.
-	right := Array new: anInteger withAll: 0 
+	right := Array new: anInteger withAll: 0.
+	dirty := true
 ]
 
 { #category : #accessing }
