@@ -1,13 +1,14 @@
 Class {
-	#name : #SoilObjectTableTest,
-	#superclass : #TestCase,
+	#name : 'SoilObjectTableTest',
+	#superclass : 'TestCase',
 	#pools : [
 		'SoilTypeCodes'
 	],
-	#category : #'Soil-Serializer-Tests'
+	#category : 'Soil-Serializer-Tests',
+	#package : 'Soil-Serializer-Tests'
 }
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectTableTest >> testAdd [
 	| table |
 	table := SoilObjectTable new.
@@ -18,7 +19,7 @@ SoilObjectTableTest >> testAdd [
 	self assert: table size equals: 2
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectTableTest >> testIdenityIndexOf [
 	| table |
 	table := SoilObjectTable new.

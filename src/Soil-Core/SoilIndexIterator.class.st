@@ -1,3 +1,12 @@
+"
+The iterator implements all logic related to iteratoring a low level index.
+
+If ""soil"" and ""readVersion"" is set, the iterator restores values using the transaction log, see SoilIndexIterator>>#journalEntriesFor:startingAt:
+
+There are two main clients
+- the low level index forwards all methods related to iterating here, not setting the read version
+- the SoilIndexedDictionary sets the readVersion (and never uses the index directly)
+"
 Class {
 	#name : #SoilIndexIterator,
 	#superclass : #Object,
@@ -107,6 +116,7 @@ SoilIndexIterator >> currentPage: anObject [
 { #category : #enumerating }
 SoilIndexIterator >> do: aBlock [
 	| item |
+	"We use basicNextAssociation to avoid the creation of intermediate associations of nextAssociation"
 	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ 
  				(self
  					 restoreValue: item value
