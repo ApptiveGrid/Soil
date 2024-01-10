@@ -6,7 +6,6 @@ Class {
 		'index'
 	],
 	#classVars : [
-		'RemovedObjectid',
 		'RootObjectId'
 	],
 	#category : #'Soil-Core-Model'
@@ -32,14 +31,7 @@ SoilObjectId class >> readFrom: stream [
 
 { #category : #'instance creation' }
 SoilObjectId class >> removed [
-	^ RemovedObjectid ifNil: [ RemovedObjectid := self new segment: 0; index: 0 ] 
-]
-
-{ #category : #initialization }
-SoilObjectId class >> reset [ 
-	<script>
-	RootObjectId := nil.
-	RemovedObjectid := nil
+	^ self new segment: 0; index: 0
 ]
 
 { #category : #'instance creation' }
