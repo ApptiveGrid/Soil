@@ -4,6 +4,7 @@ Class {
 	#instVars : [
 		'force',
 		'itemBlock',
+		'indexBlock',
 		'index',
 		'reIndexPath',
 		'newIndex',
@@ -34,11 +35,18 @@ SoilReindexer >> index: anIndex [
 	reIndexPath := anIndex path, #reindex
 ]
 
+{ #category : #accessing }
+SoilReindexer >> indexBlock: anObject [
+
+	indexBlock := anObject
+]
+
 { #category : #initialization }
 SoilReindexer >> initialize [ 
 	super initialize.
 	force := false.
-	itemBlock := [ :item | item ]
+	itemBlock := [ :item | item ].
+	indexBlock := [ :idx | idx ]
 ]
 
 { #category : #accessing }
@@ -56,13 +64,15 @@ SoilReindexer >> newIndexIterator [
 { #category : #running }
 SoilReindexer >> prepareNewIndex [ 
 	"create same index class with same parameters but a temporary path instead"
-	newIndex := index class new 
+	| indexCopy |
+	indexCopy := index class new 
 		path: reIndexPath;
 		initializeFilesystem;
 		initializeHeaderPage;
 		maxLevel: index maxLevel;
 		keySize: index keySize;
-		valueSize: index valueSize
+		valueSize: index valueSize.
+	newIndex := indexBlock value: indexCopy
 ]
 
 { #category : #running }

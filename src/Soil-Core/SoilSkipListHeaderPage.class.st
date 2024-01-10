@@ -24,7 +24,9 @@ SoilSkipListHeaderPage >> headerSize [
 
 { #category : #accessing }
 SoilSkipListHeaderPage >> keySize: anInteger [
-	keySize ifNotNil: [ Error signal: 'key size has been set alread' ].
+	"as long as no items have been added the key size can be changed"
+	((self lastPageIndex = 1) and: [ items isEmpty ]) ifFalse: [ 
+		keySize ifNotNil: [ Error signal: 'key size has been set already' ] ].
 	super keySize: anInteger.
 	
 
