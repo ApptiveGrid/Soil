@@ -49,8 +49,8 @@ SoilObjectId class >> root [
 
 { #category : #'instance creation' }
 SoilObjectId class >> segment: segmentId index: index [
-	segmentId = 0 & (index = 0) ifTrue: [ ^ self removed ].
-	segmentId = 1 & (index = 1) ifTrue: [ ^ self root ].
+	(segmentId = 0 and: [ index = 0 ]) ifTrue: [ ^ self removed ].
+	(segmentId = 1 and: [ index = 1 ]) ifTrue: [ ^ self root ].
 	^ self new 
 		segment: segmentId index: index
 ]
