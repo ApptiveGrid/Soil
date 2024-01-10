@@ -22,6 +22,11 @@ SoilBTreeHeaderPage >> headerSize [
 ]
 
 { #category : #accessing }
+SoilBTreeHeaderPage >> lastPageIndex [
+	^ lastPageIndex
+]
+
+{ #category : #accessing }
 SoilBTreeHeaderPage >> lastPageIndex: anObject [
 	lastPageIndex := anObject.
 	dirty := true

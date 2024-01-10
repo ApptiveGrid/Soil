@@ -330,6 +330,45 @@ SoilBTreeTest >> testPageAddFirstAndLoad [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testReIndexing [
+	
+	| capacity fileSizeBefore |
+	capacity := index firstPage itemCapacity.
+	1 to: capacity + 1 do: [ :n | 
+		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	index flush.
+	self assert: index headerPage lastPageIndex equals: 3.
+	self assert: (index pageAt: 3) items size equals: 128.
+	self assert: (index pageAt: 1) items size equals: 127.
+	fileSizeBefore := index path size.
+	index reIndex.
+	self assert: index headerPage lastPageIndex equals: 3.
+	self assert: (index pageAt: 3) items size equals: 128.
+	self assert: (index pageAt: 1) items size equals: 127.
+	
+	self assert: index path size equals: fileSizeBefore
+
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testReIndexingWithCleaning [
+	
+	| capacity |
+	capacity := index firstPage itemCapacity.
+	1 to: capacity + 1 do: [ :n | 
+		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	index flush.
+	1 to: capacity do: [ :n | 
+		index at: n  put: SoilObjectId removed ].
+	
+	index newReIndexer cleanRemoved run.
+	self assert: index headerPage lastPageIndex equals: 2.
+	self assert: (index pageAt: 1) items size equals: 1.
+	self assert: (index at: capacity + 1) asByteArray equals: #[ 1 2 3 4 5 6 7 8 ].
+
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testRemoveKey [
 
 	| capacity |

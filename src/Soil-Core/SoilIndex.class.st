@@ -114,6 +114,11 @@ SoilIndex >> lastPage [
 ]
 
 { #category : #accessing }
+SoilIndex >> maxLevel [
+	"ignored, this allows to switch SkiList and BTree easily"
+]
+
+{ #category : #accessing }
 SoilIndex >> maxLevel: anIntegeer [
 	"ignored, this allows to switch SkiList and BTree easily"
 ]
