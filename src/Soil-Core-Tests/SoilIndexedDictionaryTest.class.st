@@ -357,6 +357,26 @@ SoilIndexedDictionaryTest >> testFirstAssociationWithTransaction [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testFirstAssociationWithTransactionRemoved [
+	| tx tx1 tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: #one.
+	dict at: 2 put: #two.
+	"self assert: dict last equals: #two."
+	tx commit.
+	
+	"open a two transactions ..."
+	tx1 := soil newTransaction.
+	tx2 := soil newTransaction.
+	tx2 root removeKey: 1.
+	tx2 commit.
+	"in tx1 the removed one is not removed"
+	self assert: tx1 root firstAssociation equals: 1->#one.
+
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testFirstWithSingleRemovedItem [ 
 	
 	dict at: #foo put: #bar.
