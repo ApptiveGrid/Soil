@@ -56,15 +56,6 @@ SoilBTreeIndexPage >> insertItem: item for: iterator [
 	^ return indexEntry: (newPage smallestKey -> newPage index)
 ]
 
-{ #category : #accessing }
-SoilBTreeIndexPage >> itemAt: key put: anObject [ 
-	| removedItem |
-	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
-	items add: (key -> anObject).
-	dirty := true.
-	^ removedItem
-]
-
 { #category : #printing }
 SoilBTreeIndexPage >> printOn: aStream [ 
 	aStream << 'index page : #' << index asString

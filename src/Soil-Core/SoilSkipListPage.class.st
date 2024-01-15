@@ -72,34 +72,11 @@ SoilSkipListPage >> isOlderThan: aVersionNumber [
 ]
 
 { #category : #accessing }
-SoilSkipListPage >> itemAfter: key [ 
-	| i item |
-	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
-	(i = items size) ifTrue: [ ^ nil].
-	item := items at: i + 1.
-	^ item
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> itemAt: key put: anObject [ 
-	| removedItem |
-	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
-	items add: (key -> anObject).
-	dirty := true.
-	^ removedItem
-]
-
-{ #category : #accessing }
 SoilSkipListPage >> itemBefore: key [
 
 	| item |
 	item := items findBinary: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
 	^ items before: item ifAbsent: nil
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> itemCapacity [
-	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
 ]
 
 { #category : #accessing }
