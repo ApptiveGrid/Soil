@@ -13,6 +13,11 @@ SoilIndexItemsPage class >> isAbstract [
 	^ self == SoilIndexItemsPage
 ]
 
+{ #category : #adding }
+SoilIndexItemsPage >> addItem: anAssociation [ 
+	^ self subclassResponsibility
+]
+
 { #category : #accessing }
 SoilIndexItemsPage >> associationAt: anInteger [ 
 	^ self
@@ -31,6 +36,14 @@ SoilIndexItemsPage >> associationAt: anInteger ifAbsent: aBlock [
 SoilIndexItemsPage >> firstItem [
 
 	^ items isNotEmpty ifTrue: [ items first ]
+]
+
+{ #category : #testing }
+SoilIndexItemsPage >> hasRoom [
+	| used itemSize |
+	itemSize := self keySize + self valueSize.
+	used := self headerSize + (items size * itemSize).
+	^ used <= (self pageSize - itemSize)
 ]
 
 { #category : #utilities }
@@ -79,6 +92,14 @@ SoilIndexItemsPage >> itemAt: key put: anObject [
 	items add: (key -> anObject).
 	dirty := true.
 	^ removedItem
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> itemBefore: key [
+
+	| item |
+	item := items findBinary: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
+	^ items before: item ifAbsent: nil
 ]
 
 { #category : #accessing }

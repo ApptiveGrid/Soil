@@ -26,11 +26,6 @@ SoilBTreeIndexPage >> findKey: aKey [
 	^nil
 ]
 
-{ #category : #testing }
-SoilBTreeIndexPage >> hasRoom [
-	^ self headerSize + ((items size + 1) * (self keySize + self pointerSize)) <= self pageSize
-]
-
 { #category : #utilities }
 SoilBTreeIndexPage >> headerSize [
 	^ super headerSize  
