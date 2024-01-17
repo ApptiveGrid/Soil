@@ -58,15 +58,6 @@ SoilBTreeDataPage >> isLastPage [
 ]
 
 { #category : #accessing }
-SoilBTreeDataPage >> itemAt: key put: anObject [ 
-	| removedItem |
-	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
-	items add: (key -> anObject).
-	dirty := true.
-	^ removedItem
-]
-
-{ #category : #accessing }
 SoilBTreeDataPage >> itemBefore: key [
 
 	| item |

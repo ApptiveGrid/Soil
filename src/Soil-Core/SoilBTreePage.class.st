@@ -44,21 +44,6 @@ SoilBTreePage >> isOlderThan: aVersionNumber [
 ]
 
 { #category : #accessing }
-SoilBTreePage >> itemAfter: key [ 
-	| i item |
-	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
-	(i = items size) ifTrue: [ ^ nil].
-	item := items at: i + 1.
-	(item key >= ((2 raisedTo: 64) - 1)) ifTrue: [ ^ nil ].
-	^ item
-]
-
-{ #category : #accessing }
-SoilBTreePage >> itemCapacity [
-	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
-]
-
-{ #category : #accessing }
 SoilBTreePage >> keySize [
 	^ keySize
 ]
@@ -114,11 +99,6 @@ SoilBTreePage >> split: newPage [
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.
 	^ newPage
-]
-
-{ #category : #accessing }
-SoilBTreePage >> valueSize [
-	^ self subclassResponsibility
 ]
 
 { #category : #writing }

@@ -56,11 +56,34 @@ SoilIndexItemsPage >> isEmpty [
 ]
 
 { #category : #accessing }
+SoilIndexItemsPage >> itemAfter: key [ 
+	| i item |
+	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
+	(i = items size) ifTrue: [ ^ nil].
+	item := items at: i + 1.
+	^ item
+]
+
+{ #category : #accessing }
 SoilIndexItemsPage >> itemAt: anInteger ifAbsent: aBlock [
 	^ items 
 		findBinaryIndex: [ :each |  anInteger - each key ] 
 		do: [:ind | items at: ind ]
 		ifNone: aBlock 
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> itemAt: key put: anObject [ 
+	| removedItem |
+	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
+	items add: (key -> anObject).
+	dirty := true.
+	^ removedItem
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> itemCapacity [
+	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
 ]
 
 { #category : #accessing }
@@ -134,4 +157,9 @@ SoilIndexItemsPage >> valueAt: anInteger ifAbsent: aBlock [
 	^ (self 
 		associationAt: anInteger
 		ifAbsent: aBlock) value
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> valueSize [
+	^ self subclassResponsibility
 ]
