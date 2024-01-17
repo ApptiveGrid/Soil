@@ -21,6 +21,12 @@ SoilSkipList >> asCopyOnWrite [
 		yourself 
 ]
 
+{ #category : #'open/close' }
+SoilSkipList >> close [ 
+	super close.
+	keySize := nil
+]
+
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
