@@ -47,7 +47,8 @@ SoilIndexManager >> at: indexId put: aSoilIndex [
 { #category : #'open/close' }
 SoilIndexManager >> close [
 	semaphore critical: [  
-		indexes valuesDo: #close ]
+		indexes valuesDo: #close.
+		indexes := Dictionary new ]
 ]
 
 { #category : #api }
