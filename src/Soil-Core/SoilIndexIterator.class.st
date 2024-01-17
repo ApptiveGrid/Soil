@@ -285,6 +285,13 @@ SoilIndexIterator >> nextAssociation [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> nextAssociationAfter: key [
+
+	self find: key.
+	^ self nextAssociation
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> pageAt: anInteger [
 	^ index store pageAt: anInteger
 ]

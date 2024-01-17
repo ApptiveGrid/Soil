@@ -570,7 +570,7 @@ SoilIndexedDictionaryTest >> testNextAfter [
 	dict at: 1 put: #bar.
 	dict at: 2 put: #bar2.
 
-	self assert:( dict nextAfter: 1) equals: #bar2
+	self assert:( dict nextAfter: 1) equals: 2->#bar2
 ]
 
 { #category : #tests }
