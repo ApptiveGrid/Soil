@@ -22,7 +22,8 @@ SoilSkipListPage class >> isAbstract [
 ]
 
 { #category : #adding }
-SoilSkipListPage >> addItem: anAssociation [ 
+SoilSkipListPage >> addItem: anAssociation [
+	"Note: this can only be called for new items, client has to check first and update if an entry for the key is already there, different to SoilBTreePage>>#addItem:"
 	items add: anAssociation.
 	dirty := true
 ]
@@ -32,14 +33,6 @@ SoilSkipListPage >> biggestKey [
 	^ self isLastPage 
 		ifTrue: [ (2 raisedTo: (keySize * 8)) - 1 ]
 		ifFalse: [ self lastKey ]
-]
-
-{ #category : #testing }
-SoilSkipListPage >> hasRoom [
-	| used itemSize |
-	itemSize := keySize + valueSize.
-	used := self headerSize + (items size * itemSize).
-	^ used <= (self pageSize - itemSize)
 ]
 
 { #category : #initialization }
@@ -69,14 +62,6 @@ SoilSkipListPage >> isLastPage [
 { #category : #testing }
 SoilSkipListPage >> isOlderThan: aVersionNumber [ 
 	^ lastTransaction <= aVersionNumber 
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> itemBefore: key [
-
-	| item |
-	item := items findBinary: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
-	^ items before: item ifAbsent: nil
 ]
 
 { #category : #accessing }

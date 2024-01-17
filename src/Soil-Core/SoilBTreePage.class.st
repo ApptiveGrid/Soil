@@ -13,8 +13,15 @@ SoilBTreePage class >> indexClass [
 	^ SoilBTree 
 ]
 
+{ #category : #testing }
+SoilBTreePage class >> isAbstract [
+	<ignoreForCoverage>
+	^ self == SoilBTreePage
+]
+
 { #category : #adding }
 SoilBTreePage >> addItem: anAssociation [
+	"Updates entry if already there (different to SoilSkipListPage>>#addItem:)"
 	(items anySatisfy: [ :item | item key = anAssociation key ])
 		ifFalse: [ items add: anAssociation ]
 		ifTrue:  [ self itemAt: anAssociation key put: anAssociation value ].
@@ -24,11 +31,6 @@ SoilBTreePage >> addItem: anAssociation [
 { #category : #private }
 SoilBTreePage >> find: aKey with: aBTree [ 
 	^ self subclassResponsibility
-]
-
-{ #category : #testing }
-SoilBTreePage >> hasRoom [
-	^ self headerSize + ((items size + 1) * (self keySize + self valueSize)) <= self pageSize
 ]
 
 { #category : #initialization }

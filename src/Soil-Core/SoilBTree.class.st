@@ -9,6 +9,12 @@ Class {
 	#category : #'Soil-Core-Index-BTree'
 }
 
+{ #category : #'open/close' }
+SoilBTree >> close [ 
+	super close.
+	keySize := nil
+]
+
 { #category : #deleting }
 SoilBTree >> destroy [
 	path ensureDelete 

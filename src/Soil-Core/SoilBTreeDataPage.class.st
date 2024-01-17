@@ -58,14 +58,6 @@ SoilBTreeDataPage >> isLastPage [
 ]
 
 { #category : #accessing }
-SoilBTreeDataPage >> itemBefore: key [
-
-	| item |
-	item := items at: key ifAbsent: [ ^ nil ].
-	^ items before: item ifAbsent: nil
-]
-
-{ #category : #accessing }
 SoilBTreeDataPage >> next [
 	^next
 ]
