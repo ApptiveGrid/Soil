@@ -34,9 +34,19 @@ SoilJournalFragmentFile >> appendEntry: aSoilJournalEntry [
 
 ]
 
+{ #category : #accessing }
+SoilJournalFragmentFile >> basename [ 
+	^ path basename
+]
+
 { #category : #'initialize-release' }
 SoilJournalFragmentFile >> close [
 	stream close
+]
+
+{ #category : #copying }
+SoilJournalFragmentFile >> copyTo: aPath [ 
+	path copyTo: aPath
 ]
 
 { #category : #'instance creation' }

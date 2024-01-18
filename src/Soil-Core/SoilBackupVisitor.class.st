@@ -77,6 +77,18 @@ SoilBackupVisitor >> target: aSoil [
 ]
 
 { #category : #visiting }
+SoilBackupVisitor >> visitDatabaseJournal: aSoilJournal [ 
+	(target path / #journal) ensureCreateDirectory.
+	^ super visitDatabaseJournal: aSoilJournal
+]
+
+{ #category : #visiting }
+SoilBackupVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
+	aSoilJournalFragmentFile copyTo: target journal path / aSoilJournalFragmentFile basename.
+	^ aSoilJournalFragmentFile 
+]
+
+{ #category : #visiting }
 SoilBackupVisitor >> visitMetaSegment: aSoilMetaSegment [ 
 	self visit: aSoilMetaSegment indexManager.
 	self copyIndexAt: #identifier segment: 0. 
