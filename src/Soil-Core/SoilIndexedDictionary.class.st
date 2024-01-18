@@ -211,8 +211,7 @@ SoilIndexedDictionary >> newValuesSortedByKeyOrder [
 ]
 
 { #category : #accessing }
-SoilIndexedDictionary >> nextAfter: key [  
-	"Note: returns the association key->value"
+SoilIndexedDictionary >> nextAssociationAfter: key [  
 	transaction ifNil: [ 
 		| newValueSorted |
 		newValueSorted := self newValuesSortedByKeyOrder.
