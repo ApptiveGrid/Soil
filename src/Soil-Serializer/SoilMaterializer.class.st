@@ -215,6 +215,26 @@ SoilMaterializer >> nextSoilObject [
 			soilMaterialize: self 
 ]
 
+{ #category : #reading }
+SoilMaterializer >> nextUUID: aClass [ 
+	| uuid size byteArray |
+	size := self nextLengthEncodedInteger.
+	byteArray := SystemVersion current major < 12 
+		ifTrue: [ aClass new: size] 
+		ifFalse: [ ByteArray new: size].
+	
+	
+	stream readInto: byteArray startingAt: 1 count: size.
+	
+	uuid := SystemVersion current major < 12 
+		ifTrue: [byteArray ] 
+		ifFalse: [UUID nilUUID uuidData: byteArray].
+	
+	self registerObject: uuid.
+	
+	^ uuid
+]
+
 { #category : #registry }
 SoilMaterializer >> registerObject: anObject [
 	soil ifNotNil: [  
