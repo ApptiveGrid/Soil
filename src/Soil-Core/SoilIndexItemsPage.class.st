@@ -140,9 +140,29 @@ SoilIndexItemsPage >> items [
 ]
 
 { #category : #accessing }
+SoilIndexItemsPage >> keyOrClosestAfter: key [ 
+	"find the closest key in this page. This returns the exact key if 
+	present or the key that comes after. Else returns nil. This is useful if we enter the
+	list at an unknown point"
+	items isEmpty ifTrue: [ ^ nil ].
+	self lastKey < key ifTrue: [ ^ nil ].
+	^ items 
+		findBinaryIndex: [ :each | key - each key ] 
+		do: [ :e | (items at: e) key] 
+		ifNone: [ :a :b | 
+			(items at: (b min: items size)) key ]
+]
+
+{ #category : #accessing }
 SoilIndexItemsPage >> lastItem [
 
 	^ items isNotEmpty ifTrue: [ items last ] ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> lastKey [
+
+	^ items isNotEmpty ifTrue: [ items last key ]
 ]
 
 { #category : #accessing }

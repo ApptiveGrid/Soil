@@ -223,6 +223,11 @@ SoilIndexedDictionary >> nextAssociationAfter: key [
 ]
 
 { #category : #private }
+SoilIndexedDictionary >> nextKeyCloseTo: aKey [ 
+	^ self newIterator nextKeyCloseTo: aKey
+]
+
+{ #category : #private }
 SoilIndexedDictionary >> prepareNewValues [
 	newValues copy keysAndValuesDo: [ :key :object |
 		object isObjectId ifFalse: [

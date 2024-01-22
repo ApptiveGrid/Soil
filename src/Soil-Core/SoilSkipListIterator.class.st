@@ -80,21 +80,6 @@ SoilSkipListIterator >> levelAt: anInteger [
 	^ levels at: anInteger 
 ]
 
-{ #category : #private }
-SoilSkipListIterator >> nextKeyCloseTo: key [
-
-	| binKey |
-	binKey := (key asSkipListKeyOfSize: index keySize) asInteger.
-	self findPageFor: binKey.
-	nextKey := currentPage keyOrClosestAfter: binKey.
-	nextKey
-		ifNil: [ "if there is no close key found, we position the cursor at the end, so that asking for the next association will return nil" 
-			currentKey := currentPage lastKey ]
-		ifNotNil: [ 
-			"if there is a close key found, we make sure the cursor get properly positioned"
-			currentKey := nextKey ]
-]
-
 { #category : #printing }
 SoilSkipListIterator >> printOn: aStream [ 
 	aStream << 'path: ' << levels asString

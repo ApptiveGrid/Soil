@@ -65,20 +65,6 @@ SoilSkipListPage >> isOlderThan: aVersionNumber [
 ]
 
 { #category : #accessing }
-SoilSkipListPage >> keyOrClosestAfter: key [ 
-	"find the closest key in this page. This returns the exact key if 
-	present or the key that comes after. Else returns nil. This is useful if we enter the
-	list at an unknown point"
-	items isEmpty ifTrue: [ ^ nil ].
-	self lastKey < key ifTrue: [ ^ nil ].
-	^ items 
-		findBinaryIndex: [ :each | key - each key ] 
-		do: [ :e | (items at: e) key] 
-		ifNone: [ :a :b | 
-			(items at: (b min: items size)) key ]
-]
-
-{ #category : #accessing }
 SoilSkipListPage >> keySize [ 
 	^ keySize
 ]
@@ -87,12 +73,6 @@ SoilSkipListPage >> keySize [
 SoilSkipListPage >> keySize: anInteger [ 
 	(anInteger = 0) ifTrue: [ Error signal: 'cannot use key size 0' ].
 	keySize := anInteger.
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> lastKey [
-
-	^ items isNotEmpty ifTrue: [ items last key ]
 ]
 
 { #category : #accessing }
