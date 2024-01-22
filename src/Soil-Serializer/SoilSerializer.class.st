@@ -156,6 +156,16 @@ SoilSerializer >> nextPutSystemDictionary: aCollection [
 ]
 
 { #category : #writing }
+SoilSerializer >> nextPutUUID: aUUID [
+	| uuidData |
+	uuidData := SystemVersion current major < 12 ifTrue: [ aUUID ] ifFalse: [ aUUID uuidData ].
+	self 
+		nextPutByte: TypeCodeUUID; 
+		nextPutLengthEncodedInteger: uuidData size;
+		nextPutBytesFrom: uuidData
+]
+
+{ #category : #writing }
 SoilSerializer >> notSupportedError: anObject [ 
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]

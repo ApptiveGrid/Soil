@@ -30,6 +30,7 @@ Class {
 		'TypeCodeSystemDictionary',
 		'TypeCodeTime',
 		'TypeCodeTrue',
+		'TypeCodeUUID',
 		'TypeCodeUndefined',
 		'TypeCodeWideString',
 		'TypeCodeWideSymbol'
@@ -76,6 +77,7 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeCompiledMethod 			put: CompiledMethod;
 		at: TypeCodeSystemDictionary 		put: Smalltalk globals;
 		at: TypeCodeProcessScheduler  		put: Processor;
+		at: TypeCodeUUID   					put: UUID;
 		at: TypeCodeInternalReference 		put: [ :materializer | materializer nextInternalReference ];
 		at: TypeCodeExternalReference  	put: [ :materializer | materializer nextExternalReference ];
 		at: TypeCodePersistentDictionary  put: SoilPersistentDictionary
@@ -114,6 +116,7 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeCompiledMethod := 51.
 	TypeCodeSystemDictionary := 52.
 	TypeCodeProcessScheduler := 53.
+	TypeCodeUUID := 54.
 
 	TypeCodeInternalReference := 65.
 	TypeCodeExternalReference := 66.
