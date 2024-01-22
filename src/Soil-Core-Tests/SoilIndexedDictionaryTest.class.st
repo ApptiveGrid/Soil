@@ -566,15 +566,15 @@ SoilIndexedDictionaryTest >> testLastWithTransactionRemoveLast [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testNextAfter [
+SoilIndexedDictionaryTest >> testNextAssociationAfter [
 	dict at: 1 put: #bar.
 	dict at: 2 put: #bar2.
 
-	self assert:( dict nextAfter: 1) equals: #bar2
+	self assert:( dict nextAssociationAfter: 1) equals: 2->#bar2
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testNextAfterWithTransaction [
+SoilIndexedDictionaryTest >> testNextAssociationAfterWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
@@ -585,7 +585,7 @@ SoilIndexedDictionaryTest >> testNextAfterWithTransaction [
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"and test last"
-	self assert: (tx2 root nextAfter: 1) value equals: #two
+	self assert: (tx2 root nextAssociationAfter: 1) value equals: #two
 ]
 
 { #category : #tests }

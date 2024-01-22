@@ -211,17 +211,13 @@ SoilIndexedDictionary >> newValuesSortedByKeyOrder [
 ]
 
 { #category : #accessing }
-SoilIndexedDictionary >> nextAfter: key [  
-	| iterator |
+SoilIndexedDictionary >> nextAssociationAfter: key [  
 	transaction ifNil: [ 
 		| newValueSorted |
 		newValueSorted := self newValuesSortedByKeyOrder.
-		^ (newValueSorted after: (newValues associationAt: key)) value  ].
+		^ (newValueSorted after: (newValues associationAt: key))].
 
-	iterator := self newIterator 
-		find: key asInteger;
-		yourself.
-	^ iterator nextAssociation 
+	^ (self newIterator nextAssociationAfter: key)
 		ifNotNil: [ :assoc |
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 ]
