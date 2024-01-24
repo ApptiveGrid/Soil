@@ -236,20 +236,12 @@ SoilIndexIterator >> last [
 
 { #category : #accessing }
 SoilIndexIterator >> lastAssociation [
-	| lastPage item |
-	lastPage := self lastPage.
-	item := lastPage lastItem.  "sets currentPage"
-	
-	"if the last value is removed, take the one before"
-	[item notNil and: [ item value isRemoved ]] whileTrue: [  
-		item := lastPage itemBefore: item key].
-	
-	self flag: #TODO.
-	"if we did not find it in the last page, we need to check the page before"
-	item ifNil: [ ^nil ].	
-	currentKey := item key.
-	^ item 
-	
+	| lastAssociation lastValue key |
+	lastAssociation := self priorAssociation ifNil: [ ^nil ].
+	lastValue := (self
+ 			restoreValue: lastAssociation value
+ 			forKey: (key := lastAssociation key)).
+	^ lastValue ifNil: [ self priorAssociation ] ifNotNil: [ key -> lastValue ]
 ]
 
 { #category : #accessing }
@@ -309,6 +301,30 @@ SoilIndexIterator >> nextAssociationAfter: key [
 { #category : #accessing }
 SoilIndexIterator >> pageAt: anInteger [
 	^ index store pageAt: anInteger
+]
+
+{ #category : #private }
+SoilIndexIterator >> priorAssociation [
+	| item |
+	"Find the association before, if currentPage is not set we return the last association"
+	currentPage ifNil: [ 
+		currentPage := index lastPage.
+		currentKey := nil ].
+	[ currentPage isNil ] whileFalse: [  
+		item := currentKey 
+			ifNotNil: [  
+				(currentPage itemBefore: currentKey)
+					ifNotNil: [ :i | 
+						currentKey := i key. 
+						^ i ]
+					ifNil: [ 
+						(currentPage next = 0) ifTrue: [ ^ nil ].
+						currentPage := index store pageAt: currentPage priorPage.
+						currentKey := nil ] ]
+			ifNil: [
+				currentPage isEmpty ifTrue: [ ^ nil ].
+				^ currentPage lastItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
+	Error signal: 'shouldnt happen'
 ]
 
 { #category : #accessing }
