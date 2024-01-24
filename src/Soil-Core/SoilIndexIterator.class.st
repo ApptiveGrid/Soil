@@ -276,6 +276,13 @@ SoilIndexIterator >> nextAssociation [
 	^ nextValue ifNil: [ self nextAssociation ] ifNotNil: [ key -> nextValue ]
 ]
 
+{ #category : #accessing }
+SoilIndexIterator >> nextAssociationAfter: key [
+
+	self find: key.
+	^ self nextAssociation
+]
+
 { #category : #private }
 SoilIndexIterator >> nextKeyCloseTo: key [
 
@@ -289,13 +296,6 @@ SoilIndexIterator >> nextKeyCloseTo: key [
 		ifNotNil: [ 
 			"if there is a close key found, we make sure the cursor get properly positioned"
 			currentKey := nextKey ]
-]
-
-{ #category : #accessing }
-SoilIndexIterator >> nextAssociationAfter: key [
-
-	self find: key.
-	^ self nextAssociation
 ]
 
 { #category : #accessing }

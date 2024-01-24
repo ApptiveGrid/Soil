@@ -75,16 +75,6 @@ SoilIndexedDictionaryTest >> testAddAndRemoveExistingList [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testAddAndRemoveOnNewList [
-  	self 
-		shouldnt: [ dict at: #foo put: #bar ]
-		raise: Error.
-	self assert: (dict at: #foo) equals: #bar.
-	dict removeKey: #foo.
-	self assert: dict size equals: 0
-]
-
-{ #category : #tests }
 SoilIndexedDictionaryTest >> testAddToExistingEmptyList [
 	| tx tx2 tx3 tx4 |
 	"create emtpy skip list dictionary ..."
@@ -140,31 +130,6 @@ SoilIndexedDictionaryTest >> testAddToExistingNonEmptyList [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testAddToNewList [
-  	self 
-		shouldnt: [ dict at: #foo put: #bar ]
-		raise: Error.
-	self assert: (dict at: #foo) equals: #bar
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testAt [
-	dict at: #foo2 put: #bar2.
-	dict at: #foo put: #bar.
-	
-	self assert: (dict at: #foo2) equals: #bar2.
-	self should: [dict at: #ff] raise: KeyNotFound
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testAtIndex [
-	dict at: #foo2 put: #bar2.
-	dict at: #foo put: #bar.
-	
-	self assert: (dict atIndex: 1) equals: #bar2
-]
-
-{ #category : #tests }
 SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -183,9 +148,9 @@ SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
 SoilIndexedDictionaryTest >> testConcurrentAddKey [ 
 	| tx1 tx2 tx3 |
 	tx1 := soil newTransaction.
-	tx1 root: (dict
-		at: #one put: #onevalue;
-		yourself).
+	tx1 root: dict.
+	dict
+		at: #one put: #onevalue.
 	tx1 commit.
 	tx2 := soil newTransaction.
 	"After creating tx2 we open a concurrent transaction and add a key to 
@@ -202,12 +167,12 @@ SoilIndexedDictionaryTest >> testConcurrentAddKey [
 SoilIndexedDictionaryTest >> testConcurrentDo [
 	| tx1 tx2 tx3 col |
 	tx1 := soil newTransaction.
-	tx1 root: (dict
+	tx1 root: dict.
+	dict
 		at: #one put: #onevalue;
 		at: #two put: #twovalue;
 		at: #three put: #threevalue;
-		at: #four put: #fourvalue;
-		yourself).
+		at: #four put: #fourvalue.
 	tx1 commit.
 	tx2 := soil newTransaction.
 	"After creating tx2 we open a concurrent transaction and add a key to 
@@ -227,9 +192,9 @@ SoilIndexedDictionaryTest >> testConcurrentDo [
 SoilIndexedDictionaryTest >> testConcurrentIsEmpty [ 
 	| tx1 tx2 tx3 |
 	tx1 := soil newTransaction.
-	tx1 root: (dict
-		at: #one put: #onevalue;
-		yourself).
+	tx1 root: dict.
+	dict
+		at: #one put: #onevalue.
 	tx1 commit.
 	tx2 := soil newTransaction.
 	"After creating tx2 we open a concurrent transaction and add a key to 
@@ -246,9 +211,9 @@ SoilIndexedDictionaryTest >> testConcurrentIsEmpty [
 SoilIndexedDictionaryTest >> testConcurrentRemoveKey [
 	| tx1 tx2 tx3 |
 	tx1 := soil newTransaction.
-	tx1 root: (dict
-		at: #one put: #onevalue;
-		yourself).
+	tx1 root: dict.
+	dict
+		at: #one put: #onevalue.
 	tx1 commit.
 	tx2 := soil newTransaction.
 	"After creating tx2 we open a concurrent transaction and remove a key to 
@@ -260,19 +225,6 @@ SoilIndexedDictionaryTest >> testConcurrentRemoveKey [
 	self assert: (tx2 root at: #one) equals: #onevalue.
 	self deny: tx2 root isEmpty.
 
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testDo [
-	| counter |
-	dict at: #foo2 put: #bar2.
-	dict at: #foo put: #bar.
-	
-	counter := 0.
-	dict do: [ :each |
-		self assert: (each beginsWith: 'bar').
-		counter := counter + 1].
-	self assert: counter equals: 2
 ]
 
 { #category : #tests }
@@ -314,33 +266,6 @@ SoilIndexedDictionaryTest >> testDoWithTransAction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testFirst [
-	dict at: #foo2 put: #bar2.
-	dict at: #foo put: #bar.
-	
-	"first in key order"
-	self assert: dict first equals: #bar.
-	self assert: (dict first: 1) first equals: #bar.
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testFirstAssociation [
-	dict at: #foo2 put: #bar2.
-	dict at: #foo put: #bar.
-	
-	"firstAssocation in key order"
-	self assert: dict firstAssociation equals: #foo->#bar.
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testFirstAssociationWithSingleRemovedItem [ 
-	
-	dict at: #foo put: #bar.
-	dict removeKey: #foo.
-	self assert: dict firstAssociation equals: nil
-]
-
-{ #category : #tests }
 SoilIndexedDictionaryTest >> testFirstAssociationWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -374,14 +299,6 @@ SoilIndexedDictionaryTest >> testFirstAssociationWithTransactionRemoved [
 	"in tx1 the removed one is not removed"
 	self assert: tx1 root firstAssociation equals: 1->#one.
 
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testFirstWithSingleRemovedItem [ 
-	
-	dict at: #foo put: #bar.
-	dict removeKey: #foo.
-	self assert: dict first equals: nil
 ]
 
 { #category : #tests }
@@ -486,31 +403,6 @@ SoilIndexedDictionaryTest >> testIsEmpty [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testLast [
-	dict at: #foo2 put: #bar2.
-	dict at: #foo put: #bar.
-	
-	"last in key order"
-	self assert: dict last equals: #bar2
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testLastAssociation [
-	dict at: #foo2 put: #bar2.
-	dict at: #foo put: #bar.
-	
-	"last association in key order"
-	self assert: dict lastAssociation equals:  #foo2->#bar2
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testLastAssociationWithSingleRemovedItem [ 
-	dict at: #foo put: #bar.
-	dict removeKey: #foo.
-	self assert: dict lastAssociation equals: nil
-]
-
-{ #category : #tests }
 SoilIndexedDictionaryTest >> testLastAssociationWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -547,13 +439,6 @@ SoilIndexedDictionaryTest >> testLastAssociationWithTransactionRemoved [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testLastWithSingleRemovedItem [ 
-	dict at: #foo put: #bar.
-	dict removeKey: #foo.
-	self assert: dict last equals: nil
-]
-
-{ #category : #tests }
 SoilIndexedDictionaryTest >> testLastWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -586,14 +471,6 @@ SoilIndexedDictionaryTest >> testLastWithTransactionRemoveLast [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testNextAssociationAfter [
-	dict at: 1 put: #bar.
-	dict at: 2 put: #bar2.
-
-	self assert:( dict nextAssociationAfter: 1) equals: 2->#bar2
-]
-
-{ #category : #tests }
 SoilIndexedDictionaryTest >> testNextAssociationAfterWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -621,17 +498,6 @@ SoilIndexedDictionaryTest >> testNextKeyCloseToWithTransaction [
 	tx2 := soil newTransaction.
 	"and test last"
 	self assert: (tx2 root nextKeyCloseTo: 15) value equals: 20
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testRemoveKey [
-	dict at: #foo put: #bar.
-	dict at: #foo2 put: #bar2.
-	
-	dict removeKey: #foo.
-	self assert: dict size equals: 1.
-	
-	self should: [ dict removeKey: #blah ] raise: KeyNotFound
 ]
 
 { #category : #tests }
@@ -690,14 +556,6 @@ SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testSecond [
-	dict at: #foo put: #bar.
-	dict at: #foo2 put: #bar2.
-
-	self assert: dict second equals: #bar2
-]
-
-{ #category : #tests }
 SoilIndexedDictionaryTest >> testSecondWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -713,14 +571,6 @@ SoilIndexedDictionaryTest >> testSecondWithTransaction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testSize [
-	dict at: #foo put: #bar.
-	dict at: #foo2 put: #bar2.
-
-	self assert: dict size equals: 2
-]
-
-{ #category : #tests }
 SoilIndexedDictionaryTest >> testSizeWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -733,15 +583,6 @@ SoilIndexedDictionaryTest >> testSizeWithTransaction [
 	tx2 := soil newTransaction.
 	"and test last"
 	self assert: tx2 root size equals: 2
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testValues [
-	dict at: #foo put: #bar.
-	dict at: #foo2 put: #bar2.
-
-	self assert: (dict values includes: #bar).
-	self assert: (dict values includes: #bar2)
 ]
 
 { #category : #tests }
