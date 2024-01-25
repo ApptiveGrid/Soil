@@ -7,7 +7,7 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilJournalConverter >> convert [ 
 	| allJournalFiles |
 	"reset database checkpoint to process all of the transaction logs and set the 
