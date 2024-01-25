@@ -75,7 +75,7 @@ SoilIndexedDictionary >> basicAt: aString ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexedDictionary >> binaryKey: aString [
-	^ (aString asSkipListKeyOfSize: index keySize) asInteger
+	^ (aString asIndexKeyOfSize: index keySize) asInteger
 ]
 
 { #category : #initialization }

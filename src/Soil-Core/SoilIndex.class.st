@@ -54,7 +54,7 @@ SoilIndex >> do: aBlock [
 { #category : #private }
 SoilIndex >> find: aString [ 
 	^ self newIterator 
-		find: (aString asSkipListKeyOfSize: self keySize) asInteger
+		find: (aString asIndexKeyOfSize: self keySize) asInteger
 ]
 
 { #category : #accessing }
