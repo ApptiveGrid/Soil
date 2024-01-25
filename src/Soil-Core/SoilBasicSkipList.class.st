@@ -30,7 +30,7 @@ SoilBasicSkipList >> newIterator [
 { #category : #removing }
 SoilBasicSkipList >> removeKey: aString ifAbsent: aBlock [
 	| page index key |
-	key := (aString asSkipListKeyOfSize: self keySize) asInteger.
+	key := (aString asIndexKeyOfSize: self keySize) asInteger.
 	page := self newIterator 
 		find: key;
 		currentPage.
