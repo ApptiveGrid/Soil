@@ -7,30 +7,30 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #caching }
 SoilSetup >> cacheMetaRecords: anInteger [
 	soil objectRepository cacheSegmentAt: 0 upTo: anInteger  
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #caching }
 SoilSetup >> cacheObjectRecords: anInteger [
 	1 to: soil objectRepository segments size do: [:n |
 		soil objectRepository cacheSegmentAt: n upTo: anInteger ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #caching }
 SoilSetup >> cacheRecords [
 	self cacheRecords: self defaultCacheRecordsSize
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #caching }
 SoilSetup >> cacheRecords: anInteger [
 	self 
 		cacheMetaRecords: anInteger;
 		cacheObjectRecords: anInteger
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilSetup >> defaultCacheRecordsSize [
 	^ 1000
 ]
@@ -41,13 +41,13 @@ SoilSetup >> flushCachedIndexes [
 		segment flushIndexes ]
 ]
 
-{ #category : #accessing }
+{ #category : #flushing }
 SoilSetup >> flushCachedObjectRecords [
 	soil objectRepository segmentsDo: [ :segment |
 		segment flushCachedObjectRecords ]
 ]
 
-{ #category : #accessing }
+{ #category : #flushing }
 SoilSetup >> flushCaches [ 
 	self 
 		flushCachedObjectRecords;

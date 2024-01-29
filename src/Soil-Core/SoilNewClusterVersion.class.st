@@ -184,7 +184,7 @@ SoilNewClusterVersion >> shouldBeCommitted [
 	^ true
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilNewClusterVersion >> validateReadVersion [
 	"a new object record cannot conflict as the record is not on disk"
 	| currentPosition |

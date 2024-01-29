@@ -101,7 +101,7 @@ SoilSkipList >> newPage [
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #reindexing }
 SoilSkipList >> newReIndexer [
 	^ SoilReindexer new 
 		index: self
@@ -129,12 +129,12 @@ SoilSkipList >> path: aStringOrFileReference [
 	path := aStringOrFileReference asFileReference 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #reindexing }
 SoilSkipList >> reIndex [
 	self newReIndexer run
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #reindexing }
 SoilSkipList >> reIndexUsing: itemBlock [ 
 	self newReIndexer 
 		itemBlock: itemBlock;

@@ -103,7 +103,7 @@ Soil >> destroy [
 	path delete
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #public }
 Soil >> findRecord: aBlock [ 
 	| tx |
 	tx := self newTransaction.
