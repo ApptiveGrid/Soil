@@ -12,11 +12,6 @@ SoilNewSkipListIndexEntry class >> journalTypeCode [
 	^ 10
 ]
 
-{ #category : #accessing }
-SoilNewSkipListIndexEntry >> address [
-	^ 'index: ', id printString
-]
-
 { #category : #committing }
 SoilNewSkipListIndexEntry >> commitIn: soil [
 
