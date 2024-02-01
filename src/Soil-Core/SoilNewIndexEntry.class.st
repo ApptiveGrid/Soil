@@ -15,6 +15,11 @@ SoilNewIndexEntry class >> isAbstract [
 ]
 
 { #category : #accessing }
+SoilNewIndexEntry >> address [
+	^ 'index: ', id printString
+]
+
+{ #category : #accessing }
 SoilNewIndexEntry >> keySize [
 
 	^ keySize
