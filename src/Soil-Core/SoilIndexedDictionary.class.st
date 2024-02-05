@@ -176,6 +176,12 @@ SoilIndexedDictionary >> newIterator [
 ]
 
 { #category : #accessing }
+SoilIndexedDictionary >> nextAfter: key [  
+	^ (self nextAssociationAfter: key) value  
+
+]
+
+{ #category : #accessing }
 SoilIndexedDictionary >> nextAssociationAfter: key [  
 
 	^ (self newIterator nextAssociationAfter: key)

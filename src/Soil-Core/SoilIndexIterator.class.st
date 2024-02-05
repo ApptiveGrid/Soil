@@ -279,7 +279,7 @@ SoilIndexIterator >> nextAssociation [
 { #category : #accessing }
 SoilIndexIterator >> nextAssociationAfter: key [
 
-	self find: key.
+	self find: (key asIndexKeyOfSize: index keySize) asInteger.
 	^ self nextAssociation
 ]
 
