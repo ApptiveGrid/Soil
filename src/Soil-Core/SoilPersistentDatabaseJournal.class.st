@@ -118,7 +118,7 @@ SoilPersistentDatabaseJournal >> initializeFilesystem [
 
 ]
 
-{ #category : #tools }
+{ #category : #inspector }
 SoilPersistentDatabaseJournal >> inspectionContent [
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 

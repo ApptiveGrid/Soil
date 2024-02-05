@@ -41,7 +41,7 @@ SoilIndexIterator >> at: aKeyObject [
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 	| foundValue |
-	currentKey := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
+	currentKey := (aKeyObject asIndexKeyOfSize: index keySize) asInteger.
 	foundValue := self find: currentKey ifAbsent: aBlock.
  	^(self restoreValue: foundValue forKey: currentKey) ifNil: [ aBlock value ]
 ]
@@ -49,7 +49,7 @@ SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject put: anObject [
 	| key |
-	key := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
+	key := (aKeyObject asIndexKeyOfSize: index keySize) asInteger.
 	^ self 
 		basicAt: key 
 		put: anObject
@@ -287,7 +287,7 @@ SoilIndexIterator >> nextAssociationAfter: key [
 SoilIndexIterator >> nextKeyCloseTo: key [
 
 	| binKey |
-	binKey := (key asSkipListKeyOfSize: index keySize) asInteger.
+	binKey := (key asIndexKeyOfSize: index keySize) asInteger.
 	self findPageFor: binKey.
 	nextKey := currentPage keyOrClosestAfter: binKey.
 	^ nextKey

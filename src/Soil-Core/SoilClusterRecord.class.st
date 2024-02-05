@@ -81,7 +81,7 @@ SoilClusterRecord >> committed [
 	committed := true
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilClusterRecord >> findReferencesTo [
 	^ SoilReferenceFinder new
 		soil: transaction database;

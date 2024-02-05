@@ -17,13 +17,13 @@ SoilCopyOnWriteSkipList >> newPage [
 	^ wrapped newPage
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #reindexing }
 SoilCopyOnWriteSkipList >> reIndex [
 	wrapped reIndex. 
 	self flushCachedPages 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #reindexing }
 SoilCopyOnWriteSkipList >> reIndexUsing: itemBlock [
 	wrapped reIndexUsing: itemBlock.
 	self flushCachedPages 
