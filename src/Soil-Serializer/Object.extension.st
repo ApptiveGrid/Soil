@@ -1,11 +1,6 @@
 Extension { #name : #Object }
 
 { #category : #'*Soil-Serializer' }
-Object >> soilBasicSerialize [
-	^ self soilBasicSerializeWithRegistry: SoilStandaloneObjectRegistry new.
-]
-
-{ #category : #'*Soil-Serializer' }
 Object >> soilBasicSerialize: serializer [
 	"Delegate serialization to the class layout"
 	self class classLayout soilBasicSerialize: self with: serializer

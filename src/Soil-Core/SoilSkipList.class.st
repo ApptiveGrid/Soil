@@ -78,12 +78,6 @@ SoilSkipList >> keySize: anInteger [
 ]
 
 { #category : #'instance creation' }
-SoilSkipList >> newFileStore [
-	^ SoilPagedFileIndexStore new
-		index: self
-]
-
-{ #category : #'instance creation' }
 SoilSkipList >> newHeaderPage [
 	^ SoilSkipListHeaderPage new
 		index: 1;
