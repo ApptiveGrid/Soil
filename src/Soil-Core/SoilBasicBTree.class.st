@@ -45,12 +45,6 @@ SoilBasicBTree >> keySize: anInteger [
 ]
 
 { #category : #'instance creation' }
-SoilBasicBTree >> newFileStore [
-	^ SoilPagedFileIndexStore new
-		index: self
-]
-
-{ #category : #'instance creation' }
 SoilBasicBTree >> newHeaderPage [
 	^ SoilBTreeHeaderPage new
 		index: 1;
@@ -81,15 +75,6 @@ SoilBasicBTree >> newIndexPageFromRoot: rootIndexPage [
 { #category : #'instance creation' }
 SoilBasicBTree >> newIterator [ 
 	^ SoilBTreeIterator on: self 
-]
-
-{ #category : #'instance creation' }
-SoilBasicBTree >> newPage [
-	^ self pageClass new 
-		keySize: self keySize;
-		valueSize: self valueSize;
-		pageSize: self pageSize;
-		yourself
 ]
 
 { #category : #'instance creation' }
