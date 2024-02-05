@@ -192,6 +192,7 @@ SoilJournalFragmentFile >> transactionJournals [
 	[ stream atEnd ] whileFalse: [  
 		entry := SoilJournalEntry readFrom: stream.
 		entry isTransactionEntry ifTrue: [ 
+			self halt.
 			(transactionJournals 
 				at: entry transactionId
 				ifAbsentPut: [ SoilTransactionJournal new index: entry transactionId ])

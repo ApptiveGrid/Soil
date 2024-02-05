@@ -293,10 +293,23 @@ SoilTransaction >> findObject: aBlock [
 SoilTransaction >> findRecord: aBlock [ 
 	"scan all connected records in the database until one matches 
 	the condition in aBlock"
-	 ^ SoilFindRecordVisitor new 
+	 ^ (SoilFindRecordsVisitor new 
+		returnFirst;
 		find: aBlock 
 		in: self;
-		object
+		records)
+			ifNotEmpty: [ :records | records first ] 
+			ifEmpty: [ nil ] 
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransaction >> findRecords: aBlock [ 
+	"scan all connected records in the database until one matches 
+	the condition in aBlock"
+	 ^ SoilFindRecordsVisitor new 
+		find: aBlock 
+		in: self;
+		records
 ]
 
 { #category : #testing }
