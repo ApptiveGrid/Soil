@@ -9,11 +9,6 @@ SoilNewBTreeListIndexEntry class >> journalTypeCode [
 	^ 12
 ]
 
-{ #category : #accessing }
-SoilNewBTreeListIndexEntry >> address [
-	^ 'index: ', id printString
-]
-
 { #category : #committing }
 SoilNewBTreeListIndexEntry >> commitIn: soil [
 
