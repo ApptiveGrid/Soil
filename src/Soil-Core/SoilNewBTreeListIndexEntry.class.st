@@ -4,6 +4,11 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
+{ #category : #'accessing - defaults' }
+SoilNewBTreeListIndexEntry class >> journalTypeCode [ 
+	^ 12
+]
+
 { #category : #accessing }
 SoilNewBTreeListIndexEntry >> address [
 	^ 'index: ', id printString
