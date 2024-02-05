@@ -10,7 +10,7 @@ SoilMemoryDatabaseJournal >> initialize [
 	transactionJournals := Dictionary new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #inspector }
 SoilMemoryDatabaseJournal >> inspectionTransactionJournals [
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 

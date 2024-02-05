@@ -54,7 +54,7 @@ SoilIndex >> do: aBlock [
 { #category : #private }
 SoilIndex >> find: aString [ 
 	^ self newIterator 
-		find: (aString asSkipListKeyOfSize: self keySize) asInteger
+		find: (aString asIndexKeyOfSize: self keySize) asInteger
 ]
 
 { #category : #accessing }
@@ -125,7 +125,8 @@ SoilIndex >> maxLevel: anIntegeer [
 
 { #category : #'instance creation' }
 SoilIndex >> newFileStore [
-	^ self subclassResponsibility
+	^ SoilPagedFileIndexStore new
+		index: self
 ]
 
 { #category : #'instance creation' }
@@ -151,6 +152,16 @@ SoilIndex >> pageSize [
 { #category : #accessing }
 SoilIndex >> pages [
 	^ self store pages
+]
+
+{ #category : #reindexing }
+SoilIndex >> reIndex [
+	^ self subclassResponsibility
+]
+
+{ #category : #reindexing }
+SoilIndex >> reIndexUsing: itemBlock [
+	^ self subclassResponsibility
 ]
 
 { #category : #removing }

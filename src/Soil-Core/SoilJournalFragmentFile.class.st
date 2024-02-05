@@ -39,7 +39,7 @@ SoilJournalFragmentFile >> basename [
 	^ path basename
 ]
 
-{ #category : #'initialize-release' }
+{ #category : #'open/close' }
 SoilJournalFragmentFile >> close [
 	stream close
 ]
@@ -65,12 +65,12 @@ SoilJournalFragmentFile >> createdPosition [
 	^ self versionPosition + self versionSize 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilJournalFragmentFile >> createdSize [
 	^ 6
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilJournalFragmentFile >> currentLogSequenceNumber [ 
 	^ SoilLogSequenceNumber 
 		fileNumber: (ByteArray readHexFrom: path pathSegments last) asInteger 
@@ -130,7 +130,7 @@ SoilJournalFragmentFile >> initializeVersion [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #inspector }
 SoilJournalFragmentFile >> inspectionTransactionJournals [
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 
@@ -184,7 +184,7 @@ SoilJournalFragmentFile >> printOn: aStream [
 		<< path asString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #journal }
 SoilJournalFragmentFile >> transactionJournals [
 	| transactionJournals entry |
 	self stream position: self dataPosition.

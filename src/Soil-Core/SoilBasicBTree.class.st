@@ -45,12 +45,6 @@ SoilBasicBTree >> keySize: anInteger [
 ]
 
 { #category : #'instance creation' }
-SoilBasicBTree >> newFileStore [
-	^ SoilPagedFileIndexStore new
-		index: self
-]
-
-{ #category : #'instance creation' }
 SoilBasicBTree >> newHeaderPage [
 	^ SoilBTreeHeaderPage new
 		index: 1;
@@ -84,15 +78,6 @@ SoilBasicBTree >> newIterator [
 ]
 
 { #category : #'instance creation' }
-SoilBasicBTree >> newPage [
-	^ self pageClass new 
-		keySize: self keySize;
-		valueSize: self valueSize;
-		pageSize: self pageSize;
-		yourself
-]
-
-{ #category : #'instance creation' }
 SoilBasicBTree >> newRootPage [
 	^ SoilBTreeRootPage new
 		index: 2;
@@ -118,7 +103,7 @@ SoilBasicBTree >> readPageFrom: aStream [
 { #category : #removing }
 SoilBasicBTree >> removeKey: aString ifAbsent: aBlock [
 	| page index key |
-	key := (aString asSkipListKeyOfSize: self keySize) asInteger.
+	key := (aString asIndexKeyOfSize: self keySize) asInteger.
 	page := self newIterator 
 		find: key;
 		currentPage.
