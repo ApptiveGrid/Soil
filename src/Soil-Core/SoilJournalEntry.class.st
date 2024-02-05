@@ -4,7 +4,7 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilJournalEntry class >> allMapped [ 
 	| map |
 	map := Dictionary new.

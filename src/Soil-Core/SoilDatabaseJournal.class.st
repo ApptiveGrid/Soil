@@ -37,7 +37,7 @@ SoilDatabaseJournal >> do: aBlock [
 	transactionJournals do: aBlock
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilDatabaseJournal >> lastIndex [
 	^ self lastTransactionJournal 
 		ifNotNil: [ :journal | journal index ]

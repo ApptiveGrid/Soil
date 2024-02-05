@@ -7,7 +7,7 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SoilLogSequenceNumber class >> fileNumber: number offset: offset [ 
 	^ self new 
 		fileNumber: number offset: offset
@@ -31,12 +31,12 @@ SoilLogSequenceNumber >> fileNumber: number offset: offset [
 	value := value bitOr: offset 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilLogSequenceNumber >> fileOffset [ 
 	^ value bitAnd: 16rFFFFFF
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilLogSequenceNumber >> hexOffset [ 
 	^ (self fileOffset printStringBase: 16 length: 6 padded: true) asLowercase 
 ]
@@ -46,7 +46,7 @@ SoilLogSequenceNumber >> isInitial [
 	^ value = 0
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilLogSequenceNumber >> nextFilename [
 	^ self filename: self fileNumber + 1
 ]

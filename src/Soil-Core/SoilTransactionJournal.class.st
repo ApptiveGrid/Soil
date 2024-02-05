@@ -35,7 +35,7 @@ SoilTransactionJournal >> addEntry: aJournalEntry [
 	entries add: aJournalEntry 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #searching }
 SoilTransactionJournal >> anyEntrySatisfy: aBlock [
 	^ entries anySatisfy: aBlock
 ]
@@ -69,7 +69,7 @@ SoilTransactionJournal >> commitIn: soil [
 	entries do: [ :each | each commitIn: soil ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #committing }
 SoilTransactionJournal >> committedAt [
 	^ entries last committedAt 
 ]
@@ -122,7 +122,7 @@ SoilTransactionJournal >> initialize [
 	entries := OrderedCollection new
 ]
 
-{ #category : #tools }
+{ #category : #inspector }
 SoilTransactionJournal >> inspectionEntries [
 	<inspectorPresentationOrder: 0 title: 'journal entries'>
 
@@ -162,7 +162,7 @@ SoilTransactionJournal >> printOn: aStream [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'reading-writing' }
 SoilTransactionJournal >> readFrom: aStream [ 
 	| entry |
 	[ aStream atEnd ] whileFalse: [
@@ -191,14 +191,14 @@ SoilTransactionJournal >> validateIn: aSoilTransaction [
 	entries do: [ :each | each validateIn: aSoilTransaction ]
 ]
 
-{ #category : #writing }
+{ #category : #'reading-writing' }
 SoilTransactionJournal >> writeOn: aStream [
 	entries do: [ :each | each writeOn: aStream ].
 	aStream 
 		flush
 ]
 
-{ #category : #writing }
+{ #category : #'reading-writing' }
 SoilTransactionJournal >> writeVersion [
 	^ entries first transactionId
 ]
