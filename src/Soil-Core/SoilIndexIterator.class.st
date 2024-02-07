@@ -164,6 +164,7 @@ SoilIndexIterator >> first: anInteger [
 
 { #category : #accessing }
 SoilIndexIterator >> firstAssociation [ 
+	"Note: key will be binary key"
 	| item |
 	currentPage := index store headerPage.
 	item := self nextAssociation.
@@ -235,6 +236,7 @@ SoilIndexIterator >> last [
 
 { #category : #accessing }
 SoilIndexIterator >> lastAssociation [
+	"Note: key will be binary key"
 	| lastAssociation lastValue key |
 	lastAssociation := self priorAssociation ifNil: [ ^nil ].
 	lastValue := (self
@@ -266,7 +268,7 @@ SoilIndexIterator >> next: anInteger [
 
 { #category : #accessing }
 SoilIndexIterator >> nextAssociation [
-
+	"Note: key will be binary key"
 	| nextAssociation nextValue key |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
 	nextValue := (self
@@ -277,14 +279,14 @@ SoilIndexIterator >> nextAssociation [
 
 { #category : #accessing }
 SoilIndexIterator >> nextAssociationAfter: key [
-
+	"Note: key will be binary key"
 	self find: key.
 	^ self nextAssociation
 ]
 
 { #category : #private }
 SoilIndexIterator >> nextKeyCloseTo: key [
-
+	"Note: returnrd key will be binary key"
 	| binKey |
 	binKey := (key asIndexKeyOfSize: index keySize) asInteger.
 	self findPageFor: binKey.
