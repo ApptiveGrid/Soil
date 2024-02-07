@@ -1,6 +1,18 @@
 Extension { #name : #BinaryFileStream }
 
 { #category : #'*Soil-File' }
+BinaryFileStream >> dataSync [ 
+	^ self dataSync: (self fileno: self fileHandle)
+]
+
+{ #category : #'*Soil-File' }
+BinaryFileStream >> dataSync: fd [
+	^ self 
+		ffiCall: #(int fdatasync(int fd))
+		module: LibC
+]
+
+{ #category : #'*Soil-File' }
 BinaryFileStream >> fileHandle [
 
 	^ handle pointerAt: 9
@@ -48,6 +60,19 @@ BinaryFileStream >> lockForAppendStartingAt: offset [
 		lock: self fileHandle
 		from: offset
 		length: 0
+]
+
+{ #category : #'*Soil-File' }
+BinaryFileStream >> sync [ 
+	^ self sync: (self fileno: self fileHandle).
+	
+]
+
+{ #category : #'*Soil-File' }
+BinaryFileStream >> sync: fd [
+	^ self 
+		ffiCall: #(int fsync(int fd))
+		module: LibC
 ]
 
 { #category : #'*Soil-File' }
