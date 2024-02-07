@@ -134,13 +134,13 @@ SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"and test atIndex:"
-	self assert: (tx2 root atIndex: 1) equals: #one
+	self assert: (tx2 root atIndex: 1) equals: #onevalue
 
 ]
 
@@ -233,8 +233,8 @@ SoilIndexedDictionaryTest >> testDoWithTransAction [
 	
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #bar1.
-	dict at: 2 put: #bar2.
+	dict at: #one put: #bar1.
+	dict at: #two put: #bar2.
 	tx commit.
 	"open a second transaction ..."
 	tx1 := soil newTransaction.
@@ -246,7 +246,7 @@ SoilIndexedDictionaryTest >> testDoWithTransAction [
 		counter := counter + 1].
 	self assert: counter equals: 2.
 	
-	tx2 root removeKey: 1.
+	tx2 root removeKey: #one.
 	
 	counter := 0.
 	tx2 root  do: [ :each |
@@ -385,7 +385,7 @@ SoilIndexedDictionaryTest >> testIsEmpty [
 	| tx tx1 tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
+	dict at: #one put: #oneValue.
 	tx commit.
 	"open a second transaction ..."
 	tx1 := soil newTransaction.
@@ -393,7 +393,7 @@ SoilIndexedDictionaryTest >> testIsEmpty [
 	self deny: tx1 root isEmpty.
 	
 	tx2 := soil newTransaction.
-	tx2 root removeKey: 1.
+	tx2 root removeKey: #one.
 	self assert: tx2 root size equals: 0.
 	self assert: tx2 root isEmpty.
 	tx2 commit.
@@ -443,15 +443,15 @@ SoilIndexedDictionaryTest >> testLastWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 2 put: #two.
-	dict at: 1 put: #one.
+	dict at: #two put: #twovalue.
+	dict at: #one put: #onevalue.
 
 	"self assert: dict last equals: #two."
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"and test last, note: keyorder"
-	self assert: tx2 root last equals: #two
+	self assert: tx2 root last equals: #twovalue
 ]
 
 { #category : #tests }
@@ -459,15 +459,15 @@ SoilIndexedDictionaryTest >> testLastWithTransactionRemoveLast [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
 	"self assert: dict last equals: #two."
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
-	tx2 root removeKey: 2.
+	tx2 root removeKey: #two.
 	"and test last"
-	self assert: tx2 root last equals: #one
+	self assert: tx2 root last equals: #onevalue
 ]
 
 { #category : #tests }
@@ -475,14 +475,13 @@ SoilIndexedDictionaryTest >> testNextAssociationAfterWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
-	"self assert: dict last equals: #two."
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"and test last"
-	self assert: (tx2 root nextAssociationAfter: 1) value equals: #two
+	self assert: (tx2 root nextAssociationAfter: #one) value equals: #twovalue
 ]
 
 { #category : #tests }
@@ -507,22 +506,21 @@ SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 	| tx tx2 tag |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
-	"self assert: dict last equals: #two."
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"remove the key"
-	tx2 root removeKey: 2.
+	tx2 root removeKey: #two.
 	self assert: tx2 root size equals: 1.
 	"remove again to test absent case"
 	tag := false.
-	tx2 root removeKey: 3 ifAbsent: [ tag := true ].
+	tx2 root removeKey: #three ifAbsent: [ tag := true ].
 	self assert: tag.
 	"remove again to test absent case with already removed key"
 	tag := false.
-	tx2 root removeKey: 2 ifAbsent: [ tag := true ].
+	tx2 root removeKey: #two ifAbsent: [ tag := true ].
 	self assert: tag.
 	
 
@@ -537,19 +535,19 @@ SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 	self skip.
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
 	tx commit.
 	"we create two transactions"
 	tx := soil newTransaction.
 	tx2 := soil newTransaction.
 	"remove the key"
-	tx2 root removeKey: 2.
+	tx2 root removeKey: #two.
 	tx2 commit.
 	"check that we can still see in the first tr"
-	self assert: (tx root at: 2) equals: #two.
+	self assert: (tx root at: #two) equals: #twovalue.
 	"but removeKey: does not see it, we can remove it without error"
-	tx root removeKey: 2 ifAbsent: [ self fail ].
+	tx root removeKey: #two ifAbsent: [ self fail ].
 	self assert: tx root size equals: 1.
 	"but commiting it will fail, as we have commited the remove in t2"
 	self should: [tx commit] raise: SoilObjectHasConcurrentChange
@@ -560,14 +558,13 @@ SoilIndexedDictionaryTest >> testSecondWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
-	"self assert: dict last equals: #two."
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"and test last"
-	self assert: tx2 root second equals: #two
+	self assert: tx2 root second equals: #twovalue
 ]
 
 { #category : #tests }
@@ -575,9 +572,8 @@ SoilIndexedDictionaryTest >> testSizeWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
-	"self assert: dict last equals: #two."
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
@@ -590,14 +586,13 @@ SoilIndexedDictionaryTest >> testValuesWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
-	"self assert: dict last equals: #two."
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"and test last"
 	self assert: tx2 root values size equals: 2.
-	self assert: (tx2 root values includes: #one).
-	self assert: (tx2 root values includes: #two)
+	self assert: (tx2 root values includes: #onevalue).
+	self assert: (tx2 root values includes: #twovalue)
 ]

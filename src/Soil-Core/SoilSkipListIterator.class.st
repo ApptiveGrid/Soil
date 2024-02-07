@@ -33,7 +33,7 @@ SoilSkipListIterator >> basicAt: key put: anObject [
 ]
 
 { #category : #private }
-SoilSkipListIterator >> findPageFor: key [
+SoilSkipListIterator >> findPageFor: binKey [
 	| pageIndex candidatePage |
 	currentPage := index headerPage.
 	levels size to: 1 by: -1 do: [ :level |
@@ -41,7 +41,7 @@ SoilSkipListIterator >> findPageFor: key [
 			pageIndex := currentPage rightAt: level.
 			(pageIndex > 0) and: [ 
 				candidatePage := self pageAt: pageIndex.
-				candidatePage smallestKey <= key ] ]
+				candidatePage smallestKey <= binKey ] ]
 					whileTrue: [ currentPage := candidatePage  ].
 			self atLevel: level put: currentPage. ].
 	^ currentPage 

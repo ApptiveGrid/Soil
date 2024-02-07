@@ -27,18 +27,6 @@ SoilBasicSkipList >> newIterator [
 	^ SoilSkipListIterator on: self 
 ]
 
-{ #category : #removing }
-SoilBasicSkipList >> removeKey: aString ifAbsent: aBlock [
-	| page index key |
-	key := (aString asIndexKeyOfSize: self keySize) asInteger.
-	page := self newIterator 
-		find: key;
-		currentPage.
-	^ ((index := page indexOfKey: key) > 0) 
-		ifTrue: [ (page itemRemoveIndex: index) value ]
-		ifFalse: [ aBlock value ]
-]
-
 { #category : #private }
 SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 	| newPage page |

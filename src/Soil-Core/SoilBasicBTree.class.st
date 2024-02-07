@@ -100,18 +100,6 @@ SoilBasicBTree >> readPageFrom: aStream [
 	^ SoilBTreePage readPageFrom: aStream keySize: self keySize valueSize: self valueSize
 ]
 
-{ #category : #removing }
-SoilBasicBTree >> removeKey: aString ifAbsent: aBlock [
-	| page index key |
-	key := (aString asIndexKeyOfSize: self keySize) asInteger.
-	page := self newIterator 
-		find: key;
-		currentPage.
-	^ ((index := page indexOfKey: key) > 0) 
-		ifTrue: [ (page itemRemoveIndex: index) value ]
-		ifFalse: [ aBlock value ]
-]
-
 { #category : #accessing }
 SoilBasicBTree >> rootPage [
 	^ self store pageAt: 2

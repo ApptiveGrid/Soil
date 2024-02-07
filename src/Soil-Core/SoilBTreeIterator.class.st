@@ -13,8 +13,8 @@ SoilBTreeIterator >> basicAt: key put: anObject [
 ]
 
 { #category : #private }
-SoilBTreeIterator >> findPageFor: key [
-	^currentPage := index rootPage find: key with: index
+SoilBTreeIterator >> findPageFor: binKey [
+	^currentPage := index rootPage find: binKey with: index
 ]
 
 { #category : #accessing }
