@@ -33,39 +33,30 @@ SoilIndexedDictionary >> at: key [
 
 { #category : #accessing }
 SoilIndexedDictionary >> at: key ifAbsent: aBlock [
-	| objectId |
-	^ transaction 
-		ifNotNil: [  
-			objectId := (self basicAt: key ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
-			transaction proxyForObjectId: objectId ]
-		ifNil: [ newValues at: key ifAbsent: aBlock ]
+	| found |
+	found := self basicAt: key ifAbsent: [ ^ aBlock value ].
+	^ transaction proxyForObjectId: found asSoilObjectId
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> at: key put: anObject [
-	^ transaction 
-		ifNotNil: [ 
-			| objectId iterator |
-			objectId := transaction makeRoot: anObject.
-			iterator := self newIterator.
-			(iterator at: key put: objectId) ifNotNil: [ :value |
-				oldValues 
-					at: key
-					ifAbsentPut: objectId ].
-		"if there has been a prior removal of the key this new addition invalidates it"
-			removedValues removeKey: key ifAbsent: nil.
-			newValues at: key put: objectId. ]
-		ifNil: [ 
-			newValues at: key put: anObject ]
+	| objectId |
+	objectId := transaction makeRoot: anObject.
+	(self newIterator at: key put: objectId) ifNotNil: [ :value |
+		oldValues 
+			at: key
+			ifAbsentPut: objectId ].
+	"if there has been a prior removal of the key this new addition invalidates it"
+	removedValues removeKey: key ifAbsent: nil.
+	^ newValues at: key put: objectId
+
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> atIndex: anInteger [
-	^ transaction 
-		ifNotNil: [  
-			(self newIterator atIndex: anInteger)
-				ifNotNil: [ :objectId | transaction proxyForObjectId: objectId ]]
-		ifNil: [ (newValues associations at: anInteger) value ]
+	^ (self newIterator atIndex: anInteger)
+				ifNotNil: [ :objectId | transaction proxyForObjectId: objectId ]
+
 ]
 
 { #category : #accessing }
@@ -85,41 +76,27 @@ SoilIndexedDictionary >> createIndex [
 
 { #category : #enumerating }
 SoilIndexedDictionary >> do: aBlock [
-
-	transaction
-		ifNotNil: [ 
- 			self newIterator do: [ :objectId | 
- 					aBlock value: (transaction proxyForObjectId: objectId) ]]
-		ifNil: [ 
-			newValues valuesDo: [ :each | aBlock value: each ] ]
+ 	self newIterator do: [ :objectId | 
+ 				aBlock value: (transaction proxyForObjectId: objectId) ]
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> first [
-	^ transaction 
-		ifNotNil: [ self proxyFromByteArray: self newIterator first ]
-		ifNil: [ 
-			self newValuesSortedByKeyOrder ifNotEmpty: [:nv | nv first value ] ifEmpty: nil]
+	^ self proxyFromByteArray: self newIterator first
 ]
 
 { #category : #accessing }
-SoilIndexedDictionary >> first: anInteger [ 
-	^ transaction 
-		ifNotNil: [ 
-			(self newIterator first: anInteger) 
-				collect: [ :each | self proxyFromByteArray: each ] ]
-		ifNil: [ (self newValuesSortedByKeyOrder first: anInteger) collect: #value ]  
+SoilIndexedDictionary >> first: anInteger [
+
+	^ (self newIterator first: anInteger) collect: [ :each |
+		  self proxyFromByteArray: each ]
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> firstAssociation [
 
-	^ transaction
-		  ifNotNil: [
-			  self newIterator firstAssociation ifNotNil: [ :assoc |
-				  assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ] ]
-		  ifNil: [
-			self newValuesSortedByKeyOrder ifNotEmpty: [:nv | nv first ] ifEmpty: nil]
+	^ self newIterator firstAssociation ifNotNil: [ :assoc |
+			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 ]
 
 { #category : #testing }
@@ -165,21 +142,16 @@ SoilIndexedDictionary >> keySize: anInteger [
 
 { #category : #accessing }
 SoilIndexedDictionary >> last [
-	^ transaction 
-		ifNotNil: [ self proxyFromByteArray: self newIterator last ]
-		ifNil: [ 
-			self newValuesSortedByKeyOrder ifNotEmpty: [:nv | nv last value ] ifEmpty: nil ]
+	^ self proxyFromByteArray: self newIterator last
+	
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> lastAssociation [
 
-	^ transaction
-		  ifNotNil: [
-			  self newIterator lastAssociation ifNotNil: [ :assoc |
-				  assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ] ]
-		  ifNil: [ 
-			self newValuesSortedByKeyOrder ifNotEmpty: [:nv | nv last ] ifEmpty: nil ]
+	^ self newIterator lastAssociation ifNotNil: [ :assoc |
+				 assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ] 
+
 ]
 
 { #category : #private }
@@ -204,18 +176,13 @@ SoilIndexedDictionary >> newIterator [
 ]
 
 { #category : #accessing }
-SoilIndexedDictionary >> newValuesSortedByKeyOrder [
+SoilIndexedDictionary >> nextAfter: key [  
+	^ (self nextAssociationAfter: key) value  
 
-	^ newValues associations sort: [ :a :b |
-		(self binaryKey: a key) < (self binaryKey: b key)  ]
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> nextAssociationAfter: key [  
-	transaction ifNil: [ 
-		| newValueSorted |
-		newValueSorted := self newValuesSortedByKeyOrder.
-		^ (newValueSorted after: (newValues associationAt: key))].
 
 	^ (self newIterator nextAssociationAfter: key)
 		ifNotNil: [ :assoc |
@@ -255,35 +222,26 @@ SoilIndexedDictionary >> removeKey: key [
 
 { #category : #removing }
 SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
-	
-	^ transaction 
-		ifNotNil: [ | v |
-			"remove from newValues as there could be a new at:put: on that
-			key but removing the key will remove the value again"
-			newValues removeKey: key ifAbsent: nil.
-			v := self basicAt: key ifAbsent: [^ aBlock value].
-			removedValues 
-				at: key 
-				put: v asSoilObjectId.
-			self newIterator removeKey: key ]
-		ifNil: [ 
-			removedValues 
-				at: key
-				put: (newValues removeKey: key ifAbsent: [ ^ aBlock value ]) ]
+	 | v |
+	"remove from newValues as there could be a new at:put: on that
+	key but removing the key will remove the value again"
+	newValues removeKey: key ifAbsent: nil.
+	v := self basicAt: key ifAbsent: [^ aBlock value].
+	removedValues 
+			at: key 
+			put: v asSoilObjectId.
+	^ self newIterator removeKey: key
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> second [
-	^ transaction 
-		ifNotNil: [ self proxyFromByteArray: (self newIterator first; next) ]
-		ifNil: [ self newValuesSortedByKeyOrder second value ]
+	^ self proxyFromByteArray: (self newIterator first; next)
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> size [ 
-	^ transaction 
-		ifNotNil: [ self newIterator size ]
-		ifNil: [ newValues size ]
+	^ self newIterator size
+
 ]
 
 { #category : #serializing }
@@ -329,7 +287,5 @@ SoilIndexedDictionary >> soilMaterialized: aMaterializer [
 
 { #category : #accessing }
 SoilIndexedDictionary >> values [
-	^ transaction 
-		ifNotNil: [ self newIterator values collect: [ :each | self proxyFromByteArray: each ]]
-		ifNil: [ self newValuesSortedByKeyOrder collect: [ :each | each value ] ]
+	^ self newIterator values collect: [ :each | self proxyFromByteArray: each ]
 ]
