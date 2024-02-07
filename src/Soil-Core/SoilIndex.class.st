@@ -52,9 +52,9 @@ SoilIndex >> do: aBlock [
 ]
 
 { #category : #private }
-SoilIndex >> find: aString [ 
+SoilIndex >> find: key [ 
 	^ self newIterator 
-		find: (aString asIndexKeyOfSize: self keySize) asInteger
+		find: key
 ]
 
 { #category : #accessing }
@@ -172,8 +172,14 @@ SoilIndex >> removeKey: key [
 ]
 
 { #category : #'instance creation' }
-SoilIndex >> removeKey: aString ifAbsent: aBlock [
-	^ self subclassResponsibility
+SoilIndex >> removeKey: key ifAbsent: aBlock [
+	| page index |
+	page := self newIterator 
+		find: key;
+		currentPage.
+	^ ((index := page indexOfKey: (key asIndexKeyOfSize: self keySize) asInteger) > 0) 
+		ifTrue: [ (page itemRemoveIndex: index) value ]
+		ifFalse: [ aBlock value ]
 ]
 
 { #category : #accessing }

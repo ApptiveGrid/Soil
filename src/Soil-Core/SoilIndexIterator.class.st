@@ -41,8 +41,7 @@ SoilIndexIterator >> at: aKeyObject [
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 	| foundValue |
-	currentKey := (aKeyObject asIndexKeyOfSize: index keySize) asInteger.
-	foundValue := self find: currentKey ifAbsent: aBlock.
+	foundValue := self find: aKeyObject ifAbsent: aBlock.
  	^(self restoreValue: foundValue forKey: currentKey) ifNil: [ aBlock value ]
 ]
 
@@ -137,13 +136,13 @@ SoilIndexIterator >> find: key [
 
 { #category : #private }
 SoilIndexIterator >> find: key ifAbsent: aBlock [
-	currentKey := key.
-	self findPageFor: key.
-	^ currentPage valueAt: key ifAbsent: aBlock
+	currentKey := (key asIndexKeyOfSize: index keySize) asInteger.
+	self findPageFor: currentKey.
+	^ currentPage valueAt: currentKey ifAbsent: aBlock
 ]
 
 { #category : #private }
-SoilIndexIterator >> findPageFor: key [ 
+SoilIndexIterator >> findPageFor: binKey [ 
 	^ self subclassResponsibility
 ]
 
@@ -279,7 +278,7 @@ SoilIndexIterator >> nextAssociation [
 { #category : #accessing }
 SoilIndexIterator >> nextAssociationAfter: key [
 
-	self find: (key asIndexKeyOfSize: index keySize) asInteger.
+	self find: key.
 	^ self nextAssociation
 ]
 
