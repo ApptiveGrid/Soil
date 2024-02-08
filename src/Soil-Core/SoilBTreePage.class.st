@@ -1,10 +1,6 @@
 Class {
 	#name : #SoilBTreePage,
 	#superclass : #SoilIndexItemsPage,
-	#instVars : [
-		'keySize',
-		'lastTransaction'
-	],
 	#category : #'Soil-Core-Index-BTree'
 }
 
@@ -40,29 +36,9 @@ SoilBTreePage >> initialize [
 	dirty := true
 ]
 
-{ #category : #testing }
-SoilBTreePage >> isOlderThan: aVersionNumber [ 
-	^ lastTransaction <= aVersionNumber 
-]
-
-{ #category : #accessing }
-SoilBTreePage >> keySize [
-	^ keySize
-]
-
-{ #category : #accessing }
-SoilBTreePage >> keySize: anInteger [ 
-	keySize := anInteger
-]
-
-{ #category : #accessing }
-SoilBTreePage >> lastTransaction [
-	^ lastTransaction
-]
-
-{ #category : #accessing }
-SoilBTreePage >> lastTransaction: anInteger [ 
-	lastTransaction := anInteger
+{ #category : #adding }
+SoilBTreePage >> insertItem: anItem for: iterator [ 
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
@@ -84,11 +60,6 @@ SoilBTreePage >> readItemsFrom: aStream [
 	items := SortedCollection new: numberOfItems.
 	numberOfItems timesRepeat: [ 
 		items add: (aStream next: self keySize) asInteger -> (aStream next: self valueSize) ]
-]
-
-{ #category : #writing }
-SoilBTreePage >> readLastTransactionFrom: aStream [ 
-	lastTransaction := (aStream next: 8) asInteger.
 ]
 
 { #category : #private }
@@ -113,10 +84,7 @@ SoilBTreePage >> writeHeaderOn: aStream [
 SoilBTreePage >> writeItemsOn: aStream [ 
 	aStream
 		nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
-	items do: [ :assoc |
-		aStream 
-			nextPutAll: (assoc key asByteArrayOfSize: self keySize);
-			nextPutAll: (assoc value asByteArrayOfSize: self valueSize)]
+	super writeItemsOn: aStream
 ]
 
 { #category : #writing }

@@ -32,7 +32,7 @@ SoilBTreeIndexPage >> headerSize [
 		+ 2 "items size"
 ]
 
-{ #category : #searching }
+{ #category : #adding }
 SoilBTreeIndexPage >> insertItem: item for: iterator [
 	| foundItem return newPage  |
 	

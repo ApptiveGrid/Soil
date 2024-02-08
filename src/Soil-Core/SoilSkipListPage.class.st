@@ -3,9 +3,7 @@ Class {
 	#superclass : #SoilIndexItemsPage,
 	#instVars : [
 		'right',
-		'keySize',
-		'valueSize',
-		'lastTransaction'
+		'valueSize'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -59,32 +57,6 @@ SoilSkipListPage >> isLastPage [
 	^ (right at: 1) = 0
 ]
 
-{ #category : #testing }
-SoilSkipListPage >> isOlderThan: aVersionNumber [ 
-	^ lastTransaction <= aVersionNumber 
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> keySize [ 
-	^ keySize
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> keySize: anInteger [ 
-	(anInteger = 0) ifTrue: [ Error signal: 'cannot use key size 0' ].
-	keySize := anInteger.
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> lastTransaction [
-	^ lastTransaction
-]
-
-{ #category : #accessing }
-SoilSkipListPage >> lastTransaction: anInteger [ 
-	lastTransaction := anInteger
-]
-
 { #category : #accessing }
 SoilSkipListPage >> level [ 
 	^ right size
@@ -105,21 +77,6 @@ SoilSkipListPage >> postCopy [
 SoilSkipListPage >> readFrom: aStream [ 
 	super readFrom: aStream.
 	self readLastTransactionFrom: aStream
-]
-
-{ #category : #writing }
-SoilSkipListPage >> readItemsFrom: aStream [ 
-	| numberOfItems |
-	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
-	items := SortedCollection new: numberOfItems.
-	numberOfItems timesRepeat: [ 
-		items add: ((aStream next: self keySize) asInteger -> (aStream next: self valueSize) asSoilObjectId) ]
-]
-
-{ #category : #writing }
-SoilSkipListPage >> readLastTransactionFrom: aStream [ 
-	lastTransaction := (aStream next: 8) asInteger.
-
 ]
 
 { #category : #writing }
@@ -185,15 +142,6 @@ SoilSkipListPage >> valueSize: anInteger [
 SoilSkipListPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
 	aStream nextPutAll: (lastTransaction asByteArrayOfSize: 8)
-
-]
-
-{ #category : #writing }
-SoilSkipListPage >> writeItemsOn: aStream [ 
-	items do: [ :assoc |
-		aStream 
-			nextPutAll: (assoc key asByteArrayOfSize: self keySize);
-			nextPutAll: (assoc value asByteArrayOfSize: self valueSize)].
 
 ]
 
