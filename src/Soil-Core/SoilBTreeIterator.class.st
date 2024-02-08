@@ -5,9 +5,9 @@ Class {
 }
 
 { #category : #accessing }
-SoilBTreeIterator >> basicAt: key put: anObject [
+SoilBTreeIterator >> basicAt: binKey put: anObject [
 	| posiblePrioValue |
-	posiblePrioValue := index rootPage insertItem: (key -> anObject) for: self.
+	posiblePrioValue := index rootPage insertItem: (binKey -> anObject) for: self.
 	"as an optimization we return the prior value stored in the list. If there was none we return nil"
 	^ posiblePrioValue returnValue
 ]
