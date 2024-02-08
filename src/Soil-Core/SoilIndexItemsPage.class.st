@@ -2,7 +2,9 @@ Class {
 	#name : #SoilIndexItemsPage,
 	#superclass : #SoilIndexPage,
 	#instVars : [
-		'items'
+		'items',
+		'lastTransaction',
+		'keySize'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -66,6 +68,11 @@ SoilIndexItemsPage >> initialize [
 { #category : #testing }
 SoilIndexItemsPage >> isEmpty [
 	^ items isEmpty 
+]
+
+{ #category : #testing }
+SoilIndexItemsPage >> isOlderThan: aVersionNumber [ 
+	^ lastTransaction <= aVersionNumber 
 ]
 
 { #category : #accessing }
@@ -154,6 +161,17 @@ SoilIndexItemsPage >> keyOrClosestAfter: key [
 ]
 
 { #category : #accessing }
+SoilIndexItemsPage >> keySize [
+	^ keySize
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> keySize: anInteger [ 
+	(anInteger = 0) ifTrue: [ Error signal: 'cannot use key size 0' ].
+	keySize := anInteger
+]
+
+{ #category : #accessing }
 SoilIndexItemsPage >> lastItem [
 
 	^ items isNotEmpty ifTrue: [ items last ] ifFalse: [ nil ]
@@ -166,6 +184,16 @@ SoilIndexItemsPage >> lastKey [
 ]
 
 { #category : #accessing }
+SoilIndexItemsPage >> lastTransaction [
+	^ lastTransaction
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> lastTransaction: anInteger [ 
+	lastTransaction := anInteger
+]
+
+{ #category : #accessing }
 SoilIndexItemsPage >> numberOfItems [
 	^ items size
 ]
@@ -174,6 +202,21 @@ SoilIndexItemsPage >> numberOfItems [
 SoilIndexItemsPage >> postCopy [ 
 	super postCopy.
 	items := items copy.
+]
+
+{ #category : #reading }
+SoilIndexItemsPage >> readItemsFrom: aStream [ 
+	| numberOfItems |
+	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
+	items := SortedCollection new: numberOfItems.
+	numberOfItems timesRepeat: [ 
+		items add: ((aStream next: self keySize) asInteger -> (aStream next: self valueSize) asSoilObjectId) ]
+]
+
+{ #category : #writing }
+SoilIndexItemsPage >> readLastTransactionFrom: aStream [ 
+	lastTransaction := (aStream next: 8) asInteger.
+
 ]
 
 { #category : #accessing }
@@ -203,4 +246,18 @@ SoilIndexItemsPage >> valueAt: anInteger ifAbsent: aBlock [
 { #category : #accessing }
 SoilIndexItemsPage >> valueSize [
 	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> valueSize: anInteger [ 
+	^ self subclassResponsibility
+]
+
+{ #category : #writing }
+SoilIndexItemsPage >> writeItemsOn: aStream [ 
+	items do: [ :assoc |
+		aStream 
+			nextPutAll: (assoc key asByteArrayOfSize: self keySize);
+			nextPutAll: (assoc value asByteArrayOfSize: self valueSize)].
+
 ]

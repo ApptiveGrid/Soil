@@ -33,7 +33,7 @@ SoilBTreeDataPage >> initialize [
 	next := 0
 ]
 
-{ #category : #accessing }
+{ #category : #adding }
 SoilBTreeDataPage >> insertItem: anItem for: iterator [
 
 	| newPage pageWithItem return |
