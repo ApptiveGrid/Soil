@@ -71,7 +71,7 @@ SoilIndexIterator >> basicAssociationsDo: aBlock [
 ]
 
 { #category : #accessing }
-SoilIndexIterator >> basicAt: key put: anObject [
+SoilIndexIterator >> basicAt: binKey put: anObject [
 	self subclassResponsibility
 ]
 
