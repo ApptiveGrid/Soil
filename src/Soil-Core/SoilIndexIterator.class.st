@@ -47,10 +47,8 @@ SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject put: anObject [
-	| key |
-	key := (aKeyObject asIndexKeyOfSize: index keySize) asInteger.
 	^ self 
-		basicAt: key 
+		basicAt: (index binaryKey: aKeyObject) 
 		put: anObject
 ]
 
@@ -136,7 +134,7 @@ SoilIndexIterator >> find: key [
 
 { #category : #private }
 SoilIndexIterator >> find: key ifAbsent: aBlock [
-	currentKey := (key asIndexKeyOfSize: index keySize) asInteger.
+	currentKey := index binaryKey: key.
 	self findPageFor: currentKey.
 	^ currentPage valueAt: currentKey ifAbsent: aBlock
 ]
@@ -294,7 +292,7 @@ SoilIndexIterator >> nextCloseTo: key [
 SoilIndexIterator >> nextKeyCloseTo: key [
 	"Note: returnrd key will be binary key"
 	| binKey |
-	binKey := (key asIndexKeyOfSize: index keySize) asInteger.
+	binKey := index binaryKey: key.
 	self findPageFor: binKey.
 	nextKey := currentPage keyOrClosestAfter: binKey.
 	^ nextKey

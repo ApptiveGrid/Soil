@@ -31,7 +31,7 @@ SoilSkipListDictionary >> journalEntries [
 			transactionId: transaction writeVersion;
 			segment: segment;
 			id: id;
-			key: (self binaryKey: key);
+			key: (index binaryKey: key);
 			value: value;
 			oldValue: (oldValues at: key ifAbsent: nil)) ].
 	removedValues keysAndValuesDo: [ :key :value |
@@ -40,7 +40,7 @@ SoilSkipListDictionary >> journalEntries [
 			transactionId: transaction writeVersion;
 			segment: segment;
 			id: id;
-			key: (self binaryKey: key); 
+			key: (index binaryKey: key); 
 			oldValue: value) ].
 	^ entries
 ]

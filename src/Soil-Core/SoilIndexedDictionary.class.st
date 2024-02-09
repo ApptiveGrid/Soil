@@ -64,11 +64,6 @@ SoilIndexedDictionary >> basicAt: aString ifAbsent: aBlock [
 	^ self newIterator at: aString ifAbsent: aBlock
 ]
 
-{ #category : #accessing }
-SoilIndexedDictionary >> binaryKey: aString [
-	^ (aString asIndexKeyOfSize: index keySize) asInteger
-]
-
 { #category : #initialization }
 SoilIndexedDictionary >> createIndex [
 	^ self subclassResponsibility
