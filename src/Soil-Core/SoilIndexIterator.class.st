@@ -267,6 +267,11 @@ SoilIndexIterator >> next: anInteger [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> nextAfter: key [
+	^ (self nextAssociationAfter: key) value
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> nextAssociation [
 	"Note: key will be binary key"
 	| nextAssociation nextValue key |
