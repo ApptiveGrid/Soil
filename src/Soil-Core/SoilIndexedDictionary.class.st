@@ -35,7 +35,7 @@ SoilIndexedDictionary >> at: key [
 SoilIndexedDictionary >> at: key ifAbsent: aBlock [
 	| found |
 	found := self basicAt: key ifAbsent: [ ^ aBlock value ].
-	^ transaction proxyForObjectId: found asSoilObjectId
+	^ self proxyFromByteArray: found
 ]
 
 { #category : #accessing }
@@ -55,7 +55,7 @@ SoilIndexedDictionary >> at: key put: anObject [
 { #category : #accessing }
 SoilIndexedDictionary >> atIndex: anInteger [
 	^ (self newIterator atIndex: anInteger)
-				ifNotNil: [ :objectId | transaction proxyForObjectId: objectId ]
+				ifNotNil: [ :objectIdOrByteArray | self proxyFromByteArray: objectIdOrByteArray ]
 
 ]
 
@@ -71,8 +71,8 @@ SoilIndexedDictionary >> createIndex [
 
 { #category : #enumerating }
 SoilIndexedDictionary >> do: aBlock [
- 	self newIterator do: [ :objectId | 
- 				aBlock value: (transaction proxyForObjectId: objectId) ]
+ 	self newIterator do: [ :objectIdOrByteArray | 
+ 				aBlock value: (self proxyFromByteArray: objectIdOrByteArray) ]
 ]
 
 { #category : #accessing }
