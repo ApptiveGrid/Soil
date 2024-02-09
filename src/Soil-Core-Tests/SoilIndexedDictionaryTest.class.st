@@ -270,14 +270,13 @@ SoilIndexedDictionaryTest >> testFirstAssociationWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
-	"self assert: dict last equals: #two."
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"and test last"
-	self assert: tx2 root firstAssociation equals: 1->#one.
+	self assert: tx2 root firstAssociation value equals: #onevalue.
 
 ]
 
@@ -286,18 +285,17 @@ SoilIndexedDictionaryTest >> testFirstAssociationWithTransactionRemoved [
 	| tx tx1 tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
-	"self assert: dict last equals: #two."
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
 	tx commit.
 	
 	"open a two transactions ..."
 	tx1 := soil newTransaction.
 	tx2 := soil newTransaction.
-	tx2 root removeKey: 1.
+	tx2 root removeKey: #one.
 	tx2 commit.
 	"in tx1 the removed one is not removed"
-	self assert: tx1 root firstAssociation equals: 1->#one.
+	self assert: tx1 root firstAssociation value equals: #onevalue.
 
 ]
 
@@ -315,6 +313,25 @@ SoilIndexedDictionaryTest >> testFirstWithTransaction [
 	"and test first"
 	self assert: tx2 root first equals: #one. 
 	self assert: (tx2 root first: 2) second equals: #two
+
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testFirstWithTransactionRemoved [
+	| tx tx1 tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
+	tx commit.
+	
+	"open a two transactions ..."
+	tx1 := soil newTransaction.
+	tx2 := soil newTransaction.
+	tx2 root removeKey: #one.
+	tx2 commit.
+	"in tx1 the removed one is not removed"
+	self assert: tx1 root first equals: #onevalue.
 
 ]
 
@@ -407,15 +424,14 @@ SoilIndexedDictionaryTest >> testLastAssociationWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 2 put: #two.
-	dict at: 1 put: #one.
+	dict at: #two put: #twovalue.
+	dict at: #one put: #onevalue.
 	
-	"self assert: dict last equals: #two."
 	tx commit.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"and test last, not: key order"
-	self assert: tx2 root lastAssociation equals: 2->#two
+	self assert: tx2 root lastAssociation value equals: #twovalue
 ]
 
 { #category : #tests }
@@ -423,18 +439,17 @@ SoilIndexedDictionaryTest >> testLastAssociationWithTransactionRemoved [
 	| tx tx1 tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
-	dict at: 1 put: #one.
-	dict at: 2 put: #two.
-	"self assert: dict last equals: #two."
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
 	tx commit.
 	
 	"open a two transactions ..."
 	tx1 := soil newTransaction.
 	tx2 := soil newTransaction.
-	tx2 root removeKey: 2.
+	tx2 root removeKey: #two.
 	tx2 commit.
 	"in tx1 the removed one is not removed"
-	self assert: tx1 root lastAssociation equals: 2->#two.
+	self assert: tx1 root lastAssociation value equals: #twovalue.
 
 ]
 
@@ -468,6 +483,39 @@ SoilIndexedDictionaryTest >> testLastWithTransactionRemoveLast [
 	tx2 root removeKey: #two.
 	"and test last"
 	self assert: tx2 root last equals: #onevalue
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testLastWithTransactionRemoved [
+	| tx tx1 tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
+	tx commit.
+	
+	"open a two transactions ..."
+	tx1 := soil newTransaction.
+	tx2 := soil newTransaction.
+	tx2 root removeKey: #two.
+	tx2 commit.
+	"in tx1 the removed one is not removed"
+	self assert: tx1 root last equals: #twovalue.
+
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testNextAfterWithTransaction [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"and test last"
+	self assert: (tx2 root nextAfter: #one) value equals: #twovalue
 ]
 
 { #category : #tests }

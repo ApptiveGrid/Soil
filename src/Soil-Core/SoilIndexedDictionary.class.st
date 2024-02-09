@@ -94,7 +94,7 @@ SoilIndexedDictionary >> first: anInteger [
 
 { #category : #accessing }
 SoilIndexedDictionary >> firstAssociation [
-
+	"Note: key will be binary key"
 	^ self newIterator firstAssociation ifNotNil: [ :assoc |
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
 ]
@@ -148,7 +148,7 @@ SoilIndexedDictionary >> last [
 
 { #category : #accessing }
 SoilIndexedDictionary >> lastAssociation [
-
+	"Note: key will be binary key"
 	^ self newIterator lastAssociation ifNotNil: [ :assoc |
 				 assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ] 
 
@@ -183,7 +183,7 @@ SoilIndexedDictionary >> nextAfter: key [
 
 { #category : #accessing }
 SoilIndexedDictionary >> nextAssociationAfter: key [  
-
+	"Note: key will be binary key"
 	^ (self newIterator nextAssociationAfter: key)
 		ifNotNil: [ :assoc |
 			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
@@ -195,7 +195,8 @@ SoilIndexedDictionary >> nextCloseTo: aKey [
 ]
 
 { #category : #private }
-SoilIndexedDictionary >> nextKeyCloseTo: aKey [ 
+SoilIndexedDictionary >> nextKeyCloseTo: aKey [
+	"Note: key will be binary key"
 	^ self newIterator nextKeyCloseTo: aKey
 ]
 
