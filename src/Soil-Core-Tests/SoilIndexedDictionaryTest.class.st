@@ -533,21 +533,6 @@ SoilIndexedDictionaryTest >> testNextAssociationAfterWithTransaction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testNextKeyCloseToWithTransaction [
-	| tx tx2 |
-	tx := soil newTransaction.
-	tx root: dict.
-	dict at: 10 put: #one.
-	dict at: 20 put: #two.
-	"self assert: dict last equals: #two."
-	tx commit.
-	"open a second transaction ..."
-	tx2 := soil newTransaction.
-	"and test last"
-	self assert: (tx2 root nextKeyCloseTo: 15) value equals: 20
-]
-
-{ #category : #tests }
 SoilIndexedDictionaryTest >> testNextcloseToWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.

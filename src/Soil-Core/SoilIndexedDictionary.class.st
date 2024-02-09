@@ -195,12 +195,6 @@ SoilIndexedDictionary >> nextCloseTo: aKey [
 ]
 
 { #category : #private }
-SoilIndexedDictionary >> nextKeyCloseTo: aKey [
-	"Note: key will be binary key"
-	^ self newIterator nextKeyCloseTo: aKey
-]
-
-{ #category : #private }
 SoilIndexedDictionary >> prepareNewValues [
 	newValues copy keysAndValuesDo: [ :key :object |
 		object isObjectId ifFalse: [
