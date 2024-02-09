@@ -291,7 +291,7 @@ SoilBTreeTest >> testPageAddFirst [
 	self assert: index pages size equals: 2.
 	page := index headerPage.
 	self assert: page numberOfItems equals: 1.
-	self assert: page items first key equals: (index binaryKey: #foo).
+	self assert: page items first key equals: (index indexKey: #foo).
 	"the index page was updated"
 	indexPage := index rootPage.
 	"Index has been updated"
@@ -309,7 +309,7 @@ SoilBTreeTest >> testPageAddFirstAndLoad [
 	self assert: index pages size equals: 2.
 	page := index headerPage.
 	self assert: page numberOfItems equals: 1.
-	self assert: page items first key equals: (index binaryKey: #foo).
+	self assert: page items first key equals: (index indexKey: #foo).
 	"the index page was updated"
 	indexPage := index rootPage.
 	"Index has been updated"
@@ -323,7 +323,7 @@ SoilBTreeTest >> testPageAddFirstAndLoad [
 		initializeFilesystem;
 		open.
 	
-	self assert: page items first key equals:(index binaryKey: #foo).
+	self assert: page items first key equals:(index indexKey: #foo).
 	"load succeeds"
 	self assert: (index at: #foo) equals: #[ 1 2 3 4 5 6 7 8 ].
 

@@ -137,9 +137,9 @@ SoilSkipListTest >> testAddLastFitting [
 	
 	| page |
 	1 to: 61 do: [ :n | 
-		index at: (index binaryKey: n asString ) put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: (index indexKey: n asString ) put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: index pages size equals: 1.
-	index at: (index binaryKey: 63 asString) put: #[ 1 2 3 4 5 6 7 8 ].
+	index at: (index indexKey: 63 asString) put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: index pages size equals: 1.
 	page := index pageAt: 1.
 	self assert: page numberOfItems equals: 62.
@@ -331,7 +331,7 @@ SoilSkipListTest >> testLastPage [
 { #category : #tests }
 SoilSkipListTest >> testMorePages [
 	1 to: 512 do: [ :n |
-		index at: (index binaryKey: n asString) put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: (index indexKey: n asString) put: #[ 1 2 3 4 5 6 7 8 ] ].
 	index writePages.
 	self assert: index pages size equals: 3
 ]
@@ -379,7 +379,7 @@ SoilSkipListTest >> testPageAddFirst [
 	self assert: index pages size equals: 1.
 	page := index firstPage.
 	self assert: page numberOfItems equals: 1.
-	self assert: page items first key equals: (index binaryKey: #foo)
+	self assert: page items first key equals: (index indexKey: #foo)
 ]
 
 { #category : #tests }

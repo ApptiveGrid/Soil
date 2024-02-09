@@ -48,7 +48,7 @@ SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject put: anObject [
 	^ self 
-		basicAt: (index binaryKey: aKeyObject) 
+		basicAt: (index indexKey: aKeyObject) 
 		put: anObject
 ]
 
@@ -69,7 +69,7 @@ SoilIndexIterator >> basicAssociationsDo: aBlock [
 ]
 
 { #category : #accessing }
-SoilIndexIterator >> basicAt: binKey put: anObject [
+SoilIndexIterator >> basicAt: indexKey put: anObject [
 	self subclassResponsibility
 ]
 
@@ -134,13 +134,13 @@ SoilIndexIterator >> find: key [
 
 { #category : #private }
 SoilIndexIterator >> find: key ifAbsent: aBlock [
-	currentKey := index binaryKey: key.
+	currentKey := index indexKey: key.
 	self findPageFor: currentKey.
 	^ currentPage valueAt: currentKey ifAbsent: aBlock
 ]
 
 { #category : #private }
-SoilIndexIterator >> findPageFor: binKey [ 
+SoilIndexIterator >> findPageFor: indexKey [ 
 	^ self subclassResponsibility
 ]
 
@@ -162,7 +162,7 @@ SoilIndexIterator >> first: anInteger [
 
 { #category : #accessing }
 SoilIndexIterator >> firstAssociation [ 
-	"Note: key will be binary key"
+	"Note: key will be index key"
 	| item |
 	currentPage := index store headerPage.
 	item := self nextAssociation.
@@ -234,7 +234,7 @@ SoilIndexIterator >> last [
 
 { #category : #accessing }
 SoilIndexIterator >> lastAssociation [
-	"Note: key will be binary key"
+	"Note: key will be index key"
 	| lastAssociation lastValue key |
 	lastAssociation := self priorAssociation ifNil: [ ^nil ].
 	lastValue := (self
@@ -271,7 +271,7 @@ SoilIndexIterator >> nextAfter: key [
 
 { #category : #accessing }
 SoilIndexIterator >> nextAssociation [
-	"Note: key will be binary key"
+	"Note: key will be index key"
 	| nextAssociation nextValue key |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
 	nextValue := (self
@@ -282,7 +282,7 @@ SoilIndexIterator >> nextAssociation [
 
 { #category : #accessing }
 SoilIndexIterator >> nextAssociationAfter: key [
-	"Note: key will be binary key"
+	"Note: key will be index key"
 	self find: key.
 	^ self nextAssociation
 ]
@@ -295,11 +295,11 @@ SoilIndexIterator >> nextCloseTo: key [
 
 { #category : #private }
 SoilIndexIterator >> nextKeyCloseTo: key [
-	"Note: returnrd key will be binary key"
-	| binKey |
-	binKey := index binaryKey: key.
-	self findPageFor: binKey.
-	nextKey := currentPage keyOrClosestAfter: binKey.
+	"Note: returnrd key will be an index key"
+	| indexKey |
+	indexKey := index indexKey: key.
+	self findPageFor: indexKey.
+	nextKey := currentPage keyOrClosestAfter: indexKey.
 	^ nextKey
 		ifNil: [ "if there is no close key found, we position the cursor at the end, so that asking for the next association will return nil" 
 			currentKey := currentPage lastKey ]

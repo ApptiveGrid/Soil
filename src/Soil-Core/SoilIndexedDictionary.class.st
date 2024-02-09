@@ -167,7 +167,7 @@ SoilIndexedDictionary >> nextCloseTo: aKey [
 
 { #category : #private }
 SoilIndexedDictionary >> nextKeyCloseTo: aKey [
-	"Note: key will be binary key"
+	"Note: key will be index key"
 	^ self newIterator nextKeyCloseTo: aKey
 ]
 
