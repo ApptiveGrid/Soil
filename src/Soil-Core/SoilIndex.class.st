@@ -40,6 +40,11 @@ SoilIndex >> basicAt: key put: anObject [
 		put: anObject 
 ]
 
+{ #category : #accessing }
+SoilIndex >> binaryKey: aString [
+	^ (aString asIndexKeyOfSize: self keySize) asInteger
+]
+
 { #category : #'open/close' }
 SoilIndex >> close [
 	self store close.
@@ -177,7 +182,7 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 	page := self newIterator 
 		find: key;
 		currentPage.
-	^ ((index := page indexOfKey: (key asIndexKeyOfSize: self keySize) asInteger) > 0) 
+	^ ((index := page indexOfKey: (self binaryKey: key)) > 0)
 		ifTrue: [ (page itemRemoveIndex: index) value ]
 		ifFalse: [ aBlock value ]
 ]
