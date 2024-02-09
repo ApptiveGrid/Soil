@@ -64,11 +64,6 @@ SoilIndexedDictionary >> basicAt: aString ifAbsent: aBlock [
 	^ self newIterator at: aString ifAbsent: aBlock
 ]
 
-{ #category : #accessing }
-SoilIndexedDictionary >> binaryKey: aString [
-	^ (aString asIndexKeyOfSize: index keySize) asInteger
-]
-
 { #category : #initialization }
 SoilIndexedDictionary >> createIndex [
 	^ self subclassResponsibility
@@ -172,7 +167,7 @@ SoilIndexedDictionary >> nextCloseTo: aKey [
 
 { #category : #private }
 SoilIndexedDictionary >> nextKeyCloseTo: aKey [
-	"Note: key will be binary key"
+	"Note: key will be index key"
 	^ self newIterator nextKeyCloseTo: aKey
 ]
 

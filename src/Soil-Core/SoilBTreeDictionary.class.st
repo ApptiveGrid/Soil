@@ -30,7 +30,7 @@ SoilBTreeDictionary >> journalEntries [
 			transactionId: transaction writeVersion;
 			segment: segment;
 			id: id;
-			key: (self binaryKey: key);
+			key: (index indexKey: key);
 			value: value;
 			oldValue: (oldValues at: key ifAbsent: nil)) ].
 	removedValues keysAndValuesDo: [ :key :value |
@@ -39,7 +39,7 @@ SoilBTreeDictionary >> journalEntries [
 			transactionId: transaction writeVersion;
 			segment: segment;
 			id: id;
-			key: (self binaryKey: key); 
+			key: (index indexKey: key); 
 			oldValue: value) ].
 	^ entries
 ]

@@ -82,6 +82,11 @@ SoilIndex >> headerPage [
 	^ self store headerPage
 ]
 
+{ #category : #accessing }
+SoilIndex >> indexKey: aString [
+	^ aString asIndexKeyOfSize: self keySize
+]
+
 { #category : #testing }
 SoilIndex >> isEmpty [
 	^ self store headerPage isEmpty
@@ -177,7 +182,7 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 	page := self newIterator 
 		find: key;
 		currentPage.
-	^ ((index := page indexOfKey: (key asIndexKeyOfSize: self keySize) asInteger) > 0) 
+	^ ((index := page indexOfKey: (self indexKey: key)) > 0)
 		ifTrue: [ (page itemRemoveIndex: index) value ]
 		ifFalse: [ aBlock value ]
 ]

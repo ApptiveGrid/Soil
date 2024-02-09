@@ -2,7 +2,7 @@ Extension { #name : #ByteArray }
 
 { #category : #'*Soil-Core' }
 ByteArray >> asIndexKeyOfSize: anInteger [ 
-	^ self asByteArrayOfSize: anInteger 
+	^ (self asByteArrayOfSize: anInteger) asInteger
 ]
 
 { #category : #'*Soil-Core' }

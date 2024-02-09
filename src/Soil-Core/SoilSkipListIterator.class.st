@@ -13,27 +13,27 @@ SoilSkipListIterator >> atLevel: key put: anObject [
 ]
 
 { #category : #accessing }
-SoilSkipListIterator >> basicAt: binKey put: anObject [
+SoilSkipListIterator >> basicAt: indexKey put: anObject [
 
 	|itemIndex |
-	self findPageFor: binKey.
-	itemIndex := currentPage indexOfKey: binKey.
+	self findPageFor: indexKey.
+	itemIndex := currentPage indexOfKey: indexKey.
 	"as an optimization we return the prior value stored in the list. If
 	there was none we return nil"
 	^ itemIndex > 0
-		  ifTrue: [ currentPage itemAt: binKey put: anObject ]
+		  ifTrue: [ currentPage itemAt: indexKey put: anObject ]
 		  ifFalse: [
 			  currentPage hasRoom ifFalse: [  | newPage |
-				  newPage := index splitPage: self forKey: binKey.
-				  currentPage := currentPage biggestKey < binKey
+				  newPage := index splitPage: self forKey: indexKey.
+				  currentPage := currentPage biggestKey < indexKey
 					                 ifTrue: [ newPage ]
 					                 ifFalse: [ currentPage ] ].
-			  currentPage addItem: binKey -> anObject.
+			  currentPage addItem: indexKey -> anObject.
 			  nil ]
 ]
 
 { #category : #private }
-SoilSkipListIterator >> findPageFor: binKey [
+SoilSkipListIterator >> findPageFor: indexKey [
 	| pageIndex candidatePage |
 	currentPage := index headerPage.
 	levels size to: 1 by: -1 do: [ :level |
@@ -41,7 +41,7 @@ SoilSkipListIterator >> findPageFor: binKey [
 			pageIndex := currentPage rightAt: level.
 			(pageIndex > 0) and: [ 
 				candidatePage := self pageAt: pageIndex.
-				candidatePage smallestKey <= binKey ] ]
+				candidatePage smallestKey <= indexKey ] ]
 					whileTrue: [ currentPage := candidatePage  ].
 			self atLevel: level put: currentPage. ].
 	^ currentPage 
