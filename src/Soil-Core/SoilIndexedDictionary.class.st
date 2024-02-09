@@ -92,13 +92,6 @@ SoilIndexedDictionary >> first: anInteger [
 		  self proxyFromByteArray: each ]
 ]
 
-{ #category : #accessing }
-SoilIndexedDictionary >> firstAssociation [
-	"Note: key will be binary key"
-	^ self newIterator firstAssociation ifNotNil: [ :assoc |
-			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
-]
-
 { #category : #testing }
 SoilIndexedDictionary >> hasIndexUpdates [
 	self isRegistered ifFalse: [ ^ true ].
@@ -146,14 +139,6 @@ SoilIndexedDictionary >> last [
 	
 ]
 
-{ #category : #accessing }
-SoilIndexedDictionary >> lastAssociation [
-	"Note: key will be binary key"
-	^ self newIterator lastAssociation ifNotNil: [ :assoc |
-				 assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ] 
-
-]
-
 { #category : #private }
 SoilIndexedDictionary >> loadFrom: aFileReference [ 
 	^ SoilSkipList new 
@@ -177,16 +162,7 @@ SoilIndexedDictionary >> newIterator [
 
 { #category : #accessing }
 SoilIndexedDictionary >> nextAfter: key [  
-	^ (self nextAssociationAfter: key) value  
-
-]
-
-{ #category : #accessing }
-SoilIndexedDictionary >> nextAssociationAfter: key [  
-	"Note: key will be binary key"
-	^ (self newIterator nextAssociationAfter: key)
-		ifNotNil: [ :assoc |
-			assoc key -> (transaction objectWithId: assoc value asSoilObjectId) ]
+	^  self proxyFromByteArray: (self newIterator nextAfter: key) value
 ]
 
 { #category : #private }

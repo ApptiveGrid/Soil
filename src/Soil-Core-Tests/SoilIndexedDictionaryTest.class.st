@@ -266,40 +266,6 @@ SoilIndexedDictionaryTest >> testDoWithTransAction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testFirstAssociationWithTransaction [
-	| tx tx2 |
-	tx := soil newTransaction.
-	tx root: dict.
-	dict at: #one put: #onevalue.
-	dict at: #two put: #twovalue.
-	tx commit.
-	"open a second transaction ..."
-	tx2 := soil newTransaction.
-	"and test last"
-	self assert: tx2 root firstAssociation value equals: #onevalue.
-
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testFirstAssociationWithTransactionRemoved [
-	| tx tx1 tx2 |
-	tx := soil newTransaction.
-	tx root: dict.
-	dict at: #one put: #onevalue.
-	dict at: #two put: #twovalue.
-	tx commit.
-	
-	"open a two transactions ..."
-	tx1 := soil newTransaction.
-	tx2 := soil newTransaction.
-	tx2 root removeKey: #one.
-	tx2 commit.
-	"in tx1 the removed one is not removed"
-	self assert: tx1 root firstAssociation value equals: #onevalue.
-
-]
-
-{ #category : #tests }
 SoilIndexedDictionaryTest >> testFirstWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -417,40 +383,6 @@ SoilIndexedDictionaryTest >> testIsEmpty [
 	"still not empty in t1"
 	self assert: tx1 root size equals: 1.
 	self deny: tx1 root isEmpty.
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testLastAssociationWithTransaction [
-	| tx tx2 |
-	tx := soil newTransaction.
-	tx root: dict.
-	dict at: #two put: #twovalue.
-	dict at: #one put: #onevalue.
-	
-	tx commit.
-	"open a second transaction ..."
-	tx2 := soil newTransaction.
-	"and test last, not: key order"
-	self assert: tx2 root lastAssociation value equals: #twovalue
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testLastAssociationWithTransactionRemoved [
-	| tx tx1 tx2 |
-	tx := soil newTransaction.
-	tx root: dict.
-	dict at: #one put: #onevalue.
-	dict at: #two put: #twovalue.
-	tx commit.
-	
-	"open a two transactions ..."
-	tx1 := soil newTransaction.
-	tx2 := soil newTransaction.
-	tx2 root removeKey: #two.
-	tx2 commit.
-	"in tx1 the removed one is not removed"
-	self assert: tx1 root lastAssociation value equals: #twovalue.
-
 ]
 
 { #category : #tests }
