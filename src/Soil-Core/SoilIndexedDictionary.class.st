@@ -35,7 +35,7 @@ SoilIndexedDictionary >> at: key [
 SoilIndexedDictionary >> at: key ifAbsent: aBlock [
 	| found |
 	found := self basicAt: key ifAbsent: [ ^ aBlock value ].
-	^ self proxyFromByteArray: found
+	^ transaction proxyForObjectId: found
 ]
 
 { #category : #accessing }
@@ -55,7 +55,7 @@ SoilIndexedDictionary >> at: key put: anObject [
 { #category : #accessing }
 SoilIndexedDictionary >> atIndex: anInteger [
 	^ (self newIterator atIndex: anInteger)
-				ifNotNil: [ :objectIdOrByteArray | self proxyFromByteArray: objectIdOrByteArray ]
+				ifNotNil: [ :objectId | transaction proxyForObjectId: objectId  ]
 
 ]
 
@@ -71,20 +71,20 @@ SoilIndexedDictionary >> createIndex [
 
 { #category : #enumerating }
 SoilIndexedDictionary >> do: aBlock [
- 	self newIterator do: [ :objectIdOrByteArray | 
- 				aBlock value: (self proxyFromByteArray: objectIdOrByteArray) ]
+ 	self newIterator do: [ :objectId | 
+ 				aBlock value: (transaction proxyForObjectId: objectId) ]
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> first [
-	^ self proxyFromByteArray: self newIterator first
+	^ transaction proxyForObjectId: self newIterator first
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> first: anInteger [
 
 	^ (self newIterator first: anInteger) collect: [ :each |
-		  self proxyFromByteArray: each ]
+		 transaction proxyForObjectId: each ]
 ]
 
 { #category : #testing }
@@ -130,7 +130,7 @@ SoilIndexedDictionary >> keySize: anInteger [
 
 { #category : #accessing }
 SoilIndexedDictionary >> last [
-	^ self proxyFromByteArray: self newIterator last
+	^ transaction proxyForObjectId: self newIterator last
 	
 ]
 
@@ -157,7 +157,7 @@ SoilIndexedDictionary >> newIterator [
 
 { #category : #accessing }
 SoilIndexedDictionary >> nextAfter: key [  
-	^  self proxyFromByteArray: (self newIterator nextAfter: key) value
+	^  transaction proxyForObjectId: (self newIterator nextAfter: key) value
 ]
 
 { #category : #private }
@@ -184,12 +184,6 @@ SoilIndexedDictionary >> printOn: aStream [
 	aStream << ' id=' << id asString
 ]
 
-{ #category : #enumerating }
-SoilIndexedDictionary >> proxyFromByteArray: aByteArray [
-	
-	^ transaction proxyForObjectId: aByteArray asSoilObjectId
-]
-
 { #category : #removing }
 SoilIndexedDictionary >> removeKey: key [
 	^ self 
@@ -212,7 +206,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexedDictionary >> second [
-	^ self proxyFromByteArray: (self newIterator first; next)
+	^ transaction proxyForObjectId: (self newIterator first; next)
 ]
 
 { #category : #accessing }
@@ -264,5 +258,5 @@ SoilIndexedDictionary >> soilMaterialized: aMaterializer [
 
 { #category : #accessing }
 SoilIndexedDictionary >> values [
-	^ self newIterator values collect: [ :each | self proxyFromByteArray: each ]
+	^ self newIterator values collect: [ :each | transaction proxyForObjectId: each ]
 ]

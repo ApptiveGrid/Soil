@@ -171,7 +171,7 @@ SoilMaterializer >> nextDictionary: aClass [
 SoilMaterializer >> nextExternalReference [
 	| index |
 	index := self nextLengthEncodedInteger.
-	^ transaction proxyForObjectId:  (externalObjectRegistry referenceAt: index) 
+	^ transaction proxyForObjectId: (externalObjectRegistry referenceAt: index) 
 ]
 
 { #category : #reading }
