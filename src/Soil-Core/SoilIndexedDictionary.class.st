@@ -190,6 +190,11 @@ SoilIndexedDictionary >> nextAssociationAfter: key [
 ]
 
 { #category : #private }
+SoilIndexedDictionary >> nextCloseTo: aKey [ 
+	^ transaction objectWithId: (self newIterator nextCloseTo: aKey) 
+]
+
+{ #category : #private }
 SoilIndexedDictionary >> nextKeyCloseTo: aKey [
 	"Note: key will be binary key"
 	^ self newIterator nextKeyCloseTo: aKey

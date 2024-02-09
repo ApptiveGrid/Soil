@@ -285,6 +285,12 @@ SoilIndexIterator >> nextAssociationAfter: key [
 ]
 
 { #category : #private }
+SoilIndexIterator >> nextCloseTo: key [
+	"return the next entry after key, even if key itself is not there"
+	^ self at: (self nextKeyCloseTo: key)
+]
+
+{ #category : #private }
 SoilIndexIterator >> nextKeyCloseTo: key [
 	"Note: returnrd key will be binary key"
 	| binKey |

@@ -548,6 +548,26 @@ SoilIndexedDictionaryTest >> testNextKeyCloseToWithTransaction [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testNextcloseToWithTransaction [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #'10' put: #one.
+	dict at: #'20' put: #two.
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	"and test"
+	self assert: (tx2 root nextCloseTo: #'5') equals: #one.
+	self assert: (tx2 root nextCloseTo: #'10') equals: #one.
+	self assert: (tx2 root nextCloseTo: #'11') equals: #two.
+	self assert: (tx2 root nextCloseTo: #'15 ') equals: #two.
+	self assert: (tx2 root nextCloseTo: #'20') equals: #two.
+	"this is a bit odd, when looking with larger values we get the last one"
+	self assert: (tx2 root nextCloseTo: #'100') equals: #two
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 
 
