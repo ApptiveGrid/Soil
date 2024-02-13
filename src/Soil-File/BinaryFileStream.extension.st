@@ -19,6 +19,14 @@ BinaryFileStream >> fileHandle [
 ]
 
 { #category : #'*Soil-File' }
+BinaryFileStream >> fileno: stream [
+
+	^ self 
+		ffiCall: #(int fileno("FILE *"void *stream))
+		module: LibC
+]
+
+{ #category : #'*Soil-File' }
 BinaryFileStream >> flockClass [
 	^ OSPlatform current flockClass
 ]
