@@ -30,6 +30,7 @@ SoilJournalFragmentFile >> appendEntry: aSoilJournalEntry [
 	position := stream position.
 	aSoilJournalEntry writeOn: stream.
 	stream flush.
+	stream fileStream dataSync.
 	^ position
 
 ]
