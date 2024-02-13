@@ -25,12 +25,20 @@ SoilJournalFragmentFile >> acceptSoil: aSoilVisitor [
 
 { #category : #writing }
 SoilJournalFragmentFile >> appendEntry: aSoilJournalEntry [ 
-	| position |
-	stream setToEnd.
-	position := stream position.
-	aSoilJournalEntry writeOn: stream.
-	stream flush.
-	stream fileStream dataSync.
+	| position lock |
+	"lock whole file for appending. The lock context here is
+	the journal entry itself because there is no better 
+	object to use. The lock should be really exclusive"
+	lock := stream lockAppendingFor: aSoilJournalEntry.
+	[ 
+	 	"when the lock is in place it is safe the set the file 
+		to its end"
+		stream setToEnd.
+		position := stream position.
+		aSoilJournalEntry writeOn: stream.
+		stream flush.
+		stream fileStream dataSync ]
+			ensure: [ lock release ].
 	^ position
 
 ]
@@ -159,7 +167,7 @@ SoilJournalFragmentFile >> inspectionTransactionJournals [
 
 { #category : #'instance creation' }
 SoilJournalFragmentFile >> open [
-	stream := path binaryReadWriteStream 
+	stream := SoilLockableStream path: path 
 ]
 
 { #category : #accessing }
