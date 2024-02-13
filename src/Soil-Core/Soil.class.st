@@ -25,7 +25,7 @@ Soil class >> databaseFormatVersion [
 	^ 1
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 Soil class >> inMemory [ 
 	^ self new 
 		path: FileSystem memory root

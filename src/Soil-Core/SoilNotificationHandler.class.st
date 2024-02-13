@@ -39,6 +39,6 @@ SoilNotificationHandler >> transactionAborted: aSoilTransaction [
 SoilNotificationHandler >> transactionCommitted: aSoilTransaction [ 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #counting }
 SoilNotificationHandler >> transactionCreated: aSoilTransaction [
 ]
