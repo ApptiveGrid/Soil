@@ -16,7 +16,7 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #metrics }
 SoilMetrics >> cachedSegments [
 	^ soil objectRepository segments select: [ :each | each isKindOf: SoilCachedObjectSegment  ]
 ]
@@ -36,58 +36,58 @@ SoilMetrics >> initialize [
 	objectsMaterialized := 0
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #metrics }
 SoilMetrics >> metaRecordCacheHitRatio [
 	| metaSegment |
 	metaSegment := soil objectRepository metaSegment.
 	^ (metaSegment isKindOf: SoilCachedObjectSegment)
 		ifTrue: [ metaSegment cache hitRatio ] 
-		ifFalse: 0
+		ifFalse: [ 0 ]
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #metrics }
 SoilMetrics >> metaRecordCacheHits [ 
 	| metaSegment |
 	metaSegment := soil objectRepository metaSegment.
 	^ (metaSegment isKindOf: SoilCachedObjectSegment)
 		ifTrue: [ metaSegment cache hits ]
-		ifFalse: 0
+		ifFalse: [ 0 ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #metrics }
 SoilMetrics >> metaRecordCacheMaximumSize [
 	| metaSegment |
 	metaSegment := soil objectRepository metaSegment.
 	^ (metaSegment isKindOf: SoilCachedObjectSegment)
 		ifTrue: [ (metaSegment cache instVarNamed: #weight) maximum ]
-		ifFalse: 0
+		ifFalse: [ 0 ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #metrics }
 SoilMetrics >> metaRecordCacheMisses [
 	| metaSegment |
 	metaSegment := soil objectRepository metaSegment.
 	^ (metaSegment isKindOf: SoilCachedObjectSegment)
 		ifTrue: [ metaSegment cache misses ]
-		ifFalse: 0
+		ifFalse: [ 0 ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #metrics }
 SoilMetrics >> metaRecordCacheSize [
 	| metaSegment |
 	metaSegment := soil objectRepository metaSegment.
 	^ (metaSegment isKindOf: SoilCachedObjectSegment)
 		ifTrue: [ metaSegment cache size ]
-		ifFalse: 0
+		ifFalse: [ 0 ]
 ]
 
-{ #category : #accessing }
+{ #category : #metrics }
 SoilMetrics >> metaRecordsRead [
 	^ metaRecordsRead
 ]
 
-{ #category : #accessing }
+{ #category : #metrics }
 SoilMetrics >> metaRecordsWritten [
 	^ metaRecordsWritten
 ]
@@ -97,7 +97,7 @@ SoilMetrics >> objectMaterialized: anObject [
 	objectsMaterialized := objectsMaterialized + 1
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #metrics }
 SoilMetrics >> objectRecordCacheHitRatio [
 	^ self cachedSegments 
 		ifNotEmpty: [:segments | (segments collect: [ :each | each cache hitRatio ]) average ]
@@ -105,14 +105,14 @@ SoilMetrics >> objectRecordCacheHitRatio [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #metrics }
 SoilMetrics >> objectRecordCacheHits [ 
 	^ self cachedSegments 
 		ifNotEmpty: [:segments | segments sum: [ :each | each cache hits ] ]
 		ifEmpty: 0
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #metrics }
 SoilMetrics >> objectRecordCacheMaximumSize [
 	^ self cachedSegments 
 		ifNotEmpty: [:segments | (segments collect: [ :each | (each cache instVarNamed: #weight) maximum ]) average ]
@@ -120,14 +120,14 @@ SoilMetrics >> objectRecordCacheMaximumSize [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #metrics }
 SoilMetrics >> objectRecordCacheMisses [
 	^ self cachedSegments 
 		ifNotEmpty: [:segments | segments sum: [ :each | each cache misses ] ]
 		ifEmpty: 0
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #metrics }
 SoilMetrics >> objectRecordCacheSize [
 	^ self cachedSegments 
 		ifNotEmpty: [:segments | (segments collect: [ :each | each cache size ]) average ]
@@ -135,12 +135,12 @@ SoilMetrics >> objectRecordCacheSize [
 	
 ]
 
-{ #category : #accessing }
+{ #category : #metrics }
 SoilMetrics >> objectRecordsRead [
 	^ objectRecordsRead
 ]
 
-{ #category : #accessing }
+{ #category : #metrics }
 SoilMetrics >> objectRecordsWritten [
 	^ objectRecordsWritten
 ]
@@ -150,13 +150,13 @@ SoilMetrics >> objectSerialized: aString [
 	objectsSerialized := objectsSerialized + 1
 ]
 
-{ #category : #accessing }
+{ #category : #metrics }
 SoilMetrics >> objectsMaterialized [
 
 	^ objectsMaterialized
 ]
 
-{ #category : #accessing }
+{ #category : #metrics }
 SoilMetrics >> objectsSerialized [
 
 	^ objectsSerialized
@@ -176,7 +176,7 @@ SoilMetrics >> recordWritten: anObjectId [
 		ifFalse: [ objectRecordsWritten := objectRecordsWritten + 1 ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #counting }
 SoilMetrics >> transactionAborted: aSoilTransaction [ 
 	transactionsAborted := transactionsAborted + 1
 ]
@@ -188,29 +188,29 @@ SoilMetrics >> transactionCommitted: aSoilTransaction [
 		ifFalse: [ transactionsCommittedReadOnly := transactionsCommittedReadOnly + 1 ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #counting }
 SoilMetrics >> transactionCreated: aSoilTransaction [ 
 	transactionsCreated := transactionsCreated + 1
 ]
 
-{ #category : #accessing }
+{ #category : #metrics }
 SoilMetrics >> transactionsAborted [
 
 	^ transactionsAborted
 ]
 
-{ #category : #accessing }
+{ #category : #metrics }
 SoilMetrics >> transactionsCommittedReadOnly [
 
 	^ transactionsCommittedReadOnly
 ]
 
-{ #category : #accessing }
+{ #category : #metrics }
 SoilMetrics >> transactionsCommittedWrite [
 	^ transactionsCommittedWrite
 ]
 
-{ #category : #accessing }
+{ #category : #metrics }
 SoilMetrics >> transactionsCreated [
 	^ transactionsCreated
 ]

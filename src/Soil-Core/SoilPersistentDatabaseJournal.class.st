@@ -41,7 +41,7 @@ SoilPersistentDatabaseJournal >> checkpoint [
 	^ entry
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilPersistentDatabaseJournal >> createFragmentFile: filename [
 	(self path / filename) ensureCreateFile.
 	^ (self openFragmentFile: filename)
@@ -49,7 +49,7 @@ SoilPersistentDatabaseJournal >> createFragmentFile: filename [
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilPersistentDatabaseJournal >> currentFragmentFile [
 	| currentLSN filename |
 	^ currentFragmentFile ifNil: [  
@@ -72,17 +72,17 @@ SoilPersistentDatabaseJournal >> entriesMatching: aBlock [
 		file entriesMatching: aBlock  ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilPersistentDatabaseJournal >> fileNumberFrom: aString [ 
 	^ (ByteArray readHexFrom: aString) asInteger
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilPersistentDatabaseJournal >> filenameFrom: anInteger [ 
 	^ (anInteger printStringBase: 16 length: 10 padded: true) asLowercase 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilPersistentDatabaseJournal >> fragmentFileForWriting [
 	| segmentFile nextFileNumber |
 	segmentFile := self currentFragmentFile.
@@ -94,12 +94,12 @@ SoilPersistentDatabaseJournal >> fragmentFileForWriting [
 			currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber + 1) ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilPersistentDatabaseJournal >> fragmentFiles [
 	^ self path files sorted reverse collect: [ :each | SoilJournalFragmentFile path: each ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #adding }
 SoilPersistentDatabaseJournal >> importTransactionJournal: aSoilTransactionJournal [ 
 	self writeTransactionJournal: aSoilTransactionJournal.
 	self addTransactionJournal: aSoilTransactionJournal
@@ -151,7 +151,7 @@ SoilPersistentDatabaseJournal >> open [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SoilPersistentDatabaseJournal >> openFragmentFile: filename [ 
 	^ (SoilJournalFragmentFile path: self path / filename )
 		open;

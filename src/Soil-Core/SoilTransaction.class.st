@@ -596,7 +596,7 @@ SoilTransaction >> root: anObject [
 	anObject soilClusterRootIn: self
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilTransaction >> segmentAt: anInteger [ 
 	^ self objectRepository segmentAt: anInteger 
 ]
