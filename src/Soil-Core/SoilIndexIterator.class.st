@@ -250,7 +250,12 @@ SoilIndexIterator >> lastPage [
 
 { #category : #accessing }
 SoilIndexIterator >> next [
-	^ self nextAssociation value
+	| nextAssociation nextValue |
+	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
+	nextValue := (self
+ 			restoreValue: nextAssociation value
+ 			forKey: nextAssociation key).
+	^ nextValue ifNil: [ self next ]
 ]
 
 { #category : #accessing }
@@ -266,7 +271,8 @@ SoilIndexIterator >> next: anInteger [
 
 { #category : #accessing }
 SoilIndexIterator >> nextAfter: key [
-	^ (self nextAssociationAfter: key) value
+	self find: key.
+	^ self next
 ]
 
 { #category : #accessing }
