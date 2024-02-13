@@ -44,7 +44,7 @@ SoilTransaction >> acquireLocksAndDetectWriteSkew [
 	idMap rehash.
 ]
 
-{ #category : #adding }
+{ #category : #api }
 SoilTransaction >> addClusterObject: anObject [ 
 	| objectId |
 	objectMap at: anObject ifPresent: [ :record |  ^ record objectId ].
@@ -124,7 +124,7 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 	^ behaviorDescription
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> behaviorDescriptionWithObjectId: objectId andVersion: version [ 
 	idMap 
 		at: objectId
@@ -140,7 +140,7 @@ SoilTransaction >> behaviorRegistry [
 	^ soil behaviorRegistry 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [ 
 	^ self behaviorRegistry 
 		behaviorVersionsUpTo: aSOBehaviorDescription
@@ -237,7 +237,7 @@ SoilTransaction >> checkpoint [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #actions }
 SoilTransaction >> checkpointAndContinue [
 	self 
 		checkpoint;
@@ -282,14 +282,14 @@ SoilTransaction >> dirtyObjects [
 	^ idMap select: [ :each | each hasChanged ] thenCollect: #object
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> findObject: aBlock [ 
 	"scan all records in the database where the materialized object matches 
 	the condition in aBlock. Return the object of the record instead"
 	^ (self findRecord: [:record | aBlock value: record materializeObject ]) object
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> findRecord: aBlock [ 
 	"scan all connected records in the database until one matches 
 	the condition in aBlock"
@@ -302,7 +302,7 @@ SoilTransaction >> findRecord: aBlock [
 			ifEmpty: [ nil ] 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> findRecords: aBlock [ 
 	"scan all connected records in the database until one matches 
 	the condition in aBlock"
@@ -341,7 +341,7 @@ SoilTransaction >> initialize [
 	indexUpdatesToCommit := OrderedCollection new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> initializeObjectId: anObjectId [
 	| segment assoc |
 	anObjectId isInitialized ifTrue: [ SoilObjectIdAlreadyInitialized signal: 'object id is already initialized: ', anObjectId asString ].
@@ -382,7 +382,7 @@ SoilTransaction >> journal [
 	^ journal
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> lockObjectId: aSOObjectId [ 
 	^ self objectRepository lockObjectId: aSOObjectId for: self
 ]
@@ -395,7 +395,7 @@ SoilTransaction >> makeNewVersion: classDescription [
 		add: record asNewClusterVersion
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> makeRoot: anObject [ 
 	| objectId |
 	objectId := self addClusterObject: anObject theNonSoilProxy.
@@ -415,7 +415,7 @@ SoilTransaction >> markDirty: anObject [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> materializeRecord: record [
 	^ record
 		transaction: self;
@@ -472,7 +472,7 @@ SoilTransaction >> objectAt: anObjectId ifAbsent: aBlock [
 		ifAbsent: aBlock 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> objectIdOf: anObject [ 
 	^ (objectMap at: anObject) objectId.
 	
@@ -483,12 +483,12 @@ SoilTransaction >> objectIndex [
 	^ objectMap
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> objectRepository [ 
 	^ soil objectRepository
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> objectWithId: objectId [
 	idMap ifNil: [ 
 		SoilTransactionAlreadyAborted signal: 'this transaction has already been aborted' ].
@@ -529,7 +529,7 @@ SoilTransaction >> printOn: aStream [
 	aStream << 'transaction read: ' << readVersion asString << ', write: ' << writeVersion asString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> proxyForObjectId: aSOObjectId [ 
 	^ aSOObjectId asSoilObjectProxy 
 		transaction: self
@@ -545,7 +545,7 @@ SoilTransaction >> readVersion: anInteger [
 	readVersion := anInteger
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> recordWithId: objectId [
 	(objectId isInitialized) ifFalse: [ SoilIndexOutOfRange signal: 'object id ', objectId printString, ' needs index greater than zero' ].
 	^ self objectRepository 
@@ -571,7 +571,7 @@ SoilTransaction >> registerRecord: record [
 	objectMap at: record object put: record
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilTransaction >> releaseLocks [
 	locks do: [ :lock | lock release ].
 	locks := OrderedCollection new

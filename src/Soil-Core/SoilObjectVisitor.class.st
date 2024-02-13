@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilObjectVisitor,
 	#superclass : #SoilTransactionalVisitor,
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Core-Visitor'
 }
 
 { #category : #visiting }

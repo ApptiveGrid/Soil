@@ -1,3 +1,10 @@
+"
+The SoilBTreeIterator implements the SoilIndexIterator for the B+Tree index.
+
+
+To get an iterator, call #newIterator on the index when used stand-alone, if the index is used for a SoilIndexedDictionary,
+use the #newIterator there to setup the iterator correctly.
+"
 Class {
 	#name : #SoilBTreeIterator,
 	#superclass : #SoilIndexIterator,

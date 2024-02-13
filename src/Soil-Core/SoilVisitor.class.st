@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilVisitor,
 	#superclass : #Object,
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Core-Visitor'
 }
 
 { #category : #testing }

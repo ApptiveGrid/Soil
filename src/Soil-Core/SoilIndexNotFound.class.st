@@ -1,5 +1,5 @@
 Class {
 	#name : #SoilIndexNotFound,
 	#superclass : #Error,
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Core-Error'
 }

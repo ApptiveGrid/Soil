@@ -5,7 +5,7 @@ Class {
 		'condition',
 		'object'
 	],
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Core-Visitor'
 }
 
 { #category : #api }

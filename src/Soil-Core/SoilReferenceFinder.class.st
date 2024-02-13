@@ -5,7 +5,7 @@ Class {
 		'objectId',
 		'references'
 	],
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Core-Visitor'
 }
 
 { #category : #private }

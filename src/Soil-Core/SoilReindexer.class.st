@@ -10,7 +10,7 @@ Class {
 		'newIndex',
 		'newIndexIterator'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Index-Common'
 }
 
 { #category : #running }
