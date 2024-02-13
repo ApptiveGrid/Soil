@@ -32,6 +32,11 @@ SoilLockableStream >> close [
 
 ]
 
+{ #category : #accessing }
+SoilLockableStream >> fileStream [
+	^ fileStream fileStream
+]
+
 { #category : #finalization }
 SoilLockableStream >> finalize [ 
 	self close
@@ -121,6 +126,11 @@ SoilLockableStream >> nextPutAll: aString [
 	fileStream nextPutAll: aString 
 ]
 
+{ #category : #'writing - basic' }
+SoilLockableStream >> nextPutLengthEncodedInteger: anInteger [ 
+	fileStream nextPutLengthEncodedInteger: anInteger 
+]
+
 { #category : #positioning }
 SoilLockableStream >> position [
 	^ fileStream position
@@ -150,6 +160,11 @@ SoilLockableStream >> releaseAllLocks [
 		locks remove: lock.
 		lock release ].
 	locks := OrderedCollection new
+]
+
+{ #category : #initialization }
+SoilLockableStream >> setToEnd [
+	fileStream setToEnd 
 ]
 
 { #category : #accessing }
