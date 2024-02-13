@@ -44,7 +44,7 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 		assoc value isRemoved ifFalse: [ 
 			targetIndex basicAt: assoc key put: assoc value.
 			"recurse further into the values of the index"
-			self process: assoc value ] ].
+			self process: assoc value asSoilObjectId ] ].
 	targetIndex
 		flush; 
 		close.

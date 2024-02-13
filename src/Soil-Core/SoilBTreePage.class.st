@@ -53,15 +53,6 @@ SoilBTreePage >> readFrom: aStream [
 	self readLastTransactionFrom: aStream
 ]
 
-{ #category : #reading }
-SoilBTreePage >> readItemsFrom: aStream [ 
-	| numberOfItems |
-	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
-	items := SortedCollection new: numberOfItems.
-	numberOfItems timesRepeat: [ 
-		items add: (aStream next: self keySize) asInteger -> (aStream next: self valueSize) ]
-]
-
 { #category : #private }
 SoilBTreePage >> split: newPage [
 	| middle |
