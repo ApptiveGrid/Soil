@@ -5,7 +5,7 @@ Class {
 		'soil',
 		'seen'
 	],
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Core-Visitor'
 }
 
 { #category : #initialization }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'transaction'
 	],
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Core-Visitor'
 }
 
 { #category : #visiting }

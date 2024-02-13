@@ -1,5 +1,5 @@
 Class {
 	#name : #SoilTransactionAlreadyAborted,
 	#superclass : #SoilError,
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Core-Error'
 }

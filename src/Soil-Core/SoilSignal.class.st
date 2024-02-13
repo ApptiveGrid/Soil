@@ -8,7 +8,7 @@ Class {
 	#classVars : [
 		'IdCounter'
 	],
-	#category : #'Soil-Core-Base'
+	#category : #'Soil-Core-Model'
 }
 
 { #category : #initialization }

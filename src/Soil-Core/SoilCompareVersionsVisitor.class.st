@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'version'
 	],
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Core-Visitor'
 }
 
 { #category : #initialization }

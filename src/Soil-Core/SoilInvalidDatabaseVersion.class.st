@@ -1,5 +1,5 @@
 Class {
 	#name : #SoilInvalidDatabaseVersion,
 	#superclass : #SoilError,
-	#category : #'Soil-Core-Files'
+	#category : #'Soil-Core-Error'
 }
