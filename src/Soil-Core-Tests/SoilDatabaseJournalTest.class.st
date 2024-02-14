@@ -13,7 +13,7 @@ SoilDatabaseJournalTest class >> classUnderTest [
 	^ SoilPersistentDatabaseJournal 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #running }
 SoilDatabaseJournalTest >> fillDatabase [ 
 	| tx dict |
 	tx := soil newTransaction.
