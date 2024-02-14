@@ -7,7 +7,7 @@ Class {
 	#category : #'Soil-Core-Tests'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilBackupTest >> backupPath [
 	^ 'soil-backup'
 ]

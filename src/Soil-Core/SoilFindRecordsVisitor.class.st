@@ -36,7 +36,7 @@ SoilFindRecordsVisitor >> records [
 	^ records
 ]
 
-{ #category : #accessing }
+{ #category : #api }
 SoilFindRecordsVisitor >> returnFirst [
 
 	numberOfRecords := 1

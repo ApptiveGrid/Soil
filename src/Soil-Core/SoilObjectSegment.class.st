@@ -110,10 +110,11 @@ SoilObjectSegment >> id: anObject [
 ]
 
 { #category : #accessing }
-SoilObjectSegment >> indexAt: indexId [ 
-	^ self indexManager 
-		at: indexId 
-		ifAbsent: [ SoilIndexNotFound signal: 'index not found' ] 
+SoilObjectSegment >> indexAt: indexId [
+
+	^ self
+		  indexAt: indexId
+		  ifAbsent: [ SoilIndexNotFound signal: 'index not found' ]
 ]
 
 { #category : #accessing }

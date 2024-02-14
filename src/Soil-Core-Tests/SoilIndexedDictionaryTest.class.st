@@ -447,7 +447,9 @@ SoilIndexedDictionaryTest >> testNextAfterWithTransaction [
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"and test last"
-	self assert: (tx2 root nextAfter: #one) value equals: #twovalue
+	self assert: (tx2 root nextAfter: #one) equals: #twovalue.
+	"test #nextAssociationAfter: on the iterator here, too"
+	self assert: (tx2 proxyForObjectId: (tx2 root newIterator nextAssociationAfter: #one) value) equals: #twovalue
 ]
 
 { #category : #tests }

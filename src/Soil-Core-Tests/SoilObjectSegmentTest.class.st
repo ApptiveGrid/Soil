@@ -1,10 +1,6 @@
 Class {
 	#name : #SoilObjectSegmentTest,
 	#superclass : #TestCase,
-	#instVars : [
-		'reference',
-		'label'
-	],
 	#category : #'Soil-Core-Tests'
 }
 
