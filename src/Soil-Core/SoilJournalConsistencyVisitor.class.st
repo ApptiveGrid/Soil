@@ -42,7 +42,7 @@ SoilJournalConsistencyVisitor >> verifyObjectIndexes: aSoilTransactionJournal [
 				at: entry objectId segment 
 				ifAbsentPut: [ entry objectId index - 1].
 			(newIndex >= oldIndex) ifFalse: [ 
-				Error signal: 'Index consistency check failed: #verifyObjectIndexes:' ].
+				Error signal: 'Journal consistency check failed: #verifyObjectIndexes:' ].
 			segments 
 				at: entry objectId segment
 				put: newIndex ]
