@@ -15,8 +15,10 @@ SoilTransactionJournalEntry class >> isAbstract [
 
 { #category : #'instance creation' }
 SoilTransactionJournalEntry class >> readTransactionIdFrom: aStream [ 
-	aStream next.
-	^ (aStream next: 8) asInteger
+	aStream 
+		next;
+		next.
+	^ aStream nextLengthEncodedInteger 
 ]
 
 { #category : #accessing }
@@ -43,7 +45,7 @@ SoilTransactionJournalEntry >> oldValue [
 SoilTransactionJournalEntry >> readFrom: aStream [ 
 	"skip because the type code is already read"
 	super readFrom: aStream.
-	transactionId := (aStream next: 8) asInteger
+	transactionId := aStream nextLengthEncodedInteger 
 ]
 
 { #category : #accessing }
@@ -67,6 +69,5 @@ SoilTransactionJournalEntry >> validateIn: aSoilTransaction [
 SoilTransactionJournalEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
 	aStream 
-		nextPutAll: (transactionId asByteArrayOfSize: 8)
-
+		nextPutLengthEncodedInteger:  transactionId
 ]

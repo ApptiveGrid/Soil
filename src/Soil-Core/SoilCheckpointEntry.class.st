@@ -55,7 +55,7 @@ SoilCheckpointEntry >> lastCheckpoint [
 { #category : #accessing }
 SoilCheckpointEntry >> lastCheckpoint: anObject [
 
-	lastCheckpoint := anObject
+	lastCheckpoint := anObject 
 ]
 
 { #category : #accessing }

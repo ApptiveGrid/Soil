@@ -2,7 +2,7 @@ Class {
 	#name : #SoilUpdateDatabaseVersion,
 	#superclass : #SoilTransactionJournalEntry,
 	#instVars : [
-		'version',
+		'databaseVersion',
 		'previousVersion'
 	],
 	#category : #'Soil-Core-Journal'
@@ -20,7 +20,7 @@ SoilUpdateDatabaseVersion >> address [
 
 { #category : #committing }
 SoilUpdateDatabaseVersion >> commitIn: soil [ 
-	soil databaseVersion: version
+	soil databaseVersion: databaseVersion  
 ]
 
 { #category : #accessing }
@@ -35,7 +35,7 @@ SoilUpdateDatabaseVersion >> context [
 
 { #category : #accessing }
 SoilUpdateDatabaseVersion >> effect [ 
-	^ version 
+	^ databaseVersion 
 ]
 
 { #category : #accessing }
@@ -62,30 +62,30 @@ SoilUpdateDatabaseVersion >> previousVersion: anInteger [
 SoilUpdateDatabaseVersion >> printOn: aStream [ 
 	super printOn: aStream.
 	aStream 
-		<< ' version: '
-		<< version asString.
+		<< ' version: ' 
+		<< databaseVersion asString.
 ]
 
 { #category : #'instance creation' }
 SoilUpdateDatabaseVersion >> readFrom: aStream [ 
 	super readFrom: aStream.
-	version := aStream nextLengthEncodedInteger.
+	databaseVersion := aStream nextLengthEncodedInteger. 
 	previousVersion := aStream nextLengthEncodedInteger
 ]
 
 { #category : #accessing }
 SoilUpdateDatabaseVersion >> value [ 
-	^ version
+	^ databaseVersion 
 ]
 
 { #category : #accessing }
 SoilUpdateDatabaseVersion >> version: anInteger [ 
-	version := anInteger
+	databaseVersion := anInteger 
 ]
 
 { #category : #writing }
 SoilUpdateDatabaseVersion >> writeOn: aStream [ 
 	super writeOn: aStream.
-	aStream nextPutLengthEncodedInteger: version.
-	aStream nextPutLengthEncodedInteger: previousVersion.
+	aStream nextPutLengthEncodedInteger: databaseVersion.
+	aStream nextPutLengthEncodedInteger: previousVersion. 
 ]
