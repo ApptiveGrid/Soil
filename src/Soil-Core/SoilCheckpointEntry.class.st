@@ -43,7 +43,7 @@ SoilCheckpointEntry >> container [
 { #category : #initialization }
 SoilCheckpointEntry >> initialize [ 
 	super initialize.
-	checkpointedAt := DateAndTime now
+	checkpointedAt := DateAndTime now 
 ]
 
 { #category : #accessing }
