@@ -16,6 +16,7 @@ on:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         pharoversion: [ Pharo64-12, Pharo64-11 ]
     name: ${{ matrix.pharoversion }}
