@@ -1,3 +1,8 @@
+"
+The BTree root page is always created and exists even in an empty BTree.
+
+It is easily accessible via #rootPage on the BTree index
+"
 Class {
 	#name : #SoilBTreeRootPage,
 	#superclass : #SoilBTreeIndexPage,

@@ -1,3 +1,12 @@
+"
+As a B+Tree, the SoilBTree index has index nodes.
+
+The entries are indexKey -> pageNumber
+
+The pageNumber can be that of another index page or of a data page.
+
+For the root index page, we have a subclass SoilBTreeRootPage
+"
 Class {
 	#name : #SoilBTreeIndexPage,
 	#superclass : #SoilBTreePage,

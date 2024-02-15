@@ -1,3 +1,6 @@
+"
+Abstract superclass for all index related pages that store items. Just a place for all shared code.
+"
 Class {
 	#name : #SoilIndexItemsPage,
 	#superclass : #SoilIndexPage,
@@ -8,6 +11,11 @@ Class {
 	],
 	#category : #'Soil-Core-Index-Common'
 }
+
+{ #category : #accessing }
+SoilIndexItemsPage class >> indexClass [
+	^ self subclassResponsibility
+]
 
 { #category : #testing }
 SoilIndexItemsPage class >> isAbstract [

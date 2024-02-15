@@ -1,5 +1,5 @@
 Class {
 	#name : #SoilNotAClusterRoot,
-	#superclass : #Error,
+	#superclass : #SoilError,
 	#category : #'Soil-Core-Error'
 }

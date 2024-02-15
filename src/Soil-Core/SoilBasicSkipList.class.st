@@ -1,3 +1,10 @@
+"
+Abstract superclass for the SoilSkipList index.
+
+This class just contains shared code between the main SkiplList and the copy-on-write version.
+
+See SoilSkipList for more information
+"
 Class {
 	#name : #SoilBasicSkipList,
 	#superclass : #SoilIndex,

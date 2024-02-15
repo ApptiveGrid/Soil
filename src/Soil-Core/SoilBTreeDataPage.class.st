@@ -1,3 +1,12 @@
+"
+As a B+Tree, the SoilBTree has data only in the leaves, which are all instances of SoilBTreeDataPage.
+
+The data pages form a linked list and can be traversed fast in the direction of the next page. 
+
+There is a special subclass for the first page (the header).
+
+
+"
 Class {
 	#name : #SoilBTreeDataPage,
 	#superclass : #SoilBTreePage,
