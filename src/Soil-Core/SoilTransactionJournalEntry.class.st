@@ -42,6 +42,7 @@ SoilTransactionJournalEntry >> oldValue [
 { #category : #writing }
 SoilTransactionJournalEntry >> readFrom: aStream [ 
 	"skip because the type code is already read"
+	super readFrom: aStream.
 	transactionId := (aStream next: 8) asInteger
 ]
 
