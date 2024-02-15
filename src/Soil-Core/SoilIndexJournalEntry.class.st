@@ -14,11 +14,6 @@ SoilIndexJournalEntry class >> isAbstract [
 	^ self == SoilIndexJournalEntry
 ]
 
-{ #category : #'accessing - defaults' }
-SoilIndexJournalEntry class >> journalTypeCode [
-	^ 0
-]
-
 { #category : #accessing }
 SoilIndexJournalEntry >> container [
 	^ 'index: ', id asString
