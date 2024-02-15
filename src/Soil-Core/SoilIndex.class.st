@@ -1,3 +1,16 @@
+"
+This is the abstract superclass for Soil Indexes. For now, we have two implementations: SoilBTree and SoilSkipList
+
+Indexes 
+	- are stored on disk in Pages (see SoilIndexPage) with a size of 4KB.
+	- Implement a dictionary style API key-value
+	
+But note: the key is an integer created by calling #asIndexKeyOfSize:, the value is a ByteArray.
+
+Access and Iteration over the index is implemented by the SoilIndexIterator (the index fowards every access there).
+
+Indexes can be used stand alone or with a transaction of a database. This is the case when the index is used for a SoilIndexedDictionary
+"
 Class {
 	#name : #SoilIndex,
 	#superclass : #Object,
