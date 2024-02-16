@@ -26,7 +26,7 @@ SoilJournalConsistencyVisitor >> verifyDatabaseVersion: aSoilTransactionJournal 
 	"after initialization the database version should always be 
 	one larger than the one before"
 	(entry value = (databaseVersion + 1)) ifFalse: [ 
-		Error signal: 'nope' ].
+		Error signal: 'Journal consistency check failed: #verifyDatabaseVersion:' ].
 	databaseVersion := entry value
 ]
 
@@ -42,7 +42,7 @@ SoilJournalConsistencyVisitor >> verifyObjectIndexes: aSoilTransactionJournal [
 				at: entry objectId segment 
 				ifAbsentPut: [ entry objectId index - 1].
 			(newIndex >= oldIndex) ifFalse: [ 
-				Error signal: 'nope' ].
+				Error signal: 'Journal consistency check failed: #verifyObjectIndexes:' ].
 			segments 
 				at: entry objectId segment
 				put: newIndex ]
