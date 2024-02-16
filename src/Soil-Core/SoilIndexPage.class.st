@@ -8,6 +8,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'index',
+		'version',
 		'dirty',
 		'pageSize'
 	],
@@ -48,7 +49,7 @@ SoilIndexPage class >> readPageFrom: aStream keySize: keySize valueSize: valueSi
 
 { #category : #utilities }
 SoilIndexPage >> headerSize [ 
-	^ 1 "pageCode" 
+	^ 2 "pageCode, version" 
 ]
 
 { #category : #accessing }
@@ -59,6 +60,12 @@ SoilIndexPage >> index [
 { #category : #accessing }
 SoilIndexPage >> index: anInteger [ 
 	index := anInteger
+]
+
+{ #category : #initialization }
+SoilIndexPage >> initialize [ 
+	super initialize.
+	version := 1
 ]
 
 { #category : #testing }
@@ -97,12 +104,14 @@ SoilIndexPage >> printOn: aStream [
 SoilIndexPage >> readFrom: aStream [ 
 	dirty := false.
 	"we do not read the pageCode here as it was read already"
+	version := aStream next
 ]
 
 { #category : #writing }
 SoilIndexPage >> writeHeaderOn: aStream [ 
 	aStream
-		nextPut: self class pageCode
+		nextPut: self class pageCode;
+		nextPut: version
 ]
 
 { #category : #writing }

@@ -70,6 +70,7 @@ SoilIndexItemsPage >> indexOfKey: anInteger [
 
 { #category : #initialization }
 SoilIndexItemsPage >> initialize [
+	super initialize.
 	items := SortedCollection new
 ]
 
