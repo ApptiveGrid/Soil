@@ -206,11 +206,17 @@ SoilIndexItemsPage >> postCopy [
 
 { #category : #reading }
 SoilIndexItemsPage >> readItemsFrom: aStream [ 
-	| numberOfItems |
+	| numberOfItems key value |
 	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
 	items := SortedCollection new: numberOfItems.
 	numberOfItems timesRepeat: [ 
-		items add: ((aStream next: self keySize) asInteger -> (aStream next: self valueSize) ) ]
+		key := (aStream next: self keySize) asInteger.
+		value := aStream next: self valueSize.
+		"if a page is read from disk means that removed items are obsolete. 
+		Removing them on writing a page can be costly so we ignore them just 
+		when reading"
+		value isRemoved ifFalse: [  
+			items add: (key -> value) ] ]
 ]
 
 { #category : #writing }
