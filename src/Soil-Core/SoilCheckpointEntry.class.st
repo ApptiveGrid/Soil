@@ -3,7 +3,7 @@ Class {
 	#superclass : #SoilJournalEntry,
 	#instVars : [
 		'checkpointedAt',
-		'lastCheckpoint'
+		'previousCheckpoint'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -47,27 +47,27 @@ SoilCheckpointEntry >> initialize [
 ]
 
 { #category : #accessing }
-SoilCheckpointEntry >> lastCheckpoint [
-
-	^ lastCheckpoint
-]
-
-{ #category : #accessing }
-SoilCheckpointEntry >> lastCheckpoint: anObject [
-
-	lastCheckpoint := anObject 
-]
-
-{ #category : #accessing }
 SoilCheckpointEntry >> objectIds [
 	^ {  }
+]
+
+{ #category : #accessing }
+SoilCheckpointEntry >> previousCheckpoint [
+
+	^ previousCheckpoint
+]
+
+{ #category : #accessing }
+SoilCheckpointEntry >> previousCheckpoint: anObject [
+
+	previousCheckpoint := anObject 
 ]
 
 { #category : #'instance creation' }
 SoilCheckpointEntry >> readFrom: aStream [ 
 	super readFrom: aStream.
 	checkpointedAt := (DateAndTime epoch + ((aStream nextLengthEncodedInteger) asInteger / 1000) milliSeconds) asLocal.
-	lastCheckpoint := SoilLogSequenceNumber readFrom: aStream
+	previousCheckpoint := SoilLogSequenceNumber readFrom: aStream
 ]
 
 { #category : #accessing }
@@ -83,5 +83,5 @@ SoilCheckpointEntry >> writeOn: aStream [
 	timestamp := checkpointedAt asSeconds * 1000000 + (checkpointedAt nanoSecond // 1000).
 	
 	aStream nextPutLengthEncodedInteger:  timestamp.
-	lastCheckpoint writeOn: aStream 
+	previousCheckpoint writeOn: aStream 
 ]
