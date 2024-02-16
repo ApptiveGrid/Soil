@@ -117,6 +117,24 @@ SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	lastFreePageIndex :=(aStream next: 4) asInteger 
 ]
 
+{ #category : #'instance creation' }
+SoilSkipListHeaderPage >> readLegacyFrom: aStream [ 
+	dirty := false.
+	self 
+		readLastTransactionFrom: aStream;
+		readLegacyHeaderFrom: aStream;
+		readLevelsFrom: aStream;
+		readItemsFrom: aStream
+]
+
+{ #category : #'instance creation' }
+SoilSkipListHeaderPage >> readLegacyHeaderFrom: aStream [
+	keySize := (aStream next: 2) asInteger.
+	valueSize := (aStream next: 2) asInteger.
+	maxLevel := (aStream next: 2) asInteger.
+	lastPageIndex :=(aStream next: 4) asInteger.
+]
+
 { #category : #accessing }
 SoilSkipListHeaderPage >> smallestKey [ 
 	^ 0

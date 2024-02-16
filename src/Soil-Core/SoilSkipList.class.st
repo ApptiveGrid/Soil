@@ -27,6 +27,25 @@ SoilSkipList >> close [
 	keySize := nil
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipList >> convertToNewSoilIn: transaction [ 
+	self newReIndexer 
+		indexBlock: [ :idx :oldIndex | | headerPage |
+			"read from start of file without pagecode = position 1"
+			oldIndex store ensureStreamIsOpen.
+			oldIndex store stream position: 1.
+			"force reading the old format of the header page"
+			headerPage := oldIndex newHeaderPage readLegacyFrom: oldIndex store stream.
+			"put it in place in the old index so it behaves normal from now on"
+			oldIndex store pageAt: 1 put: headerPage.
+			oldIndex store flushPages.
+			idx ];
+		itemBlock: [ :item |  
+			item key -> item value ];
+		cleanRemoved;
+		run
+]
+
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 

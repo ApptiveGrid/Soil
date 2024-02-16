@@ -64,17 +64,21 @@ SoilReindexer >> newIndexIterator [
 { #category : #running }
 SoilReindexer >> prepareNewIndex [ 
 	"create same index class with same parameters but a temporary path instead"
-	| indexCopy |
+	| indexCopy headerPage |
 	indexCopy := index class new 
 		path: reIndexPath;
 		initializeFilesystem.
-	newIndex := indexBlock value: indexCopy.
+	newIndex := indexBlock cull: indexCopy cull: index.
 	newIndex hasHeaderPage ifFalse: [  
-		newIndex 
+		headerPage := newIndex 
 			initializeHeaderPage;
 			maxLevel: index maxLevel;
 			keySize: index keySize;
-			valueSize: index valueSize ]
+			valueSize: index valueSize;
+			headerPage.
+		"headerPage
+			lastPageIndex: index headerPage lastPageIndex;
+			lastFreePageIndex: index headerPage lastFreePageIndex" ]
 ]
 
 { #category : #running }
@@ -98,7 +102,9 @@ SoilReindexer >> run [
 	self validatePath.
 	self prepareNewIndex.
 	[  
+	self halt.
 		index newIterator basicAssociationsDo: [ :item |
+				
 				(itemBlock value: item) ifNotNil: [ :newItem | 
 					self newIndexIterator at: newItem key put: newItem value ] ] ]
 		ifCurtailed: [ 
