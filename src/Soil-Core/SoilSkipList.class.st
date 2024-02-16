@@ -82,6 +82,7 @@ SoilSkipList >> newHeaderPage [
 	^ SoilSkipListHeaderPage new
 		index: 1;
 		lastPageIndex: 1;
+		lastFreePageIndex: 0;
 		pageSize: self pageSize
 ]
 
