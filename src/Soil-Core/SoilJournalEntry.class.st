@@ -1,6 +1,9 @@
 Class {
 	#name : #SoilJournalEntry,
 	#superclass : #Object,
+	#instVars : [
+		'version'
+	],
 	#category : #'Soil-Core-Journal'
 }
 
@@ -35,6 +38,12 @@ SoilJournalEntry class >> withTypeCode: anInteger [
 		ifNone: [ Error signal: 'cannot find class for journal type code ', anInteger asString ]
 ]
 
+{ #category : #initialization }
+SoilJournalEntry >> initialize [ 
+	super initialize.
+	version := 1
+]
+
 { #category : #testing }
 SoilJournalEntry >> isTransactionEntry [ 
 	^ false
@@ -43,11 +52,12 @@ SoilJournalEntry >> isTransactionEntry [
 { #category : #'instance creation' }
 SoilJournalEntry >> readFrom: aStream [ 
 	"skip because the type code is already read"
-
+	version := aStream next  
 ]
 
 { #category : #writing }
 SoilJournalEntry >> writeOn: aStream [ 
 	aStream 
-		nextPut: self class journalTypeCode
+		nextPut: self class journalTypeCode;
+		nextPut: version   
 ]

@@ -2,8 +2,8 @@ Class {
 	#name : #SoilUpdateDatabaseVersion,
 	#superclass : #SoilTransactionJournalEntry,
 	#instVars : [
-		'version',
-		'previousVersion'
+		'databaseVersion',
+		'previousDatabaseVersion'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -20,7 +20,7 @@ SoilUpdateDatabaseVersion >> address [
 
 { #category : #committing }
 SoilUpdateDatabaseVersion >> commitIn: soil [ 
-	soil databaseVersion: version
+	soil databaseVersion: databaseVersion  
 ]
 
 { #category : #accessing }
@@ -34,8 +34,13 @@ SoilUpdateDatabaseVersion >> context [
 ]
 
 { #category : #accessing }
+SoilUpdateDatabaseVersion >> databaseVersion: anInteger [ 
+	databaseVersion := anInteger 
+]
+
+{ #category : #accessing }
 SoilUpdateDatabaseVersion >> effect [ 
-	^ version 
+	^ databaseVersion 
 ]
 
 { #category : #accessing }
@@ -45,47 +50,42 @@ SoilUpdateDatabaseVersion >> objectIds [
 
 { #category : #accessing }
 SoilUpdateDatabaseVersion >> oldValue [ 
-	^ previousVersion 
+	^ previousDatabaseVersion 
 ]
 
 { #category : #accessing }
-SoilUpdateDatabaseVersion >> previousVersion [ 
-	^ previousVersion 
+SoilUpdateDatabaseVersion >> previousDatabaseVersion [ 
+	^ previousDatabaseVersion 
 ]
 
 { #category : #accessing }
-SoilUpdateDatabaseVersion >> previousVersion: anInteger [ 
-	previousVersion := anInteger
+SoilUpdateDatabaseVersion >> previousDatabaseVersion: anInteger [ 
+	previousDatabaseVersion := anInteger
 ]
 
 { #category : #printing }
 SoilUpdateDatabaseVersion >> printOn: aStream [ 
 	super printOn: aStream.
 	aStream 
-		<< ' version: '
-		<< version asString.
+		<< ' version: ' 
+		<< databaseVersion asString.
 ]
 
 { #category : #'instance creation' }
 SoilUpdateDatabaseVersion >> readFrom: aStream [ 
 	super readFrom: aStream.
-	version := aStream nextLengthEncodedInteger.
-	previousVersion := aStream nextLengthEncodedInteger
+	databaseVersion := aStream nextLengthEncodedInteger. 
+	previousDatabaseVersion := aStream nextLengthEncodedInteger
 ]
 
 { #category : #accessing }
 SoilUpdateDatabaseVersion >> value [ 
-	^ version
-]
-
-{ #category : #accessing }
-SoilUpdateDatabaseVersion >> version: anInteger [ 
-	version := anInteger
+	^ databaseVersion 
 ]
 
 { #category : #writing }
 SoilUpdateDatabaseVersion >> writeOn: aStream [ 
 	super writeOn: aStream.
-	aStream nextPutLengthEncodedInteger: version.
-	aStream nextPutLengthEncodedInteger: previousVersion.
+	aStream nextPutLengthEncodedInteger: databaseVersion.
+	aStream nextPutLengthEncodedInteger: previousDatabaseVersion. 
 ]

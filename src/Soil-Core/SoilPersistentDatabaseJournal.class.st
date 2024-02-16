@@ -31,7 +31,8 @@ SoilPersistentDatabaseJournal >> appendEntry: aSoilNewCheckpointEntry [
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> checkpoint [ 
 	| entry checkpointLSN |
-	entry := SoilCheckpointEntry new.
+	entry := SoilCheckpointEntry new
+		previousCheckpoint: soil settings checkpoint.
 	entry commitIn: soil.
 	"write the checkpoint entry in the journal and get 
 	the position of that entry in the file"

@@ -13,6 +13,12 @@ SoilLogSequenceNumber class >> fileNumber: number offset: offset [
 		fileNumber: number offset: offset
 ]
 
+{ #category : #'instance creation' }
+SoilLogSequenceNumber class >> readFrom: aStream [
+
+	^ self value: aStream nextLengthEncodedInteger
+]
+
 { #category : #accessing }
 SoilLogSequenceNumber class >> value: anInteger [ 
 	^ self new 
@@ -68,4 +74,9 @@ SoilLogSequenceNumber >> value [
 { #category : #accessing }
 SoilLogSequenceNumber >> value: anInteger [ 
 	value := anInteger
+]
+
+{ #category : #writing }
+SoilLogSequenceNumber >> writeOn: aStream [ 
+	aStream nextPutLengthEncodedInteger: value
 ]

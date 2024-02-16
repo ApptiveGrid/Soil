@@ -131,6 +131,11 @@ SoilLockableStream >> nextPutLengthEncodedInteger: anInteger [
 	fileStream nextPutLengthEncodedInteger: anInteger 
 ]
 
+{ #category : #accessing }
+SoilLockableStream >> peek [
+	^ fileStream  peek
+]
+
 { #category : #positioning }
 SoilLockableStream >> position [
 	^ fileStream position

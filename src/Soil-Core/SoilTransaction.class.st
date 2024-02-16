@@ -179,8 +179,8 @@ SoilTransaction >> buildJournal [
 	"update the global database version"
 	journal addEntry: (SoilUpdateDatabaseVersion new 
 		transactionId: self writeVersion;
-		version: writeVersion;
-		previousVersion: readVersion).
+		databaseVersion: writeVersion;
+		previousDatabaseVersion: readVersion).
 	journal addEntry: (SoilCommitTransactionEntry new 
 		transactionId: self writeVersion;
 		committedAt: DateAndTime now;

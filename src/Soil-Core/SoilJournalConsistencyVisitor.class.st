@@ -22,7 +22,7 @@ SoilJournalConsistencyVisitor >> verifyDatabaseVersion: aSoilTransactionJournal 
 	"if we don't have a database version we initialize with the old
 	value which includes ANY prior/start value"
 	databaseVersion ifNil: [ 
-		databaseVersion := entry previousVersion ].
+		databaseVersion := entry previousDatabaseVersion ].
 	"after initialization the database version should always be 
 	one larger than the one before"
 	(entry value = (databaseVersion + 1)) ifFalse: [ 
