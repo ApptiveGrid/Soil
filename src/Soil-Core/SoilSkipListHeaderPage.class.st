@@ -17,10 +17,17 @@ SoilSkipListHeaderPage class >> pageCode [
 { #category : #utilities }
 SoilSkipListHeaderPage >> headerSize [
 	^ super headerSize 
-		+ 10 "keySize, valueSize, maxLevel, lastPageIndex" 
+		+ 14 "keySize(2), valueSize(2), maxLevel(2), lastPageIndex(4), lastFreePageIndex(4)" 
 		+ 1 "level" 
 		+ (self level * self rightSize)
 		+ 2 "items size"
+]
+
+{ #category : #initialization }
+SoilSkipListHeaderPage >> initialize [ 
+	super initialize.
+	lastPageIndex := 1.
+	lastFreePageIndex := 0
 ]
 
 { #category : #accessing }
