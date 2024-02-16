@@ -29,6 +29,11 @@ SoilBasicBTree >> flush [
 	self store flush
 ]
 
+{ #category : #testing }
+SoilBasicBTree >> hasHeaderPage [
+	^ store hasHeaderPage 
+]
+
 { #category : #initialization }
 SoilBasicBTree >> initializeFilesystem [ 
 	self store initializeFilesystem

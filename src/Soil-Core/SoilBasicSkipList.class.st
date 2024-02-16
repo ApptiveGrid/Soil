@@ -17,6 +17,11 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
+{ #category : #testing }
+SoilBasicSkipList >> hasHeaderPage [
+	^ store hasHeaderPage 
+]
+
 { #category : #accessing }
 SoilBasicSkipList >> maxLevel [
 

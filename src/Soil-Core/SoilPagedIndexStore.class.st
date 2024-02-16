@@ -25,6 +25,11 @@ SoilPagedIndexStore >> flushCachedPages [
 	pages removeAll
 ]
 
+{ #category : #testing }
+SoilPagedIndexStore >> hasHeaderPage [
+	^ pages includesKey: 1
+]
+
 { #category : #accessing }
 SoilPagedIndexStore >> headerPage [
 	^ self pageAt: 1
