@@ -1,3 +1,8 @@
+"
+Abstract superclass for all index related pages. Just a place for all shared code.
+
+
+"
 Class {
 	#name : #SoilIndexPage,
 	#superclass : #Object,

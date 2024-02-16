@@ -1,3 +1,10 @@
+"
+A skiplist stores data in pages (of 4KB), which are all instances of the two subclasses of this class.
+
+The data pages form a linked list and can be traversed fast in the direction of the next page.
+
+There is a special subclass for the first page (the header).
+"
 Class {
 	#name : #SoilSkipListPage,
 	#superclass : #SoilIndexItemsPage,

@@ -1,3 +1,6 @@
+"
+This is a special subclass for all data pages but the first. See superclass comment for more infos
+"
 Class {
 	#name : #SoilSkipListDataPage,
 	#superclass : #SoilSkipListPage,

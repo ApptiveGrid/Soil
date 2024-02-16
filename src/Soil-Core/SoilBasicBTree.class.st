@@ -1,3 +1,10 @@
+"
+Abstract superclass for the SoilBtree B+Tree index.
+
+This class just contains shared code between the main BTree and the copy-on-write version.
+
+See SoilBTree for more information
+"
 Class {
 	#name : #SoilBasicBTree,
 	#superclass : #SoilIndex,

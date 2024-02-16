@@ -1,3 +1,6 @@
+"
+Abstract superclass for all BTree related pages. Just a place for all shared code between all the btree related pages
+"
 Class {
 	#name : #SoilBTreePage,
 	#superclass : #SoilIndexItemsPage,

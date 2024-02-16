@@ -1,3 +1,10 @@
+"
+The Header page is the first of the data pages. It knows the last page (and like all data pages the next page).
+
+The header page is always there, even for an empty BTree.
+
+It is easily accessible via #headerPage on the BTree index
+"
 Class {
 	#name : #SoilBTreeHeaderPage,
 	#superclass : #SoilBTreeDataPage,

@@ -1,3 +1,16 @@
+"
+The Header page is the first of the data pages.
+
+It knows 
+- the last page (and like all data pages the next page).
+- the maxLevel (maximum number of levels for the skipping lists)
+
+The header page is always there, even for an empty SkipList.
+
+It is easily accessible via #headerPage on the BTree index.
+
+See superclass comment for more infos.
+"
 Class {
 	#name : #SoilSkipListHeaderPage,
 	#superclass : #SoilSkipListPage,
