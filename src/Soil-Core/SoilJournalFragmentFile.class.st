@@ -176,8 +176,7 @@ SoilJournalFragmentFile >> path [
 ]
 
 { #category : #accessing }
-SoilJournalFragmentFile >> path: aFileReference [ 
-	aFileReference  isDirectory ifTrue: [ self halt ].
+SoilJournalFragmentFile >> path: aFileReference [
 	path := aFileReference 
 ]
 

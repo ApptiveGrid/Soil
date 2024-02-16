@@ -60,9 +60,7 @@ SoilDatabaseJournal >> soil: aSoil [
 
 { #category : #accessing }
 SoilDatabaseJournal >> transactionJournalAt: anInteger [ 
-	^ transactionJournals 
-		at: anInteger 
-		ifAbsentPut: [ self halt ]
+	^ transactionJournals at: anInteger
 ]
 
 { #category : #accessing }
