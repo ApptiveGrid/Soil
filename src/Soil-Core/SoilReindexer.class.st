@@ -67,12 +67,14 @@ SoilReindexer >> prepareNewIndex [
 	| indexCopy |
 	indexCopy := index class new 
 		path: reIndexPath;
-		initializeFilesystem;
-		initializeHeaderPage;
-		maxLevel: index maxLevel;
-		keySize: index keySize;
-		valueSize: index valueSize.
-	newIndex := indexBlock value: indexCopy
+		initializeFilesystem.
+	newIndex := indexBlock value: indexCopy.
+	newIndex hasHeaderPage ifFalse: [  
+		newIndex 
+			initializeHeaderPage;
+			maxLevel: index maxLevel;
+			keySize: index keySize;
+			valueSize: index valueSize ]
 ]
 
 { #category : #running }
