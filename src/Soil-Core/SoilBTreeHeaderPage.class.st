@@ -48,6 +48,7 @@ SoilBTreeHeaderPage >> printOn: aStream [
 SoilBTreeHeaderPage >> readFrom: aStream [ 
 	dirty := false.
 	"we do not read the pageCode, that was done before"
+	version := aStream next.
 	self readLastTransactionFrom: aStream.
 	self readNextFrom: aStream.
 	keySize := (aStream next: 2) asInteger.
