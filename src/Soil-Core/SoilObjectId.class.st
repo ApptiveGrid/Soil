@@ -130,7 +130,7 @@ SoilObjectId >> isObjectId [
 
 { #category : #testing }
 SoilObjectId >> isRemoved [ 
-	^ (segment = 0) and: [index = 0]
+	^ (segment == 0) and: [index == 0]
 ]
 
 { #category : #testing }
