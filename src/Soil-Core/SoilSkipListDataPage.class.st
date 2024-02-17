@@ -20,7 +20,7 @@ SoilSkipListDataPage >> headerSize [
 		+ 2 "items size"
 ]
 
-{ #category : #'instance creation' }
+{ #category : #reading }
 SoilSkipListDataPage >> readFrom: aStream [ 
 	super readFrom: aStream.
 	self 

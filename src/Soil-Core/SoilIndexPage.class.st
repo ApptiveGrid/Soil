@@ -100,7 +100,7 @@ SoilIndexPage >> printOn: aStream [
 	aStream << 'page : #' << index asString
 ]
 
-{ #category : #writing }
+{ #category : #reading }
 SoilIndexPage >> readFrom: aStream [ 
 	dirty := false.
 	"we do not read the pageCode here as it was read already"

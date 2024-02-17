@@ -7,7 +7,7 @@ It is easily accessible via #headerPage on the BTree index
 "
 Class {
 	#name : #SoilBTreeHeaderPage,
-	#superclass : #SoilBTreeDataPage,
+	#superclass : #SoilAbstractBTreeDataPage,
 	#instVars : [
 		'lastPageIndex'
 	],
@@ -51,13 +51,9 @@ SoilBTreeHeaderPage >> printOn: aStream [
 	aStream << 'header page : #' << index asString
 ]
 
-{ #category : #writing }
+{ #category : #reading }
 SoilBTreeHeaderPage >> readFrom: aStream [ 
-	dirty := false.
-	"we do not read the pageCode, that was done before"
-	version := aStream next.
-	self readLastTransactionFrom: aStream.
-	self readNextFrom: aStream.
+	super readFrom: aStream.
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	lastPageIndex :=(aStream next: self pointerSize) asInteger.

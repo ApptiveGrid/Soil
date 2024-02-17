@@ -80,13 +80,13 @@ SoilSkipListPage >> postCopy [
 	right := right copy
 ]
 
-{ #category : #'instance creation' }
+{ #category : #reading }
 SoilSkipListPage >> readFrom: aStream [ 
 	super readFrom: aStream.
 	self readLastTransactionFrom: aStream
 ]
 
-{ #category : #writing }
+{ #category : #reading }
 SoilSkipListPage >> readLevelsFrom: aStream [ 
 	| level |
 	level := aStream next asInteger.
