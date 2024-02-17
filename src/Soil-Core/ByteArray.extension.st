@@ -17,7 +17,7 @@ ByteArray >> asSoilObjectProxy [
 
 { #category : #'*Soil-Core' }
 ByteArray >> isRemoved [
-	"First two bits are the segment ID, for normal objects it is 1, 
+	"First two bytes are the segment ID, for normal objects it is 1, 
 	thus checking that first speeds up the check by avoiding #asInteger"
 	^ (self at: 2) == 0 and: [self asInteger == 0]
 ]
