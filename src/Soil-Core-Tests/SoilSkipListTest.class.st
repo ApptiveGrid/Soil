@@ -64,6 +64,7 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 	index := SoilSkipList new 
 		path: 'sunit-skiplist';
 		initializeFilesystem;
+		valueSize: 8;
 		open.
 	"we should be able to do a lookup"
 	self assert: ((index at: capacity) asByteArrayOfSize: 8) equals: #[ 1 2 3 4 5 6 7 8 ].
@@ -391,6 +392,7 @@ SoilSkipListTest >> testReIndexing [
 		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
 	index flush.
 	fileSizeBefore := index path size.
+	self halt.
 	index reIndex.
 	self assert: index headerPage lastPageIndex equals: 2.
 	self assert: (index pageAt: 2) items size equals: 1.

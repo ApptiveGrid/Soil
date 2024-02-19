@@ -86,7 +86,7 @@ SoilSkipList >> keySize: anInteger [
 
 { #category : #'instance creation' }
 SoilSkipList >> newHeaderPage [
-	^ SoilSkipListLegacyHeaderPage new
+	^ SoilSkipListHeaderPage new
 		index: 1;
 		lastPageIndex: 1;
 		lastFreePageIndex: 0;
