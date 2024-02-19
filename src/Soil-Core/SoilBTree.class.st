@@ -48,7 +48,7 @@ SoilBTree >> newPage [
 
 { #category : #reindexing }
 SoilBTree >> newPluggableRewriter [
-	^ SoilPluggableReindexer new 
+	^ SoilPluggableIndexRewriter new 
 		index: self
 ]
 

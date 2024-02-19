@@ -105,7 +105,7 @@ SoilSkipList >> newPage [
 
 { #category : #reindexing }
 SoilSkipList >> newPluggableRewriter [
-	^ SoilPluggableReindexer new 
+	^ SoilPluggableIndexRewriter new 
 		index: self
 ]
 

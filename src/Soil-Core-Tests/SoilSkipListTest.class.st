@@ -236,6 +236,39 @@ SoilSkipListTest >> testFirstArgLargerThenSize [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testIndexRewriting [
+	
+	| capacity fileSizeBefore |
+	capacity := index firstPage itemCapacity.
+	1 to: capacity + 1 do: [ :n | 
+		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	index flush.
+	fileSizeBefore := index path size.
+	index newPluggableRewriter rewrite.
+	self assert: index headerPage lastPageIndex equals: 2.
+	self assert: (index pageAt: 2) items size equals: 1.
+	"self assert: index path size equals: fileSizeBefore"
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testIndexRewritingWithCleaning [
+	
+	| capacity |
+	capacity := index firstPage itemCapacity.
+	1 to: capacity + 1 do: [ :n | 
+		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	index flush.
+	1 to: capacity do: [ :n | 
+		index at: n  put: SoilObjectId removed ].
+	
+	index newPluggableRewriter cleanRemoved rewrite.
+	self assert: index headerPage lastPageIndex equals: 1.
+	self assert: (index pageAt: 1) items size equals: 1.
+	self assert: (index at: capacity + 1) asByteArray equals: #[ 1 2 3 4 5 6 7 8 ].
+
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testIsEmpty [
 	self assert: index isEmpty.
 	index at: 1 put: #[1 2].
@@ -381,39 +414,6 @@ SoilSkipListTest >> testPageAddFirst [
 	page := index firstPage.
 	self assert: page numberOfItems equals: 1.
 	self assert: page items first key equals: (index indexKey: #foo)
-]
-
-{ #category : #tests }
-SoilSkipListTest >> testReIndexing [
-	
-	| capacity fileSizeBefore |
-	capacity := index firstPage itemCapacity.
-	1 to: capacity + 1 do: [ :n | 
-		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
-	index flush.
-	fileSizeBefore := index path size.
-	index newPluggableRewriter rewrite.
-	self assert: index headerPage lastPageIndex equals: 2.
-	self assert: (index pageAt: 2) items size equals: 1.
-	"self assert: index path size equals: fileSizeBefore"
-]
-
-{ #category : #tests }
-SoilSkipListTest >> testReIndexingWithCleaning [
-	
-	| capacity |
-	capacity := index firstPage itemCapacity.
-	1 to: capacity + 1 do: [ :n | 
-		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
-	index flush.
-	1 to: capacity do: [ :n | 
-		index at: n  put: SoilObjectId removed ].
-	
-	index newPluggableRewriter cleanRemoved rewrite.
-	self assert: index headerPage lastPageIndex equals: 1.
-	self assert: (index pageAt: 1) items size equals: 1.
-	self assert: (index at: capacity + 1) asByteArray equals: #[ 1 2 3 4 5 6 7 8 ].
-
 ]
 
 { #category : #tests }

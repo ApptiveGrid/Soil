@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilPluggableReindexer,
+	#name : #SoilPluggableIndexRewriter,
 	#superclass : #SoilIndexRewriter,
 	#instVars : [
 		'itemBlock',
@@ -9,7 +9,7 @@ Class {
 }
 
 { #category : #running }
-SoilPluggableReindexer >> cleanRemoved [
+SoilPluggableIndexRewriter >> cleanRemoved [
 	"wrap item block with a filter that removes stale values"
 	| oldBlock |
 	oldBlock := itemBlock.
@@ -20,38 +20,43 @@ SoilPluggableReindexer >> cleanRemoved [
 ]
 
 { #category : #running }
-SoilPluggableReindexer >> convertIndex [
+SoilPluggableIndexRewriter >> convertIndex [
 	
 ]
 
 { #category : #running }
-SoilPluggableReindexer >> convertItems [ 
+SoilPluggableIndexRewriter >> convertItem: item [
+	(itemBlock value: item) ifNotNil: [ :newItem | 
+		self storeItem: newItem ]
+]
+
+{ #category : #running }
+SoilPluggableIndexRewriter >> convertItems [ 
 	index newIterator basicAssociationsDo: [ :item |
-		(itemBlock value: item) ifNotNil: [ :newItem | 
-			self storeItem: newItem ] ]
+		self convertItem: item ]
 ]
 
 { #category : #accessing }
-SoilPluggableReindexer >> indexBlock: anObject [
+SoilPluggableIndexRewriter >> indexBlock: anObject [
 
 	indexBlock := anObject
 ]
 
 { #category : #initialization }
-SoilPluggableReindexer >> initialize [ 
+SoilPluggableIndexRewriter >> initialize [ 
 	super initialize.
 	itemBlock := [ :item | item ].
 	indexBlock := [ :idx | idx ]
 ]
 
 { #category : #accessing }
-SoilPluggableReindexer >> itemBlock: anObject [
+SoilPluggableIndexRewriter >> itemBlock: anObject [
 
 	itemBlock := anObject
 ]
 
 { #category : #running }
-SoilPluggableReindexer >> prepareNewIndex [ 
+SoilPluggableIndexRewriter >> prepareNewIndex [ 
 	"create same index class with same parameters but a temporary path instead"
 	| indexCopy headerPage |
 	indexCopy := index class new 
@@ -68,7 +73,7 @@ SoilPluggableReindexer >> prepareNewIndex [
 ]
 
 { #category : #running }
-SoilPluggableReindexer >> run [ 
+SoilPluggableIndexRewriter >> run [ 
 	self validatePath.
 	self prepareNewIndex.
 	[  
