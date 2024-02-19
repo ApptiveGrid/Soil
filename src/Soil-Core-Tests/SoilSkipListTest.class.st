@@ -392,7 +392,6 @@ SoilSkipListTest >> testReIndexing [
 		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
 	index flush.
 	fileSizeBefore := index path size.
-	self halt.
 	index reIndex.
 	self assert: index headerPage lastPageIndex equals: 2.
 	self assert: (index pageAt: 2) items size equals: 1.
