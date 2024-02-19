@@ -27,6 +27,13 @@ SoilAbstractBTreeDataPage >> find: aKey with: aBTree [
 
 ]
 
+{ #category : #utilities }
+SoilAbstractBTreeDataPage >> headerSize [
+	^ super headerSize  
+		+ self pointerSize "next"
+		+ 2 "items size"
+]
+
 { #category : #initialization }
 SoilAbstractBTreeDataPage >> initialize [ 
 	super initialize.

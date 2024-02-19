@@ -12,13 +12,6 @@ SoilBTreeDataPage class >> pageCode [
 	^ 4
 ]
 
-{ #category : #utilities }
-SoilBTreeDataPage >> headerSize [
-	^ super headerSize  
-		+ self pointerSize "next"
-		+ 2 "items size"
-]
-
 { #category : #reading }
 SoilBTreeDataPage >> readFrom: aStream [ 
 	super readFrom: aStream.

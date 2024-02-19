@@ -9,7 +9,8 @@ Class {
 	#name : #SoilBTreeHeaderPage,
 	#superclass : #SoilAbstractBTreeDataPage,
 	#instVars : [
-		'lastPageIndex'
+		'lastPageIndex',
+		'lastFreePageIndex'
 	],
 	#category : #'Soil-Core-Index-BTree'
 }
@@ -25,7 +26,19 @@ SoilBTreeHeaderPage >> headerSize [
 		+ 2 "valueSize"
 		+ 2 "keySize"
 		+ self pointerSize "lastPageIndex"
-		
+		+ self pointerSize "lastFreePageIndex"
+]
+
+{ #category : #initialization }
+SoilBTreeHeaderPage >> initialize [ 
+	super initialize.
+	lastFreePageIndex := 0
+]
+
+{ #category : #accessing }
+SoilBTreeHeaderPage >> lastFreePageIndex: anObject [
+
+	lastFreePageIndex := anObject
 ]
 
 { #category : #accessing }
@@ -57,6 +70,7 @@ SoilBTreeHeaderPage >> readFrom: aStream [
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	lastPageIndex :=(aStream next: self pointerSize) asInteger.
+	lastFreePageIndex :=(aStream next: 4) asInteger.
 	self readItemsFrom: aStream
 ]
 
@@ -66,5 +80,6 @@ SoilBTreeHeaderPage >> writeHeaderOn: aStream [
 	aStream
 		nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
-		nextPutAll: (lastPageIndex asByteArrayOfSize: self pointerSize)
+		nextPutAll: (lastPageIndex asByteArrayOfSize: self pointerSize);
+		nextPutAll: (lastFreePageIndex asByteArrayOfSize: 4)
 ]
