@@ -64,11 +64,6 @@ SoilBTree >> path: aStringOrFileReference [
 	path := aStringOrFileReference asFileReference 
 ]
 
-{ #category : #reindexing }
-SoilBTree >> rewrite [
-	self newPluggableRewriter run
-]
-
 { #category : #converting }
 SoilBTree >> thePersistentInstance [
 	^ self

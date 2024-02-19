@@ -28,10 +28,10 @@ SoilSkipList >> close [
 ]
 
 { #category : #'as yet unclassified' }
-SoilSkipList >> convertToNewSoilIn: transaction [ 
+SoilSkipList >> convertToNewFormat [
 	SoilNewFormatIndexRewriter new
 		index: self;
-		run
+		rewrite
 ]
 
 { #category : #deleting }

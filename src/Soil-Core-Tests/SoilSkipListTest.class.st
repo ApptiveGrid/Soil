@@ -64,7 +64,6 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 	index := SoilSkipList new 
 		path: 'sunit-skiplist';
 		initializeFilesystem;
-		valueSize: 8;
 		open.
 	"we should be able to do a lookup"
 	self assert: ((index at: capacity) asByteArrayOfSize: 8) equals: #[ 1 2 3 4 5 6 7 8 ].
