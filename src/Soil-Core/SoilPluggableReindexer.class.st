@@ -1,20 +1,15 @@
 Class {
-	#name : #SoilReindexer,
-	#superclass : #Object,
+	#name : #SoilPluggableReindexer,
+	#superclass : #SoilReIndexer,
 	#instVars : [
-		'force',
 		'itemBlock',
-		'indexBlock',
-		'index',
-		'reIndexPath',
-		'newIndex',
-		'newIndexIterator'
+		'indexBlock'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
 
 { #category : #running }
-SoilReindexer >> cleanRemoved [
+SoilPluggableReindexer >> cleanRemoved [
 	"wrap item block with a filter that removes stale values"
 	| oldBlock |
 	oldBlock := itemBlock.
@@ -24,45 +19,34 @@ SoilReindexer >> cleanRemoved [
 			ifFalse: [ oldBlock value: item  ] ] 
 ]
 
-{ #category : #accessing }
-SoilReindexer >> force: aBoolean [ 
-	force := aBoolean
+{ #category : #running }
+SoilPluggableReindexer >> convertItems [ 
+	index newIterator basicAssociationsDo: [ :item |
+		(itemBlock value: item) ifNotNil: [ :newItem | 
+			self storeItem: newItem ] ]
 ]
 
 { #category : #accessing }
-SoilReindexer >> index: anIndex [ 
-	index := anIndex.
-	reIndexPath := anIndex path, #reindex
-]
-
-{ #category : #accessing }
-SoilReindexer >> indexBlock: anObject [
+SoilPluggableReindexer >> indexBlock: anObject [
 
 	indexBlock := anObject
 ]
 
 { #category : #initialization }
-SoilReindexer >> initialize [ 
+SoilPluggableReindexer >> initialize [ 
 	super initialize.
-	force := false.
 	itemBlock := [ :item | item ].
 	indexBlock := [ :idx | idx ]
 ]
 
 { #category : #accessing }
-SoilReindexer >> itemBlock: anObject [
+SoilPluggableReindexer >> itemBlock: anObject [
 
 	itemBlock := anObject
 ]
 
 { #category : #running }
-SoilReindexer >> newIndexIterator [  
-	^ newIndexIterator ifNil: [  
-		newIndexIterator := newIndex newIterator ] 
-]
-
-{ #category : #running }
-SoilReindexer >> prepareNewIndex [ 
+SoilPluggableReindexer >> prepareNewIndex [ 
 	"create same index class with same parameters but a temporary path instead"
 	| indexCopy headerPage |
 	indexCopy := index class new 
@@ -82,27 +66,10 @@ SoilReindexer >> prepareNewIndex [
 ]
 
 { #category : #running }
-SoilReindexer >> replaceIndex [ 
-	"flush new index to disk and then close streams"
-	newIndex 
-		flush;
-		close.
-	"close old index so the file store gets unloaded"
-	index close.
-	"replace old index file with new index file"
-	index path delete.
-	reIndexPath moveTo: index path.
-	"reopen source index to load new index file"
-	index open.
-	
-]
-
-{ #category : #running }
-SoilReindexer >> run [ 
+SoilPluggableReindexer >> run [ 
 	self validatePath.
 	self prepareNewIndex.
 	[  
-	self halt.
 		index newIterator basicAssociationsDo: [ :item |
 				
 				(itemBlock value: item) ifNotNil: [ :newItem | 
@@ -111,13 +78,4 @@ SoilReindexer >> run [
 			reIndexPath deleteIfAbsent: [].
 			Error signal: 'reindexing failed' ].
 	self replaceIndex 
-]
-
-{ #category : #running }
-SoilReindexer >> validatePath [
-	"forcing a reindex will remove already existing temporary path"
-	force ifTrue: [ reIndexPath deleteIfAbsent: [ ] ].
-	"if not being forced it is safer to abort if the temporary path for reindexing exists"
-	reIndexPath exists 
-		ifTrue: [ Error signal: 'path of index reindexing file already exists.' ].
 ]

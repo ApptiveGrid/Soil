@@ -48,7 +48,7 @@ SoilBTree >> newPage [
 
 { #category : #reindexing }
 SoilBTree >> newReIndexer [
-	^ SoilReindexer new 
+	^ SoilPluggableReindexer new 
 		index: self
 ]
 

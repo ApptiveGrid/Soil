@@ -92,7 +92,7 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 		ifAbsent: nil.
 		
 	objectId ifNotNil: [ 
-		behaviorDescription := (objectId index = 2)
+		behaviorDescription := (objectId asSoilObjectId index = 2)
 			ifTrue: [ ^ SoilBehaviorDescription meta ]
 			ifFalse: [ (self objectWithId: objectId) 
 				ifNotNil: [ :object | object objectId: objectId ]
@@ -547,7 +547,7 @@ SoilTransaction >> readVersion: anInteger [
 
 { #category : #api }
 SoilTransaction >> recordWithId: objectId [
-	(objectId isInitialized) ifFalse: [ SoilIndexOutOfRange signal: 'object id ', objectId printString, ' needs index greater than zero' ].
+	(objectId asSoilObjectId isInitialized) ifFalse: [ SoilIndexOutOfRange signal: 'object id ', objectId printString, ' needs index greater than zero' ].
 	^ self objectRepository 
 		at: objectId 
 		version: readVersion

@@ -65,8 +65,8 @@ SoilObjectRepository >> at: objectId put: bytes [
 { #category : #accessing }
 SoilObjectRepository >> at: objectid version: version [ 
 	| segment |
-	segment := self segmentAt: objectid segment.
-	^ (segment at: objectid index version: version)
+	segment := self segmentAt: objectid asSoilObjectId segment.
+	^ (segment at: objectid asSoilObjectId index version: version)
 		ifNotNil: [ :record | record objectId: objectid ]
 ]
 

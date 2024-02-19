@@ -1,24 +1,16 @@
-"
-This is a special subclass for all data pages but the first. See superclass comment for more infos
-"
 Class {
-	#name : #SoilSkipListDataPage,
+	#name : #SoilSkipListLegacyDataPage,
 	#superclass : #SoilSkipListPage,
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #'as yet unclassified' }
-SoilSkipListDataPage class >> legacyClass [
-	^ SoilSkipListLegacyDataPage 
-]
-
 { #category : #accessing }
-SoilSkipListDataPage class >> pageCode [ 
+SoilSkipListLegacyDataPage class >> pageCode [ 
 	^ 2
 ]
 
 { #category : #utilities }
-SoilSkipListDataPage >> headerSize [
+SoilSkipListLegacyDataPage >> headerSize [
 	^ super headerSize  
 		+ 1 "level"
 		+ (self level * self rightSize)
@@ -26,15 +18,16 @@ SoilSkipListDataPage >> headerSize [
 ]
 
 { #category : #'instance creation' }
-SoilSkipListDataPage >> readFrom: aStream [ 
-	super readFrom: aStream.
+SoilSkipListLegacyDataPage >> readFrom: aStream [ 
+	dirty := false.
 	self 
+		readLastTransactionFrom: aStream;
 		readLevelsFrom: aStream;
 		readItemsFrom: aStream
 ]
 
 { #category : #writing }
-SoilSkipListDataPage >> writeHeaderOn: aStream [ 
+SoilSkipListLegacyDataPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
 	self writeLevelsOn: aStream.
 	aStream nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
