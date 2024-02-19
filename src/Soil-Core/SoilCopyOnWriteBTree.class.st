@@ -17,18 +17,6 @@ SoilCopyOnWriteBTree >> newPage [
 	^ wrapped newPage
 ]
 
-{ #category : #reindexing }
-SoilCopyOnWriteBTree >> reIndex [
-	wrapped reIndex. 
-	self flushCachedPages 
-]
-
-{ #category : #reindexing }
-SoilCopyOnWriteBTree >> reIndexUsing: itemBlock [
-	wrapped reIndexUsing: itemBlock.
-	self flushCachedPages 
-]
-
 { #category : #converting }
 SoilCopyOnWriteBTree >> thePersistentInstance [
 	^ wrapped

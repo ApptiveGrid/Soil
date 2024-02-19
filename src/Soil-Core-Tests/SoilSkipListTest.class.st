@@ -392,7 +392,7 @@ SoilSkipListTest >> testReIndexing [
 		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
 	index flush.
 	fileSizeBefore := index path size.
-	index reIndex.
+	index newPluggableRewriter rewrite.
 	self assert: index headerPage lastPageIndex equals: 2.
 	self assert: (index pageAt: 2) items size equals: 1.
 	"self assert: index path size equals: fileSizeBefore"
@@ -409,7 +409,7 @@ SoilSkipListTest >> testReIndexingWithCleaning [
 	1 to: capacity do: [ :n | 
 		index at: n  put: SoilObjectId removed ].
 	
-	index newReIndexer cleanRemoved run.
+	index newPluggableRewriter cleanRemoved rewrite.
 	self assert: index headerPage lastPageIndex equals: 1.
 	self assert: (index pageAt: 1) items size equals: 1.
 	self assert: (index at: capacity + 1) asByteArray equals: #[ 1 2 3 4 5 6 7 8 ].

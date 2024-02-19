@@ -1,58 +1,64 @@
 Class {
-	#name : #SoilReIndexer,
+	#name : #SoilIndexRewriter,
 	#superclass : #Object,
 	#instVars : [
 		'index',
-		'reIndexPath',
 		'force',
 		'newIndex',
-		'newIndexIterator'
+		'newIndexIterator',
+		'rewritePath'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
 
+{ #category : #accessing }
+SoilIndexRewriter class >> index: anIndex [ 
+	^ self new 
+		index: anIndex 
+]
+
 { #category : #running }
-SoilReIndexer >> convertIndex [
+SoilIndexRewriter >> convertIndex [
 	self subclassResponsibility 
 ]
 
 { #category : #running }
-SoilReIndexer >> convertItem: item [
+SoilIndexRewriter >> convertItem: item [
 	self subclassResponsibility 
 ]
 
 { #category : #'as yet unclassified' }
-SoilReIndexer >> convertItems [
+SoilIndexRewriter >> convertItems [
 	index newIterator basicAssociationsDo: [ :item |
 		self storeItem: (self convertItem: item) ] 
 ]
 
 { #category : #accessing }
-SoilReIndexer >> force: aBoolean [ 
+SoilIndexRewriter >> force: aBoolean [ 
 	force := aBoolean
 ]
 
 { #category : #accessing }
-SoilReIndexer >> index: anIndex [ 
+SoilIndexRewriter >> index: anIndex [ 
 	index := anIndex.
-	reIndexPath := anIndex path, #reindex
+	rewritePath := anIndex path, #reindex
 ]
 
 { #category : #initialization }
-SoilReIndexer >> initialize [ 
+SoilIndexRewriter >> initialize [ 
 	super initialize.
 	force := false.
 
 ]
 
 { #category : #running }
-SoilReIndexer >> newIndexIterator [  
+SoilIndexRewriter >> newIndexIterator [  
 	^ newIndexIterator ifNil: [  
 		newIndexIterator := newIndex newIterator ] 
 ]
 
 { #category : #running }
-SoilReIndexer >> replaceIndex [ 
+SoilIndexRewriter >> replaceIndex [ 
 	"flush new index to disk and then close streams"
 	newIndex 
 		flush;
@@ -61,14 +67,14 @@ SoilReIndexer >> replaceIndex [
 	index close.
 	"replace old index file with new index file"
 	index path delete.
-	reIndexPath moveTo: index path.
+	rewritePath moveTo: index path.
 	"reopen source index to load new index file"
 	index open.
 	
 ]
 
 { #category : #running }
-SoilReIndexer >> run [ 
+SoilIndexRewriter >> rewrite [ 
 	self validatePath.
 	[  
 		self 
@@ -77,20 +83,20 @@ SoilReIndexer >> run [
 			convertItems; 
 			replaceIndex  ]
 		ifCurtailed: [ 
-			reIndexPath deleteIfAbsent: [].
+			rewritePath deleteIfAbsent: [].
 			Error signal: 'reindexing failed' ].
 ]
 
 { #category : #running }
-SoilReIndexer >> storeItem: anItem [ 
+SoilIndexRewriter >> storeItem: anItem [ 
 	self newIndexIterator at: anItem key put: anItem value 
 ]
 
 { #category : #running }
-SoilReIndexer >> validatePath [
+SoilIndexRewriter >> validatePath [
 	"forcing a reindex will remove already existing temporary path"
-	force ifTrue: [ reIndexPath deleteIfAbsent: [ ] ].
+	force ifTrue: [ rewritePath deleteIfAbsent: [ ] ].
 	"if not being forced it is safer to abort if the temporary path for reindexing exists"
-	reIndexPath exists 
+	rewritePath exists 
 		ifTrue: [ Error signal: 'path of index reindexing file already exists.' ].
 ]

@@ -43,6 +43,11 @@ SoilSkipListHeaderPage >> initialize [
 	lastFreePageIndex := 0
 ]
 
+{ #category : #initialization }
+SoilSkipListHeaderPage >> initializeInIndex: aSoilSkipList [ 
+	
+]
+
 { #category : #accessing }
 SoilSkipListHeaderPage >> keySize: anInteger [
 	"as long as no items have been added the key size can be changed"

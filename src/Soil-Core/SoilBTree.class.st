@@ -47,7 +47,7 @@ SoilBTree >> newPage [
 ]
 
 { #category : #reindexing }
-SoilBTree >> newReIndexer [
+SoilBTree >> newPluggableRewriter [
 	^ SoilPluggableReindexer new 
 		index: self
 ]
@@ -65,15 +65,8 @@ SoilBTree >> path: aStringOrFileReference [
 ]
 
 { #category : #reindexing }
-SoilBTree >> reIndex [
-	self newReIndexer run
-]
-
-{ #category : #reindexing }
-SoilBTree >> reIndexUsing: itemBlock [ 
-	self newReIndexer 
-		itemBlock: itemBlock;
-		run
+SoilBTree >> rewrite [
+	self newPluggableRewriter run
 ]
 
 { #category : #converting }

@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilPluggableReindexer,
-	#superclass : #SoilReIndexer,
+	#superclass : #SoilIndexRewriter,
 	#instVars : [
 		'itemBlock',
 		'indexBlock'
@@ -17,6 +17,11 @@ SoilPluggableReindexer >> cleanRemoved [
 		item value isRemoved 
 			ifTrue: [ nil ]
 			ifFalse: [ oldBlock value: item  ] ] 
+]
+
+{ #category : #running }
+SoilPluggableReindexer >> convertIndex [
+	
 ]
 
 { #category : #running }
@@ -50,7 +55,7 @@ SoilPluggableReindexer >> prepareNewIndex [
 	"create same index class with same parameters but a temporary path instead"
 	| indexCopy headerPage |
 	indexCopy := index class new 
-		path: reIndexPath;
+		path: rewritePath;
 		initializeFilesystem.
 	newIndex := indexBlock cull: indexCopy cull: index.
 	newIndex hasHeaderPage ifFalse: [  
@@ -59,10 +64,7 @@ SoilPluggableReindexer >> prepareNewIndex [
 			maxLevel: index maxLevel;
 			keySize: index keySize;
 			valueSize: index valueSize;
-			headerPage.
-		"headerPage
-			lastPageIndex: index headerPage lastPageIndex;
-			lastFreePageIndex: index headerPage lastFreePageIndex" ]
+			headerPage ]
 ]
 
 { #category : #running }
@@ -75,7 +77,7 @@ SoilPluggableReindexer >> run [
 				(itemBlock value: item) ifNotNil: [ :newItem | 
 					self newIndexIterator at: newItem key put: newItem value ] ] ]
 		ifCurtailed: [ 
-			reIndexPath deleteIfAbsent: [].
+			rewritePath deleteIfAbsent: [].
 			Error signal: 'reindexing failed' ].
 	self replaceIndex 
 ]

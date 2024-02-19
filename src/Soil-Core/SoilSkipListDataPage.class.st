@@ -25,6 +25,12 @@ SoilSkipListDataPage >> headerSize [
 		+ 2 "items size"
 ]
 
+{ #category : #initialization }
+SoilSkipListDataPage >> initializeInIndex: aSoilSkipList [ 
+	keySize := aSoilSkipList keySize.
+	valueSize := aSoilSkipList valueSize 
+]
+
 { #category : #'instance creation' }
 SoilSkipListDataPage >> readFrom: aStream [ 
 	super readFrom: aStream.

@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilNewFormatIndexRewriter,
-	#superclass : #SoilReIndexer,
+	#superclass : #SoilIndexRewriter,
 	#category : #'Soil-Core-Index-Common'
 }
 
@@ -20,7 +20,7 @@ SoilNewFormatIndexRewriter >> prepareNewIndex [
 	"create same index class with same parameters but a temporary path instead"
 	| headerPage |
 	newIndex := SoilSkipList new 
-		path: reIndexPath;
+		path: rewritePath;
 		initializeFilesystem.
 	newIndex hasHeaderPage ifFalse: [  
 		headerPage := newIndex 

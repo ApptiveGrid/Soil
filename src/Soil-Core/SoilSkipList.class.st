@@ -104,7 +104,7 @@ SoilSkipList >> newPage [
 ]
 
 { #category : #reindexing }
-SoilSkipList >> newReIndexer [
+SoilSkipList >> newPluggableRewriter [
 	^ SoilPluggableReindexer new 
 		index: self
 ]
@@ -131,18 +131,6 @@ SoilSkipList >> path: aStringOrFileReference [
 	path := aStringOrFileReference asFileReference 
 ]
 
-{ #category : #reindexing }
-SoilSkipList >> reIndex [
-	self newReIndexer run
-]
-
-{ #category : #reindexing }
-SoilSkipList >> reIndexUsing: itemBlock [ 
-	self newReIndexer 
-		itemBlock: itemBlock;
-		run
-]
-
 { #category : #'instance creation' }
 SoilSkipList >> readPageClassFrom: aStream [.
 	^ SoilIndexPage readPageClassFrom: aStream
@@ -151,9 +139,8 @@ SoilSkipList >> readPageClassFrom: aStream [.
 { #category : #'instance creation' }
 SoilSkipList >> readPageFrom: aStream [
 	| page |
-	page := (self readPageClassFrom: aStream)new 
-		keySize: keySize;
-		valueSize: valueSize.
+	page := (self readPageClassFrom: aStream) new.
+	page initializeInIndex: self. 
 	^ page readFrom: aStream 
 ]
 
