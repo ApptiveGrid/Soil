@@ -17,6 +17,12 @@ SoilIndexRewriter class >> index: anIndex [
 		index: anIndex 
 ]
 
+{ #category : #testing }
+SoilIndexRewriter class >> isAbstract [
+
+	^ self == SoilIndexRewriter
+]
+
 { #category : #running }
 SoilIndexRewriter >> convertIndex [
 	self subclassResponsibility 
@@ -27,7 +33,7 @@ SoilIndexRewriter >> convertItem: item [
 	self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #running }
 SoilIndexRewriter >> convertItems [
 	index newIterator basicAssociationsDo: [ :item |
 		self storeItem: (self convertItem: item) ] 
@@ -55,6 +61,11 @@ SoilIndexRewriter >> initialize [
 SoilIndexRewriter >> newIndexIterator [  
 	^ newIndexIterator ifNil: [  
 		newIndexIterator := newIndex newIterator ] 
+]
+
+{ #category : #running }
+SoilIndexRewriter >> prepareNewIndex [
+	^ self subclassResponsibility
 ]
 
 { #category : #running }

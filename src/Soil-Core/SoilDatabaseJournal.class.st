@@ -69,6 +69,11 @@ SoilDatabaseJournal >> transactionJournals: anObject [
 	transactionJournals := anObject
 ]
 
+{ #category : #accessing }
+SoilDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock [ 
+	^ self subclassResponsibility
+]
+
 { #category : #adding }
 SoilDatabaseJournal >> verifyNextJournalIndex: index [ 
 	"transaction journals have a strict sequence in the same way the

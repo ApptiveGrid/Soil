@@ -1,3 +1,13 @@
+"
+The SoilIndexedDictionary implements a Dictionary that uses an on-disk index.
+
+Keys are created with #asIndexKeyOfSize: with the keySize being configurable when creating the dictionary. 
+Values are SoilObjectId instances (8 byte). 
+
+The indexes store data on pages (currently 4kb) on disk. 
+
+Take care: SoilIndexedDictionary needs a transaction before values can be added.
+"
 Class {
 	#name : #SoilIndexedDictionary,
 	#superclass : #Object,
