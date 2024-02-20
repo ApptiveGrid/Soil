@@ -1,3 +1,13 @@
+"
+SoilObjectId is a unique ID for all subgraphs (roots) stored in the database.
+
+Object IDs have two parts: segement and index. 
+
+for now, we fix the segment id to be the 16 upper bits and the index be 48 lower bits, this will be configurable in the future
+
+Segment 0 is use for meta data (e.g SoilBehaviorDescription), while domain objects are in Segment 1.
+
+"
 Class {
 	#name : #SoilObjectId,
 	#superclass : #Object,
@@ -20,17 +30,18 @@ SoilObjectId class >> example [
 
 { #category : #'instance creation' }
 SoilObjectId class >> readFrom: stream [ 
-	"for now fix the segment id to be the 16 upper bits and the index 
-	be 48 lower bits"
+	"for now fix the segment id to be the 16 upper bits and the index be 48 lower bits
+	If this is changed, please update the optimization in ByteArray>>#isRemoved"
+	
 	| segment index |
 	segment := (stream next: 2) asInteger.
 	index := (stream next: 6) asInteger.
-	"(index = 0) ifTrue: [ SoilIndexOutOfRange signal: 'index cannot be zero' ]."
 	^ self segment: segment index: index
 ]
 
 { #category : #'instance creation' }
 SoilObjectId class >> removed [
+	"This special ID models a removed value in a SoilIndexedDictionary"
 	^ self new segment: 0; index: 0
 ]
 
@@ -130,7 +141,7 @@ SoilObjectId >> isObjectId [
 
 { #category : #testing }
 SoilObjectId >> isRemoved [ 
-	^ (segment = 0) and: [index = 0]
+	^ (segment == 0) and: [index == 0]
 ]
 
 { #category : #testing }

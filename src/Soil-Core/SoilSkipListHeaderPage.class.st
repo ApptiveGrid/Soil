@@ -104,7 +104,7 @@ SoilSkipListHeaderPage >> nextPageIndex [
 	^ lastPageIndex 
 ]
 
-{ #category : #'instance creation' }
+{ #category : #reading }
 SoilSkipListHeaderPage >> readFrom: aStream [ 
 	super readFrom: aStream.
 	self 
@@ -113,7 +113,7 @@ SoilSkipListHeaderPage >> readFrom: aStream [
 		readItemsFrom: aStream
 ]
 
-{ #category : #'instance creation' }
+{ #category : #reading }
 SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
