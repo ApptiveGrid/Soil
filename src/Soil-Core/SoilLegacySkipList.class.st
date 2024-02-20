@@ -14,6 +14,6 @@ SoilLegacySkipList >> newHeaderPage [
 ]
 
 { #category : #'instance creation' }
-SoilLegacySkipList >> readPageClassFrom: aStream [.
+SoilLegacySkipList >> readPageClassFrom: aStream [
 	^ (super readPageClassFrom: aStream) legacyClass 
 ]

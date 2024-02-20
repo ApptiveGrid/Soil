@@ -41,6 +41,11 @@ SoilBTreeIndexPage >> headerSize [
 		+ 2 "items size"
 ]
 
+{ #category : #initialization }
+SoilBTreeIndexPage >> initializeInIndex: aSoilSkipList [ 
+	keySize := aSoilSkipList keySize
+]
+
 { #category : #adding }
 SoilBTreeIndexPage >> insertItem: item for: iterator [
 	| foundItem return newPage  |

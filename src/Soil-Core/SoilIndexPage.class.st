@@ -51,17 +51,6 @@ SoilIndexPage class >> readPageCodeFrom: aStream [
 	
 ]
 
-{ #category : #'instance creation' }
-SoilIndexPage class >> readPageFrom: aStream keySize: keySize valueSize: valueSize [
-	| pageCode pageClass page |
-	pageCode := self readPageCodeFrom: aStream.
-	pageClass := self allSubclasses detect: [ :class | class pageCode = pageCode ].
-	page := pageClass new.
-	page keySize: keySize.
-	page valueSize: valueSize.
-	^page readFrom: aStream.
-]
-
 { #category : #utilities }
 SoilIndexPage >> headerSize [ 
 	^ 2 "pageCode, version" 

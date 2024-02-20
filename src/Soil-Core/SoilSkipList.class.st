@@ -131,19 +131,6 @@ SoilSkipList >> path: aStringOrFileReference [
 	path := aStringOrFileReference asFileReference 
 ]
 
-{ #category : #'instance creation' }
-SoilSkipList >> readPageClassFrom: aStream [.
-	^ SoilIndexPage readPageClassFrom: aStream
-]
-
-{ #category : #'instance creation' }
-SoilSkipList >> readPageFrom: aStream [
-	| page |
-	page := (self readPageClassFrom: aStream) new.
-	page initializeInIndex: self. 
-	^ page readFrom: aStream 
-]
-
 { #category : #converting }
 SoilSkipList >> thePersistentInstance [
 	^ self

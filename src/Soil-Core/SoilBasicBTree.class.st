@@ -108,11 +108,6 @@ SoilBasicBTree >> pageClass [
 	^ SoilBTreeDataPage
 ]
 
-{ #category : #'instance creation' }
-SoilBasicBTree >> readPageFrom: aStream [
-	^ SoilBTreePage readPageFrom: aStream keySize: self keySize valueSize: self valueSize
-]
-
 { #category : #accessing }
 SoilBasicBTree >> rootPage [
 	^ self store pageAt: 2
