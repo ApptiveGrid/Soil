@@ -172,11 +172,6 @@ SoilIndex >> pages [
 	^ self store pages
 ]
 
-{ #category : #reindexing }
-SoilIndex >> reIndexUsing: itemBlock [
-	^ self subclassResponsibility
-]
-
 { #category : #'instance creation' }
 SoilIndex >> readPageClassFrom: aStream [
 	^ SoilIndexPage readPageClassFrom: aStream
@@ -206,11 +201,6 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 	^ ((index := page indexOfKey: (self indexKey: key)) > 0)
 		ifTrue: [ (page itemRemoveIndex: index) value ]
 		ifFalse: [ aBlock value ]
-]
-
-{ #category : #reindexing }
-SoilIndex >> rewrite [
-	^ self subclassResponsibility
 ]
 
 { #category : #accessing }

@@ -7,7 +7,7 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilSkipListDataPage class >> legacyClass [
 	^ SoilSkipListLegacyDataPage 
 ]

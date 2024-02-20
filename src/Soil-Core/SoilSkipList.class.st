@@ -27,7 +27,7 @@ SoilSkipList >> close [
 	keySize := nil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'converting-legacy' }
 SoilSkipList >> convertToNewFormat [
 	SoilNewFormatIndexRewriter new
 		index: self;

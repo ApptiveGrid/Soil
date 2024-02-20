@@ -13,10 +13,10 @@ Class {
 
 { #category : #accessing }
 SoilBTreeIterator >> basicAt: indexKey put: anObject [
-	| posiblePrioValue |
-	posiblePrioValue := index rootPage insertItem: (indexKey -> anObject) for: self.
+	| possiblePriorValue |
+	possiblePriorValue := index rootPage insertItem: (indexKey -> anObject) for: self.
 	"as an optimization we return the prior value stored in the list. If there was none we return nil"
-	^ posiblePrioValue returnValue
+	^ possiblePriorValue returnValue
 ]
 
 { #category : #private }
