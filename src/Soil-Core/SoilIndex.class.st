@@ -177,6 +177,19 @@ SoilIndex >> reIndexUsing: itemBlock [
 	^ self subclassResponsibility
 ]
 
+{ #category : #'instance creation' }
+SoilIndex >> readPageClassFrom: aStream [
+	^ SoilIndexPage readPageClassFrom: aStream
+]
+
+{ #category : #'instance creation' }
+SoilIndex >> readPageFrom: aStream [
+	| page |
+	page := (self readPageClassFrom: aStream) new.
+	page initializeInIndex: self. 
+	^ page readFrom: aStream 
+]
+
 { #category : #removing }
 SoilIndex >> removeKey: key [ 
 	^ self

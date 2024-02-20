@@ -12,6 +12,12 @@ SoilBTreeDataPage class >> pageCode [
 	^ 4
 ]
 
+{ #category : #initialization }
+SoilBTreeDataPage >> initializeInIndex: aSoilSkipList [ 
+	keySize := aSoilSkipList keySize.
+	valueSize := aSoilSkipList valueSize 
+]
+
 { #category : #reading }
 SoilBTreeDataPage >> readFrom: aStream [ 
 	super readFrom: aStream.
