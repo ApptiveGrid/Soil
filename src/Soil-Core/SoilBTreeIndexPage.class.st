@@ -65,13 +65,13 @@ SoilBTreeIndexPage >> printOn: aStream [
 	aStream << 'index page : #' << index asString
 ]
 
-{ #category : #'reading-writing' }
+{ #category : #reading }
 SoilBTreeIndexPage >> readFrom: aStream [ 
 	super readFrom: aStream.
 	self readItemsFrom: aStream
 ]
 
-{ #category : #'reading-writing' }
+{ #category : #reading }
 SoilBTreeIndexPage >> readItemsFrom: aStream [ 
 	| numberOfItems |
 	
