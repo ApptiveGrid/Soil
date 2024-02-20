@@ -4,6 +4,16 @@ Class {
 	#category : #'Soil-Core-Tests'
 }
 
+{ #category : #'instance creation' }
+SoilSkipListPageTest >> readPageFrom: aStream [ 
+	| page |
+	page := (SoilIndexPage readPageClassFrom: aStream) new.
+	page 
+		keySize: 8;
+		valueSize: 8.
+	^ page readFrom: aStream
+]
+
 { #category : #tests }
 SoilSkipListPageTest >> testCreation [ 
 	| page |
@@ -33,7 +43,7 @@ SoilSkipListPageTest >> testDataPageFull [
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self deny: page isDirty.
-	readPage := SoilIndexPage readPageFrom: bytes readStream keySize: 8 valueSize: 8.
+	readPage := self readPageFrom: bytes readStream.
 	1 to: 255 do: [ :n |
 		self assert: (page itemAt: n ifAbsent: nil) value equals: n ]
 
@@ -83,7 +93,7 @@ SoilSkipListPageTest >> testDataPageWriteAndRead [
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self deny: page isDirty.
-	readPage := SoilIndexPage readPageFrom: bytes readStream keySize: 8 valueSize: 8.
+	readPage := self readPageFrom: bytes readStream.
 	self assert: readPage level equals: 8.
 	self deny: readPage isDirty 
 ]
@@ -99,7 +109,7 @@ SoilSkipListPageTest >> testDataPageWriteAndReadRightArray [
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self deny: page isDirty.
-	readPage := SoilIndexPage readPageFrom: bytes readStream keySize: 8 valueSize: 8. 
+	readPage := self readPageFrom: bytes readStream. 
 	self assert: readPage level equals: 8.
 	self assert: readPage right equals: #( 1 2 3 4 5 6 7 8).
 	self deny: readPage isDirty 
@@ -123,7 +133,7 @@ SoilSkipListPageTest >> testHeaderPageFull [
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self deny: page isDirty.
-	readPage := SoilIndexPage readPageFrom: bytes readStream keySize: 8 valueSize: 8.
+	readPage := self readPageFrom: bytes readStream.
 	1 to: 253 do: [ :n |
 		self assert: (page itemAt: n ifAbsent: nil) value equals: n ]
 
@@ -181,7 +191,7 @@ SoilSkipListPageTest >> testHeaderPageWriteAndRead [
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self deny: page isDirty.
-	readPage := SoilIndexPage readPageFrom: bytes readStream keySize: 8 valueSize: 8.
+	readPage := self readPageFrom: bytes readStream.
 	self assert: readPage level equals: 8.
 	self assert: readPage keySize equals: 16.
 	self assert: readPage valueSize equals: 8.
