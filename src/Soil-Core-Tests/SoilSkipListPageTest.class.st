@@ -133,7 +133,7 @@ SoilSkipListPageTest >> testHeaderPageFull [
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self deny: page isDirty.
-	readPage := (SoilIndexPage readPageFrom: bytes readStream) keySize: 8; valueSize: 8.
+	readPage := self readPageFrom: bytes readStream.
 	1 to: 253 do: [ :n |
 		self assert: (page itemAt: n ifAbsent: nil) value equals: n ]
 
