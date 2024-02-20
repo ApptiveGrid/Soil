@@ -52,12 +52,6 @@ SoilIndexPage class >> readPageCodeFrom: aStream [
 ]
 
 { #category : #'instance creation' }
-SoilIndexPage class >> readPageFrom: aStream [
-	
-	^ (self readPageClassFrom: aStream) new
-]
-
-{ #category : #'instance creation' }
 SoilIndexPage class >> readPageFrom: aStream keySize: keySize valueSize: valueSize [
 	| pageCode pageClass page |
 	pageCode := self readPageCodeFrom: aStream.
