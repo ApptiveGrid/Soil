@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #'as yet unclassified' }
+SoilSkipListDataPage class >> legacyClass [
+	^ SoilSkipListLegacyDataPage 
+]
+
 { #category : #accessing }
 SoilSkipListDataPage class >> pageCode [ 
 	^ 2
@@ -20,7 +25,13 @@ SoilSkipListDataPage >> headerSize [
 		+ 2 "items size"
 ]
 
-{ #category : #reading }
+{ #category : #initialization }
+SoilSkipListDataPage >> initializeInIndex: aSoilSkipList [ 
+	keySize := aSoilSkipList keySize.
+	valueSize := aSoilSkipList valueSize 
+]
+
+{ #category : #'instance creation' }
 SoilSkipListDataPage >> readFrom: aStream [ 
 	super readFrom: aStream.
 	self 

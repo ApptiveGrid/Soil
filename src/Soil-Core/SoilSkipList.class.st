@@ -27,6 +27,13 @@ SoilSkipList >> close [
 	keySize := nil
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipList >> convertToNewFormat [
+	SoilNewFormatIndexRewriter new
+		index: self;
+		rewrite
+]
+
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
@@ -97,8 +104,8 @@ SoilSkipList >> newPage [
 ]
 
 { #category : #reindexing }
-SoilSkipList >> newReIndexer [
-	^ SoilReindexer new 
+SoilSkipList >> newPluggableRewriter [
+	^ SoilPluggableIndexRewriter new 
 		index: self
 ]
 
@@ -124,22 +131,17 @@ SoilSkipList >> path: aStringOrFileReference [
 	path := aStringOrFileReference asFileReference 
 ]
 
-{ #category : #reindexing }
-SoilSkipList >> reIndex [
-	self newReIndexer run
-]
-
-{ #category : #reindexing }
-SoilSkipList >> reIndexUsing: itemBlock [ 
-	self newReIndexer 
-		itemBlock: itemBlock;
-		run
+{ #category : #'instance creation' }
+SoilSkipList >> readPageClassFrom: aStream [.
+	^ SoilIndexPage readPageClassFrom: aStream
 ]
 
 { #category : #'instance creation' }
 SoilSkipList >> readPageFrom: aStream [
-	^ (SoilIndexPage readPageFrom: aStream keySize: self keySize valueSize: self valueSize)
-		pageSize: self pageSize 
+	| page |
+	page := (self readPageClassFrom: aStream) new.
+	page initializeInIndex: self. 
+	^ page readFrom: aStream 
 ]
 
 { #category : #converting }

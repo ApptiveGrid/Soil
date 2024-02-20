@@ -57,6 +57,14 @@ SoilPagedFileIndexStore >> hasStream [
 	^ stream notNil
 ]
 
+{ #category : #accessing }
+SoilPagedFileIndexStore >> headerPage [ 
+	pages ifEmpty: [ 
+		self ensureStreamIsOpen.
+		self readHeaderPage ].
+	^ super headerPage
+]
+
 { #category : #initialization }
 SoilPagedFileIndexStore >> initialize [ 
 	super initialize.
@@ -80,8 +88,7 @@ SoilPagedFileIndexStore >> initializeHeaderPage [
 SoilPagedFileIndexStore >> open [
 	streamSemaphore critical: [  
 		self 
-			openStream;
-			readHeaderPage ]
+			openStream ]
 ]
 
 { #category : #'open/close' }

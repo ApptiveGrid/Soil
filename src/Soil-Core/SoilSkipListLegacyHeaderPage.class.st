@@ -1,18 +1,5 @@
-"
-The Header page is the first of the data pages.
-
-It knows 
-- the last page (and like all data pages the next page).
-- the maxLevel (maximum number of levels for the skipping lists)
-
-The header page is always there, even for an empty SkipList.
-
-It is easily accessible via #headerPage on the BTree index.
-
-See superclass comment for more infos.
-"
 Class {
-	#name : #SoilSkipListHeaderPage,
+	#name : #SoilSkipListLegacyHeaderPage,
 	#superclass : #SoilSkipListPage,
 	#instVars : [
 		'maxLevel',
@@ -23,12 +10,12 @@ Class {
 }
 
 { #category : #accessing }
-SoilSkipListHeaderPage class >> pageCode [ 
+SoilSkipListLegacyHeaderPage class >> pageCode [ 
 	^ 1 
 ]
 
 { #category : #utilities }
-SoilSkipListHeaderPage >> headerSize [
+SoilSkipListLegacyHeaderPage >> headerSize [
 	^ super headerSize 
 		+ 14 "keySize(2), valueSize(2), maxLevel(2), lastPageIndex(4), lastFreePageIndex(4)" 
 		+ 1 "level" 
@@ -37,19 +24,14 @@ SoilSkipListHeaderPage >> headerSize [
 ]
 
 { #category : #initialization }
-SoilSkipListHeaderPage >> initialize [ 
+SoilSkipListLegacyHeaderPage >> initialize [ 
 	super initialize.
 	lastPageIndex := 1.
 	lastFreePageIndex := 0
 ]
 
-{ #category : #initialization }
-SoilSkipListHeaderPage >> initializeInIndex: aSoilSkipList [ 
-	
-]
-
 { #category : #accessing }
-SoilSkipListHeaderPage >> keySize: anInteger [
+SoilSkipListLegacyHeaderPage >> keySize: anInteger [
 	"as long as no items have been added the key size can be changed"
 	((self lastPageIndex = 1) and: [ items isEmpty ]) ifFalse: [ 
 		keySize ifNotNil: [ Error signal: 'key size has been set already' ] ].
@@ -60,37 +42,37 @@ SoilSkipListHeaderPage >> keySize: anInteger [
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> lastFreePageIndex [
+SoilSkipListLegacyHeaderPage >> lastFreePageIndex [
 
 	^ lastFreePageIndex
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> lastFreePageIndex: anObject [
+SoilSkipListLegacyHeaderPage >> lastFreePageIndex: anObject [
 
 	lastFreePageIndex := anObject
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> lastPageIndex [
+SoilSkipListLegacyHeaderPage >> lastPageIndex [
 
 	^ lastPageIndex
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> lastPageIndex: anObject [
+SoilSkipListLegacyHeaderPage >> lastPageIndex: anObject [
 	lastPageIndex := anObject.
 	dirty := true
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> maxLevel [
+SoilSkipListLegacyHeaderPage >> maxLevel [
 
 	^ maxLevel
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> maxLevel: anInteger [
+SoilSkipListLegacyHeaderPage >> maxLevel: anInteger [
 
 	maxLevel := anInteger.
 	right := Array new: anInteger withAll: 0.
@@ -98,23 +80,24 @@ SoilSkipListHeaderPage >> maxLevel: anInteger [
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> nextPageIndex [
+SoilSkipListLegacyHeaderPage >> nextPageIndex [
 	lastPageIndex := lastPageIndex + 1.
 	dirty := true.
 	^ lastPageIndex 
 ]
 
-{ #category : #reading }
-SoilSkipListHeaderPage >> readFrom: aStream [ 
-	super readFrom: aStream.
+{ #category : #'instance creation' }
+SoilSkipListLegacyHeaderPage >> readFrom: aStream [ 
+	dirty := false.
 	self 
-		readHeaderFrom: aStream;
+		readLastTransactionFrom: aStream;
+		readLegacyHeaderFrom: aStream;
 		readLevelsFrom: aStream;
 		readItemsFrom: aStream
 ]
 
-{ #category : #reading }
-SoilSkipListHeaderPage >> readHeaderFrom: aStream [
+{ #category : #'instance creation' }
+SoilSkipListLegacyHeaderPage >> readHeaderFrom: aStream [
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	maxLevel := (aStream next: 2) asInteger.
@@ -122,13 +105,31 @@ SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	lastFreePageIndex :=(aStream next: 4) asInteger 
 ]
 
+{ #category : #'instance creation' }
+SoilSkipListLegacyHeaderPage >> readLegacyFrom: aStream [ 
+	dirty := false.
+	self 
+		readLastTransactionFrom: aStream;
+		readLegacyHeaderFrom: aStream;
+		readLevelsFrom: aStream;
+		readItemsFrom: aStream
+]
+
+{ #category : #'instance creation' }
+SoilSkipListLegacyHeaderPage >> readLegacyHeaderFrom: aStream [
+	keySize := (aStream next: 2) asInteger.
+	valueSize := (aStream next: 2) asInteger.
+	maxLevel := (aStream next: 2) asInteger.
+	lastPageIndex :=(aStream next: 4) asInteger.
+]
+
 { #category : #accessing }
-SoilSkipListHeaderPage >> smallestKey [ 
+SoilSkipListLegacyHeaderPage >> smallestKey [ 
 	^ 0
 ]
 
 { #category : #writing }
-SoilSkipListHeaderPage >> writeHeaderOn: aStream [ 
+SoilSkipListLegacyHeaderPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
 	aStream 
 		nextPutAll: (keySize asByteArrayOfSize: 2);

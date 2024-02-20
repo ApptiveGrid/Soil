@@ -37,9 +37,24 @@ SoilIndexPage class >> random [
 ]
 
 { #category : #'instance creation' }
+SoilIndexPage class >> readPageClassFrom: aStream [
+	| pageCode |
+	pageCode := self readPageCodeFrom: aStream.
+	^ self allSubclasses 
+		detect: [ :class | class pageCode = pageCode ].
+	
+]
+
+{ #category : #'instance creation' }
+SoilIndexPage class >> readPageCodeFrom: aStream [
+	^ aStream next asInteger
+	
+]
+
+{ #category : #'instance creation' }
 SoilIndexPage class >> readPageFrom: aStream keySize: keySize valueSize: valueSize [
 	| pageCode pageClass page |
-	pageCode := aStream next asInteger.
+	pageCode := self readPageCodeFrom: aStream.
 	pageClass := self allSubclasses detect: [ :class | class pageCode = pageCode ].
 	page := pageClass new.
 	page keySize: keySize.

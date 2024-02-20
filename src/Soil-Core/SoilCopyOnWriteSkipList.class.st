@@ -17,18 +17,6 @@ SoilCopyOnWriteSkipList >> newPage [
 	^ wrapped newPage
 ]
 
-{ #category : #reindexing }
-SoilCopyOnWriteSkipList >> reIndex [
-	wrapped reIndex. 
-	self flushCachedPages 
-]
-
-{ #category : #reindexing }
-SoilCopyOnWriteSkipList >> reIndexUsing: itemBlock [
-	wrapped reIndexUsing: itemBlock.
-	self flushCachedPages 
-]
-
 { #category : #converting }
 SoilCopyOnWriteSkipList >> thePersistentInstance [
 	^ wrapped
