@@ -151,6 +151,11 @@ SoilSerializer >> nextPutProcessorScheduler: aProcessorScheduler [
 ]
 
 { #category : #writing }
+SoilSerializer >> nextPutSmalltalkImage: aCollection [ 
+	self nextPutByte: TypeCodeSmalltalkImage
+]
+
+{ #category : #writing }
 SoilSerializer >> nextPutSystemDictionary: aCollection [ 
 	self nextPutByte: TypeCodeSystemDictionary 
 ]

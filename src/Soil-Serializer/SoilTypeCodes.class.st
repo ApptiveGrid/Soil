@@ -25,6 +25,7 @@ Class {
 		'TypeCodePositiveInteger',
 		'TypeCodeProcessScheduler',
 		'TypeCodeScaledDecimal',
+		'TypeCodeSmalltalkImage',
 		'TypeCodeString',
 		'TypeCodeSymbol',
 		'TypeCodeSystemDictionary',
@@ -76,6 +77,7 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeCompiledBlock  			put: CompiledBlock;
 		at: TypeCodeCompiledMethod 			put: CompiledMethod;
 		at: TypeCodeSystemDictionary 		put: Smalltalk globals;
+		at: TypeCodeSmalltalkImage 			put: Smalltalk;
 		at: TypeCodeProcessScheduler  		put: Processor;
 		at: TypeCodeUUID   					put: UUID;
 		at: TypeCodeInternalReference 		put: [ :materializer | materializer nextInternalReference ];
@@ -117,6 +119,7 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeSystemDictionary := 52.
 	TypeCodeProcessScheduler := 53.
 	TypeCodeUUID := 54.
+	TypeCodeSmalltalkImage := 55.
 
 	TypeCodeInternalReference := 65.
 	TypeCodeExternalReference := 66.
