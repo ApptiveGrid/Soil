@@ -4,7 +4,7 @@ Class {
 	#pools : [
 		'SoilTypeCodes'
 	],
-	#category : 'Soil-Serializer-Tests'
+	#category : #'Soil-Serializer-Tests'
 }
 
 { #category : #'instance creation' }
@@ -604,6 +604,19 @@ SoilPrimitiveSerializationTest >> testSerializationSmallFloat64ZeroAndOne [
 	self assert: materialized class equals: SmallFloat64.
 	self assert: materialized identicalTo: float.
 	self assert: materialized identicalTo: Float negativeZero.
+]
+
+{ #category : #tests }
+SoilPrimitiveSerializationTest >> testSerializationSmalltalkImage [
+
+	| object serialized materialized |
+	object := Smalltalk.
+	serialized := SoilSerializer serializeToBytes: object.
+	self assert: serialized equals: #[ 55 ].
+	self assert: (serialized at: 1) equals: TypeCodeSmalltalkImage.
+
+	materialized := SoilMaterializer materializeFromBytes: serialized.
+	self assert: materialized identicalTo: Smalltalk
 ]
 
 { #category : #tests }
