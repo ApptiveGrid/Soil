@@ -145,6 +145,11 @@ SoilPersistentDatabaseJournal >> inspectionContent [
 			width: 50)"
 ]
 
+{ #category : #accessing }
+SoilPersistentDatabaseJournal >> lastFileNumber [
+	^ self fileNumberFrom: self fragmentFiles last basename.
+]
+
 { #category : #'instance creation' }
 SoilPersistentDatabaseJournal >> newTransactionJournalForId: anInteger [ 
 	^ semaphore critical: [  
@@ -163,6 +168,20 @@ SoilPersistentDatabaseJournal >> openFragmentFile: filename [
 	^ (SoilJournalFragmentFile path: self path / filename )
 		open;
 		yourself
+]
+
+{ #category : #'instance creation' }
+SoilPersistentDatabaseJournal >> openFragmentFileNumber: anInteger [ 
+	^ self openFragmentFile: (self filenameFrom: anInteger)
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> openFragmentForLSN: aSoilLogSequenceNumber [ 
+	| file |
+	file := self openFragmentFileNumber: aSoilLogSequenceNumber fileNumber.
+	file position: aSoilLogSequenceNumber fileOffset.
+	^ file
+
 ]
 
 { #category : #accessing }
@@ -202,6 +221,7 @@ SoilPersistentDatabaseJournal >> writeEntry: aSoilNewCheckpointEntry [
 	position of the entry being written"
 	| entryLSN file |
 	file := self currentFragmentFile.
+	file setToEnd.
 	entryLSN := file currentLogSequenceNumber.
 	file appendEntry: aSoilNewCheckpointEntry.
 	^ entryLSN

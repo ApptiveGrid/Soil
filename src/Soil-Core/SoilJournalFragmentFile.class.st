@@ -185,6 +185,11 @@ SoilJournalFragmentFile >> path: aFileReference [
 	path := aFileReference 
 ]
 
+{ #category : #accessing }
+SoilJournalFragmentFile >> position: anInteger [ 
+	stream position: anInteger 
+]
+
 { #category : #utilities }
 SoilJournalFragmentFile >> prefix [
 	^ 'SOIL|JOURNAL FRAGMENT' asByteArray
@@ -195,6 +200,11 @@ SoilJournalFragmentFile >> printOn: aStream [
 	aStream 
 		<< 'journal segment file: '
 		<< path asString
+]
+
+{ #category : #initialization }
+SoilJournalFragmentFile >> setToEnd [
+	stream setToEnd
 ]
 
 { #category : #accessing }

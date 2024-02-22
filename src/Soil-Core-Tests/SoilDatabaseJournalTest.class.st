@@ -62,7 +62,15 @@ SoilDatabaseJournalTest >> tearDown [
 ]
 
 { #category : #tests }
-SoilDatabaseJournalTest >> testRecoverWithNormalEnd [
+SoilDatabaseJournalTest >> testRecoverWithAtEnd [
+	soil close.
+	soil open.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28) 
+	
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testRecoverWithJournalAndCheckpoint [
 	| newJournal |
 	
 	newJournal := SoilTransactionJournal new.
@@ -79,7 +87,29 @@ SoilDatabaseJournalTest >> testRecoverWithNormalEnd [
 	soil journal writeTransactionJournal: newJournal.
 	soil close.
 	soil open.
-	self assert: soil control checkpoint equals: nil 
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 61) 
+	
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testRecoverWithRemainingJournal [
+	| newJournal |
+	
+	newJournal := SoilTransactionJournal new.
+	newJournal addEntry: (SoilBeginTransactionEntry new
+		readVersion: 0; 
+		transactionId: 1;
+		createdAt: DateAndTime now).
+	newJournal addEntry: (SoilCommitTransactionEntry new 
+		transactionId: 1;
+		committedAt: DateAndTime now;
+		yourself).
+	soil journal writeTransactionJournal: newJournal.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28).
+	soil close.
+	soil open.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 61) 
+	
 	
 ]
 
