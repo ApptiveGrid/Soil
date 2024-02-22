@@ -1,3 +1,30 @@
+"
+The Soil instance is the main API for your database
+
+To create it:
+
+```
+db := Soil path: ‚mydb‘.
+db initializeFilesystem.
+```
+
+Transactions can be requested from the soil instance:
+
+```
+txn := db newTransaction.
+txn root: yourModelRoot.
+txn commit.
+```
+
+this will save the whole object graph pointed to by youModelRoot the database. 
+
+To load the objects back, open another transation and access the root: 
+
+```
+txn := db newTransaction.
+txn root
+```
+"
 Class {
 	#name : #Soil,
 	#superclass : #Object,
@@ -145,9 +172,7 @@ Soil >> initializeFilesystem [
 { #category : #inspector }
 Soil >> inspectionJournal [
 	<inspectorPresentationOrder: 2000 title: 'journal'>
-	<ignoreNotImplementedSelectors: #(inspectionContent)>
-
-
+	
 	^ self journal inspectionContent
 ]
 

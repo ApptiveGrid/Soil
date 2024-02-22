@@ -1,3 +1,6 @@
+"
+All Files that are used by Soil are modeled using a subclass
+"
 Class {
 	#name : #SoilBinaryFile,
 	#superclass : #Object,

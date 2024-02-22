@@ -1,3 +1,6 @@
+"
+Abstract superclass of both the Serializer and the Materializer
+"
 Class {
 	#name : #SoilObjectCodec,
 	#superclass : #Object,
