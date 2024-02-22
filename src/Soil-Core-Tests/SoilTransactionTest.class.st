@@ -1,18 +1,19 @@
 Class {
-	#name : #SoilTransactionTest,
-	#superclass : #TestCase,
+	#name : 'SoilTransactionTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTransactionTest >> path [ 
 	^ 'soil-tests'
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilTransactionTest >> setUp [ 
 	super setUp.
 	soil := Soil new 
@@ -22,14 +23,14 @@ SoilTransactionTest >> setUp [
 		yourself.
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilTransactionTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
 		soil close ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionTest >> testAddSameObjectIdTwice [
 	| tx |
 	tx := SoilTransaction new.
@@ -38,7 +39,7 @@ SoilTransactionTest >> testAddSameObjectIdTwice [
 	self assert: tx dirtyObjects size equals: 2
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionTest >> testCheckpointAndContinue [
 	| tx |
 	tx := soil newTransaction.
@@ -49,7 +50,7 @@ SoilTransactionTest >> testCheckpointAndContinue [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionTest >> testConflictingReadVersion [
 	| obj tx1 tx2 tx3 |
 	obj := SoilTestGraphRoot new 
@@ -75,7 +76,7 @@ SoilTransactionTest >> testConflictingReadVersion [
 		raise: SoilObjectHasConcurrentChange 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionTest >> testEmptyAbort [
 	| tx |
 	tx := SoilTransaction new.
@@ -84,7 +85,7 @@ SoilTransactionTest >> testEmptyAbort [
 	self assert: tx isAborted
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionTest >> testRootObjectModifies [ 
 	| tx obj |
 	obj := Object new.
@@ -98,7 +99,7 @@ SoilTransactionTest >> testRootObjectModifies [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionTest >> testTwoRootsWithAlwaysRoot [
 	| tx obj1 obj2 |
 	tx := soil newTransaction.
@@ -115,7 +116,7 @@ SoilTransactionTest >> testTwoRootsWithAlwaysRoot [
 	self assert: tx records size equals: 4
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionTest >> testTwoRootsWithMakeRoot [
 	| tx obj1 obj2 |
 	tx := soil newTransaction.

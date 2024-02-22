@@ -1,18 +1,19 @@
 Class {
-	#name : #SoilPersistentDictionaryTest,
-	#superclass : #TestCase,
+	#name : 'SoilPersistentDictionaryTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilPersistentDictionaryTest >> path [ 
 	^ 'soil-tests-dict'
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilPersistentDictionaryTest >> setUp [ 
 	super setUp.
 	soil := Soil path: self path.
@@ -21,14 +22,14 @@ SoilPersistentDictionaryTest >> setUp [
 		initializeFilesystem
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilPersistentDictionaryTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
 		soil close ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPersistentDictionaryTest >> testAt [
 
 	| dict transaction |
@@ -45,7 +46,7 @@ SoilPersistentDictionaryTest >> testAt [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPersistentDictionaryTest >> testAtPut [
 
 	| dict transaction |
@@ -61,7 +62,7 @@ SoilPersistentDictionaryTest >> testAtPut [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPersistentDictionaryTest >> testCommitAndRead [
 
 	| dict transaction materialized |
@@ -83,7 +84,7 @@ SoilPersistentDictionaryTest >> testCommitAndRead [
 	self assert: (materialized at: #test) class equals: SoilObjectProxy
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPersistentDictionaryTest >> testKeys [
 
 	| dict transaction |
@@ -98,7 +99,7 @@ SoilPersistentDictionaryTest >> testKeys [
 	self assert: (dict keys includes: 'test2')
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPersistentDictionaryTest >> testNewPersistentDictionary [
 
 	| dict |
@@ -107,7 +108,7 @@ SoilPersistentDictionaryTest >> testNewPersistentDictionary [
 	self assert: dict class identicalTo: SoilPersistentDictionary
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPersistentDictionaryTest >> testRemoveKey [
 
 	| dict transaction |
@@ -127,7 +128,7 @@ SoilPersistentDictionaryTest >> testRemoveKey [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilPersistentDictionaryTest >> testValues [
 
 	| dict transaction |

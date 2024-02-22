@@ -1,18 +1,19 @@
 Class {
-	#name : #SoilMultiVersionTest,
-	#superclass : #TestCase,
+	#name : 'SoilMultiVersionTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilMultiVersionTest >> path [ 
 	^ 'soil-tests'
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilMultiVersionTest >> setUp [ 
 	super setUp.
 	soil := Soil path: self path.
@@ -21,14 +22,14 @@ SoilMultiVersionTest >> setUp [
 		initializeFilesystem
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilMultiVersionTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
 		soil close ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilMultiVersionTest >> testReadIsolation [
 	| tx1 tx2 tx3 object |
 	object := SoilTestClusterRoot new nested: 'first'.

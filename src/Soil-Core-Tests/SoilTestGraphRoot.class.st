@@ -1,19 +1,20 @@
 Class {
-	#name : #SoilTestGraphRoot,
-	#superclass : #Object,
+	#name : 'SoilTestGraphRoot',
+	#superclass : 'Object',
 	#instVars : [
 		'nested'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestGraphRoot >> nested [
 
 	^ nested
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestGraphRoot >> nested: anObject [
 
 	nested := anObject

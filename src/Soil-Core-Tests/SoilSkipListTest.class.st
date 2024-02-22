@@ -1,13 +1,14 @@
 Class {
-	#name : #SoilSkipListTest,
-	#superclass : #TestCase,
+	#name : 'SoilSkipListTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'index'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #running }
+{ #category : 'running' }
 SoilSkipListTest >> setUp [ 
 	super setUp.
 	index := SoilSkipList new 
@@ -20,14 +21,14 @@ SoilSkipListTest >> setUp [
 		valueSize: 8
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilSkipListTest >> tearDown [ 
 	index ifNotNil: [ 
 		index close ].
 	super tearDown
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testAddFirstOverflowAppending [
 	
 	| page capacity |
@@ -43,7 +44,7 @@ SoilSkipListTest >> testAddFirstOverflowAppending [
 	self assert: page items last key asByteArray equals: #[ 254 ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testAddFirstOverflowReload [
 	
 	| page capacity |
@@ -69,7 +70,7 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 	self assert: ((index at: capacity) asByteArrayOfSize: 8) equals: #[ 1 2 3 4 5 6 7 8 ].
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testAddFirstOverflowSplitting [
 	
 	| page capacity |
@@ -85,7 +86,7 @@ SoilSkipListTest >> testAddFirstOverflowSplitting [
 	self assert: page items last key asByteArray equals: #[ 1 249 ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testAddInBetween [
 	
 	| page capacity |
@@ -100,7 +101,7 @@ SoilSkipListTest >> testAddInBetween [
 	self assert: (page items at: (capacity / 2) floor) key equals: 126
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testAddInBetweenOverflowing [
 	
 	| page capacity |
@@ -117,7 +118,7 @@ SoilSkipListTest >> testAddInBetweenOverflowing [
 	index writePages 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testAddInBetweenOverwriting [
 	
 	| page capacity |
@@ -132,7 +133,7 @@ SoilSkipListTest >> testAddInBetweenOverwriting [
 	self assert: (page items at: 16) value equals: #[ 8 7 6 5 4 3 2 1 ] 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testAddLastFitting [
 	
 	| page |
@@ -146,7 +147,7 @@ SoilSkipListTest >> testAddLastFitting [
 	self assert: page items last key asByteArray equals: #[ 54 51 ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testAt [
 	
 	| capacity |
@@ -162,7 +163,7 @@ SoilSkipListTest >> testAt [
 	self should: [ index at: capacity + 2  ] raise: KeyNotFound
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testAtIndex [
 	| value |
 	1 to: 200 do: [ :n |
@@ -171,12 +172,12 @@ SoilSkipListTest >> testAtIndex [
 	self assert: (value isSameObjectId: 133 asSoilObjectId) 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testCreation [
 	self assert: index pages size equals: 1
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testDo [
 	
 	| capacity col |
@@ -192,7 +193,7 @@ SoilSkipListTest >> testDo [
 	self assert: col size equals: capacity + 1
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testFindKey [
 	| value |
 	1 to: 200 do: [ :n |
@@ -201,7 +202,7 @@ SoilSkipListTest >> testFindKey [
 	self assert: value equals: #[ 1 2 3 4 5 6 7 8 ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testFindKeyReverse [
 	| value |
 	200 to: 1 by: -1 do: [ :n |
@@ -211,7 +212,7 @@ SoilSkipListTest >> testFindKeyReverse [
 	self assert: value equals: #[ 1 2 3 4 5 6 7 8 ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testFirst [
 	
 	| capacity |
@@ -225,7 +226,7 @@ SoilSkipListTest >> testFirst [
 	self assert: (index first: 2) second equals: #[ 1 2 3 4 5 6 7 8 ].
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testFirstArgLargerThenSize [
 
 	1 to: 4 do: [ :n |
@@ -234,7 +235,7 @@ SoilSkipListTest >> testFirstArgLargerThenSize [
 	self assert: (index first: 5) size equals: 4
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testIndexRewriting [
 	
 	| capacity fileSizeBefore |
@@ -249,7 +250,7 @@ SoilSkipListTest >> testIndexRewriting [
 	"self assert: index path size equals: fileSizeBefore"
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testIndexRewritingWithCleaning [
 	
 	| capacity |
@@ -267,14 +268,14 @@ SoilSkipListTest >> testIndexRewritingWithCleaning [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testIsEmpty [
 	self assert: index isEmpty.
 	index at: 1 put: #[1 2].
 	self deny: index isEmpty
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testIteratorFindAndNext [
 	
 	| capacity iterator value |
@@ -289,7 +290,7 @@ SoilSkipListTest >> testIteratorFindAndNext [
 	self assert: value equals: (223 asByteArrayOfSize: 8)
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testIteratorFindAndNext2 [
 	
 	| capacity iterator values |
@@ -313,7 +314,7 @@ SoilSkipListTest >> testIteratorFindAndNext2 [
 	self assert: values asArray equals: {(capacity asByteArrayOfSize: 8)}
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testIteratorFirstWithSingleRemovedItem [ 
 	| iterator |
 	iterator := index newIterator.
@@ -322,7 +323,7 @@ SoilSkipListTest >> testIteratorFirstWithSingleRemovedItem [
 	self assert: iterator firstAssociation equals: nil
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testIteratorLastWithSingleRemovedItem [ 
 	| iterator |
 	iterator := index newIterator.
@@ -331,7 +332,7 @@ SoilSkipListTest >> testIteratorLastWithSingleRemovedItem [
 	self assert: iterator lastAssociation equals: nil
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testLast [
 	
 	| capacity |
@@ -344,7 +345,7 @@ SoilSkipListTest >> testLast [
 	self assert: index last equals: #[ 8 7 6 5 4 3 2 1 ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testLastPage [
 	
 	| capacity lastItem |
@@ -361,7 +362,7 @@ SoilSkipListTest >> testLastPage [
 	self assert: lastItem value equals: #[ 8 7 6 5 4 3 2 1 ].
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testMorePages [
 	1 to: 512 do: [ :n |
 		index at: (index indexKey: n asString) put: #[ 1 2 3 4 5 6 7 8 ] ].
@@ -369,7 +370,7 @@ SoilSkipListTest >> testMorePages [
 	self assert: index pages size equals: 3
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testOverflowCopyOnWriteAppending [
 	
 	| page capacity copyOnWrite |
@@ -386,7 +387,7 @@ SoilSkipListTest >> testOverflowCopyOnWriteAppending [
 	self assert: page items last key asByteArray equals: #[ 254 ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testOverflowCopyOnWriteSplitting [
 	
 	| page capacity copyOnWrite |
@@ -403,7 +404,7 @@ SoilSkipListTest >> testOverflowCopyOnWriteSplitting [
 	self assert: page items last key asByteArray equals: #[ 1 249 ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testPageAddFirst [
 	
 	| page |
@@ -415,7 +416,7 @@ SoilSkipListTest >> testPageAddFirst [
 	self assert: page items first key equals: (index indexKey: #foo)
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testRemoveKey [
 
 	| capacity |
@@ -433,7 +434,7 @@ SoilSkipListTest >> testRemoveKey [
 	self should: [ index removeKey: capacity + 1 ] raise: KeyNotFound
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testSize [
 	
 	| capacity |
@@ -446,7 +447,7 @@ SoilSkipListTest >> testSize [
 	self assert: index size equals: capacity + 1.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListTest >> testSplitLastPage [	
 	| headerCapacity itemCapacity |
 	"fill the header page"

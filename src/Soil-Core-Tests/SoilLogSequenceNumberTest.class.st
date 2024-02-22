@@ -1,10 +1,11 @@
 Class {
-	#name : #SoilLogSequenceNumberTest,
-	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#name : 'SoilLogSequenceNumberTest',
+	#superclass : 'TestCase',
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilLogSequenceNumberTest >> testCreation [ 
 	| lsn lsn2 |
 	lsn := SoilLogSequenceNumber fileNumber: 16 offset: 32.
@@ -15,7 +16,7 @@ SoilLogSequenceNumberTest >> testCreation [
 	self assert: lsn2 fileOffset equals: 32
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilLogSequenceNumberTest >> testStringValues [
 	| lsn |
 	lsn := SoilLogSequenceNumber value: ((16 bitShift: 24) bitOr: 32).

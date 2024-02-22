@@ -1,21 +1,22 @@
 Class {
-	#name : #SoilMigrationTest,
-	#superclass : #TestCase,
+	#name : 'SoilMigrationTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'soil',
 		'migrationClass'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #helpers }
+{ #category : 'helpers' }
 SoilMigrationTest >> createMigrationClassByteLayout [
 	^ (SoilBaseTestObject << #SOMigrationObject
 		layout: ByteLayout;
 		package: self class package name) install
 ]
 
-{ #category : #helpers }
+{ #category : 'helpers' }
 SoilMigrationTest >> createMigrationClassFixedLayout [
 	^ (SoilBaseTestObject << #SOMigrationObject
 		layout: FixedLayout;
@@ -23,7 +24,7 @@ SoilMigrationTest >> createMigrationClassFixedLayout [
 		package: self class package name) install
 ]
 
-{ #category : #helpers }
+{ #category : 'helpers' }
 SoilMigrationTest >> createMigrationClassFixedLayout2 [
 	^ (SoilBaseTestObject << #SOMigrationObject2
 		layout: FixedLayout;
@@ -31,7 +32,7 @@ SoilMigrationTest >> createMigrationClassFixedLayout2 [
 		package: self class package name) install
 ]
 
-{ #category : #helpers }
+{ #category : 'helpers' }
 SoilMigrationTest >> createMigrationClassVariableLayout [
 	^ (SoilBaseTestObject << #SOMigrationObject
 		layout: VariableLayout;
@@ -39,18 +40,18 @@ SoilMigrationTest >> createMigrationClassVariableLayout [
 		package: self class package name) install
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilMigrationTest >> path [ 
 	^ 'soil-tests'
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilMigrationTest >> runCase [ 
 	SystemAnnouncer uniqueInstance 
 		suspendAllWhile: [ super runCase ]
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilMigrationTest >> setUp [ 
 	super setUp.
 	soil := Soil path: self path.
@@ -60,7 +61,7 @@ SoilMigrationTest >> setUp [
 	migrationClass := self createMigrationClassFixedLayout
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilMigrationTest >> tearDown [ 
 	migrationClass removeFromSystem.
 	super tearDown.
@@ -68,7 +69,7 @@ SoilMigrationTest >> tearDown [
 		soil close ]
 ]
 
-{ #category : #'tests - change classlayout' }
+{ #category : 'tests - change classlayout' }
 SoilMigrationTest >> testMaterializingObjectByteLayputFromFixedLayout [
 	| tx tx2 materializedRoot object |
 	object := self createMigrationClassFixedLayout new.
@@ -88,7 +89,7 @@ SoilMigrationTest >> testMaterializingObjectByteLayputFromFixedLayout [
 
 ]
 
-{ #category : #'tests - change classlayout' }
+{ #category : 'tests - change classlayout' }
 SoilMigrationTest >> testMaterializingObjectFixedLayputFromByteLayout [
 	| tx tx2 materializedRoot object |
 
@@ -107,7 +108,7 @@ SoilMigrationTest >> testMaterializingObjectFixedLayputFromByteLayout [
 	self should: [materializedRoot := tx2 root] raise: SoilLayoutMigrationError
 ]
 
-{ #category : #'tests - change classlayout' }
+{ #category : 'tests - change classlayout' }
 SoilMigrationTest >> testMaterializingObjectFixedLayputFromVariableLayout [
 	| tx tx2 materializedRoot object |
 	object := self createMigrationClassVariableLayout new.
@@ -129,7 +130,7 @@ SoilMigrationTest >> testMaterializingObjectFixedLayputFromVariableLayout [
 	self assert: (materializedRoot instVarNamed: #two) equals: 2
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilMigrationTest >> testMaterializingObjectRenamedClass [
 		| tx tx2 materializedRoot object |
 
@@ -150,7 +151,31 @@ SoilMigrationTest >> testMaterializingObjectRenamedClass [
 	self assert: materializedRoot class name equals: 'SOMigrationObject2'
 ]
 
-{ #category : #'tests - change classlayout' }
+{ #category : 'tests' }
+SoilMigrationTest >> testMaterializingObjectRenamedClassPharo12 [
+	| tx tx2 materializedRoot object |
+	
+	"alternative way to support class renames using a Pharo12 feature"
+	
+	SystemVersion current major <12 ifTrue: [ self skip].
+	
+	object := self createMigrationClassFixedLayout new.
+	self deny: object class isVariable.
+	tx := soil newTransaction.
+	tx root: object.
+	tx commit.
+	"now we remove the class and create a new one with a different name"
+	migrationClass removeFromSystem.
+	migrationClass := self createMigrationClassFixedLayout2.
+	"use the Pharo12 aliasing, this would be normally done in a class side initialize method"
+	migrationClass deprecatedAliases: #(#SOMigrationObject).
+
+	tx2 := soil newTransaction.
+	materializedRoot := tx2 root.
+	self assert: materializedRoot class name equals: 'SOMigrationObject2'
+]
+
+{ #category : 'tests - change classlayout' }
 SoilMigrationTest >> testMaterializingObjectVariableLayputFromFixedLayout [
 	| tx tx2 materializedRoot object |
 	object := self createMigrationClassFixedLayout new.
@@ -172,7 +197,7 @@ SoilMigrationTest >> testMaterializingObjectVariableLayputFromFixedLayout [
 	self assert: (materializedRoot instVarNamed: #two) equals: 2
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilMigrationTest >> testMaterializingObjectVariableLayputWithChangedShape [
 	| tx tx2 materializedRoot object |
 	object := self createMigrationClassVariableLayout new.
@@ -193,7 +218,7 @@ SoilMigrationTest >> testMaterializingObjectVariableLayputWithChangedShape [
 	self assert: (materializedRoot instVarNamed: #three) equals: nil.	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilMigrationTest >> testMaterializingObjectWithChangedShape [
 	| tx tx2 materializedRoot object |
 	object := migrationClass new.
@@ -213,7 +238,7 @@ SoilMigrationTest >> testMaterializingObjectWithChangedShape [
 	self assert: (materializedRoot instVarNamed: #three) equals: nil.	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilMigrationTest >> testMaterializingObjectWithIVarRemovedAndAddedBack [
 
 	| tx tx2 root materializedRoot object |
@@ -261,7 +286,7 @@ SoilMigrationTest >> testMaterializingObjectWithIVarRemovedAndAddedBack [
 	self assert: ((materializedRoot at: #version2) instVarNamed: #two ) equals: nil
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilMigrationTest >> testMaterializingObjectWithIvarRemoved [
 	"We can load an object that was saved with two ivars even if the current class has just one"
 	| tx tx2 materializedRoot object |
@@ -282,7 +307,7 @@ SoilMigrationTest >> testMaterializingObjectWithIvarRemoved [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilMigrationTest >> testMaterializingObjectWithIvarRemoved2 [
 	"We can load an object that was saved with two ivars even if the current class has just one"
 	| tx tx2 materializedRoot object |
@@ -302,7 +327,7 @@ SoilMigrationTest >> testMaterializingObjectWithIvarRemoved2 [
 	self assert: (materializedRoot instVarNamed: #two) equals: 2.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilMigrationTest >> testMaterializingObjectWithIvarRemovedThenCommit [
 	"We can load an object that was saved with two ivars even if the current class has just one"
 	| tx tx2 materializedRoot object |
@@ -334,7 +359,7 @@ SoilMigrationTest >> testMaterializingObjectWithIvarRemovedThenCommit [
 	self assert: (materializedRoot instVarNamed: #one) equals: 1
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilMigrationTest >> testMaterializingObjectWithMultipleChangesinHistory [
 	| tx tx2 root materializedRoot object |
 
@@ -371,7 +396,7 @@ SoilMigrationTest >> testMaterializingObjectWithMultipleChangesinHistory [
 	self assert: ((materializedRoot at: #version2) instVarNamed: #one ) equals: 'one'
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilMigrationTest >> testMaterializingObjectWithReOrderedIvars [
 	| tx tx2 materializedRoot object |
 	
@@ -398,7 +423,7 @@ SoilMigrationTest >> testMaterializingObjectWithReOrderedIvars [
 	self assert: (materializedRoot instVarNamed: #two) equals: 2
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilMigrationTest >> testSerializingObjectWithChangedShape [
 	| tx tx2 materializedRoot object tx3 description topDescription obj |
 	object := migrationClass new.

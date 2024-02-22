@@ -1,14 +1,15 @@
 Class {
-	#name : #SoilBehaviorRegistryTest,
-	#superclass : #TestCase,
+	#name : 'SoilBehaviorRegistryTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'soil',
 		'registry'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilBehaviorRegistryTest >> setUp [ 
 	super setUp.
 	soil := (Soil path: 'sunit-soil') destroy; initializeFilesystem.
@@ -16,21 +17,21 @@ SoilBehaviorRegistryTest >> setUp [
 	 
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilBehaviorRegistryTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
 		soil close ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBehaviorRegistryTest >> testRegisterNewClass [
 	registry nameAt: #Object put: SoilObjectId example.
 	self assert: (registry nameAt: #Object ifAbsent: nil) equals: (SoilObjectId example).
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBehaviorRegistryTest >> testSOBehaviorDescription [
 	"SOBehaviorDescription (the class) itself is always there with index 2"
 	self assert: (registry nameAt: #SoilBehaviorDescription ifAbsent: nil) index equals: 2

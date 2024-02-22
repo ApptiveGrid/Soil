@@ -1,45 +1,46 @@
 Class {
-	#name : #SoilTestClass1,
-	#superclass : #Object,
+	#name : 'SoilTestClass1',
+	#superclass : 'Object',
 	#instVars : [
 		'one',
 		'two',
 		'three'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClass1 >> one [
 
 	^ one
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClass1 >> one: anObject [
 
 	one := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClass1 >> three [
 
 	^ three
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClass1 >> three: anObject [
 
 	three := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClass1 >> two [
 
 	^ two
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClass1 >> two: anObject [
 
 	two := anObject

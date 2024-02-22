@@ -1,10 +1,11 @@
 Class {
-	#name : #SoilObjectSegmentTest,
-	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#name : 'SoilObjectSegmentTest',
+	#superclass : 'TestCase',
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectSegmentTest >> newMemorySegment [
 	| segment |
 	segment := SoilObjectSegment new.
@@ -19,7 +20,7 @@ SoilObjectSegmentTest >> newMemorySegment [
 	^ segment
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectSegmentTest >> testStoreObject [ 
 	| segment obj newIndex |
 	segment := self newMemorySegment.

@@ -1,13 +1,14 @@
 Class {
-	#name : #SoilBTreeTest,
-	#superclass : #TestCase,
+	#name : 'SoilBTreeTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'index'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #running }
+{ #category : 'running' }
 SoilBTreeTest >> setUp [ 
 	super setUp.
 	index := SoilBTree new 
@@ -19,14 +20,14 @@ SoilBTreeTest >> setUp [
 		valueSize: 8
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilBTreeTest >> tearDown [ 
 	index ifNotNil: [ 
 		index close ].
 	super tearDown
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testAddFirstOverflow [
 
 	| page capacity |
@@ -45,7 +46,7 @@ SoilBTreeTest >> testAddFirstOverflow [
 	self assert: (index pageAt:((index headerPage) next)) identicalTo: (index pageAt: 3)
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testAddRandom [
 	| numEntries entries |
 	"just some random addind and checking that we can find it. tree is configured to create lots of pages"
@@ -70,7 +71,7 @@ SoilBTreeTest >> testAddRandom [
 	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testAddSecondOverflow [
 
 	| page capacity |
@@ -89,7 +90,7 @@ SoilBTreeTest >> testAddSecondOverflow [
 	index writePages.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testAddSecondOverflowReload [
 	| page capacity |
 
@@ -115,7 +116,7 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 	self assert: (index at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testAt [
 
 	| capacity |
@@ -133,7 +134,7 @@ SoilBTreeTest >> testAt [
 	self should: [ index at: capacity + 2  ] raise: KeyNotFound
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testAtSecondOverflow [
 
 	| capacity |
@@ -152,7 +153,7 @@ SoilBTreeTest >> testAtSecondOverflow [
 	self should: [ index at: capacity * 2 + 1  ] raise: KeyNotFound
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testCreation [
 	"we alwaus create one data page and the root index"
 	self assert: index pages size equals: 2.
@@ -161,7 +162,7 @@ SoilBTreeTest >> testCreation [
 	self assert: (index pages at: 2) isDirty
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testFirst [
 	
 	| capacity |
@@ -175,7 +176,7 @@ SoilBTreeTest >> testFirst [
 	self assert: (index first: 2) second equals: #[ 1 2 3 4 5 6 7 8 ].
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testIndexRewriting [
 	
 	| capacity fileSizeBefore |
@@ -196,7 +197,7 @@ SoilBTreeTest >> testIndexRewriting [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testIndexRewritingWithCleaning [
 	
 	| capacity |
@@ -214,14 +215,14 @@ SoilBTreeTest >> testIndexRewritingWithCleaning [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testIsEmpty [
 	self assert: index isEmpty.
 	index at: 1 put: #[1 2].
 	self deny: index isEmpty
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testIteratorFindAndNext [
 	
 	| capacity iterator value |
@@ -236,7 +237,7 @@ SoilBTreeTest >> testIteratorFindAndNext [
 	self assert: value equals: (223 asByteArrayOfSize: 8)
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testIteratorFindAndNext2 [
 	
 	| capacity iterator values |
@@ -262,7 +263,7 @@ SoilBTreeTest >> testIteratorFindAndNext2 [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testIteratorFirst [
 	
 	| capacity first |
@@ -275,7 +276,7 @@ SoilBTreeTest >> testIteratorFirst [
 	self assert: first equals: #[ 8 7 6 5 4 3 2 1 ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testLast [
 	
 	| capacity |
@@ -288,7 +289,7 @@ SoilBTreeTest >> testLast [
 	self assert: index last equals: #[ 8 7 6 5 4 3 2 1 ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testLastPage [
 	
 	| capacity lastItem |
@@ -305,7 +306,7 @@ SoilBTreeTest >> testLastPage [
 	self assert: lastItem value equals: #[ 8 7 6 5 4 3 2 1 ].
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testOverflowCopyOnWriteSplitting [
 	
 	| page capacity copyOnWrite |
@@ -321,7 +322,7 @@ SoilBTreeTest >> testOverflowCopyOnWriteSplitting [
 	self assert: page items last key asByteArray equals: #[1 251]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testPageAddFirst [
 	
 	| page indexPage |
@@ -339,7 +340,7 @@ SoilBTreeTest >> testPageAddFirst [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testPageAddFirstAndLoad [
 	
 	| page indexPage |
@@ -368,7 +369,7 @@ SoilBTreeTest >> testPageAddFirstAndLoad [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testRemoveKey [
 
 	| capacity |
@@ -383,7 +384,7 @@ SoilBTreeTest >> testRemoveKey [
 	self should: [ index removeKey: 20  ] raise: KeyNotFound.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testSize [
 	
 	| capacity |
@@ -396,7 +397,7 @@ SoilBTreeTest >> testSize [
 	self assert: index size equals: capacity + 1.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testSplitIndexPage [
 	| entries |
 	"this test leads to a split of a non-root index page"
@@ -418,7 +419,7 @@ SoilBTreeTest >> testSplitIndexPage [
 	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreeTest >> testSplitIndexPageReleoad [
 	| entries |
 	"this test leads to a split of a non-root index page"

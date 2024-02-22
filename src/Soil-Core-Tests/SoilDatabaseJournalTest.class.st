@@ -1,19 +1,20 @@
 Class {
-	#name : #SoilDatabaseJournalTest,
-	#superclass : #TestCase,
+	#name : 'SoilDatabaseJournalTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'soil',
 		'copy'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #helper }
+{ #category : 'helper' }
 SoilDatabaseJournalTest class >> classUnderTest [ 
 	^ SoilPersistentDatabaseJournal 
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilDatabaseJournalTest >> fillDatabase [ 
 	| tx dict |
 	tx := soil newTransaction.
@@ -44,7 +45,7 @@ SoilDatabaseJournalTest >> fillDatabase [
 	
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilDatabaseJournalTest >> setUp [ 
 	super setUp.
 	soil := (Soil path: 'soil-tests')
@@ -52,7 +53,7 @@ SoilDatabaseJournalTest >> setUp [
 		initializeFilesystem
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilDatabaseJournalTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
@@ -61,7 +62,7 @@ SoilDatabaseJournalTest >> tearDown [
 		copy close ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilDatabaseJournalTest >> testReplicationToEmptyDatabase [
 	| tx |
 	self fillDatabase. 
@@ -76,7 +77,7 @@ SoilDatabaseJournalTest >> testReplicationToEmptyDatabase [
 	self assert: soil journal lastIndex equals: copy journal lastIndex
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilDatabaseJournalTest >> testReplicationToNonEmptyDatabase [
 	| tx |
 	self fillDatabase. 

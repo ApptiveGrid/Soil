@@ -1,18 +1,19 @@
 Class {
-	#name : #SoilTransactionJournalTest,
-	#superclass : #TestCase,
+	#name : 'SoilTransactionJournalTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #helper }
+{ #category : 'helper' }
 SoilTransactionJournalTest class >> classUnderTest [ 
 	^ SoilPersistentDatabaseJournal 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : 'as yet unclassified' }
 SoilTransactionJournalTest >> fillDatabase [ 
 	| tx dict |
 	tx := soil newTransaction.
@@ -43,7 +44,7 @@ SoilTransactionJournalTest >> fillDatabase [
 	
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilTransactionJournalTest >> setUp [ 
 	super setUp.
 	soil := (Soil path: 'soil-tests')
@@ -51,14 +52,14 @@ SoilTransactionJournalTest >> setUp [
 		initializeFilesystem
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilTransactionJournalTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
 		soil close ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionJournalTest >> testConsistency [
 	| txn |
 	10 timesRepeat: [ 
@@ -72,7 +73,7 @@ SoilTransactionJournalTest >> testConsistency [
 		raise: Error
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionJournalTest >> testNewRootObject [
 	| tx journal |
 	tx := soil newTransaction.
@@ -89,7 +90,7 @@ SoilTransactionJournalTest >> testNewRootObject [
 	self assert: (journal entryAt: 6) class equals: SoilUpdateDatabaseVersion.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionJournalTest >> testNewRootSkipList [
 	| tx journal |
 	tx := soil newTransaction.
@@ -108,7 +109,7 @@ SoilTransactionJournalTest >> testNewRootSkipList [
 	self assert: (journal entryAt: 10) class equals: SoilUpdateDatabaseVersion.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionJournalTest >> testRootObjectUpdate [
 	| tx tx2 journal |
 	tx := soil newTransaction.
@@ -125,7 +126,7 @@ SoilTransactionJournalTest >> testRootObjectUpdate [
 	self assert: (journal entryAt: 3) class equals: SoilUpdateDatabaseVersion.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionJournalTest >> testRootObjectUpdateClusterObject [
 	| tx tx2 journal object |
 	tx := soil newTransaction.
@@ -147,7 +148,7 @@ SoilTransactionJournalTest >> testRootObjectUpdateClusterObject [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTransactionJournalTest >> testRootObjectUpdateClusterPrimitive [
 	| tx tx2 journal string |
 	tx := soil newTransaction.

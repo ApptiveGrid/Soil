@@ -1,10 +1,11 @@
 Class {
-	#name : #SoilClusterVersionTest,
-	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#name : 'SoilClusterVersionTest',
+	#superclass : 'TestCase',
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilClusterVersionTest >> testPersistentClusterVersionRoundtrip [
 	| record bytes read |
 	record := SoilPersistentClusterVersion new

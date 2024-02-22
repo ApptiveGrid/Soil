@@ -1,15 +1,16 @@
 Class {
-	#name : #SoilIndexedDictionaryTest,
-	#superclass : #ParametrizedTestCase,
+	#name : 'SoilIndexedDictionaryTest',
+	#superclass : 'ParametrizedTestCase',
 	#instVars : [
 		'soil',
 		'dict',
 		'classToTest'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest class >> testParameters [
 	^ ParametrizedTestMatrix new
 		addCase: { #classToTest -> SoilSkipListDictionary };
@@ -17,24 +18,24 @@ SoilIndexedDictionaryTest class >> testParameters [
 		yourself
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilIndexedDictionaryTest >> classToTest [
 
 	^ classToTest
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilIndexedDictionaryTest >> classToTest: anObject [
 
 	classToTest := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilIndexedDictionaryTest >> path [ 
 	^ 'soil-tests'
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilIndexedDictionaryTest >> setUp [ 
 	super setUp.
 	soil := Soil path: self path.
@@ -47,14 +48,14 @@ SoilIndexedDictionaryTest >> setUp [
 		yourself
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilIndexedDictionaryTest >> tearDown [ 
 	soil ifNotNil: [ 
 		soil close ].
 	super tearDown.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testAddAndRemoveExistingList [
 	| tx tx2 tx3 |
 	"create skip list dictionary with a key ..."
@@ -74,7 +75,7 @@ SoilIndexedDictionaryTest >> testAddAndRemoveExistingList [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testAddToExistingEmptyList [
 	| tx tx2 tx3 tx4 |
 	"create emtpy skip list dictionary ..."
@@ -101,7 +102,7 @@ SoilIndexedDictionaryTest >> testAddToExistingEmptyList [
 	self assert: (tx4 root at: #foo) equals: #bar
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testAddToExistingNonEmptyList [
 	|  tx tx2 tx3 tx4 |
 	"create skip list dictionary with a key ..."
@@ -129,7 +130,7 @@ SoilIndexedDictionaryTest >> testAddToExistingNonEmptyList [
 	self assert: (tx4 root at: #foo) equals: #bar.	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -144,7 +145,7 @@ SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testConcurrentAddKey [ 
 	| tx1 tx2 tx3 |
 	tx1 := soil newTransaction.
@@ -163,7 +164,7 @@ SoilIndexedDictionaryTest >> testConcurrentAddKey [
 	self assert: (tx2 root at: #two ifAbsent: [ #notfound ]) equals: #notfound
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testConcurrentDo [
 	| tx1 tx2 tx3 col |
 	tx1 := soil newTransaction.
@@ -188,7 +189,7 @@ SoilIndexedDictionaryTest >> testConcurrentDo [
 	self assert: (col noneSatisfy: [:each | each = #fiveValue ])
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testConcurrentIsEmpty [ 
 	| tx1 tx2 tx3 |
 	tx1 := soil newTransaction.
@@ -207,7 +208,7 @@ SoilIndexedDictionaryTest >> testConcurrentIsEmpty [
 	self assert: tx2 root size equals: 1
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testConcurrentRemoveKey [
 	| tx1 tx2 tx3 |
 	tx1 := soil newTransaction.
@@ -227,7 +228,7 @@ SoilIndexedDictionaryTest >> testConcurrentRemoveKey [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testDoWithTransAction [
 	| tx tx1 tx2 counter |
 	
@@ -265,7 +266,7 @@ SoilIndexedDictionaryTest >> testDoWithTransAction [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testFirstWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -282,7 +283,7 @@ SoilIndexedDictionaryTest >> testFirstWithTransaction [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testFirstWithTransactionRemoved [
 	| tx tx1 tx2 |
 	tx := soil newTransaction.
@@ -301,7 +302,7 @@ SoilIndexedDictionaryTest >> testFirstWithTransactionRemoved [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testFlushIndexPages [
 	| tx  capacity txn2 txn1 root1 root2 |
 	tx := soil newTransaction.
@@ -327,7 +328,7 @@ SoilIndexedDictionaryTest >> testFlushIndexPages [
 	txn2 abort
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testIndexCreation [ 
 	| tx obj1 obj2 |
 	tx := soil newTransaction.
@@ -343,7 +344,7 @@ SoilIndexedDictionaryTest >> testIndexCreation [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testIndexCreationAndRead [
 	| tx obj1 obj2 tx2 |
 	tx := soil newTransaction.
@@ -363,7 +364,7 @@ SoilIndexedDictionaryTest >> testIndexCreationAndRead [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testIsEmpty [
 	| tx tx1 tx2 |
 	tx := soil newTransaction.
@@ -385,7 +386,7 @@ SoilIndexedDictionaryTest >> testIsEmpty [
 	self deny: tx1 root isEmpty.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testLastWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -401,7 +402,7 @@ SoilIndexedDictionaryTest >> testLastWithTransaction [
 	self assert: tx2 root last equals: #twovalue
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testLastWithTransactionRemoveLast [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -417,7 +418,7 @@ SoilIndexedDictionaryTest >> testLastWithTransactionRemoveLast [
 	self assert: tx2 root last equals: #onevalue
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testLastWithTransactionRemoved [
 	| tx tx1 tx2 |
 	tx := soil newTransaction.
@@ -436,7 +437,7 @@ SoilIndexedDictionaryTest >> testLastWithTransactionRemoved [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testNextAfterWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -452,7 +453,7 @@ SoilIndexedDictionaryTest >> testNextAfterWithTransaction [
 	self assert: (tx2 proxyForObjectId: (tx2 root newIterator nextAssociationAfter: #one) value) equals: #twovalue
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testNextcloseToWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -472,7 +473,7 @@ SoilIndexedDictionaryTest >> testNextcloseToWithTransaction [
 	self assert: (tx2 root nextCloseTo: #'100') equals: #two
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 
 
@@ -499,7 +500,7 @@ SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 
 	| tx tx2 |
@@ -526,7 +527,7 @@ SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 	self should: [tx commit] raise: SoilObjectHasConcurrentChange
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testSecondWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -540,7 +541,7 @@ SoilIndexedDictionaryTest >> testSecondWithTransaction [
 	self assert: tx2 root second equals: #twovalue
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testSizeWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -554,7 +555,7 @@ SoilIndexedDictionaryTest >> testSizeWithTransaction [
 	self assert: tx2 root size equals: 2
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilIndexedDictionaryTest >> testValuesWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.

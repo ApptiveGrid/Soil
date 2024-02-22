@@ -1,10 +1,11 @@
 Class {
-	#name : #SoilObjectFileTest,
-	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#name : 'SoilObjectFileTest',
+	#superclass : 'TestCase',
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 SoilObjectFileTest >> streamContents: aBlock [ 
 	| stream |
 	stream := ReadWriteStream on: ByteArray new.
@@ -13,7 +14,7 @@ SoilObjectFileTest >> streamContents: aBlock [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectFileTest >> testInitializeOnStream [
 	| index bytes prefix |
 	bytes := ByteArray streamContents: [ :stream |
@@ -24,7 +25,7 @@ SoilObjectFileTest >> testInitializeOnStream [
 	self assert: prefix equals: 'SOIL|OBJECT ' asByteArray
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectFileTest >> testWriteAndReadFirstObject [
 	| index bytes newIndex n2 |
 	bytes := self streamContents: [ :stream |

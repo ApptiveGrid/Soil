@@ -1,13 +1,14 @@
 Class {
-	#name : #SoilObjectRepositoryTest,
-	#superclass : #TestCase,
+	#name : 'SoilObjectRepositoryTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilObjectRepositoryTest >> setUp [ 
 	super setUp.
 	soil := (Soil new path: 'soil-tests')
@@ -16,14 +17,14 @@ SoilObjectRepositoryTest >> setUp [
 		yourself.
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilObjectRepositoryTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
 		soil close ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectRepositoryTest >> testCacheObjectRecordMetrics [
 	| txn root segment metrics txn2 |
 	soil notificationHandler: SoilMetrics new.
@@ -40,7 +41,7 @@ SoilObjectRepositoryTest >> testCacheObjectRecordMetrics [
 	self assert: metrics objectRecordCacheHitRatio equals: 1
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectRepositoryTest >> testCacheObjectRecords [
 	| txn root segment |
 	soil objectRepository cacheSegmentAt: 1 upTo: 1000. 
@@ -52,12 +53,12 @@ SoilObjectRepositoryTest >> testCacheObjectRecords [
 	self assert: segment cache size equals: 1
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectRepositoryTest >> testFirstSegment [ 
 	self assert: soil objectRepository firstSegment id equals: 1
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectRepositoryTest >> testFlushCachedObjectRecords [
 	| txn root segment |
 	soil objectRepository cacheSegmentAt: 1 upTo: 1000. 
@@ -72,7 +73,7 @@ SoilObjectRepositoryTest >> testFlushCachedObjectRecords [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectRepositoryTest >> testSegmentCreation [	
 	soil objectRepository addNewSegment.
 	self assert: ('soil-tests' asFileReference / #segments / '2') exists.
@@ -80,7 +81,7 @@ SoilObjectRepositoryTest >> testSegmentCreation [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectRepositoryTest >> testSegmentInitializationFromDisk [ 
 	soil objectRepository instVarNamed: #segments put: nil.
 	('soil-tests' asFileReference / #segments / '1') ensureCreateDirectory.

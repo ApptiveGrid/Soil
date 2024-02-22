@@ -1,23 +1,24 @@
 Class {
-	#name : #SoilBackupTest,
-	#superclass : #TestCase,
+	#name : 'SoilBackupTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilBackupTest >> backupPath [
 	^ 'soil-backup'
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilBackupTest >> path [ 
 	^ 'soil-tests'
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilBackupTest >> setUp [ 
 	super setUp.
 	soil := Soil path: self path.
@@ -26,14 +27,14 @@ SoilBackupTest >> setUp [
 		initializeFilesystem
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilBackupTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
 		soil close ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBackupTest >> testBackupWithIndex [ 
 	| tx backup tx2 dict object |
 	tx := soil newTransaction.
@@ -57,7 +58,7 @@ SoilBackupTest >> testBackupWithIndex [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBackupTest >> testBackupWithIndexRemoval [
 	| tx backup tx2 dict object |
 	"removed keys in indexes get objectId 0:0. On backup time we only
@@ -85,7 +86,7 @@ SoilBackupTest >> testBackupWithIndexRemoval [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBackupTest >> testSimpleBackup [ 
 	| tx backup tx2 |
 	soil control

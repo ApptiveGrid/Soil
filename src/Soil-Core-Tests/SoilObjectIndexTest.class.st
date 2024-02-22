@@ -1,10 +1,11 @@
 Class {
-	#name : #SoilObjectIndexTest,
-	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#name : 'SoilObjectIndexTest',
+	#superclass : 'TestCase',
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectIndexTest >> streamContents: aBlock [ 
 	| stream |
 	stream := ReadWriteStream on: ByteArray new.
@@ -13,7 +14,7 @@ SoilObjectIndexTest >> streamContents: aBlock [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectIndexTest >> testInitializeOnStream [
 	| index bytes prefix |
 	bytes := self streamContents: [ :stream |
@@ -24,7 +25,7 @@ SoilObjectIndexTest >> testInitializeOnStream [
 	self assert: prefix equals: 'SOIL|OBJECT INDEX' asByteArray
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilObjectIndexTest >> testWriteAndReadFirstObject [
 	| index bytes newIndex n2 |
 	bytes := self streamContents: [ :stream |

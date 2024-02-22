@@ -1,30 +1,31 @@
 Class {
-	#name : #SoilTestNestedObject,
-	#superclass : #Object,
+	#name : 'SoilTestNestedObject',
+	#superclass : 'Object',
 	#instVars : [
 		'reference',
 		'label'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestNestedObject >> label [
 	^ label
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestNestedObject >> label: aString [ 
 	label := aString
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestNestedObject >> reference [
 
 	^ reference
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestNestedObject >> reference: anObject [
 
 	reference := anObject

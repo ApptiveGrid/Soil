@@ -1,10 +1,11 @@
 Class {
-	#name : #SoilBTreePageTest,
-	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#name : 'SoilBTreePageTest',
+	#superclass : 'TestCase',
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #helper }
+{ #category : 'helper' }
 SoilBTreePageTest >> readPageFrom: aStream [ 
 	| page |
 	page := (SoilIndexPage readPageClassFrom: aStream) new.
@@ -14,7 +15,7 @@ SoilBTreePageTest >> readPageFrom: aStream [
 	^ page readFrom: aStream
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreePageTest >> testCreation [ 
 	| page |
 	page := SoilBTreeDataPage new 
@@ -25,7 +26,7 @@ SoilBTreePageTest >> testCreation [
 	self assert: page hasRoom
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreePageTest >> testCreationIndex [
 	| page |
 	page := SoilBTreeIndexPage new 
@@ -35,7 +36,7 @@ SoilBTreePageTest >> testCreationIndex [
 	self assert: page hasRoom
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreePageTest >> testWriteAndRead [
 	| page bytes readPage |
 	page := SoilBTreeDataPage new 
@@ -55,7 +56,7 @@ SoilBTreePageTest >> testWriteAndRead [
 	self deny: readPage isDirty 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreePageTest >> testWriteAndReadIndex [
 	| page bytes readPage |
 	page := SoilBTreeIndexPage new 
@@ -69,7 +70,7 @@ SoilBTreePageTest >> testWriteAndReadIndex [
 	self deny: readPage isDirty
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilBTreePageTest >> testWriteAndReadPageCode [
 	| page bytes readPage |
 	page := SoilBTreeDataPage new 

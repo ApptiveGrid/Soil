@@ -2,53 +2,54 @@
 Example class where one ivar is tagged as transient, see class side method #soilTransientInstVars
 "
 Class {
-	#name : #SoilTestClassWithTransient,
-	#superclass : #Object,
+	#name : 'SoilTestClassWithTransient',
+	#superclass : 'Object',
 	#instVars : [
 		'one',
 		'two',
 		'three'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClassWithTransient class >> soilTransientInstVars [
 
 	^ #(two)
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClassWithTransient >> one [
 
 	^ one
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClassWithTransient >> one: anObject [
 
 	one := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClassWithTransient >> three [
 
 	^ three
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClassWithTransient >> three: anObject [
 
 	three := anObject
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClassWithTransient >> two [
 
 	^ two
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTestClassWithTransient >> two: anObject [
 
 	two := anObject

@@ -1,10 +1,11 @@
 Class {
-	#name : #SoilSkipListPageTest,
-	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#name : 'SoilSkipListPageTest',
+	#superclass : 'TestCase',
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 SoilSkipListPageTest >> readPageFrom: aStream [ 
 	| page |
 	page := (SoilIndexPage readPageClassFrom: aStream) new.
@@ -14,7 +15,7 @@ SoilSkipListPageTest >> readPageFrom: aStream [
 	^ page readFrom: aStream
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListPageTest >> testCreation [ 
 	| page |
 	page := SoilSkipListDataPage new 
@@ -27,7 +28,7 @@ SoilSkipListPageTest >> testCreation [
 		
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListPageTest >> testDataPageFull [
 	| page bytes readPage |
 	page := SoilSkipListDataPage new 
@@ -49,7 +50,7 @@ SoilSkipListPageTest >> testDataPageFull [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListPageTest >> testDataPageFullStreamSize [
 	| page bytes number |
 	page := SoilSkipListDataPage new 
@@ -69,7 +70,7 @@ SoilSkipListPageTest >> testDataPageFullStreamSize [
 	self assert: bytes size <= page pageSize
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListPageTest >> testDataPageSizeOfHeader [
 	| page bytes |
 	page := SoilSkipListDataPage new 
@@ -83,7 +84,7 @@ SoilSkipListPageTest >> testDataPageSizeOfHeader [
 	self assert: bytes size equals: page headerSize 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListPageTest >> testDataPageWriteAndRead [
 	| page bytes readPage |
 	page := SoilSkipListDataPage new 
@@ -98,7 +99,7 @@ SoilSkipListPageTest >> testDataPageWriteAndRead [
 	self deny: readPage isDirty 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListPageTest >> testDataPageWriteAndReadRightArray [
 	| page bytes readPage |
 	page := SoilSkipListDataPage new 
@@ -115,7 +116,7 @@ SoilSkipListPageTest >> testDataPageWriteAndReadRightArray [
 	self deny: readPage isDirty 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListPageTest >> testHeaderPageFull [
 	| page bytes readPage |
 	page := SoilSkipListHeaderPage new 
@@ -139,7 +140,7 @@ SoilSkipListPageTest >> testHeaderPageFull [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListPageTest >> testHeaderPageFullStreamSize [
 	| page bytes number |
 	page := SoilSkipListHeaderPage new 
@@ -161,7 +162,7 @@ SoilSkipListPageTest >> testHeaderPageFullStreamSize [
 	self assert: bytes size <= page pageSize
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListPageTest >> testHeaderPageSizeOfHeader [
 	| page bytes |
 	page := SoilSkipListHeaderPage new 
@@ -177,7 +178,7 @@ SoilSkipListPageTest >> testHeaderPageSizeOfHeader [
 	self assert: bytes size equals: page headerSize 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilSkipListPageTest >> testHeaderPageWriteAndRead [
 	| page bytes readPage |
 	page := SoilSkipListHeaderPage new 

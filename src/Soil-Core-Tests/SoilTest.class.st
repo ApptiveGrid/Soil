@@ -1,29 +1,30 @@
 Class {
-	#name : #SoilTest,
-	#superclass : #TestCase,
+	#name : 'SoilTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTest class >> classNamesNotUnderTest [
 	"we for now ignore flock as this is platform specific"
 	^ #(#MacOSFileLock #UnixFileLock)
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTest class >> packageNamesUnderTest [
 	^ #(#'Soil-Core')
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilTest >> path [ 
 	^ 'soil-tests' asFileReference
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilTest >> setUp [ 
 	super setUp.
 	soil := Soil path: self path.
@@ -32,7 +33,7 @@ SoilTest >> setUp [
 		initializeFilesystem 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> simpleGraph [
 	^ SoilTestGraphRoot new 
 		nested: (SoilTestNestedObject new 
@@ -42,14 +43,14 @@ SoilTest >> simpleGraph [
 					label: 'nested under cluster')))
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
 		soil close ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testCachedSegment [
 	| txn |
 	soil setup cacheObjectRecords: 100.
@@ -69,7 +70,7 @@ SoilTest >> testCachedSegment [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testChangePathToControl [ 
 	soil close.
 	(self path / #control) moveTo: (self path / #settings).
@@ -80,7 +81,7 @@ SoilTest >> testChangePathToControl [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testCheckpointEmptyRecordsToCommit [
 	| tx root skipList obj items |
 	tx := soil newTransaction.
@@ -115,7 +116,7 @@ SoilTest >> testCheckpointEmptyRecordsToCommit [
 		raise: Error
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testFindRecordWithIndex [ 
 	| tx skipList rec |
 	tx := soil newTransaction.
@@ -131,7 +132,7 @@ SoilTest >> testFindRecordWithIndex [
 	self assert: (rec indexIds includes: skipList id)
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testIncompatibleDatabaseFormatVersion [ 
 	soil control databaseFormatVersion: 2.
 	soil close.
@@ -142,19 +143,19 @@ SoilTest >> testIncompatibleDatabaseFormatVersion [
 		raise: SoilIncompatibleDatabaseFormat 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testInitializeDatabase [
 	self assert: (soil path / #segments / '1' / #index) exists
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testInitializeDatabaseFailsIfExisting [
 	self 
 		should: [ soil initializeFilesystem ]
 		raise: Error
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testMetricsUncached [
 	| tx metrics txn2 |
 	soil notificationHandler: SoilMetrics new.
@@ -188,7 +189,7 @@ SoilTest >> testMetricsUncached [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testMetricsWithRecordCache [
 	| tx metrics txn2 |
 	soil setup cacheRecords.
@@ -232,7 +233,7 @@ SoilTest >> testMetricsWithRecordCache [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testSerializingClassDescription [
 	| obj bytes obj2 stream transaction |
 	self skip.
@@ -254,7 +255,7 @@ SoilTest >> testSerializingClassDescription [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testSerializingRootOneCluster [
 	| tx tx2 materializedRoot |
 	tx := soil newTransaction.
@@ -266,7 +267,7 @@ SoilTest >> testSerializingRootOneCluster [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testSerializingRootTwoCluster [
 	| tx tx2 materializedRoot graph |
 	tx := soil newTransaction.
@@ -281,7 +282,7 @@ SoilTest >> testSerializingRootTwoCluster [
 	self assert: materializedRoot nested reference nested label equals: 'nested under cluster'.	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testSerializingToSavedRoot [
 	| tx theRoot modelMap modelName theModel tx2 soil2 tx3 soil3 materializedRoot materializedModelMap |
 	tx := soil newTransaction.
@@ -312,7 +313,7 @@ SoilTest >> testSerializingToSavedRoot [
 	self assert: (materializedModelMap soilRealObject at: 'foo') nested reference nested label equals: 'nested under cluster'
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testSetupMetaRecords [ 
 	soil setup 
 		cacheMetaRecords: 100.
@@ -321,7 +322,7 @@ SoilTest >> testSetupMetaRecords [
 	self assert: soil objectRepository firstSegment class equals: SoilObjectSegment 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testSetupObjectRecords [ 
 	soil setup 
 		cacheObjectRecords: 1000.
@@ -330,7 +331,7 @@ SoilTest >> testSetupObjectRecords [
 	self assert: soil objectRepository metaSegment class equals: SoilObjectSegment 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilTest >> testUpdatingPersistentObject [
 	| tx updateTx persistedRoot readTx root3 |
 	tx := soil newTransaction.

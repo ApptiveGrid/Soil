@@ -1,13 +1,14 @@
 Class {
-	#name : #SoilCleanCodeTest,
-	#superclass : #TestCase,
+	#name : 'SoilCleanCodeTest',
+	#superclass : 'TestCase',
 	#pools : [
 		'SoilTypeCodes'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : 'Soil-Core-Tests',
+	#package : 'Soil-Core-Tests'
 }
 
-{ #category : #cleanup }
+{ #category : 'cleanup' }
 SoilCleanCodeTest class >> cleanupWhiteSpaceTrimRight [
 	<script>
 	| badCases |
@@ -27,7 +28,7 @@ SoilCleanCodeTest class >> cleanupWhiteSpaceTrimRight [
 		refactoring execute ]
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilCleanCodeTest >> testCodeCoverage [
 
 	| collector methods coverage testClasses perMethodCoveragePercentage |
@@ -67,7 +68,7 @@ SoilCleanCodeTest >> testCodeCoverage [
 	self assert: perMethodCoveragePercentage >= 93.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilCleanCodeTest >> testNoDuplicatedMethodInHierarchy [
 	"There should be no methods in the hierachy that are already in a superclass"
 	
@@ -84,7 +85,7 @@ SoilCleanCodeTest >> testNoDuplicatedMethodInHierarchy [
 		description: ('the following methods are already in the superclass hierarchy and can be removed: ', methods asString)
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilCleanCodeTest >> testNoUncategorizedMethods [
 	"Check that we have no #'as yet unclassified' protocols left"
 
@@ -100,7 +101,7 @@ SoilCleanCodeTest >> testNoUncategorizedMethods [
 		description: 'the following classes have uncategorized methods: ', violating asString
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilCleanCodeTest >> testNoUnimplementedCalls [
 
 	| remaining |
@@ -118,7 +119,7 @@ SoilCleanCodeTest >> testNoUnimplementedCalls [
 	self assert: remaining isEmpty description: ('the following methods send selectors that do not exist', remaining asString)
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilCleanCodeTest >> testNoUnsentMessages [
 	"Fail if there are methods implemented whose selectors is not sent anywhere in Pharo.
 	Please add a test or remove the method!"
@@ -138,7 +139,7 @@ SoilCleanCodeTest >> testNoUnsentMessages [
 		description: ('the following selectors are implemented, but never send', found asString)
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilCleanCodeTest >> testNoUnusedClasses [
 	"Fail if there are Classes that are not used. They should either be tested or deleted.
 	(check how to override #isUsed for cases where classes are discovered reflectively)"
@@ -155,7 +156,7 @@ SoilCleanCodeTest >> testNoUnusedClasses [
 		description: ('the following classes are unused: ', found asString)
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilCleanCodeTest >> testNoUnusedInstanceVariablesLeft [
 	| variables classes validExceptions remaining |
 	classes := Soil package definedClasses
@@ -172,7 +173,7 @@ SoilCleanCodeTest >> testNoUnusedInstanceVariablesLeft [
 	self assert: remaining isEmpty description: ('the following classes have unused instance variables and should be cleaned: ', remaining asString)
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilCleanCodeTest >> testNoUnusedTemporaryVariablesLeft [
 	"Fail if there are methods who have unused temporary variables"
 	| found  |
