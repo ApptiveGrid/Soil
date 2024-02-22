@@ -20,7 +20,7 @@ SoilTest class >> packageNamesUnderTest [
 
 { #category : #accessing }
 SoilTest >> path [ 
-	^ 'soil-tests'
+	^ 'soil-tests' asFileReference
 ]
 
 { #category : #initialization }
@@ -67,6 +67,17 @@ SoilTest >> testCachedSegment [
 		tx abort ].
 	self assert: (soil objectRepository firstSegment cache instVarNamed: #statistics) hitRatio equals: 1.
 
+]
+
+{ #category : #tests }
+SoilTest >> testChangePathToControl [ 
+	soil close.
+	(self path / #control) moveTo: (self path / #settings).
+	soil := Soil path: self path.
+	soil open.
+	self assert: soil databaseVersion equals: 0
+	 
+	
 ]
 
 { #category : #tests }
@@ -122,7 +133,7 @@ SoilTest >> testFindRecordWithIndex [
 
 { #category : #tests }
 SoilTest >> testIncompatibleDatabaseFormatVersion [ 
-	soil settings databaseFormatVersion: 2.
+	soil control databaseFormatVersion: 2.
 	soil close.
 	
 	soil := Soil path: self path.

@@ -33,11 +33,11 @@ Class {
 		'objectRepository',
 		'behaviorRegistry',
 		'semaphore',
-		'settings',
 		'journal',
 		'notificationHandler',
 		'serializerClass',
-		'materializerClass'
+		'materializerClass',
+		'control'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -94,8 +94,14 @@ Soil >> close [
 		objectRepository close ].
 	behaviorRegistry ifNotNil: [ 
 		behaviorRegistry close ].
-	settings ifNotNil: [ 
-		settings close ]
+	control ifNotNil: [ 
+		control close ]
+]
+
+{ #category : #accessing }
+Soil >> control [
+
+	^ control
 ]
 
 { #category : #initialization }
@@ -105,12 +111,12 @@ Soil >> critical: aBlock [
 
 { #category : #accessing }
 Soil >> databaseVersion [
-	^ settings databaseVersion
+	^ control databaseVersion
 ]
 
 { #category : #accessing }
 Soil >> databaseVersion: anInteger [ 
-	settings databaseVersion: anInteger
+	control databaseVersion: anInteger
 ]
 
 { #category : #'instance creation' }
@@ -149,7 +155,7 @@ Soil >> initializeFilesystem [
 	(path exists and: [ path hasChildren ]) 
 		ifTrue: [ SoilDatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
 	self path ensureCreateDirectory.
-	settings := SoilParameterFile new
+	control := SoilControlFile new
 		soil: self;
 		initializeFilesystem;
 		yourself.
@@ -180,7 +186,7 @@ Soil >> inspectionJournal [
 Soil >> inspectionParameters [
 	<inspectorPresentationOrder: 2100 title: 'parameters'>
 
-	^ self settings inspectionParameters 
+	^ self control inspectionParameters 
 ]
 
 { #category : #accessing }
@@ -190,7 +196,7 @@ Soil >> journal [
 
 { #category : #locking }
 Soil >> lockDatabaseVersionFor: lockContext [ 
-	^ settings lockDatabaseVersionFor: lockContext 
+	^ control lockDatabaseVersionFor: lockContext 
 ]
 
 { #category : #locking }
@@ -266,7 +272,7 @@ Soil >> objectRepository [
 { #category : #'opening/closing' }
 Soil >> open [
 	('open soil database at ', path asString) soilEmit.
-	settings := SoilParameterFile new
+	control := SoilControlFile new
 		soil: self;
 		open.
 	objectRepository := SoilObjectRepository new 
@@ -300,7 +306,7 @@ Soil >> path: aString [
 Soil >> printOn: aStream [ 
 	aStream 
 		<< 'Soil ['
-		<< self settings databaseVersion printString
+		<< self control databaseVersion printString
 		<< '] '
 		<< self path pathString
 ]
@@ -358,12 +364,6 @@ Soil >> serializerClass [
 Soil >> serializerClass: anObject [
 
 	serializerClass := anObject
-]
-
-{ #category : #accessing }
-Soil >> settings [
-
-	^ settings
 ]
 
 { #category : #accessing }
