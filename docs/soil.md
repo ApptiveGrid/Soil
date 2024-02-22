@@ -59,3 +59,12 @@ soil renameClassNamed: #SOMigrationObject to: #SOMigrationObject2.
 ```
 
 This allows the Soil Materializer to load the old objects into instances of the new class. 
+
+In Pharo12, the support for deprecated aliases can be used alternatively. Add an initalize method on the class side of the new SOMigrationObject2 class (and make sure to call it once):
+
+```
+self deprecatedAliases: #(##SOMigrationObject).
+```
+
+This will add an alias to the global namespace, Soil will be able to use this alias transparenty to load the old objects.
+
