@@ -106,14 +106,12 @@ SoilCleanCodeTest >> testNoUnimplementedCalls [
 	| remaining |
 	"To tag selectors send that are not implemented that should not trigger this rule, use the pragma 
 	<ignoreNotImplementedSelectors: #(selector:to:be:ignored)>"
+	
 	self skip.
 	remaining := Soil package methods select: [ :meth | 
 		             | ignored |
-						 "when not supporting Pharo10, we can use #allIgnoredNotImplementedSelectors"
-		             ignored := (meth pragmaAt: #ignoreNotImplementedSelectors:)
-		  					ifNotNil: [ :pragma | pragma argumentAt: 1 ]
-		  					ifNil: [ #(  ) ].
-		             meth messages anySatisfy: [ :m | 
+		             ignored := meth allIgnoredNotImplementedSelectors.
+						 meth messages anySatisfy: [ :m | 
 			             m isSelectorSymbol not and: [ 
 				             (ignored includes: m) not ] ] ].
 	
@@ -126,12 +124,12 @@ SoilCleanCodeTest >> testNoUnsentMessages [
 	Please add a test or remove the method!"
 
 	| found knownviolations |
+	"As this is not critical, we skip this test. If you are want to cleanup, just run it!"
 	self skip.
 	found := Soil package allUnsentMessages.
 
-	"To be fixed, see https://github.com/ApptiveGrid/Soil/issues/24"
-	knownviolations :=
-	 #('idOf:' 'inspectionObject' 'versionSize' 'makePersistent:' 'nextAfter:').
+
+	knownviolations := #().
 
 	found := found copyWithoutAll: knownviolations.
 
@@ -145,10 +143,11 @@ SoilCleanCodeTest >> testNoUnusedClasses [
 	"Fail if there are Classes that are not used. They should either be tested or deleted.
 	(check how to override #isUsed for cases where classes are discovered reflectively)"
 	| found  knownviolations |
+	"As this is not critical, we skip this test. If you are want to cleanup, just run it!"
 	self skip.
 	found := Soil package definedClasses reject: [ :class | class isUsed]. 
 	
-	knownviolations := #( SoilIndexConsistencyVisitor ).
+	knownviolations := #( ).
 	found := found reject: [:class | knownviolations includes: class name  ].
 	
 	self 

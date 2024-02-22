@@ -1,3 +1,13 @@
+"
+A SoilBehaviorDescription is a flat, versioned view of classes
+
+- Flat, this means that it models the class with all instance variables of the superclasses (what #allInstVarNames returns)
+- Names, not offsets. Soil reads and writes by name, it does not care about the offset of the instance Variable
+
+Together, this allows us to read data from disk even though the code was changed (e.g. instance variable order, variables moved in the hierachy)
+
+
+"
 Class {
 	#name : #SoilBehaviorDescription,
 	#superclass : #Object,
