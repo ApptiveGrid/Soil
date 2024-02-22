@@ -145,8 +145,8 @@ SoilControlFile >> initializeStart [
 ]
 
 { #category : #inspector }
-SoilControlFile >> inspectionParameters [
-	<inspectorPresentationOrder: 1000 title: 'soil parameters'>
+SoilControlFile >> inspectionControl [
+	<inspectorPresentationOrder: 1000 title: 'control'>
 
 	^ SpTablePresenter new
 		items: self parameterNames;

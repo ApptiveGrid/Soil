@@ -176,17 +176,17 @@ Soil >> initializeFilesystem [
 ]
 
 { #category : #inspector }
+Soil >> inspectionControl [
+	<inspectorPresentationOrder: 2100 title: 'control'>
+
+	^ self control inspectionControl 
+]
+
+{ #category : #inspector }
 Soil >> inspectionJournal [
 	<inspectorPresentationOrder: 2000 title: 'journal'>
 	
 	^ self journal inspectionContent
-]
-
-{ #category : #inspector }
-Soil >> inspectionParameters [
-	<inspectorPresentationOrder: 2100 title: 'parameters'>
-
-	^ self control inspectionParameters 
 ]
 
 { #category : #accessing }
