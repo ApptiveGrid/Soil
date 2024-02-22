@@ -42,7 +42,7 @@ SoilIndexIterator >> at: aKeyObject [
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 	| foundValue |
 	foundValue := self find: aKeyObject ifAbsent: aBlock.
- 	^(self restoreValue: foundValue forKey: currentKey) ifNil: [ aBlock value ]
+ 	^(self restoreItem: currentKey -> foundValue) ifNil: [ aBlock value ]
 ]
 
 { #category : #accessing }
@@ -122,9 +122,8 @@ SoilIndexIterator >> do: aBlock [
 	| item |
 	"We use basicNextAssociation to avoid the creation of intermediate associations of nextAssociation"
 	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ 
- 				(self
- 					 restoreValue: item value
- 					 forKey: item key) ifNotNil: [:notNil | aBlock value: notNil ]]
+ 		(self restoreItem: item ) 
+			ifNotNil: [:notNil | aBlock value: notNil ]]
 ]
 
 { #category : #private }
@@ -209,7 +208,7 @@ SoilIndexIterator >> isEmpty [
 		self currentPage: index firstPage.
 		"all items might be removed and not restorable"
  		self index firstPage items allSatisfy: [ :each |
- 		  	(self restoreValue: each value forKey: each key) isNil ]]
+ 		  	(self restoreItem: each) isNil ]]
 ]
 
 { #category : #private }
@@ -237,10 +236,11 @@ SoilIndexIterator >> lastAssociation [
 	"Note: key will be index key"
 	| lastAssociation lastValue key |
 	lastAssociation := self priorAssociation ifNil: [ ^nil ].
-	lastValue := (self
- 			restoreValue: lastAssociation value
- 			forKey: (key := lastAssociation key)).
-	^ lastValue ifNil: [ self priorAssociation ] ifNotNil: [ key -> lastValue ]
+	key := lastAssociation key.
+	lastValue := self restoreItem: lastAssociation.
+	^ lastValue 
+		ifNotNil: [ key -> lastValue ] 
+		ifNil: [ self priorAssociation ] 
 ]
 
 { #category : #accessing }
@@ -252,9 +252,7 @@ SoilIndexIterator >> lastPage [
 SoilIndexIterator >> next [
 	| nextAssociation nextValue |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
-	nextValue := (self
- 			restoreValue: nextAssociation value
- 			forKey: nextAssociation key).
+	nextValue := self restoreItem: nextAssociation .
 	^ nextValue ifNil: [ self next ]
 ]
 
@@ -280,10 +278,11 @@ SoilIndexIterator >> nextAssociation [
 	"Note: key will be index key"
 	| nextAssociation nextValue key |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
-	nextValue := (self
- 			restoreValue: nextAssociation value
- 			forKey: (key := nextAssociation key)).
-	^ nextValue ifNil: [ self nextAssociation ] ifNotNil: [ key -> nextValue ]
+	key := nextAssociation key.
+	nextValue := self restoreItem: nextAssociation.
+	^ nextValue 
+		ifNotNil: [ key -> nextValue ] 
+		ifNil: [ self nextAssociation ] 
 ]
 
 { #category : #accessing }
@@ -360,6 +359,21 @@ SoilIndexIterator >> removeKey: key [
 	^ self 
 		at: key 
 		put: SoilObjectId removed
+]
+
+{ #category : #private }
+SoilIndexIterator >> restoreItem: item [
+	"restore a value that has been removed by a later transaction"
+	^ item value isRemoved 
+		ifTrue: [
+			self 
+				historicValueAt: item key 
+				ifAbsent: [ nil ] ]
+		ifFalse: [
+			"restore a value that has been overwritten by a later transaction"   
+			self 
+				historicValueAt: item key 
+				ifAbsent: [ item value ] ]
 ]
 
 { #category : #private }
