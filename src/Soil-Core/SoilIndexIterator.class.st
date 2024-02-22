@@ -376,21 +376,6 @@ SoilIndexIterator >> restoreItem: item [
 				ifAbsent: [ item value ] ]
 ]
 
-{ #category : #private }
-SoilIndexIterator >> restoreValue: value forKey: key [
-	"restore a value that has been removed by a later transaction"
-	^ value isRemoved 
-		ifTrue: [
-			self 
-				historicValueAt: key 
-				ifAbsent: [ nil ] ]
-		ifFalse: [
-			"restore a value that has been overwritten by a later transaction"   
-			self 
-				historicValueAt: key 
-				ifAbsent: [ value ] ]
-]
-
 { #category : #accessing }
 SoilIndexIterator >> size [
 	"We iterate over all elements to get the size. Slow!"
