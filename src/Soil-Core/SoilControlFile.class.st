@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilParameterFile,
+	#name : #SoilControlFile,
 	#superclass : #SoilBinaryFile,
 	#instVars : [
 		'soil',
@@ -12,12 +12,12 @@ Class {
 }
 
 { #category : #visiting }
-SoilParameterFile >> acceptSoil: aSoilVisitor [ 
-	^ aSoilVisitor visitParameters: self
+SoilControlFile >> acceptSoil: aSoilVisitor [ 
+	^ aSoilVisitor visitControl: self
 ]
 
 { #category : #accessing }
-SoilParameterFile >> applicationVersion [
+SoilControlFile >> applicationVersion [
 	^ semaphore critical: [  
 		applicationVersion ifNil: [ 
 			stream position: self applicationVersionPosition.
@@ -25,7 +25,7 @@ SoilParameterFile >> applicationVersion [
 ]
 
 { #category : #accessing }
-SoilParameterFile >> applicationVersion: anInteger [
+SoilControlFile >> applicationVersion: anInteger [
 	semaphore critical: [  
 		self stream 
 			position: self applicationVersionPosition;
@@ -35,17 +35,17 @@ SoilParameterFile >> applicationVersion: anInteger [
 ]
 
 { #category : #accessing }
-SoilParameterFile >> applicationVersionPosition [
+SoilControlFile >> applicationVersionPosition [
 	^ self databaseVersionPosition + self databaseVersionSize
 ]
 
 { #category : #accessing }
-SoilParameterFile >> applicationVersionSize [
+SoilControlFile >> applicationVersionSize [
 	^ 8
 ]
 
 { #category : #private }
-SoilParameterFile >> basicDatabaseVersion: anInteger [
+SoilControlFile >> basicDatabaseVersion: anInteger [
 	semaphore critical: [
 		currentDatabaseVersion := anInteger.  
 		self stream 
@@ -55,7 +55,7 @@ SoilParameterFile >> basicDatabaseVersion: anInteger [
 ]
 
 { #category : #accessing }
-SoilParameterFile >> checkpoint [
+SoilControlFile >> checkpoint [
 	^ semaphore critical: [  
 		self stream 
 			position: self checkpointPosition.
@@ -63,7 +63,7 @@ SoilParameterFile >> checkpoint [
 ]
 
 { #category : #accessing }
-SoilParameterFile >> checkpoint: anInteger [
+SoilControlFile >> checkpoint: anInteger [
 	semaphore critical: [  
 		self stream 
 			position: self checkpointPosition;
@@ -72,17 +72,17 @@ SoilParameterFile >> checkpoint: anInteger [
 ]
 
 { #category : #accessing }
-SoilParameterFile >> checkpointPosition [
+SoilControlFile >> checkpointPosition [
 	^ self applicationVersionPosition + self applicationVersionSize
 ]
 
 { #category : #accessing }
-SoilParameterFile >> checkpointPositionSize [
+SoilControlFile >> checkpointPositionSize [
 	^ 8
 ]
 
 { #category : #accessing }
-SoilParameterFile >> databaseFormatVersion [
+SoilControlFile >> databaseFormatVersion [
 	^ semaphore critical: [ 
 		databaseFormatVersion ifNil: [ 
 			stream position: self headerSize.
@@ -90,7 +90,7 @@ SoilParameterFile >> databaseFormatVersion [
 ]
 
 { #category : #accessing }
-SoilParameterFile >> databaseFormatVersion: anInteger [
+SoilControlFile >> databaseFormatVersion: anInteger [
 	semaphore critical: [   
 		self stream 
 			position: self headerSize;
@@ -100,19 +100,19 @@ SoilParameterFile >> databaseFormatVersion: anInteger [
 ]
 
 { #category : #accessing }
-SoilParameterFile >> databaseFormatVersionSize [
+SoilControlFile >> databaseFormatVersionSize [
 	^ 1
 ]
 
 { #category : #accessing }
-SoilParameterFile >> databaseVersion [
+SoilControlFile >> databaseVersion [
 	^ semaphore critical: [  
 		stream position: self databaseVersionPosition.
 		(stream next: self databaseVersionSize) asInteger ]
 ]
 
 { #category : #accessing }
-SoilParameterFile >> databaseVersion: anInteger [
+SoilControlFile >> databaseVersion: anInteger [
 	(currentDatabaseVersion < anInteger) ifFalse: [ 
 		SoilInvalidDatabaseVersion signal: 'database version can only grow' ]. 
 	(self databaseVersion < anInteger) ifFalse: [ 
@@ -121,32 +121,32 @@ SoilParameterFile >> databaseVersion: anInteger [
 ]
 
 { #category : #accessing }
-SoilParameterFile >> databaseVersionPosition [
+SoilControlFile >> databaseVersionPosition [
 	^ self headerSize + self databaseFormatVersionSize
 ]
 
 { #category : #accessing }
-SoilParameterFile >> databaseVersionSize [
+SoilControlFile >> databaseVersionSize [
 	^ 8
 ]
 
 { #category : #initialization }
-SoilParameterFile >> initialize [ 
+SoilControlFile >> initialize [ 
 	super initialize.
 	semaphore := Semaphore forMutualExclusion.
 	currentDatabaseVersion := 0
 ]
 
 { #category : #initialization }
-SoilParameterFile >> initializeStart [
+SoilControlFile >> initializeStart [
 	self databaseFormatVersion: 1.
 	self basicDatabaseVersion: 0.
 	self applicationVersion: 1
 ]
 
 { #category : #inspector }
-SoilParameterFile >> inspectionParameters [
-	<inspectorPresentationOrder: 1000 title: 'soil parameters'>
+SoilControlFile >> inspectionControl [
+	<inspectorPresentationOrder: 1000 title: 'control'>
 
 	^ SpTablePresenter new
 		items: self parameterNames;
@@ -158,8 +158,13 @@ SoilParameterFile >> inspectionParameters [
 			addColumn: (SpStringTableColumn evaluated: [:each | self perform: each asSymbol ]))
 ]
 
+{ #category : #accessing }
+SoilControlFile >> legacyPath [
+	^ soil path / #settings
+]
+
 { #category : #locking }
-SoilParameterFile >> lockDatabaseVersionFor: lockContext [
+SoilControlFile >> lockDatabaseVersionFor: lockContext [
 	^ stream 
 		lockFrom: self headerSize
 		length: self databaseVersionSize
@@ -167,7 +172,11 @@ SoilParameterFile >> lockDatabaseVersionFor: lockContext [
 ]
 
 { #category : #'open/close' }
-SoilParameterFile >> open [ 
+SoilControlFile >> open [ 
+	"convert legacy path to new one"
+	self path exists ifFalse: [ 
+		self legacyPath exists ifTrue: [ 
+			self legacyPath moveTo: self path ] ].
 	super open.
 	(Soil databaseFormatVersion = self databaseFormatVersion)	
 		ifFalse: [ SoilIncompatibleDatabaseFormat signal: 'database format version ', Soil databaseFormatVersion asString, ' does not match persisted database format version ', self databaseFormatVersion asString ].
@@ -175,28 +184,28 @@ SoilParameterFile >> open [
 ]
 
 { #category : #accessing }
-SoilParameterFile >> parameterNames [
+SoilControlFile >> parameterNames [
 	^ #( databaseFormatVersion databaseVersion applicationVersion checkpoint ) 
 ]
 
 { #category : #accessing }
-SoilParameterFile >> path [
-	^ soil path / #settings
+SoilControlFile >> path [
+	^ soil path / #control
 ]
 
 { #category : #utilities }
-SoilParameterFile >> prefix [ 
+SoilControlFile >> prefix [ 
 	^ 'SOIL|PARAMETERS' asByteArray
 ]
 
 { #category : #accessing }
-SoilParameterFile >> soil [
+SoilControlFile >> soil [
 
 	^ soil
 ]
 
 { #category : #accessing }
-SoilParameterFile >> soil: anObject [
+SoilControlFile >> soil: anObject [
 
 	soil := anObject
 ]

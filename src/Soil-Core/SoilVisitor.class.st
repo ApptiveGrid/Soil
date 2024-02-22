@@ -28,6 +28,11 @@ SoilVisitor >> visitAll: aCollection [
 ]
 
 { #category : #visiting }
+SoilVisitor >> visitControl: aSoilControlFile [ 
+
+]
+
+{ #category : #visiting }
 SoilVisitor >> visitDatabaseJournal: aSoilJournal [ 
 	self visitAll: aSoilJournal fragmentFiles.
 	^ aSoilJournal 
@@ -76,11 +81,6 @@ SoilVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [
 ]
 
 { #category : #visiting }
-SoilVisitor >> visitParameters: aSoilParameterFile [ 
-
-]
-
-{ #category : #visiting }
 SoilVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	aSoilPersistentClusterVersion references 
 		do: [ :reference | self processReference: reference ].
@@ -94,7 +94,7 @@ SoilVisitor >> visitSkipList: aSoilSkipList [
 
 { #category : #visiting }
 SoilVisitor >> visitSoil: aSoil [ 
-	self visit: aSoil settings.
+	self visit: aSoil control.
 	self visit: aSoil objectRepository.
 	self visit: aSoil journal.
 	^ aSoil

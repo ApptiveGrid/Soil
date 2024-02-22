@@ -77,6 +77,14 @@ SoilBackupVisitor >> target: aSoil [
 ]
 
 { #category : #visiting }
+SoilBackupVisitor >> visitControl: aSoilControlFile [ 
+	target control 
+		databaseFormatVersion: aSoilControlFile databaseFormatVersion;
+		databaseVersion: aSoilControlFile databaseVersion;
+		applicationVersion: aSoilControlFile applicationVersion
+]
+
+{ #category : #visiting }
 SoilBackupVisitor >> visitDatabaseJournal: aSoilJournal [ 
 	(target path / #journal) ensureCreateDirectory.
 	^ super visitDatabaseJournal: aSoilJournal
@@ -99,14 +107,6 @@ SoilBackupVisitor >> visitMetaSegment: aSoilMetaSegment [
 SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [ 
 	self process: SoilObjectId root.
 	super visitObjectSegment: aSoilObjectSegment.
-]
-
-{ #category : #visiting }
-SoilBackupVisitor >> visitParameters: aSoilParameterFile [ 
-	target settings 
-		databaseFormatVersion: aSoilParameterFile databaseFormatVersion;
-		databaseVersion: aSoilParameterFile databaseVersion;
-		applicationVersion: aSoilParameterFile applicationVersion
 ]
 
 { #category : #visiting }

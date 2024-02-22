@@ -88,7 +88,7 @@ SoilBackupTest >> testBackupWithIndexRemoval [
 { #category : #tests }
 SoilBackupTest >> testSimpleBackup [ 
 	| tx backup tx2 |
-	soil settings
+	soil control
 		databaseFormatVersion: 1; 
 		applicationVersion: 5.
 	tx := soil newTransaction.
@@ -100,7 +100,7 @@ SoilBackupTest >> testSimpleBackup [
 		open.
 	[tx2 := backup newTransaction.
 	self assert: tx2 root equals: tx2 root.
-	self assert: backup settings applicationVersion equals: 5]
+	self assert: backup control applicationVersion equals: 5]
 		ensure: [ backup close ]
 	
 	
