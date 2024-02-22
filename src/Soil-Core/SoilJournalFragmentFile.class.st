@@ -44,6 +44,11 @@ SoilJournalFragmentFile >> appendEntry: aSoilJournalEntry [
 ]
 
 { #category : #accessing }
+SoilJournalFragmentFile >> atEnd [
+	^ stream atEnd
+]
+
+{ #category : #accessing }
 SoilJournalFragmentFile >> basename [ 
 	^ path basename
 ]
@@ -190,6 +195,16 @@ SoilJournalFragmentFile >> printOn: aStream [
 	aStream 
 		<< 'journal segment file: '
 		<< path asString
+]
+
+{ #category : #accessing }
+SoilJournalFragmentFile >> setToStart [
+	self stream position: self dataPosition
+]
+
+{ #category : #accessing }
+SoilJournalFragmentFile >> size [ 
+	^ stream size 
 ]
 
 { #category : #journal }

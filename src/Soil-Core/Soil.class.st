@@ -286,6 +286,7 @@ Soil >> open [
 	journal := SoilPersistentDatabaseJournal new
 		soil: self;
 		open;
+		recover;
 		yourself.
 	notificationHandler := SoilNotificationHandler new
 		soil: self

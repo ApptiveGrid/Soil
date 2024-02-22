@@ -115,7 +115,13 @@ SoilPersistentDatabaseJournal >> initialize [
 
 { #category : #initialization }
 SoilPersistentDatabaseJournal >> initializeFilesystem [
+	| file lsn |
 	self path ensureCreateDirectory.
+	self path hasChildren ifFalse: [ 
+		file := self currentFragmentFile.
+		lsn := self appendEntry: (SoilCheckpointEntry new
+			previousCheckpoint: soil control checkpoint).
+		soil control checkpoint: lsn ]
 
 ]
 
@@ -162,6 +168,14 @@ SoilPersistentDatabaseJournal >> openFragmentFile: filename [
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> path [
 	^ soil path / #journal
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> recover [
+	SoilDatabaseRecovery new 
+		soil: soil;
+		journal: self;
+		recover 
 ]
 
 { #category : #initialization }

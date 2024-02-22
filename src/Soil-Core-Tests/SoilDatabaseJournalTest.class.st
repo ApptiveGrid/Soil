@@ -62,6 +62,28 @@ SoilDatabaseJournalTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilDatabaseJournalTest >> testRecoverWithNormalEnd [
+	| newJournal |
+	
+	newJournal := SoilTransactionJournal new.
+	newJournal addEntry: (SoilBeginTransactionEntry new
+		readVersion: 0; 
+		transactionId: 1;
+		createdAt: DateAndTime now).
+	newJournal addEntry: (SoilCommitTransactionEntry new 
+		transactionId: 1;
+		committedAt: DateAndTime now;
+		yourself).
+	newJournal addEntry: (SoilCheckpointEntry new
+		previousCheckpoint: soil control checkpoint).
+	soil journal writeTransactionJournal: newJournal.
+	soil close.
+	soil open.
+	self assert: soil control checkpoint equals: nil 
+	
+]
+
+{ #category : #tests }
 SoilDatabaseJournalTest >> testReplicationToEmptyDatabase [
 	| tx |
 	self fillDatabase. 
