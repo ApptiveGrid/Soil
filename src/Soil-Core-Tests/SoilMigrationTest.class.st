@@ -150,6 +150,30 @@ SoilMigrationTest >> testMaterializingObjectRenamedClass [
 	self assert: materializedRoot class name equals: 'SOMigrationObject2'
 ]
 
+{ #category : #tests }
+SoilMigrationTest >> testMaterializingObjectRenamedClassPharo12 [
+	| tx tx2 materializedRoot object |
+	
+	"alternative way to support class renames using a Pharo12 feature"
+	
+	SystemVersion current major <12 ifTrue: [ self skip].
+	
+	object := self createMigrationClassFixedLayout new.
+	self deny: object class isVariable.
+	tx := soil newTransaction.
+	tx root: object.
+	tx commit.
+	"now we remove the class and create a new one with a different name"
+	migrationClass removeFromSystem.
+	migrationClass := self createMigrationClassFixedLayout2.
+	"use the Pharo12 aliasing, this would be normally done in a class side initialize method"
+	migrationClass deprecatedAliases: #(#SOMigrationObject).
+
+	tx2 := soil newTransaction.
+	materializedRoot := tx2 root.
+	self assert: materializedRoot class name equals: 'SOMigrationObject2'
+]
+
 { #category : #'tests - change classlayout' }
 SoilMigrationTest >> testMaterializingObjectVariableLayputFromFixedLayout [
 	| tx tx2 materializedRoot object |
