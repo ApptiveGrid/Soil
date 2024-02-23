@@ -15,12 +15,19 @@ SoilDatabaseRecovery >> journal: aSoilPersistentDatabaseJournal [
 ]
 
 { #category : #'as yet unclassified' }
+SoilDatabaseRecovery >> readEntryFrom: stream [
+	^ [ SoilJournalEntry readFrom: stream ]
+		on: MessageNotUnderstood
+		do: [ :err | SoilTruncatedRead signal: 'cannot read' ]
+]
+
+{ #category : #'as yet unclassified' }
 SoilDatabaseRecovery >> readFileUpToEnd: aSoilJournalFragmentFile [ 
 	| processed entry transactionJournal lsn |
 	[ aSoilJournalFragmentFile atEnd ] whileFalse: [ 
 		processed := false.
 		lsn := aSoilJournalFragmentFile currentLogSequenceNumber.
-		entry := SoilJournalEntry readFrom: aSoilJournalFragmentFile stream.
+		entry := self readEntryFrom: aSoilJournalFragmentFile stream.
 		(entry class = SoilBeginTransactionEntry) ifTrue: [ 
 			processed := true.
 			transactionJournal :=  SoilTransactionJournal new index: entry transactionId.
@@ -36,7 +43,7 @@ SoilDatabaseRecovery >> readFileUpToEnd: aSoilJournalFragmentFile [
 SoilDatabaseRecovery >> readTransactionJournal: transactionJournal from: stream [ 
 	| entry |
 	[ stream atEnd ] whileFalse: [  
-		entry := SoilJournalEntry readFrom: stream.
+		entry := self readEntryFrom: stream.
 		transactionJournal addEntry: entry.
 		(entry class = SoilCommitTransactionEntry) 
 			ifTrue: [ ^ transactionJournal ] ].
@@ -46,7 +53,7 @@ SoilDatabaseRecovery >> readTransactionJournal: transactionJournal from: stream 
 { #category : #'as yet unclassified' }
 SoilDatabaseRecovery >> recover [
 	| lastCheckpoint lastFileNumber checkpoint |
-
+	self halt.
 	lastCheckpoint := soil control checkpoint.
 	file := journal openFragmentForLSN: lastCheckpoint.
 	checkpoint := SoilJournalEntry readFrom: file stream.

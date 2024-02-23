@@ -87,12 +87,49 @@ SoilDatabaseJournalTest >> testRecoverWithJournalAndCheckpoint [
 	soil journal writeTransactionJournal: newJournal.
 	soil close.
 	soil open.
+	"we have now two entries checkpoint at the end but that is to be expected"
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 72) 
+	
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testRecoverWithRemainingBytes [
+	
+	soil journal currentFragmentFile stream 
+		nextPutAll: #( 1 2 3 4 );
+		flush.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28).
+	soil close.
+	soil open.
 	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 61) 
+	
 	
 ]
 
 { #category : #tests }
 SoilDatabaseJournalTest >> testRecoverWithRemainingJournal [
+	| newJournal |
+	
+	newJournal := SoilTransactionJournal new.
+	newJournal addEntry: (SoilBeginTransactionEntry new
+		readVersion: 0; 
+		transactionId: 1;
+		createdAt: DateAndTime now).
+	newJournal addEntry: (SoilCommitTransactionEntry new 
+		transactionId: 1;
+		committedAt: DateAndTime now;
+		yourself).
+	soil journal writeTransactionJournal: newJournal.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28).
+	soil close.
+	soil open.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 61) 
+	
+	
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testRecoverWithRemainingJournalAndBytes [
 	| newJournal |
 	
 	newJournal := SoilTransactionJournal new.
