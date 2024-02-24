@@ -75,7 +75,9 @@ SoilDatabaseJournalTest >> setUp [
 	super setUp.
 	soil := (Soil path: 'soil-tests')
 		destroy;
-		initializeFilesystem
+		initializeFilesystem;
+		close;
+		open
 ]
 
 { #category : #running }

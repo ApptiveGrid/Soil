@@ -125,14 +125,7 @@ SoilPersistentDatabaseJournal >> initialize [
 
 { #category : #initialization }
 SoilPersistentDatabaseJournal >> initializeFilesystem [
-	| file lsn |
-	self path ensureCreateDirectory.
-	self path hasChildren ifFalse: [ 
-		file := self currentFragmentFile.
-		lsn := self appendEntry: (SoilCheckpointEntry new
-			previousCheckpoint: soil control checkpoint).
-		soil control checkpoint: lsn ]
-
+	self path ensureCreateDirectory
 ]
 
 { #category : #inspector }
@@ -170,6 +163,12 @@ SoilPersistentDatabaseJournal >> newTransactionJournalForId: anInteger [
 
 { #category : #'instance creation' }
 SoilPersistentDatabaseJournal >> open [ 
+	| file lsn |
+	self path hasChildren ifFalse: [ 
+		file := self currentFragmentFile.
+		lsn := self appendEntry: (SoilCheckpointEntry new
+			previousCheckpoint: soil control checkpoint).
+		soil control checkpoint: lsn ]
 	
 ]
 

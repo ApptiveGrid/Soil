@@ -81,7 +81,8 @@ SoilBackupVisitor >> visitControl: aSoilControlFile [
 	target control 
 		databaseFormatVersion: aSoilControlFile databaseFormatVersion;
 		databaseVersion: aSoilControlFile databaseVersion;
-		applicationVersion: aSoilControlFile applicationVersion
+		applicationVersion: aSoilControlFile applicationVersion;
+		checkpoint: aSoilControlFile checkpoint
 ]
 
 { #category : #visiting }
