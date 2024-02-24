@@ -157,7 +157,7 @@ SoilPersistentDatabaseJournal >> inspectionContent [
 
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> lastFileNumber [
-	^ self fileNumberFrom: self fragmentFiles last basename.
+	^ self fileNumberFrom: self fragmentFiles first basename.
 ]
 
 { #category : #'instance creation' }
