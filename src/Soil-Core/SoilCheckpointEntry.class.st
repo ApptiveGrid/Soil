@@ -63,6 +63,15 @@ SoilCheckpointEntry >> previousCheckpoint: anObject [
 	previousCheckpoint := anObject 
 ]
 
+{ #category : #printing }
+SoilCheckpointEntry >> printOn: aStream [ 
+	aStream 
+		<< 'checkpointed at: ' 
+		<< checkpointedAt printString 
+		<< ', previous: '
+		<< previousCheckpoint printString
+]
+
 { #category : #'instance creation' }
 SoilCheckpointEntry >> readFrom: aStream [ 
 	super readFrom: aStream.

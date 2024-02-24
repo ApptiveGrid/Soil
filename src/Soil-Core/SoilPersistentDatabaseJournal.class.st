@@ -61,6 +61,16 @@ SoilPersistentDatabaseJournal >> currentFragmentFile [
 			ifFalse: [ self openFragmentFile: filename ] ]
 ]
 
+{ #category : #accessing }
+SoilPersistentDatabaseJournal >> currentFragmentFile: aSoilJournalFragmentFile [ 
+	currentFragmentFile := aSoilJournalFragmentFile
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> cycleFragmentFile [
+	currentFragmentFile := self createFragmentFile: (self filenameFrom: currentFragmentFile fileNumber + 1)
+]
+
 { #category : #enumerating }
 SoilPersistentDatabaseJournal >> do: aBlock [ 
 	semaphore critical: [  

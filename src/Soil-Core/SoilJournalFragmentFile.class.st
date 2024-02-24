@@ -7,6 +7,16 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
+{ #category : #'as yet unclassified' }
+SoilJournalFragmentFile class >> filenameFromFilenumber: anInteger [ 
+	^ (anInteger printStringBase: 16 length: 10 padded: true) asLowercase 
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournalFragmentFile class >> filenumberFromFilename: aString [ 
+	^ (ByteArray readHexFrom: aString) asInteger
+]
+
 { #category : #accessing }
 SoilJournalFragmentFile class >> path: aFileReference [ 
 	^ self new 
@@ -87,7 +97,7 @@ SoilJournalFragmentFile >> createdSize [
 { #category : #accessing }
 SoilJournalFragmentFile >> currentLogSequenceNumber [ 
 	^ SoilLogSequenceNumber 
-		fileNumber: (ByteArray readHexFrom: path pathSegments last) asInteger 
+		fileNumber: (self class filenumberFromFilename: path basename) 
 		offset: stream position 
 ]
 
@@ -103,6 +113,11 @@ SoilJournalFragmentFile >> entriesMatching: aBlock [
 ]
 
 { #category : #accessing }
+SoilJournalFragmentFile >> fileNumber [
+	^ self class filenumberFromFilename: path basename
+]
+
+{ #category : #accessing }
 SoilJournalFragmentFile >> filename [ 
 	^ self path basename
 ]
@@ -110,7 +125,10 @@ SoilJournalFragmentFile >> filename [
 { #category : #accessing }
 SoilJournalFragmentFile >> firstTransactionId [
 	self stream position: self dataPosition.
-
+	self flag: #todo.
+	"we skip the "
+	((SoilJournalEntry readFrom: self stream) class = SoilCheckpointEntry) ifFalse: [ 
+		Error signal: 'fragment file should start with a checkpoint entry' ].
 	^ SoilTransactionJournalEntry readTransactionIdFrom: stream
 ]
 
