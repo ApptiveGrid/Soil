@@ -7,6 +7,16 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
+{ #category : #'as yet unclassified' }
+SoilJournalFragmentFile class >> filenameFromFilenumber: anInteger [ 
+	^ (anInteger printStringBase: 16 length: 10 padded: true) asLowercase 
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournalFragmentFile class >> filenumberFromFilename: aString [ 
+	^ (ByteArray readHexFrom: aString) asInteger
+]
+
 { #category : #accessing }
 SoilJournalFragmentFile class >> path: aFileReference [ 
 	^ self new 
@@ -41,6 +51,11 @@ SoilJournalFragmentFile >> appendEntry: aSoilJournalEntry [
 			ensure: [ lock release ].
 	^ position
 
+]
+
+{ #category : #accessing }
+SoilJournalFragmentFile >> atEnd [
+	^ stream atEnd
 ]
 
 { #category : #accessing }
@@ -82,7 +97,7 @@ SoilJournalFragmentFile >> createdSize [
 { #category : #accessing }
 SoilJournalFragmentFile >> currentLogSequenceNumber [ 
 	^ SoilLogSequenceNumber 
-		fileNumber: (ByteArray readHexFrom: path pathSegments last) asInteger 
+		fileNumber: (self class filenumberFromFilename: path basename) 
 		offset: stream position 
 ]
 
@@ -98,6 +113,11 @@ SoilJournalFragmentFile >> entriesMatching: aBlock [
 ]
 
 { #category : #accessing }
+SoilJournalFragmentFile >> fileNumber [
+	^ self class filenumberFromFilename: path basename
+]
+
+{ #category : #accessing }
 SoilJournalFragmentFile >> filename [ 
 	^ self path basename
 ]
@@ -105,7 +125,10 @@ SoilJournalFragmentFile >> filename [
 { #category : #accessing }
 SoilJournalFragmentFile >> firstTransactionId [
 	self stream position: self dataPosition.
-
+	self flag: #todo.
+	"we skip the "
+	((SoilJournalEntry readFrom: self stream) class = SoilCheckpointEntry) ifFalse: [ 
+		Error signal: 'fragment file should start with a checkpoint entry' ].
 	^ SoilTransactionJournalEntry readTransactionIdFrom: stream
 ]
 
@@ -180,6 +203,11 @@ SoilJournalFragmentFile >> path: aFileReference [
 	path := aFileReference 
 ]
 
+{ #category : #accessing }
+SoilJournalFragmentFile >> position: anInteger [ 
+	stream position: anInteger 
+]
+
 { #category : #utilities }
 SoilJournalFragmentFile >> prefix [
 	^ 'SOIL|JOURNAL FRAGMENT' asByteArray
@@ -190,6 +218,21 @@ SoilJournalFragmentFile >> printOn: aStream [
 	aStream 
 		<< 'journal segment file: '
 		<< path asString
+]
+
+{ #category : #initialization }
+SoilJournalFragmentFile >> setToEnd [
+	stream setToEnd
+]
+
+{ #category : #accessing }
+SoilJournalFragmentFile >> setToStart [
+	self stream position: self dataPosition
+]
+
+{ #category : #accessing }
+SoilJournalFragmentFile >> size [ 
+	^ stream size 
 ]
 
 { #category : #journal }

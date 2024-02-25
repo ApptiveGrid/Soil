@@ -25,6 +25,12 @@ SoilLogSequenceNumber class >> value: anInteger [
 		value: anInteger 
 ]
 
+{ #category : #comparing }
+SoilLogSequenceNumber >> = aLogSequenceNumber [ 
+	(aLogSequenceNumber class = self class) ifFalse: [ ^ false ].
+	^ aLogSequenceNumber value = value
+]
+
 { #category : #accessing }
 SoilLogSequenceNumber >> fileNumber [
 	"the high 40 bits are making up the file number"
@@ -40,6 +46,11 @@ SoilLogSequenceNumber >> fileNumber: number offset: offset [
 { #category : #accessing }
 SoilLogSequenceNumber >> fileOffset [ 
 	^ value bitAnd: 16rFFFFFF
+]
+
+{ #category : #comparing }
+SoilLogSequenceNumber >> hash [ 
+	^ value hash
 ]
 
 { #category : #accessing }

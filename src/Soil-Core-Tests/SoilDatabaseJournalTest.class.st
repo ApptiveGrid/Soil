@@ -14,6 +14,14 @@ SoilDatabaseJournalTest class >> classUnderTest [
 ]
 
 { #category : #running }
+SoilDatabaseJournalTest >> addDictionaryRoot [ 
+	| tx |
+	tx := soil newTransaction.
+	tx root: Dictionary new.
+	tx commit
+]
+
+{ #category : #running }
 SoilDatabaseJournalTest >> fillDatabase [ 
 	| tx dict |
 	tx := soil newTransaction.
@@ -44,12 +52,32 @@ SoilDatabaseJournalTest >> fillDatabase [
 	
 ]
 
+{ #category : #tests }
+SoilDatabaseJournalTest >> modifyDictionaryRootEntry [
+	| txn record newRecord |
+	txn := soil newTransaction.
+	record := (txn recordWithId: SoilObjectId root)
+		transaction: txn;
+		materializeObject;
+		yourself.
+	record object at: #foo put: #bar.
+	newRecord := record asNewClusterVersion
+		version: 1;
+		serializeObject;
+		yourself.
+	^ newRecord asJournalEntry first
+				transactionId: 1;
+				yourself
+]
+
 { #category : #initialization }
 SoilDatabaseJournalTest >> setUp [ 
 	super setUp.
 	soil := (Soil path: 'soil-tests')
 		destroy;
-		initializeFilesystem
+		initializeFilesystem;
+		close;
+		open
 ]
 
 { #category : #running }
@@ -59,6 +87,130 @@ SoilDatabaseJournalTest >> tearDown [
 		soil close ].
 	copy ifNotNil: [ 
 		copy close ]
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testRecoverWithAtEnd [
+	soil close.
+	soil open.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28) 
+	
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testRecoverWithIncompleteTransactionJournal [	
+	| newJournal |
+	self addDictionaryRoot.
+	newJournal := SoilTransactionJournal new.
+	newJournal 
+		addEntry: (SoilBeginTransactionEntry new
+			readVersion: 0; 
+			transactionId: 1;
+			createdAt: DateAndTime now);
+		addEntry: self modifyDictionaryRootEntry.
+	soil journal writeTransactionJournal: newJournal.
+	soil journal currentFragmentFile stream 
+		nextPutAll: #( 1 2 3 4 );
+		flush.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 86).
+	soil close.
+	soil open.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 1 offset: 28) 
+	
+	
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testRecoverWithJournalAndCheckpoint [
+	| newJournal |
+	
+	newJournal := SoilTransactionJournal new.
+	newJournal addEntry: (SoilBeginTransactionEntry new
+		readVersion: 0; 
+		transactionId: 1;
+		createdAt: DateAndTime now).
+	newJournal addEntry: (SoilCommitTransactionEntry new 
+		transactionId: 1;
+		committedAt: DateAndTime now;
+		yourself).
+	newJournal addEntry: (SoilCheckpointEntry new
+		previousCheckpoint: soil control checkpoint).
+	soil journal writeTransactionJournal: newJournal.
+	soil close.
+	soil open.
+	"we have now two entries checkpoint at the end but that is to be expected"
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 72) 
+	
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testRecoverWithRemainingBytes [
+	
+	soil journal currentFragmentFile stream 
+		nextPutAll: #( 1 2 3 4 );
+		flush.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28).
+	soil close.
+	soil open.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 1 offset: 28) 
+	
+	
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testRecoverWithRemainingJournal [
+	| newJournal |
+	
+	newJournal := SoilTransactionJournal new.
+	newJournal addEntry: (SoilBeginTransactionEntry new
+		readVersion: 0; 
+		transactionId: 1;
+		createdAt: DateAndTime now).
+	newJournal addEntry: (SoilCommitTransactionEntry new 
+		transactionId: 1;
+		committedAt: DateAndTime now;
+		yourself).
+	soil journal writeTransactionJournal: newJournal.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28).
+	soil close.
+	soil open.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 61) 
+	
+	
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testRecoverWithRemainingJournalAndBytes [
+	| newJournal txn |
+	self addDictionaryRoot.
+	newJournal := SoilTransactionJournal new.
+	newJournal 
+		addEntry: (SoilBeginTransactionEntry new
+			readVersion: 0; 
+			transactionId: 1;
+			createdAt: DateAndTime now);
+		addEntry: self modifyDictionaryRootEntry;
+		addEntry: (SoilCommitTransactionEntry new 
+			transactionId: 1;
+			committedAt: DateAndTime now;
+			yourself).
+	soil journal writeTransactionJournal: newJournal.
+	"put bogus bytes after the journal"
+	soil journal currentFragmentFile stream 
+		nextPutAll: #( 1 2 3 4 );
+		flush.
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 86).
+	soil close.
+	soil open.
+	"the fragment file should have advanced to a new file so the truncated bytes are the rest of
+	the old file which can be skipped in future reads"
+	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 1 offset: 28).
+	"the change of the replayed transaction should be visible now"
+	txn := soil newTransaction. 
+	[ self assert: (txn root at: #foo) equals: #bar  ]
+		ensure: [ txn abort ]
+	
+	
 ]
 
 { #category : #tests }
