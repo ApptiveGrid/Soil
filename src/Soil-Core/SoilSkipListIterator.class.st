@@ -8,7 +8,7 @@ use the #newIterator there to setup the iterator correctly.
 "
 Class {
 	#name : #SoilSkipListIterator,
-	#superclass : #SoilIndexIterator,
+	#superclass : #SoilTransactionIndexIterator,
 	#instVars : [
 		'levels'
 	],

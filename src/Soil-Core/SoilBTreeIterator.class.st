@@ -7,7 +7,7 @@ use the #newIterator there to setup the iterator correctly.
 "
 Class {
 	#name : #SoilBTreeIterator,
-	#superclass : #SoilIndexIterator,
+	#superclass : #SoilTransactionIndexIterator,
 	#category : #'Soil-Core-Index-BTree'
 }
 
