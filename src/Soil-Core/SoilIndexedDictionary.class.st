@@ -45,6 +45,7 @@ SoilIndexedDictionary >> at: key [
 SoilIndexedDictionary >> at: key ifAbsent: aBlock [
 	| found |
 	found := self basicAt: key ifAbsent: [ ^ aBlock value ].
+	found ifNil: [ ^ nil ].
 	^ transaction proxyForObjectId: found
 ]
 
@@ -94,7 +95,7 @@ SoilIndexedDictionary >> first [
 SoilIndexedDictionary >> first: anInteger [
 
 	^ (self newIterator first: anInteger) collect: [ :each |
-		 transaction proxyForObjectId: each ]
+		 transaction proxyForObjectId: each value ]
 ]
 
 { #category : #testing }
@@ -161,8 +162,7 @@ SoilIndexedDictionary >> maxLevel: anInteger [
 { #category : #private }
 SoilIndexedDictionary >> newIterator [
 	^ index newIterator
-			soil: transaction soil;
-			readVersion: transaction readVersion
+		transaction: transaction 
 ]
 
 { #category : #accessing }
