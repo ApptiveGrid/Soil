@@ -162,7 +162,8 @@ SoilIndexedDictionary >> maxLevel: anInteger [
 { #category : #private }
 SoilIndexedDictionary >> newIterator [
 	^ index newIterator
-		transaction: transaction 
+		soil: transaction soil;
+		readVersion: transaction readVersion 
 ]
 
 { #category : #accessing }

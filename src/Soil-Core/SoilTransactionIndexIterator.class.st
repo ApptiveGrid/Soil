@@ -11,7 +11,8 @@ Class {
 	#name : #SoilTransactionIndexIterator,
 	#superclass : #SoilIndexIterator,
 	#instVars : [
-		'transaction'
+		'soil',
+		'readVersion'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -46,8 +47,8 @@ SoilTransactionIndexIterator >> convertItem: item [
 { #category : #private }
 SoilTransactionIndexIterator >> historicValueAt: key ifAbsent: absentBlock [
  	"a removed value will return ObjectId 0:0"
- 	transaction ifNil: [ ^ absentBlock value ].
- 	^ (self currentPage isOlderThan: transaction readVersion) 
+ 	readVersion ifNil: [ ^ absentBlock value ].
+ 	^ (self currentPage isOlderThan: readVersion) 
  		ifTrue: [ 
  			"all modifications to this page have been done before we
  			started the transaction, so the removal is visibile and 
@@ -69,8 +70,8 @@ SoilTransactionIndexIterator >> journalEntriesFor: key startingAt: anInteger [
 	| transactionId entries |
 	entries := OrderedCollection new.
 	transactionId := anInteger.
-	[ transactionId >  transaction readVersion ] whileTrue: [  
-		(transaction soil journal transactionJournalAt: transactionId) entries do: [ :each | 
+	[ transactionId > readVersion ] whileTrue: [  
+		(soil journal transactionJournalAt: transactionId) entries do: [ :each | 
 			((each class = SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
 				(each key = key) ifTrue: [ 
 					entries add: each ] ]  ].
@@ -80,8 +81,15 @@ SoilTransactionIndexIterator >> journalEntriesFor: key startingAt: anInteger [
 ]
 
 { #category : #accessing }
-SoilTransactionIndexIterator >> transaction: aSoilTransaction [ 
-	transaction := aSoilTransaction
+SoilTransactionIndexIterator >> readVersion: anObject [
+
+	readVersion := anObject
+]
+
+{ #category : #accessing }
+SoilTransactionIndexIterator >> soil: anObject [
+
+	soil := anObject
 ]
 
 { #category : #transactions }

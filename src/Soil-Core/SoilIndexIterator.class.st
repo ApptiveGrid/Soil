@@ -12,7 +12,9 @@ Class {
 
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject [
-	^ self at: aKeyObject ifAbsent: [ KeyNotFound signalFor: aKeyObject in: self  ] 
+	^ self 
+		at: aKeyObject 
+		ifAbsent: [ KeyNotFound signalFor: aKeyObject in: self  ] 
 ]
 
 { #category : #accessing }
@@ -203,7 +205,7 @@ SoilIndexIterator >> next [
 	| nextAssociation nextValue |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
 	nextValue := self convertItem: nextAssociation .
-	^ (nextValue ifNil: [ self next ]) value
+	^ (nextValue ifNil: [ self nextAssociation ]) value
 ]
 
 { #category : #accessing }
