@@ -10,6 +10,11 @@ Class {
 }
 
 { #category : #converting }
+SoilObjectProxy >> asSoilObjectId [ 
+	^ objectId 
+]
+
+{ #category : #converting }
 SoilObjectProxy >> asUnresolvedProxy [ 
 	^ SoilUnresolvedProxy new
 		objectId: objectId 

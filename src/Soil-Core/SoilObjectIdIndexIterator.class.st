@@ -8,7 +8,7 @@ There are two main clients
 - the SoilIndexedDictionary sets the readVersion (and never uses the index directly)
 "
 Class {
-	#name : #SoilTransactionIndexIterator,
+	#name : #SoilObjectIdIndexIterator,
 	#superclass : #SoilIndexIterator,
 	#instVars : [
 		'soil',
@@ -18,21 +18,22 @@ Class {
 }
 
 { #category : #testing }
-SoilTransactionIndexIterator class >> isAbstract [
+SoilObjectIdIndexIterator class >> isAbstract [
 	<ignoreForCoverage>
-	^ self == SoilTransactionIndexIterator
+	^ self == SoilObjectIdIndexIterator
 ]
 
 { #category : #'instance creation' }
-SoilTransactionIndexIterator class >> on: aSoilIndex [
+SoilObjectIdIndexIterator class >> on: aSoilIndex [
 	^ self new 
 		index: aSoilIndex 
 ]
 
 { #category : #private }
-SoilTransactionIndexIterator >> convertItem: item [
+SoilObjectIdIndexIterator >> convertItem: item [
 	"restore a value that has been removed by a later transaction"
-	^ item value isRemoved 
+	| newItem |
+	newItem :=  item value isRemoved 
 		ifTrue: [
 			self 
 				historicValueAt: item key 
@@ -41,11 +42,14 @@ SoilTransactionIndexIterator >> convertItem: item [
 			"restore a value that has been overwritten by a later transaction"   
 			self 
 				historicValueAt: item key 
-				ifAbsent: [ item ] ]
+				ifAbsent: [ item ] ].
+	^ newItem value 
+		ifNotNil: [ super convertItem: newItem ]
+		ifNil: [ newItem ]
 ]
 
 { #category : #private }
-SoilTransactionIndexIterator >> historicValueAt: key ifAbsent: absentBlock [
+SoilObjectIdIndexIterator >> historicValueAt: key ifAbsent: absentBlock [
  	"a removed value will return ObjectId 0:0"
  	readVersion ifNil: [ ^ absentBlock value ].
  	^ (self currentPage isOlderThan: readVersion) 
@@ -66,7 +70,7 @@ SoilTransactionIndexIterator >> historicValueAt: key ifAbsent: absentBlock [
 ]
 
 { #category : #private }
-SoilTransactionIndexIterator >> journalEntriesFor: key startingAt: anInteger [ 
+SoilObjectIdIndexIterator >> journalEntriesFor: key startingAt: anInteger [ 
 	| transactionId entries |
 	entries := OrderedCollection new.
 	transactionId := anInteger.
@@ -81,18 +85,30 @@ SoilTransactionIndexIterator >> journalEntriesFor: key startingAt: anInteger [
 ]
 
 { #category : #accessing }
-SoilTransactionIndexIterator >> readVersion: anObject [
+SoilObjectIdIndexIterator >> readVersion: anObject [
 
 	readVersion := anObject
 ]
 
+{ #category : #'as yet unclassified' }
+SoilObjectIdIndexIterator >> returnObjectId [
+	itemStrategy := SoilObjectIdItemStrategy new
+]
+
+{ #category : #'as yet unclassified' }
+SoilObjectIdIndexIterator >> returnProxyIn: aSoilTransaction [ 
+	itemStrategy := SoilProxyItemStrategy new 
+		transaction: aSoilTransaction;
+		yourself
+]
+
 { #category : #accessing }
-SoilTransactionIndexIterator >> soil: anObject [
+SoilObjectIdIndexIterator >> soil: anObject [
 
 	soil := anObject
 ]
 
 { #category : #transactions }
-SoilTransactionIndexIterator >> updateCurrentTransaction: anInteger [ 
+SoilObjectIdIndexIterator >> updateCurrentTransaction: anInteger [ 
 	currentPage lastTransaction: anInteger
 ]
