@@ -5,7 +5,8 @@ Class {
 		'index',
 		'nextKey',
 		'currentPage',
-		'currentKey'
+		'currentKey',
+		'itemStrategy'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -23,7 +24,7 @@ SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 	foundValue := self find: aKeyObject ifAbsent: aBlock.
  	item := self convertItem: currentKey -> foundValue.
 	^ item value
-		ifNotNil: [ :i | i value ]
+		ifNotNil: [ :i | item value ]
 		ifNil: [ aBlock value ]
 ]
 
@@ -40,7 +41,7 @@ SoilIndexIterator >> atIndex: anInteger [
 	current := self firstAssociation.
 	2 to: anInteger do: [ :idx |
 		current := self nextAssociation ].
-	^ (self convertItem: current) value
+	^ current value
 ]
 
 { #category : #enumerating }
@@ -89,7 +90,9 @@ SoilIndexIterator >> basicNextAssociation [
 
 { #category : #private }
 SoilIndexIterator >> convertItem: anItem [ 
-	^ anItem 
+	^ itemStrategy 
+		ifNotNil: [ itemStrategy convertItem: anItem ]
+		ifNil: [ anItem ]
 ]
 
 { #category : #accessing }
