@@ -192,11 +192,11 @@ SoilIndexIterator >> last [
 { #category : #accessing }
 SoilIndexIterator >> lastAssociation [
 	"Note: key will be index key"
-	| lastAssociation lastValue |
+	| lastAssociation restoredItem |
 	lastAssociation := self priorAssociation ifNil: [ ^nil ].
-	lastValue := self restoreItem: lastAssociation.
-	^ lastValue 
-		ifNotNil: [ lastValue key -> (self convertValue: lastValue value) ] 
+	restoredItem := self restoreItem: lastAssociation.
+	^ restoredItem 
+		ifNotNil: [ restoredItem key -> (self convertValue: restoredItem value) ] 
 		ifNil: [
 			(self restoreItem: self priorAssociation)
 				ifNotNil: [ :item | item key -> (self convertValue: item value) ] ] 
