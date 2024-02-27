@@ -43,10 +43,10 @@ SoilIndexedDictionary >> at: key [
 
 { #category : #accessing }
 SoilIndexedDictionary >> at: key ifAbsent: aBlock [
-	| found |
-	found := self basicAt: key ifAbsent: [ ^ aBlock value ].
-	found ifNil: [ ^ nil ].
-	^ transaction proxyForObjectId: found
+	^ self 
+		basicAt: key 
+		ifAbsent: [ ^ aBlock value ].
+
 ]
 
 { #category : #accessing }
@@ -65,9 +65,7 @@ SoilIndexedDictionary >> at: key put: anObject [
 
 { #category : #accessing }
 SoilIndexedDictionary >> atIndex: anInteger [
-	^ (self newIterator atIndex: anInteger)
-				ifNotNil: [ :objectId | transaction proxyForObjectId: objectId  ]
-
+	^ self newIterator atIndex: anInteger
 ]
 
 { #category : #accessing }
@@ -83,19 +81,18 @@ SoilIndexedDictionary >> createIndex [
 { #category : #enumerating }
 SoilIndexedDictionary >> do: aBlock [
  	self newIterator do: [ :objectId | 
- 				aBlock value: (transaction proxyForObjectId: objectId) ]
+ 				aBlock value: objectId ]
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> first [
-	^ transaction proxyForObjectId: self newIterator first
+	^ self newIterator first
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> first: anInteger [
 
-	^ (self newIterator first: anInteger) collect: [ :each |
-		 transaction proxyForObjectId: each value ]
+	^ self newIterator first: anInteger
 ]
 
 { #category : #testing }
@@ -141,7 +138,7 @@ SoilIndexedDictionary >> keySize: anInteger [
 
 { #category : #accessing }
 SoilIndexedDictionary >> last [
-	^ transaction proxyForObjectId: self newIterator last
+	^ self newIterator last
 	
 ]
 
@@ -162,18 +159,20 @@ SoilIndexedDictionary >> maxLevel: anInteger [
 { #category : #private }
 SoilIndexedDictionary >> newIterator [
 	^ index newIterator
-		soil: transaction soil;
+		returnProxyForTransaction: transaction;
+		journal: transaction soil journal;
 		readVersion: transaction readVersion 
+
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> nextAfter: key [  
-	^  transaction proxyForObjectId: (self newIterator nextAfter: key) value
+	^  self newIterator nextAfter: key
 ]
 
 { #category : #private }
 SoilIndexedDictionary >> nextCloseTo: aKey [ 
-	^ transaction objectWithId: (self newIterator nextCloseTo: aKey) 
+	^ self newIterator nextCloseTo: aKey 
 ]
 
 { #category : #private }
@@ -211,7 +210,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexedDictionary >> second [
-	^ transaction proxyForObjectId: (self newIterator first; next)
+	^ self newIterator first; next
 ]
 
 { #category : #accessing }
@@ -263,5 +262,5 @@ SoilIndexedDictionary >> soilMaterialized: aMaterializer [
 
 { #category : #accessing }
 SoilIndexedDictionary >> values [
-	^ self newIterator values collect: [ :each | transaction proxyForObjectId: each ]
+	^ self newIterator values
 ]

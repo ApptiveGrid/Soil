@@ -5,7 +5,8 @@ Class {
 		'index',
 		'nextKey',
 		'currentPage',
-		'currentKey'
+		'currentKey',
+		'itemStrategy'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -21,9 +22,13 @@ SoilIndexIterator >> at: aKeyObject [
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 	| foundValue item |
 	foundValue := self find: aKeyObject ifAbsent: aBlock.
- 	item := self convertItem: currentKey -> foundValue.
-	^ item value
-		ifNotNil: [ :i | i value ]
+ 	item := self restoreItem: currentKey -> foundValue.
+	^ item
+		ifNotNil: [ :i | | p |
+			p := (self convertValue: item value).
+			p theNonSoilProxy 
+				ifNotNil: [ :v | p ]
+				ifNil: [ ^ aBlock value ] ]
 		ifNil: [ aBlock value ]
 ]
 
@@ -40,14 +45,15 @@ SoilIndexIterator >> atIndex: anInteger [
 	current := self firstAssociation.
 	2 to: anInteger do: [ :idx |
 		current := self nextAssociation ].
-	^ (self convertItem: current) value
+	^ current value
 ]
 
 { #category : #enumerating }
 SoilIndexIterator >> basicAssociationsDo: aBlock [
 	| item |
-	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ 
- 		aBlock value: (self convertItem: item) ] 
+	[ (item := self basicNextAssociation ) notNil ] whileTrue: [
+		(self restoreItem: item) ifNotNil: [ :assoc | 
+ 			aBlock value: assoc key -> (self convertValue: assoc value) ] ] 
 ]
 
 { #category : #accessing }
@@ -88,8 +94,10 @@ SoilIndexIterator >> basicNextAssociation [
 ]
 
 { #category : #private }
-SoilIndexIterator >> convertItem: anItem [ 
-	^ anItem 
+SoilIndexIterator >> convertValue: anObject [ 
+	^ itemStrategy 
+		ifNotNil: [ itemStrategy convertValue: anObject ]
+		ifNil: [ anObject ]
 ]
 
 { #category : #accessing }
@@ -109,9 +117,12 @@ SoilIndexIterator >> do: aBlock [
 	| item |
 	"We use basicNextAssociation to avoid the creation of intermediate associations of nextAssociation"
 	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ | i |
- 		i := self convertItem: item.
-		i value 
-			ifNotNil: [:notNil | aBlock value: notNil value ]]
+ 		i := self restoreItem: item.
+		i
+			ifNotNil: [:notNil | | v |
+				v := self convertValue: notNil value.
+				v theNonSoilProxy ifNotNil: [  
+					aBlock value: v ] ] ]
 ]
 
 { #category : #private }
@@ -153,7 +164,7 @@ SoilIndexIterator >> firstAssociation [
 	| item |
 	currentPage := index store headerPage.
 	item := self nextAssociation.
-	currentKey := item 
+	currentKey := item theNonSoilProxy 
 		ifNotNil: [ item key ].
 	^ item
 ]
@@ -175,7 +186,7 @@ SoilIndexIterator >> isEmpty [
 		self currentPage: index firstPage.
 		"all items might be removed and not restorable"
  		self index firstPage items allSatisfy: [ :each |
- 		  	(self convertItem: each) isNil ]]
+ 		  	(self restoreItem: each) isNil ]]
 ]
 
 { #category : #accessing }
@@ -186,13 +197,14 @@ SoilIndexIterator >> last [
 { #category : #accessing }
 SoilIndexIterator >> lastAssociation [
 	"Note: key will be index key"
-	| lastAssociation lastValue key |
+	| lastAssociation lastValue |
 	lastAssociation := self priorAssociation ifNil: [ ^nil ].
-	key := lastAssociation key.
-	lastValue := self convertItem: lastAssociation.
+	lastValue := self restoreItem: lastAssociation.
 	^ lastValue 
-		ifNotNil: [ lastValue ] 
-		ifNil: [ self priorAssociation ] 
+		ifNotNil: [ lastValue key -> (self convertValue: lastValue value) ] 
+		ifNil: [
+			(self restoreItem: self priorAssociation)
+				ifNotNil: [ :item | item key -> (self convertValue: item value) ] ] 
 ]
 
 { #category : #accessing }
@@ -204,8 +216,8 @@ SoilIndexIterator >> lastPage [
 SoilIndexIterator >> next [
 	| nextAssociation nextValue |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
-	nextValue := self convertItem: nextAssociation .
-	^ (nextValue ifNil: [ self nextAssociation ]) value
+	nextValue := self restoreItem: nextAssociation .
+	^ self convertValue: (nextValue ifNil: [ self nextAssociation ]) value
 ]
 
 { #category : #accessing }
@@ -228,12 +240,11 @@ SoilIndexIterator >> nextAfter: key [
 { #category : #accessing }
 SoilIndexIterator >> nextAssociation [
 	"Note: key will be index key"
-	| nextAssociation nextValue key |
+	| nextAssociation nextValue |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
-	key := nextAssociation key.
-	nextValue := self convertItem: nextAssociation.
+	nextValue := self restoreItem: nextAssociation.
 	^ nextValue 
-		ifNotNil: [ nextValue ] 
+		ifNotNil: [ nextValue key -> (self convertValue: nextValue value)] 
 		ifNil: [ self nextAssociation ] 
 ]
 
@@ -301,6 +312,11 @@ SoilIndexIterator >> removeKey: key [
 		put: SoilObjectId removed
 ]
 
+{ #category : #private }
+SoilIndexIterator >> restoreItem: anItem [ 
+	^ anItem 
+]
+
 { #category : #accessing }
 SoilIndexIterator >> size [
 	"We iterate over all elements to get the size. Slow!"
@@ -308,6 +324,11 @@ SoilIndexIterator >> size [
 	sum := 0.
 	self do: [ :each | sum := sum + 1 ].
 	^ sum
+]
+
+{ #category : #transactions }
+SoilIndexIterator >> updateCurrentTransaction: anInteger [ 
+	currentPage lastTransaction: anInteger
 ]
 
 { #category : #enumerating }

@@ -26,15 +26,9 @@ SoilPluggableIndexRewriter >> convertIndex [
 ]
 
 { #category : #running }
-SoilPluggableIndexRewriter >> convertItem: item [
-	(itemBlock value: item) ifNotNil: [ :newItem | 
-		self storeItem: newItem ]
-]
-
-{ #category : #running }
 SoilPluggableIndexRewriter >> convertItems [ 
 	index newIterator basicAssociationsDo: [ :item |
-		self convertItem: item ]
+		self restoreItem: item ]
 ]
 
 { #category : #accessing }
@@ -71,6 +65,12 @@ SoilPluggableIndexRewriter >> prepareNewIndex [
 			keySize: index keySize;
 			valueSize: index valueSize;
 			headerPage ]
+]
+
+{ #category : #running }
+SoilPluggableIndexRewriter >> restoreItem: item [
+	(itemBlock value: item) ifNotNil: [ :newItem | 
+		self storeItem: newItem ]
 ]
 
 { #category : #running }

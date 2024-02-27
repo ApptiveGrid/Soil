@@ -11,11 +11,6 @@ SoilNewFormatIndexRewriter >> convertIndex [
 ]
 
 { #category : #running }
-SoilNewFormatIndexRewriter >> convertItem: item [ 
-	^ item
-]
-
-{ #category : #running }
 SoilNewFormatIndexRewriter >> prepareNewIndex [ 
 	"create same index class with same parameters but a temporary path instead"
 	| headerPage |
@@ -32,4 +27,9 @@ SoilNewFormatIndexRewriter >> prepareNewIndex [
 		"headerPage
 			lastPageIndex: index headerPage lastPageIndex;
 			lastFreePageIndex: index headerPage lastFreePageIndex" ]
+]
+
+{ #category : #running }
+SoilNewFormatIndexRewriter >> restoreItem: item [ 
+	^ item
 ]
