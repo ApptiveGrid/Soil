@@ -24,11 +24,9 @@ SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 	foundValue := self find: aKeyObject ifAbsent: aBlock.
  	item := self restoreItem: currentKey -> foundValue.
 	^ item
-		ifNotNil: [ :i | | p |
-			p := (self convertValue: item value).
-			p theNonSoilProxy 
-				ifNotNil: [ :v | p ]
-				ifNil: [ ^ aBlock value ] ]
+		ifNotNil: [ 
+			(self convertValue: item value) 
+				ifNil: [ aBlock value ] ]
 		ifNil: [ aBlock value ]
 ]
 
@@ -95,6 +93,7 @@ SoilIndexIterator >> basicNextAssociation [
 
 { #category : #private }
 SoilIndexIterator >> convertValue: anObject [ 
+	anObject ifNil: [ ^ nil ].
 	^ itemStrategy 
 		ifNotNil: [ itemStrategy convertValue: anObject ]
 		ifNil: [ anObject ]
@@ -116,13 +115,10 @@ SoilIndexIterator >> currentPage: anObject [
 SoilIndexIterator >> do: aBlock [
 	| item |
 	"We use basicNextAssociation to avoid the creation of intermediate associations of nextAssociation"
-	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ | i |
- 		i := self restoreItem: item.
-		i
-			ifNotNil: [:notNil | | v |
-				v := self convertValue: notNil value.
-				v theNonSoilProxy ifNotNil: [  
-					aBlock value: v ] ] ]
+	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ 
+ 		(self restoreItem: item) ifNotNil: [ :notNil |
+			(self convertValue: notNil value)
+				ifNotNil: [ :value | aBlock value: value ] ] ]
 ]
 
 { #category : #private }
@@ -164,8 +160,7 @@ SoilIndexIterator >> firstAssociation [
 	| item |
 	currentPage := index store headerPage.
 	item := self nextAssociation.
-	currentKey := item theNonSoilProxy 
-		ifNotNil: [ item key ].
+	currentKey := item ifNotNil: [ item key ].
 	^ item
 ]
 
@@ -217,7 +212,7 @@ SoilIndexIterator >> next [
 	| nextAssociation nextValue |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
 	nextValue := self restoreItem: nextAssociation .
-	^ self convertValue: (nextValue ifNil: [ self nextAssociation ]) value
+	^ self convertValue: (nextValue ifNil: [ self next ]) value
 ]
 
 { #category : #accessing }

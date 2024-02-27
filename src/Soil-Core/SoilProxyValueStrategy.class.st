@@ -8,8 +8,12 @@ Class {
 }
 
 { #category : #running }
-SoilProxyValueStrategy >> convertValue: item [ 
-	^ self proxyForObjectId: item value
+SoilProxyValueStrategy >> convertValue: aSoilObjectId [ 
+	| value |
+	value := self proxyForObjectId: aSoilObjectId.
+	^ value soilRealObject 
+		ifNotNil: [  value ]
+		ifNil: [ nil  ]
 ]
 
 { #category : #accessing }
