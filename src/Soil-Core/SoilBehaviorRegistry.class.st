@@ -100,9 +100,9 @@ SoilBehaviorRegistry >> loadHistoryForBehaviorWithIndex: objectIndex transaction
 
 { #category : #accessing }
 SoilBehaviorRegistry >> nameAt: classIdentifier ifAbsent: aBlock [
-	^ self index 
+	^ (self index 
 		at: classIdentifier 
-		ifAbsent: aBlock
+		ifAbsent: aBlock) asSoilObjectId 
 ]
 
 { #category : #accessing }
