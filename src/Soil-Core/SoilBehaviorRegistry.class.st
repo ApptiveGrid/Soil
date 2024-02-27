@@ -100,7 +100,7 @@ SoilBehaviorRegistry >> loadHistoryForBehaviorWithIndex: objectIndex transaction
 
 { #category : #accessing }
 SoilBehaviorRegistry >> nameAt: classIdentifier ifAbsent: aBlock [
-	^ self index 
+	^ self newIterator
 		at: classIdentifier 
 		ifAbsent: aBlock
 ]
