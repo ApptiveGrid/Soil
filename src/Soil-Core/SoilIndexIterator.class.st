@@ -1,48 +1,33 @@
-"
-The iterator implements all logic related to iteratoring a low level index.
-
-If ""soil"" and ""readVersion"" is set, the iterator restores values using the transaction log, see SoilIndexIterator>>#journalEntriesFor:startingAt:
-
-There are two main clients
-- the low level index forwards all methods related to iterating here, not setting the read version
-- the SoilIndexedDictionary sets the readVersion (and never uses the index directly)
-"
 Class {
 	#name : #SoilIndexIterator,
 	#superclass : #Object,
 	#instVars : [
 		'index',
+		'nextKey',
 		'currentPage',
 		'currentKey',
-		'nextKey',
-		'soil',
-		'readVersion'
+		'itemStrategy'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
 
-{ #category : #testing }
-SoilIndexIterator class >> isAbstract [
-	<ignoreForCoverage>
-	^ self == SoilIndexIterator
-]
-
-{ #category : #'instance creation' }
-SoilIndexIterator class >> on: aSoilIndex [
-	^ self new 
-		index: aSoilIndex 
-]
-
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject [
-	^ self at: aKeyObject ifAbsent: [ KeyNotFound signalFor: aKeyObject in: self  ] 
+	^ self 
+		at: aKeyObject 
+		ifAbsent: [ KeyNotFound signalFor: aKeyObject in: self  ] 
 ]
 
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
-	| foundValue |
+	| foundValue item |
 	foundValue := self find: aKeyObject ifAbsent: aBlock.
- 	^(self restoreItem: currentKey -> foundValue) ifNil: [ aBlock value ]
+ 	item := self restoreItem: currentKey -> foundValue.
+	^ item
+		ifNotNil: [ 
+			(self convertValue: item value) 
+				ifNil: [ aBlock value ] ]
+		ifNil: [ aBlock value ]
 ]
 
 { #category : #accessing }
@@ -55,17 +40,18 @@ SoilIndexIterator >> at: aKeyObject put: anObject [
 { #category : #accessing }
 SoilIndexIterator >> atIndex: anInteger [
 	| current |
-	current := self first.
+	current := self firstAssociation.
 	2 to: anInteger do: [ :idx |
-		current := self next ].
+		current := self nextAssociation ].
 	^ current value
 ]
 
 { #category : #enumerating }
 SoilIndexIterator >> basicAssociationsDo: aBlock [
 	| item |
-	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ 
- 		aBlock value: item ] 
+	[ (item := self basicNextAssociation ) notNil ] whileTrue: [
+		(self restoreItem: item) ifNotNil: [ :assoc | 
+ 			aBlock value: assoc key -> (self convertValue: assoc value) ] ] 
 ]
 
 { #category : #accessing }
@@ -105,6 +91,14 @@ SoilIndexIterator >> basicNextAssociation [
 	Error signal: 'shouldnt happen'
 ]
 
+{ #category : #private }
+SoilIndexIterator >> convertValue: anObject [ 
+	anObject ifNil: [ ^ nil ].
+	^ itemStrategy 
+		ifNotNil: [ itemStrategy convertValue: anObject ]
+		ifNil: [ anObject ]
+]
+
 { #category : #accessing }
 SoilIndexIterator >> currentPage [
 
@@ -122,8 +116,9 @@ SoilIndexIterator >> do: aBlock [
 	| item |
 	"We use basicNextAssociation to avoid the creation of intermediate associations of nextAssociation"
 	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ 
- 		(self restoreItem: item ) 
-			ifNotNil: [:notNil | aBlock value: notNil ]]
+ 		(self restoreItem: item) ifNotNil: [ :notNil |
+			(self convertValue: notNil value)
+				ifNotNil: [ :value | aBlock value: value ] ] ]
 ]
 
 { #category : #private }
@@ -165,30 +160,8 @@ SoilIndexIterator >> firstAssociation [
 	| item |
 	currentPage := index store headerPage.
 	item := self nextAssociation.
-	currentKey := item 
-		ifNotNil: [ item key ].
+	currentKey := item ifNotNil: [ item key ].
 	^ item
-]
-
-{ #category : #private }
-SoilIndexIterator >> historicValueAt: key ifAbsent: absentBlock [
- 	"a removed value will return ObjectId 0:0"
- 	readVersion ifNil: [ ^ absentBlock value ].
- 	^ (self currentPage isOlderThan: readVersion) 
- 		ifTrue: [ 
- 			"all modifications to this page have been done before we
- 			started the transaction, so the removal is visibile and 
- 			value absent"
- 			   absentBlock value ] 
- 		ifFalse: [
- 			"we determine all changes between our transaction and the
- 			last one modifying the page. if we get back changes for the
- 			key the value of the oldes entry has the value it had before"
- 			(self 
- 				journalEntriesFor: key 
- 				startingAt: self currentPage lastTransaction)
- 					ifNotEmpty: [:entries | entries last oldValue ]
- 					ifEmpty: absentBlock]
 ]
 
 { #category : #accessing }
@@ -211,21 +184,6 @@ SoilIndexIterator >> isEmpty [
  		  	(self restoreItem: each) isNil ]]
 ]
 
-{ #category : #private }
-SoilIndexIterator >> journalEntriesFor: key startingAt: anInteger [ 
-	| transactionId entries |
-	entries := OrderedCollection new.
-	transactionId := anInteger.
-	[ transactionId >  readVersion ] whileTrue: [  
-		(soil journal transactionJournalAt: transactionId) entries do: [ :each | 
-			((each class = SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
-				(each key = key) ifTrue: [ 
-					entries add: each ] ]  ].
-		transactionId := transactionId - 1.
-	].
-   ^ entries
-]
-
 { #category : #accessing }
 SoilIndexIterator >> last [
 	^ self lastAssociation value
@@ -234,13 +192,14 @@ SoilIndexIterator >> last [
 { #category : #accessing }
 SoilIndexIterator >> lastAssociation [
 	"Note: key will be index key"
-	| lastAssociation lastValue key |
+	| lastAssociation restoredItem |
 	lastAssociation := self priorAssociation ifNil: [ ^nil ].
-	key := lastAssociation key.
-	lastValue := self restoreItem: lastAssociation.
-	^ lastValue 
-		ifNotNil: [ key -> lastValue ] 
-		ifNil: [ self priorAssociation ] 
+	restoredItem := self restoreItem: lastAssociation.
+	^ restoredItem 
+		ifNotNil: [ restoredItem key -> (self convertValue: restoredItem value) ] 
+		ifNil: [
+			(self restoreItem: self priorAssociation)
+				ifNotNil: [ :item | item key -> (self convertValue: item value) ] ] 
 ]
 
 { #category : #accessing }
@@ -253,7 +212,7 @@ SoilIndexIterator >> next [
 	| nextAssociation nextValue |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
 	nextValue := self restoreItem: nextAssociation .
-	^ nextValue ifNil: [ self next ]
+	^ self convertValue: (nextValue ifNil: [ self next ]) value
 ]
 
 { #category : #accessing }
@@ -276,12 +235,11 @@ SoilIndexIterator >> nextAfter: key [
 { #category : #accessing }
 SoilIndexIterator >> nextAssociation [
 	"Note: key will be index key"
-	| nextAssociation nextValue key |
+	| nextAssociation nextValue |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
-	key := nextAssociation key.
 	nextValue := self restoreItem: nextAssociation.
 	^ nextValue 
-		ifNotNil: [ key -> nextValue ] 
+		ifNotNil: [ nextValue key -> (self convertValue: nextValue value)] 
 		ifNil: [ self nextAssociation ] 
 ]
 
@@ -342,18 +300,6 @@ SoilIndexIterator >> priorAssociation [
 	Error signal: 'shouldnt happen'
 ]
 
-{ #category : #accessing }
-SoilIndexIterator >> readVersion [
-
-	^ readVersion
-]
-
-{ #category : #accessing }
-SoilIndexIterator >> readVersion: anObject [
-
-	readVersion := anObject
-]
-
 { #category : #removing }
 SoilIndexIterator >> removeKey: key [ 
 	^ self 
@@ -362,18 +308,8 @@ SoilIndexIterator >> removeKey: key [
 ]
 
 { #category : #private }
-SoilIndexIterator >> restoreItem: item [
-	"restore a value that has been removed by a later transaction"
-	^ item value isRemoved 
-		ifTrue: [
-			self 
-				historicValueAt: item key 
-				ifAbsent: [ nil ] ]
-		ifFalse: [
-			"restore a value that has been overwritten by a later transaction"   
-			self 
-				historicValueAt: item key 
-				ifAbsent: [ item value ] ]
+SoilIndexIterator >> restoreItem: anItem [ 
+	^ anItem 
 ]
 
 { #category : #accessing }
@@ -383,18 +319,6 @@ SoilIndexIterator >> size [
 	sum := 0.
 	self do: [ :each | sum := sum + 1 ].
 	^ sum
-]
-
-{ #category : #accessing }
-SoilIndexIterator >> soil [
-
-	^ soil
-]
-
-{ #category : #accessing }
-SoilIndexIterator >> soil: anObject [
-
-	soil := anObject
 ]
 
 { #category : #transactions }

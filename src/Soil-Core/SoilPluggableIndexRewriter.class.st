@@ -14,9 +14,10 @@ SoilPluggableIndexRewriter >> cleanRemoved [
 	| oldBlock |
 	oldBlock := itemBlock.
 	itemBlock := [ :item |
+		item ifNotNil: [  
 		item value isRemoved 
 			ifTrue: [ nil ]
-			ifFalse: [ oldBlock value: item  ] ] 
+			ifFalse: [ oldBlock value: item ] ] ] 
 ]
 
 { #category : #running }
@@ -25,15 +26,9 @@ SoilPluggableIndexRewriter >> convertIndex [
 ]
 
 { #category : #running }
-SoilPluggableIndexRewriter >> convertItem: item [
-	(itemBlock value: item) ifNotNil: [ :newItem | 
-		self storeItem: newItem ]
-]
-
-{ #category : #running }
 SoilPluggableIndexRewriter >> convertItems [ 
 	index newIterator basicAssociationsDo: [ :item |
-		self convertItem: item ]
+		self restoreItem: item ]
 ]
 
 { #category : #accessing }
@@ -73,14 +68,20 @@ SoilPluggableIndexRewriter >> prepareNewIndex [
 ]
 
 { #category : #running }
+SoilPluggableIndexRewriter >> restoreItem: item [
+	(itemBlock value: item) ifNotNil: [ :newItem | 
+		self storeItem: newItem ]
+]
+
+{ #category : #running }
 SoilPluggableIndexRewriter >> run [ 
 	self validatePath.
 	self prepareNewIndex.
 	[  
 		index newIterator basicAssociationsDo: [ :item |
-				
+				item ifNotNil: [  
 				(itemBlock value: item) ifNotNil: [ :newItem | 
-					self newIndexIterator at: newItem key put: newItem value ] ] ]
+					self newIndexIterator at: newItem key put: newItem value ] ] ] ]
 		ifCurtailed: [ 
 			rewritePath deleteIfAbsent: [].
 			Error signal: 'reindexing failed' ].

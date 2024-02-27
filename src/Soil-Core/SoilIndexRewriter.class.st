@@ -29,14 +29,9 @@ SoilIndexRewriter >> convertIndex [
 ]
 
 { #category : #running }
-SoilIndexRewriter >> convertItem: item [
-	self subclassResponsibility 
-]
-
-{ #category : #running }
 SoilIndexRewriter >> convertItems [
 	index newIterator basicAssociationsDo: [ :item |
-		self storeItem: (self convertItem: item) ] 
+		self storeItem: (self restoreItem: item) ] 
 ]
 
 { #category : #accessing }
@@ -82,6 +77,11 @@ SoilIndexRewriter >> replaceIndex [
 	"reopen source index to load new index file"
 	index open.
 	
+]
+
+{ #category : #running }
+SoilIndexRewriter >> restoreItem: item [
+	self subclassResponsibility 
 ]
 
 { #category : #running }
