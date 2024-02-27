@@ -1,10 +1,10 @@
 Class {
-	#name : #SoilObjectIdItemStrategy,
-	#superclass : #SoilItemStrategy,
+	#name : #SoilObjectIdValueStrategy,
+	#superclass : #SoilIndexValueStrategy,
 	#category : #'Soil-Core-Index-Common'
 }
 
 { #category : #running }
-SoilObjectIdItemStrategy >> convertItem: anAssociation [ 
+SoilObjectIdValueStrategy >> restoreItem: anAssociation [ 
 	^ anAssociation key -> anAssociation value asSoilObjectId 
 ]

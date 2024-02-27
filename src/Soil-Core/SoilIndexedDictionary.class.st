@@ -159,7 +159,9 @@ SoilIndexedDictionary >> maxLevel: anInteger [
 { #category : #private }
 SoilIndexedDictionary >> newIterator [
 	^ index newIterator
-		returnProxyIn: transaction
+		returnProxyForTransaction: transaction;
+		journal: transaction soil journal;
+		readVersion: transaction readVersion 
 
 ]
 
