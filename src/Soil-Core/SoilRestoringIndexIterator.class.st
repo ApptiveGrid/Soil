@@ -47,9 +47,7 @@ SoilRestoringIndexIterator >> historicValueAt: key ifAbsent: absentBlock [
  				journalEntriesFor: key 
  				startingAt: self currentPage lastTransaction)
  					ifNotEmpty: [:entries | 
-						entries last oldValue
-							ifNotNil: [ :oldValue | key -> oldValue ]
-							ifNil: [ ^ absentBlock value ] ]
+						entries last oldValue ifNotNil: [ :old | key -> old ] ]
  					ifEmpty: absentBlock]
 ]
 

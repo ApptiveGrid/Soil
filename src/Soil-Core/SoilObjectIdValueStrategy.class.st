@@ -8,8 +8,3 @@ Class {
 SoilObjectIdValueStrategy >> convertValue: aByteArray [ 
 	^ aByteArray asSoilObjectId 
 ]
-
-{ #category : #running }
-SoilObjectIdValueStrategy >> restoreItem: anAssociation [ 
-	^ anAssociation key -> anAssociation value asSoilObjectId 
-]
