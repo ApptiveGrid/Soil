@@ -294,26 +294,8 @@ Soil >> objectRepository [
 
 { #category : #'opening/closing' }
 Soil >> open [
-	('open soil database at ', path asString) soilEmit.
-	control := SoilControlFile new
-		soil: self;
-		open.
-	objectRepository := SoilObjectRepository new 
-		soil: self;
-		loadSegments;
-		yourself.
-	behaviorRegistry := SoilBehaviorRegistry new
-			soil: self;
-			open;
-			yourself.
-	journal := SoilPersistentDatabaseJournal new
-		soil: self;
-		open;
-		recover;
-		yourself.
-	notificationHandler := SoilNotificationHandler new
-		soil: self
-	
+	self basicOpen.
+	"journal recover "
 ]
 
 { #category : #accessing }
