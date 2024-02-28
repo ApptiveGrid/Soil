@@ -96,12 +96,12 @@ SoilRestoringIndexIterator >> restoreItem: item [
 		ifNil: [ newItem ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #strategy }
 SoilRestoringIndexIterator >> returnObjectId [
 	itemStrategy := SoilObjectIdValueStrategy new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #strategy }
 SoilRestoringIndexIterator >> returnProxyForSoil: aSoil readVersion: aReadVersion [
 	itemStrategy := SoilProxyValueStrategy new 
 		iterator: self;
@@ -109,7 +109,7 @@ SoilRestoringIndexIterator >> returnProxyForSoil: aSoil readVersion: aReadVersio
 		yourself
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #strategy }
 SoilRestoringIndexIterator >> returnProxyForTransaction: aSoilTransaction [ 
 	itemStrategy := SoilProxyValueStrategy new 
 		objectRepository: aSoilTransaction;
