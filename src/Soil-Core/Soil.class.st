@@ -83,6 +83,29 @@ Soil >> backupTo: aStringOrFileReference [
 		
 ]
 
+{ #category : #'opening/closing' }
+Soil >> basicOpen [
+	('open soil database at ', path asString) soilEmit.
+	control := SoilControlFile new
+		soil: self;
+		open.
+	objectRepository := SoilObjectRepository new 
+		soil: self;
+		loadSegments;
+		yourself.
+	behaviorRegistry := SoilBehaviorRegistry new
+			soil: self;
+			open;
+			yourself.
+	journal := SoilPersistentDatabaseJournal new
+		soil: self;
+		open;
+		yourself.
+	notificationHandler := SoilNotificationHandler new
+		soil: self
+	
+]
+
 { #category : #accessing }
 Soil >> behaviorRegistry [
 	^ behaviorRegistry

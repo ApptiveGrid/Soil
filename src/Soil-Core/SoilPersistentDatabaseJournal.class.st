@@ -68,7 +68,8 @@ SoilPersistentDatabaseJournal >> currentFragmentFile: aSoilJournalFragmentFile [
 
 { #category : #'as yet unclassified' }
 SoilPersistentDatabaseJournal >> cycleFragmentFile [
-	currentFragmentFile := self createFragmentFile: (self filenameFrom: currentFragmentFile fileNumber + 1)
+	currentFragmentFile := self createFragmentFile: (self filenameFrom: self currentFragmentFile fileNumber + 1).
+	soil journal checkpoint 
 ]
 
 { #category : #enumerating }
