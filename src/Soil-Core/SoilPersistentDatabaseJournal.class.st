@@ -66,7 +66,7 @@ SoilPersistentDatabaseJournal >> currentFragmentFile: aSoilJournalFragmentFile [
 	currentFragmentFile := aSoilJournalFragmentFile
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilPersistentDatabaseJournal >> cycleFragmentFile [
 	currentFragmentFile := self createFragmentFile: (self filenameFrom: currentFragmentFile fileNumber + 1)
 ]
@@ -184,7 +184,7 @@ SoilPersistentDatabaseJournal >> openFragmentFileNumber: anInteger [
 	^ self openFragmentFile: (self filenameFrom: anInteger)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilPersistentDatabaseJournal >> openFragmentForLSN: aSoilLogSequenceNumber [ 
 	| file |
 	file := self openFragmentFileNumber: aSoilLogSequenceNumber fileNumber.
@@ -198,7 +198,7 @@ SoilPersistentDatabaseJournal >> path [
 	^ soil path / #journal
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #recover }
 SoilPersistentDatabaseJournal >> recover [
 	SoilDatabaseRecovery new 
 		soil: soil;

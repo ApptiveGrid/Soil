@@ -209,10 +209,10 @@ SoilIndexIterator >> lastPage [
 
 { #category : #accessing }
 SoilIndexIterator >> next [
-	| nextAssociation nextValue |
+	| nextAssociation restoredItem |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
-	nextValue := self restoreItem: nextAssociation .
-	^ self convertValue: (nextValue ifNil: [ self next ]) value
+	restoredItem := self restoreItem: nextAssociation.
+	^ self convertValue: (restoredItem value ifNil: [ self next]) 
 ]
 
 { #category : #accessing }
@@ -235,11 +235,11 @@ SoilIndexIterator >> nextAfter: key [
 { #category : #accessing }
 SoilIndexIterator >> nextAssociation [
 	"Note: key will be index key"
-	| nextAssociation nextValue |
+	| nextAssociation restoredItem |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
-	nextValue := self restoreItem: nextAssociation.
-	^ nextValue 
-		ifNotNil: [ nextValue key -> (self convertValue: nextValue value)] 
+	restoredItem := self restoreItem: nextAssociation.
+	^ restoredItem 
+		ifNotNil: [ restoredItem key -> (self convertValue: restoredItem value)] 
 		ifNil: [ self nextAssociation ] 
 ]
 

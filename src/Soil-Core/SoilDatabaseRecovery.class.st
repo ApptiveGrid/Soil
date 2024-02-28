@@ -14,14 +14,14 @@ SoilDatabaseRecovery >> journal: aSoilPersistentDatabaseJournal [
 	journal := aSoilPersistentDatabaseJournal 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilDatabaseRecovery >> readEntryFrom: stream [
 	^ [ SoilJournalEntry readFrom: stream ]
 		on: MessageNotUnderstood
 		do: [ :err | SoilTruncatedRead signal: 'cannot read' ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilDatabaseRecovery >> readFragmentFile: aSoilJournalFragmentFile [ 
 	| processed entry transactionJournal |
 	[ aSoilJournalFragmentFile atEnd ] whileFalse: [ 
@@ -50,7 +50,7 @@ SoilDatabaseRecovery >> readFragmentFile: aSoilJournalFragmentFile [
 			Error signal: 'unknown journal entry discovered' ] ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilDatabaseRecovery >> readFragmentFileProtected: aSoilFragmentFile [
 	[ self readFragmentFile: aSoilFragmentFile ]
 		on: SoilTruncatedRead 
@@ -68,7 +68,7 @@ SoilDatabaseRecovery >> readFragmentFileProtected: aSoilFragmentFile [
 				cycleFragmentFile ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilDatabaseRecovery >> readTransactionJournal: transactionJournal from: stream [ 
 	| entry |
 	"read the transaction journal until a commit entry is read"
@@ -80,7 +80,7 @@ SoilDatabaseRecovery >> readTransactionJournal: transactionJournal from: stream 
 	SoilTruncatedRead signal: 'reading of transaction journal is incomplete'
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilDatabaseRecovery >> recover [
 	| lastCheckpoint checkpointEntry fragmentFile |
 	"read the log sequence number of the last successful checkpoint from the control 
