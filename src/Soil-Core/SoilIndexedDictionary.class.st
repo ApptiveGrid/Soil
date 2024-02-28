@@ -45,7 +45,7 @@ SoilIndexedDictionary >> at: key [
 SoilIndexedDictionary >> at: key ifAbsent: aBlock [
 	^ self 
 		basicAt: key 
-		ifAbsent: [ ^ aBlock value ].
+		ifAbsent: [ ^ aBlock value ]
 
 ]
 
