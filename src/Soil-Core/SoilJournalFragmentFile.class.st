@@ -47,7 +47,7 @@ SoilJournalFragmentFile >> appendEntry: aSoilJournalEntry [
 		position := stream position.
 		aSoilJournalEntry writeOn: stream.
 		stream flush.
-		stream fileStream dataSync ]
+		"stream fileStream dataSync" ]
 			ensure: [ lock release ].
 	^ position
 
