@@ -295,7 +295,7 @@ Soil >> objectRepository [
 { #category : #'opening/closing' }
 Soil >> open [
 	self basicOpen.
-	"journal recover "
+	journal recover
 ]
 
 { #category : #accessing }
