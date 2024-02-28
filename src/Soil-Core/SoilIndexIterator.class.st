@@ -235,11 +235,11 @@ SoilIndexIterator >> nextAfter: key [
 { #category : #accessing }
 SoilIndexIterator >> nextAssociation [
 	"Note: key will be index key"
-	| nextAssociation nextItem |
+	| nextAssociation restoredItem |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
-	nextItem := self restoreItem: nextAssociation.
-	^ nextItem 
-		ifNotNil: [ nextItem key -> (self convertValue: nextItem value)] 
+	restoredItem := self restoreItem: nextAssociation.
+	^ restoredItem 
+		ifNotNil: [ restoredItem key -> (self convertValue: restoredItem value)] 
 		ifNil: [ self nextAssociation ] 
 ]
 
