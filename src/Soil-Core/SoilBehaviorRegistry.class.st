@@ -87,7 +87,7 @@ SoilBehaviorRegistry >> loadHistoryForBehaviorWithIndex: objectIndex transaction
 	"check if we loaded the history already"
 	(versions includesKey: objectIndex ) ifTrue: [ ^ self ].
 
-	records := transaction objectRepository metaSegment allVersionsAt: objectIndex.
+	records := self segment allVersionsAt: objectIndex.
 	chain := records collect: [ :record |
 		record
 			transaction: transaction;
@@ -132,6 +132,18 @@ SoilBehaviorRegistry >> open [
 { #category : #accessing }
 SoilBehaviorRegistry >> path [
 	^ soil objectRepository metaSegment indexManager path / #identifier , #index
+]
+
+{ #category : #accessing }
+SoilBehaviorRegistry >> segment [ 
+
+	^ soil objectRepository metaSegment
+]
+
+{ #category : #accessing }
+SoilBehaviorRegistry >> soil [
+
+	^ soil
 ]
 
 { #category : #accessing }
