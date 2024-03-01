@@ -105,9 +105,18 @@ SoilPersistentDatabaseJournal >> fragmentFileForWriting [
 			currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber + 1) ]
 ]
 
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> fragmentFileWritten: aSoilFragmentFile [ 
+	soil setup isFsyncEnabled ifTrue: [  
+		aSoilFragmentFile writeContentsToDisk ]
+]
+
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> fragmentFiles [
-	^ self path files sorted reverse collect: [ :each | SoilJournalFragmentFile path: each ]
+	^ self path files sorted reverse collect: [ :each | 
+		(SoilJournalFragmentFile path: each)
+			databaseJournal: self;
+			yourself ]
 ]
 
 { #category : #adding }
@@ -175,6 +184,7 @@ SoilPersistentDatabaseJournal >> open [
 { #category : #'instance creation' }
 SoilPersistentDatabaseJournal >> openFragmentFile: filename [ 
 	^ (SoilJournalFragmentFile path: self path / filename )
+		databaseJournal: self;
 		open;
 		yourself
 ]
