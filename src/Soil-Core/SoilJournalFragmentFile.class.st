@@ -2,7 +2,8 @@ Class {
 	#name : #SoilJournalFragmentFile,
 	#superclass : #SoilBinaryFile,
 	#instVars : [
-		'path'
+		'path',
+		'databaseJournal'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -47,7 +48,7 @@ SoilJournalFragmentFile >> appendEntry: aSoilJournalEntry [
 		position := stream position.
 		aSoilJournalEntry writeOn: stream.
 		stream flush.
-		stream fileStream dataSync ]
+		databaseJournal fragmentFileWritten: self  ]
 			ensure: [ lock release ].
 	^ position
 
@@ -104,6 +105,16 @@ SoilJournalFragmentFile >> currentLogSequenceNumber [
 { #category : #accessing }
 SoilJournalFragmentFile >> dataPosition [
 	^ self createdPosition + self createdSize 
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournalFragmentFile >> dataSync [ 
+	stream fileStream dataSync
+]
+
+{ #category : #accessing }
+SoilJournalFragmentFile >> databaseJournal: aSoilPersistentDatabaseJournal [
+	databaseJournal := aSoilPersistentDatabaseJournal 
 ]
 
 { #category : #searching }

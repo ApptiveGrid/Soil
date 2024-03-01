@@ -37,7 +37,8 @@ Class {
 		'notificationHandler',
 		'serializerClass',
 		'materializerClass',
-		'control'
+		'control',
+		'setup'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -374,8 +375,10 @@ Soil >> serializerClass: anObject [
 
 { #category : #accessing }
 Soil >> setup [
-	^ SoilSetup new 
-		soil: self 
+	^ setup ifNil: [
+		setup := SoilSetup new 
+			soil: self;
+			yourself ] 
 ]
 
 { #category : #transactions }

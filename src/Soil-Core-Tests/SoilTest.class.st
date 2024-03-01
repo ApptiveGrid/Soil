@@ -116,6 +116,17 @@ SoilTest >> testCheckpointEmptyRecordsToCommit [
 ]
 
 { #category : #tests }
+SoilTest >> testDisabledFsync [
+	| tx |
+	soil setup disableFsync.
+	tx := soil newTransaction.
+	tx root: self simpleGraph.
+	self 
+		shouldnt: [ tx commit ]
+		raise: Error
+]
+
+{ #category : #tests }
 SoilTest >> testFindRecordWithIndex [ 
 	| tx skipList rec |
 	tx := soil newTransaction.

@@ -2,7 +2,8 @@ Class {
 	#name : #SoilSetup,
 	#superclass : #Object,
 	#instVars : [
-		'soil'
+		'soil',
+		'fsyncEnabled'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -35,6 +36,16 @@ SoilSetup >> defaultCacheRecordsSize [
 	^ 1000
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSetup >> disableFsync [ 
+	fsyncEnabled := false
+]
+
+{ #category : #'as yet unclassified' }
+SoilSetup >> enableFsync [ 
+	fsyncEnabled := true
+]
+
 { #category : #flushing }
 SoilSetup >> flushCachedIndexes [
 	soil objectRepository segmentsDo: [ :segment |
@@ -52,6 +63,23 @@ SoilSetup >> flushCaches [
 	self 
 		flushCachedObjectRecords;
 		flushCachedIndexes
+]
+
+{ #category : #accessing }
+SoilSetup >> fsyncEnabled: anObject [
+
+	fsyncEnabled := anObject
+]
+
+{ #category : #initialization }
+SoilSetup >> initialize [ 
+	super initialize.
+	fsyncEnabled := true
+]
+
+{ #category : #testing }
+SoilSetup >> isFsyncEnabled [ 
+	^ fsyncEnabled 
 ]
 
 { #category : #accessing }
