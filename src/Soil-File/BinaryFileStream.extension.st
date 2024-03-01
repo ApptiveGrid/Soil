@@ -1,19 +1,19 @@
 Extension { #name : #BinaryFileStream }
 
 { #category : #'*Soil-File' }
-BinaryFileStream >> dataSync [ 
-	| fd err |
-	fd := self fileno.
-	err := self dataSync: self fileno.
-	(err = 0) ifFalse: [ 
-		Error signal: 'fdatasync(', fd printString, ') failed with error code: ', err printString ]
-]
-
-{ #category : #'*Soil-File' }
-BinaryFileStream >> dataSync: fd [
+BinaryFileStream >> fdataSync: fd [
 	^ self 
 		ffiCall: #(int fdatasync(int fd))
 		module: LibC
+]
+
+{ #category : #'*Soil-File' }
+BinaryFileStream >> fdatasync [ 
+	| fd err |
+	fd := self fileno.
+	err := self fdataSync: self fileno.
+	(err = 0) ifFalse: [ 
+		Error signal: 'fdatasync(', fd printString, ') failed with error code: ', err printString ]
 ]
 
 { #category : #'*Soil-File' }

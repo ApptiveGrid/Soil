@@ -107,11 +107,6 @@ SoilJournalFragmentFile >> dataPosition [
 	^ self createdPosition + self createdSize 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilJournalFragmentFile >> dataSync [ 
-	stream fileStream dataSync
-]
-
 { #category : #accessing }
 SoilJournalFragmentFile >> databaseJournal: aSoilPersistentDatabaseJournal [
 	databaseJournal := aSoilPersistentDatabaseJournal 
@@ -275,4 +270,9 @@ SoilJournalFragmentFile >> versionPosition [
 { #category : #versions }
 SoilJournalFragmentFile >> versionSize [
 	^ 1
+]
+
+{ #category : #'as yet unclassified' }
+SoilJournalFragmentFile >> writeContentsToDisk [
+	stream fileStream fdatasync
 ]

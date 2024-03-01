@@ -108,7 +108,7 @@ SoilPersistentDatabaseJournal >> fragmentFileForWriting [
 { #category : #'as yet unclassified' }
 SoilPersistentDatabaseJournal >> fragmentFileWritten: aSoilFragmentFile [ 
 	soil setup isFsyncEnabled ifTrue: [  
-		aSoilFragmentFile dataSync ]
+		aSoilFragmentFile writeContentsToDisk ]
 ]
 
 { #category : #accessing }
