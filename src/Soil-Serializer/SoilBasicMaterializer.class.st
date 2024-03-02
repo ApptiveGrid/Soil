@@ -112,6 +112,17 @@ SoilBasicMaterializer >> nextScaledDecimal: aClass [
 ]
 
 { #category : #reading }
+SoilBasicMaterializer >> nextSoilObject [ 
+	| byte |
+
+	byte := self nextByte.
+	^ (TypeCodeMapping 
+		at: byte
+		ifAbsent: [ Error signal: 'cannot find type code for ', byte asString]) 
+			soilMaterialize: self 
+]
+
+{ #category : #reading }
 SoilBasicMaterializer >> nextString [
 	| string |
 	string := self basicNextString.
