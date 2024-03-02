@@ -108,11 +108,6 @@ SoilLockableStream >> next: anInteger [
 	^ fileStream next: anInteger 
 ]
 
-{ #category : #writing }
-SoilLockableStream >> nextBytesPutAll: aString [ 
-	^ fileStream nextBytesPutAll: aString 
-]
-
 { #category : #'reading - basic' }
 SoilLockableStream >> nextLengthEncodedInteger [
 	| value |

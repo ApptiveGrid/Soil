@@ -11,14 +11,14 @@ Class {
 SoilBasicSerializer >> basicNextPutString: aString [ 
 	self
 		nextPutLengthEncodedInteger: aString size;
-		nextPutBytesFrom: aString 
+		nextPutBytesFrom: aString asByteArray
 ]
 
 { #category : #writing }
 SoilBasicSerializer >> basicNextPutSymbol: aSymbol [ 
 	self
 		nextPutLengthEncodedInteger: aSymbol size;
-		nextPutBytesFrom: aSymbol
+		nextPutBytesFrom: aSymbol asByteArray
 ]
 
 { #category : #initialization }
