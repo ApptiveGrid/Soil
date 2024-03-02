@@ -207,17 +207,6 @@ SoilMaterializer >> nextPersistentDictionary: aClass [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextSoilObject [ 
-	| byte |
-
-	byte := self nextByte.
-	^ (TypeCodeMapping 
-		at: byte
-		ifAbsent: [ Error signal: 'cannot find type code for ', byte asString]) 
-			soilMaterialize: self 
-]
-
-{ #category : #reading }
 SoilMaterializer >> nextUUID: aClass [ 
 	| uuid size byteArray |
 	size := self nextLengthEncodedInteger.

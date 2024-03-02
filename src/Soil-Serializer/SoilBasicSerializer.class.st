@@ -11,7 +11,7 @@ Class {
 SoilBasicSerializer >> basicNextPutString: aString [ 
 	self
 		nextPutLengthEncodedInteger: aString size;
-		nextPutBytesFrom: aString
+		nextPutBytesFrom: aString 
 ]
 
 { #category : #writing }
@@ -42,7 +42,7 @@ SoilBasicSerializer >> nextPutByteArray: aByteArray [
 
 { #category : #'writing - basic' }
 SoilBasicSerializer >> nextPutBytesFrom: aByteArray [
-	stream nextBytesPutAll: aByteArray 
+	stream nextPutAll: aByteArray 
 
 ]
 
@@ -58,6 +58,14 @@ SoilBasicSerializer >> nextPutDate: aDate [
 		nextPutByte: TypeCodeDate; 
 		nextPutInteger: aDate julianDayNumber - 2415386; 
 		nextPutInteger: ((aDate offset hours * 60) + aDate offset minutes)
+]
+
+{ #category : #writing }
+SoilBasicSerializer >> nextPutDateAndTime: aDateAndTime [
+	self 
+		nextPutByte: TypeCodeDateAndTime; 
+		basicNextPutString: aDateAndTime printString 
+
 ]
 
 { #category : #writing }

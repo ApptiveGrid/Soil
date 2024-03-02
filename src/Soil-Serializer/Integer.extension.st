@@ -7,6 +7,11 @@ Integer >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Serializer' }
+Integer class >> soilMaterialize: materializer [ 
+	^ materializer nextSoilObject 
+]
+
+{ #category : #'*Soil-Serializer' }
 Integer >> soilSerialize: serializer [
 	"Small Integers are immediate objects, no registration needed"
 	self isImmediateObject ifTrue: [ ^ self soilBasicSerialize: serializer ].

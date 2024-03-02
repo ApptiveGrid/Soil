@@ -51,6 +51,11 @@ SoilBasicMaterializer >> nextDate: aClass [
 	^ date
 ]
 
+{ #category : #materializing }
+SoilBasicMaterializer >> nextDateAndTime: aClass [ 
+	^ aClass fromString: self basicNextString 
+]
+
 { #category : #reading }
 SoilBasicMaterializer >> nextFloat: aClass [ 
 	"We multiply the Boxedfloat by 1, this way we create a SmallFloat if possible"
@@ -109,6 +114,17 @@ SoilBasicMaterializer >> nextScaledDecimal: aClass [
 		                 scale: self nextLengthEncodedInteger.
 	self registerObject: scaledDecimal.
 	^ scaledDecimal
+]
+
+{ #category : #reading }
+SoilBasicMaterializer >> nextSoilObject [ 
+	| byte |
+
+	byte := self nextByte.
+	^ (TypeCodeMapping 
+		at: byte
+		ifAbsent: [ Error signal: 'cannot find type code for ', byte asString]) 
+			soilMaterialize: self 
 ]
 
 { #category : #reading }

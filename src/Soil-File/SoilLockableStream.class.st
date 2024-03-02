@@ -108,6 +108,11 @@ SoilLockableStream >> next: anInteger [
 	^ fileStream next: anInteger 
 ]
 
+{ #category : #writing }
+SoilLockableStream >> nextBytesPutAll: aString [ 
+	^ fileStream nextBytesPutAll: aString 
+]
+
 { #category : #'reading - basic' }
 SoilLockableStream >> nextLengthEncodedInteger [
 	| value |
@@ -144,6 +149,11 @@ SoilLockableStream >> position [
 { #category : #positioning }
 SoilLockableStream >> position: anInteger [ 
 	fileStream position: anInteger 
+]
+
+{ #category : #accessing }
+SoilLockableStream >> readInto: aCollection startingAt: startIndex count: count [ 
+	^ fileStream readInto: aCollection startingAt: startIndex count: count 
 ]
 
 { #category : #locking }

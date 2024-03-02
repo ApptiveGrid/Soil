@@ -38,7 +38,8 @@ Class {
 		'serializerClass',
 		'materializerClass',
 		'control',
-		'setup'
+		'setup',
+		'metadata'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -213,6 +214,13 @@ Soil >> inspectionJournal [
 	^ self journal inspectionContent
 ]
 
+{ #category : #'as yet unclassified' }
+Soil >> inspectionMetadata [
+	<inspectorPresentationOrder: 2200 title: 'metadata'>
+
+	^ self metadata inspectionMetadata
+]
+
 { #category : #accessing }
 Soil >> journal [
 	^ journal 
@@ -242,6 +250,15 @@ Soil >> materializerClass [
 Soil >> materializerClass: anObject [
 
 	materializerClass := anObject
+]
+
+{ #category : #accessing }
+Soil >> metadata [
+	^ metadata ifNil: [ 
+		metadata := SoilFrame new 
+			path: self path / #metadata;
+			open;
+			yourself ]
 ]
 
 { #category : #'instance creation' }
