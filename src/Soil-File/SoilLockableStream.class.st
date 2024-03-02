@@ -146,6 +146,11 @@ SoilLockableStream >> position: anInteger [
 	fileStream position: anInteger 
 ]
 
+{ #category : #accessing }
+SoilLockableStream >> readInto: aCollection startingAt: startIndex count: count [ 
+	^ fileStream readInto: aCollection startingAt: startIndex count: count 
+]
+
 { #category : #locking }
 SoilLockableStream >> registerLock: lock [
 	
