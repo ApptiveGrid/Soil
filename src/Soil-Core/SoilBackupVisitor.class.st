@@ -27,6 +27,7 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	| sourceSegment sourceIndex targetSegment targetIndex iterator assoc |
 	
 	sourceSegment := source objectRepository segmentAt: segmentId.
+	indexId ifEmpty: [ ^ self indexNotFound: indexId ].
 	sourceIndex := sourceSegment indexManager 
 		loadIndexWithId: indexId 
 		ifNone: [ ^ self indexNotFound: indexId ].
@@ -44,7 +45,7 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 		assoc value isRemoved ifFalse: [ 
 			targetIndex basicAt: assoc key put: assoc value.
 			"recurse further into the values of the index"
-			self process: assoc value ] ].
+			self process: assoc value asSoilObjectId ] ].
 	targetIndex
 		flush; 
 		close.
