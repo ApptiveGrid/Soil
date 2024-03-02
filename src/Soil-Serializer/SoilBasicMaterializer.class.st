@@ -51,6 +51,11 @@ SoilBasicMaterializer >> nextDate: aClass [
 	^ date
 ]
 
+{ #category : #materializing }
+SoilBasicMaterializer >> nextDateAndTime: aClass [ 
+	^ aClass fromString: self basicNextString 
+]
+
 { #category : #reading }
 SoilBasicMaterializer >> nextFloat: aClass [ 
 	"We multiply the Boxedfloat by 1, this way we create a SmallFloat if possible"

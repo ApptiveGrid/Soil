@@ -61,6 +61,14 @@ SoilBasicSerializer >> nextPutDate: aDate [
 ]
 
 { #category : #writing }
+SoilBasicSerializer >> nextPutDateAndTime: aDateAndTime [
+	self 
+		nextPutByte: TypeCodeDateAndTime; 
+		basicNextPutString: aDateAndTime printString 
+
+]
+
+{ #category : #writing }
 SoilBasicSerializer >> nextPutFalse: aBoolean [ 
 	self nextPutByte: TypeCodeFalse 
 ]
