@@ -34,6 +34,13 @@ SoilIndexedDictionaryTest >> path [
 	^ 'soil-tests'
 ]
 
+{ #category : #tests }
+SoilIndexedDictionaryTest >> reopen [ 
+	soil ifNotNil: [ 
+		soil close ].
+	soil open
+]
+
 { #category : #running }
 SoilIndexedDictionaryTest >> setUp [ 
 	super setUp.
@@ -127,6 +134,23 @@ SoilIndexedDictionaryTest >> testAddToExistingNonEmptyList [
 	tx3 abort.	
 	tx4 := soil newTransaction.
 	self assert: (tx4 root at: #foo) equals: #bar.	
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testAfterReopen [
+	| tx |
+	tx := soil newTransaction.
+	tx root: dict.
+	tx commit.
+	"Open a fresh Soil instance, so index structures are not cached"
+	self reopen.
+	tx := soil newTransaction.
+	"Getting the values, before doing #at:put: yielded index pages with nil pageSize"
+	tx root values.
+	tx root at: 'abc' asByteArray put: #one.
+	self
+		shouldnt: [ tx commit ]
+		raise: Error
 ]
 
 { #category : #tests }
