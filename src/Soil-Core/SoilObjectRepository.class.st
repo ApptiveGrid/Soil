@@ -92,6 +92,11 @@ SoilObjectRepository >> firstSegment [
 ]
 
 { #category : #accessing }
+SoilObjectRepository >> flush [
+	self segmentsDo: #flush
+]
+
+{ #category : #accessing }
 SoilObjectRepository >> heapPositionOf: anObjectId [ 
 	^ (self segmentAt: anObjectId segment)
 		heapPositionAt: anObjectId index  

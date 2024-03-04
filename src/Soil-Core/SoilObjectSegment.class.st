@@ -83,6 +83,13 @@ SoilObjectSegment >> close [
 ]
 
 { #category : #accessing }
+SoilObjectSegment >> flush [
+	indexFile flush.
+	objectFile flush.
+	indexManager flush
+]
+
+{ #category : #accessing }
 SoilObjectSegment >> flushCachedObjectRecords [
 	
 ]

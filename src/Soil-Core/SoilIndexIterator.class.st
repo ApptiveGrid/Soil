@@ -43,6 +43,7 @@ SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 	| foundValue |
 	currentKey := (aKeyObject asSkipListKeyOfSize: index keySize) asInteger.
 	foundValue := self find: currentKey ifAbsent: aBlock.
+	foundValue ifNil: [  ^ aBlock value ].
  	^(self restoreValue: foundValue forKey: currentKey) ifNil: [ aBlock value ]
 ]
 
