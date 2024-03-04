@@ -130,6 +130,24 @@ SoilIndexedDictionaryTest >> testAddToExistingNonEmptyList [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testAfterReopen [
+	"test that we can close and re-open the database"
+ 	| tx |
+ 	tx := soil newTransaction.
+ 	tx root: dict.
+ 	tx commit.
+ 	"Open a fresh Soil instance, so index structures are not cached"
+ 	soil close. soil open.
+ 	tx := soil newTransaction.
+ 	"Getting the values, before doing #at:put: yielded index pages with nil pageSize"
+ 	tx root values.
+ 	tx root at: 'abc' asByteArray put: #one.
+ 	self
+ 		shouldnt: [ tx commit ]
+ 		raise: Error
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.
