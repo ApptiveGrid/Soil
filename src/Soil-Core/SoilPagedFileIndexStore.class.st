@@ -102,7 +102,10 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	self ensureStreamIsOpen.
 	streamSemaphore critical: [  
 		stream position: (self positionOfPageIndex: anInteger).
-		page := (index readPageFrom: stream) index: anInteger ].
+		page := (index readPageFrom: stream) 
+			index: anInteger;
+			pageSize:  self filePageSize
+			yourself ].
 	pagesMutex critical: [  
 		pages at: anInteger put: page ].
 	^ page
