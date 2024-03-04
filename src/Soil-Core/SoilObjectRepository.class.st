@@ -92,6 +92,11 @@ SoilObjectRepository >> firstSegment [
 ]
 
 { #category : #accessing }
+SoilObjectRepository >> flush [
+	self segmentsDo: #flush
+]
+
+{ #category : #accessing }
 SoilObjectRepository >> heapPositionOf: anObjectId [ 
 	^ (self segmentAt: anObjectId segment)
 		heapPositionAt: anObjectId index  
@@ -207,4 +212,10 @@ SoilObjectRepository >> soil [
 { #category : #accessing }
 SoilObjectRepository >> soil: aSoil [ 
 	soil := aSoil 
+]
+
+{ #category : #writing }
+SoilObjectRepository >> writeContentsToDisk [
+	soil setup isFsyncEnabled ifTrue: [  
+		self segmentsDo: #writeContentsToDisk ]
 ]

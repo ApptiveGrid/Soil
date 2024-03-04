@@ -150,3 +150,9 @@ SoilBehaviorRegistry >> soil [
 SoilBehaviorRegistry >> soil: aSoil [ 
 	soil := aSoil
 ]
+
+{ #category : #writing }
+SoilBehaviorRegistry >> writeContentsToDisk [
+	soil setup isFsyncEnabled ifTrue: [  
+		self index writeContentsToDisk ]
+]
