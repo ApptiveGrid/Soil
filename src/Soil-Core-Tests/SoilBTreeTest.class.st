@@ -110,8 +110,7 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 	index close.
 	index := SoilBTree new 
 		path: 'sunit-btree';
-		initializeFilesystem;
-		open. 
+		initializeFilesystem.
 	self assert: (index at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
 ]
 
@@ -359,8 +358,7 @@ SoilBTreeTest >> testPageAddFirstAndLoad [
 	index close.
 	index := SoilBTree new 
 		path: 'sunit-btree';
-		initializeFilesystem;
-		open.
+		initializeFilesystem.
 	
 	self assert: page items first key equals:(index indexKey: #foo).
 	"load succeeds"
@@ -444,8 +442,7 @@ SoilBTreeTest >> testSplitIndexPageReleoad [
 	index close.
 	index := SoilBTree new 
 		path: 'sunit-btree';
-		initializeFilesystem;
-		open. 
+		initializeFilesystem.
 	
 	"can we find all the keys we added?"
 	entries do: [:each | self assert: (index at: each ) equals: (#[ 1 2 3 4 5 6 7 8 ] asByteArrayOfSize: 512)].
