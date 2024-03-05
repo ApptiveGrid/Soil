@@ -28,20 +28,6 @@ SoilPersistentDatabaseJournal >> appendEntry: aSoilNewCheckpointEntry [
 		
 ]
 
-{ #category : #accessing }
-SoilPersistentDatabaseJournal >> checkpoint [ 
-	| entry checkpointLSN |
-	entry := SoilCheckpointEntry new
-		previousCheckpoint: soil control lastCheckpoint.
-	entry commitIn: soil.
-	"write the checkpoint entry in the journal and get 
-	the position of that entry in the file"
-	checkpointLSN := self writeEntry: entry.
-	"set the checkpoint position so it can be read back"
-	soil control checkpoint: checkpointLSN.
-	^ entry
-]
-
 { #category : #private }
 SoilPersistentDatabaseJournal >> createFragmentFile: filename [
 	(self path / filename) ensureCreateFile.

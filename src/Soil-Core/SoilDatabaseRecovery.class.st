@@ -111,7 +111,7 @@ SoilDatabaseRecovery >> recover [
 	"we end up here because the journal needed to be recovered. We create new checkpoint
 	to mark that we covered about the extra entries or bogus data so future reads can
 	proceed from here"
-	journal checkpoint.
+	soil checkpoint.
 ]
 
 { #category : #accessing }

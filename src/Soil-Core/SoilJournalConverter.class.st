@@ -24,7 +24,7 @@ SoilJournalConverter >> convert [
 		stream close.
 		each delete ].
 	"write a final checkpoint record and about its position in the database"
-	soil journal checkpoint
+	soil checkpoint
 
 
 ]

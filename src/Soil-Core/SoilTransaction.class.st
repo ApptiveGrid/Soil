@@ -229,9 +229,8 @@ SoilTransaction >> checkpoint [
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
-		soil journal 
-			addTransactionJournal: journal;
-			checkpoint ]
+		soil journal addTransactionJournal: journal.
+		soil checkpoint ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
 
