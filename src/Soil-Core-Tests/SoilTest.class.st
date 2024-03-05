@@ -166,6 +166,13 @@ SoilTest >> testInitializeDatabaseFailsIfExisting [
 ]
 
 { #category : #tests }
+SoilTest >> testIsOpen [
+	self assert: soil isOpen.
+	soil close.
+	self deny: soil isOpen
+]
+
+{ #category : #tests }
 SoilTest >> testMetricsUncached [
 	| tx metrics txn2 |
 	soil notificationHandler: SoilMetrics new.

@@ -213,6 +213,11 @@ Soil >> inspectionJournal [
 	^ self journal inspectionContent
 ]
 
+{ #category : #testing }
+Soil >> isOpen [
+	^control notNil and: [control isOpen]
+]
+
 { #category : #accessing }
 Soil >> journal [
 	^ journal 
@@ -295,6 +300,7 @@ Soil >> objectRepository [
 
 { #category : #'opening/closing' }
 Soil >> open [
+	self isOpen ifTrue: [ self error: 'Database already open' ].
 	self basicOpen.
 	journal recover
 ]
