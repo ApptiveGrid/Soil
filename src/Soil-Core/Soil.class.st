@@ -391,3 +391,13 @@ Soil >> setup [
 Soil >> transactionClass [
 	^ SoilTransaction 
 ]
+
+{ #category : #writing }
+Soil >> writeEverythingToDisk [ 
+	self behaviorRegistry 
+		flush;
+		writeContentsToDisk.
+	self objectRepository 
+		flush;
+		writeContentsToDisk 
+]

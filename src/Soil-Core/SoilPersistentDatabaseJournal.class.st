@@ -32,7 +32,7 @@ SoilPersistentDatabaseJournal >> appendEntry: aSoilNewCheckpointEntry [
 SoilPersistentDatabaseJournal >> checkpoint [ 
 	| entry checkpointLSN |
 	entry := SoilCheckpointEntry new
-		previousCheckpoint: soil control checkpoint.
+		previousCheckpoint: soil control lastCheckpoint.
 	entry commitIn: soil.
 	"write the checkpoint entry in the journal and get 
 	the position of that entry in the file"
@@ -54,7 +54,7 @@ SoilPersistentDatabaseJournal >> createFragmentFile: filename [
 SoilPersistentDatabaseJournal >> currentFragmentFile [
 	| currentLSN filename |
 	^ currentFragmentFile ifNil: [  
-		currentLSN := soil control checkpoint.
+		currentLSN := soil control lastCheckpoint.
 		filename := self filenameFrom: currentLSN fileNumber.
 		currentFragmentFile := (currentLSN isInitial) 
 			ifTrue: [ self createFragmentFile: filename ]
@@ -176,7 +176,7 @@ SoilPersistentDatabaseJournal >> open [
 	self path hasChildren ifFalse: [ 
 		file := self currentFragmentFile.
 		lsn := self appendEntry: (SoilCheckpointEntry new
-			previousCheckpoint: soil control checkpoint).
+			previousCheckpoint: soil control lastCheckpoint).
 		soil control checkpoint: lsn ]
 	
 ]

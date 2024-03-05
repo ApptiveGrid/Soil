@@ -25,17 +25,8 @@ SoilCheckpointEntry >> checkpointedAt [
 
 { #category : #committing }
 SoilCheckpointEntry >> commitIn: soil [
-	"make sure behavior registry gets flushed at the end of 
-	a transaction"
-	soil behaviorRegistry 
-		flush;
-		writeContentsToDisk.
-	"as indexes are just created and keys/values being added,
-	we need to flush sometime and the checkpoint time is good
-	for this"
-	soil objectRepository 
-		flush;
-		writeContentsToDisk 
+	"write all values in the heap to disk"
+	soil writeEverythingToDisk 
 ]
 
 { #category : #accessing }
