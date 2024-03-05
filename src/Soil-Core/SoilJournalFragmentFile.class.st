@@ -271,8 +271,3 @@ SoilJournalFragmentFile >> versionPosition [
 SoilJournalFragmentFile >> versionSize [
 	^ 1
 ]
-
-{ #category : #'as yet unclassified' }
-SoilJournalFragmentFile >> writeContentsToDisk [
-	stream fileStream fdatasync
-]

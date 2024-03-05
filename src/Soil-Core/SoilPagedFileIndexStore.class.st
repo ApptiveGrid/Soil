@@ -145,6 +145,11 @@ SoilPagedFileIndexStore >> stream [
 ]
 
 { #category : #writing }
+SoilPagedFileIndexStore >> writeContentsToDisk [
+	stream fileStream fdatasync  
+]
+
+{ #category : #writing }
 SoilPagedFileIndexStore >> writePage: aPage [ 
 	| pagePosition |
 	self ensureStreamIsOpen.

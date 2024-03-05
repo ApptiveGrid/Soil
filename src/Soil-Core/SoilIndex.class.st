@@ -240,3 +240,8 @@ SoilIndex >> valueSize: anInteger [
 SoilIndex >> values [ 
 	^ self newIterator values
 ]
+
+{ #category : #writing }
+SoilIndex >> writeContentsToDisk [
+	self store writeContentsToDisk 
+]

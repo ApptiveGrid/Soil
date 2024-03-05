@@ -86,7 +86,7 @@ SoilDatabaseRecovery >> recover [
 	"read the log sequence number of the last successful checkpoint from the control 
 	file. A successful checkpoint includes writing the transaction logs to disk, 
 	commit the contents to the heap, write the checkpoint entry"
-	lastCheckpoint := soil control checkpoint.
+	lastCheckpoint := soil control lastCheckpoint.
 	fragmentFile := journal openFragmentForLSN: lastCheckpoint.
 	"The log sequence number of a successful checkpoint points to the checkpoint 
 	entry that was last written"
@@ -111,7 +111,7 @@ SoilDatabaseRecovery >> recover [
 	"we end up here because the journal needed to be recovered. We create new checkpoint
 	to mark that we covered about the extra entries or bogus data so future reads can
 	proceed from here"
-	journal checkpoint.
+	soil checkpoint.
 ]
 
 { #category : #accessing }

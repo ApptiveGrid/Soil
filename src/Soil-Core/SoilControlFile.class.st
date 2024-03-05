@@ -55,14 +55,6 @@ SoilControlFile >> basicDatabaseVersion: anInteger [
 ]
 
 { #category : #accessing }
-SoilControlFile >> checkpoint [
-	^ semaphore critical: [  
-		self stream 
-			position: self checkpointPosition.
-		(stream next: self checkpointPositionSize) asInteger asLogSequenceNumber ]
-]
-
-{ #category : #accessing }
 SoilControlFile >> checkpoint: anInteger [
 	semaphore critical: [  
 		self stream 
@@ -159,6 +151,14 @@ SoilControlFile >> inspectionControl [
 ]
 
 { #category : #accessing }
+SoilControlFile >> lastCheckpoint [
+	^ semaphore critical: [  
+		self stream 
+			position: self checkpointPosition.
+		(stream next: self checkpointPositionSize) asInteger asLogSequenceNumber ]
+]
+
+{ #category : #accessing }
 SoilControlFile >> legacyPath [
 	^ soil path / #settings
 ]
@@ -185,7 +185,7 @@ SoilControlFile >> open [
 
 { #category : #accessing }
 SoilControlFile >> parameterNames [
-	^ #( databaseFormatVersion databaseVersion applicationVersion checkpoint ) 
+	^ #( databaseFormatVersion databaseVersion applicationVersion #lastCheckpoint ) 
 ]
 
 { #category : #accessing }

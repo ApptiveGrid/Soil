@@ -96,3 +96,8 @@ SoilBinaryFile >> stream [
 SoilBinaryFile >> stream: anObject [
 	stream := anObject
 ]
+
+{ #category : #writing }
+SoilBinaryFile >> writeContentsToDisk [
+	stream fileStream fdatasync
+]

@@ -83,6 +83,11 @@ SoilObjectSegment >> close [
 ]
 
 { #category : #accessing }
+SoilObjectSegment >> flush [
+	self indexManager flush
+]
+
+{ #category : #accessing }
 SoilObjectSegment >> flushCachedObjectRecords [
 	
 ]
@@ -231,4 +236,12 @@ SoilObjectSegment >> soil [
 { #category : #validating }
 SoilObjectSegment >> validateLastObjectIndex: anInteger [ 
 	indexFile validateLastObjectIndex: anInteger
+]
+
+{ #category : #writing }
+SoilObjectSegment >> writeContentsToDisk [
+	self soil setup isFsyncEnabled ifTrue: [  
+		indexFile writeContentsToDisk.
+		objectFile writeContentsToDisk.
+		self indexManager writeContentsToDisk ]
 ]
