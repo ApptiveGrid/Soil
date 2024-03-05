@@ -88,7 +88,7 @@ SoilTest >> testCheckpointEmptyRecordsToCommit [
 	"N.B. Having the skip list at the root, did not trigger the error"
 	tx makeRoot: root.
 	tx root: root.
-	tx checkpointAndContinue.
+	tx commitAndContinue.
 
 	skipList := SoilSkipListDictionary new keySize: 32; maxLevel: 8; yourself.
 	tx makeRoot: skipList.
@@ -102,7 +102,7 @@ SoilTest >> testCheckpointEmptyRecordsToCommit [
 	tx makeRoot: obj.
 	skipList at: 'bbb' asByteArray put: obj.
 
-	tx checkpointAndContinue.
+	tx commitAndContinue.
 
 	self
 		shouldnt: [
@@ -111,7 +111,7 @@ SoilTest >> testCheckpointEmptyRecordsToCommit [
 				skipList := tx root at: 123.
 				"N.B. Have to actually pull in the proxy object to trigger error"
 				items := skipList values collect: [ :each | each one ].
-				tx checkpointAndContinue ] ]
+				tx commitAndContinue ] ]
 		raise: Error
 ]
 
@@ -284,7 +284,7 @@ SoilTest >> testSerializingRootTwoCluster [
 	graph := self simpleGraph.
 	tx makeRoot: graph nested reference. 
 	tx root: graph. 
-	tx checkpoint.
+	tx basicCommit.
 	tx2 := soil newTransaction.
 	materializedRoot := tx2 root.
 	self assert: materializedRoot nested reference objectIsNotLoaded.

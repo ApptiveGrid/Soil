@@ -77,6 +77,44 @@ SoilTransaction >> basicAbort [
 	objectMap := nil
 ]
 
+{ #category : #accessing }
+SoilTransaction >> basicCommit [
+	"serialize objects and collect all to be written records. This can be done without 
+	resources that need locking. This reduces time needed for locking"
+	self prepareRecordsForCommit.
+	"if there are no records to commit we can just return and don't allocate any
+	resources"
+	(recordsToCommit isEmpty and: [indexUpdatesToCommit isEmpty ]) ifTrue: [ 
+		soil notificationHandler transactionCommitted: self.
+		^ self ].
+	"only one transactions is allowed at a time. We use the critical block of the database
+	to avoid parallel committing"
+	soil critical: [ 
+	"enter lock phase. Acquire lock on global databaseVersion which centrally locks
+	the database for commiting until this checkpoint is done. The ensure block is needed
+	to be sure to release all locks at the end."
+		[ 
+		"lock global database version and create a version for new modification"
+		writeVersion := self buildWriteVersion.
+		"lock all records in the segment and check indexes for out of date versions"
+		self acquireLocksAndDetectWriteSkew.
+		"lastObjectIndexes contains the highest allocated index number per segment. We
+		lock all positions in order to update the index numbers in the database."
+		lastObjectIndexes keysDo: [ :segment |
+			locks add: (segment lockAppendingFor: self) ].
+		"convert the records into journal entries, write the journal to disk and then
+		execute the journal on the database"
+		journal := self buildJournal.
+		journal validateIn: self.
+		soil journal writeTransactionJournal: journal.
+		journal commitIn: soil.
+		soil journal addTransactionJournal: journal.
+		soil basicCommit ]
+				ensure: [self releaseLocks ] ].
+		soil notificationHandler transactionCommitted: self
+
+]
+
 { #category : #public }
 SoilTransaction >> behaviorDescriptionFor: aClass [
 	| behaviorDescription objectId |
@@ -199,55 +237,17 @@ SoilTransaction >> buildWriteVersion [
 ]
 
 { #category : #accessing }
-SoilTransaction >> checkpoint [
-	"serialize objects and collect all to be written records. This can be done without 
-	resources that need locking. This reduces time needed for locking"
-	self prepareRecordsForCommit.
-	"if there are no records to commit we can just return and don't allocate any
-	resources"
-	(recordsToCommit isEmpty and: [indexUpdatesToCommit isEmpty ]) ifTrue: [ 
-		soil notificationHandler transactionCommitted: self.
-		^ self ].
-	"only one transactions is allowed at a time. We use the critical block of the database
-	to avoid parallel committing"
-	soil critical: [ 
-	"enter lock phase. Acquire lock on global databaseVersion which centrally locks
-	the database for commiting until this checkpoint is done. The ensure block is needed
-	to be sure to release all locks at the end."
-		[ 
-		"lock global database version and create a version for new modification"
-		writeVersion := self buildWriteVersion.
-		"lock all records in the segment and check indexes for out of date versions"
-		self acquireLocksAndDetectWriteSkew.
-		"lastObjectIndexes contains the highest allocated index number per segment. We
-		lock all positions in order to update the index numbers in the database."
-		lastObjectIndexes keysDo: [ :segment |
-			locks add: (segment lockAppendingFor: self) ].
-		"convert the records into journal entries, write the journal to disk and then
-		execute the journal on the database"
-		journal := self buildJournal.
-		journal validateIn: self.
-		soil journal writeTransactionJournal: journal.
-		journal commitIn: soil.
-		soil journal addTransactionJournal: journal.
-		soil checkpoint ]
-				ensure: [self releaseLocks ] ].
-		soil notificationHandler transactionCommitted: self
-
+SoilTransaction >> commit [
+	self basicCommit.
+	soil checkpoint.
+	self basicAbort.
 ]
 
 { #category : #actions }
-SoilTransaction >> checkpointAndContinue [
-	self 
-		checkpoint;
-		continue
-]
-
-{ #category : #accessing }
-SoilTransaction >> commit [
-	self 
-		checkpoint;
-		basicAbort
+SoilTransaction >> commitAndContinue [
+	self basicCommit.
+	soil checkpoint.
+	self continue
 ]
 
 { #category : #actions }
