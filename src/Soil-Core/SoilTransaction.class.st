@@ -109,7 +109,7 @@ SoilTransaction >> basicCommit [
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
 		soil journal addTransactionJournal: journal.
-		soil basicCommit ]
+		soil checkpoint ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
 
