@@ -108,8 +108,7 @@ SoilTransaction >> basicCommit [
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
-		soil journal addTransactionJournal: journal.
-		soil checkpoint ]
+		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
 

@@ -365,12 +365,7 @@ Soil >> replayJournal: aSoilJournal [
 	journals := aSoilJournal 
 		transactionJournalsStartingAt: databaseVersion + 1
 		do: [:tj | self replayTransactionJournal: tj ].
-	self behaviorRegistry 
-		flush;
-		writeContentsToDisk.
-	self objectRepository 
-		flush;
-		writeContentsToDisk 
+	self writeEverythingToDisk 
 ]
 
 { #category : #journal }
