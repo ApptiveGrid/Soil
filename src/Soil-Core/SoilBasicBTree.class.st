@@ -100,6 +100,7 @@ SoilBasicBTree >> newRootPage [
 
 { #category : #'open/close' }
 SoilBasicBTree >> open [
+ 	self isOpen ifTrue: [ self error: 'Index already open' ].
 	self store open
 ]
 

@@ -63,6 +63,11 @@ SoilPagedIndexStore >> isCopyOnWrite [
 	^ false
 ]
 
+{ #category : #testing }
+SoilPagedIndexStore >> isOpen [
+	^ self subclassResponsibility
+]
+
 { #category : #accessing }
 SoilPagedIndexStore >> lastPageIndex [
 	^ self headerPage lastPageIndex

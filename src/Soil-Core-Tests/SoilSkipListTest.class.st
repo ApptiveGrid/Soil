@@ -274,6 +274,13 @@ SoilSkipListTest >> testIsEmpty [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testIsOpen [
+	self assert: index isOpen.
+	index close.
+	self deny: index isOpen
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testIteratorFindAndNext [
 	
 	| capacity iterator value |
