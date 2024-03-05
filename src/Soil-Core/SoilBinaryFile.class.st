@@ -47,6 +47,11 @@ SoilBinaryFile >> initializeStart [
 
 ]
 
+{ #category : #testing }
+SoilBinaryFile >> isOpen [
+	^stream isOpen
+]
+
 { #category : #locking }
 SoilBinaryFile >> lockAppendingFor: lockContext [
 	^ stream lockAppendingFor: lockContext 

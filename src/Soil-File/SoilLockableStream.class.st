@@ -62,6 +62,11 @@ SoilLockableStream >> initializePath: aStringOrFileReference [
 	lockRegistry := SoilFileLockRegistry forPath: aStringOrFileReference asFileReference 
 ]
 
+{ #category : #testing }
+SoilLockableStream >> isOpen [
+	^fileStream closed not
+]
+
 { #category : #locking }
 SoilLockableStream >> lockAppendingFor: lockContext [
 	^ self registerLock: (self lockClass from: 0 to: 0 context: lockContext)
