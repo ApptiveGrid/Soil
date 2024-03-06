@@ -91,6 +91,13 @@ SoilIndexIterator >> basicNextAssociation [
 	Error signal: 'shouldnt happen'
 ]
 
+{ #category : #removing }
+SoilIndexIterator >> basicRemoveKey: key [ 
+	^ self 
+		basicAt: key 
+		put: SoilObjectId removed
+]
+
 { #category : #private }
 SoilIndexIterator >> convertValue: anObject [ 
 	anObject ifNil: [ ^ nil ].
