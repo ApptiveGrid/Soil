@@ -115,14 +115,15 @@ Soil >> behaviorRegistry [
 { #category : #accessing }
 Soil >> checkpoint [ 
 	| entry checkpointLSN |
-	entry := SoilCheckpointEntry new
-		previousCheckpoint: self control lastCheckpoint.
-	entry commitIn: self.
-	"write the checkpoint entry in the journal and get 
-	the position of that entry in the file"
-	checkpointLSN := self journal writeEntry: entry.
-	"set the checkpoint position so it can be read back"
-	self control checkpoint: checkpointLSN.
+	semaphore critical: [  
+		entry := SoilCheckpointEntry new
+			previousCheckpoint: self control lastCheckpoint.
+		entry commitIn: self.
+		"write the checkpoint entry in the journal and get 
+		the position of that entry in the file"
+		checkpointLSN := self journal writeEntry: entry.
+		"set the checkpoint position so it can be read back"
+		self control checkpoint: checkpointLSN ].
 	^ entry
 ]
 
