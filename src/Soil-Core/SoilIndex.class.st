@@ -90,6 +90,11 @@ SoilIndex >> flushCachedPages [
 	store flushCachedPages
 ]
 
+{ #category : #testing }
+SoilIndex >> hasHeaderPage [
+	^ self subclassResponsibility
+]
+
 { #category : #accessing }
 SoilIndex >> headerPage [
 	^ self store headerPage
@@ -103,6 +108,11 @@ SoilIndex >> indexKey: aString [
 { #category : #testing }
 SoilIndex >> isEmpty [
 	^ self store headerPage isEmpty
+]
+
+{ #category : #testing }
+SoilIndex >> isOpen [
+	^ store isNotNil and: [ store isOpen ]
 ]
 
 { #category : #testing }

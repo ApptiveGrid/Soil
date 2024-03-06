@@ -84,6 +84,11 @@ SoilPagedFileIndexStore >> initializeHeaderPage [
 		pages at: page index put: page	]
 ]
 
+{ #category : #testing }
+SoilPagedFileIndexStore >> isOpen [
+	^stream isNotNil and: [ stream isOpen ]
+]
+
 { #category : #'open/close' }
 SoilPagedFileIndexStore >> open [
 	streamSemaphore critical: [  

@@ -111,6 +111,7 @@ SoilSkipList >> newPluggableRewriter [
 
 { #category : #'opening/closing' }
 SoilSkipList >> open [
+	self isOpen ifTrue: [ self error: 'Index already open' ].
 	self store open
 ]
 

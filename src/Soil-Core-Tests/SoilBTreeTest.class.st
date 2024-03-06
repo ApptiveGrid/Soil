@@ -221,6 +221,13 @@ SoilBTreeTest >> testIsEmpty [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testIsOpen [
+ 	self assert: index isOpen.
+ 	index close.
+ 	self deny: index isOpen
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testIteratorFindAndNext [
 	
 	| capacity iterator value |
