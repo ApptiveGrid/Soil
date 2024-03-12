@@ -472,7 +472,9 @@ SoilTransaction >> objectAt: anObjectId ifAbsent: aBlock [
 
 { #category : #api }
 SoilTransaction >> objectIdOf: anObject [ 
-	^ (objectMap at: anObject) objectId.
+	^ (anObject class = SoilObjectProxy)
+		ifTrue: [ anObject objectId ]
+		ifFalse: [ (objectMap at: anObject) objectId ].
 	
 ]
 
