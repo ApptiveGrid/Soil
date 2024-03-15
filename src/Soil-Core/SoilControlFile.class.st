@@ -209,3 +209,13 @@ SoilControlFile >> soil: anObject [
 
 	soil := anObject
 ]
+
+{ #category : #accessing }
+SoilControlFile >> updateDatabaseVersion: anInteger [
+	(self databaseVersion = anInteger) ifTrue: [ 
+		"when doing a database recovery it is possible that the version 
+		has been updated already. If the version on disk is the same as
+		the argument we just return and let it pass"
+		^ self ].
+	self databaseVersion: anInteger
+]
