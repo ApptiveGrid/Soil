@@ -75,7 +75,7 @@ SoilTest >> testChangePathToControl [
 	(self path / #control) moveTo: (self path / #settings).
 	soil := Soil path: self path.
 	soil open.
-	self assert: soil databaseVersion equals: 0
+	self assert: soil control databaseVersion equals: 0
 	 
 	
 ]

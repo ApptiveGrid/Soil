@@ -232,7 +232,7 @@ SoilTransaction >> buildWriteVersion [
 	locks add: (soil lockDatabaseVersionFor: self).
 	"Now the version is locked. We can read it again to have the real version and
 	increment"
-	^ soil databaseVersion + 1 
+	^ soil control databaseVersion + 1 
 ]
 
 { #category : #accessing }

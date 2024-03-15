@@ -66,7 +66,12 @@ SoilTransactionJournal >> asSortedJournal [
 
 { #category : #committing }
 SoilTransactionJournal >> commitIn: soil [ 
-	entries do: [ :each | each commitIn: soil ]
+	self commitIn: soil recovery: false 
+]
+
+{ #category : #committing }
+SoilTransactionJournal >> commitIn: soil recovery: aBoolean [
+	entries do: [ :each | each commitIn: soil recovery: aBoolean ]
 ]
 
 { #category : #committing }

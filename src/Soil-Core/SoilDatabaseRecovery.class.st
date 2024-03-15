@@ -36,7 +36,7 @@ SoilDatabaseRecovery >> readFragmentFile: aSoilJournalFragmentFile [
 			"transaction journals are written always completely so we can read until we 
 			discover a commit entry. "
 			self readTransactionJournal: transactionJournal from: aSoilJournalFragmentFile stream.
-			transactionJournal commitIn: soil ].
+			transactionJournal commitIn: soil recovery: true ].
 		"reading a checkpoint entry is unlikely. It should be possible only if there was an 
 		error after writing the checkpoint entry and before marking that position in the control
 		file. But it is possible it happens so we just need to complete it by updating the 
