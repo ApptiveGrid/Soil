@@ -222,7 +222,7 @@ SoilDatabaseJournalTest >> testReplicationToEmptyDatabase [
 		initializeFilesystem.
 	copy replayJournal: soil journal.
 	tx := copy newTransaction.
-	self assert: soil databaseVersion equals: copy databaseVersion.
+	self assert: soil control databaseVersion equals: copy control databaseVersion.
 	self assert: soil objectRepository metaSegment lastObjectIndex equals: copy objectRepository metaSegment lastObjectIndex.
 	self assert: soil objectRepository firstSegment lastObjectIndex equals: copy objectRepository firstSegment lastObjectIndex.
 	self assert: soil journal lastIndex equals: copy journal lastIndex
@@ -236,12 +236,12 @@ SoilDatabaseJournalTest >> testReplicationToNonEmptyDatabase [
 		destroy;
 		initializeFilesystem.
 	copy replayJournal: (soil journal copyFrom: 1 to: 3).
-	self assert: copy databaseVersion equals: 3.
+	self assert: copy control databaseVersion equals: 3.
 	self assert: copy objectRepository metaSegment lastObjectIndex equals: 5.
 	self assert: copy objectRepository firstSegment lastObjectIndex equals: 3.
 	copy replayJournal: soil journal.
 	self assert: soil journal lastIndex equals: copy journal lastIndex.
-	self assert: soil databaseVersion equals: copy databaseVersion.
+	self assert: soil control databaseVersion equals: copy control databaseVersion.
 	self assert: soil objectRepository metaSegment lastObjectIndex equals: copy objectRepository metaSegment lastObjectIndex.
 	self assert: soil objectRepository firstSegment lastObjectIndex equals: copy objectRepository firstSegment lastObjectIndex.
 	self assert: soil journal lastIndex equals: copy journal lastIndex.

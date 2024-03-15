@@ -20,7 +20,7 @@ SoilUpdateDatabaseVersion >> address [
 
 { #category : #committing }
 SoilUpdateDatabaseVersion >> commitIn: soil [ 
-	soil databaseVersion: databaseVersion  
+	soil control databaseVersion: databaseVersion  
 ]
 
 { #category : #accessing }

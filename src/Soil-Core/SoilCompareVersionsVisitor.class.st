@@ -17,7 +17,7 @@ SoilCompareVersionsVisitor >> initialize [
 SoilCompareVersionsVisitor >> print: aSoil [ 
 	soil := aSoil.
 	self visit: aSoil.
-	^ (version = aSoil databaseVersion) 
+	^ (version = aSoil control databaseVersion) 
 		ifTrue: [ 
 			'highest scanned version ', version printString, ' is the same as database version ' ]
 		ifFalse: [ 
@@ -28,7 +28,7 @@ SoilCompareVersionsVisitor >> print: aSoil [
 SoilCompareVersionsVisitor >> validate: aSoil [ 
 	soil := aSoil.
 	self visit: aSoil.
-	(version = aSoil databaseVersion) 
+	(version = aSoil control databaseVersion) 
 		ifFalse: [ 
 			Error signal: 'highest scanned version ', version printString, ' is not the same as database version ',aSoil databaseVersion printString ]
 ]

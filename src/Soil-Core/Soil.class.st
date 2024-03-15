@@ -148,16 +148,6 @@ Soil >> critical: aBlock [
 	semaphore critical: aBlock
 ]
 
-{ #category : #accessing }
-Soil >> databaseVersion [
-	^ control databaseVersion
-]
-
-{ #category : #accessing }
-Soil >> databaseVersion: anInteger [ 
-	control databaseVersion: anInteger
-]
-
 { #category : #'instance creation' }
 Soil >> defaultMaterializerClass [
 	^ SoilMaterializer
@@ -288,7 +278,7 @@ Soil >> newTransaction: aClass [
 	| txn |
 	txn := aClass new 
 		soil: self;
-		readVersion: self databaseVersion;
+		readVersion: self control databaseVersion;
 		start;
 		yourself.
 	notificationHandler transactionCreated: txn.
@@ -368,7 +358,7 @@ Soil >> renameClassNamed: oldName to: newName [
 { #category : #journal }
 Soil >> replayJournal: aSoilJournal [ 
 	| journals databaseVersion |
-	databaseVersion := self databaseVersion.
+	databaseVersion := self control databaseVersion.
 	journals := aSoilJournal 
 		transactionJournalsStartingAt: databaseVersion + 1
 		do: [:tj | self replayTransactionJournal: tj ].
@@ -378,7 +368,7 @@ Soil >> replayJournal: aSoilJournal [
 { #category : #journal }
 Soil >> replayTransactionJournal: aSoilTransactionJournal [
 	| databaseVersion |
-	databaseVersion := self databaseVersion.
+	databaseVersion := self control databaseVersion.
 	(aSoilTransactionJournal index > databaseVersion) ifTrue: [ 
 		aSoilTransactionJournal asSortedJournal commitIn: self.
 		self journal importTransactionJournal: aSoilTransactionJournal ]
