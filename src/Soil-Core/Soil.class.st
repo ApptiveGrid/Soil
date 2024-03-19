@@ -405,5 +405,8 @@ Soil >> writeEverythingToDisk [
 		writeContentsToDisk.
 	self objectRepository 
 		flush;
-		writeContentsToDisk 
+		writeContentsToDisk.
+	self control 
+		flush;
+		writeContentsToDisk 		
 ]
