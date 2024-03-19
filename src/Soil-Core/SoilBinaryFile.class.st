@@ -49,7 +49,7 @@ SoilBinaryFile >> initializeStart [
 
 { #category : #testing }
 SoilBinaryFile >> isOpen [
-	^stream isOpen
+	^stream notNil and: [stream isOpen]
 ]
 
 { #category : #locking }
@@ -59,6 +59,7 @@ SoilBinaryFile >> lockAppendingFor: lockContext [
 
 { #category : #'open/close' }
 SoilBinaryFile >> open [
+	self isOpen ifTrue: [ self error: 'File already open' ].
 	stream := self soil lockableStream initializePath: self path
 ]
 
