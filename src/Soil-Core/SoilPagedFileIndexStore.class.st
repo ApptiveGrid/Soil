@@ -91,14 +91,15 @@ SoilPagedFileIndexStore >> isOpen [
 
 { #category : #'open/close' }
 SoilPagedFileIndexStore >> open [
-	streamSemaphore critical: [  
-		self 
-			openStream ]
+	self isOpen ifTrue: [ self error: 'Index store already open' ].
+	self openStream
 ]
 
 { #category : #'open/close' }
 SoilPagedFileIndexStore >> openStream [
-	stream := SoilLockableStream path: index path.
+	streamSemaphore critical: [  
+		stream := SoilLockableStream path: index path
+	]
 ]
 
 { #category : #accessing }
