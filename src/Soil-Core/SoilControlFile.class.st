@@ -31,7 +31,8 @@ SoilControlFile >> applicationVersion: anInteger [
 			position: self applicationVersionPosition;
 			nextPutAll: (anInteger asByteArrayOfSize: self applicationVersionSize);
 			flush.
-		applicationVersion := anInteger ]
+		applicationVersion := anInteger.
+		self writeContentsToDisk ]
 ]
 
 { #category : #accessing }
@@ -51,7 +52,8 @@ SoilControlFile >> basicDatabaseVersion: anInteger [
 		self stream 
 			position: self databaseVersionPosition;
 			nextPutAll: (anInteger asByteArrayOfSize: self databaseVersionSize);
-			flush ]
+			flush.
+		self writeContentsToDisk ]
 ]
 
 { #category : #accessing }
