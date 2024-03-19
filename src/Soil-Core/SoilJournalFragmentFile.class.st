@@ -194,8 +194,9 @@ SoilJournalFragmentFile >> inspectionTransactionJournals [
 			evaluated: #committedAt)
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'open/close' }
 SoilJournalFragmentFile >> open [
+	self isOpen ifTrue: [ self error: 'File already open' ].
 	stream := SoilLockableStream path: path 
 ]
 
