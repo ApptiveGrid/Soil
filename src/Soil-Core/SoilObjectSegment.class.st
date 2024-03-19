@@ -233,6 +233,11 @@ SoilObjectSegment >> soil [
 	^ objectRepository soil
 ]
 
+{ #category : #accessing }
+SoilObjectSegment >> updateLastObjectIndex: anInteger [ 
+	^ indexFile updateLastObjectIndex: anInteger 
+]
+
 { #category : #validating }
 SoilObjectSegment >> validateLastObjectIndex: anInteger [ 
 	indexFile validateLastObjectIndex: anInteger
