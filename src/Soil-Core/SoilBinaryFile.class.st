@@ -22,6 +22,11 @@ SoilBinaryFile >> close [
 		stream close ]
 ]
 
+{ #category : #accessing }
+SoilBinaryFile >> flush [
+	stream flush 
+]
+
 { #category : #utilities }
 SoilBinaryFile >> headerSize [ 
 	^ self prefix size
