@@ -2,7 +2,7 @@
 
 [![CI matrix](https://github.com//ApptiveGrid/Soil/actions/workflows/build.yml/badge.svg)](https://github.com//ApptiveGrid/Soil/actions/workflows/build.yml)
 
-Soil is an object oriented database in [pharo](http://pharo.org). It is transaction based having ACID transactions. It has binary search capabilities with SkipList and BTree+ indexes. It aims to be a simple yet powerful database making it easy to develop with, easy to debug with ... 
+Soil is an object oriented database in [pharo](http://pharo.org). It is transaction based having ACID transactions. It has binary search capabilities with SkipList and BTree+ indexes. It aims to be a simple yet powerful database making it easy to develop with, easy to debug with, easy to inspect, ... 
 
 
 To read more please have a look at the [documentation](./docs/soil.md)
