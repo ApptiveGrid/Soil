@@ -38,7 +38,7 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction
 	self loadHistoryForBehaviorWithIndex: objectId index transaction: transaction.
 	chain := versions at: objectId index.
 	chain first isCurrent ifFalse: [ 
-		chain addFirst: ((SoilBehaviorDescription for: aSOBehaviorDescription objectClass) version: (aSOBehaviorDescription version + 1))].
+		chain addFirst: ((SoilBehaviorDescription for: aSOBehaviorDescription objectClass) version: (chain first version + 1))].
 	offset := chain detectIndex: [ :each | each matchesDescription: aSOBehaviorDescription ].
 	^ chain copyFrom: 1 to: offset
 ]
