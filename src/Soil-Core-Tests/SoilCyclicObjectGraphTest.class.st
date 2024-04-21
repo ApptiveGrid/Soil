@@ -66,7 +66,7 @@ SoilCyclicObjectGraphTest >> testCyclicGraph [
 
 	self
 		assert: ((txn root at: #o1) includes: (txn root at: #o2));
-		assert: (txn root at: #o2) isEmpty
+		assert: ((txn root at: #o2) includes: (txn root at: #o1))
 ]
 
 { #category : #tests }
