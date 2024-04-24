@@ -48,15 +48,30 @@ Soil class >> characterEncoding: aString [
 	SoilObjectCodec characterEncoding: aString
 ]
 
+{ #category : #'instance creation' }
+Soil class >> createOnPath: aStringOrFileReference [
+	^ (self path: aStringOrFileReference)
+		initializeFilesystem 
+]
+
 { #category : #accessing }
 Soil class >> databaseFormatVersion [ 
 	^ 1
 ]
 
 { #category : #'instance creation' }
-Soil class >> inMemory [ 
-	^ self new 
-		path: FileSystem memory root
+Soil class >> ensureOnPath: aStringOrFileReference [
+	| soil |
+	soil := self path: aStringOrFileReference.
+	^ soil isInitialized  
+		ifTrue: [ soil open ]
+		ifFalse: [ soil initializeFilesystem ] 
+]
+
+{ #category : #'instance creation' }
+Soil class >> openOnPath: aStringOrFileReference [
+	^ (self path: aStringOrFileReference)
+		open
 ]
 
 { #category : #'instance creation' }
@@ -181,7 +196,7 @@ Soil >> initialize [
 
 { #category : #initialization }
 Soil >> initializeFilesystem [
-	(path exists and: [ path hasChildren ]) 
+	self isInitialized 
 		ifTrue: [ SoilDatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
 	self path ensureCreateDirectory.
 	control := SoilControlFile new
@@ -216,6 +231,11 @@ Soil >> inspectionJournal [
 	<inspectorPresentationOrder: 2000 title: 'journal'>
 	
 	^ self journal inspectionContent
+]
+
+{ #category : #testing }
+Soil >> isInitialized [ 
+	^ path exists and: [ path hasChildren ]
 ]
 
 { #category : #testing }
