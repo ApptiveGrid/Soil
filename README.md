@@ -24,7 +24,14 @@ Note: For now, Windows is not supported. Contact us if you want to help!
 
 ## Current release
 
-We are working towards release 1 which should appear soon. When ready you will find them here: [releases](https://github.com/ApptiveGrid/Soil/releases)
+The newest release is [v1](https://github.com/ApptiveGrid/Soil/tree/v1) which you can load via
+
+```smalltalk
+Metacello new 
+	repository: 'github://ApptiveGrid/Soil:v1/src';
+	baseline: 'Soil';
+	load.
+```
 
 ### Development
 
