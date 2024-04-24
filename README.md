@@ -22,9 +22,9 @@ Note: For now, Windows is not supported. Contact us if you want to help!
 
 **caution** Soil is in an early stage meaning there are might be things missing. It is battle tested as it is the driving database behind [ApptiveGrid](http://www.apptivegrid.de) but you might have different requirements. If so, tell us!
 
-## Current release
+## Latest release
 
-The newest release is [v1](https://github.com/ApptiveGrid/Soil/tree/v1) which you can load via
+The latest release is [v1](https://github.com/ApptiveGrid/Soil/tree/v1) which you can load via
 
 ```smalltalk
 Metacello new 
@@ -32,6 +32,8 @@ Metacello new
 	baseline: 'Soil';
 	load.
 ```
+
+*note*: Releases in Soil are branches. Loading it with a release tag will get the hot fixes of that release. If you do not want this please use the commit hash as version instead
 
 ### Development
 
