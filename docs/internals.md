@@ -8,11 +8,11 @@ Flat view means that it record the name of the class and all instance variables 
 
 Soil operates on *names*, not *offsets*. This the BehavorDesription stores the names of all instance variables of the class itself and all superclasses. (the names that #allInstVarNames returns in Pharo).
 
-This deseign immediatly solves the problem of loading serialized objects after a change of the order of the invars or even after moving the ivars up and down the hierachy.
+This design immediately solves the problem of loading serialized objects after a change of the order of the ivars or even after moving the ivars up and down the hierachy.
 
-If instane variables are removed, the stored values is skipped. If you add new ivars, they are not touched when loading the old objects from disk, but stored with the next commit.
+If instance variables are removed, the stored values are skipped. If you add new ivars, they are not touched when loading the old objects from disk, but stored with the next commit.
 
-We do not (for now) have any support for renames. Soil sees these are a remove and a new variable, thus the value ist lost. See Issue https://github.com/ApptiveGrid/Soil/issues/103 for how this will be solved in the future.
+We do not (for now) have any support for renames. Soil sees these as a remove and a new variable, thus the value is lost. See Issue https://github.com/ApptiveGrid/Soil/issues/103 for how this will be solved in the future.
 
 # Support for code changes / refactoring: Class Renames
 
