@@ -38,9 +38,9 @@ There are conditions when we do not want to write the changes to disk. This e.g.
 txn abort
 ```
 
-does this. It aborts the transactions which means it removes all objects from its internal structure and marks the transaction invalid so it cannot be used further.
+does this. It aborts the transaction which means it removes all objects from its internal structure and marks the transaction invalid so it cannot be used further.
 
-*note* Aborting a transaction does not roll back the changes made to objects in memory. This is the duty of the application controlling the life cycle of that objects.
+*note* Aborting a transaction does not roll back the changes made to objects in memory. This is the duty of the application controlling the life cycle of these objects.
 
 ## commitAndContinue
 
@@ -56,7 +56,7 @@ will write the changes to disk but leaves a fully operable transaction that can 
 
 ## markDirty - write changes back to disk
 
-Soil has no support yet for detecting which objects have been in-memory. This might be a future addtition but for now if you change an object in-memory you have to tell soil that this object has changed. This can be done like this
+Soil has no support yet for detecting which objects have been in-memory. This might be a future addition but for now if you change an object in-memory you have to tell soil that this object has changed. This can be done like this
 
 ```
 txn markDirty: myObject
@@ -78,7 +78,7 @@ Soil can store an arbitrary object as database root (except full closures). This
 
 While this is a good feature it might be less good if the graph becomes huge. That would mean that on each transaction read the whole graph will be read and on all writes the whole graph would be written. This is often not wanted.
 
-Soil offers the possibilty to partition your model. Partitioning means that some references are cut and replaced with a surrogate reference. On accessing of the model this will load the graph until one of these surrogate references is detected and will return a proxy for the second graph instead. This way it is doable to make lots of of tiny graphs that are while being connected they will be loaded individually which results into just a few graphs being loaded. This way access for reading and writing is much faster.
+Soil offers the possibility to partition your model. Partitioning means that some references are cut and replaced with a surrogate reference. On accessing of the model this will load the graph until one of these surrogate references is detected and will return a proxy for the second graph instead. This way it is doable to make lots of of tiny graphs that while being connected will be loaded individually which results into just a few graphs being loaded. This way access for reading and writing is much faster.
 
 To partition a model you just need to call 
 
