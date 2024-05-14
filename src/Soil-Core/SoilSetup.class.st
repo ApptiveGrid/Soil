@@ -82,6 +82,11 @@ SoilSetup >> isFsyncEnabled [
 	^ fsyncEnabled 
 ]
 
+{ #category : #caching }
+SoilSetup >> maxFragmentFiles:  anInteger [
+	soil journal maxFragmentFiles: anInteger
+]
+
 { #category : #accessing }
 SoilSetup >> soil: aSoil [ 
 	soil := aSoil
