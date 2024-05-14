@@ -1,22 +1,23 @@
 Class {
-	#name : #SoilFileLockRegistryTest,
-	#superclass : #TestCase,
-	#category : #'Soil-File-Tests'
+	#name : 'SoilFileLockRegistryTest',
+	#superclass : 'TestCase',
+	#category : 'Soil-File-Tests',
+	#package : 'Soil-File-Tests'
 }
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilFileLockRegistryTest >> setUp [
 	super setUp.
 	SoilFileLockRegistry reset
 ]
 
-{ #category : #running }
+{ #category : 'running' }
 SoilFileLockRegistryTest >> tearDown [ 
 	super tearDown.
 	SoilFileLockRegistry reset
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testAcquireAndGarbageCollect [
 	| registry |
 	registry := SoilFileLockRegistry forPath: '/tmp/foo'.
@@ -29,7 +30,7 @@ SoilFileLockRegistryTest >> testAcquireAndGarbageCollect [
 	self assert: SoilFileLockRegistry numberOfRegistries equals: 0.
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testAcquireRegistry [ 
 	| registry |
 	registry := SoilFileLockRegistry forPath: '/tmp/foo'.
@@ -37,7 +38,7 @@ SoilFileLockRegistryTest >> testAcquireRegistry [
 	self assert: SoilFileLockRegistry numberOfRegistries equals: 1
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testCanonicalizePaths [
 	| registry registry2 |
 	registry := SoilFileLockRegistry forPath: '/tmp/foo'.
@@ -45,7 +46,7 @@ SoilFileLockRegistryTest >> testCanonicalizePaths [
 	self assert: registry == registry2
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testCanonicalizePathsTrailingSlash [
 	| registry registry2 |
 	registry := SoilFileLockRegistry forPath: '/tmp/foo'.
@@ -53,7 +54,7 @@ SoilFileLockRegistryTest >> testCanonicalizePathsTrailingSlash [
 	self assert: registry == registry2
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testLockBorderOverlapLowerBound [
 	| registry pOne pTwo |
 	pOne := Object new.
@@ -67,7 +68,7 @@ SoilFileLockRegistryTest >> testLockBorderOverlapLowerBound [
 		raise: SoilAlreadyLocked 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testLockBorderOverlapUpperBound [
 	| registry pOne pTwo |
 	pOne := Object new.
@@ -81,7 +82,7 @@ SoilFileLockRegistryTest >> testLockBorderOverlapUpperBound [
 		raise: SoilAlreadyLocked 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testLockSameRangeDifferentContext [
 	| registry pOne pTwo |
 	pOne := Object new.
@@ -95,7 +96,7 @@ SoilFileLockRegistryTest >> testLockSameRangeDifferentContext [
 		raise: SoilAlreadyLocked
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testLockSameRangeSameContext [
 	| registry pOne |
 	pOne := Object new.
@@ -108,7 +109,7 @@ SoilFileLockRegistryTest >> testLockSameRangeSameContext [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testLockSameRangeTwoProcesses [
 	| registry pOneFailed pTwoFailed |
 	registry := SoilFileLockRegistry forPath: '/tmp/foo'.
@@ -128,7 +129,7 @@ SoilFileLockRegistryTest >> testLockSameRangeTwoProcesses [
 	
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testTwoRegistries [
 	| registry registry2 |
 	registry := SoilFileLockRegistry forPath: '/tmp/foo'.
@@ -136,7 +137,7 @@ SoilFileLockRegistryTest >> testTwoRegistries [
 	self deny: registry == registry2
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testUnlockDifferentContext [
 	| registry pOne pTwo |
 	pOne := Object new.
@@ -151,7 +152,7 @@ SoilFileLockRegistryTest >> testUnlockDifferentContext [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testUnlockInvalidRange [
 	| registry pOne |
 	pOne := Object new.
@@ -165,7 +166,7 @@ SoilFileLockRegistryTest >> testUnlockInvalidRange [
 
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilFileLockRegistryTest >> testUnlockRangeSameContext [
 	| registry pOne |
 	pOne := Object new.

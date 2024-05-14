@@ -163,7 +163,7 @@ SoilLockableStream >> registerLock: lock [
 		lock lockInMemory: lockRegistry ].
 	
 	fileLocked ifTrue: [ 
-		lock lockOn: fileStream  ].
+		lock lockOn: self  ].
 	
 	^ locks add: lock
 	
@@ -172,7 +172,6 @@ SoilLockableStream >> registerLock: lock [
 { #category : #finalization }
 SoilLockableStream >> releaseAllLocks [
 	locks copy do: [ :lock | 
-		locks remove: lock.
 		lock release ].
 	locks := OrderedCollection new
 ]
@@ -195,7 +194,7 @@ SoilLockableStream >> unlockFrom: from to: to for: lockContext [
 		detect: [ :each | 
 			(each from = from) and: [ (each to = to) and: [ each context = lockContext ] ] ]
 		ifNone: [ NotFound signal: 'cannot find lock' ].
-	lock release.
+	fileStream wrappedStream unlockAt: from length: to - from. 
 	locks remove: lock
 	
 ]
