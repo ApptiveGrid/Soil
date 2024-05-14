@@ -1,20 +1,27 @@
 Class {
-	#name : #SoilLockableStreamTest,
-	#superclass : #TestCase,
+	#name : 'SoilLockableStreamTest',
+	#superclass : 'TestCase',
 	#instVars : [
 		'stream'
 	],
-	#category : #'Soil-File-Tests'
+	#category : 'Soil-File-Tests',
+	#package : 'Soil-File-Tests'
 }
 
-{ #category : #running }
+{ #category : 'running' }
+SoilLockableStreamTest >> setUp [ 
+	super setUp.
+	SoilFileLockRegistry reset 
+]
+
+{ #category : 'running' }
 SoilLockableStreamTest >> tearDown [ 
 	super tearDown.
 	stream close.
 	stream := nil
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilLockableStreamTest >> testMemoryLock [
 	| objA objB registry |
 	objA := Object new.
@@ -27,7 +34,7 @@ SoilLockableStreamTest >> testMemoryLock [
 	self assert: registry numberOfLocks equals: 1
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilLockableStreamTest >> testMemoryLockConflict [
 	| objA objB |
 	objA := Object new.
@@ -43,7 +50,7 @@ SoilLockableStreamTest >> testMemoryLockConflict [
 		ensure: [ stream releaseAllLocks ] .
 ]
 
-{ #category : #tests }
+{ #category : 'tests' }
 SoilLockableStreamTest >> testMemoryUnlock [
 	| objA objB |
 	objA := Object new.
