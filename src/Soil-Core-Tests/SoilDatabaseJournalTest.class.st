@@ -214,6 +214,13 @@ SoilDatabaseJournalTest >> testRecoverWithRemainingJournalAndBytes [
 ]
 
 { #category : #tests }
+SoilDatabaseJournalTest >> testRemoveFragmentFiles [
+	soil setup maxFragmentFiles: 5.
+	10 timesRepeat: [ soil journal cycleFragmentFile ].
+	self assert: soil journal sortedFiles size equals: 5	
+]
+
+{ #category : #tests }
 SoilDatabaseJournalTest >> testReplicationToEmptyDatabase [
 	| tx |
 	self fillDatabase. 

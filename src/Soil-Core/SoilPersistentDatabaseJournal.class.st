@@ -3,7 +3,8 @@ Class {
 	#superclass : #SoilDatabaseJournal,
 	#instVars : [
 		'semaphore',
-		'currentFragmentFile'
+		'currentFragmentFile',
+		'maxFragmentFiles'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -30,6 +31,7 @@ SoilPersistentDatabaseJournal >> appendEntry: aSoilNewCheckpointEntry [
 
 { #category : #private }
 SoilPersistentDatabaseJournal >> createFragmentFile: filename [
+	self removeFragmentFiles.
 	(self path / filename) ensureCreateFile.
 	^ (self openFragmentFile: filename)
 		initializeFilesystem;
@@ -99,7 +101,7 @@ SoilPersistentDatabaseJournal >> fragmentFileWritten: aSoilFragmentFile [
 
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> fragmentFiles [
-	^ self path files sorted reverse collect: [ :each | 
+	^ self sortedFiles collect: [ :each | 
 		(SoilJournalFragmentFile path: each)
 			databaseJournal: self;
 			yourself ]
@@ -146,6 +148,18 @@ SoilPersistentDatabaseJournal >> inspectionContent [
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> lastFileNumber [
 	^ self fileNumberFrom: self fragmentFiles first basename.
+]
+
+{ #category : #accessing }
+SoilPersistentDatabaseJournal >> maxFragmentFiles [
+
+	^ maxFragmentFiles
+]
+
+{ #category : #accessing }
+SoilPersistentDatabaseJournal >> maxFragmentFiles: anObject [
+
+	maxFragmentFiles := anObject
 ]
 
 { #category : #'instance creation' }
@@ -202,9 +216,22 @@ SoilPersistentDatabaseJournal >> recover [
 		recover 
 ]
 
+{ #category : #private }
+SoilPersistentDatabaseJournal >> removeFragmentFiles [
+	| files |
+	maxFragmentFiles ifNotNil: [ 
+		((files := self sortedFiles) size >= maxFragmentFiles) ifTrue: [ 
+			(files allButFirst: maxFragmentFiles - 1) do: #delete ] ]
+]
+
 { #category : #initialization }
 SoilPersistentDatabaseJournal >> resetFragmentFile [
 	currentFragmentFile := nil
+]
+
+{ #category : #accessing }
+SoilPersistentDatabaseJournal >> sortedFiles [
+	^ self path files sorted reverse
 ]
 
 { #category : #accessing }
