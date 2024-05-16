@@ -1,6 +1,6 @@
-Extension { #name : #HashedCollection }
+Extension { #name : 'HashedCollection' }
 
-{ #category : #'*Soil-Serializer' }
+{ #category : '*Soil-Serializer' }
 HashedCollection >> soilMaterialized: materialized [
 	super soilMaterialized: materialized.
 	"We have to re-hash, as the elements are newly de-serialized objects.

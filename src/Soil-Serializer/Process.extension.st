@@ -1,6 +1,6 @@
-Extension { #name : #Process }
+Extension { #name : 'Process' }
 
-{ #category : #'*Soil-Serializer' }
+{ #category : '*Soil-Serializer' }
 Process >> soilSerialize: serializer [
 	"Not stored, thus no registration needed"
 	serializer notSupportedError: self

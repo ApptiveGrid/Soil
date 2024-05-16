@@ -1,19 +1,21 @@
 Class {
-	#name : #SoilSerializer,
-	#superclass : #SoilBasicSerializer,
+	#name : 'SoilSerializer',
+	#superclass : 'SoilBasicSerializer',
 	#instVars : [
 		'clusterRoot'
 	],
-	#category : #'Soil-Serializer-Serializer/Materializer'
+	#category : 'Soil-Serializer-Serializer/Materializer',
+	#package : 'Soil-Serializer',
+	#tag : 'Serializer/Materializer'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 SoilSerializer class >> on: aStream [ 
 	^ self new 
 		stream: aStream 
 ]
 
-{ #category : #public }
+{ #category : 'public' }
 SoilSerializer class >> serializeToBytes: anObject [ 
 
 	^ (self on: ByteArray new writeStream) 
@@ -21,7 +23,7 @@ SoilSerializer class >> serializeToBytes: anObject [
 
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutArray: anArray [ 
 	self 
 		nextPutByte: TypeCodeArray;
@@ -30,14 +32,14 @@ SoilSerializer >> nextPutArray: anArray [
 		(anArray at: i) theNonSoilProxy soilSerialize: self ].
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutAssociation: anAssociation [ 
 	self nextPutByte: TypeCodeAssociation.
 	anAssociation key theNonSoilProxy soilSerialize: self.
 	anAssociation value theNonSoilProxy soilSerialize: self.
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutClass: aClass [ 
 
 	self 
@@ -45,7 +47,7 @@ SoilSerializer >> nextPutClass: aClass [
 		basicNextPutString: aClass name asString
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutCompiledBlock: aCompiledMethod [
 	
 	| bytecodesPlusTrailerSize |
@@ -68,7 +70,7 @@ SoilSerializer >> nextPutCompiledBlock: aCompiledMethod [
 
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutCompiledMethod: aCompiledMethod [
 
 	| bytecodesPlusTrailerSize |
@@ -88,7 +90,7 @@ SoilSerializer >> nextPutCompiledMethod: aCompiledMethod [
 	
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutDictionary: aDictionary [ 
 	self 
 		nextPutByte: TypeCodeDictionary;
@@ -98,14 +100,14 @@ SoilSerializer >> nextPutDictionary: aDictionary [
 		value theNonSoilProxy soilSerialize: self ]
 ]
 
-{ #category : #registry }
+{ #category : 'registry' }
 SoilSerializer >> nextPutExternalReference: anInteger [
 	self 
 		nextPutByte: TypeCodeExternalReference; 
 		nextPutLengthEncodedInteger: anInteger 
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutIdentityDictionary: anIdentityDictionary [ 
 	self 
 		nextPutByte: TypeCodeIdentityDictionary;
@@ -115,19 +117,19 @@ SoilSerializer >> nextPutIdentityDictionary: anIdentityDictionary [
 		value theNonSoilProxy soilSerialize: self ]
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutInternalReference: anInteger [ 
 	self 
 		nextPutByte: TypeCodeInternalReference; 
 		nextPutLengthEncodedInteger: anInteger 
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutObjectType [
 	self nextPutByte: TypeCodeObject 
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutOrderedCollection: aCollection [ 
 	self
 		nextPutByte: TypeCodeOrderedCollection;
@@ -135,7 +137,7 @@ SoilSerializer >> nextPutOrderedCollection: aCollection [
 	aCollection do: [:each | each theNonSoilProxy soilSerialize: self ].
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutPersistentDictionary: aPersistentDictionary [ 
 	self 
 		nextPutByte: TypeCodePersistentDictionary;
@@ -145,22 +147,22 @@ SoilSerializer >> nextPutPersistentDictionary: aPersistentDictionary [
 		value theNonSoilProxy soilSerialize: self ]
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutProcessorScheduler: aProcessorScheduler [ 
 	self nextPutByte: TypeCodeProcessScheduler 
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutSmalltalkImage: aCollection [ 
 	self nextPutByte: TypeCodeSmalltalkImage
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutSystemDictionary: aCollection [ 
 	self nextPutByte: TypeCodeSystemDictionary 
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> nextPutUUID: aUUID [
 	| uuidData |
 	uuidData := SystemVersion current major < 12 ifTrue: [ aUUID ] ifFalse: [ aUUID uuidData ].
@@ -170,17 +172,17 @@ SoilSerializer >> nextPutUUID: aUUID [
 		nextPutBytesFrom: uuidData
 ]
 
-{ #category : #writing }
+{ #category : 'writing' }
 SoilSerializer >> notSupportedError: anObject [ 
 	Error signal: 'serialization of class ', anObject class name asString , ' is not supported'
 ]
 
-{ #category : #registry }
+{ #category : 'registry' }
 SoilSerializer >> registerIndexId: aString [ 
 	externalObjectRegistry registerIndexId: aString
 ]
 
-{ #category : #registry }
+{ #category : 'registry' }
 SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 	| index externalIndex |
 	objectIdTable isEmpty ifTrue: [
@@ -211,7 +213,7 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 			aBlock value ]
 ]
 
-{ #category : #private }
+{ #category : 'private' }
 SoilSerializer >> serialize: anObject [
 	clusterRoot := anObject.
 	clusterRoot soilSerialize: self.
@@ -219,7 +221,7 @@ SoilSerializer >> serialize: anObject [
 	^ stream contents
 ]
 
-{ #category : #public }
+{ #category : 'public' }
 SoilSerializer >> serializeBehaviorDescriptionFor: anObject [
 	| index |
 	index := externalObjectRegistry indexOfBehaviorDescription: anObject class.
@@ -228,7 +230,7 @@ SoilSerializer >> serializeBehaviorDescriptionFor: anObject [
 	^ externalObjectRegistry behaviorDescriptionAt: index
 ]
 
-{ #category : #public }
+{ #category : 'public' }
 SoilSerializer >> serializeToBytes: anObject [ 
 
 	^ (self stream: ByteArray new writeStream) 
@@ -236,7 +238,7 @@ SoilSerializer >> serializeToBytes: anObject [
 
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilSerializer >> transaction [
 	^ transaction 
 ]

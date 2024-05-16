@@ -1,1 +1,1 @@
-Package { #name : #'Soil-Serializer' }
+Package { #name : 'Soil-Serializer' }

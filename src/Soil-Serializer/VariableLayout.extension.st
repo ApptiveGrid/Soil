@@ -1,6 +1,6 @@
-Extension { #name : #VariableLayout }
+Extension { #name : 'VariableLayout' }
 
-{ #category : #'*Soil-Serializer' }
+{ #category : '*Soil-Serializer' }
 VariableLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object basicSize |
 
@@ -16,7 +16,7 @@ VariableLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer 
 	^object soilMaterialized: materializer
 ]
 
-{ #category : #'*Soil-Serializer' }
+{ #category : '*Soil-Serializer' }
 VariableLayout >> soilBasicSerialize: anObject with: serializer [
 	| description basicSize|
 

@@ -1,29 +1,31 @@
 Class {
-	#name : #SoilPersistentDictionary,
-	#superclass : #Object,
+	#name : 'SoilPersistentDictionary',
+	#superclass : 'Object',
 	#instVars : [
 		'transaction',
 		'dict'
 	],
-	#category : #'Soil-Serializer-Base'
+	#category : 'Soil-Serializer-Base',
+	#package : 'Soil-Serializer',
+	#tag : 'Base'
 }
 
-{ #category : #'instance creation' }
+{ #category : 'instance creation' }
 SoilPersistentDictionary class >> new: size [
 	^self new
 ]
 
-{ #category : #materializing }
+{ #category : 'materializing' }
 SoilPersistentDictionary class >> soilMaterialize: materializer [
 	^ materializer nextPersistentDictionary: self
 ]
 
-{ #category : #accessing }
+{ #category : 'accessing' }
 SoilPersistentDictionary class >> soilTransientInstVars [
 	^#(transaction)
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> add: anAssociation [
 	| return |
 	transaction makeRoot: anAssociation value.
@@ -32,30 +34,30 @@ SoilPersistentDictionary >> add: anAssociation [
 	^return
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> anyOne [ 
 	^ dict anyOne
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> at: key [
 	^ dict at: key ifAbsent: [ 
 		KeyNotFound signal: ('cannot find key ', key printString,' in dict with keys: ', dict keys printString)  ]
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> at: key ifAbsent: aBlock [ 
 	^ dict at: key ifAbsent: aBlock
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> at: key ifAbsentPut: aBlock [
 	^ dict 
 		at: key 
 		ifAbsent: [ self at: key put: aBlock value ]
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> at: key put: value [
 	| return |
 	transaction ifNotNil: [:tr | tr makeRoot: value].
@@ -65,61 +67,61 @@ SoilPersistentDictionary >> at: key put: value [
 
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> collect: aBlock [ 
 	^ dict collect: aBlock
 ]
 
-{ #category : #enumerating }
+{ #category : 'enumerating' }
 SoilPersistentDictionary >> detect: detectBlock ifNone: noneBlock [ 
 	^ dict values
 		detect: detectBlock 
 		ifNone: noneBlock 
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> includesKey: key [
 	^dict includesKey: key
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilPersistentDictionary >> initialize [
 	dict := Dictionary new
 ]
 
-{ #category : #testing }
+{ #category : 'testing' }
 SoilPersistentDictionary >> isCollection [ 
 	^ true
 ]
 
-{ #category : #testing }
+{ #category : 'testing' }
 SoilPersistentDictionary >> isEmpty [
 	^ dict isEmpty
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> keys [
 	^ dict keys
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> keysAndValuesDo: aBlock [
 	^ dict keysAndValuesDo: aBlock
 ]
 
-{ #category : #copying }
+{ #category : 'copying' }
 SoilPersistentDictionary >> postCopy [ 
 	dict := dict copy
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> removeKey: key [
 	^ self 
 		removeKey: key 
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> removeKey: anObject ifAbsent: aBlock [
 	| return |
 	return := dict removeKey: anObject ifAbsent: aBlock.
@@ -127,18 +129,18 @@ SoilPersistentDictionary >> removeKey: anObject ifAbsent: aBlock [
 	^return
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> size [
 	^ dict size
 ]
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 SoilPersistentDictionary >> soilBasicSerialize: serializer [
 	self class == SoilPersistentDictionary ifFalse: [ ^ super soilBasicSerialize: serializer ].
 	serializer nextPutPersistentDictionary: self
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilPersistentDictionary >> soilClusterRootIn: aTransaction [
 	(transaction isNil or: [ transaction == aTransaction ])
 		ifFalse: [self error: 'Object is already persistent in another transaction'].
@@ -147,12 +149,12 @@ SoilPersistentDictionary >> soilClusterRootIn: aTransaction [
 
 ]
 
-{ #category : #serialization }
+{ #category : 'serialization' }
 SoilPersistentDictionary >> soilLoadedIn: aSOTransaction [
 	transaction := aSOTransaction 
 ]
 
-{ #category : #forwarded }
+{ #category : 'forwarded' }
 SoilPersistentDictionary >> values [
 	^ dict values
 ]

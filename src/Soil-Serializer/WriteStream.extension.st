@@ -1,6 +1,6 @@
-Extension { #name : #WriteStream }
+Extension { #name : 'WriteStream' }
 
-{ #category : #'*Soil-Serializer' }
+{ #category : '*Soil-Serializer' }
 WriteStream >> nextPutLengthEncodedInteger: anInteger [ 
 	"store length of integer encoded in a way that the presence of a
 	most significant bit indicates that the next byte is part of

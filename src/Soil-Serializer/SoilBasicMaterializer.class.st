@@ -1,13 +1,15 @@
 Class {
-	#name : #SoilBasicMaterializer,
-	#superclass : #SoilObjectCodec,
+	#name : 'SoilBasicMaterializer',
+	#superclass : 'SoilObjectCodec',
 	#instVars : [
 		'objects'
 	],
-	#category : #'Soil-Serializer-Serializer/Materializer'
+	#category : 'Soil-Serializer-Serializer/Materializer',
+	#package : 'Soil-Serializer',
+	#tag : 'Serializer/Materializer'
 }
 
-{ #category : #'reading - basic' }
+{ #category : 'reading - basic' }
 SoilBasicMaterializer >> basicNextString [
 	| string length |
 	string := String new: (length := self nextLengthEncodedInteger).
@@ -15,18 +17,18 @@ SoilBasicMaterializer >> basicNextString [
 	^ string
 ]
 
-{ #category : #initialization }
+{ #category : 'initialization' }
 SoilBasicMaterializer >> initialize [ 
 	super initialize.
 	objects := OrderedCollection new
 ]
 
-{ #category : #'reading - basic' }
+{ #category : 'reading - basic' }
 SoilBasicMaterializer >> nextByte [
 	^ stream next
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextByteArray: aClass [ 
 	| byteArray size |
 	byteArray := aClass new: (size := self nextLengthEncodedInteger).
@@ -35,13 +37,13 @@ SoilBasicMaterializer >> nextByteArray: aClass [
 	^ byteArray
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextCharacter [
 	"call to #register: not needed as character is an immediate Object"
 	^ Character value: self nextLengthEncodedInteger
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextDate: aClass [ 
 	| date |
 	date := aClass 
@@ -51,7 +53,7 @@ SoilBasicMaterializer >> nextDate: aClass [
 	^ date
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextFloat: aClass [ 
 	"We multiply the Boxedfloat by 1, this way we create a SmallFloat if possible"
 	| float |
@@ -64,7 +66,7 @@ SoilBasicMaterializer >> nextFloat: aClass [
 	^float
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextFraction: aClass [
 	| fraction |
 	fraction := aClass
@@ -74,7 +76,7 @@ SoilBasicMaterializer >> nextFraction: aClass [
 	^ fraction
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextLargeNegativeInteger [
 	| integer |
 	"Large Integers are normal objects (need to be registered), small integers are immediate"
@@ -83,7 +85,7 @@ SoilBasicMaterializer >> nextLargeNegativeInteger [
 	^integer
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextLargePositiveInteger [
 	| integer |
 	integer := self nextLengthEncodedInteger.
@@ -91,7 +93,7 @@ SoilBasicMaterializer >> nextLargePositiveInteger [
 	^integer
 ]
 
-{ #category : #'reading - basic' }
+{ #category : 'reading - basic' }
 SoilBasicMaterializer >> nextLengthEncodedInteger [
 	| value |
 	value := self nextByte.
@@ -99,7 +101,7 @@ SoilBasicMaterializer >> nextLengthEncodedInteger [
 	^ (self nextLengthEncodedInteger bitShift: 7) bitOr: (value bitAnd: 127)
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextScaledDecimal: aClass [
 
 	| scaledDecimal |
@@ -111,7 +113,7 @@ SoilBasicMaterializer >> nextScaledDecimal: aClass [
 	^ scaledDecimal
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextSoilObject [ 
 	| byte |
 
@@ -122,7 +124,7 @@ SoilBasicMaterializer >> nextSoilObject [
 			soilMaterialize: self 
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextString [
 	| string |
 	string := self basicNextString.
@@ -131,7 +133,7 @@ SoilBasicMaterializer >> nextString [
 
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextSymbol [
 	| bytes length |
 	length := self nextLengthEncodedInteger.
@@ -142,7 +144,7 @@ SoilBasicMaterializer >> nextSymbol [
 
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextTime [
 	| time |
 	time := Time fromSeconds: self nextLengthEncodedInteger.
@@ -150,7 +152,7 @@ SoilBasicMaterializer >> nextTime [
 	^ time
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextWideString [
 	| buf length wideString |
 	buf := ByteArray new: (length := self nextLengthEncodedInteger).
@@ -160,7 +162,7 @@ SoilBasicMaterializer >> nextWideString [
 	^ wideString
 ]
 
-{ #category : #reading }
+{ #category : 'reading' }
 SoilBasicMaterializer >> nextWideSymbol [
 	| buf len |
 	buf := ByteArray new: (len := self nextLengthEncodedInteger).

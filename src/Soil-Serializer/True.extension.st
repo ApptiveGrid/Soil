@@ -1,11 +1,11 @@
-Extension { #name : #True }
+Extension { #name : 'True' }
 
-{ #category : #'*Soil-Serializer' }
+{ #category : '*Soil-Serializer' }
 True >> soilBasicSerialize: serializer [
 	serializer nextPutTrue: self
 ]
 
-{ #category : #'*Soil-Serializer' }
+{ #category : '*Soil-Serializer' }
 True >> soilSerialize: serializer [
 	self soilBasicSerialize: serializer 
 ]

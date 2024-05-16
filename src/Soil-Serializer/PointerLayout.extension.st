@@ -1,6 +1,6 @@
-Extension { #name : #PointerLayout }
+Extension { #name : 'PointerLayout' }
 
-{ #category : #'*Soil-Serializer' }
+{ #category : '*Soil-Serializer' }
 PointerLayout >> soilBasicSerialize: anObject with: serializer [
 	| description |
 	description := serializer serializeBehaviorDescriptionFor: anObject.
@@ -8,7 +8,7 @@ PointerLayout >> soilBasicSerialize: anObject with: serializer [
 	description instVarNames do: [:ivarName | (anObject instVarNamed: ivarName) theNonSoilProxy soilSerialize: serializer ]
 ]
 
-{ #category : #'*Soil-Serializer' }
+{ #category : '*Soil-Serializer' }
 PointerLayout >> updateIvars: aBehaviorDescription with: materializer for: object [
 	
 	aBehaviorDescription isCurrent
