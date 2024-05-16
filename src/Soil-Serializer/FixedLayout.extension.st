@@ -1,6 +1,6 @@
-Extension { #name : 'FixedLayout' }
+Extension { #name : #FixedLayout }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 FixedLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object |
 	object := aBehaviorDescription basicNew.
@@ -10,7 +10,7 @@ FixedLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	^ object soilMaterialized: materializer
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 FixedLayout >> updateIvars: aBehaviorDescription with: materializer for: object [
 
 	"if we read an object that was stored with a variable layout, ignore the stored size"

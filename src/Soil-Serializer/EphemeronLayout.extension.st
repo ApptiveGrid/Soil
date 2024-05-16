@@ -1,6 +1,6 @@
-Extension { #name : 'EphemeronLayout' }
+Extension { #name : #EphemeronLayout }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 EphemeronLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object basicSize |
 
@@ -12,7 +12,7 @@ EphemeronLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer
 	^object soilMaterialized: materializer
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 EphemeronLayout >> soilBasicSerialize: anObject with: serializer [
 	| description basicSize|
 

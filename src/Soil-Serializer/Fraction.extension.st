@@ -1,6 +1,6 @@
-Extension { #name : 'Fraction' }
+Extension { #name : #Fraction }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 Fraction >> soilBasicSerialize: serializer [
 	(numerator isInteger and: [ numerator isImmediateObject]) 
 		ifFalse: [ ^ super soilBasicSerialize: serializer ].
@@ -11,7 +11,7 @@ Fraction >> soilBasicSerialize: serializer [
 	serializer nextPutFraction: self
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 Fraction class >> soilMaterialize: materializer [
 
 	^ materializer nextFraction: self

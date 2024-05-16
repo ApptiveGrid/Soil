@@ -1,6 +1,6 @@
-Extension { #name : 'WeakLayout' }
+Extension { #name : #WeakLayout }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 WeakLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object basicSize |
 
@@ -12,7 +12,7 @@ WeakLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	^ object soilMaterialized: materializer
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 WeakLayout >> soilBasicSerialize: anObject with: serializer [
 	| description basicSize|
 

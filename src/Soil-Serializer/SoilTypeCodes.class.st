@@ -1,6 +1,6 @@
 Class {
-	#name : 'SoilTypeCodes',
-	#superclass : 'SharedPool',
+	#name : #SoilTypeCodes,
+	#superclass : #SharedPool,
 	#classVars : [
 		'TypeCodeArray',
 		'TypeCodeAssociation',
@@ -36,18 +36,16 @@ Class {
 		'TypeCodeWideString',
 		'TypeCodeWideSymbol'
 	],
-	#category : 'Soil-Serializer-Serializer/Materializer',
-	#package : 'Soil-Serializer',
-	#tag : 'Serializer/Materializer'
+	#category : #'Soil-Serializer-Serializer/Materializer'
 }
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 SoilTypeCodes class >> initialize [ 
 	self initializeTypeCodes.
 	self initializeTypeCodeMapping 
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 SoilTypeCodes class >> initializeTypeCodeMapping [
 	<script>
 
@@ -88,7 +86,7 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 					
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 SoilTypeCodes class >> initializeTypeCodes [ 
 	<script>
 	TypeCodeObject := 1.

@@ -1,21 +1,19 @@
 Class {
-	#name : 'SoilStandaloneObjectRegistry',
-	#superclass : 'Object',
+	#name : #SoilStandaloneObjectRegistry,
+	#superclass : #Object,
 	#instVars : [
 		'classes'
 	],
-	#category : 'Soil-Serializer-Base',
-	#package : 'Soil-Serializer',
-	#tag : 'Base'
+	#category : #'Soil-Serializer-Base'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 SoilStandaloneObjectRegistry class >> readFrom: aStream [ 
 	^ self new 
 		readFrom: aStream
 ]
 
-{ #category : 'query' }
+{ #category : #query }
 SoilStandaloneObjectRegistry >> behaviorDescriptionAt: anInteger [ 
 	^ (SoilBehaviorDescription for: (classes at: anInteger))
 		objectId: (SoilObjectId segment: 0 index: anInteger); 
@@ -23,12 +21,12 @@ SoilStandaloneObjectRegistry >> behaviorDescriptionAt: anInteger [
 
 ]
 
-{ #category : 'query' }
+{ #category : #query }
 SoilStandaloneObjectRegistry >> behaviorDescriptionWithObjectId: aSoilObjectId andVersion: version [
 	^ SoilBehaviorDescription for: (classes at: aSoilObjectId index)
 ]
 
-{ #category : 'query' }
+{ #category : #query }
 SoilStandaloneObjectRegistry >> indexOfBehaviorDescription: aClass [ 
 	| index |
 	(classes includes: aClass) 
@@ -39,18 +37,18 @@ SoilStandaloneObjectRegistry >> indexOfBehaviorDescription: aClass [
 	^ index
 ]
 
-{ #category : 'query' }
+{ #category : #query }
 SoilStandaloneObjectRegistry >> indexOfExternalReference: aCollection [ 
 	^ 0
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 SoilStandaloneObjectRegistry >> initialize [ 
 	super initialize.
 	classes := OrderedCollection new
 ]
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 SoilStandaloneObjectRegistry >> readFrom: aStream [ 
 	| size |
 	size := aStream nextLengthEncodedInteger.
@@ -59,7 +57,7 @@ SoilStandaloneObjectRegistry >> readFrom: aStream [
 		 classes add: (Smalltalk globals at: (aStream next: (aStream nextLengthEncodedInteger)) asString  asSymbol) ]
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilStandaloneObjectRegistry >> writeOn: aStream [ 
 	aStream nextPutLengthEncodedInteger: classes size.
 	classes do: [ :cls |

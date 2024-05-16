@@ -1,6 +1,6 @@
-Extension { #name : 'WordLayout' }
+Extension { #name : #WordLayout }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 WordLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	| object basicSize |
 	object := aBehaviorDescription basicNew: (basicSize := materializer nextLengthEncodedInteger).
@@ -10,7 +10,7 @@ WordLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	^object soilMaterialized: materializer
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 WordLayout >> soilBasicSerialize: anObject with: serializer [
 	| description basicSize |
 

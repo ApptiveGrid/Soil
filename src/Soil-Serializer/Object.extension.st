@@ -1,12 +1,12 @@
-Extension { #name : 'Object' }
+Extension { #name : #Object }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 Object >> soilBasicSerialize: serializer [
 	"Delegate serialization to the class layout"
 	self class classLayout soilBasicSerialize: self with: serializer
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 Object >> soilBasicSerializeWithRegistry: aRegistry [
 	^ ByteArray streamContents: [:stream |
 		SoilSerializer new  
@@ -15,33 +15,33 @@ Object >> soilBasicSerializeWithRegistry: aRegistry [
 			serialize: self ]
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 Object >> soilLoadedIn: aTransaction [ 
 
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 Object >> soilMaterialize: materializer [
 	^ self
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 Object >> soilMaterialized: materializer [
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 Object class >> soilPersistentInstVars [
 	^ self allInstVarNames difference: self soilTransientInstVars 
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 Object >> soilSerialize [
 	^ ByteArray streamContents: [ :stream |
 		self soilSerializeOn: stream ]
 	
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 Object >> soilSerialize: aSoilSerializer [ 
 	aSoilSerializer 
 		registerObject: self 
@@ -49,7 +49,7 @@ Object >> soilSerialize: aSoilSerializer [
 	
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 Object >> soilSerializeOn: aStream [ 
 	| registry bytes |
 	registry := SoilStandaloneObjectRegistry new.

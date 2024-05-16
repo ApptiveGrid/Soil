@@ -1,12 +1,12 @@
-Extension { #name : 'WideString' }
+Extension { #name : #WideString }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 WideString >> soilBasicSerialize: serializer [
 	
 	serializer nextPutWideString: self
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 WideString class >> soilMaterialize: materializer [
 
 	^ materializer nextWideString

@@ -1,11 +1,11 @@
-Extension { #name : 'CompiledBlock' }
+Extension { #name : #CompiledBlock }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 CompiledBlock >> soilBasicSerialize: serializer [
 	serializer nextPutCompiledBlock: self
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 CompiledBlock class >> soilMaterialize: materializer [ 
 	^ materializer nextCompiledBlock: self
 ]

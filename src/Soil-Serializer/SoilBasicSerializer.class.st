@@ -1,40 +1,38 @@
 Class {
-	#name : 'SoilBasicSerializer',
-	#superclass : 'SoilObjectCodec',
+	#name : #SoilBasicSerializer,
+	#superclass : #SoilObjectCodec,
 	#instVars : [
 		'objectIdTable'
 	],
-	#category : 'Soil-Serializer-Serializer/Materializer',
-	#package : 'Soil-Serializer',
-	#tag : 'Serializer/Materializer'
+	#category : #'Soil-Serializer-Serializer/Materializer'
 }
 
-{ #category : 'writing - basic' }
+{ #category : #'writing - basic' }
 SoilBasicSerializer >> basicNextPutString: aString [ 
 	self
 		nextPutLengthEncodedInteger: aString size;
 		nextPutBytesFrom: aString
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> basicNextPutSymbol: aSymbol [ 
 	self
 		nextPutLengthEncodedInteger: aSymbol size;
 		nextPutBytesFrom: aSymbol
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 SoilBasicSerializer >> initialize [ 
 	super initialize.
 	objectIdTable := SoilObjectTable new
 ]
 
-{ #category : 'writing - basic' }
+{ #category : #'writing - basic' }
 SoilBasicSerializer >> nextPutByte: anInteger [ 
 	stream nextPut: anInteger
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutByteArray: aByteArray [
 	self 
 		nextPutByte: TypeCodeByteArray; 
@@ -42,19 +40,19 @@ SoilBasicSerializer >> nextPutByteArray: aByteArray [
 		nextPutBytesFrom: aByteArray
 ]
 
-{ #category : 'writing - basic' }
+{ #category : #'writing - basic' }
 SoilBasicSerializer >> nextPutBytesFrom: aByteArray [
 	stream nextBytesPutAll: aByteArray 
 
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutCharacter: aCharacter [
 	self nextPutByte: TypeCodeCharacter.
 	self nextPutLengthEncodedInteger: aCharacter asInteger
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutDate: aDate [ 
 	self 
 		nextPutByte: TypeCodeDate; 
@@ -62,12 +60,12 @@ SoilBasicSerializer >> nextPutDate: aDate [
 		nextPutInteger: ((aDate offset hours * 60) + aDate offset minutes)
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutFalse: aBoolean [ 
 	self nextPutByte: TypeCodeFalse 
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutFloat: aFloat [ 
 	self
 		nextPutByte: TypeCodeFloat;
@@ -75,7 +73,7 @@ SoilBasicSerializer >> nextPutFloat: aFloat [
 		nextPutLengthEncodedInteger: (aFloat at: 2)
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutFraction: aNumber [
 	"we know that numerator and denominator are SmallIntegers"
 	self
@@ -84,28 +82,28 @@ SoilBasicSerializer >> nextPutFraction: aNumber [
 		nextPutLengthEncodedInteger: aNumber denominator
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutInteger: anInteger [ 
 	(anInteger < 0)
 		ifTrue: [ self nextPutLargeNegativeInteger: anInteger ] 
 		ifFalse: [ self nextPutLargePositiveInteger: anInteger ]
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutLargeNegativeInteger: anInteger [ 
 	self 
 		nextPutByte: TypeCodeNegativeInteger;
 		nextPutLengthEncodedInteger: 0 - anInteger
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutLargePositiveInteger: anInteger [ 
 	self 
 		nextPutByte: TypeCodePositiveInteger;
 		nextPutLengthEncodedInteger: anInteger
 ]
 
-{ #category : 'writing - basic' }
+{ #category : #'writing - basic' }
 SoilBasicSerializer >> nextPutLengthEncodedInteger: anInteger [ 
 	"store length of integer encoded in a way that the presence of a
 	most significant bit indicates that the next byte is part of
@@ -113,12 +111,12 @@ SoilBasicSerializer >> nextPutLengthEncodedInteger: anInteger [
 	stream nextPutLengthEncodedInteger: anInteger 
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutNil: anUndefinedObject [ 
 	self nextPutByte: TypeCodeUndefined 
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutScaledDecimal: aNumber [
 	"we know that numerator, denominator and scale are SmallIntegers"
 	self
@@ -128,33 +126,33 @@ SoilBasicSerializer >> nextPutScaledDecimal: aNumber [
 		nextPutLengthEncodedInteger: aNumber scale 
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutString: aString [ 
 	self
 		nextPutByte: TypeCodeString;
 		basicNextPutString: aString
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutSymbol: aSymbol [ 
 	self
 		nextPutByte: TypeCodeSymbol;
 		basicNextPutSymbol: aSymbol
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutTime: aTime [ 
 	self
 		nextPutByte: TypeCodeTime;
 		nextPutLengthEncodedInteger: aTime asSeconds
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutTrue: aBoolean [ 
 	self nextPutByte: TypeCodeTrue 
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutWideString: aWideString [ 
 	| buf |
 	buf := self class encodeString: aWideString.
@@ -164,7 +162,7 @@ SoilBasicSerializer >> nextPutWideString: aWideString [
 		nextPutBytesFrom: buf
 ]
 
-{ #category : 'writing' }
+{ #category : #writing }
 SoilBasicSerializer >> nextPutWideSymbol: aSymbol [
 	| buf |
 	buf := self class encodeString: aSymbol.

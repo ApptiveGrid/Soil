@@ -1,6 +1,6 @@
-Extension { #name : 'ScaledDecimal' }
+Extension { #name : #ScaledDecimal }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 ScaledDecimal >> soilBasicSerialize: serializer [
 	(numerator isInteger and: [ numerator isImmediateObject]) 
 		ifFalse: [ ^ super soilBasicSerialize: serializer ].
@@ -13,7 +13,7 @@ ScaledDecimal >> soilBasicSerialize: serializer [
 	serializer nextPutScaledDecimal: self
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 ScaledDecimal class >> soilMaterialize: materializer [
 
 	^ materializer nextScaledDecimal: self

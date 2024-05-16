@@ -1,6 +1,6 @@
-Extension { #name : 'ReadStream' }
+Extension { #name : #ReadStream }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 ReadStream >> nextLengthEncodedInteger [
 	| value |
 	value := self next.

@@ -1,11 +1,11 @@
-Extension { #name : 'String' }
+Extension { #name : #String }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 String >> soilBasicSerialize: serializer [
 	serializer nextPutString: self
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 String class >> soilMaterialize: materializer [
 
 	^ materializer nextString

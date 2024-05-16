@@ -1,6 +1,6 @@
-Extension { #name : 'ZnBufferedReadWriteStream' }
+Extension { #name : #ZnBufferedReadWriteStream }
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 ZnBufferedReadWriteStream >> nextLengthEncodedInteger [
 	| value |
 	value := self next.
@@ -8,7 +8,7 @@ ZnBufferedReadWriteStream >> nextLengthEncodedInteger [
 	^ (self nextLengthEncodedInteger bitShift: 7) bitOr: (value bitAnd: 127)
 ]
 
-{ #category : '*Soil-Serializer' }
+{ #category : #'*Soil-Serializer' }
 ZnBufferedReadWriteStream >> nextPutLengthEncodedInteger: anInteger [ 
 	"store length of integer encoded in a way that the presence of a
 	most significant bit indicates that the next byte is part of

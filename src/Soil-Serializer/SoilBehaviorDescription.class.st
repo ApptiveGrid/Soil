@@ -9,8 +9,8 @@ Together, this allows us to read data from disk even though the code was changed
 
 "
 Class {
-	#name : 'SoilBehaviorDescription',
-	#superclass : 'Object',
+	#name : #SoilBehaviorDescription,
+	#superclass : #Object,
 	#instVars : [
 		'instVarNames',
 		'behaviorIdentifier',
@@ -18,65 +18,63 @@ Class {
 		'classLayout',
 		'version'
 	],
-	#category : 'Soil-Serializer-Base',
-	#package : 'Soil-Serializer',
-	#tag : 'Base'
+	#category : #'Soil-Serializer-Base'
 }
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 SoilBehaviorDescription class >> for: aClass [ 
 	^ self new 
 		initializeFromBehavior: aClass
 ]
 
-{ #category : 'instance creation' }
+{ #category : #'instance creation' }
 SoilBehaviorDescription class >> isSoilClusterRoot [ 
 	^ true
 ]
 
-{ #category : 'combining' }
+{ #category : #combining }
 SoilBehaviorDescription class >> meta [
 	^ (self for: self) 
 		beFirstVersion;
 		objectId: self metaId
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 SoilBehaviorDescription class >> soilTransientInstVars [ 
 	^ #( objectId ) 
 ]
 
-{ #category : 'converting' }
+{ #category : #converting }
 SoilBehaviorDescription >> asSoilObjectId [
 	^ objectId 
 ]
 
-{ #category : 'object creation' }
+{ #category : #'object creation' }
 SoilBehaviorDescription >> basicNew [
 	^ self compatibilityCheckObject: self objectClass basicNew
 ]
 
-{ #category : 'object creation' }
+{ #category : #'object creation' }
 SoilBehaviorDescription >> basicNew: size [
 	^ self compatibilityCheckObject: (self objectClass basicNew: size)
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 SoilBehaviorDescription >> beFirstVersion [
 	version := 1
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 SoilBehaviorDescription >> behaviorIdentifier [ 
 	^ behaviorIdentifier 
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 SoilBehaviorDescription >> classLayout [
 	^ classLayout
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 SoilBehaviorDescription >> compatibilityCheck: aClassLayout [
 
 	"we can read if the layout is the same"
@@ -88,19 +86,19 @@ SoilBehaviorDescription >> compatibilityCheck: aClassLayout [
 	SoilLayoutMigrationError signal: 'Incompatible layout detected: trying to read a ', classLayout , ' current code uses ', aClassLayout class name asString
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 SoilBehaviorDescription >> compatibilityCheckObject: anObject [
 
 	self compatibilityCheck: anObject class classLayout.
 	^anObject
 ]
 
-{ #category : 'api' }
+{ #category : #api }
 SoilBehaviorDescription >> incrementVersion [ 
 	version := version + 1
 ]
 
-{ #category : 'initialization' }
+{ #category : #initialization }
 SoilBehaviorDescription >> initializeFromBehavior: aClass [
 	behaviorIdentifier := aClass soilBehaviorIdentifier.
 	"we record only the persistent ivar names, in order"
@@ -109,13 +107,13 @@ SoilBehaviorDescription >> initializeFromBehavior: aClass [
 	classLayout := aClass classLayout class name
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 SoilBehaviorDescription >> instVarNames [
 
 	^ instVarNames
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 SoilBehaviorDescription >> isCurrent [
 	^ self isMeta
 		ifTrue: [
@@ -128,17 +126,17 @@ SoilBehaviorDescription >> isCurrent [
 			classLayout == currentClass classLayout class name and: [ self matchesBehavior: currentClass ] ]
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 SoilBehaviorDescription >> isFixedLayout [
 	^ classLayout == #FixedLayout
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 SoilBehaviorDescription >> isMeta [
 	^ behaviorIdentifier = self class name
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 SoilBehaviorDescription >> isVariableLayout [
 	"WeakLayout and EphemeronLayout answer implement isVariable, too"
 
@@ -146,49 +144,49 @@ SoilBehaviorDescription >> isVariableLayout [
 		  classLayout == #WeakLayout or: [ classLayout == #EphemeronLayout ] ]
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 SoilBehaviorDescription >> matchesBehavior: aBehavior [
 	^ self matchesDescription: (self class for: aBehavior)
 ]
 
-{ #category : 'testing' }
+{ #category : #testing }
 SoilBehaviorDescription >> matchesDescription: description [
 	(behaviorIdentifier = description behaviorIdentifier) ifFalse: [ ^ false ].
 	(instVarNames = description instVarNames) ifFalse: [ ^ false ].
 	^ true
 ]
 
-{ #category : 'object creation' }
+{ #category : #'object creation' }
 SoilBehaviorDescription >> newObjectWith: aSerializer [
 	^ self objectClass classLayout soilBasicMaterialize: self with: aSerializer
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 SoilBehaviorDescription >> objectClass [
 	^ Smalltalk at: behaviorIdentifier asSymbol
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 SoilBehaviorDescription >> objectId [
 	^ objectId
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 SoilBehaviorDescription >> objectId: aSOObjectId [
 	objectId := aSOObjectId
 ]
 
-{ #category : 'printing' }
+{ #category : #printing }
 SoilBehaviorDescription >> printOn: aStream [ 
 	aStream << 'behavior: ' << behaviorIdentifier asString
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 SoilBehaviorDescription >> version [
 	^ version
 ]
 
-{ #category : 'accessing' }
+{ #category : #accessing }
 SoilBehaviorDescription >> version: anObject [
 
 	version := anObject
