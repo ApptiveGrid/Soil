@@ -212,7 +212,7 @@ SoilMaterializer >> nextCompiledMethod12: aClass [
 SoilMaterializer >> nextCompiledMethod: aClass [
 
  	"API changed from version 12 on"
- 	^ SystemVersion current major < 12 
+ 	^ SystemVersion current major < 12
 		ifTrue: [self nextCompiledMethod11: aClass]
 		ifFalse: [self nextCompiledMethod12: aClass]
 ]
