@@ -240,7 +240,7 @@ SoilPersistentDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock
 	fragmentFiles := self fragmentFiles.
 	fileIndex := fragmentFiles 
 		detectIndex: [ :fragment | fragment firstTransactionId <= index  ]
-		ifNone: [ self halt ].
+		ifNone: [ self error: 'fileIndex not found, should not happen' ].
 	(fragmentFiles copyFrom: fileIndex to: fragmentFiles size) do: [ :fragmentFile |
 		fragmentFile transactionJournals do: [ :transactionJournal |
 			aBlock value: transactionJournal ] ].
