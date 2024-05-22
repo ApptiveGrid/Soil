@@ -42,7 +42,7 @@ SoilTransactionJournal >> anyEntrySatisfy: aBlock [
 
 { #category : #converting }
 SoilTransactionJournal >> asSortedJournal [
-| first last middle sorted |
+	| first last middle sorted |
 	"Current treatment of new values keeps values in a dictionary loosing order. This 
 	helper method sorts the dictionary keys for index access in a way that the appending
 	page case can be used"
@@ -58,7 +58,6 @@ SoilTransactionJournal >> asSortedJournal [
 			middle add: entry ] ].
 	middle := middle sorted: [ :a :b | a key < b key ].
 	sorted := first, middle, last.
-	(sorted size = entries size) ifFalse: [ self halt ].
 	^ self copy 
 		entries: sorted;
 		yourself

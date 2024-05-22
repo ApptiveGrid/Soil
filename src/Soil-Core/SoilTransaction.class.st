@@ -135,7 +135,6 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 				ifNotNil: [ :object | object objectId: objectId ]
 				ifNil: [ Error signal: ('could not find object with ', objectId asString, ' for class ', aClass name, ' in transaction ', self printString) ] ].
 		"the description in the database might not be current, if not, we create a new one later"
-		(behaviorDescription behaviorIdentifier  = SoilBehaviorDescription) ifTrue: [ self halt. ]. 
 		behaviorDescription isCurrent 
 			ifTrue: [ ^ behaviorDescription ] ].
 			
