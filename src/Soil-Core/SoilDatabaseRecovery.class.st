@@ -6,7 +6,7 @@ Class {
 		'journal',
 		'lsn'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Journal'
 }
 
 { #category : #accessing }
