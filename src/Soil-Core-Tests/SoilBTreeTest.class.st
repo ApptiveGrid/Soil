@@ -512,8 +512,9 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
 	
 	
-	entries do: [:entry|
-		index removeKey: entry.
+	entries do: [:entry| |removed|
+		removed := index removeKey: entry.
+		self assert: removed key equals: entry.
 		remainingEntries remove: entry.
 		"check that all remaining entries can be found"	
 		remainingEntries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
@@ -528,11 +529,13 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 { #category : #tests }
 SoilBTreeTest >> testRemoveKey [
 
-	| capacity |
+	| capacity removed |
 	capacity := index headerPage itemCapacity.
 	1 to: capacity do: [ :n | index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	
-	index removeKey: 20.
+	removed := index removeKey: 20.
+	self assert: removed value equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: removed key equals: 20.
 	
 	self assert: (index at: 1) equals: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: (index at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
