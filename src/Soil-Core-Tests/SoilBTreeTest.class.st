@@ -492,6 +492,40 @@ SoilBTreeTest >> testRemoveFromIndex [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testRemoveFromIndexAll [
+	| entries remainingEntries |
+	"We test that removing an entry will update the index"
+	index := SoilBTree new 
+		path: 'sunit-btree';
+		destroy;
+		initializeFilesystem;
+		initializeHeaderPage;
+		keySize: 512;
+		valueSize: 512.
+	
+	entries :=  #(104 247 56 281 61 286 66 337 308 1 400 272 347 335 45 62 207 7 123 140).
+	remainingEntries := entries asOrderedCollection.
+	
+	entries do: [:toAdd |
+		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	
+	entries do: [:entry|
+		index removeKey: entry.
+		remainingEntries remove: entry.
+		"check that all remaining entries can be found"	
+		remainingEntries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+		 ].
+	self assert: index isEmpty.
+	"and add back"
+	entries do: [:toAdd |
+		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]]
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testRemoveKey [
 
 	| capacity |

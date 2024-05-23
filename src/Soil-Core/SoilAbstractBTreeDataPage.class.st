@@ -91,6 +91,12 @@ SoilAbstractBTreeDataPage >> readFrom: aStream [
 	next := (aStream next: self pointerSize) asInteger
 ]
 
+{ #category : #removing }
+SoilAbstractBTreeDataPage >> remove: aKey for: aBTree [
+	"remove and return the item"
+	^ self itemRemoveAt: aKey ifAbsent: nil
+]
+
 { #category : #accessing }
 SoilAbstractBTreeDataPage >> valueSize [ 
 	^ valueSize
