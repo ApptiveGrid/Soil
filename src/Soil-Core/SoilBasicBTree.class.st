@@ -25,6 +25,11 @@ SoilBasicBTree >> asCopyOnWrite [
 ]
 
 { #category : #accessing }
+SoilBasicBTree >> dataPages [
+	^ (self pages reject: [ :page | page isIndexPage ]) asArray
+]
+
+{ #category : #accessing }
 SoilBasicBTree >> flush [
 	self store flush
 ]
@@ -32,6 +37,11 @@ SoilBasicBTree >> flush [
 { #category : #testing }
 SoilBasicBTree >> hasHeaderPage [
 	^ store hasHeaderPage 
+]
+
+{ #category : #accessing }
+SoilBasicBTree >> indexPages [
+	^ (self pages select: [ :page | page isIndexPage ]) asArray
 ]
 
 { #category : #initialization }
@@ -107,6 +117,13 @@ SoilBasicBTree >> open [
 { #category : #initialization }
 SoilBasicBTree >> pageClass [
 	^ SoilBTreeDataPage
+]
+
+{ #category : #removing }
+SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
+	| return |
+	return := self rootPage remove: key for: self.
+	^ return ifNil: [aBlock value]
 ]
 
 { #category : #accessing }

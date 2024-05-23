@@ -49,6 +49,12 @@ SoilIndexItemsPage >> firstItem [
 ]
 
 { #category : #testing }
+SoilIndexItemsPage >> hasKey: aKey [
+
+	^ items anySatisfy: [ :each | each key = aKey ]
+]
+
+{ #category : #testing }
 SoilIndexItemsPage >> hasRoom [
 	| used itemSize |
 	itemSize := self keySize + self valueSize.
@@ -77,6 +83,11 @@ SoilIndexItemsPage >> initialize [
 { #category : #testing }
 SoilIndexItemsPage >> isEmpty [
 	^ items isEmpty 
+]
+
+{ #category : #testing }
+SoilIndexItemsPage >> isNotEmpty [
+	^ items isNotEmpty
 ]
 
 { #category : #testing }
