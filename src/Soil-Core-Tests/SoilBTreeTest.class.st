@@ -515,6 +515,7 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 	entries do: [:entry| |removed|
 		removed := index removeKey: entry.
 		self assert: removed key equals: entry.
+		self assert: removed value equals: #[ 1 2 3 4 5 6 7 8 ].
 		remainingEntries remove: entry.
 		"check that all remaining entries can be found"	
 		remainingEntries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].

@@ -102,7 +102,7 @@ SoilBTreeIndexPage >> remove: aKey for: aBTree [
 	(self hasKey: aKey) ifTrue: [
 				(ret notNil and: [page isNotEmpty])
 					ifTrue: [ item key: page items first key]
-				   ifFalse: [ret := self itemRemoveAt: aKey]].
+				   ifFalse: [self itemRemoveAt: aKey]].
 	^ ret
 ]
 
