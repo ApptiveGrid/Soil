@@ -80,6 +80,7 @@ SoilBasicBTree >> newIndexPage [
 	^ SoilBTreeIndexPage new 
 		keySize: self keySize;
 		pageSize: self pageSize;
+		index: self store nextPageIndex;
 		yourself
 ]
 
@@ -87,7 +88,6 @@ SoilBasicBTree >> newIndexPage [
 SoilBasicBTree >> newIndexPageFromRoot: rootIndexPage [
 	| newPage |
 	newPage := self newIndexPage.
-	newPage index: self store nextPageIndex.
 	self store pageAt: newPage index put: newPage.
 	"now move over all items"
 	newPage setItems: rootIndexPage items.
@@ -135,7 +135,6 @@ SoilBasicBTree >> rootPage [
 SoilBasicBTree >> splitIndexPage: page [ 
 	| newPage |
 	newPage := page split: self newIndexPage.
-	newPage index: self store nextPageIndex.
 	self store pageAt: newPage index put: newPage.
 	^ newPage 
 ]
