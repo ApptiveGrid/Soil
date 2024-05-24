@@ -23,12 +23,11 @@ SoilSkipListIterator >> atLevel: key put: anObject [
 { #category : #accessing }
 SoilSkipListIterator >> basicAt: indexKey put: anObject [
 
-	|itemIndex |
 	self findPageFor: indexKey.
-	itemIndex := currentPage indexOfKey: indexKey.
+
 	"as an optimization we return the prior value stored in the list. If
 	there was none we return nil"
-	^ itemIndex > 0
+	^(currentPage hasKey: indexKey)
 		  ifTrue: [ currentPage itemAt: indexKey put: anObject ]
 		  ifFalse: [
 			  currentPage hasRoom ifFalse: [  | newPage |
