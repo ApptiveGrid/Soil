@@ -65,6 +65,11 @@ SoilBTreeIndexPage >> insertItem: item for: iterator [
 	^ return indexEntry: (newPage smallestKey -> newPage index)
 ]
 
+{ #category : #testing }
+SoilBTreeIndexPage >> isIndexPage [
+	^ true
+]
+
 { #category : #printing }
 SoilBTreeIndexPage >> printOn: aStream [ 
 	aStream << 'index page : #' << index asString
@@ -84,6 +89,21 @@ SoilBTreeIndexPage >> readItemsFrom: aStream [
 	items := SortedCollection new: numberOfItems.
 	numberOfItems timesRepeat: [ 
 		items add: (aStream next: self keySize) asInteger -> (aStream next: self pointerSize) asInteger ]
+]
+
+{ #category : #removing }
+SoilBTreeIndexPage >> remove: aKey for: aBTree [
+	| item page ret  |
+	
+	item := self findKey: aKey.
+	page := aBTree pageAt: item value.
+	ret := page remove: aKey for: aBTree.
+	"if the key is in the index, we have to update or remove"
+	(self hasKey: aKey) ifTrue: [
+				(ret notNil and: [page isNotEmpty])
+					ifTrue: [ item key: page items first key]
+				   ifFalse: [self itemRemoveAt: aKey]].
+	^ ret
 ]
 
 { #category : #accessing }

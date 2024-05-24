@@ -202,7 +202,7 @@ SoilIndex >> removeKey: key [
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
-{ #category : #'instance creation' }
+{ #category : #removing }
 SoilIndex >> removeKey: key ifAbsent: aBlock [
 	| page index |
 	page := self newIterator 

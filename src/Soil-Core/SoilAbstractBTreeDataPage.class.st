@@ -52,12 +52,17 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 	"We have to split"
 	newPage := iterator index splitPage: self.
 	"newPage is the one with the small values"
-	pageWithItem := ((self smallestKey > anItem key)
+	pageWithItem := ((self smallestKey <= anItem key)
 						ifTrue: [ newPage ]
 						ifFalse: [ self ]).
 	iterator currentPage: pageWithItem.
 	"we need to add the new page to the index above"
 	^ return indexEntry: (newPage smallestKey -> newPage index)
+]
+
+{ #category : #testing }
+SoilAbstractBTreeDataPage >> isIndexPage [
+	^ false
 ]
 
 { #category : #testing }
@@ -84,6 +89,12 @@ SoilAbstractBTreeDataPage >> nextPageIn: btree [
 SoilAbstractBTreeDataPage >> readFrom: aStream [
 	super readFrom: aStream.
 	next := (aStream next: self pointerSize) asInteger
+]
+
+{ #category : #removing }
+SoilAbstractBTreeDataPage >> remove: aKey for: aBTree [
+	"remove and return the item"
+	^ self itemRemoveAt: aKey ifAbsent: nil
 ]
 
 { #category : #accessing }
