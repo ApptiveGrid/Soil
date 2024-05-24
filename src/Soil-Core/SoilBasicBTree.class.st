@@ -77,14 +77,11 @@ SoilBasicBTree >> newHeaderPage [
 
 { #category : #'instance creation' }
 SoilBasicBTree >> newIndexPage [
-	| newPage |
-	newPage := SoilBTreeIndexPage new 
+	^ SoilBTreeIndexPage new 
 		keySize: self keySize;
 		pageSize: self pageSize;
-		yourself.
-		
-	newPage index: self store nextPageIndex.
-	^newPage
+		index: self store nextPageIndex;
+		yourself
 ]
 
 { #category : #'instance creation' }
