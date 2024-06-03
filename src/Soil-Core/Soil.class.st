@@ -131,14 +131,18 @@ Soil >> behaviorRegistry [
 Soil >> checkpoint [ 
 	| entry checkpointLSN |
 	semaphore critical: [  
+		"prepare a consistent setting first "
 		entry := SoilCheckpointEntry new
 			previousCheckpoint: self control lastCheckpoint.
-		entry commitIn: self.
 		"write the checkpoint entry in the journal and get 
 		the position of that entry in the file"
 		checkpointLSN := self journal writeEntry: entry.
 		"set the checkpoint position so it can be read back"
-		self control checkpoint: checkpointLSN ].
+		self control checkpoint: checkpointLSN.
+		"finally write all files to disk and sync so that it
+		creates a real checkpoint"
+		entry commitIn: self.
+ ].
 	^ entry
 ]
 

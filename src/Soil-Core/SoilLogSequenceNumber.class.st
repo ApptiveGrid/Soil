@@ -53,6 +53,11 @@ SoilLogSequenceNumber >> hash [
 	^ value hash
 ]
 
+{ #category : #printing }
+SoilLogSequenceNumber >> hexFileNumber [
+	^ (self fileNumber printStringBase: 16 length: 6 padded: true) asLowercase 
+]
+
 { #category : #accessing }
 SoilLogSequenceNumber >> hexOffset [ 
 	^ (self fileOffset printStringBase: 16 length: 6 padded: true) asLowercase 
@@ -72,7 +77,7 @@ SoilLogSequenceNumber >> nextFilename [
 SoilLogSequenceNumber >> printOn: aStream [ 
 	aStream 
 		<< 'LSN: ' 
-		<< self fileNumber asString
+		<< self hexFileNumber
 		<< '-'
 		<< self hexOffset 
 ]
