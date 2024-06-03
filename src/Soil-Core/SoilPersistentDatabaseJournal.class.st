@@ -71,6 +71,13 @@ SoilPersistentDatabaseJournal >> entriesMatching: aBlock [
 		file entriesMatching: aBlock  ]
 ]
 
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> existsFragmentFileForLSN: aSoilLogSequenceNumber [ 
+	| filename |
+	filename := self filenameFrom: aSoilLogSequenceNumber fileNumber.
+	^ (self path / filename) exists
+]
+
 { #category : #private }
 SoilPersistentDatabaseJournal >> fileNumberFrom: aString [ 
 	^ (ByteArray readHexFrom: aString) asInteger

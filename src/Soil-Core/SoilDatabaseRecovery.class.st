@@ -87,6 +87,15 @@ SoilDatabaseRecovery >> recover [
 	file. A successful checkpoint includes writing the transaction logs to disk, 
 	commit the contents to the heap, write the checkpoint entry"
 	lastCheckpoint := soil control lastCheckpoint.
+	"in case the fragment file is missing we restart the journal from the next 
+	fragment file id. 
+	NOTE: This is a deliberate emergency handler at the moment. In case of very strange
+	filesystem inconsistency we can continue to use the database with the last checkpointed
+	state. This may become a configuration option later"
+	(journal existsFragmentFileForLSN: lastCheckpoint) ifFalse: [ 
+		journal cycleFragmentFile.
+		soil checkpoint.
+		^ self ].
 	fragmentFile := journal openFragmentForLSN: lastCheckpoint.
 	"The log sequence number of a successful checkpoint points to the checkpoint 
 	entry that was last written"
