@@ -259,7 +259,7 @@ SoilPersistentDatabaseJournal >> writeEntry: aSoilNewCheckpointEntry [
 	is exceeded a new one will taken to write the entry. Return the 
 	position of the entry being written"
 	| entryLSN file |
-	file := self currentFragmentFile.
+	file := self fragmentFileForWriting.
 	file setToEnd.
 	entryLSN := file currentLogSequenceNumber.
 	file appendEntry: aSoilNewCheckpointEntry.
