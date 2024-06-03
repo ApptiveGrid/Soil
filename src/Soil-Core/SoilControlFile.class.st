@@ -212,10 +212,11 @@ SoilControlFile >> soil: anObject [
 
 { #category : #accessing }
 SoilControlFile >> updateDatabaseVersion: anInteger [
-	(self databaseVersion = anInteger) ifTrue: [ 
+	(anInteger <= self databaseVersion) ifTrue: [ 
 		"when doing a database recovery it is possible that the version 
-		has been updated already. If the version on disk is the same as
-		the argument we just return and let it pass"
+		has been updated already. Prior updates that are replayed will
+		have smaller numbers. We don't want to lower numbers so we just
+		ignore them and let the journal catch up"
 		^ self ].
 	self databaseVersion: anInteger
 ]
