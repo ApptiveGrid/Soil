@@ -18,13 +18,13 @@ SoilPersistentDatabaseJournal >> addTransactionJournal: aTransactionJournal [
 ]
 
 { #category : #writing }
-SoilPersistentDatabaseJournal >> appendEntry: aSoilNewCheckpointEntry [
+SoilPersistentDatabaseJournal >> appendEntry: aSoilJournalEntry [
 	"append the entry to the current file in order not to split 
 	the transaction journal. Remember the postion where the 
 	entry is stored and return"
 	| entryLSN |
 	entryLSN := currentFragmentFile currentLogSequenceNumber.
-	currentFragmentFile appendEntry: aSoilNewCheckpointEntry.
+	currentFragmentFile appendEntry: aSoilJournalEntry.
 	^ entryLSN
 		
 ]
@@ -269,10 +269,9 @@ SoilPersistentDatabaseJournal >> writeEntry: aSoilNewCheckpointEntry [
 
 { #category : #writing }
 SoilPersistentDatabaseJournal >> writeTransactionJournal: aSoilTransactionJournal [ 
-	| file |
+	| fragmentFile |
 	^ semaphore critical: [  
 		self verifyNextJournalIndex: aSoilTransactionJournal index.	
-		file := self fragmentFileForWriting.
-		aSoilTransactionJournal entries do: [ :entry |
-			file appendEntry: entry ] ]
+		fragmentFile := self fragmentFileForWriting.
+		fragmentFile appendEntries: aSoilTransactionJournal entries ]
 ]
