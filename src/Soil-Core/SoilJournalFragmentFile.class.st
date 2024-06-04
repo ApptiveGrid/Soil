@@ -35,12 +35,30 @@ SoilJournalFragmentFile >> acceptSoil: aSoilVisitor [
 ]
 
 { #category : #writing }
+SoilJournalFragmentFile >> appendEntries: aCollection [ 
+	| position lock |
+	"append all entries in the collection using a single lock, 
+	flush and sync operation."
+	lock := stream lockAppendingFor: self.
+	[ 
+	 	"when the lock is in place it is safe the set the file 
+		to its end"
+		stream setToEnd.
+		position := stream position.
+		aCollection do: [ :entry | entry writeOn: stream ].
+		"after all entries are written we can have a single flush
+		and potential sync to disk"
+		stream flush.
+		databaseJournal fragmentFileWritten: self  ]
+			ensure: [ lock release ].
+	^ position
+
+]
+
+{ #category : #writing }
 SoilJournalFragmentFile >> appendEntry: aSoilJournalEntry [ 
 	| position lock |
-	"lock whole file for appending. The lock context here is
-	the journal entry itself because there is no better 
-	object to use. The lock should be really exclusive"
-	lock := stream lockAppendingFor: aSoilJournalEntry.
+	lock := stream lockAppendingFor: self.
 	[ 
 	 	"when the lock is in place it is safe the set the file 
 		to its end"
