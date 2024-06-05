@@ -39,6 +39,8 @@ SoilLogSequenceNumber >> fileNumber [
 
 { #category : #accessing }
 SoilLogSequenceNumber >> fileNumber: number offset: offset [ 
+	(offset < 16777216) ifFalse: [ 
+		Error signal: 'offset of LSN is to big. Must fit into 24 bits' ].
 	value := number bitShift: 24.
 	value := value bitOr: offset 
 ]

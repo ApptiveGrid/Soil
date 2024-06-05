@@ -34,6 +34,15 @@ SoilJournalFragmentFile >> acceptSoil: aSoilVisitor [
 	aSoilVisitor visitJournalFragmentFile: self
 ]
 
+{ #category : #journal }
+SoilJournalFragmentFile >> allEntries [
+	| entries |
+	entries := OrderedCollection new.
+	self entriesDo: [ :entry |
+		entries add: entry ].
+	^ entries 
+]
+
 { #category : #writing }
 SoilJournalFragmentFile >> appendEntries: aCollection [ 
 	| position lock |
@@ -128,6 +137,22 @@ SoilJournalFragmentFile >> dataPosition [
 { #category : #accessing }
 SoilJournalFragmentFile >> databaseJournal: aSoilPersistentDatabaseJournal [
 	databaseJournal := aSoilPersistentDatabaseJournal 
+]
+
+{ #category : #journal }
+SoilJournalFragmentFile >> entriesDo: aBlock [
+	| position oldPosition |
+	self stream position: self dataPosition.
+	oldPosition  := 0.
+	[ stream atEnd ] whileFalse: [ 
+		position := stream position.
+		"call block with three arguments: entry, file position, length"
+		aBlock 
+			cull: (SoilJournalEntry readFrom: stream)
+			cull: position
+			cull: position - oldPosition.
+		oldPosition := position ].
+
 ]
 
 { #category : #searching }
@@ -225,7 +250,7 @@ SoilJournalFragmentFile >> path [
 
 { #category : #accessing }
 SoilJournalFragmentFile >> path: aFileReference [
-	path := aFileReference 
+	path := aFileReference asFileReference 
 ]
 
 { #category : #accessing }
