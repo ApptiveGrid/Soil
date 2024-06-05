@@ -185,7 +185,7 @@ SoilJournalFragmentFile >> firstTransactionId [
 SoilJournalFragmentFile >> hasSpace [
 	"a fragment file when writing to it must be smaller be with a 
 	file size of 24 bit = 16MB"
-	^ stream position < (2 raisedTo: 24)
+	^ stream size < (2 raisedTo: 24)
 ]
 
 { #category : #initialization }
