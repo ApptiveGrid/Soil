@@ -90,9 +90,8 @@ SoilPersistentDatabaseJournal >> filenameFrom: anInteger [
 
 { #category : #private }
 SoilPersistentDatabaseJournal >> fragmentFileForWriting [
-	| segmentFile nextFileNumber |
-	segmentFile := self currentFragmentFile.
-	^ currentFragmentFile hasSpace 
+	| nextFileNumber |
+	^ self currentFragmentFile hasSpace 
 		ifTrue: [ currentFragmentFile ]
 		ifFalse: [ 
 			nextFileNumber := (self fileNumberFrom: currentFragmentFile filename).
@@ -179,12 +178,11 @@ SoilPersistentDatabaseJournal >> newTransactionJournalForId: anInteger [
 
 { #category : #'instance creation' }
 SoilPersistentDatabaseJournal >> open [ 
-	| file lsn |
-	self path hasChildren ifFalse: [ 
-		file := self currentFragmentFile.
-		lsn := self appendEntry: (SoilCheckpointEntry new
-			previousCheckpoint: soil control lastCheckpoint).
-		soil control checkpoint: lsn ]
+	"if there are no fragment files then we create one with 
+	a checkpoint entry to enable consistency with later 
+	operations assuming there is a checkpoint"
+	self sortedFiles ifEmpty: [ 
+		soil checkpoint ]
 	
 ]
 
@@ -238,7 +236,11 @@ SoilPersistentDatabaseJournal >> resetFragmentFile [
 
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> sortedFiles [
-	^ self path files sorted reverse
+	^ (self path files 
+		select: [ :file | 
+			"a fragment file is always 10 characters long. 
+			40 bit (address space) / 8 (bits in a byte) * 2 (hex characters)"
+			(file basename size = 10) ]) sorted reverse
 ]
 
 { #category : #accessing }

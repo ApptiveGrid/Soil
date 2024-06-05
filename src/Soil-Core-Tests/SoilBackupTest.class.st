@@ -15,7 +15,7 @@ SoilBackupTest >> backupPath [
 
 { #category : #accessing }
 SoilBackupTest >> path [ 
-	^ 'soil-tests'
+	^ 'soil-tests' asFileReference 
 ]
 
 { #category : #initialization }

@@ -147,9 +147,11 @@ SoilDatabaseJournalTest >> testRecoverWithJournalAndCheckpoint [
 SoilDatabaseJournalTest >> testRecoverWithRemainingBytes [
 	
 	soil journal currentFragmentFile stream 
+		setToEnd;
 		nextPutAll: #( 1 2 3 4 );
 		flush.
 	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28).
+	self assert: soil journal currentFragmentFile stream size equals: 43.
 	soil close.
 	soil open.
 	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 1 offset: 28) 
