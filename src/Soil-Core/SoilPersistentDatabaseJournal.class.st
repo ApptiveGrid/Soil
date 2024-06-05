@@ -56,7 +56,12 @@ SoilPersistentDatabaseJournal >> currentFragmentFile: aSoilJournalFragmentFile [
 
 { #category : #'as yet unclassified' }
 SoilPersistentDatabaseJournal >> cycleFragmentFile [
-	currentFragmentFile := self createFragmentFile: (self filenameFrom: self currentFragmentFile fileNumber + 1)
+	| nextFileNumber |
+	nextFileNumber := (self fileNumberFrom: currentFragmentFile filename) + 1.
+	currentFragmentFile 
+		flush;
+		close.
+	currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber)
 ]
 
 { #category : #enumerating }
@@ -90,13 +95,9 @@ SoilPersistentDatabaseJournal >> filenameFrom: anInteger [
 
 { #category : #private }
 SoilPersistentDatabaseJournal >> fragmentFileForWriting [
-	| nextFileNumber |
-	^ self currentFragmentFile hasSpace 
-		ifTrue: [ currentFragmentFile ]
-		ifFalse: [ 
-			nextFileNumber := (self fileNumberFrom: currentFragmentFile filename).
-			currentFragmentFile close.
-			currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber + 1) ]
+	self currentFragmentFile hasSpace 
+		ifFalse: [ self cycleFragmentFile ].
+	^ currentFragmentFile
 ]
 
 { #category : #'as yet unclassified' }
