@@ -120,6 +120,27 @@ SoilPersistentDatabaseJournal >> fragmentFiles [
 			yourself ]
 ]
 
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> historyOfObjectId: aSoilObjectId [ 
+	| history objectEntries transactionStart |
+	history := OrderedCollection new.
+	objectEntries := OrderedCollection new.
+	self entriesDo: [ :entry |
+		(entry class = SoilBeginTransactionEntry) ifTrue: [ 
+			transactionStart := entry ].
+		entry providesObjectIds ifTrue: [ 
+			(entry includesObjectId: aSoilObjectId) ifTrue: [ 
+				objectEntries add: entry ] ].
+		(entry class = SoilCommitTransactionEntry) ifTrue: [ 
+			objectEntries ifNotEmpty: [ 
+				 history 
+					add: transactionStart;
+					addAll: objectEntries;
+					add: entry ].
+				objectEntries removeAll ] ].
+	^ history 
+]
+
 { #category : #adding }
 SoilPersistentDatabaseJournal >> importTransactionJournal: aSoilTransactionJournal [ 
 	self writeTransactionJournal: aSoilTransactionJournal.
@@ -181,6 +202,24 @@ SoilPersistentDatabaseJournal >> newTransactionJournalForId: anInteger [
 		self verifyNextJournalIndex: anInteger.
 		SoilTransactionJournal new 
 			index: anInteger ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> objectEntriesDo: aBlock [
+	self fragmentFiles reverse do: [ :file |
+		file entriesDo: [ :entry | 
+			entry providesObjectIds ifTrue: [ 
+				 (aBlock value: entry)  ] ] ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> objectEntriesSelect: aBlock [
+	| entries |
+	entries := OrderedCollection new.
+	self objectEntriesDo: [ :entry | 
+		 (aBlock value: entry) ifTrue: [ 
+			entries add: entry ] ].
+	^ entries
 ]
 
 { #category : #'instance creation' }
