@@ -18,6 +18,11 @@ SoilObjectSegment >> acceptSoil: aSoilVisitor [
 		ifFalse: [ aSoilVisitor visitObjectSegment: self ]
 ]
 
+{ #category : #'as yet unclassified' }
+SoilObjectSegment >> allRecords [
+	^ objectFile allRecords
+]
+
 { #category : #accessing }
 SoilObjectSegment >> allVersionsAt: index [ 
 	| obj versions |

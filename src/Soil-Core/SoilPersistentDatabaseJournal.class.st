@@ -64,12 +64,6 @@ SoilPersistentDatabaseJournal >> cycleFragmentFile [
 	currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber)
 ]
 
-{ #category : #enumerating }
-SoilPersistentDatabaseJournal >> do: aBlock [ 
-	semaphore critical: [  
-		transactionJournals do: aBlock ]	
-]
-
 { #category : #'as yet unclassified' }
 SoilPersistentDatabaseJournal >> entriesDo: aBlock [
 	self fragmentFiles reverse do: [ :file |
