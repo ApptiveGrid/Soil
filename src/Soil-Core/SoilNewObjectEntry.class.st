@@ -22,6 +22,11 @@ SoilNewObjectEntry >> address [
 ]
 
 { #category : #accessing }
+SoilNewObjectEntry >> bytes [ 
+	^ bytes
+]
+
+{ #category : #accessing }
 SoilNewObjectEntry >> bytes: aCollection [ 
 	bytes := aCollection
 ]
@@ -30,7 +35,7 @@ SoilNewObjectEntry >> bytes: aCollection [
 SoilNewObjectEntry >> commitIn: soil [ 
 	position := soil objectRepository  
 		at: objectId 
-		put: bytes.
+		putBytes: bytes.
 	record ifNotNil: [ 
 		record position: position.
 		record := nil ]
