@@ -134,7 +134,7 @@ SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersio
 		resetPreviousVersion.
 	target objectRepository 
 		at: backupCluster objectId
-		put: backupCluster serialize.
+		putBytes: backupCluster serialize.
 	backupCluster references do: [ :reference |
 		self process: reference ].
 	aSoilPersistentClusterVersion indexIds do:[ :indexId |
