@@ -4,6 +4,18 @@ Class {
 	#category : #'Soil-Core-Files'
 }
 
+{ #category : #'as yet unclassified' }
+SoilObjectFile >> allRecords [
+	| records pos record |
+	records := OrderedCollection new.
+	stream position: self recordStart.
+	[ stream atEnd ] whileFalse: [ 
+		pos := stream position.
+		record := SoilPersistentClusterVersion readFrom: stream.
+		records add: (pos -> record) ].
+	^ records 
+]
+
 { #category : #writing }
 SoilObjectFile >> appendBytes: aCollection [ 
 	| position |
@@ -48,6 +60,13 @@ SoilObjectFile >> path [
 { #category : #writing }
 SoilObjectFile >> prefix [ 
 	^ 'SOIL|OBJECT ' asByteArray
+]
+
+{ #category : #'as yet unclassified' }
+SoilObjectFile >> recordStart [
+	^ (segment id = 0)
+		ifTrue: [ self headerSize + 16 ]
+		ifFalse: [ self headerSize + 8 ]
 ]
 
 { #category : #accessing }

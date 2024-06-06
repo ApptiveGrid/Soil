@@ -71,12 +71,22 @@ SoilNewObjectEntry >> objectIds [
 	^ { objectId }
 ]
 
+{ #category : #'as yet unclassified' }
+SoilNewObjectEntry >> objectIn: aSoilTransaction [
+	^ (aSoilTransaction materializeRecord: bytes asSoilClusterVersion) object 
+]
+
 { #category : #printing }
 SoilNewObjectEntry >> printOn: aStream [ 
 	super printOn: aStream.
 	aStream 
 		<< ' objectId: '
 		<< objectId asString 
+]
+
+{ #category : #'as yet unclassified' }
+SoilNewObjectEntry >> providesObjectIds [ 
+	^ true
 ]
 
 { #category : #'instance creation' }

@@ -47,7 +47,7 @@ SoilInstanceVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [
 		page := aSoilPagedFileIndexStore pageAt: pageIndex.
 		page items do: [ :item |
 			item value isRemoved ifFalse: [ 
-				self visit: item value ] ] ].
+				self visit: item value asSoilObjectId ] ] ].
 	^ aSoilPagedFileIndexStore 
 ]
 

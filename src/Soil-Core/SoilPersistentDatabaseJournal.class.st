@@ -64,16 +64,22 @@ SoilPersistentDatabaseJournal >> cycleFragmentFile [
 	currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber)
 ]
 
-{ #category : #enumerating }
-SoilPersistentDatabaseJournal >> do: aBlock [ 
-	semaphore critical: [  
-		transactionJournals do: aBlock ]	
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> entriesDo: aBlock [
+	self fragmentFiles reverse do: [ :file |
+		file entriesDo: aBlock ]
 ]
 
 { #category : #searching }
 SoilPersistentDatabaseJournal >> entriesMatching: aBlock [
 	^ self fragmentFiles flatCollect: [ :file |
 		file entriesMatching: aBlock  ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> entriesWithObjectId: aSoilObjectId [ 
+	^ self objectEntriesSelect: [ :entry | 
+		entry includesObjectId: aSoilObjectId ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -112,6 +118,27 @@ SoilPersistentDatabaseJournal >> fragmentFiles [
 		(SoilJournalFragmentFile path: each)
 			databaseJournal: self;
 			yourself ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> historyOfObjectId: aSoilObjectId [ 
+	| history objectEntries transactionStart |
+	history := OrderedCollection new.
+	objectEntries := OrderedCollection new.
+	self entriesDo: [ :entry |
+		(entry class = SoilBeginTransactionEntry) ifTrue: [ 
+			transactionStart := entry ].
+		entry providesObjectIds ifTrue: [ 
+			(entry includesObjectId: aSoilObjectId) ifTrue: [ 
+				objectEntries add: entry ] ].
+		(entry class = SoilCommitTransactionEntry) ifTrue: [ 
+			objectEntries ifNotEmpty: [ 
+				 history 
+					add: transactionStart;
+					addAll: objectEntries;
+					add: entry ].
+				objectEntries removeAll ] ].
+	^ history 
 ]
 
 { #category : #adding }
@@ -175,6 +202,24 @@ SoilPersistentDatabaseJournal >> newTransactionJournalForId: anInteger [
 		self verifyNextJournalIndex: anInteger.
 		SoilTransactionJournal new 
 			index: anInteger ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> objectEntriesDo: aBlock [
+	self fragmentFiles reverse do: [ :file |
+		file entriesDo: [ :entry | 
+			entry providesObjectIds ifTrue: [ 
+				 (aBlock value: entry)  ] ] ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> objectEntriesSelect: aBlock [
+	| entries |
+	entries := OrderedCollection new.
+	self objectEntriesDo: [ :entry | 
+		 (aBlock value: entry) ifTrue: [ 
+			entries add: entry ] ].
+	^ entries
 ]
 
 { #category : #'instance creation' }

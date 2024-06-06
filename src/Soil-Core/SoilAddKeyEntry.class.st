@@ -69,6 +69,11 @@ SoilAddKeyEntry >> printOn: aStream [
 	aStream << 'add key: ' << key printString << ' to index ' << id printString
 ]
 
+{ #category : #'as yet unclassified' }
+SoilAddKeyEntry >> providesObjectIds [ 
+	^ true
+]
+
 { #category : #writing }
 SoilAddKeyEntry >> readFrom: aStream [ 
 	| idSize |

@@ -18,6 +18,11 @@ SoilNewObjectVersionEntry >> oldBytes: aCollection [
 	oldBytes := aCollection
 ]
 
+{ #category : #'as yet unclassified' }
+SoilNewObjectVersionEntry >> oldObjectIn: aSoilTransaction [
+	^ (aSoilTransaction materializeRecord: oldBytes asSoilClusterVersion) object
+]
+
 { #category : #'instance creation' }
 SoilNewObjectVersionEntry >> readFrom: aStream [ 
 	| oldBytesSize |
