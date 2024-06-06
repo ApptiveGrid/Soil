@@ -49,9 +49,10 @@ SoilObjectSegment >> at: anInteger [
 { #category : #accessing }
 SoilObjectSegment >> at: anInteger putBytes: bytes [ 
 	| position |
-	position := objectFile size.
-	objectFile appendBytes: bytes.
-	indexFile at: anInteger putPosition: position.
+	position := objectFile appendBytes: bytes.
+	indexFile 
+		at: anInteger 
+		putPosition: position.
 	^ position
 ]
 

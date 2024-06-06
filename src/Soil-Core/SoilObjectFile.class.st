@@ -6,10 +6,13 @@ Class {
 
 { #category : #writing }
 SoilObjectFile >> appendBytes: aCollection [ 
-	mutex critical: [  
-		stream position: stream size.
+	| position |
+	^ mutex critical: [  
+		position := stream size.
+		stream position: position.
 		stream nextPutAll: aCollection.
-		stream flush ]
+		stream flush.
+		position ]
 ]
 
 { #category : #accessing }
