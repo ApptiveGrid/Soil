@@ -19,9 +19,9 @@ SoilNewClusterVersion >> asJournalEntry [
 	| objectEntry entries |
 	entries := OrderedCollection new.
 	objectEntry := self hasPreviousVersion 
-		ifTrue: [ 
+		ifTrue: [
 			SoilNewObjectVersionEntry new
-				oldBytes: previousVersionRecord bytes ]
+				oldBytes: previousVersionRecord serialize ]
 		ifFalse: [ SoilNewObjectEntry new ].
 	objectEntry 
 		record: self;
