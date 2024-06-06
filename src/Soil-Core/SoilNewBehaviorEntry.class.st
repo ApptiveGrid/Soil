@@ -71,6 +71,11 @@ SoilNewBehaviorEntry >> printOn: aStream [
 		
 ]
 
+{ #category : #'as yet unclassified' }
+SoilNewBehaviorEntry >> providesObjectIds [ 
+	^ true
+]
+
 { #category : #'instance creation' }
 SoilNewBehaviorEntry >> readFrom: aStream [ 
 	| size |

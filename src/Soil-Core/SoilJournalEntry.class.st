@@ -59,6 +59,11 @@ SoilJournalEntry >> isTransactionEntry [
 	^ false
 ]
 
+{ #category : #'as yet unclassified' }
+SoilJournalEntry >> providesObjectIds [ 
+	^ false
+]
+
 { #category : #'instance creation' }
 SoilJournalEntry >> readFrom: aStream [ 
 	"skip because the type code is already read"

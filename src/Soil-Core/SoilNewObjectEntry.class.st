@@ -79,6 +79,11 @@ SoilNewObjectEntry >> printOn: aStream [
 		<< objectId asString 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilNewObjectEntry >> providesObjectIds [ 
+	^ true
+]
+
 { #category : #'instance creation' }
 SoilNewObjectEntry >> readFrom: aStream [ 
 	| bytesSize |

@@ -57,6 +57,11 @@ SoilRemoveKeyEntry >> oldValue: aString [
 	oldValue := aString
 ]
 
+{ #category : #'as yet unclassified' }
+SoilRemoveKeyEntry >> providesObjectIds [ 
+	^ true
+]
+
 { #category : #'instance creation' }
 SoilRemoveKeyEntry >> readFrom: aStream [
 	| idSize |

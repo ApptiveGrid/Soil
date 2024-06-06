@@ -70,10 +70,22 @@ SoilPersistentDatabaseJournal >> do: aBlock [
 		transactionJournals do: aBlock ]	
 ]
 
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> entriesDo: aBlock [
+	self fragmentFiles reverse do: [ :file |
+		file entriesDo: aBlock ]
+]
+
 { #category : #searching }
 SoilPersistentDatabaseJournal >> entriesMatching: aBlock [
 	^ self fragmentFiles flatCollect: [ :file |
 		file entriesMatching: aBlock  ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilPersistentDatabaseJournal >> entriesWithObjectId: aSoilObjectId [ 
+	^ self objectEntriesSelect: [ :entry | 
+		entry includesObjectId: aSoilObjectId ]
 ]
 
 { #category : #'as yet unclassified' }

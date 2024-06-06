@@ -34,15 +34,6 @@ SoilJournalFragmentFile >> acceptSoil: aSoilVisitor [
 	aSoilVisitor visitJournalFragmentFile: self
 ]
 
-{ #category : #journal }
-SoilJournalFragmentFile >> allEntries [
-	| entries |
-	entries := OrderedCollection new.
-	self entriesDo: [ :entry |
-		entries add: entry ].
-	^ entries 
-]
-
 { #category : #writing }
 SoilJournalFragmentFile >> appendEntries: aCollection [ 
 	| position lock |
@@ -137,6 +128,24 @@ SoilJournalFragmentFile >> dataPosition [
 { #category : #accessing }
 SoilJournalFragmentFile >> databaseJournal: aSoilPersistentDatabaseJournal [
 	databaseJournal := aSoilPersistentDatabaseJournal 
+]
+
+{ #category : #journal }
+SoilJournalFragmentFile >> entries [
+	| entries |
+	entries := OrderedCollection new.
+	self entriesDo: [ :entry |
+		entries add: entry ].
+	^ entries 
+]
+
+{ #category : #journal }
+SoilJournalFragmentFile >> entriesCollect: aBlock [
+	| col |
+	col := OrderedCollection new.
+	self entriesDo: [ :entry |
+		col add: (aBlock value: entry) ].
+	^ col 
 ]
 
 { #category : #journal }
