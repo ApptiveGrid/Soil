@@ -10,6 +10,12 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #rewriting }
+SoilSkipListDictionary >> compact [ 
+	"Rewrite index file without removed items"
+	self rewriteUsing: [ :item | item ]
+]
+
 { #category : #initialization }
 SoilSkipListDictionary >> createIndex [ 
 	^ SoilSkipList new
@@ -49,4 +55,18 @@ SoilSkipListDictionary >> journalEntries [
 			key: (index indexKey: key); 
 			oldValue: value) ].
 	^ entries
+]
+
+{ #category : #rewriting }
+SoilSkipListDictionary >> rewriteUsing: aBlock [
+	| skipList |
+	"write new index file and add all items. Use aBlock to 
+	enable converting items"
+	skipList := index wrapped.
+	SoilPluggableIndexRewriter new 
+		index: index wrapped;
+		indexBlock: [ :idx | idx  ];
+		itemBlock: aBlock;
+		cleanRemoved;
+		run
 ]
