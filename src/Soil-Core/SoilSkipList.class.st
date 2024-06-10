@@ -27,13 +27,6 @@ SoilSkipList >> close [
 	keySize := nil
 ]
 
-{ #category : #'converting-legacy' }
-SoilSkipList >> convertToNewFormat [
-	SoilNewFormatIndexRewriter new
-		index: self;
-		rewrite
-]
-
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
