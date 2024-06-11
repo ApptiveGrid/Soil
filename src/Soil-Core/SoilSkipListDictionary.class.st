@@ -12,8 +12,7 @@ Class {
 
 { #category : #rewriting }
 SoilSkipListDictionary >> compact [ 
-	"Rewrite index file without removed items"
-	self rewriteUsing: [ :item | item ]
+	index wrapped compact
 ]
 
 { #category : #initialization }
@@ -59,12 +58,5 @@ SoilSkipListDictionary >> journalEntries [
 
 { #category : #rewriting }
 SoilSkipListDictionary >> rewriteUsing: aBlock [
-	"write new index file and add all items. Use aBlock to 
-	enable converting items"
-	SoilPluggableIndexRewriter new 
-		index: index wrapped;
-		indexBlock: [ :idx | idx  ];
-		itemBlock: aBlock;
-		cleanRemoved;
-		run
+	index wrapped rewriteUsing: aBlock
 ]
