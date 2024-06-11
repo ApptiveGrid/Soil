@@ -313,6 +313,14 @@ SoilIndexIterator >> pageAt: anInteger [
 	^ index store pageAt: anInteger
 ]
 
+{ #category : #enumerating }
+SoilIndexIterator >> pagesDo: aBlock [ 
+	currentPage := index store headerPage.
+	[ currentPage isNil ] whileFalse: [ 
+		aBlock value: currentPage.
+		currentPage := self nextPage ]
+]
+
 { #category : #private }
 SoilIndexIterator >> priorAssociation [
 	| item |
@@ -335,6 +343,12 @@ SoilIndexIterator >> priorAssociation [
 				currentPage isEmpty ifTrue: [ ^ nil ].
 				^ currentPage lastItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
 	Error signal: 'shouldnt happen'
+]
+
+{ #category : #removing }
+SoilIndexIterator >> removeItemsSuchThat: aBlock [ 
+	self pagesDo: [ :page | page items removeAllSuchThat: aBlock ].
+
 ]
 
 { #category : #removing }
