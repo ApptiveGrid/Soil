@@ -300,6 +300,15 @@ SoilIndexIterator >> nextKeyCloseTo: key [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> nextPage [ 
+	| nextPageIndex |
+	nextPageIndex := currentPage next.
+	^ (nextPageIndex > 0)
+		ifTrue: [ self pageAt: nextPageIndex ]
+		ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> pageAt: anInteger [
 	^ index store pageAt: anInteger
 ]
