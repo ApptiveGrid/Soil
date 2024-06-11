@@ -75,6 +75,8 @@ SoilIndexIterator >> basicNextAssociation [
 		currentPage := index store headerPage.
 		currentKey := nil ].
 	[ currentPage isNil ] whileFalse: [  
+		"if there is a current key the item after that key is next
+		if present"
 		item := currentKey 
 			ifNotNil: [  
 				(currentPage itemAfter: currentKey)
@@ -82,13 +84,30 @@ SoilIndexIterator >> basicNextAssociation [
 						currentKey := i key. 
 						^ i ]
 					ifNil: [ 
+						"if we did not find an element after the current key we
+						need to proceed with the next page. 
+						if the next index is 0 there is no next page and we 
+						return nil"
 						(currentPage next = 0) ifTrue: [ ^ nil ].
+						"if there is a next page we set it to current and restart"
 						currentPage := index store pageAt: currentPage next.
 						currentKey := nil ] ]
 			ifNil: [
-				currentPage isEmpty ifTrue: [ ^ nil ].
-				^ currentPage firstItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
-	Error signal: 'shouldnt happen'
+				"without currentKey we are looking for the first item in a page.
+				If the currentPage is empty we advance the page and restart"
+				currentPage isEmpty 
+					ifTrue: [ 
+						currentPage := self nextPage.
+						currentKey := nil ]
+					ifFalse: [
+						"if the currentPage has an item we set currentKey and 
+						return the found item"
+						currentPage firstItem ifNotNil: [ :item2 | 
+							currentKey := item2 key. 
+							^ item2 ] ] ] ].
+	"if we end up here then there was no next page to continue looking for the
+	next item"
+	^ nil 
 ]
 
 { #category : #removing }
@@ -278,6 +297,15 @@ SoilIndexIterator >> nextKeyCloseTo: key [
 		ifNotNil: [ 
 			"if there is a close key found, we make sure the cursor get properly positioned"
 			currentKey := nextKey ]
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> nextPage [ 
+	| nextPageIndex |
+	nextPageIndex := currentPage next.
+	^ (nextPageIndex > 0)
+		ifTrue: [ self pageAt: nextPageIndex ]
+		ifFalse: [ nil ]
 ]
 
 { #category : #accessing }
