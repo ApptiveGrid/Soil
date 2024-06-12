@@ -422,6 +422,30 @@ SoilSkipListTest >> testPageAddFirst [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testRemoveAllFromPage [
+	| entries |
+	"We test that after removing all entries from one page, #nextAssociation will continue to the next page"
+	
+	index keySize: 1016. "huge keySize forces multiple pages"
+	entries :=  #(104 247 56 281 61 286 66 337 308 1 400 272 347 335 45 62 207 7 123 140).
+	
+	
+	entries do: [:toAdd |
+		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	"#values iterates using #basicNextAssociation"
+	self assert: index values size equals: entries size.
+	
+	index removeKey: 247.
+	index removeKey: 272.
+	self assert: (index pageAt: 3) isEmpty.
+	"iterating goes beyond the empty page"
+	self assert: index values size equals: entries size - 2.
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testRemoveKey [
 
 	| capacity |
