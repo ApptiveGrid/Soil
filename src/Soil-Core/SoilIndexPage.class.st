@@ -73,8 +73,19 @@ SoilIndexPage >> initialize [
 ]
 
 { #category : #testing }
+SoilIndexPage >> isDataPage [
+	"is this a page that stores data? Btree has index only pages, too"
+	^ true
+]
+
+{ #category : #testing }
 SoilIndexPage >> isDirty [
 	^ dirty 
+]
+
+{ #category : #testing }
+SoilIndexPage >> isHeaderPage [
+	^ false
 ]
 
 { #category : #testing }

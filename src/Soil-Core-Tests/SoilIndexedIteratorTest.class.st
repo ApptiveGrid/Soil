@@ -118,3 +118,19 @@ SoilIndexedIteratorTest >> testIteratorLastWithSingleRemovedItem [
 	iterator removeKey: #foo.
 	self assert: iterator lastAssociation equals: nil
 ]
+
+{ #category : #tests }
+SoilIndexedIteratorTest >> testPriorAssociation [
+	
+	| capacity iterator value toFind |
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	iterator := index newIterator.
+	"select a key where we have to cross over to another page"
+	toFind := index class == SoilSkipList ifTrue: [ 254 ] ifFalse: [ 255 ].
+	value := iterator
+		find: toFind;
+		priorAssociation.
+	self assert: value value equals: ((toFind - 1) asByteArrayOfSize: 8)
+]

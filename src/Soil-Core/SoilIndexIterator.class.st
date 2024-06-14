@@ -164,6 +164,14 @@ SoilIndexIterator >> findPageFor: indexKey [
 	^ self subclassResponsibility
 ]
 
+{ #category : #private }
+SoilIndexIterator >> findPriorPageOf: aPage [
+	"For now we use a very slow approach that searched all pages from the first following the next pointer.
+	TODO:
+	We need to do something more clever that iterates similar to finding a key, thus not requiring all pages"
+	^ index store priorPageOf: aPage
+]
+
 { #category : #accessing }
 SoilIndexIterator >> first [
 	^ self firstAssociation value
@@ -336,8 +344,9 @@ SoilIndexIterator >> priorAssociation [
 						currentKey := i key. 
 						^ i ]
 					ifNil: [ 
-						(currentPage next = 0) ifTrue: [ ^ nil ].
-						currentPage := index store pageAt: currentPage priorPage.
+						"are we the first page? if yes, there is no item before"
+						currentPage isHeaderPage ifTrue: [ ^nil ].
+						currentPage := self findPriorPageOf: currentPage.
 						currentKey := nil ] ]
 			ifNil: [
 				currentPage isEmpty ifTrue: [ ^ nil ].

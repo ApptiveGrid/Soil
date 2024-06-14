@@ -110,7 +110,7 @@ SoilPagedIndexStore >> pages [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> priorPage [
+SoilPagedIndexStore >> priorPageOf: aPage [
 	"this is slow as it checks all pages"
-	^ pages detect: [: page | page next == self ]
+	^ pages detect: [: page | page isDataPage and: [page next == aPage index ]]
 ]

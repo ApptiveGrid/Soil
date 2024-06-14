@@ -66,8 +66,8 @@ SoilBTreeIndexPage >> insertItem: item for: iterator [
 ]
 
 { #category : #testing }
-SoilBTreeIndexPage >> isIndexPage [
-	^ true
+SoilBTreeIndexPage >> isDataPage [
+	^ false
 ]
 
 { #category : #printing }

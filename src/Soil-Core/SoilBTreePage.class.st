@@ -44,11 +44,6 @@ SoilBTreePage >> insertItem: anItem for: iterator [
 	^ self subclassResponsibility
 ]
 
-{ #category : #testing }
-SoilBTreePage >> isIndexPage [
-	^ self subclassResponsibility
-]
-
 { #category : #accessing }
 SoilBTreePage >> pointerSize [
 	"this is the size in bytes used to point to other pages"
