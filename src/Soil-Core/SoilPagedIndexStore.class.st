@@ -108,9 +108,3 @@ SoilPagedIndexStore >> pageFaultAt: anInteger [
 SoilPagedIndexStore >> pages [
 	^ pages
 ]
-
-{ #category : #accessing }
-SoilPagedIndexStore >> priorPageOf: aPage [
-	"this is slow as it checks all pages"
-	^ pages detect: [: page | page isDataPage and: [page next == aPage index ]]
-]
