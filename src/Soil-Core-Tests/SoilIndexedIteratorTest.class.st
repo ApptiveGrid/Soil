@@ -53,7 +53,7 @@ SoilIndexedIteratorTest >> tearDown [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testIteratorFindAndNext [
+SoilIndexedIteratorTest >> testFindAndNext [
 	
 	| capacity iterator value |
 	capacity := index headerPage itemCapacity * 2.
@@ -67,7 +67,7 @@ SoilIndexedIteratorTest >> testIteratorFindAndNext [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testIteratorFindAndNext2 [
+SoilIndexedIteratorTest >> testFindAndNext2 [
 	
 	| capacity iterator values |
 	capacity := index firstPage itemCapacity * 2.
@@ -90,7 +90,7 @@ SoilIndexedIteratorTest >> testIteratorFindAndNext2 [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testIteratorFirst [
+SoilIndexedIteratorTest >> testFirst [
 	
 	| capacity first |
 	capacity := index headerPage itemCapacity * 2.
@@ -102,21 +102,82 @@ SoilIndexedIteratorTest >> testIteratorFirst [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testIteratorFirstWithSingleRemovedItem [ 
+SoilIndexedIteratorTest >> testFirstWithRemovedItem [ 
 	| iterator |
+	
 	iterator := index newIterator.
-	iterator at: #foo put: #bar.
+	iterator at: #foo put: (1 asByteArrayOfSize: 8).
 	iterator removeKey: #foo.
-	self assert: iterator firstAssociation equals: nil
+	self assert: iterator firstAssociation value equals: nil.
+	
+	iterator := index newIterator.
+	iterator at: #foo put: (1 asByteArrayOfSize: 8).
+	iterator at: #foo1 put: (2 asByteArrayOfSize: 8).
+	iterator removeKey: #foo.
+	self assert: iterator firstAssociation value equals: (2 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testIteratorLastWithSingleRemovedItem [ 
+SoilIndexedIteratorTest >> testLastWithRemovedItem [ 
 	| iterator |
+	
 	iterator := index newIterator.
-	iterator at: #foo put: #bar.
-	iterator removeKey: #foo.
-	self assert: iterator lastAssociation equals: nil
+	iterator at: 1 put: (2 asByteArrayOfSize: 8).
+	iterator removeKey: 1.
+	self assert: iterator lastAssociation equals: nil.
+	
+	"last when the last one was removed"
+	iterator := index newIterator.
+	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	iterator at: 2 put: (2 asByteArrayOfSize: 8).
+	iterator removeKey: 2.
+	self assert: iterator lastAssociation value equals: (1 asByteArrayOfSize: 8).
+	iterator := index newIterator.
+	self assert: iterator lastAssociation value equals: (1 asByteArrayOfSize: 8).
+	
+	"lets remove the two last ones"
+	iterator := index newIterator.
+	iterator at: 2 put: (2 asByteArrayOfSize: 8).
+	iterator at: 3 put: (3 asByteArrayOfSize: 8).
+	self assert: iterator last equals: (3 asByteArrayOfSize: 8).
+	iterator removeKey: 3.
+	iterator removeKey: 2.
+	self assert: iterator lastAssociation value equals: (1 asByteArrayOfSize: 8).
+	"but lets see if this works with a new iterator"
+	iterator := index newIterator.
+	self assert: iterator lastAssociation value equals: (1 asByteArrayOfSize: 8).
+
+
+]
+
+{ #category : #tests }
+SoilIndexedIteratorTest >> testPrior [
+	
+	| capacity iterator value toFind |
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	iterator := index newIterator.
+	"select a key where we have to cross over to another page"
+	toFind := index class == SoilSkipList ifTrue: [ 254 ] ifFalse: [ 255 ].
+	value := iterator
+		find: toFind;
+		prior.
+	self assert: value equals: ((toFind - 1) asByteArrayOfSize: 8)
+]
+
+{ #category : #tests }
+SoilIndexedIteratorTest >> testPrior5 [
+	
+	| capacity iterator result |
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	iterator := index newIterator.
+	result := iterator
+		find: 6;
+		prior: 5.
+	self assert: result size equals: 5.
 ]
 
 { #category : #tests }

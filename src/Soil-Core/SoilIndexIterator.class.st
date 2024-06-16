@@ -232,8 +232,8 @@ SoilIndexIterator >> lastAssociation [
 	^ restoredItem 
 		ifNotNil: [ restoredItem key -> (self convertValue: restoredItem value) ] 
 		ifNil: [
-			(self restoreItem: self priorAssociation)
-				ifNotNil: [ :item | item key -> (self convertValue: item value) ] ] 
+			"if the last entry is deleted, we need to take the one before"
+			^ self lastAssociation ] 
 ]
 
 { #category : #accessing }
@@ -329,7 +329,23 @@ SoilIndexIterator >> pagesDo: aBlock [
 		currentPage := self nextPage ]
 ]
 
-{ #category : #private }
+{ #category : #accessing }
+SoilIndexIterator >> prior [
+	^ self priorAssociation value
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> prior: anInteger [
+	| result |
+	result := OrderedCollection new: anInteger.
+	anInteger timesRepeat: [
+		| prior |
+		prior := self prior ifNil: [ ^ result].
+		result add: prior ].
+	^ result
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> priorAssociation [
 	| item |
 	"Find the association before, if currentPage is not set we return the last association"
