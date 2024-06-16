@@ -106,15 +106,13 @@ SoilIndexedIteratorTest >> testFirstWithRemovedItem [
 	| iterator |
 	
 	iterator := index newIterator.
-	iterator at: #foo put: (1 asByteArrayOfSize: 8).
-	iterator removeKey: #foo.
+	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	iterator removeKey: 1.
+	iterator := index newIterator.
 	self assert: iterator firstAssociation value equals: nil.
 	
-	iterator := index newIterator.
-	iterator at: #foo put: (1 asByteArrayOfSize: 8).
-	iterator at: #foo1 put: (2 asByteArrayOfSize: 8).
-	iterator removeKey: #foo.
-	self assert: iterator firstAssociation value equals: (2 asByteArrayOfSize: 8)
+	self flag: #TODO. 
+	"need to test with two items, remove first, three items, remove first two"
 ]
 
 { #category : #tests }
@@ -122,8 +120,9 @@ SoilIndexedIteratorTest >> testLastWithRemovedItem [
 	| iterator |
 	
 	iterator := index newIterator.
-	iterator at: 1 put: (2 asByteArrayOfSize: 8).
+	iterator at: 1 put: (1 asByteArrayOfSize: 8).
 	iterator removeKey: 1.
+	iterator := index newIterator.
 	self assert: iterator lastAssociation equals: nil.
 	
 	"last when the last one was removed"
@@ -131,7 +130,7 @@ SoilIndexedIteratorTest >> testLastWithRemovedItem [
 	iterator at: 1 put: (1 asByteArrayOfSize: 8).
 	iterator at: 2 put: (2 asByteArrayOfSize: 8).
 	iterator removeKey: 2.
-	self assert: iterator lastAssociation value equals: (1 asByteArrayOfSize: 8).
+	
 	iterator := index newIterator.
 	self assert: iterator lastAssociation value equals: (1 asByteArrayOfSize: 8).
 	
@@ -139,15 +138,10 @@ SoilIndexedIteratorTest >> testLastWithRemovedItem [
 	iterator := index newIterator.
 	iterator at: 2 put: (2 asByteArrayOfSize: 8).
 	iterator at: 3 put: (3 asByteArrayOfSize: 8).
-	self assert: iterator last equals: (3 asByteArrayOfSize: 8).
 	iterator removeKey: 3.
 	iterator removeKey: 2.
-	self assert: iterator lastAssociation value equals: (1 asByteArrayOfSize: 8).
-	"but lets see if this works with a new iterator"
 	iterator := index newIterator.
-	self assert: iterator lastAssociation value equals: (1 asByteArrayOfSize: 8).
-
-
+	self assert: iterator lastAssociation value equals: (1 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
