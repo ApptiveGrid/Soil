@@ -111,8 +111,23 @@ SoilIndexedIteratorTest >> testFirstWithRemovedItem [
 	iterator := index newIterator.
 	self assert: iterator firstAssociation value equals: nil.
 	
-	self flag: #TODO. 
-	"need to test with two items, remove first, three items, remove first two"
+	"first when the first one was removed"
+	iterator := index newIterator.
+	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	iterator at: 2 put: (2 asByteArrayOfSize: 8).
+	iterator removeKey: 1.
+	iterator := index newIterator.
+	self assert: iterator firstAssociation value equals: (2 asByteArrayOfSize: 8).
+	
+	"lets remove the two first ones"
+	iterator := index newIterator.
+	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	iterator at: 2 put: (2 asByteArrayOfSize: 8).
+	iterator at: 3 put: (3 asByteArrayOfSize: 8).
+	iterator removeKey: 1.
+	iterator removeKey: 2.
+	iterator := index newIterator.
+	self assert: iterator firstAssociation value equals: (3 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
