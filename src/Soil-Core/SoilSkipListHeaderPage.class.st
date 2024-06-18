@@ -48,6 +48,11 @@ SoilSkipListHeaderPage >> initializeInIndex: aSoilSkipList [
 	
 ]
 
+{ #category : #testing }
+SoilSkipListHeaderPage >> isHeaderPage [
+	^ true
+]
+
 { #category : #accessing }
 SoilSkipListHeaderPage >> keySize: anInteger [
 	"as long as no items have been added the key size can be changed"

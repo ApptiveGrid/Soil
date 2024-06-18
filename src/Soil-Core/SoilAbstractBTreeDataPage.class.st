@@ -62,7 +62,7 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 
 { #category : #testing }
 SoilAbstractBTreeDataPage >> isIndexPage [
-	^ false
+	^false
 ]
 
 { #category : #testing }

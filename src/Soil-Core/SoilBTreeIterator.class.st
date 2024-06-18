@@ -26,9 +26,9 @@ SoilBTreeIterator >> findPageFor: indexKey [
 
 { #category : #accessing }
 SoilBTreeIterator >> lastPage [
-	| pageNumber |
-	currentPage := index headerPage.
-	[ (pageNumber := currentPage next) isZero ] whileFalse: [ 
-		currentPage := self pageAt: pageNumber ].
-	^currentPage
+	"follow the last index entry till reaching a data page"
+	currentPage := index rootPage.
+	[ currentPage isIndexPage ] whileTrue: [
+		 currentPage := self pageAt: currentPage lastItem value ].
+	^ currentPage
 ]

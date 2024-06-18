@@ -164,6 +164,14 @@ SoilIndexIterator >> findPageFor: indexKey [
 	^ self subclassResponsibility
 ]
 
+{ #category : #private }
+SoilIndexIterator >> findPriorPageOf: aPage [
+	"For now we use a very slow approach that searched all pages from the first following the next pointer.
+	TODO:
+	We need to do something more clever that iterates similar to finding a key, thus not requiring all pages"
+	^ self pagesDo: [ :page | page next == aPage index ifTrue: [ ^page ] ]
+]
+
 { #category : #accessing }
 SoilIndexIterator >> first [
 	^ self firstAssociation value
@@ -224,8 +232,8 @@ SoilIndexIterator >> lastAssociation [
 	^ restoredItem 
 		ifNotNil: [ restoredItem key -> (self convertValue: restoredItem value) ] 
 		ifNil: [
-			(self restoreItem: self priorAssociation)
-				ifNotNil: [ :item | item key -> (self convertValue: item value) ] ] 
+			"if the last entry is deleted, we need to take the one before"
+			^ self lastAssociation ] 
 ]
 
 { #category : #accessing }
@@ -321,7 +329,23 @@ SoilIndexIterator >> pagesDo: aBlock [
 		currentPage := self nextPage ]
 ]
 
-{ #category : #private }
+{ #category : #accessing }
+SoilIndexIterator >> prior [
+	^ self priorAssociation value
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> prior: anInteger [
+	| result |
+	result := OrderedCollection new: anInteger.
+	anInteger timesRepeat: [
+		| prior |
+		prior := self prior ifNil: [ ^ result].
+		result add: prior ].
+	^ result
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> priorAssociation [
 	| item |
 	"Find the association before, if currentPage is not set we return the last association"
@@ -336,8 +360,9 @@ SoilIndexIterator >> priorAssociation [
 						currentKey := i key. 
 						^ i ]
 					ifNil: [ 
-						(currentPage next = 0) ifTrue: [ ^ nil ].
-						currentPage := index store pageAt: currentPage priorPage.
+						"are we the first page? if yes, there is no item before"
+						currentPage isHeaderPage ifTrue: [ ^nil ].
+						currentPage := self findPriorPageOf: currentPage.
 						currentKey := nil ] ]
 			ifNil: [
 				currentPage isEmpty ifTrue: [ ^ nil ].
