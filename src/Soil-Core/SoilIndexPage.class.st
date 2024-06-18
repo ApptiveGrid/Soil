@@ -78,6 +78,11 @@ SoilIndexPage >> isDirty [
 ]
 
 { #category : #testing }
+SoilIndexPage >> isHeaderPage [
+	^ false
+]
+
+{ #category : #testing }
 SoilIndexPage >> isLastPage [
 	self shouldBeImplemented.
 ]

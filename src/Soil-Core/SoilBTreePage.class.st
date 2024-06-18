@@ -46,7 +46,7 @@ SoilBTreePage >> insertItem: anItem for: iterator [
 
 { #category : #testing }
 SoilBTreePage >> isIndexPage [
-	^ self subclassResponsibility
+ 	^ self subclassResponsibility
 ]
 
 { #category : #accessing }

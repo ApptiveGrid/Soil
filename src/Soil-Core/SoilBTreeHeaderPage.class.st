@@ -39,6 +39,11 @@ SoilBTreeHeaderPage >> initialize [
 SoilBTreeHeaderPage >> initializeInIndex: aSoilSkipList [
 ]
 
+{ #category : #testing }
+SoilBTreeHeaderPage >> isHeaderPage [
+	^ true
+]
+
 { #category : #accessing }
 SoilBTreeHeaderPage >> lastFreePageIndex: anObject [
 
