@@ -49,7 +49,7 @@ SoilFileLockRegistry >> addLock: aLock [
 	^ semaphore critical: [  
 		locks 
 			detect: [:lock | lock conflictsWith: aLock ]
-			ifFound: [:lock | SoilAlreadyLocked signal: 'cannot lock <', aLock asString, '> because is locked by  <', lock asString,'>'  ].
+			ifFound: [:lock | SoilAlreadyLocked signal: 'cannot memory lock <', aLock asString, '> because is locked by  <', lock context asString,'>'  ].
 		locks add: aLock ]
 	
 ]

@@ -86,19 +86,20 @@ SoilRangeLock >> lockInMemory: aLockRegistry [
 { #category : #locking }
 SoilRangeLock >> lockOn: aStream [ 
 	stream := aStream.
-	stream fileStream lockAt: from length: to - from 
+	(stream fileStream lockAt: from length: to - from) ifFalse: [ 
+		SoilAlreadyLocked signal: 'cannot file lock <', self asString, '> because there is a file lock present on disk'
+	] 
 ]
 
 { #category : #printing }
 SoilRangeLock >> printOn: aStream [ 
+	| path |
 	aStream << 'range lock  ' 
 		<< from asString << ' - ' << to asString.
-	registry ifNotNil: [  
-		aStream << ' mem ' << registry path asString ].
-	stream ifNotNil: [  
-		aStream << ' file ' << stream fileStream name asString ].
-	aStream << ' '.
-	context printOn: aStream
+	path := registry ifNotNil: [ registry path pathString ].
+	stream ifNotNil: [ 
+		path := stream fileStream name asString ].
+	aStream << ' @ ' << path
 ]
 
 { #category : #accessing }
