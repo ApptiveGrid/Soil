@@ -26,7 +26,7 @@ SoilBasicBTree >> asCopyOnWrite [
 
 { #category : #accessing }
 SoilBasicBTree >> dataPages [
-	^ (self pages select: [ :page | page isDataPage ]) asArray
+	^ (self pages reject: [ :page | page isIndexPage ]) asArray
 ]
 
 { #category : #accessing }
@@ -41,7 +41,7 @@ SoilBasicBTree >> hasHeaderPage [
 
 { #category : #accessing }
 SoilBasicBTree >> indexPages [
-	^ (self pages reject: [ :page | page isDataPage ]) asArray
+	^ (self pages select: [ :page | page isIndexPage ]) asArray
 ]
 
 { #category : #initialization }
