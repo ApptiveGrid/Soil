@@ -78,9 +78,9 @@ SoilFileLockRegistry >> path [
 ]
 
 { #category : #accessing }
-SoilFileLockRegistry >> path: anObject [
+SoilFileLockRegistry >> path: aStringOrFileReference [
 
-	path := anObject
+	path := aStringOrFileReference asFileReference 
 ]
 
 { #category : #printing }
