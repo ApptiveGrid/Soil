@@ -193,6 +193,13 @@ Soil >> findRecord: aBlock [
 		ensure: [ tx abort ]
 ]
 
+{ #category : #'memory space' }
+Soil >> garbageCollect [
+	SoilGarbageCollectVisitor new 
+		soil: self;
+		run
+]
+
 { #category : #initialization }
 Soil >> initialize [ 
 	super initialize.
