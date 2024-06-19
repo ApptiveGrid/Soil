@@ -417,7 +417,7 @@ SoilIndexedDictionaryTest >> testLastWithTransaction [
 	tx2 := soil newTransaction.
 	"and test last, note: keyorder"
 	self assert: tx2 root last equals: #twovalue.
-	self assert: (tx2 root first: 2) second equals: #twovalue
+	self assert: (tx2 root last: 2) second equals: #twovalue
 ]
 
 { #category : #tests }
