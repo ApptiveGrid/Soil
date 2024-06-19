@@ -24,6 +24,14 @@ SoilBTreeIterator >> findPageFor: indexKey [
 	^currentPage := index rootPage find: indexKey with: index
 ]
 
+{ #category : #private }
+SoilBTreeIterator >> findPreviousPageOf: aPage [
+	| key |
+	"The previous page can be found by searching using the index pages for the first item in aPage"
+	key := aPage firstItem key.
+	^currentPage := index rootPage findPreviousPage: key with: index
+]
+
 { #category : #accessing }
 SoilBTreeIterator >> lastPage [
 	"follow the last index entry till reaching a data page"
