@@ -168,8 +168,11 @@ SoilIndexIterator >> findPreviousPageOf: aPage [
 	"For now we use a very slow approach that searched all pages from the first following the next pointer.
 	TODO:
 	We need to do something more clever that iterates similar to finding a key, thus not requiring all pages"
+	aPage isHeaderPage ifTrue: [ ^nil ].
+	
 	self pagesDo: [ :page | page next == aPage index ifTrue: [ ^page ] ].
-	^nil
+	
+	self error: 'should not happen'
 ]
 
 { #category : #accessing }
