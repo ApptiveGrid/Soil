@@ -142,6 +142,11 @@ SoilIndexedDictionary >> last [
 	
 ]
 
+{ #category : #accessing }
+SoilIndexedDictionary >> last: anInteger [
+	^ self newIterator last: anInteger
+]
+
 { #category : #private }
 SoilIndexedDictionary >> loadFrom: aFileReference [ 
 	^ SoilSkipList new 

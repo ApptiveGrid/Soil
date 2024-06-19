@@ -98,7 +98,12 @@ SoilIndexedIteratorTest >> testFirst [
 	2 to: capacity do: [ :n |
 		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	first := index newIterator first.
-	self assert: first equals: #[ 8 7 6 5 4 3 2 1 ]
+	self assert: first equals: #[ 8 7 6 5 4 3 2 1 ].
+	
+	first := index newIterator first: 3.
+	self assert: first size equals: 3.
+	self assert: first third equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: first first equals: #[ 8 7 6 5 4 3 2 1 ]
 ]
 
 { #category : #tests }
@@ -128,6 +133,24 @@ SoilIndexedIteratorTest >> testFirstWithRemovedItem [
 	iterator removeKey: 2.
 	iterator := index newIterator.
 	self assert: iterator firstAssociation value equals: (3 asByteArrayOfSize: 8)
+]
+
+{ #category : #tests }
+SoilIndexedIteratorTest >> testLast [
+	
+	| capacity last |
+	capacity := index headerPage itemCapacity * 2.
+	
+	1 to: capacity - 1  do: [ :n |
+		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	index at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
+	last := index newIterator last.
+	self assert: last equals: #[ 8 7 6 5 4 3 2 1 ].
+	
+	last := index newIterator last: 3.
+	self assert: last size equals: 3.
+	self assert: last first equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: last third equals: #[ 8 7 6 5 4 3 2 1 ]
 ]
 
 { #category : #tests }
