@@ -493,7 +493,6 @@ SoilIndexedDictionaryTest >> testNextcloseToWithTransaction [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 
-
 	| tx tx2 tag |
 	tx := soil newTransaction.
 	tx root: dict.

@@ -73,6 +73,7 @@ SoilBTreePage >> split: newPage [
 	middle := (items size - 1 / 2) ceiling.
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.
+	dirty := true.
 	^ newPage
 ]
 

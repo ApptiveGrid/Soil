@@ -169,6 +169,10 @@ SoilIndexedIteratorTest >> testPrior [
 	iterator := index newIterator.
 	"select a key where we have to cross over to another page"
 	toFind := index class == SoilSkipList ifTrue: [ 254 ] ifFalse: [ 255 ].
+	"the key is indeed the first one in the page"
+	self assert: (iterator findPageFor: toFind) firstItem key equals: toFind.
+	
+	iterator := index newIterator.
 	value := iterator
 		find: toFind;
 		prior.
@@ -197,10 +201,74 @@ SoilIndexedIteratorTest >> testPriorAssociation [
 	1 to: capacity do: [ :n |
 		index at: n put: (n asByteArrayOfSize: 8) ].
 	iterator := index newIterator.
+	
 	"select a key where we have to cross over to another page"
 	toFind := index class == SoilSkipList ifTrue: [ 254 ] ifFalse: [ 255 ].
+	"the key is indeed the first one in the page"
+	self assert: (iterator findPageFor: toFind) firstItem key equals: toFind.
+	
+	iterator := index newIterator.
 	value := iterator
 		find: toFind;
 		priorAssociation.
 	self assert: value value equals: ((toFind - 1) asByteArrayOfSize: 8)
+]
+
+{ #category : #tests }
+SoilIndexedIteratorTest >> testPriorAssociationFirstPage [
+	
+	| capacity iterator value  |
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	
+	"prior of first"
+	iterator := index newIterator.
+	value := iterator
+		find: 1;
+		priorAssociation.
+	self assert: value value equals: nil.
+	
+	"prior of last"
+	iterator := index newIterator.
+	value := iterator
+		find: capacity;
+		priorAssociation.
+	self assert: value value equals: (capacity - 1 asByteArrayOfSize: 8).
+]
+
+{ #category : #tests }
+SoilIndexedIteratorTest >> testPriorPage [
+	
+	| capacity iterator page toFind priorPage |
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	iterator := index newIterator.
+	"select a key where we have to cross over to another page"
+	toFind := index class == SoilSkipList ifTrue: [ 254 ] ifFalse: [ 255 ].
+	"the key is indeed the first one in the page"
+	self assert: (iterator findPageFor: toFind) firstItem key equals: toFind.
+	
+	iterator := index newIterator.
+	priorPage := iterator
+		find: toFind;
+		priorPage.
+		
+	iterator := index newIterator.
+	page := iterator findPageFor: toFind.
+			
+	self assert: priorPage next equals: page index
+]
+
+{ #category : #tests }
+SoilIndexedIteratorTest >> testPriorPageFirstPage [
+	
+	| capacity iterator |
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	iterator := index newIterator.
+	iterator firstPage. "set iterator currentPage to first page"
+	self assert: iterator priorPage equals: nil
 ]
