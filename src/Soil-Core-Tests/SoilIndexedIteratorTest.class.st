@@ -238,6 +238,28 @@ SoilIndexedIteratorTest >> testPreviousAssociationFirstPage [
 ]
 
 { #category : #tests }
+SoilIndexedIteratorTest >> testPreviousAssociationNonBoundary [
+	"check previousAssociation where we have to *not* cross a page boundary"
+	
+	| capacity iterator value toFind |
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	iterator := index newIterator.
+	
+	"select a key where we do not have to cross over to another page"
+	toFind := index class == SoilSkipList ifTrue: [ 255 ] ifFalse: [ 256 ].
+	"the key is indeed not the first one in the page"
+	self deny: (iterator findPageFor: toFind) firstItem key equals: toFind.
+	
+	iterator := index newIterator.
+	value := iterator
+		find: toFind;
+		previousAssociation.
+	self assert: value value equals: ((toFind - 1) asByteArrayOfSize: 8)
+]
+
+{ #category : #tests }
 SoilIndexedIteratorTest >> testPreviousPage [
 	
 	| capacity iterator page toFind priorPage |

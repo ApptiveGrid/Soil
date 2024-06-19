@@ -35,32 +35,17 @@ SoilBTreeIndexPage >> findKey: aKey [
 	^nil
 ]
 
-{ #category : #searching }
-SoilBTreeIndexPage >> findKeyOffset: aKey [
-	| offset |
-	"this returns the offset of the index entry where aKey would be found"
-	offset := items size.
-	items
-		reverseDo: [ :each |
-			each key <= aKey 
-				ifTrue: [ ^ offset ].
-			offset := offset -1 ].
-	^nil
-]
-
 { #category : #private }
 SoilBTreeIndexPage >> findPreviousPage: aKey with: aBTree [
 	| item page |
 	item := self findKey: aKey.
 	page := aBTree pageAt: item value.
-	
-	page isHeaderPage ifTrue: [ ^nil ].
-	
+		
 	^ page isIndexPage 
 		ifFalse: [
 			"if we get a data page, we know that the prior page is just the page
-			referenced from the index enrty before "
-			aBTree pageAt: (self items at: (self findKeyOffset: aKey) - 1) value]
+			referenced from the index entry before "
+			aBTree pageAt: (self itemBefore: aKey) value]
 		ifTrue:  [ page findPreviousPage: aKey with: aBTree ]
 ]
 

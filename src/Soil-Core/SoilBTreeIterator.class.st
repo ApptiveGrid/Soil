@@ -26,10 +26,10 @@ SoilBTreeIterator >> findPageFor: indexKey [
 
 { #category : #private }
 SoilBTreeIterator >> findPreviousPageOf: aPage [
-	| key |
+	
+	aPage isHeaderPage ifTrue: [ ^nil ].
 	"The previous page can be found by searching using the index pages for the first item in aPage"
-	key := aPage firstItem key.
-	^currentPage := index rootPage findPreviousPage: key with: index
+	^currentPage := index rootPage findPreviousPage: aPage firstItem key with: index
 ]
 
 { #category : #accessing }
