@@ -164,7 +164,7 @@ SoilIndexIterator >> findPageFor: indexKey [
 ]
 
 { #category : #private }
-SoilIndexIterator >> findPriorPageOf: aPage [
+SoilIndexIterator >> findPreviousPageOf: aPage [
 	"For now we use a very slow approach that searched all pages from the first following the next pointer.
 	TODO:
 	We need to do something more clever that iterates similar to finding a key, thus not requiring all pages"
@@ -232,8 +232,8 @@ SoilIndexIterator >> last [
 SoilIndexIterator >> lastAssociation [
 	"Note: key will be index key"
 	| lastAssociation restoredItem |
-	"priorAssociation will use last page if currentPage is nil"
-	lastAssociation := self priorAssociation ifNil: [ ^nil ].
+	"previousAssociation will use last page if currentPage is nil"
+	lastAssociation := self previousAssociation ifNil: [ ^nil ].
 	restoredItem := self restoreItem: lastAssociation.
 	^ restoredItem 
 		ifNotNil: [ restoredItem key -> (self convertValue: restoredItem value) ] 
@@ -300,7 +300,7 @@ SoilIndexIterator >> nextCloseTo: key [
 
 { #category : #private }
 SoilIndexIterator >> nextKeyCloseTo: key [
-	"Note: returnrd key will be an index key"
+	"Note: returned key will be an index key"
 	| indexKey |
 	indexKey := index indexKey: key.
 	self findPageFor: indexKey.
@@ -336,23 +336,23 @@ SoilIndexIterator >> pagesDo: aBlock [
 ]
 
 { #category : #accessing }
-SoilIndexIterator >> prior [
-	^ self priorAssociation value
+SoilIndexIterator >> previous [
+	^ self previousAssociation value
 ]
 
 { #category : #accessing }
-SoilIndexIterator >> prior: anInteger [
+SoilIndexIterator >> previous: anInteger [
 	| result |
 	result := OrderedCollection new: anInteger.
 	anInteger timesRepeat: [
-		| prior |
-		prior := self prior ifNil: [ ^ result].
-		result add: prior ].
+		| previous |
+		previous := self previous ifNil: [ ^ result].
+		result add: previous ].
 	^ result
 ]
 
 { #category : #accessing }
-SoilIndexIterator >> priorAssociation [
+SoilIndexIterator >> previousAssociation [
 	| item |
 	"Find the association before, if currentPage is not set we return the last association"
 	currentPage ifNil: [ 
@@ -368,7 +368,7 @@ SoilIndexIterator >> priorAssociation [
 					ifNil: [ 
 						"are we the first page? if yes, there is no item before"
 						currentPage isHeaderPage ifTrue: [ ^nil ].
-						currentPage := self priorPage.
+						currentPage := self previousPage.
 						currentKey := nil ] ]
 			ifNil: [
 				currentPage isEmpty ifTrue: [ ^ nil ].
@@ -377,8 +377,8 @@ SoilIndexIterator >> priorAssociation [
 ]
 
 { #category : #accessing }
-SoilIndexIterator >> priorPage [ 
-	^ self findPriorPageOf: currentPage
+SoilIndexIterator >> previousPage [ 
+	^ self findPreviousPageOf: currentPage
 ]
 
 { #category : #removing }

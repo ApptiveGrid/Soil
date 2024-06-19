@@ -160,7 +160,7 @@ SoilIndexedIteratorTest >> testLastWithRemovedItem [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPrior [
+SoilIndexedIteratorTest >> testPrevious [
 	
 	| capacity iterator value toFind |
 	capacity := index headerPage itemCapacity * 2.
@@ -175,12 +175,12 @@ SoilIndexedIteratorTest >> testPrior [
 	iterator := index newIterator.
 	value := iterator
 		find: toFind;
-		prior.
+		previous.
 	self assert: value equals: ((toFind - 1) asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPrior5 [
+SoilIndexedIteratorTest >> testPrevious5 [
 	
 	| capacity iterator result |
 	capacity := index headerPage itemCapacity * 2.
@@ -189,12 +189,12 @@ SoilIndexedIteratorTest >> testPrior5 [
 	iterator := index newIterator.
 	result := iterator
 		find: 6;
-		prior: 5.
+		previous: 5.
 	self assert: result size equals: 5.
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPriorAssociation [
+SoilIndexedIteratorTest >> testPreviousAssociation [
 	
 	| capacity iterator value toFind |
 	capacity := index headerPage itemCapacity * 2.
@@ -210,12 +210,12 @@ SoilIndexedIteratorTest >> testPriorAssociation [
 	iterator := index newIterator.
 	value := iterator
 		find: toFind;
-		priorAssociation.
+		previousAssociation.
 	self assert: value value equals: ((toFind - 1) asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPriorAssociationFirstPage [
+SoilIndexedIteratorTest >> testPreviousAssociationFirstPage [
 	
 	| capacity iterator value  |
 	capacity := index headerPage itemCapacity * 2.
@@ -226,19 +226,19 @@ SoilIndexedIteratorTest >> testPriorAssociationFirstPage [
 	iterator := index newIterator.
 	value := iterator
 		find: 1;
-		priorAssociation.
+		previousAssociation.
 	self assert: value value equals: nil.
 	
 	"prior of last"
 	iterator := index newIterator.
 	value := iterator
 		find: capacity;
-		priorAssociation.
+		previousAssociation.
 	self assert: value value equals: (capacity - 1 asByteArrayOfSize: 8).
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPriorPage [
+SoilIndexedIteratorTest >> testPreviousPage [
 	
 	| capacity iterator page toFind priorPage |
 	capacity := index headerPage itemCapacity * 2.
@@ -253,7 +253,7 @@ SoilIndexedIteratorTest >> testPriorPage [
 	iterator := index newIterator.
 	priorPage := iterator
 		find: toFind;
-		priorPage.
+		previousPage.
 		
 	iterator := index newIterator.
 	page := iterator findPageFor: toFind.
@@ -262,7 +262,7 @@ SoilIndexedIteratorTest >> testPriorPage [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPriorPageFirstPage [
+SoilIndexedIteratorTest >> testPreviousPageFirstPage [
 	
 	| capacity iterator |
 	capacity := index headerPage itemCapacity * 2.
@@ -270,5 +270,5 @@ SoilIndexedIteratorTest >> testPriorPageFirstPage [
 		index at: n put: (n asByteArrayOfSize: 8) ].
 	iterator := index newIterator.
 	iterator firstPage. "set iterator currentPage to first page"
-	self assert: iterator priorPage equals: nil
+	self assert: iterator previousPage equals: nil
 ]
