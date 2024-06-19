@@ -465,6 +465,8 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 		remainingEntries remove: entry.
 		"check that all remaining entries can be found"	
 		remainingEntries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+		"check size, this makes sure we can iterate over all remaining entries"
+		self assert: index values size equals: remainingEntries size.	
 		 ].
 	self assert: index isEmpty.
 	"and add back"
@@ -523,6 +525,10 @@ SoilBTreeTest >> testSplitIndexPage [
 	
 	"can we find all the keys we added?"
 	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	"check size, this makes sure we can iterate over all remaining entries"
+	self assert: index values size equals: entries size.	
+
 ]
 
 { #category : #tests }
@@ -555,4 +561,8 @@ SoilBTreeTest >> testSplitIndexPageReleoad [
 	
 	"can we find all the keys we added?"
 	entries do: [:each | self assert: (index at: each ) equals: (#[ 1 2 3 4 5 6 7 8 ] asByteArrayOfSize: 512)].
+	
+	"check size, this makes sure we can iterate over all remaining entries"
+	self assert: index values size equals: entries size.	
+
 ]

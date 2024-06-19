@@ -85,12 +85,11 @@ SoilIndexIterator >> basicNextAssociation [
 						^ i ]
 					ifNil: [ 
 						"if we did not find an element after the current key we
-						need to proceed with the next page. 
-						if the next index is 0 there is no next page and we 
-						return nil"
-						(currentPage next = 0) ifTrue: [ ^ nil ].
+						need to proceed with the next page.
+						For the last page there is no next page and we return nil"
+						(currentPage isLastPage) ifTrue: [ ^ nil ].
 						"if there is a next page we set it to current and restart"
-						currentPage := index store pageAt: currentPage next.
+						currentPage := self nextPage.
 						currentKey := nil ] ]
 			ifNil: [
 				"without currentKey we are looking for the first item in a page.
@@ -169,7 +168,8 @@ SoilIndexIterator >> findPriorPageOf: aPage [
 	"For now we use a very slow approach that searched all pages from the first following the next pointer.
 	TODO:
 	We need to do something more clever that iterates similar to finding a key, thus not requiring all pages"
-	^ self pagesDo: [ :page | page next == aPage index ifTrue: [ ^page ] ]
+	self pagesDo: [ :page | page next == aPage index ifTrue: [ ^page ] ].
+	^nil
 ]
 
 { #category : #accessing }
@@ -196,6 +196,11 @@ SoilIndexIterator >> firstAssociation [
 	item := self nextAssociation.
 	currentKey := item ifNotNil: [ item key ].
 	^ item
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> firstPage [
+	^ currentPage := index firstPage
 ]
 
 { #category : #accessing }
@@ -227,6 +232,7 @@ SoilIndexIterator >> last [
 SoilIndexIterator >> lastAssociation [
 	"Note: key will be index key"
 	| lastAssociation restoredItem |
+	"priorAssociation will use last page if currentPage is nil"
 	lastAssociation := self priorAssociation ifNil: [ ^nil ].
 	restoredItem := self restoreItem: lastAssociation.
 	^ restoredItem 
@@ -362,12 +368,17 @@ SoilIndexIterator >> priorAssociation [
 					ifNil: [ 
 						"are we the first page? if yes, there is no item before"
 						currentPage isHeaderPage ifTrue: [ ^nil ].
-						currentPage := self findPriorPageOf: currentPage.
+						currentPage := self priorPage.
 						currentKey := nil ] ]
 			ifNil: [
 				currentPage isEmpty ifTrue: [ ^ nil ].
 				^ currentPage lastItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
 	Error signal: 'shouldnt happen'
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> priorPage [ 
+	^ self findPriorPageOf: currentPage
 ]
 
 { #category : #removing }

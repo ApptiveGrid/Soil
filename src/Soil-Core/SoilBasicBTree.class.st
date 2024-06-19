@@ -144,6 +144,7 @@ SoilBasicBTree >> splitPage: page [
 	| newPage |
 	newPage := page split: store newPage.
 	newPage index: self store nextPageIndex.
+	newPage next: page next.
 	page next: newPage index.
 	self store pageAt: newPage index put: newPage.
 	^ newPage 
