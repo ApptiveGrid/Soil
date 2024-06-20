@@ -232,6 +232,18 @@ SoilIndexIterator >> last [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> last: anInteger [
+	| result |
+	result := OrderedCollection new: anInteger.
+	result add: self last.
+	anInteger - 1 timesRepeat: [
+		| prev |
+		prev := self previous ifNil: [ ^ result].
+		result add: prev ].
+	^ result reversed
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> lastAssociation [
 	"Note: key will be index key"
 	| lastAssociation restoredItem |
