@@ -27,9 +27,22 @@ SoilBTreePage >> addItem: anAssociation [
 	dirty := true
 ]
 
+{ #category : #assertions }
+SoilBTreePage >> bTreeAssertion [
+	self assert: self hasRoom.
+	"each node has a maximum of M children and at least ceil(M/2) - 1 children"
+	self assert: (self numberOfItems <= self itemCapacity).
+	items isEmpty ifFalse: [ self assert:  self hasUnderflow not  ]
+]
+
 { #category : #private }
 SoilBTreePage >> find: aKey with: aBTree [ 
 	^ self subclassResponsibility
+]
+
+{ #category : #assertions }
+SoilBTreePage >> hasUnderflow [
+	^ self numberOfItems < ((self itemCapacity  / 2) ceiling - 1)
 ]
 
 { #category : #initialization }

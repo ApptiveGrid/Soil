@@ -469,6 +469,10 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 		self assert: index values size equals: remainingEntries size.	
 		 ].
 	self assert: index isEmpty.
+	
+	"add data pages are empty"
+	index dataPages do: [ :dataPage | self assert: dataPage isEmpty].
+	
 	"and add back"
 	entries do: [:toAdd |
 		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].

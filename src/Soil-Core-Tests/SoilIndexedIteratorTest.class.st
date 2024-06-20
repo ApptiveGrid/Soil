@@ -99,6 +99,8 @@ SoilIndexedIteratorTest >> testFirst [
 		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	first := index newIterator first.
 	self assert: first equals: #[ 8 7 6 5 4 3 2 1 ].
+	"we get always the first"
+	self assert: first equals: #[ 8 7 6 5 4 3 2 1 ].
 	
 	first := index newIterator first: 3.
 	self assert: first size equals: 3.
@@ -141,6 +143,9 @@ SoilIndexedIteratorTest >> testLast [
 	| capacity last |
 	capacity := index headerPage itemCapacity * 2.
 	
+	"check last on empty iterator"
+	self assert: index newIterator last equals: nil.
+	
 	1 to: capacity - 1  do: [ :n |
 		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	index at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
@@ -151,6 +156,22 @@ SoilIndexedIteratorTest >> testLast [
 	self assert: last size equals: 3.
 	self assert: last first equals: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: last third equals: #[ 8 7 6 5 4 3 2 1 ]
+]
+
+{ #category : #tests }
+SoilIndexedIteratorTest >> testLastPage [
+	
+	| capacity lastPage |
+	capacity := index headerPage itemCapacity * 2.
+	
+	"check last on empty iterator"
+	self assert: index newIterator lastPage identicalTo: index headerPage.
+	
+	1 to: capacity - 1  do: [ :n |
+		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	index at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
+	lastPage := index newIterator lastPage.
+	self assert: lastPage lastItem value equals: #[ 8 7 6 5 4 3 2 1 ]
 ]
 
 { #category : #tests }
@@ -310,6 +331,12 @@ SoilIndexedIteratorTest >> testPreviousPage [
 SoilIndexedIteratorTest >> testPreviousPageFirstPage [
 	
 	| capacity iterator |
+	
+	"fisrt check on empty"
+	iterator := index newIterator.
+	iterator firstPage. "set iterator currentPage to first page"
+	self assert: iterator previousPage equals: nil.
+	
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n |
 		index at: n put: (n asByteArrayOfSize: 8) ].
