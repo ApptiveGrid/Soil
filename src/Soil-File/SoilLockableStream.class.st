@@ -187,6 +187,11 @@ SoilLockableStream >> size [
 	^ fileStream size
 ]
 
+{ #category : #public }
+SoilLockableStream >> sync [
+	fileStream wrappedStream fdatasync 
+]
+
 { #category : #locking }
 SoilLockableStream >> unlockFrom: from to: to for: lockContext [ 
 	
