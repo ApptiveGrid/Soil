@@ -29,6 +29,7 @@ SoilLockableStream >> close [
 	fileStream ifNotNil: [  
 		fileStream closed 
 			ifFalse: [ fileStream close ] ].
+	lockRegistry := nil 
 
 ]
 
