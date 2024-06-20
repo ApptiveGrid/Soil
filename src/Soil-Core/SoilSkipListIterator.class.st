@@ -66,7 +66,7 @@ SoilSkipListIterator >> findPreviousPageOf: aPage [
 			pageIndex := currentPage rightAt: level.
 			(pageIndex > 0) and: [ 
 				candidatePage := self pageAt: pageIndex.
-				(candidatePage isLastPage not and: [ (self pageAt: (candidatePage next)) smallestKey <= aPage smallestKey])]]
+				(candidatePage isLastPage not and: [ (self pageAt: (candidatePage next)) == aPage])]]
 					whileTrue: [ currentPage := candidatePage  ].
 			self atLevel: level put: currentPage. ].
 		
