@@ -235,10 +235,11 @@ SoilIndexIterator >> last [
 SoilIndexIterator >> last: anInteger [
 	| result |
 	result := OrderedCollection new: anInteger.
-	anInteger timesRepeat: [
-		| next |
-		next := self last ifNil: [ ^ result].
-		result add: next ].
+	result add: self last.
+	anInteger - 1 timesRepeat: [
+		| prev |
+		prev := self previous ifNil: [ ^ result].
+		result add: prev ].
 	^ result reversed
 ]
 
