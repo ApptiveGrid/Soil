@@ -60,6 +60,7 @@ SoilPersistentDatabaseJournal >> cycleFragmentFile [
 	nextFileNumber := (self fileNumberFrom: currentFragmentFile filename) + 1.
 	currentFragmentFile 
 		flush;
+		writeContentsToDisk;
 		close.
 	currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber)
 ]

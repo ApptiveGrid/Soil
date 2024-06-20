@@ -36,8 +36,9 @@ SoilBinaryFile >> headerSize [
 SoilBinaryFile >> initializeFilesystem [
 	self initializeHeader.
 	self initializeStart.
-	self stream 
-		flush
+	self 
+		flush;
+		writeContentsToDisk 
 ]
 
 { #category : #initialization }
