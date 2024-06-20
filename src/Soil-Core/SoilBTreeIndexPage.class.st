@@ -75,6 +75,13 @@ SoilBTreeIndexPage >> insertItem: item for: iterator [
 		
 	"no space, we have to split"
 	newPage := iterator index splitIndexPage: self.
+	
+	"check that the current and new pages are balanced"
+	self flag: #TODO. "should be moved to a consistency checker"
+	newPage bTreeAssertion.
+	self bTreeAssertion.
+	
+	
 	"we need to add the new page to the index above"
 	^ return indexEntry: (newPage smallestKey -> newPage index)
 ]

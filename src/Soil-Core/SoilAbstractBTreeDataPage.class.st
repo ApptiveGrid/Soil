@@ -46,7 +46,7 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 
 	| newPage pageWithItem return |
 
-	return := SoilBTreeReturnWrapper new returnValue: ((self associationAt: anItem key ifAbsent: nil) ifNotNil: [:item | item value]).
+	return := SoilBTreeReturnWrapper new returnValue: (self valueAt: anItem key).
 	self addItem: anItem.
 	self hasRoom ifTrue: [  iterator currentPage: self. ^ return ].
 	"We have to split"
@@ -56,6 +56,12 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 						ifTrue: [ newPage ]
 						ifFalse: [ self ]).
 	iterator currentPage: pageWithItem.
+	
+	"check that the current and new pages are balanced"
+	self flag: #TODO. "should be moved to a consistency checker"
+	newPage bTreeAssertion.
+	self bTreeAssertion.
+	
 	"we need to add the new page to the index above"
 	^ return indexEntry: (newPage smallestKey -> newPage index)
 ]
