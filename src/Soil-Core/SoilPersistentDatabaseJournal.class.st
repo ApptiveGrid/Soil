@@ -29,6 +29,12 @@ SoilPersistentDatabaseJournal >> appendEntry: aSoilJournalEntry [
 		
 ]
 
+{ #category : #'open/close' }
+SoilPersistentDatabaseJournal >> close [
+	currentFragmentFile ifNotNil: [
+		currentFragmentFile close ]
+]
+
 { #category : #private }
 SoilPersistentDatabaseJournal >> createFragmentFile: filename [
 	self removeFragmentFiles.

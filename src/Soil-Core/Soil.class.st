@@ -154,7 +154,9 @@ Soil >> close [
 	behaviorRegistry ifNotNil: [ 
 		behaviorRegistry close ].
 	control ifNotNil: [ 
-		control close ]
+		control close ].
+	journal ifNotNil: [ 
+		journal close ]
 ]
 
 { #category : #accessing }
