@@ -121,9 +121,10 @@ SoilBasicBTree >> pageClass [
 
 { #category : #removing }
 SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
-	| return |
-	return := self rootPage remove: key for: self.
-	^ return ifNil: [aBlock value]
+	| removedItem |
+	removedItem := self rootPage remove: key for: self.
+	removedItem ifNil: [aBlock value].
+	^removedItem value 
 ]
 
 { #category : #accessing }

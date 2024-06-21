@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilIndexedIteratorTest,
+	#name : #SoilIndexIteratorTest,
 	#superclass : #ParametrizedTestCase,
 	#instVars : [
 		'index',
@@ -9,7 +9,7 @@ Class {
 }
 
 { #category : #'building suites' }
-SoilIndexedIteratorTest class >> testParameters [
+SoilIndexIteratorTest class >> testParameters [
 	"even though we test the iterators, the test creates the indexes and gets the iterators from there"
 	^ ParametrizedTestMatrix new
 		addCase: { #classToTest -> SoilSkipList };
@@ -18,19 +18,19 @@ SoilIndexedIteratorTest class >> testParameters [
 ]
 
 { #category : #accessing }
-SoilIndexedIteratorTest >> classToTest [
+SoilIndexIteratorTest >> classToTest [
 
 	^ classToTest
 ]
 
 { #category : #accessing }
-SoilIndexedIteratorTest >> classToTest: anObject [
+SoilIndexIteratorTest >> classToTest: anObject [
 
 	classToTest := anObject
 ]
 
 { #category : #running }
-SoilIndexedIteratorTest >> setUp [ 
+SoilIndexIteratorTest >> setUp [ 
 	super setUp.
 
 	index := classToTest new
@@ -46,14 +46,14 @@ SoilIndexedIteratorTest >> setUp [
 ]
 
 { #category : #running }
-SoilIndexedIteratorTest >> tearDown [ 
+SoilIndexIteratorTest >> tearDown [ 
 	index ifNotNil: [ 
 		index close ].
 	super tearDown
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testFindAndNext [
+SoilIndexIteratorTest >> testFindAndNext [
 	
 	| capacity iterator value |
 	capacity := index headerPage itemCapacity * 2.
@@ -67,7 +67,7 @@ SoilIndexedIteratorTest >> testFindAndNext [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testFindAndNext2 [
+SoilIndexIteratorTest >> testFindAndNext2 [
 	
 	| capacity iterator values |
 	capacity := index firstPage itemCapacity * 2.
@@ -90,7 +90,7 @@ SoilIndexedIteratorTest >> testFindAndNext2 [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testFirst [
+SoilIndexIteratorTest >> testFirst [
 	
 	| capacity first |
 	capacity := index headerPage itemCapacity * 2.
@@ -109,7 +109,7 @@ SoilIndexedIteratorTest >> testFirst [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testFirstWithRemovedItem [ 
+SoilIndexIteratorTest >> testFirstWithRemovedItem [ 
 	| iterator |
 	
 	iterator := index newIterator.
@@ -138,7 +138,7 @@ SoilIndexedIteratorTest >> testFirstWithRemovedItem [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testLast [
+SoilIndexIteratorTest >> testLast [
 	
 	| capacity last |
 	capacity := index headerPage itemCapacity * 2.
@@ -159,7 +159,7 @@ SoilIndexedIteratorTest >> testLast [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testLastPage [
+SoilIndexIteratorTest >> testLastPage [
 	
 	| capacity lastPage |
 	capacity := index headerPage itemCapacity * 2.
@@ -175,7 +175,7 @@ SoilIndexedIteratorTest >> testLastPage [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testLastWithRemovedItem [ 
+SoilIndexIteratorTest >> testLastWithRemovedItem [ 
 	| iterator |
 	
 	iterator := index newIterator.
@@ -204,7 +204,7 @@ SoilIndexedIteratorTest >> testLastWithRemovedItem [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPrevious [
+SoilIndexIteratorTest >> testPrevious [
 	
 	| capacity iterator value toFind |
 	capacity := index headerPage itemCapacity * 2.
@@ -224,7 +224,7 @@ SoilIndexedIteratorTest >> testPrevious [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPrevious5 [
+SoilIndexIteratorTest >> testPrevious5 [
 	
 	| capacity iterator result |
 	capacity := index headerPage itemCapacity * 2.
@@ -238,7 +238,7 @@ SoilIndexedIteratorTest >> testPrevious5 [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPreviousAssociation [
+SoilIndexIteratorTest >> testPreviousAssociation [
 	
 	| capacity iterator value toFind |
 	capacity := index headerPage itemCapacity * 2.
@@ -259,7 +259,7 @@ SoilIndexedIteratorTest >> testPreviousAssociation [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPreviousAssociationFirstPage [
+SoilIndexIteratorTest >> testPreviousAssociationFirstPage [
 	
 	| capacity iterator value  |
 	capacity := index headerPage itemCapacity * 2.
@@ -282,7 +282,7 @@ SoilIndexedIteratorTest >> testPreviousAssociationFirstPage [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPreviousAssociationNonBoundary [
+SoilIndexIteratorTest >> testPreviousAssociationNonBoundary [
 	"check previousAssociation where we have to *not* cross a page boundary"
 	
 	| capacity iterator value toFind |
@@ -304,7 +304,7 @@ SoilIndexedIteratorTest >> testPreviousAssociationNonBoundary [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPreviousPage [
+SoilIndexIteratorTest >> testPreviousPage [
 	
 	| capacity iterator page toFind priorPage |
 	capacity := index headerPage itemCapacity * 2.
@@ -328,7 +328,7 @@ SoilIndexedIteratorTest >> testPreviousPage [
 ]
 
 { #category : #tests }
-SoilIndexedIteratorTest >> testPreviousPageFirstPage [
+SoilIndexIteratorTest >> testPreviousPageFirstPage [
 	
 	| capacity iterator |
 	
