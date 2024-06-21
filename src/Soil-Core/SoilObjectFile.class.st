@@ -52,6 +52,12 @@ SoilObjectFile >> initialize [
 	mutex := Mutex new
 ]
 
+{ #category : #initialization }
+SoilObjectFile >> initializeFilesystem [ 
+	super initializeFilesystem.
+	self writeContentsToDisk 
+]
+
 { #category : #accessing }
 SoilObjectFile >> path [
 	^ segment path / #objects
@@ -77,4 +83,10 @@ SoilObjectFile >> size [
 { #category : #versions }
 SoilObjectFile >> versionSize [
 	^ 8
+]
+
+{ #category : #initialization }
+SoilObjectFile >> writeContentsToDisk [ 
+	(segment notNil and: [ segment soil setup isFsyncEnabled  ]) ifTrue: [
+		stream sync ]
 ]

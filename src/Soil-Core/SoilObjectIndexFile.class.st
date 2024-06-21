@@ -148,3 +148,8 @@ SoilObjectIndexFile >> validateLastObjectIndex: anInteger [
 	(fileIndex < anInteger) ifFalse: [ 
 		SoilInvalidSegmentIndex signal: 'segment indexes can only grow. ', anInteger printString, ' is smaller than the on-disk index ', fileIndex printString ] 
 ]
+
+{ #category : #writing }
+SoilObjectIndexFile >> writeContentsToDisk [
+	stream sync 
+]
