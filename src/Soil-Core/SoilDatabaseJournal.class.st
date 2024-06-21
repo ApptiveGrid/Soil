@@ -54,6 +54,11 @@ SoilDatabaseJournal >> lastTransactionJournal [
 ]
 
 { #category : #accessing }
+SoilDatabaseJournal >> soil [
+	^ soil
+]
+
+{ #category : #accessing }
 SoilDatabaseJournal >> soil: aSoil [ 
 	soil := aSoil
 ]
