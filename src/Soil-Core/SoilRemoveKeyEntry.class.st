@@ -57,7 +57,7 @@ SoilRemoveKeyEntry >> oldValue: aString [
 	oldValue := aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilRemoveKeyEntry >> providesObjectIds [ 
 	^ true
 ]

@@ -84,7 +84,7 @@ SoilNewObjectEntry >> printOn: aStream [
 		<< objectId asString 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilNewObjectEntry >> providesObjectIds [ 
 	^ true
 ]
