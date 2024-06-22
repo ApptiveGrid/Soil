@@ -328,5 +328,5 @@ SoilJournalFragmentFile >> versionSize [
 { #category : #writing }
 SoilJournalFragmentFile >> writeContentsToDisk [ 
 	databaseJournal soil setup isFsyncEnabled ifTrue: [ 
-		stream sync]
+		stream sync ]
 ]
