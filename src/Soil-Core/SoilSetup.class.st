@@ -36,12 +36,12 @@ SoilSetup >> defaultCacheRecordsSize [
 	^ 1000
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #fsync }
 SoilSetup >> disableFsync [ 
 	fsyncEnabled := false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #fsync }
 SoilSetup >> enableFsync [ 
 	fsyncEnabled := true
 ]

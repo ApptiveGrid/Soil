@@ -4,7 +4,7 @@ Class {
 	#category : #'Soil-Core-Files'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #versions }
 SoilObjectFile >> allRecords [
 	| records pos record |
 	records := OrderedCollection new.
@@ -68,7 +68,7 @@ SoilObjectFile >> prefix [
 	^ 'SOIL|OBJECT ' asByteArray
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilObjectFile >> recordStart [
 	^ (segment id = 0)
 		ifTrue: [ self headerSize + 16 ]

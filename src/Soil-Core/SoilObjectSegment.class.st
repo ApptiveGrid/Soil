@@ -18,7 +18,7 @@ SoilObjectSegment >> acceptSoil: aSoilVisitor [
 		ifFalse: [ aSoilVisitor visitObjectSegment: self ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilObjectSegment >> allRecords [
 	^ objectFile allRecords
 ]

@@ -71,7 +71,7 @@ SoilNewBehaviorEntry >> printOn: aStream [
 		
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilNewBehaviorEntry >> providesObjectIds [ 
 	^ true
 ]

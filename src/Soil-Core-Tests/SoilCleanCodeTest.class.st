@@ -94,7 +94,7 @@ SoilCleanCodeTest >> testNoUncategorizedMethods [
 	           , (Soil package definedClasses collect: [ :each | each classSide ]).
 
 	violating := classes select: [ :class | 
-		             class protocols includes: #'as yet unclassified' ].
+		             class protocolNames includes: #'as yet unclassified' ].
 	self
 		assert: violating isEmpty
 		description: 'the following classes have uncategorized methods: ', violating asString
