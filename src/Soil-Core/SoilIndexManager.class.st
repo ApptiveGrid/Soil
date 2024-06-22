@@ -132,5 +132,5 @@ SoilIndexManager >> segment: aSOObjectSegment [
 { #category : #writing }
 SoilIndexManager >> writeContentsToDisk [
 	segment soil setup isFsyncEnabled ifTrue: [  
-		self indexes do: #writeContentsToDisk ]
+		self indexes do: [ :each | each writeContentsToDisk ] ]
 ]

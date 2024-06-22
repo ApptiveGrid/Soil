@@ -151,5 +151,6 @@ SoilObjectIndexFile >> validateLastObjectIndex: anInteger [
 
 { #category : #writing }
 SoilObjectIndexFile >> writeContentsToDisk [
-	stream sync 
+	(segment notNil and: [ segment soil setup isFsyncEnabled  ]) ifTrue: [
+		stream sync ]
 ]
