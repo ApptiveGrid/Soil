@@ -37,7 +37,7 @@ SoilTransaction >> acquireLocksAndDetectWriteSkew [
 		"check if the version we've read is still actual. Another transaction could have
 		committed since we last read. Checking for the position in the index is sufficient
 		as each version relates to a unique position"
-		locks add: record lockIndex.
+		self addLock: record lockIndex.
 		record validateReadVersion ].
 	"idMap is keyed by objectIds which could have changed by now so we rehash in order
 	not to miss lookups"
@@ -54,6 +54,11 @@ SoilTransaction >> addClusterObject: anObject [
 		putObject: anObject.
 	^ objectId
 
+]
+
+{ #category : #adding }
+SoilTransaction >> addLock: aLock [ 
+	locks add: aLock
 ]
 
 { #category : #accessing }
@@ -101,7 +106,7 @@ SoilTransaction >> basicCommit [
 		"lastObjectIndexes contains the highest allocated index number per segment. We
 		lock all positions in order to update the index numbers in the database."
 		lastObjectIndexes keysDo: [ :segment |
-			locks add: (segment lockAppendingFor: self) ].
+			self addLock: (segment lockAppendingFor: self) ].
 		"convert the records into journal entries, write the journal to disk and then
 		execute the journal on the database"
 		journal := self buildJournal.
@@ -228,7 +233,7 @@ SoilTransaction >> buildJournal [
 SoilTransaction >> buildWriteVersion [
 	"first we lock the database version so it cannot be modified while we are 
 	checkpointing"
-	locks add: (soil lockDatabaseVersionFor: self).
+	self addLock: (soil lockDatabaseVersionFor: self).
 	"Now the version is locked. We can read it again to have the real version and
 	increment"
 	^ soil control databaseVersion + 1 
@@ -347,7 +352,7 @@ SoilTransaction >> initializeObjectId: anObjectId [
 	assoc := lastObjectIndexes 
 		at: segment 
 		ifAbsentPut: [ 
-			locks add: (segment lockLastObjectIndexFor: self).
+			self addLock: (segment lockLastObjectIndexFor: self).
 			segment lastObjectIndex -> segment lastObjectIndex ].
 	"we use an association here to keep the version read from database
 	as well as the new version"
@@ -572,8 +577,13 @@ SoilTransaction >> registerRecord: record [
 
 { #category : #api }
 SoilTransaction >> releaseLocks [
-	locks do: [ :lock | lock release ].
-	locks := OrderedCollection new
+	locks copy do: [ :lock | self removeLock: lock ]
+]
+
+{ #category : #adding }
+SoilTransaction >> removeLock: aLock [ 
+	aLock release.
+	locks remove: aLock
 ]
 
 { #category : #accessing }
