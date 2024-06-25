@@ -97,9 +97,7 @@ SoilLockableStream >> imageLocked [
 SoilLockableStream >> initialize [ 
 	super initialize.
 	locks := OrderedCollection new.
-	self class finalizationRegistry add: self.
-	imageLocked := true.
-	fileLocked := true.
+	self class finalizationRegistry add: self
 ]
 
 { #category : #initialization }
@@ -205,10 +203,10 @@ SoilLockableStream >> readInto: aCollection startingAt: startIndex count: count 
 { #category : #locking }
 SoilLockableStream >> registerLock: lock [
 	
-	imageLocked ifTrue: [ 
+	self imageLocked ifTrue: [ 
 		lock lockInMemory: lockRegistry ].
 	
-	fileLocked ifTrue: [ 
+	self fileLocked ifTrue: [ 
 		lock lockOn: self  ].
 	
 	^ locks add: lock
