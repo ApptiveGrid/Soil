@@ -8,8 +8,32 @@ Class {
 		'lockRegistry',
 		'locks'
 	],
+	#classInstVars : [
+		'defaultImageLocked',
+		'defaultFileLocked'
+	],
 	#category : #'Soil-File'
 }
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultFileLocked [
+	^ defaultFileLocked ifNil: [ true ]
+]
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultFileLocked: aBoolean [ 
+	defaultFileLocked := aBoolean 
+]
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultImageLocked [
+	^ defaultImageLocked ifNil: [ true ]
+]
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultImageLocked: aBoolean [ 
+	defaultImageLocked := aBoolean 
+]
 
 { #category : #'instance creation' }
 SoilLockableStream class >> path: aStringOrFileReference [ 
@@ -34,6 +58,22 @@ SoilLockableStream >> close [
 ]
 
 { #category : #accessing }
+SoilLockableStream >> defaultFileLocked [
+	^ self class defaultFileLocked 
+]
+
+{ #category : #accessing }
+SoilLockableStream >> defaultImageLocked [
+	^ self class defaultImageLocked 
+]
+
+{ #category : #accessing }
+SoilLockableStream >> fileLocked [ 
+	^ fileLocked ifNil: [ 
+		fileLocked := self defaultFileLocked  ]
+]
+
+{ #category : #accessing }
 SoilLockableStream >> fileStream [
 	^ fileStream fileStream
 ]
@@ -46,6 +86,12 @@ SoilLockableStream >> finalize [
 { #category : #writing }
 SoilLockableStream >> flush [
 	^ fileStream flush
+]
+
+{ #category : #accessing }
+SoilLockableStream >> imageLocked [ 
+	^ imageLocked ifNil: [ 
+		imageLocked := self defaultImageLocked  ]
 ]
 
 { #category : #initialization }
