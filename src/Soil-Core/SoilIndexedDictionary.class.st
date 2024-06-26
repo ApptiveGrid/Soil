@@ -206,11 +206,11 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 	"remove from newValues as there could be a new at:put: on that
 	key but removing the key will remove the value again"
 	newValues removeKey: key ifAbsent: nil.
-	v := self basicAt: key ifAbsent: [^ aBlock value].
+	v := self newIterator removeKey: key ifAbsent: [^ aBlock value].
 	removedValues 
 			at: key 
 			put: v asSoilObjectId.
-	^ self newIterator removeKey: key
+	^v
 ]
 
 { #category : #accessing }

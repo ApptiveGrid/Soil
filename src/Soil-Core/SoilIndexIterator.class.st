@@ -400,8 +400,15 @@ SoilIndexIterator >> removeItemsSuchThat: aBlock [
 
 { #category : #removing }
 SoilIndexIterator >> removeKey: key [
+	^ self 
+		removeKey: key 
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
+]
+
+{ #category : #removing }
+SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 	| returnValue |
-	returnValue := self at: key.
+	returnValue := self at: key ifAbsent: aBlock.
 	self 
 		at: key 
 		put: SoilObjectId removed.
