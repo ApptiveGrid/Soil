@@ -399,10 +399,13 @@ SoilIndexIterator >> removeItemsSuchThat: aBlock [
 ]
 
 { #category : #removing }
-SoilIndexIterator >> removeKey: key [ 
-	^ self 
+SoilIndexIterator >> removeKey: key [
+	| returnValue |
+	returnValue := self at: key.
+	self 
 		at: key 
-		put: SoilObjectId removed
+		put: SoilObjectId removed.
+	^ returnValue
 ]
 
 { #category : #private }
