@@ -407,12 +407,23 @@ SoilIndexIterator >> removeKey: key [
 
 { #category : #removing }
 SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
-	| returnValue |
-	returnValue := self at: key ifAbsent: aBlock.
-	self 
-		at: key 
+	| indexKey item oldValue |
+	indexKey := index indexKey: key.
+	"We search for the data page for the key to update the value with a removed ID
+	and return the prior value just like #at: would do"
+	self findPageFor: indexKey.
+	item :=  self restoreItem: (currentPage itemAt: indexKey ifAbsent: aBlock).
+	oldValue := item
+		ifNotNil: [ 
+			(self convertValue: item value) 
+				ifNil: [ aBlock value ] ]
+		ifNil: [ aBlock value ].
+	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
+	(e.g no need to update index pages for the BTree"
+	currentPage 
+		itemAt: indexKey 
 		put: SoilObjectId removed.
-	^ returnValue
+	^ oldValue
 ]
 
 { #category : #private }
