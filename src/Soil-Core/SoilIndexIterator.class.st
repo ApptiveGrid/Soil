@@ -246,7 +246,7 @@ SoilIndexIterator >> lastAssociation [
 	currentPage := nil.
 	currentKey := nil.
 	"previousAssociation returns last key if currentPage is nil"
-	lastAssociation := self previousAssociation.
+	lastAssociation := self previousAssociation ifNil: [ ^nil ].
 	[restoredItem := self restoreItem: lastAssociation] whileNil: [   
 			"if the last entry is deleted, we need to take the one before"
 			lastAssociation := self previousAssociation ifNil: [ ^nil ] ].
