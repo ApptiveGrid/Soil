@@ -412,7 +412,7 @@ SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 	"We search for the data page for the key to update the value with a removed ID
 	and return the prior value just like #at: would do"
 	self findPageFor: indexKey.
-	item :=  self restoreItem: (currentPage itemAt: indexKey ifAbsent: aBlock).
+	item :=  self restoreItem: (currentPage itemAt: indexKey ifAbsent: [^ aBlock value]).
 	oldValue := item
 		ifNotNil: [ 
 			(self convertValue: item value) 
