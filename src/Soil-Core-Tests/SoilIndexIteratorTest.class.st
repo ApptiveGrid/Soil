@@ -344,3 +344,21 @@ SoilIndexIteratorTest >> testPreviousPageFirstPage [
 	iterator firstPage. "set iterator currentPage to first page"
 	self assert: iterator previousPage equals: nil
 ]
+
+{ #category : #tests }
+SoilIndexIteratorTest >> testRemoveKey [
+	
+	| capacity iterator result |
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	iterator := index newIterator.
+	"removing non-existing keys raises KeyNotFound error"
+	self should: [iterator removeKey: capacity+1] raise: KeyNotFound.
+	result := iterator removeKey: 1.
+	self assert: result equals: (1 asByteArrayOfSize: 8).
+	result := iterator removeKey: capacity.
+	self assert: result equals: (capacity asByteArrayOfSize: 8).
+	"removing the key again raises KeyNotFound, too"
+	self should: [iterator removeKey: capacity] raise: KeyNotFound.
+]

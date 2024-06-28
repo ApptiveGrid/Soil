@@ -110,15 +110,16 @@ SoilPersistentDictionaryTest >> testNewPersistentDictionary [
 { #category : #tests }
 SoilPersistentDictionaryTest >> testRemoveKey [
 
-	| dict transaction |
+	| dict transaction removed |
 	transaction := soil newTransaction.
 	dict := SoilPersistentDictionary new.
 	transaction makeRoot: dict.
 	dict at: #test put: 'string'.
 	dict at: #test2 put: 'string2'.
-	dict removeKey: #test.
+	removed := dict removeKey: #test.
 	transaction commit.
-		
+	
+	self assert: removed equals: 'string'.
 	self assert: (dict at: #test2) equals: 'string2'.
 	self deny: (dict includesKey: #test)
 	

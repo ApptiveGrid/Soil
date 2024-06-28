@@ -492,9 +492,8 @@ SoilIndexedDictionaryTest >> testNextcloseToWithTransaction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
-
-	| tx tx2 tag |
+SoilIndexedDictionaryTest >> testRemoveKey [
+	| tx tx2 tag return |
 	tx := soil newTransaction.
 	tx root: dict.
 	dict at: #one put: #onevalue.
@@ -503,8 +502,9 @@ SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"remove the key"
-	tx2 root removeKey: #two.
+	return := tx2 root removeKey: #two.
 	self assert: tx2 root size equals: 1.
+	self assert: return equals: #twovalue.
 	"remove again to test absent case"
 	tag := false.
 	tx2 root removeKey: #three ifAbsent: [ tag := true ].
@@ -512,8 +512,7 @@ SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 	"remove again to test absent case with already removed key"
 	tag := false.
 	tx2 root removeKey: #two ifAbsent: [ tag := true ].
-	self assert: tag.
-	
+	self assert: tag
 
 ]
 
