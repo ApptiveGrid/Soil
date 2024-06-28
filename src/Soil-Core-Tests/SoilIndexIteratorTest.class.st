@@ -53,6 +53,22 @@ SoilIndexIteratorTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilIndexIteratorTest >> testAtPut [
+	| iterator return |
+	
+	
+	"at:put: returns last prior value"
+	iterator := index newIterator.
+	return := iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	self assert: return isNil.
+	self assert: (iterator at: 1) equals:  (1 asByteArrayOfSize: 8).
+	return := iterator at: 1 put: (2 asByteArrayOfSize: 8).
+	
+	self assert: return equals: (1 asByteArrayOfSize: 8).
+	self assert: (iterator at: 1) equals: (2 asByteArrayOfSize: 8)
+]
+
+{ #category : #tests }
 SoilIndexIteratorTest >> testFindAndNext [
 	
 	| capacity iterator value |
