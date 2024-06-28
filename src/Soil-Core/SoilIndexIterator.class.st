@@ -243,14 +243,15 @@ SoilIndexIterator >> last: anInteger [
 SoilIndexIterator >> lastAssociation [
 	"Note: key will be index key"
 	| lastAssociation restoredItem |
-	"previousAssociation will use last page if currentPage is nil"
+	currentPage := nil.
+	currentKey := nil.
+	"previousAssociation returns last key if currentPage is nil"
 	lastAssociation := self previousAssociation ifNil: [ ^nil ].
-	restoredItem := self restoreItem: lastAssociation.
-	^ restoredItem 
-		ifNotNil: [ restoredItem key -> (self convertValue: restoredItem value) ] 
-		ifNil: [
+	[restoredItem := self restoreItem: lastAssociation] whileNil: [   
 			"if the last entry is deleted, we need to take the one before"
-			^ self lastAssociation ] 
+			lastAssociation := self previousAssociation ifNil: [ ^nil ] ].
+
+	^ restoredItem key -> (self convertValue: restoredItem value).
 ]
 
 { #category : #accessing }

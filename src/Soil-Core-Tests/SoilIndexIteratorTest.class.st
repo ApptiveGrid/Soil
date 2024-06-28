@@ -159,6 +159,23 @@ SoilIndexIteratorTest >> testLast [
 ]
 
 { #category : #tests }
+SoilIndexIteratorTest >> testLastAssociation [
+	| iterator |
+	
+	"test empty index"
+	iterator := index newIterator.
+	self assert: iterator lastAssociation isNil.
+	
+	"lastAssociation always returns last"
+	iterator := index newIterator.
+	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	iterator at: 2 put: (2 asByteArrayOfSize: 8).
+
+	self assert: iterator lastAssociation value equals: (2 asByteArrayOfSize: 8).
+	self assert: iterator lastAssociation value equals: (2 asByteArrayOfSize: 8).
+]
+
+{ #category : #tests }
 SoilIndexIteratorTest >> testLastPage [
 	
 	| capacity lastPage |
