@@ -28,7 +28,7 @@ SoilSkipListIterator >> basicAt: indexKey put: anObject [
 	"as an optimization we return the prior value stored in the list. If
 	there was none we return nil"
 	^(currentPage hasKey: indexKey)
-		  ifTrue: [ currentPage itemAt: indexKey put: anObject ]
+		  ifTrue: [ (currentPage itemAt: indexKey put: anObject) value ]
 		  ifFalse: [
 			  currentPage hasRoom ifFalse: [  | newPage |
 				  newPage := index splitPage: self forKey: indexKey.
