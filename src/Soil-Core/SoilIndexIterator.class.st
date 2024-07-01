@@ -243,15 +243,22 @@ SoilIndexIterator >> last: anInteger [
 SoilIndexIterator >> lastAssociation [
 	"Note: key will be index key"
 	| lastAssociation restoredItem |
-	currentPage := nil.
-	currentKey := nil.
-	"previousAssociation returns last key if currentPage is nil"
-	lastAssociation := self previousAssociation ifNil: [ ^nil ].
+	currentPage := self lastNonEmptyPage ifNil: [ ^nil ]. 
+	lastAssociation := currentPage lastItem.
 	[restoredItem := self restoreItem: lastAssociation] whileNil: [   
 			"if the last entry is deleted, we need to take the one before"
 			lastAssociation := self previousAssociation ifNil: [ ^nil ] ].
 
 	^ restoredItem key -> (self convertValue: restoredItem value).
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> lastNonEmptyPage [
+	currentPage := self lastPage.
+	[currentPage isEmpty] whileTrue: [ currentPage := 
+		"if the page is emprty, go to the prev page, if that returns nil all pages are empty"
+		self previousPage ifNil: [^nil]].
+	^ currentPage
 ]
 
 { #category : #accessing }
@@ -366,10 +373,8 @@ SoilIndexIterator >> previous: anInteger [
 { #category : #accessing }
 SoilIndexIterator >> previousAssociation [
 	| item |
-	"Find the association before, if currentPage is not set we return the last association"
-	currentPage ifNil: [ 
-		currentPage := index lastPage.
-		currentKey := nil ].
+	"Find the association before"
+	currentPage ifNil: [ ^ self error: 'you need to navigate first using find: or last, for example'].
 	[ currentPage isNil ] whileFalse: [  
 		item := currentKey 
 			ifNotNil: [  
