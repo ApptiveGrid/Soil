@@ -248,7 +248,7 @@ SoilIndexIterator >> lastAssociation [
 	[restoredItem := self restoreItem: lastAssociation] whileNil: [   
 			"if the last entry is deleted, we need to take the one before"
 			lastAssociation := self previousAssociation ifNil: [ ^nil ] ].
-
+	currentKey := restoredItem key.
 	^ restoredItem key -> (self convertValue: restoredItem value).
 ]
 
