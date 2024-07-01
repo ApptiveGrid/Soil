@@ -255,9 +255,9 @@ SoilIndexIterator >> lastAssociation [
 { #category : #accessing }
 SoilIndexIterator >> lastNonEmptyPage [
 	currentPage := self lastPage.
-	[currentPage isEmpty] whileTrue: [ currentPage := 
-		"if the page is emprty, go to the prev page, if that returns nil all pages are empty"
-		self previousPage ifNil: [^nil]].
+	[currentPage isEmpty] whileTrue: [ 
+		"if the page is empty, go to the previous page, if that returns nil all pages are empty"
+		currentPage := self previousPage ifNil: [^nil]].
 	^ currentPage
 ]
 
