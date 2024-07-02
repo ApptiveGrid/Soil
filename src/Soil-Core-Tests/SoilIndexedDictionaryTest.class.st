@@ -148,6 +148,15 @@ SoilIndexedDictionaryTest >> testAfterReopen [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testAtIfAbsent [
+	| return tx |
+	tx := soil newTransaction.
+	tx root: dict.
+	return := dict at: 1 ifAbsent: [ #missing ].
+	self assert: return equals:  #missing
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
 	| tx tx2 |
 	tx := soil newTransaction.

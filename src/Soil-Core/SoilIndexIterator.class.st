@@ -21,7 +21,7 @@ SoilIndexIterator >> at: aKeyObject [
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 	| foundValue item |
-	foundValue := self find: aKeyObject ifAbsent: aBlock.
+	foundValue := self find: aKeyObject ifAbsent: [^ aBlock value].
  	item := self restoreItem: currentKey -> foundValue.
 	^ item
 		ifNotNil: [ 

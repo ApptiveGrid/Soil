@@ -46,6 +46,18 @@ SoilPersistentDictionaryTest >> testAt [
 ]
 
 { #category : #tests }
+SoilPersistentDictionaryTest >> testAtIfAbsent [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	transaction commit.
+		
+	self assert: (dict at: #test2 ifAbsent: [#missing]) equals: #missing
+]
+
+{ #category : #tests }
 SoilPersistentDictionaryTest >> testAtPut [
 
 	| dict transaction |
