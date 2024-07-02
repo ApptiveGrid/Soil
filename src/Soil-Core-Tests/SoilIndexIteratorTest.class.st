@@ -115,6 +115,29 @@ SoilIndexIteratorTest >> testFindAndNext2 [
 ]
 
 { #category : #tests }
+SoilIndexIteratorTest >> testFindAndNextCloseTo [
+	
+	| iterator |
+	
+	"first empty dict"
+	iterator := index newIterator.
+	self assert: (iterator nextCloseTo: 5) equals: nil.
+
+	iterator := index newIterator.
+	index at: 10 put: (10 asByteArrayOfSize: 8).
+	index at: 20 put: (20 asByteArrayOfSize: 8).
+
+	
+	self assert: (iterator nextCloseTo: 5) equals: (10 asByteArrayOfSize: 8).
+	self assert: (iterator nextCloseTo: 10) equals: (10 asByteArrayOfSize: 8).
+	self assert: (iterator nextCloseTo: 11) equals: (20 asByteArrayOfSize: 8).
+	self assert: (iterator nextCloseTo: 15) equals:(20 asByteArrayOfSize: 8).
+	self assert: (iterator nextCloseTo: 20) equals:  (20 asByteArrayOfSize: 8).
+	"this is a bit odd, when looking with larger values we get the last one"
+	self assert: (iterator nextCloseTo: 100) equals:  (20 asByteArrayOfSize: 8).
+]
+
+{ #category : #tests }
 SoilIndexIteratorTest >> testFirst [
 	
 	| capacity first |
