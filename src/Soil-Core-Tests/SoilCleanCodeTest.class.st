@@ -4,7 +4,7 @@ Class {
 	#pools : [
 		'SoilTypeCodes'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-CleanCode'
 }
 
 { #category : #cleanup }

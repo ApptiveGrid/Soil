@@ -6,7 +6,7 @@ Class {
 		'dict',
 		'classToTest'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Index'
 }
 
 { #category : #tests }

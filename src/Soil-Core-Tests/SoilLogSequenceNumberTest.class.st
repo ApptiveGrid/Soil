@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilLogSequenceNumberTest,
 	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Journal'
 }
 
 { #category : #tests }

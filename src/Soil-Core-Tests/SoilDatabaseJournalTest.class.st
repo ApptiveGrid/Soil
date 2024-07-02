@@ -5,7 +5,7 @@ Class {
 		'soil',
 		'copy'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Journal'
 }
 
 { #category : #helper }

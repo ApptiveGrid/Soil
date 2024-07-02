@@ -5,7 +5,7 @@ Class {
 		'index',
 		'classToTest'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Index'
 }
 
 { #category : #'building suites' }

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'index'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Index'
 }
 
 { #category : #running }
