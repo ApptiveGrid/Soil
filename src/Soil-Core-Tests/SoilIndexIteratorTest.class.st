@@ -53,6 +53,15 @@ SoilIndexIteratorTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilIndexIteratorTest >> testAtIfAbsent [
+	| iterator return |
+
+	iterator := index newIterator.
+	return := iterator at: 1 ifAbsent: [ #missing ].
+	self assert: return equals:  #missing
+]
+
+{ #category : #tests }
 SoilIndexIteratorTest >> testAtPut [
 	| iterator return |
 	
