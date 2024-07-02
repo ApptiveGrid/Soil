@@ -245,11 +245,11 @@ SoilIndexIterator >> lastAssociation [
 	| lastAssociation restoredItem |
 	currentPage := self lastNonEmptyPage ifNil: [ ^nil ]. 
 	lastAssociation := currentPage lastItem.
+	currentKey := lastAssociation key.
 	[restoredItem := self restoreItem: lastAssociation] whileNil: [   
 			"if the last entry is deleted, we need to take the one before"
-			lastAssociation := self previousAssociation ifNil: [ ^nil ] ].
-	currentKey := restoredItem key.
-	^ restoredItem key -> (self convertValue: restoredItem value).
+			lastAssociation := self previousAssociation ifNil: [ ^nil ]].
+	^ restoredItem key -> (self convertValue: restoredItem value)
 ]
 
 { #category : #accessing }
@@ -374,7 +374,8 @@ SoilIndexIterator >> previous: anInteger [
 SoilIndexIterator >> previousAssociation [
 	| item |
 	"Find the association before"
-	currentPage ifNil: [ ^ self error: 'you need to navigate first using find: or last, for example'].
+	currentKey ifNil: [ ^ self error: 'you need to navigate first using find: or last, for example'].
+	currentPage ifNil: [ self findPageFor: currentKey].
 	[ currentPage isNil ] whileFalse: [  
 		item := currentKey 
 			ifNotNil: [  
