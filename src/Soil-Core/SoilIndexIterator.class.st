@@ -307,7 +307,9 @@ SoilIndexIterator >> nextAssociationAfter: key [
 { #category : #private }
 SoilIndexIterator >> nextCloseTo: key [
 	"return the next entry after key, even if key itself is not there"
-	^ self at: (self nextKeyCloseTo: key)
+	| nextExisitingKey |
+	nextExisitingKey := (self nextKeyCloseTo: key) ifNil: [ ^nil ]. 
+	^ self at: nextExisitingKey
 ]
 
 { #category : #private }
