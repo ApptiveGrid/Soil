@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Journal'
 }
 
 { #category : #helper }
@@ -12,7 +12,7 @@ SoilTransactionJournalTest class >> classUnderTest [
 	^ SoilPersistentDatabaseJournal 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #running }
 SoilTransactionJournalTest >> fillDatabase [ 
 	| tx dict |
 	tx := soil newTransaction.

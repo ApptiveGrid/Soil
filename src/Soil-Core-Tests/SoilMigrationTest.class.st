@@ -5,7 +5,7 @@ Class {
 		'soil',
 		'migrationClass'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Model'
 }
 
 { #category : #helpers }

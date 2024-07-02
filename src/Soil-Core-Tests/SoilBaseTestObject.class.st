@@ -1,5 +1,5 @@
 Class {
 	#name : #SoilBaseTestObject,
 	#superclass : #Object,
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-TestData'
 }

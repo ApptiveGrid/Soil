@@ -5,7 +5,7 @@ Class {
 		'soil',
 		'backupSoil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Visitor'
 }
 
 { #category : #accessing }

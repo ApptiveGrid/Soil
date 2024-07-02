@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'nested'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-TestData'
 }
 
 { #category : #accessing }
