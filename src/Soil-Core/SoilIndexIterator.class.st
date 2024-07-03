@@ -312,16 +312,13 @@ SoilIndexIterator >> nextCloseTo: key [
 { #category : #private }
 SoilIndexIterator >> nextKeyCloseTo: key [
 	"Note: returned key will be an index key"
-	| indexKey nextKey |
+	| indexKey |
 	indexKey := index indexKey: key.
 	self findPageFor: indexKey.
-	nextKey := currentPage keyOrClosestAfter: indexKey.
-	^ nextKey
-		ifNil: [ "if there is no close key found, we position the cursor at the end, so that asking for the next association will return nil" 
-			currentKey := currentPage lastKey ]
-		ifNotNil: [ 
-			"if there is a close key found, we make sure the cursor get properly positioned"
-			currentKey := nextKey ]
+	currentKey := currentPage keyOrClosestAfter: indexKey.
+	"if there is no close key found, we position the cursor at the end, so that asking for the next association will return nil" 
+	^ currentKey
+		ifNil: [ currentKey := currentPage lastKey ]
 ]
 
 { #category : #accessing }
