@@ -3,7 +3,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'index',
-		'nextKey',
 		'currentPage',
 		'currentKey',
 		'itemStrategy'
@@ -62,15 +61,6 @@ SoilIndexIterator >> basicAt: indexKey put: anObject [
 { #category : #accessing }
 SoilIndexIterator >> basicNextAssociation [
 	| item |
-	"preliminary support for nextKey. This is useful when iterating via #next 
-	in order not jump over the first search key. nextKey implies the currentPage
-	is on the right spot"
-	nextKey ifNotNil: [ 
-		item := currentPage 
-			itemAt: nextKey 
-			ifAbsent: [ Error signal: 'shoulndt be possible' ].
-		nextKey := nil.
-		^ item ].
 	currentPage ifNil: [ 
 		currentPage := index store headerPage.
 		currentKey := nil ].
@@ -322,7 +312,7 @@ SoilIndexIterator >> nextCloseTo: key [
 { #category : #private }
 SoilIndexIterator >> nextKeyCloseTo: key [
 	"Note: returned key will be an index key"
-	| indexKey |
+	| indexKey nextKey |
 	indexKey := index indexKey: key.
 	self findPageFor: indexKey.
 	nextKey := currentPage keyOrClosestAfter: indexKey.
