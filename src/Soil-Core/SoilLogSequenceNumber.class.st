@@ -70,11 +70,6 @@ SoilLogSequenceNumber >> isInitial [
 	^ value = 0
 ]
 
-{ #category : #accessing }
-SoilLogSequenceNumber >> nextFilename [
-	^ self filename: self fileNumber + 1
-]
-
 { #category : #printing }
 SoilLogSequenceNumber >> printOn: aStream [ 
 	aStream 

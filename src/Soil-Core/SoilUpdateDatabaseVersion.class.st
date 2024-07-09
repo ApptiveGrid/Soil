@@ -46,11 +46,6 @@ SoilUpdateDatabaseVersion >> databaseVersion: anInteger [
 ]
 
 { #category : #accessing }
-SoilUpdateDatabaseVersion >> effect [ 
-	^ databaseVersion 
-]
-
-{ #category : #accessing }
 SoilUpdateDatabaseVersion >> objectIds [
 	^ { }
 ]

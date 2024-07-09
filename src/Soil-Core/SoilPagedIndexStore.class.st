@@ -36,11 +36,6 @@ SoilPagedIndexStore >> headerPage [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> highestPageIndex [ 
-	^ pages size
-]
-
-{ #category : #accessing }
 SoilPagedIndexStore >> index [
 	^ index
 ]
