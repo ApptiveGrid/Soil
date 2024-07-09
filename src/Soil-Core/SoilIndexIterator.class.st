@@ -138,7 +138,7 @@ SoilIndexIterator >> do: aBlock [
 
 { #category : #private }
 SoilIndexIterator >> find: key [
-	^ self find: key ifAbsent: [ ]
+	^ self find: key ifAbsent: nil
 ]
 
 { #category : #private }

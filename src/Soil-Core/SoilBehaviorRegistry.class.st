@@ -102,16 +102,14 @@ SoilBehaviorRegistry >> loadHistoryForBehaviorWithIndex: objectIndex transaction
 SoilBehaviorRegistry >> nameAt: classIdentifier ifAbsent: aBlock [
 	^ self newIterator
 		at: classIdentifier 
-		ifAbsent: [ ^ aBlock value ]
+		ifAbsent: aBlock
 ]
 
 { #category : #accessing }
 SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
-	| dict |
 	(objectId index = 0) ifTrue: [ Error signal: 'cannot add non-initialized object id' ].
-	dict := self newIterator
-		at: classIdentifier put: objectId;
-		yourself
+	^ self newIterator
+		at: classIdentifier put: objectId
 ]
 
 { #category : #accessing }
