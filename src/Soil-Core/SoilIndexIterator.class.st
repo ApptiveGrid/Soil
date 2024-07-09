@@ -415,6 +415,11 @@ SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 	^ oldValue
 ]
 
+{ #category : #initialization }
+SoilIndexIterator >> resetCurrentKey [ 	
+	currentKey := nil
+]
+
 { #category : #private }
 SoilIndexIterator >> restoreItem: anItem [ 
 	^ anItem 
