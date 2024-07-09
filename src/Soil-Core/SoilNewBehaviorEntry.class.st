@@ -36,11 +36,6 @@ SoilNewBehaviorEntry >> context [
 ]
 
 { #category : #accessing }
-SoilNewBehaviorEntry >> effect [
-	^ identifier 
-]
-
-{ #category : #accessing }
 SoilNewBehaviorEntry >> identifier: aString [ 
 	identifier := aString 
 ]

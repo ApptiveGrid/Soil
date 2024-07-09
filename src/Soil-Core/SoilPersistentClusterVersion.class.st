@@ -28,12 +28,6 @@ SoilPersistentClusterVersion >> beChanged [
 ]
 
 { #category : #accessing }
-SoilPersistentClusterVersion >> behaviorDescriptionWithIndex: anInteger [ 
-	(anInteger = 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
-	^ behaviorDescriptions at: anInteger 
-]
-
-{ #category : #accessing }
 SoilPersistentClusterVersion >> changed: aBoolean [
 	changed := aBoolean 
 ]

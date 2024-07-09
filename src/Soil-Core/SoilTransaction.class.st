@@ -320,14 +320,6 @@ SoilTransaction >> hasModifications [
 ]
 
 { #category : #accessing }
-SoilTransaction >> indexAt: indexId segment: segmentIndex [ 
-	^ indexes 
-		at: indexId 
-		ifAbsentPut: [ 
-			(self segmentAt: segmentIndex) indexAt: indexId  ]
-]
-
-{ #category : #accessing }
 SoilTransaction >> indexes [ 
 	^ indexes
 ]

@@ -136,12 +136,6 @@ SoilObjectSegment >> indexAt: indexId ifAbsent: aBlock [
 ]
 
 { #category : #accessing }
-SoilObjectSegment >> indexAt: indexId put: aSoilIndex [
-
-	^ self indexManager at: indexId put: aSoilIndex
-]
-
-{ #category : #accessing }
 SoilObjectSegment >> indexFile: aSOObjectIndexFile [ 
 	indexFile := aSOObjectIndexFile
 ]

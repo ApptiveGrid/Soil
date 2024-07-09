@@ -9,11 +9,6 @@ Class {
 }
 
 { #category : #'file names' }
-SoilJournalFragmentFile class >> filenameFromFilenumber: anInteger [ 
-	^ (anInteger printStringBase: 16 length: 10 padded: true) asLowercase 
-]
-
-{ #category : #'file names' }
 SoilJournalFragmentFile class >> filenumberFromFilename: aString [ 
 	^ (ByteArray readHexFrom: aString) asInteger
 ]

@@ -52,11 +52,6 @@ SoilPagedFileIndexStore >> flushPages [
 				self writePage: page ] ] ]
 ]
 
-{ #category : #testing }
-SoilPagedFileIndexStore >> hasStream [
-	^ stream notNil
-]
-
 { #category : #accessing }
 SoilPagedFileIndexStore >> headerPage [ 
 	pages ifEmpty: [ 
@@ -115,11 +110,6 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	pagesMutex critical: [  
 		pages at: anInteger put: page ].
 	^ page
-]
-
-{ #category : #accessing }
-SoilPagedFileIndexStore >> pagesStart [
-	^ 4096
 ]
 
 { #category : #'instance creation' }

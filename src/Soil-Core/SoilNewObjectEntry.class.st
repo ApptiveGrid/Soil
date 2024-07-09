@@ -51,11 +51,6 @@ SoilNewObjectEntry >> context [
 	^ objectId
 ]
 
-{ #category : #committing }
-SoilNewObjectEntry >> effect [ 
-	^ 'position: ', position asString
-]
-
 { #category : #accessing }
 SoilNewObjectEntry >> objectId [
 	^ objectId

@@ -62,11 +62,6 @@ SoilSkipList >> initializeParametersFrom: aSoilSkipList [
 ]
 
 { #category : #testing }
-SoilSkipList >> isPersistent [
-	^ path notNil
-]
-
-{ #category : #testing }
 SoilSkipList >> isRegistered [
 	^ path notNil
 ]

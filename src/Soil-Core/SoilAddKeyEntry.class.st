@@ -35,11 +35,6 @@ SoilAddKeyEntry >> context [
 ]
 
 { #category : #accessing }
-SoilAddKeyEntry >> effect [
-	^ key -> value 
-]
-
-{ #category : #accessing }
 SoilAddKeyEntry >> key [
 	^ key
 ]
