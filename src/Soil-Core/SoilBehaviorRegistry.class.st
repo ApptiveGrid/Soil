@@ -134,6 +134,31 @@ SoilBehaviorRegistry >> path [
 	^ soil objectRepository metaSegment indexManager path / #identifier , #index
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBehaviorRegistry >> recreateIndex [ 
+	| txn metaSegment record zeroFound |
+	"this is a last resort action to recreate the index in a sane
+	state. It assumes that all behavior descriptions are written 
+	in the meta segement but the entry in the index is bogus. 
+	So we read all from the segment and readd them"
+	txn := soil newTransaction.
+	[
+		metaSegment := soil objectRepository metaSegment.
+		3 to: metaSegment lastObjectIndex do: [ :n |
+			record := txn materializeRecord: (metaSegment at: n). 
+			self nameAt: record object behaviorIdentifier put: record objectId 
+		].
+		txn commit ] 
+			ensure: [ txn abort ].
+	"there are pages with multiple zero entries. The only way right now
+	is to remove the same key until the ifAbsent block is executed"
+	zeroFound := true.
+	[ zeroFound ] whileTrue: [  
+		index removeKey: 0 ifAbsent: [ zeroFound := false ] ].
+	"as we are on it we can also compact the index"
+	index compact
+]
+
 { #category : #accessing }
 SoilBehaviorRegistry >> segment [ 
 

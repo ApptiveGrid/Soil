@@ -83,6 +83,20 @@ SoilPagedIndexStore >> nextPageIndex [
 	^ self headerPage nextPageIndex
 ]
 
+{ #category : #private }
+SoilPagedIndexStore >> orderedPages [
+	| page orderedPages |
+	page := self pageAt: 1.
+	orderedPages := OrderedCollection new.
+	orderedPages add: page.
+	[ page isLastPage ] whileFalse: [ 
+	   page := self pageAt: page next.
+		orderedPages add: page
+	].
+	^ orderedPages
+		
+]
+
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger [ 
 	^ pagesMutex critical: [  
