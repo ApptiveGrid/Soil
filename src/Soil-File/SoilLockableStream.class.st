@@ -233,7 +233,7 @@ SoilLockableStream >> size [
 
 { #category : #public }
 SoilLockableStream >> sync [
-	fileStream wrappedStream fdatasync 
+	fileStream wrappedStream fsync 
 ]
 
 { #category : #locking }
