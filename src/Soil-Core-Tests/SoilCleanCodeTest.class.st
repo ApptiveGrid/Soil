@@ -123,19 +123,17 @@ SoilCleanCodeTest >> testNoUnsentMessages [
 	"Fail if there are methods implemented whose selectors is not sent anywhere in Pharo.
 	Please add a test or remove the method!"
 
-	| found knownviolations |
+	| found methods|
 	"As this is not critical, we skip this test. If you are want to cleanup, just run it!"
 	self skip.
 	found := Soil package allUnsentMessages.
-
-
-	knownviolations := #().
-
-	found := found copyWithoutAll: knownviolations.
-
+	methods := Soil package methods select: [ :method | found includes: method selector ].
+	methods := methods reject: [:method | method hasPragmaNamed: #inspectorPresentationOrder:title:
+  ].
+	
 	self
-		assert: found isEmpty
-		description: ('the following selectors are implemented, but never send', found asString)
+		assert: methods isEmpty
+		description: ('the following selectors are implemented, but never send', methods asString)
 ]
 
 { #category : #tests }
