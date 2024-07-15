@@ -425,6 +425,17 @@ SoilIndexIterator >> restoreItem: anItem [
 	^ anItem 
 ]
 
+{ #category : #enumerating }
+SoilIndexIterator >> reverseDo: aBlock [ 
+	| item |
+	aBlock value: self lastAssociation value.
+	
+	[ (item := self previousAssociation ) notNil ] whileTrue: [ 
+ 		(self restoreItem: item) ifNotNil: [ :notNil |
+			(self convertValue: notNil value)
+				ifNotNil: [ :value | aBlock value: value ] ] ]
+]
+
 { #category : #accessing }
 SoilIndexIterator >> size [
 	"We iterate over all elements to get the size. Slow!"

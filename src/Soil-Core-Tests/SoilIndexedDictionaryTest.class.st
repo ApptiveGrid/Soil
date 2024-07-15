@@ -268,7 +268,7 @@ SoilIndexedDictionaryTest >> testDoWithTransAction [
 	tx2 := soil newTransaction.
 
 	counter := 0.
-	tx2 root  do: [ :each |
+	tx2 root do: [ :each |
 		self assert: (each beginsWith: 'bar').
 		counter := counter + 1].
 	self assert: counter equals: 2.
@@ -276,7 +276,7 @@ SoilIndexedDictionaryTest >> testDoWithTransAction [
 	tx2 root removeKey: #one.
 	
 	counter := 0.
-	tx2 root  do: [ :each |
+	tx2 root do: [ :each |
 		self assert: (each beginsWith: 'bar').
 		counter := counter + 1].
 	self assert: counter equals: 1.
@@ -288,8 +288,6 @@ SoilIndexedDictionaryTest >> testDoWithTransAction [
 		self assert: (each beginsWith: 'bar').
 		counter := counter + 1].
 	self assert: counter equals: 2
-	
-	
 ]
 
 { #category : #tests }
@@ -550,6 +548,42 @@ SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 	self assert: tx root size equals: 1.
 	"but commiting it will fail, as we have commited the remove in t2"
 	self should: [tx commit] raise: SoilObjectHasConcurrentChange
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testReverseDo [
+	| tx tx1 tx2 counter |
+	
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #bar1.
+	dict at: #two put: #bar2.
+	tx commit.
+	"open a second transaction ..."
+	tx1 := soil newTransaction.
+	tx2 := soil newTransaction.
+
+	counter := 0.
+	tx2 root reverseDo: [ :each |
+		self assert: (each beginsWith: 'bar').
+		counter := counter + 1].
+	self assert: counter equals: 2.
+	
+	tx2 root removeKey: #one.
+	
+	counter := 0.
+	tx2 root reverseDo: [ :each |
+		self assert: (each beginsWith: 'bar').
+		counter := counter + 1].
+	self assert: counter equals: 1.
+	
+	tx2 commit.
+	"in tx1 the key is not removed, do: correcty uses the restorValue"
+	counter := 0.
+	tx1 root reverseDo: [ :each |
+		self assert: (each beginsWith: 'bar').
+		counter := counter + 1].
+	self assert: counter equals: 2
 ]
 
 { #category : #tests }

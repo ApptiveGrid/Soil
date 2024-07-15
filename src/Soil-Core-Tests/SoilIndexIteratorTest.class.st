@@ -78,6 +78,22 @@ SoilIndexIteratorTest >> testAtPut [
 ]
 
 { #category : #tests }
+SoilIndexIteratorTest >> testDo [
+	
+	| capacity result |
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	
+	result := OrderedCollection new.
+	index newIterator do: [ :each | result add: each ].
+
+	self assert: result size equals: capacity.
+	self assert: result first equals: (1 asByteArrayOfSize: 8).
+	self assert: result last equals: (capacity asByteArrayOfSize: 8)
+]
+
+{ #category : #tests }
 SoilIndexIteratorTest >> testFindAndNext [
 	
 	| capacity iterator value |
@@ -426,4 +442,20 @@ SoilIndexIteratorTest >> testRemoveKey [
 	self assert: result equals: (capacity asByteArrayOfSize: 8).
 	"removing the key again raises KeyNotFound, too"
 	self should: [iterator removeKey: capacity] raise: KeyNotFound.
+]
+
+{ #category : #tests }
+SoilIndexIteratorTest >> testReverseDo [
+	
+	| capacity result |
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	
+	result := OrderedCollection new.
+	index newIterator reverseDo: [ :each | result add: each ].
+
+	self assert: result size equals: capacity.
+	self assert: result first equals: (capacity asByteArrayOfSize: 8).
+	self assert: result last equals: (1 asByteArrayOfSize: 8)
 ]
