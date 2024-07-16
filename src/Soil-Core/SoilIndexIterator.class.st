@@ -175,6 +175,7 @@ SoilIndexIterator >> firstAssociation [
 	"Note: key will be index key"
 	| item |
 	currentPage := index store headerPage.
+	currentKey := nil.
 	item := self nextAssociation.
 	currentKey := item ifNotNil: [ item key ].
 	^ item
