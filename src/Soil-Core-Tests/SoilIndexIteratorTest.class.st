@@ -320,8 +320,8 @@ SoilIndexIteratorTest >> testNext [
 	
 	iterator := index newIterator.
 	value := iterator
-		lastAssociation;
-		nextAssociation.
+		last;
+		next.
 		
 	self assert: value isNil
 ]
