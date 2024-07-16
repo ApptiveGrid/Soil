@@ -146,6 +146,38 @@ SoilSkipListTest >> testAddLastFitting [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testAddRandom [
+	| numEntries entries |
+	"just some random adding and checking that we can find it, configured to create lots of pages"
+	index := SoilSkipList new 
+		path: 'sunit-skiplist-testAddRandom';
+		destroy;
+		initializeFilesystem;
+		initializeHeaderPage;
+		maxLevel: 10;
+		keySize: 512;
+		valueSize: 512.
+	
+	numEntries := 20.
+	entries := Set new: numEntries.
+	
+	
+	numEntries timesRepeat: [ | toAdd |
+		toAdd := (numEntries*20) atRandom.
+		entries add: toAdd.
+		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	
+	"check size"
+	self assert: index size equals: entries size.
+	
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	"iterate index, all should be in entries"
+	index do: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]]
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testAt [
 	
 	| capacity |
