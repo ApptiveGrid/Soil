@@ -133,9 +133,9 @@ SoilBTreeTest >> testAddFirstOverflow [
 { #category : #tests }
 SoilBTreeTest >> testAddRandom [
 	| numEntries entries |
-	"just some random addind and checking that we can find it. tree is configured to create lots of pages"
+	"just some random adding and checking that we can find it. tree is configured to create lots of pages"
 	index := SoilBTree new 
-		path: 'sunit-btree';
+		path: 'sunit-btree-testAddRandom';
 		destroy;
 		initializeFilesystem;
 		initializeHeaderPage;
@@ -151,8 +151,14 @@ SoilBTreeTest >> testAddRandom [
 		entries add: toAdd.
 		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
 	
+	"check size"
+	self assert: index size equals: entries size.
+	
 	"can we find all the keys we added?"
 	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	"iterate index, all should be in entries"
+	index do: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]]
 ]
 
 { #category : #tests }
