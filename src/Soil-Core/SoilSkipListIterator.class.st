@@ -56,11 +56,14 @@ SoilSkipListIterator >> findPageFor: indexKey [
 
 { #category : #private }
 SoilSkipListIterator >> findPreviousPageOf: aPage [
-	| pageIndex candidatePage |
 	aPage isHeaderPage ifTrue: [ ^nil ].
 	aPage isEmpty ifTrue: [ ^super findPreviousPageOf: aPage ].
+	
+	"faster search not yet working"
+	self flag: #TOOD.
+	^ super findPreviousPageOf: aPage.
 
-	currentPage := index headerPage.
+"	currentPage := index headerPage.
 	levels size to: 1 by: -1 do: [ :level |
 		[ 
 			pageIndex := currentPage rightAt: level.
@@ -72,7 +75,7 @@ SoilSkipListIterator >> findPreviousPageOf: aPage [
 		
 	self assert: (self nextPage == aPage).
 	
-	^ currentPage 
+	^ currentPage "
 ]
 
 { #category : #accessing }

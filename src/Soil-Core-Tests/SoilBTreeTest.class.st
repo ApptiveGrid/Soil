@@ -158,7 +158,9 @@ SoilBTreeTest >> testAddRandom [
 	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
 	
 	"iterate index, all should be in entries"
-	index do: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]]
+	index do: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]].
+	index reverseDo: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]]
+	
 ]
 
 { #category : #tests }
