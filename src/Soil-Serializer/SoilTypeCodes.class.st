@@ -10,6 +10,7 @@ Class {
 		'TypeCodeCompiledBlock',
 		'TypeCodeCompiledMethod',
 		'TypeCodeDate',
+		'TypeCodeDateAndTime',
 		'TypeCodeDictionary',
 		'TypeCodeExternalReference',
 		'TypeCodeFalse',
@@ -73,6 +74,7 @@ SoilTypeCodes class >> initializeTypeCodeMapping [
 		at: TypeCodeIdentityDictionary 	put: IdentityDictionary;
 		at: TypeCodeDate 						put: Date;
 		at: TypeCodeTime 						put: Time;
+		at: TypeCodeDateAndTime 				put: DateAndTime;
 		at: TypeCodeClass 						put: Class;
 		at: TypeCodeCompiledBlock  			put: CompiledBlock;
 		at: TypeCodeCompiledMethod 			put: CompiledMethod;
@@ -112,6 +114,7 @@ SoilTypeCodes class >> initializeTypeCodes [
 	TypeCodeIdentityDictionary := 26.
 	TypeCodeDate := 27.
 	TypeCodeTime := 28.
+	TypeCodeDateAndTime := 29.
 
 	TypeCodeClass := 49.
 	TypeCodeCompiledBlock := 50.

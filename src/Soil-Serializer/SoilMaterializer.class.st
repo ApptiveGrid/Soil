@@ -1,32 +1,14 @@
 Class {
 	#name : #SoilMaterializer,
 	#superclass : #SoilBasicMaterializer,
+	#instVars : [
+		'objects',
+		'transaction',
+		'externalObjectRegistry',
+		'soil'
+	],
 	#category : #'Soil-Serializer-Serializer/Materializer'
 }
-
-{ #category : #materializing }
-SoilMaterializer class >> materializeFromBytes: aByteArray [
-	^ (self on: aByteArray readStream)
-		materialize
-]
-
-{ #category : #'reading - basic' }
-SoilMaterializer class >> nextLengthEncodedInteger [
-
-	| value aSoilMaterializer |
-	self flag: #TODO. "seems to be not called and does not work"
-	aSoilMaterializer := self new.
-	value := aSoilMaterializer nextByte.
-	value < 128 ifTrue: [ ^ value ].
-	^ (aSoilMaterializer nextLengthEncodedInteger bitShift: 7) bitOr:
-		  (value bitAnd: 127)
-]
-
-{ #category : #'instance creation' }
-SoilMaterializer class >> on: aReadStream [
-	^ self new 
-		stream: aReadStream 
-]
 
 { #category : #public }
 SoilMaterializer >> behaviorVersionsUpTo: aDescription [ 
@@ -34,19 +16,20 @@ SoilMaterializer >> behaviorVersionsUpTo: aDescription [
 ]
 
 { #category : #accessing }
+SoilMaterializer >> externalObjectRegistry: anObject [
+
+	externalObjectRegistry := anObject
+]
+
+{ #category : #accessing }
 SoilMaterializer >> indexAt: indexId [ 
 	^ externalObjectRegistry indexAt: indexId
 ]
 
-{ #category : #public }
-SoilMaterializer >> materialize [
-	^ self nextSoilObject
-]
-
-{ #category : #public }
-SoilMaterializer >> materializeFromBytes: aByteArray [
-	^ (self stream: aByteArray readStream)
-		materialize
+{ #category : #initialization }
+SoilMaterializer >> initialize [ 
+	super initialize.
+	objects := OrderedCollection new
 ]
 
 { #category : #'instance creation' }
@@ -295,6 +278,23 @@ SoilMaterializer >> registerObject: anObject [
 ]
 
 { #category : #accessing }
+SoilMaterializer >> soil [
+
+	^ soil
+]
+
+{ #category : #accessing }
+SoilMaterializer >> soil: anObject [
+
+	soil := anObject
+]
+
+{ #category : #accessing }
 SoilMaterializer >> stream [
 	^stream
+]
+
+{ #category : #accessing }
+SoilMaterializer >> transaction: aSOTransaction [ 
+	transaction := aSOTransaction 
 ]

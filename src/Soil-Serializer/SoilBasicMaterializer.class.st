@@ -1,11 +1,32 @@
 Class {
 	#name : #SoilBasicMaterializer,
 	#superclass : #SoilObjectCodec,
-	#instVars : [
-		'objects'
-	],
 	#category : #'Soil-Serializer-Serializer/Materializer'
 }
+
+{ #category : #materializing }
+SoilBasicMaterializer class >> materializeFromBytes: aByteArray [
+	^ (self on: aByteArray readStream)
+		materialize
+]
+
+{ #category : #'reading - basic' }
+SoilBasicMaterializer class >> nextLengthEncodedInteger [
+
+	| value aSoilMaterializer |
+	self flag: #TODO. "seems to be not called and does not work"
+	aSoilMaterializer := self new.
+	value := aSoilMaterializer nextByte.
+	value < 128 ifTrue: [ ^ value ].
+	^ (aSoilMaterializer nextLengthEncodedInteger bitShift: 7) bitOr:
+		  (value bitAnd: 127)
+]
+
+{ #category : #'instance creation' }
+SoilBasicMaterializer class >> on: aReadStream [
+	^ self new 
+		stream: aReadStream 
+]
 
 { #category : #'reading - basic' }
 SoilBasicMaterializer >> basicNextString [
@@ -15,10 +36,15 @@ SoilBasicMaterializer >> basicNextString [
 	^ string
 ]
 
-{ #category : #initialization }
-SoilBasicMaterializer >> initialize [ 
-	super initialize.
-	objects := OrderedCollection new
+{ #category : #public }
+SoilBasicMaterializer >> materialize [
+	^ self nextSoilObject
+]
+
+{ #category : #public }
+SoilBasicMaterializer >> materializeFromBytes: aByteArray [
+	^ (self stream: aByteArray readStream)
+		materialize
 ]
 
 { #category : #'reading - basic' }
@@ -49,6 +75,18 @@ SoilBasicMaterializer >> nextDate: aClass [
 		offset: (Duration minutes: self nextSoilObject).
 	self registerObject: date.
 	^ date
+]
+
+{ #category : #reading }
+SoilBasicMaterializer >> nextDateAndTime [
+	| dateAndTime |
+	dateAndTime := DateAndTime basicNew 
+		setJdn: 2415386 + self nextSoilObject  
+		seconds:  self nextLengthEncodedInteger
+		nano:  self nextLengthEncodedInteger 
+		offset: (Duration minutes: self nextSoilObject).
+	self registerObject: dateAndTime.
+	^ dateAndTime
 ]
 
 { #category : #reading }
@@ -168,4 +206,8 @@ SoilBasicMaterializer >> nextWideSymbol [
 	buf := ByteArray new: (len := self nextLengthEncodedInteger).
 	stream readInto: buf startingAt: 1 count: len.
 	^ (self class decodeBytes: buf) asSymbol
+]
+
+{ #category : #registry }
+SoilBasicMaterializer >> registerObject: anObject [ 
 ]

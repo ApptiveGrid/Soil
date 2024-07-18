@@ -1,11 +1,22 @@
 Class {
 	#name : #SoilBasicSerializer,
 	#superclass : #SoilObjectCodec,
-	#instVars : [
-		'objectIdTable'
-	],
 	#category : #'Soil-Serializer-Serializer/Materializer'
 }
+
+{ #category : #'instance creation' }
+SoilBasicSerializer class >> on: aStream [ 
+	^ self new 
+		stream: aStream 
+]
+
+{ #category : #public }
+SoilBasicSerializer class >> serializeToBytes: anObject [ 
+
+	^ (self on: ByteArray new writeStream) 
+		serialize: anObject
+
+]
 
 { #category : #'writing - basic' }
 SoilBasicSerializer >> basicNextPutString: aString [ 
@@ -19,12 +30,6 @@ SoilBasicSerializer >> basicNextPutSymbol: aSymbol [
 	self
 		nextPutLengthEncodedInteger: aSymbol size;
 		nextPutBytesFrom: aSymbol
-]
-
-{ #category : #initialization }
-SoilBasicSerializer >> initialize [ 
-	super initialize.
-	objectIdTable := SoilObjectTable new
 ]
 
 { #category : #'writing - basic' }
@@ -58,6 +63,16 @@ SoilBasicSerializer >> nextPutDate: aDate [
 		nextPutByte: TypeCodeDate; 
 		nextPutInteger: aDate julianDayNumber - 2415386; 
 		nextPutInteger: ((aDate offset hours * 60) + aDate offset minutes)
+]
+
+{ #category : #writing }
+SoilBasicSerializer >> nextPutDateAndTime: aDateAndTime [ 
+	self 
+		nextPutByte: TypeCodeDateAndTime; 
+		nextPutInteger: aDateAndTime julianDayNumber - 2415386; 
+		nextPutLengthEncodedInteger: aDateAndTime secondsSinceMidnightUTC;
+		nextPutLengthEncodedInteger: aDateAndTime nanoSecond;
+		nextPutInteger: ((aDateAndTime offset hours * 60) + aDateAndTime offset minutes)
 ]
 
 { #category : #writing }
@@ -171,4 +186,11 @@ SoilBasicSerializer >> nextPutWideSymbol: aSymbol [
 		nextPutByte: TypeCodeWideSymbol;
 		nextPutLengthEncodedInteger: buf size;
 		nextPutBytesFrom: buf
+]
+
+{ #category : #private }
+SoilBasicSerializer >> serialize: anObject [
+	anObject soilBasicSerialize: self.
+	stream flush.
+	^ stream contents
 ]
