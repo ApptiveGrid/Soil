@@ -99,6 +99,30 @@ SoilIndexIterator >> basicNextAssociation [
 	^ nil 
 ]
 
+{ #category : #accessing }
+SoilIndexIterator >> basicPreviousAssociation [
+	| item |
+	"Find the association before"
+	currentKey ifNil: [ ^ self error: 'you need to navigate first using find: or last, for example'].
+	currentPage ifNil: [ self findPageFor: currentKey].
+	[ currentPage isNil ] whileFalse: [  
+		item := currentKey 
+			ifNotNil: [  
+				(currentPage itemBefore: currentKey)
+					ifNotNil: [ :i | 
+						currentKey := i key. 
+						^ i ]
+					ifNil: [ 
+						"are we the first page? if yes, there is no item before"
+						currentPage isHeaderPage ifTrue: [ ^nil ].
+						currentPage := self previousPage.
+						currentKey := nil ] ]
+			ifNil: [
+				currentPage isEmpty ifTrue: [ ^ nil ].
+				^ currentPage lastItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
+	Error signal: 'shouldnt happen'
+]
+
 { #category : #private }
 SoilIndexIterator >> convertValue: anObject [ 
 	anObject ifNil: [ ^ nil ].
@@ -232,7 +256,7 @@ SoilIndexIterator >> lastAssociation [
 	currentKey := lastAssociation key.
 	[restoredItem := self restoreItem: lastAssociation] whileNil: [   
 			"if the last entry is deleted, we need to take the one before"
-			lastAssociation := self previousAssociation ifNil: [ ^nil ]].
+			lastAssociation := self basicPreviousAssociation ifNil: [ ^nil ]].
 	^ restoredItem key -> (self convertValue: restoredItem value)
 ]
 
@@ -355,26 +379,13 @@ SoilIndexIterator >> previous: anInteger [
 
 { #category : #accessing }
 SoilIndexIterator >> previousAssociation [
-	| item |
-	"Find the association before"
-	currentKey ifNil: [ ^ self error: 'you need to navigate first using find: or last, for example'].
-	currentPage ifNil: [ self findPageFor: currentKey].
-	[ currentPage isNil ] whileFalse: [  
-		item := currentKey 
-			ifNotNil: [  
-				(currentPage itemBefore: currentKey)
-					ifNotNil: [ :i | 
-						currentKey := i key. 
-						^ i ]
-					ifNil: [ 
-						"are we the first page? if yes, there is no item before"
-						currentPage isHeaderPage ifTrue: [ ^nil ].
-						currentPage := self previousPage.
-						currentKey := nil ] ]
-			ifNil: [
-				currentPage isEmpty ifTrue: [ ^ nil ].
-				^ currentPage lastItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
-	Error signal: 'shouldnt happen'
+	"Note: key will be index key"
+	| previousAssociation restoredItem |
+	previousAssociation := self basicPreviousAssociation ifNil: [ ^nil ].
+	restoredItem := self restoreItem: previousAssociation.
+	^ restoredItem 
+		ifNotNil: [ restoredItem key -> (self convertValue: restoredItem value)] 
+		ifNil: [ self previousAssociation ] 
 ]
 
 { #category : #accessing }
@@ -431,7 +442,8 @@ SoilIndexIterator >> reverseDo: aBlock [
 	| item |
 	aBlock value: self lastAssociation value.
 	
-	[ (item := self previousAssociation ) notNil ] whileTrue: [ 
+	"We use basicNextAssociation to avoid the creation of intermediate associations of nextAssociation"
+	[ (item := self basicPreviousAssociation ) notNil ] whileTrue: [ 
  		(self restoreItem: item) ifNotNil: [ :notNil |
 			(self convertValue: notNil value)
 				ifNotNil: [ :value | aBlock value: value ] ] ]
