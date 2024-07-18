@@ -145,7 +145,9 @@ SoilBasicMaterializer >> nextSymbol [
 { #category : #reading }
 SoilBasicMaterializer >> nextTime [
 	| time |
-	time := Time fromSeconds: self nextLengthEncodedInteger.
+	time := Time 
+		seconds: self nextLengthEncodedInteger
+		nanoSeconds: self nextLengthEncodedInteger.
 	self registerObject: time.
 	^ time
 ]

@@ -737,7 +737,7 @@ SoilPrimitiveSerializationTest >> testSerializationTime [
 	| object serialized materialized |
 	object := Time midnight.
 	serialized := SoilSerializer serializeToBytes: object.
-	self assert: serialized equals: #[28 0].
+	self assert: serialized equals: #[28 0 0].
 	self assert: (serialized at: 1) equals: TypeCodeTime.
 
 	materialized := SoilMaterializer materializeFromBytes: serialized.
