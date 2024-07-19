@@ -144,7 +144,8 @@ SoilBasicSerializer >> nextPutSymbol: aSymbol [
 SoilBasicSerializer >> nextPutTime: aTime [ 
 	self
 		nextPutByte: TypeCodeTime;
-		nextPutLengthEncodedInteger: aTime asSeconds
+		nextPutLengthEncodedInteger: aTime asSeconds;
+		nextPutLengthEncodedInteger: aTime nanoSecond 
 ]
 
 { #category : #writing }
