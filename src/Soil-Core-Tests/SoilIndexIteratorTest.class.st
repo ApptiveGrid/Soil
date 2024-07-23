@@ -53,6 +53,31 @@ SoilIndexIteratorTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilIndexIteratorTest >> testAddRandom [
+	| iterator numEntries entries |
+	"just some random adding and checking that we can find it, configured to create lots of pages"
+	iterator := index newIterator.
+	
+	numEntries := 1000.
+	entries := Set new: numEntries.
+	
+	numEntries timesRepeat: [ | toAdd |
+		toAdd := (numEntries*20) atRandom.
+		entries add: toAdd.
+		iterator at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	
+	"check size"
+	self assert: iterator size equals: entries size.
+	
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (iterator at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	"iterate index, all should be in entries"
+	iterator do: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]].
+	iterator reverseDo: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]]
+]
+
+{ #category : #tests }
 SoilIndexIteratorTest >> testAtIfAbsent [
 	| iterator return |
 
@@ -80,13 +105,15 @@ SoilIndexIteratorTest >> testAtPut [
 { #category : #tests }
 SoilIndexIteratorTest >> testDo [
 	
-	| capacity result |
+	| iterator capacity result |
+	iterator := index newIterator.
+	
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n |
-		index at: n put: (n asByteArrayOfSize: 8) ].
+		iterator at: n put: (n asByteArrayOfSize: 8) ].
 	
 	result := OrderedCollection new.
-	index newIterator do: [ :each | result add: each ].
+	iterator do: [ :each | result add: each ].
 
 	self assert: result size equals: capacity.
 	self assert: result first equals: (1 asByteArrayOfSize: 8).
@@ -528,4 +555,20 @@ SoilIndexIteratorTest >> testReverseDo [
 	self assert: result size equals: capacity.
 	self assert: result first equals: (capacity asByteArrayOfSize: 8).
 	self assert: result last equals: (1 asByteArrayOfSize: 8)
+]
+
+{ #category : #tests }
+SoilIndexIteratorTest >> testSize [
+	
+	| iterator capacity result |
+	iterator := index newIterator.
+	
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		iterator at: n put: (n asByteArrayOfSize: 8) ].
+	
+	result := OrderedCollection new.
+	iterator do: [ :each | result add: each ].
+
+	self assert: result size equals: capacity
 ]
