@@ -29,6 +29,11 @@ SoilGlobals >> inspectionFields [
 ]
 
 { #category : #accessing }
+SoilGlobals >> lastModified [
+	^ self fieldAt: #lastModified
+]
+
+{ #category : #accessing }
 SoilGlobals >> lastModified: aDateAndTime [ 
 	self fieldAt: #lastModified put: aDateAndTime 
 ]
@@ -46,4 +51,10 @@ SoilGlobals >> lastOpened: aDateAndTime [
 { #category : #utilities }
 SoilGlobals >> prefix [
 	^ 'SOIL GLOBALS'
+]
+
+{ #category : #counting }
+SoilGlobals >> transactionCommitted: aSoilTransaction [ 
+	aSoilTransaction hasModifications ifTrue: [ 
+		self lastModified: DateAndTime now  ]
 ]
