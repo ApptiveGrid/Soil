@@ -146,6 +146,8 @@ SoilIndexIterator >> currentPage: anObject [
 { #category : #enumerating }
 SoilIndexIterator >> do: aBlock [
 	| item |
+	"set currentPage to nil to force starting at the first element"
+	currentPage := nil.
 	"We use basicNextAssociation to avoid the creation of intermediate associations of nextAssociation"
 	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ 
  		(self restoreItem: item) ifNotNil: [ :notNil |
