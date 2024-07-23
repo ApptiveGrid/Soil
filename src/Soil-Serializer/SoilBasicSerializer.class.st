@@ -1,11 +1,22 @@
 Class {
 	#name : #SoilBasicSerializer,
 	#superclass : #SoilObjectCodec,
-	#instVars : [
-		'objectIdTable'
-	],
 	#category : #'Soil-Serializer-Serializer/Materializer'
 }
+
+{ #category : #'instance creation' }
+SoilBasicSerializer class >> on: aStream [ 
+	^ self new 
+		stream: aStream 
+]
+
+{ #category : #public }
+SoilBasicSerializer class >> serializeToBytes: anObject [ 
+
+	^ (self on: ByteArray new writeStream) 
+		serialize: anObject
+
+]
 
 { #category : #'writing - basic' }
 SoilBasicSerializer >> basicNextPutString: aString [ 
@@ -19,12 +30,6 @@ SoilBasicSerializer >> basicNextPutSymbol: aSymbol [
 	self
 		nextPutLengthEncodedInteger: aSymbol size;
 		nextPutBytesFrom: aSymbol
-]
-
-{ #category : #initialization }
-SoilBasicSerializer >> initialize [ 
-	super initialize.
-	objectIdTable := SoilObjectTable new
 ]
 
 { #category : #'writing - basic' }
@@ -61,11 +66,13 @@ SoilBasicSerializer >> nextPutDate: aDate [
 ]
 
 { #category : #writing }
-SoilBasicSerializer >> nextPutDateAndTime: aDateAndTime [
+SoilBasicSerializer >> nextPutDateAndTime: aDateAndTime [ 
 	self 
 		nextPutByte: TypeCodeDateAndTime; 
-		basicNextPutString: aDateAndTime printString 
-
+		nextPutInteger: aDateAndTime julianDayNumber - 2415386; 
+		nextPutLengthEncodedInteger: aDateAndTime secondsSinceMidnightUTC;
+		nextPutLengthEncodedInteger: aDateAndTime nanoSecond;
+		nextPutInteger: ((aDateAndTime offset hours * 60) + aDateAndTime offset minutes)
 ]
 
 { #category : #writing }
@@ -152,7 +159,8 @@ SoilBasicSerializer >> nextPutSymbol: aSymbol [
 SoilBasicSerializer >> nextPutTime: aTime [ 
 	self
 		nextPutByte: TypeCodeTime;
-		nextPutLengthEncodedInteger: aTime asSeconds
+		nextPutLengthEncodedInteger: aTime asSeconds;
+		nextPutLengthEncodedInteger: aTime nanoSecond 
 ]
 
 { #category : #writing }
@@ -178,4 +186,11 @@ SoilBasicSerializer >> nextPutWideSymbol: aSymbol [
 		nextPutByte: TypeCodeWideSymbol;
 		nextPutLengthEncodedInteger: buf size;
 		nextPutBytesFrom: buf
+]
+
+{ #category : #private }
+SoilBasicSerializer >> serialize: anObject [
+	anObject soilBasicSerialize: self.
+	stream flush.
+	^ stream contents
 ]

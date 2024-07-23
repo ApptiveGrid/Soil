@@ -213,6 +213,11 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 		ifFalse: [ aBlock value ]
 ]
 
+{ #category : #enumerating }
+SoilIndex >> reverseDo: aBlock [
+	self newIterator reverseDo: aBlock
+]
+
 { #category : #accessing }
 SoilIndex >> size [
 	"We iterate over all elements to get the size. Slow!"

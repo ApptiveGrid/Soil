@@ -212,6 +212,12 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 	^v
 ]
 
+{ #category : #enumerating }
+SoilIndexedDictionary >> reverseDo: aBlock [
+ 	self newIterator reverseDo: [ :objectId | 
+ 				aBlock value: objectId ]
+]
+
 { #category : #accessing }
 SoilIndexedDictionary >> second [
 	^ self newIterator first; next

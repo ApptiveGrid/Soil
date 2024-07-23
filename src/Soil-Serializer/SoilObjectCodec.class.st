@@ -5,10 +5,7 @@ Class {
 	#name : #SoilObjectCodec,
 	#superclass : #Object,
 	#instVars : [
-		'externalObjectRegistry',
-		'stream',
-		'transaction',
-		'soil'
+		'stream'
 	],
 	#classVars : [
 		'CharacterEncoder'
@@ -46,29 +43,6 @@ SoilObjectCodec class >> initialize [
 ]
 
 { #category : #accessing }
-SoilObjectCodec >> externalObjectRegistry: anObject [
-
-	externalObjectRegistry := anObject
-]
-
-{ #category : #accessing }
-SoilObjectCodec >> soil [
-
-	^ soil
-]
-
-{ #category : #accessing }
-SoilObjectCodec >> soil: anObject [
-
-	soil := anObject
-]
-
-{ #category : #accessing }
 SoilObjectCodec >> stream: aStream [ 
 	stream := aStream
-]
-
-{ #category : #accessing }
-SoilObjectCodec >> transaction: aSOTransaction [ 
-	transaction := aSOTransaction 
 ]

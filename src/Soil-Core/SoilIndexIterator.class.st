@@ -99,6 +99,30 @@ SoilIndexIterator >> basicNextAssociation [
 	^ nil 
 ]
 
+{ #category : #accessing }
+SoilIndexIterator >> basicPreviousAssociation [
+	| item |
+	"Find the association before"
+	currentKey ifNil: [ ^ self error: 'you need to navigate first using find: or last, for example'].
+	currentPage ifNil: [ self findPageFor: currentKey].
+	[ currentPage isNil ] whileFalse: [  
+		item := currentKey 
+			ifNotNil: [  
+				(currentPage itemBefore: currentKey)
+					ifNotNil: [ :i | 
+						currentKey := i key. 
+						^ i ]
+					ifNil: [ 
+						"are we the first page? if yes, there is no item before"
+						currentPage isHeaderPage ifTrue: [ ^nil ].
+						currentPage := self previousPage.
+						currentKey := nil ] ]
+			ifNil: [
+				currentPage isEmpty ifTrue: [ ^ nil ].
+				^ currentPage lastItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
+	Error signal: 'shouldnt happen'
+]
+
 { #category : #private }
 SoilIndexIterator >> convertValue: anObject [ 
 	anObject ifNil: [ ^ nil ].
@@ -122,6 +146,8 @@ SoilIndexIterator >> currentPage: anObject [
 { #category : #enumerating }
 SoilIndexIterator >> do: aBlock [
 	| item |
+	"set currentPage to nil to force starting at the first element"
+	currentPage := nil.
 	"We use basicNextAssociation to avoid the creation of intermediate associations of nextAssociation"
 	[ (item := self basicNextAssociation ) notNil ] whileTrue: [ 
  		(self restoreItem: item) ifNotNil: [ :notNil |
@@ -175,6 +201,7 @@ SoilIndexIterator >> firstAssociation [
 	"Note: key will be index key"
 	| item |
 	currentPage := index store headerPage.
+	currentKey := nil.
 	item := self nextAssociation.
 	currentKey := item ifNotNil: [ item key ].
 	^ item
@@ -231,7 +258,7 @@ SoilIndexIterator >> lastAssociation [
 	currentKey := lastAssociation key.
 	[restoredItem := self restoreItem: lastAssociation] whileNil: [   
 			"if the last entry is deleted, we need to take the one before"
-			lastAssociation := self previousAssociation ifNil: [ ^nil ]].
+			lastAssociation := self basicPreviousAssociation ifNil: [ ^nil ]].
 	^ restoredItem key -> (self convertValue: restoredItem value)
 ]
 
@@ -354,26 +381,13 @@ SoilIndexIterator >> previous: anInteger [
 
 { #category : #accessing }
 SoilIndexIterator >> previousAssociation [
-	| item |
-	"Find the association before"
-	currentKey ifNil: [ ^ self error: 'you need to navigate first using find: or last, for example'].
-	currentPage ifNil: [ self findPageFor: currentKey].
-	[ currentPage isNil ] whileFalse: [  
-		item := currentKey 
-			ifNotNil: [  
-				(currentPage itemBefore: currentKey)
-					ifNotNil: [ :i | 
-						currentKey := i key. 
-						^ i ]
-					ifNil: [ 
-						"are we the first page? if yes, there is no item before"
-						currentPage isHeaderPage ifTrue: [ ^nil ].
-						currentPage := self previousPage.
-						currentKey := nil ] ]
-			ifNil: [
-				currentPage isEmpty ifTrue: [ ^ nil ].
-				^ currentPage lastItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
-	Error signal: 'shouldnt happen'
+	"Note: key will be index key"
+	| previousAssociation restoredItem |
+	previousAssociation := self basicPreviousAssociation ifNil: [ ^nil ].
+	restoredItem := self restoreItem: previousAssociation.
+	^ restoredItem 
+		ifNotNil: [ restoredItem key -> (self convertValue: restoredItem value)] 
+		ifNil: [ self previousAssociation ] 
 ]
 
 { #category : #accessing }
@@ -425,6 +439,18 @@ SoilIndexIterator >> restoreItem: anItem [
 	^ anItem 
 ]
 
+{ #category : #enumerating }
+SoilIndexIterator >> reverseDo: aBlock [ 
+	| item |
+	aBlock value: self lastAssociation value.
+	
+	"We use basicNextAssociation to avoid the creation of intermediate associations of nextAssociation"
+	[ (item := self basicPreviousAssociation ) notNil ] whileTrue: [ 
+ 		(self restoreItem: item) ifNotNil: [ :notNil |
+			(self convertValue: notNil value)
+				ifNotNil: [ :value | aBlock value: value ] ] ]
+]
+
 { #category : #accessing }
 SoilIndexIterator >> size [
 	"We iterate over all elements to get the size. Slow!"
@@ -444,6 +470,6 @@ SoilIndexIterator >> values [
 	| values |
 	values := OrderedCollection new.
 	self do: [ :each |
-		values add: each value ].
+		values add: each ].
 	^ values
 ]

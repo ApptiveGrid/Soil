@@ -143,7 +143,7 @@ SoilPagedFileIndexStore >> stream [
 { #category : #writing }
 SoilPagedFileIndexStore >> writeContentsToDisk [
 	stream ifNotNil: [  
-		stream fileStream fdatasync ]
+		stream fileStream fsync ]
 ]
 
 { #category : #writing }

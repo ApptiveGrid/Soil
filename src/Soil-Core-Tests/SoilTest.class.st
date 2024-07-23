@@ -127,6 +127,17 @@ SoilTest >> testDisabledFsync [
 ]
 
 { #category : #tests }
+SoilTest >> testEnabledFsync [
+	| tx |
+	soil setup enableFsync.
+	tx := soil newTransaction.
+	tx root: self simpleGraph.
+	self 
+		shouldnt: [ tx commit ]
+		raise: Error
+]
+
+{ #category : #tests }
 SoilTest >> testFindRecordWithIndex [ 
 	| tx skipList rec |
 	tx := soil newTransaction.
@@ -202,8 +213,16 @@ SoilTest >> testMetricsUncached [
 	self assert: metrics metaRecordCacheHits equals: 0.
 	self assert: metrics metaRecordsWritten equals: 3.
 	self assert: metrics metaRecordCacheHitRatio equals: 0.
-
-
+	
+	"test some more metrics here"
+	self assert: metrics objectRecordCacheMaximumSize equals: 0.
+	self assert: metrics metaRecordCacheMaximumSize equals: 0.
+	self assert: metrics metaRecordCacheSize equals: 0.
+	self assert: metrics objectRecordCacheSize equals: 0.
+	
+	self assert: metrics objectsMaterialized equals: 12.
+	self assert: metrics objectsSerialized equals: 8.
+	self assert: metrics transactionsAborted equals: 0
 ]
 
 { #category : #tests }
@@ -246,6 +265,12 @@ SoilTest >> testMetricsWithRecordCache [
 	self assert: metrics metaRecordCacheMisses equals: 0.
 	self assert: metrics metaRecordCacheHitRatio equals: 1.
 	self assert: metrics metaRecordsWritten equals: 3.
+	
+	"test some more metrics here"
+	self assert: metrics objectRecordCacheMaximumSize equals: 1000.
+	self assert: metrics metaRecordCacheMaximumSize equals: 1000.
+	self assert: metrics metaRecordCacheSize equals: 3.
+	self assert: metrics objectRecordCacheSize equals: 1.
 
 
 ]
