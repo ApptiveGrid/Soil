@@ -1,32 +1,14 @@
 Class {
 	#name : #SoilMaterializer,
 	#superclass : #SoilBasicMaterializer,
+	#instVars : [
+		'objects',
+		'transaction',
+		'externalObjectRegistry',
+		'soil'
+	],
 	#category : #'Soil-Serializer-Serializer/Materializer'
 }
-
-{ #category : #materializing }
-SoilMaterializer class >> materializeFromBytes: aByteArray [
-	^ (self on: aByteArray readStream)
-		materialize
-]
-
-{ #category : #'reading - basic' }
-SoilMaterializer class >> nextLengthEncodedInteger [
-
-	| value aSoilMaterializer |
-	self flag: #TODO. "seems to be not called and does not work"
-	aSoilMaterializer := self new.
-	value := aSoilMaterializer nextByte.
-	value < 128 ifTrue: [ ^ value ].
-	^ (aSoilMaterializer nextLengthEncodedInteger bitShift: 7) bitOr:
-		  (value bitAnd: 127)
-]
-
-{ #category : #'instance creation' }
-SoilMaterializer class >> on: aReadStream [
-	^ self new 
-		stream: aReadStream 
-]
 
 { #category : #public }
 SoilMaterializer >> behaviorVersionsUpTo: aDescription [ 
@@ -34,19 +16,20 @@ SoilMaterializer >> behaviorVersionsUpTo: aDescription [
 ]
 
 { #category : #accessing }
+SoilMaterializer >> externalObjectRegistry: anObject [
+
+	externalObjectRegistry := anObject
+]
+
+{ #category : #accessing }
 SoilMaterializer >> indexAt: indexId [ 
 	^ externalObjectRegistry indexAt: indexId
 ]
 
-{ #category : #public }
-SoilMaterializer >> materialize [
-	^ self nextSoilObject
-]
-
-{ #category : #public }
-SoilMaterializer >> materializeFromBytes: aByteArray [
-	^ (self stream: aByteArray readStream)
-		materialize
+{ #category : #initialization }
+SoilMaterializer >> initialize [ 
+	super initialize.
+	objects := OrderedCollection new
 ]
 
 { #category : #'instance creation' }
@@ -84,6 +67,13 @@ SoilMaterializer >> nextBehaviorDescription [
 	^ externalObjectRegistry 
 		behaviorDescriptionWithObjectId: behaviorDescription objectId 
 		andVersion: behaviorDescription version
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextByteArray: aClass [ 
+
+	^ self registerObject: (super nextByteArray: aClass)
+
 ]
 
 { #category : #reading }
@@ -218,6 +208,12 @@ SoilMaterializer >> nextCompiledMethod: aClass [
 ]
 
 { #category : #reading }
+SoilMaterializer >> nextDate: aClass [ 
+	
+	^ self registerObject: (super nextDate: aClass).
+]
+
+{ #category : #reading }
 SoilMaterializer >> nextDictionary: aClass [ 
 	| size dict key |
 	size := self nextLengthEncodedInteger.
@@ -238,10 +234,41 @@ SoilMaterializer >> nextExternalReference [
 ]
 
 { #category : #reading }
+SoilMaterializer >> nextFloat: aClass [ 
+	| float |
+	float := super nextFloat: aClass.
+	float isImmediateObject ifFalse: [self registerObject: float].
+	^ float
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextFraction: aClass [
+	
+	^ self registerObject: (super nextFraction: aClass).
+]
+
+{ #category : #reading }
 SoilMaterializer >> nextInternalReference [
 	| index |
 	index := self nextLengthEncodedInteger.
 	^ objects at: index
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextLargeNegativeInteger [
+	| integer |
+	"Large Integers are normal objects (need to be registered), small integers are immediate"
+	integer := super nextLargeNegativeInteger.
+	integer isImmediateObject ifFalse: [ self registerObject: integer].
+	^ integer
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextLargePositiveInteger [
+	| integer |
+	integer := super nextLargePositiveInteger.
+	integer isImmediateObject ifFalse: [ self registerObject: integer].
+	^ integer
 ]
 
 { #category : #reading }
@@ -268,33 +295,62 @@ SoilMaterializer >> nextPersistentDictionary: aClass [
 ]
 
 { #category : #reading }
+SoilMaterializer >> nextScaledDecimal: aClass [
+
+	^ self registerObject: (super nextScaledDecimal: aClass)
+
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextString [
+
+	^ self registerObject: super nextString
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextTime [
+
+	^ self registerObject: super nextTime
+]
+
+{ #category : #reading }
 SoilMaterializer >> nextUUID: aClass [ 
-	| uuid size byteArray |
-	size := self nextLengthEncodedInteger.
-	byteArray := SystemVersion current major < 12 
-		ifTrue: [ aClass new: size] 
-		ifFalse: [ ByteArray new: size].
 	
-	
-	stream readInto: byteArray startingAt: 1 count: size.
-	
-	uuid := SystemVersion current major < 12 
-		ifTrue: [byteArray ] 
-		ifFalse: [UUID nilUUID uuidData: byteArray].
-	
-	self registerObject: uuid.
-	
-	^ uuid
+	^ self registerObject: (super nextUUID: aClass)
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextWideString [
+
+	^ self registerObject: super nextWideString 
 ]
 
 { #category : #registry }
 SoilMaterializer >> registerObject: anObject [
 	soil ifNotNil: [  
 		soil notificationHandler objectMaterialized: anObject ].
-	objects add: anObject 
+	objects add: anObject.
+	^ anObject 
+]
+
+{ #category : #accessing }
+SoilMaterializer >> soil [
+
+	^ soil
+]
+
+{ #category : #accessing }
+SoilMaterializer >> soil: anObject [
+
+	soil := anObject
 ]
 
 { #category : #accessing }
 SoilMaterializer >> stream [
 	^stream
+]
+
+{ #category : #accessing }
+SoilMaterializer >> transaction: aSOTransaction [ 
+	transaction := aSOTransaction 
 ]
