@@ -8,8 +8,32 @@ Class {
 		'lockRegistry',
 		'locks'
 	],
+	#classInstVars : [
+		'defaultImageLocked',
+		'defaultFileLocked'
+	],
 	#category : #'Soil-File'
 }
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultFileLocked [
+	^ defaultFileLocked ifNil: [ true ]
+]
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultFileLocked: aBoolean [ 
+	defaultFileLocked := aBoolean 
+]
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultImageLocked [
+	^ defaultImageLocked ifNil: [ true ]
+]
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultImageLocked: aBoolean [ 
+	defaultImageLocked := aBoolean 
+]
 
 { #category : #'instance creation' }
 SoilLockableStream class >> path: aStringOrFileReference [ 
@@ -29,7 +53,24 @@ SoilLockableStream >> close [
 	fileStream ifNotNil: [  
 		fileStream closed 
 			ifFalse: [ fileStream close ] ].
+	lockRegistry := nil 
 
+]
+
+{ #category : #accessing }
+SoilLockableStream >> defaultFileLocked [
+	^ self class defaultFileLocked 
+]
+
+{ #category : #accessing }
+SoilLockableStream >> defaultImageLocked [
+	^ self class defaultImageLocked 
+]
+
+{ #category : #accessing }
+SoilLockableStream >> fileLocked [ 
+	^ fileLocked ifNil: [ 
+		fileLocked := self defaultFileLocked  ]
 ]
 
 { #category : #accessing }
@@ -47,19 +88,28 @@ SoilLockableStream >> flush [
 	^ fileStream flush
 ]
 
+{ #category : #accessing }
+SoilLockableStream >> imageLocked [ 
+	^ imageLocked ifNil: [ 
+		imageLocked := self defaultImageLocked  ]
+]
+
 { #category : #initialization }
 SoilLockableStream >> initialize [ 
 	super initialize.
 	locks := OrderedCollection new.
-	self class finalizationRegistry add: self.
-	imageLocked := true.
-	fileLocked := true.
+	self class finalizationRegistry add: self
 ]
 
 { #category : #initialization }
 SoilLockableStream >> initializePath: aStringOrFileReference [ 
 	fileStream := aStringOrFileReference asFileReference binaryReadWriteStream.
 	lockRegistry := SoilFileLockRegistry forPath: aStringOrFileReference asFileReference 
+]
+
+{ #category : #testing }
+SoilLockableStream >> isOpen [
+	^fileStream closed not
 ]
 
 { #category : #locking }
@@ -154,11 +204,11 @@ SoilLockableStream >> readInto: aCollection startingAt: startIndex count: count 
 { #category : #locking }
 SoilLockableStream >> registerLock: lock [
 	
-	imageLocked ifTrue: [ 
+	self imageLocked ifTrue: [ 
 		lock lockInMemory: lockRegistry ].
 	
-	fileLocked ifTrue: [ 
-		lock lockOn: fileStream  ].
+	self fileLocked ifTrue: [ 
+		lock lockOn: self  ].
 	
 	^ locks add: lock
 	
@@ -167,7 +217,6 @@ SoilLockableStream >> registerLock: lock [
 { #category : #finalization }
 SoilLockableStream >> releaseAllLocks [
 	locks copy do: [ :lock | 
-		locks remove: lock.
 		lock release ].
 	locks := OrderedCollection new
 ]
@@ -182,6 +231,11 @@ SoilLockableStream >> size [
 	^ fileStream size
 ]
 
+{ #category : #public }
+SoilLockableStream >> sync [
+	fileStream wrappedStream fdatasync 
+]
+
 { #category : #locking }
 SoilLockableStream >> unlockFrom: from to: to for: lockContext [ 
 	
@@ -190,7 +244,7 @@ SoilLockableStream >> unlockFrom: from to: to for: lockContext [
 		detect: [ :each | 
 			(each from = from) and: [ (each to = to) and: [ each context = lockContext ] ] ]
 		ifNone: [ NotFound signal: 'cannot find lock' ].
-	lock release.
+	fileStream wrappedStream unlockAt: from length: to - from. 
 	locks remove: lock
 	
 ]

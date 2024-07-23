@@ -25,6 +25,11 @@ SoilBasicBTree >> asCopyOnWrite [
 ]
 
 { #category : #accessing }
+SoilBasicBTree >> dataPages [
+	^ (self pages reject: [ :page | page isIndexPage ]) asArray
+]
+
+{ #category : #accessing }
 SoilBasicBTree >> flush [
 	self store flush
 ]
@@ -32,6 +37,11 @@ SoilBasicBTree >> flush [
 { #category : #testing }
 SoilBasicBTree >> hasHeaderPage [
 	^ store hasHeaderPage 
+]
+
+{ #category : #accessing }
+SoilBasicBTree >> indexPages [
+	^ (self pages select: [ :page | page isIndexPage ]) asArray
 ]
 
 { #category : #initialization }
@@ -70,6 +80,7 @@ SoilBasicBTree >> newIndexPage [
 	^ SoilBTreeIndexPage new 
 		keySize: self keySize;
 		pageSize: self pageSize;
+		index: self store nextPageIndex;
 		yourself
 ]
 
@@ -77,7 +88,6 @@ SoilBasicBTree >> newIndexPage [
 SoilBasicBTree >> newIndexPageFromRoot: rootIndexPage [
 	| newPage |
 	newPage := self newIndexPage.
-	newPage index: self store nextPageIndex.
 	self store pageAt: newPage index put: newPage.
 	"now move over all items"
 	newPage setItems: rootIndexPage items.
@@ -100,12 +110,21 @@ SoilBasicBTree >> newRootPage [
 
 { #category : #'open/close' }
 SoilBasicBTree >> open [
+ 	self isOpen ifTrue: [ self error: 'Index already open' ].
 	self store open
 ]
 
 { #category : #initialization }
 SoilBasicBTree >> pageClass [
 	^ SoilBTreeDataPage
+]
+
+{ #category : #removing }
+SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
+	| removedItem |
+	removedItem := self rootPage remove: key for: self.
+	removedItem ifNil: [aBlock value].
+	^removedItem value 
 ]
 
 { #category : #accessing }
@@ -117,7 +136,6 @@ SoilBasicBTree >> rootPage [
 SoilBasicBTree >> splitIndexPage: page [ 
 	| newPage |
 	newPage := page split: self newIndexPage.
-	newPage index: self store nextPageIndex.
 	self store pageAt: newPage index put: newPage.
 	^ newPage 
 ]
@@ -127,6 +145,7 @@ SoilBasicBTree >> splitPage: page [
 	| newPage |
 	newPage := page split: store newPage.
 	newPage index: self store nextPageIndex.
+	newPage next: page next.
 	page next: newPage index.
 	self store pageAt: newPage index put: newPage.
 	^ newPage 

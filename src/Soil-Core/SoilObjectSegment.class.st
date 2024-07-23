@@ -19,6 +19,11 @@ SoilObjectSegment >> acceptSoil: aSoilVisitor [
 ]
 
 { #category : #accessing }
+SoilObjectSegment >> allRecords [
+	^ objectFile allRecords
+]
+
+{ #category : #accessing }
 SoilObjectSegment >> allVersionsAt: index [ 
 	| obj versions |
 	obj := self at: index.
@@ -49,9 +54,10 @@ SoilObjectSegment >> at: anInteger [
 { #category : #accessing }
 SoilObjectSegment >> at: anInteger putBytes: bytes [ 
 	| position |
-	position := objectFile size.
-	objectFile appendBytes: bytes.
-	indexFile at: anInteger putPosition: position.
+	position := objectFile appendBytes: bytes.
+	indexFile 
+		at: anInteger 
+		putPosition: position.
 	^ position
 ]
 
@@ -80,6 +86,11 @@ SoilObjectSegment >> close [
 		objectFile close ].
 	indexManager ifNotNil: [ 
 		indexManager close ]
+]
+
+{ #category : #accessing }
+SoilObjectSegment >> flush [
+	self indexManager flush
 ]
 
 { #category : #accessing }
@@ -122,12 +133,6 @@ SoilObjectSegment >> indexAt: indexId ifAbsent: aBlock [
 	^ self indexManager 
 		at: indexId 
 		ifAbsent: aBlock
-]
-
-{ #category : #accessing }
-SoilObjectSegment >> indexAt: indexId put: aSoilIndex [
-
-	^ self indexManager at: indexId put: aSoilIndex
 ]
 
 { #category : #accessing }
@@ -228,7 +233,20 @@ SoilObjectSegment >> soil [
 	^ objectRepository soil
 ]
 
+{ #category : #accessing }
+SoilObjectSegment >> updateLastObjectIndex: anInteger [ 
+	^ indexFile updateLastObjectIndex: anInteger 
+]
+
 { #category : #validating }
 SoilObjectSegment >> validateLastObjectIndex: anInteger [ 
 	indexFile validateLastObjectIndex: anInteger
+]
+
+{ #category : #writing }
+SoilObjectSegment >> writeContentsToDisk [
+	self soil setup isFsyncEnabled ifTrue: [  
+		indexFile writeContentsToDisk.
+		objectFile writeContentsToDisk.
+		self indexManager writeContentsToDisk ]
 ]

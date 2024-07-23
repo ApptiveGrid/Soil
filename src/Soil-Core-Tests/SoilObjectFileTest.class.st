@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilObjectFileTest,
 	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Files'
 }
 
 { #category : #'instance creation' }

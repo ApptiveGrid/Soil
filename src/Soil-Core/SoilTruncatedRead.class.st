@@ -1,5 +1,5 @@
 Class {
 	#name : #SoilTruncatedRead,
 	#superclass : #SoilError,
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Error'
 }

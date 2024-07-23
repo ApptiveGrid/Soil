@@ -2,9 +2,10 @@ Class {
 	#name : #SoilBackupTest,
 	#superclass : #TestCase,
 	#instVars : [
-		'soil'
+		'soil',
+		'backupSoil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Visitor'
 }
 
 { #category : #accessing }
@@ -14,7 +15,7 @@ SoilBackupTest >> backupPath [
 
 { #category : #accessing }
 SoilBackupTest >> path [ 
-	^ 'soil-tests'
+	^ 'soil-tests' asFileReference 
 ]
 
 { #category : #initialization }
@@ -30,7 +31,70 @@ SoilBackupTest >> setUp [
 SoilBackupTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
-		soil close ]
+		soil close ].
+	backupSoil ifNotNil: [ 
+		backupSoil 
+			close;
+			destroy ]
+]
+
+{ #category : #tests }
+SoilBackupTest >> testBackupCurrentVersion [ 
+	| tx tx2 visitor tx3 |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #versionOne) ).
+	tx makeRoot: tx root nested.
+	tx commit.
+	
+	self assert: soil control databaseVersion equals: 1.
+	
+	tx2 := soil newTransaction.
+	tx2 root nested label: #versionTwo.
+	tx2 markDirty: tx2 root nested.
+	tx2 commit.
+	
+	backupSoil := Soil createOnPath: self path, #backup.
+	[ 
+	visitor := SoilBackupVisitor new 
+		target: backupSoil;
+		backup: soil.
+
+	backupSoil close; open.
+	
+	tx3 := backupSoil newTransaction.
+	  self assert: tx3 root nested label equals: #versionTwo ]
+		ensure: [ 
+			tx3 abort ].
+]
+
+{ #category : #tests }
+SoilBackupTest >> testBackupOldVersion [ 
+	| tx tx2 visitor tx3 |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #versionOne) ).
+	tx makeRoot: tx root nested.
+	tx commit.
+	
+	self assert: soil control databaseVersion equals: 1.
+	
+	tx2 := soil newTransaction.
+	tx2 root nested label: #versionTwo.
+	tx2 markDirty: tx2 root nested.
+	tx2 commit.
+	
+	backupSoil := Soil createOnPath: self path, #backup.
+	[ 
+	visitor := SoilBackupVisitor new 
+		target: backupSoil;
+		version: 1;
+		backup: soil.
+
+	backupSoil close; open.
+	
+	tx3 := backupSoil newTransaction.
+	  self assert: tx3 root nested label equals: #versionOne ]
+		ensure: [ 
+			tx3 abort ].
 ]
 
 { #category : #tests }

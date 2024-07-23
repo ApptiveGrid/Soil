@@ -27,9 +27,22 @@ SoilBTreePage >> addItem: anAssociation [
 	dirty := true
 ]
 
+{ #category : #assertions }
+SoilBTreePage >> bTreeAssertion [
+	self assert: self hasRoom.
+	"each node has a maximum of M children and at least ceil(M/2) - 1 children"
+	self assert: (self numberOfItems <= self itemCapacity).
+	items isEmpty ifFalse: [ self assert:  self hasUnderflow not  ]
+]
+
 { #category : #private }
 SoilBTreePage >> find: aKey with: aBTree [ 
 	^ self subclassResponsibility
+]
+
+{ #category : #assertions }
+SoilBTreePage >> hasUnderflow [
+	^ self numberOfItems < ((self itemCapacity  / 2) ceiling - 1)
 ]
 
 { #category : #initialization }
@@ -44,6 +57,11 @@ SoilBTreePage >> insertItem: anItem for: iterator [
 	^ self subclassResponsibility
 ]
 
+{ #category : #testing }
+SoilBTreePage >> isIndexPage [
+ 	^ self subclassResponsibility
+]
+
 { #category : #accessing }
 SoilBTreePage >> pointerSize [
 	"this is the size in bytes used to point to other pages"
@@ -56,15 +74,19 @@ SoilBTreePage >> readFrom: aStream [
 	self readLastTransactionFrom: aStream
 ]
 
+{ #category : #removing }
+SoilBTreePage >> remove: aKey for: aBTree [ 
+	^ self subclassResponsibility
+]
+
 { #category : #private }
 SoilBTreePage >> split: newPage [
 	| middle |
 	
-	newPage 
-		index: index.
-	middle := (items size / 2) ceiling.
+	middle := (items size - 1 / 2) ceiling.
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.
+	dirty := true.
 	^ newPage
 ]
 

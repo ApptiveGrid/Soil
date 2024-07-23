@@ -85,20 +85,23 @@ SoilRangeLock >> lockInMemory: aLockRegistry [
 
 { #category : #locking }
 SoilRangeLock >> lockOn: aStream [ 
-	stream := aStream wrappedStream.
-	stream lockAt: from length: to - from 
+	stream := aStream.
+	(stream fileStream lockAt: from length: to - from) ifFalse: [ 
+		SoilAlreadyLocked signal: 'cannot file lock <', self asString, '> because there is a file lock present on disk'
+	] 
 ]
 
 { #category : #printing }
 SoilRangeLock >> printOn: aStream [ 
+	| path |
 	aStream << 'range lock  ' 
 		<< from asString << ' - ' << to asString.
-	registry ifNotNil: [  
-		aStream << ' mem ' << registry path asString ].
-	stream ifNotNil: [  
-		aStream << ' file ' << stream name asString ].
-	aStream << ' '.
-	context printOn: aStream
+	path := registry ifNotNil: [ registry path pathString ].
+	stream ifNotNil: [ 
+		path := stream fileStream name asString ].
+	aStream << ' @ ' << path.
+	aStream << ' -> '.
+	context printOn: aStream 
 ]
 
 { #category : #accessing }
@@ -116,7 +119,7 @@ SoilRangeLock >> registry: anObject [
 { #category : #initialization }
 SoilRangeLock >> release [ 
 	stream ifNotNil: [ 
-		stream unlockAt: from length: to - from.
+		stream unlockFrom: from to: to for: context.
 		stream := nil ].
 	registry ifNotNil: [ 
 		registry removeLock: self.

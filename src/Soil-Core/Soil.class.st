@@ -38,8 +38,7 @@ Class {
 		'serializerClass',
 		'materializerClass',
 		'control',
-		'setup',
-		'metadata'
+		'setup'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -49,15 +48,30 @@ Soil class >> characterEncoding: aString [
 	SoilObjectCodec characterEncoding: aString
 ]
 
+{ #category : #'instance creation' }
+Soil class >> createOnPath: aStringOrFileReference [
+	^ (self path: aStringOrFileReference)
+		initializeFilesystem 
+]
+
 { #category : #accessing }
 Soil class >> databaseFormatVersion [ 
 	^ 1
 ]
 
 { #category : #'instance creation' }
-Soil class >> inMemory [ 
-	^ self new 
-		path: FileSystem memory root
+Soil class >> ensureOnPath: aStringOrFileReference [
+	| soil |
+	soil := self path: aStringOrFileReference.
+	^ soil isInitialized  
+		ifTrue: [ soil open ]
+		ifFalse: [ soil initializeFilesystem ] 
+]
+
+{ #category : #'instance creation' }
+Soil class >> openOnPath: aStringOrFileReference [
+	^ (self path: aStringOrFileReference)
+		open
 ]
 
 { #category : #'instance creation' }
@@ -100,9 +114,10 @@ Soil >> basicOpen [
 			open;
 			yourself.
 	journal := SoilPersistentDatabaseJournal new
-		soil: self;
-		open;
-		yourself.
+		soil: self.
+	"journal open might checkpoint so we set the journal 
+	instance variable first before calling open"
+	journal open.
 	notificationHandler := SoilNotificationHandler new
 		soil: self
 	
@@ -113,6 +128,25 @@ Soil >> behaviorRegistry [
 	^ behaviorRegistry
 ]
 
+{ #category : #accessing }
+Soil >> checkpoint [ 
+	| entry checkpointLSN |
+	semaphore critical: [  
+		"prepare a consistent setting first "
+		entry := SoilCheckpointEntry new
+			previousCheckpoint: self control lastCheckpoint.
+		"write the checkpoint entry in the journal and get 
+		the position of that entry in the file"
+		checkpointLSN := self journal writeEntry: entry.
+		"set the checkpoint position so it can be read back"
+		self control checkpoint: checkpointLSN.
+		"finally write all files to disk and sync so that it
+		creates a real checkpoint"
+		entry commitIn: self.
+ ].
+	^ entry
+]
+
 { #category : #'opening/closing' }
 Soil >> close [
 	objectRepository ifNotNil: [ 
@@ -120,7 +154,9 @@ Soil >> close [
 	behaviorRegistry ifNotNil: [ 
 		behaviorRegistry close ].
 	control ifNotNil: [ 
-		control close ]
+		control close ].
+	journal ifNotNil: [ 
+		journal close ]
 ]
 
 { #category : #accessing }
@@ -132,16 +168,6 @@ Soil >> control [
 { #category : #initialization }
 Soil >> critical: aBlock [ 
 	semaphore critical: aBlock
-]
-
-{ #category : #accessing }
-Soil >> databaseVersion [
-	^ control databaseVersion
-]
-
-{ #category : #accessing }
-Soil >> databaseVersion: anInteger [ 
-	control databaseVersion: anInteger
 ]
 
 { #category : #'instance creation' }
@@ -177,7 +203,7 @@ Soil >> initialize [
 
 { #category : #initialization }
 Soil >> initializeFilesystem [
-	(path exists and: [ path hasChildren ]) 
+	self isInitialized 
 		ifTrue: [ SoilDatabaseAlreadyPresent signal: 'the directory ', path asString, ' already exists' ].
 	self path ensureCreateDirectory.
 	control := SoilControlFile new
@@ -219,6 +245,16 @@ Soil >> inspectionMetadata [
 	<inspectorPresentationOrder: 2200 title: 'metadata'>
 
 	^ self metadata inspectionMetadata
+]
+
+{ #category : #testing }
+Soil >> isInitialized [ 
+	^ path exists and: [ path hasChildren ]
+]
+
+{ #category : #testing }
+Soil >> isOpen [
+	^control notNil and: [control isOpen]
 ]
 
 { #category : #accessing }
@@ -285,7 +321,7 @@ Soil >> newTransaction: aClass [
 	| txn |
 	txn := aClass new 
 		soil: self;
-		readVersion: self databaseVersion;
+		readVersion: self control databaseVersion;
 		start;
 		yourself.
 	notificationHandler transactionCreated: txn.
@@ -312,6 +348,7 @@ Soil >> objectRepository [
 
 { #category : #'opening/closing' }
 Soil >> open [
+	self isOpen ifTrue: [ self error: 'Database already open' ].
 	self basicOpen.
 	journal recover
 ]
@@ -364,16 +401,17 @@ Soil >> renameClassNamed: oldName to: newName [
 { #category : #journal }
 Soil >> replayJournal: aSoilJournal [ 
 	| journals databaseVersion |
-	databaseVersion := self databaseVersion.
+	databaseVersion := self control databaseVersion.
 	journals := aSoilJournal 
 		transactionJournalsStartingAt: databaseVersion + 1
-		do: [:tj | self replayTransactionJournal: tj ]
+		do: [:tj | self replayTransactionJournal: tj ].
+	self writeEverythingToDisk 
 ]
 
 { #category : #journal }
 Soil >> replayTransactionJournal: aSoilTransactionJournal [
 	| databaseVersion |
-	databaseVersion := self databaseVersion.
+	databaseVersion := self control databaseVersion.
 	(aSoilTransactionJournal index > databaseVersion) ifTrue: [ 
 		aSoilTransactionJournal asSortedJournal commitIn: self.
 		self journal importTransactionJournal: aSoilTransactionJournal ]
@@ -401,4 +439,17 @@ Soil >> setup [
 { #category : #transactions }
 Soil >> transactionClass [
 	^ SoilTransaction 
+]
+
+{ #category : #writing }
+Soil >> writeEverythingToDisk [ 
+	self behaviorRegistry 
+		flush;
+		writeContentsToDisk.
+	self objectRepository 
+		flush;
+		writeContentsToDisk.
+	self control 
+		flush;
+		writeContentsToDisk 		
 ]

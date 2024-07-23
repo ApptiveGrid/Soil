@@ -37,7 +37,7 @@ SoilTransaction >> acquireLocksAndDetectWriteSkew [
 		"check if the version we've read is still actual. Another transaction could have
 		committed since we last read. Checking for the position in the index is sufficient
 		as each version relates to a unique position"
-		locks add: record lockIndex.
+		self addLock: record lockIndex.
 		record validateReadVersion ].
 	"idMap is keyed by objectIds which could have changed by now so we rehash in order
 	not to miss lookups"
@@ -54,6 +54,11 @@ SoilTransaction >> addClusterObject: anObject [
 		putObject: anObject.
 	^ objectId
 
+]
+
+{ #category : #adding }
+SoilTransaction >> addLock: aLock [ 
+	locks add: aLock
 ]
 
 { #category : #accessing }
@@ -77,6 +82,43 @@ SoilTransaction >> basicAbort [
 	objectMap := nil
 ]
 
+{ #category : #accessing }
+SoilTransaction >> basicCommit [
+	"serialize objects and collect all to be written records. This can be done without 
+	resources that need locking. This reduces time needed for locking"
+	self prepareRecordsForCommit.
+	"if there are no records to commit we can just return and don't allocate any
+	resources"
+	(recordsToCommit isEmpty and: [indexUpdatesToCommit isEmpty ]) ifTrue: [ 
+		soil notificationHandler transactionCommitted: self.
+		^ self ].
+	"only one transactions is allowed at a time. We use the critical block of the database
+	to avoid parallel committing"
+	soil critical: [ 
+	"enter lock phase. Acquire lock on global databaseVersion which centrally locks
+	the database for commiting until this checkpoint is done. The ensure block is needed
+	to be sure to release all locks at the end."
+		[ 
+		"lock global database version and create a version for new modification"
+		writeVersion := self buildWriteVersion.
+		"lock all records in the segment and check indexes for out of date versions"
+		self acquireLocksAndDetectWriteSkew.
+		"lastObjectIndexes contains the highest allocated index number per segment. We
+		lock all positions in order to update the index numbers in the database."
+		lastObjectIndexes keysDo: [ :segment |
+			self addLock: (segment lockAppendingFor: self) ].
+		"convert the records into journal entries, write the journal to disk and then
+		execute the journal on the database"
+		journal := self buildJournal.
+		journal validateIn: self.
+		soil journal writeTransactionJournal: journal.
+		journal commitIn: soil.
+		soil journal addTransactionJournal: journal ]
+				ensure: [self releaseLocks ] ].
+		soil notificationHandler transactionCommitted: self
+
+]
+
 { #category : #public }
 SoilTransaction >> behaviorDescriptionFor: aClass [
 	| behaviorDescription objectId |
@@ -98,7 +140,6 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 				ifNotNil: [ :object | object objectId: objectId ]
 				ifNil: [ Error signal: ('could not find object with ', objectId asString, ' for class ', aClass name, ' in transaction ', self printString) ] ].
 		"the description in the database might not be current, if not, we create a new one later"
-		(behaviorDescription behaviorIdentifier  = SoilBehaviorDescription) ifTrue: [ self halt. ]. 
 		behaviorDescription isCurrent 
 			ifTrue: [ ^ behaviorDescription ] ].
 			
@@ -192,63 +233,24 @@ SoilTransaction >> buildJournal [
 SoilTransaction >> buildWriteVersion [
 	"first we lock the database version so it cannot be modified while we are 
 	checkpointing"
-	locks add: (soil lockDatabaseVersionFor: self).
+	self addLock: (soil lockDatabaseVersionFor: self).
 	"Now the version is locked. We can read it again to have the real version and
 	increment"
-	^ soil databaseVersion + 1 
-]
-
-{ #category : #accessing }
-SoilTransaction >> checkpoint [
-	"serialize objects and collect all to be written records. This can be done without 
-	resources that need locking. This reduces time needed for locking"
-	self prepareRecordsForCommit.
-	"if there are no records to commit we can just return and don't allocate any
-	resources"
-	(recordsToCommit isEmpty and: [indexUpdatesToCommit isEmpty ]) ifTrue: [ 
-		soil notificationHandler transactionCommitted: self.
-		^ self ].
-	"only one transactions is allowed at a time. We use the critical block of the database
-	to avoid parallel committing"
-	soil critical: [ 
-	"enter lock phase. Acquire lock on global databaseVersion which centrally locks
-	the database for commiting until this checkpoint is done. The ensure block is needed
-	to be sure to release all locks at the end."
-		[ 
-		"lock global database version and create a version for new modification"
-		writeVersion := self buildWriteVersion.
-		"lock all records in the segment and check indexes for out of date versions"
-		self acquireLocksAndDetectWriteSkew.
-		"lastObjectIndexes contains the highest allocated index number per segment. We
-		lock all positions in order to update the index numbers in the database."
-		lastObjectIndexes keysDo: [ :segment |
-			locks add: (segment lockAppendingFor: self) ].
-		"convert the records into journal entries, write the journal to disk and then
-		execute the journal on the database"
-		journal := self buildJournal.
-		journal validateIn: self.
-		soil journal writeTransactionJournal: journal.
-		journal commitIn: soil.
-		soil journal 
-			addTransactionJournal: journal;
-			checkpoint ]
-				ensure: [self releaseLocks ] ].
-		soil notificationHandler transactionCommitted: self
-
-]
-
-{ #category : #actions }
-SoilTransaction >> checkpointAndContinue [
-	self 
-		checkpoint;
-		continue
+	^ soil control databaseVersion + 1 
 ]
 
 { #category : #accessing }
 SoilTransaction >> commit [
-	self 
-		checkpoint;
-		basicAbort
+	self basicCommit.
+	soil checkpoint.
+	self basicAbort.
+]
+
+{ #category : #actions }
+SoilTransaction >> commitAndContinue [
+	self basicCommit.
+	soil checkpoint.
+	self continue
 ]
 
 { #category : #actions }
@@ -318,14 +320,6 @@ SoilTransaction >> hasModifications [
 ]
 
 { #category : #accessing }
-SoilTransaction >> indexAt: indexId segment: segmentIndex [ 
-	^ indexes 
-		at: indexId 
-		ifAbsentPut: [ 
-			(self segmentAt: segmentIndex) indexAt: indexId  ]
-]
-
-{ #category : #accessing }
 SoilTransaction >> indexes [ 
 	^ indexes
 ]
@@ -350,7 +344,7 @@ SoilTransaction >> initializeObjectId: anObjectId [
 	assoc := lastObjectIndexes 
 		at: segment 
 		ifAbsentPut: [ 
-			locks add: (segment lockLastObjectIndexFor: self).
+			self addLock: (segment lockLastObjectIndexFor: self).
 			segment lastObjectIndex -> segment lastObjectIndex ].
 	"we use an association here to keep the version read from database
 	as well as the new version"
@@ -474,7 +468,9 @@ SoilTransaction >> objectAt: anObjectId ifAbsent: aBlock [
 
 { #category : #api }
 SoilTransaction >> objectIdOf: anObject [ 
-	^ (objectMap at: anObject) objectId.
+	^ (anObject class = SoilObjectProxy)
+		ifTrue: [ anObject objectId ]
+		ifFalse: [ (objectMap at: anObject) objectId ].
 	
 ]
 
@@ -573,8 +569,13 @@ SoilTransaction >> registerRecord: record [
 
 { #category : #api }
 SoilTransaction >> releaseLocks [
-	locks do: [ :lock | lock release ].
-	locks := OrderedCollection new
+	locks copy do: [ :lock | self removeLock: lock ]
+]
+
+{ #category : #adding }
+SoilTransaction >> removeLock: aLock [ 
+	aLock release.
+	locks remove: aLock
 ]
 
 { #category : #accessing }

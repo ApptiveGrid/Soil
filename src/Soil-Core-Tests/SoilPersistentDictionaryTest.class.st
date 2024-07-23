@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Model'
 }
 
 { #category : #accessing }
@@ -43,6 +43,18 @@ SoilPersistentDictionaryTest >> testAt [
 	
 
 
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testAtIfAbsent [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	transaction commit.
+		
+	self assert: (dict at: #test2 ifAbsent: [#missing]) equals: #missing
 ]
 
 { #category : #tests }
@@ -110,15 +122,16 @@ SoilPersistentDictionaryTest >> testNewPersistentDictionary [
 { #category : #tests }
 SoilPersistentDictionaryTest >> testRemoveKey [
 
-	| dict transaction |
+	| dict transaction removed |
 	transaction := soil newTransaction.
 	dict := SoilPersistentDictionary new.
 	transaction makeRoot: dict.
 	dict at: #test put: 'string'.
 	dict at: #test2 put: 'string2'.
-	dict removeKey: #test.
+	removed := dict removeKey: #test.
 	transaction commit.
-		
+	
+	self assert: removed equals: 'string'.
 	self assert: (dict at: #test2) equals: 'string2'.
 	self deny: (dict includesKey: #test)
 	

@@ -47,8 +47,9 @@ SoilIndexManager >> at: indexId put: aSoilIndex [
 { #category : #'open/close' }
 SoilIndexManager >> close [
 	semaphore critical: [  
-		indexes valuesDo: #close.
-		indexes := Dictionary new ]
+		indexes copy keysAndValuesDo: [ :id :index |
+			index close.
+			indexes removeKey: id ] ]
 ]
 
 { #category : #api }
@@ -126,4 +127,10 @@ SoilIndexManager >> segment [
 { #category : #accessing }
 SoilIndexManager >> segment: aSOObjectSegment [ 
 	segment := aSOObjectSegment 
+]
+
+{ #category : #writing }
+SoilIndexManager >> writeContentsToDisk [
+	segment soil setup isFsyncEnabled ifTrue: [  
+		self indexes do: [ :each | each writeContentsToDisk ] ]
 ]

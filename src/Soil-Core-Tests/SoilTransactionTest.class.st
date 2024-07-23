@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Model'
 }
 
 { #category : #accessing }
@@ -43,7 +43,7 @@ SoilTransactionTest >> testCheckpointAndContinue [
 	| tx |
 	tx := soil newTransaction.
 	tx root: Object new.
-	tx checkpointAndContinue.
+	tx commitAndContinue.
 	self deny: tx hasModifications.
 	 
 	
@@ -110,7 +110,7 @@ SoilTransactionTest >> testTwoRootsWithAlwaysRoot [
 	"obj1 is made root but refers to an object that has a class
 	side setting for being root. The second object is being made
 	root when serializing obj1 "
-	tx checkpoint.
+	tx basicCommit.
 	"expect 4 records: 2 instances and 2 classes"
 	self assert: tx records size equals: 4
 ]

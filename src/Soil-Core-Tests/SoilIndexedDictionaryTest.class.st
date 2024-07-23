@@ -6,7 +6,7 @@ Class {
 		'dict',
 		'classToTest'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Index'
 }
 
 { #category : #tests }
@@ -127,6 +127,33 @@ SoilIndexedDictionaryTest >> testAddToExistingNonEmptyList [
 	tx3 abort.	
 	tx4 := soil newTransaction.
 	self assert: (tx4 root at: #foo) equals: #bar.	
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testAfterReopen [
+	"test that we can close and re-open the database"
+ 	| tx |
+ 	tx := soil newTransaction.
+ 	tx root: dict.
+ 	tx commit.
+ 	"Open a fresh Soil instance, so index structures are not cached"
+ 	soil close. soil open.
+ 	tx := soil newTransaction.
+ 	"Getting the values, before doing #at:put: yielded index pages with nil pageSize"
+ 	tx root values.
+ 	tx root at: 'abc' asByteArray put: #one.
+ 	self
+ 		shouldnt: [ tx commit ]
+ 		raise: Error
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testAtIfAbsent [
+	| return tx |
+	tx := soil newTransaction.
+	tx root: dict.
+	return := dict at: 1 ifAbsent: [ #missing ].
+	self assert: return equals:  #missing
 ]
 
 { #category : #tests }
@@ -398,7 +425,8 @@ SoilIndexedDictionaryTest >> testLastWithTransaction [
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"and test last, note: keyorder"
-	self assert: tx2 root last equals: #twovalue
+	self assert: tx2 root last equals: #twovalue.
+	self assert: (tx2 root last: 2) second equals: #twovalue
 ]
 
 { #category : #tests }
@@ -473,10 +501,8 @@ SoilIndexedDictionaryTest >> testNextcloseToWithTransaction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
-
-
-	| tx tx2 tag |
+SoilIndexedDictionaryTest >> testRemoveKey [
+	| tx tx2 tag return |
 	tx := soil newTransaction.
 	tx root: dict.
 	dict at: #one put: #onevalue.
@@ -485,8 +511,9 @@ SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"remove the key"
-	tx2 root removeKey: #two.
+	return := tx2 root removeKey: #two.
 	self assert: tx2 root size equals: 1.
+	self assert: return equals: #twovalue.
 	"remove again to test absent case"
 	tag := false.
 	tx2 root removeKey: #three ifAbsent: [ tag := true ].
@@ -494,8 +521,7 @@ SoilIndexedDictionaryTest >> testRemoveKeyIfAbsentWithTransaction [
 	"remove again to test absent case with already removed key"
 	tag := false.
 	tx2 root removeKey: #two ifAbsent: [ tag := true ].
-	self assert: tag.
-	
+	self assert: tag
 
 ]
 

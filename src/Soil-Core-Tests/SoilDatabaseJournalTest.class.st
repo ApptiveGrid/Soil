@@ -5,7 +5,7 @@ Class {
 		'soil',
 		'copy'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Journal'
 }
 
 { #category : #helper }
@@ -93,7 +93,7 @@ SoilDatabaseJournalTest >> tearDown [
 SoilDatabaseJournalTest >> testRecoverWithAtEnd [
 	soil close.
 	soil open.
-	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28) 
+	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28) 
 	
 ]
 
@@ -112,10 +112,10 @@ SoilDatabaseJournalTest >> testRecoverWithIncompleteTransactionJournal [
 	soil journal currentFragmentFile stream 
 		nextPutAll: #( 1 2 3 4 );
 		flush.
-	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 86).
+	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 86).
 	soil close.
 	soil open.
-	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 1 offset: 28) 
+	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 1 offset: 28) 
 	
 	
 ]
@@ -134,12 +134,12 @@ SoilDatabaseJournalTest >> testRecoverWithJournalAndCheckpoint [
 		committedAt: DateAndTime now;
 		yourself).
 	newJournal addEntry: (SoilCheckpointEntry new
-		previousCheckpoint: soil control checkpoint).
+		previousCheckpoint: soil control lastCheckpoint).
 	soil journal writeTransactionJournal: newJournal.
 	soil close.
 	soil open.
 	"we have now two entries checkpoint at the end but that is to be expected"
-	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 72) 
+	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 72) 
 	
 ]
 
@@ -147,12 +147,14 @@ SoilDatabaseJournalTest >> testRecoverWithJournalAndCheckpoint [
 SoilDatabaseJournalTest >> testRecoverWithRemainingBytes [
 	
 	soil journal currentFragmentFile stream 
+		setToEnd;
 		nextPutAll: #( 1 2 3 4 );
 		flush.
-	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28).
+	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28).
+	self assert: soil journal currentFragmentFile stream size equals: 43.
 	soil close.
 	soil open.
-	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 1 offset: 28) 
+	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 1 offset: 28) 
 	
 	
 ]
@@ -171,10 +173,10 @@ SoilDatabaseJournalTest >> testRecoverWithRemainingJournal [
 		committedAt: DateAndTime now;
 		yourself).
 	soil journal writeTransactionJournal: newJournal.
-	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28).
+	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 28).
 	soil close.
 	soil open.
-	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 61) 
+	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 61) 
 	
 	
 ]
@@ -199,18 +201,25 @@ SoilDatabaseJournalTest >> testRecoverWithRemainingJournalAndBytes [
 	soil journal currentFragmentFile stream 
 		nextPutAll: #( 1 2 3 4 );
 		flush.
-	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 86).
+	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 0 offset: 86).
 	soil close.
 	soil open.
 	"the fragment file should have advanced to a new file so the truncated bytes are the rest of
 	the old file which can be skipped in future reads"
-	self assert: soil control checkpoint equals: (SoilLogSequenceNumber fileNumber: 1 offset: 28).
+	self assert: soil control lastCheckpoint equals: (SoilLogSequenceNumber fileNumber: 1 offset: 28).
 	"the change of the replayed transaction should be visible now"
 	txn := soil newTransaction. 
 	[ self assert: (txn root at: #foo) equals: #bar  ]
 		ensure: [ txn abort ]
 	
 	
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testRemoveFragmentFiles [
+	soil setup maxFragmentFiles: 5.
+	10 timesRepeat: [ soil journal cycleFragmentFile ].
+	self assert: soil journal sortedFiles size equals: 5	
 ]
 
 { #category : #tests }
@@ -222,7 +231,7 @@ SoilDatabaseJournalTest >> testReplicationToEmptyDatabase [
 		initializeFilesystem.
 	copy replayJournal: soil journal.
 	tx := copy newTransaction.
-	self assert: soil databaseVersion equals: copy databaseVersion.
+	self assert: soil control databaseVersion equals: copy control databaseVersion.
 	self assert: soil objectRepository metaSegment lastObjectIndex equals: copy objectRepository metaSegment lastObjectIndex.
 	self assert: soil objectRepository firstSegment lastObjectIndex equals: copy objectRepository firstSegment lastObjectIndex.
 	self assert: soil journal lastIndex equals: copy journal lastIndex
@@ -236,12 +245,12 @@ SoilDatabaseJournalTest >> testReplicationToNonEmptyDatabase [
 		destroy;
 		initializeFilesystem.
 	copy replayJournal: (soil journal copyFrom: 1 to: 3).
-	self assert: copy databaseVersion equals: 3.
+	self assert: copy control databaseVersion equals: 3.
 	self assert: copy objectRepository metaSegment lastObjectIndex equals: 5.
 	self assert: copy objectRepository firstSegment lastObjectIndex equals: 3.
 	copy replayJournal: soil journal.
 	self assert: soil journal lastIndex equals: copy journal lastIndex.
-	self assert: soil databaseVersion equals: copy databaseVersion.
+	self assert: soil control databaseVersion equals: copy control databaseVersion.
 	self assert: soil objectRepository metaSegment lastObjectIndex equals: copy objectRepository metaSegment lastObjectIndex.
 	self assert: soil objectRepository firstSegment lastObjectIndex equals: copy objectRepository firstSegment lastObjectIndex.
 	self assert: soil journal lastIndex equals: copy journal lastIndex.

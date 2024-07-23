@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'index'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Index'
 }
 
 { #category : #running }
@@ -63,8 +63,7 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 	index close.
 	index := SoilSkipList new 
 		path: 'sunit-skiplist';
-		initializeFilesystem;
-		open.
+		initializeFilesystem.
 	"we should be able to do a lookup"
 	self assert: ((index at: capacity) asByteArrayOfSize: 8) equals: #[ 1 2 3 4 5 6 7 8 ].
 ]
@@ -275,60 +274,10 @@ SoilSkipListTest >> testIsEmpty [
 ]
 
 { #category : #tests }
-SoilSkipListTest >> testIteratorFindAndNext [
-	
-	| capacity iterator value |
-	capacity := index firstPage itemCapacity * 2.
-	1 to: capacity do: [ :n |
-		index at: n put: (n asByteArrayOfSize: 8) ].
-	self assert: index pages size equals: 2.
-	iterator := index newIterator.
-	value := iterator
-		find: 222;
-		next.
-	self assert: value equals: (223 asByteArrayOfSize: 8)
-]
-
-{ #category : #tests }
-SoilSkipListTest >> testIteratorFindAndNext2 [
-	
-	| capacity iterator values |
-	capacity := index firstPage itemCapacity * 2.
-	1 to: capacity do: [ :n |
-		index at: n put: (n asByteArrayOfSize: 8) ].
-	self assert: index pages size equals: 2.
-	iterator := index newIterator.
-	values := iterator
-		find: 222;
-		next: 3.
-	self assert: values size equals: 3.
-	self assert: values asArray equals: {(223 asByteArrayOfSize: 8). (224 asByteArrayOfSize: 8). (225 asByteArrayOfSize: 8)}.
-	"test requesting more at the end when the are not enough entries"
-	values := iterator
-		find: capacity-1;
-		next: 3.
-	"size is 1"
-	self assert: values size equals: 1.
-	"and we get the right value"
-	self assert: values asArray equals: {(capacity asByteArrayOfSize: 8)}
-]
-
-{ #category : #tests }
-SoilSkipListTest >> testIteratorFirstWithSingleRemovedItem [ 
-	| iterator |
-	iterator := index newIterator.
-	iterator at: #foo put: #bar.
-	iterator removeKey: #foo.
-	self assert: iterator firstAssociation equals: nil
-]
-
-{ #category : #tests }
-SoilSkipListTest >> testIteratorLastWithSingleRemovedItem [ 
-	| iterator |
-	iterator := index newIterator.
-	iterator at: #foo put: #bar.
-	iterator removeKey: #foo.
-	self assert: iterator lastAssociation equals: nil
+SoilSkipListTest >> testIsOpen [
+	self assert: index isOpen.
+	index close.
+	self deny: index isOpen
 ]
 
 { #category : #tests }
@@ -416,13 +365,38 @@ SoilSkipListTest >> testPageAddFirst [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testRemoveAllFromPage [
+	| entries |
+	"We test that after removing all entries from one page, #nextAssociation will continue to the next page"
+	
+	index keySize: 1016. "huge keySize forces multiple pages"
+	entries :=  #(104 247 56 281 61 286 66 337 308 1 400 272 347 335 45 62 207 7 123 140).
+	
+	
+	entries do: [:toAdd |
+		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	"#values iterates using #basicNextAssociation"
+	self assert: index values size equals: entries size.
+	
+	index removeKey: 247.
+	index removeKey: 272.
+	self assert: (index pageAt: 3) isEmpty.
+	"iterating goes beyond the empty page"
+	self assert: index values size equals: entries size - 2.
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testRemoveKey [
 
-	| capacity |
+	| capacity removed |
 	capacity := index headerPage itemCapacity.
 	1 to: capacity do: [ :n | index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	
-	index removeKey: 20.
+	removed := index removeKey: 20.
+	self assert: removed equals: #[ 1 2 3 4 5 6 7 8 ].
 	
 	self assert: (index at: 1) equals: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: (index at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].

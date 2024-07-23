@@ -36,11 +36,6 @@ SoilPagedIndexStore >> headerPage [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> highestPageIndex [ 
-	^ pages size
-]
-
-{ #category : #accessing }
 SoilPagedIndexStore >> index [
 	^ index
 ]
@@ -63,6 +58,11 @@ SoilPagedIndexStore >> isCopyOnWrite [
 	^ false
 ]
 
+{ #category : #testing }
+SoilPagedIndexStore >> isOpen [
+	^ self subclassResponsibility
+]
+
 { #category : #accessing }
 SoilPagedIndexStore >> lastPageIndex [
 	^ self headerPage lastPageIndex
@@ -76,6 +76,20 @@ SoilPagedIndexStore >> newPage [
 { #category : #accessing }
 SoilPagedIndexStore >> nextPageIndex [
 	^ self headerPage nextPageIndex
+]
+
+{ #category : #private }
+SoilPagedIndexStore >> orderedPages [
+	| page orderedPages |
+	page := self pageAt: 1.
+	orderedPages := OrderedCollection new.
+	orderedPages add: page.
+	[ page isLastPage ] whileFalse: [ 
+	   page := self pageAt: page next.
+		orderedPages add: page
+	].
+	^ orderedPages
+		
 ]
 
 { #category : #accessing }
@@ -102,10 +116,4 @@ SoilPagedIndexStore >> pageFaultAt: anInteger [
 { #category : #accessing }
 SoilPagedIndexStore >> pages [
 	^ pages
-]
-
-{ #category : #accessing }
-SoilPagedIndexStore >> priorPage [
-	"this is slow as it checks all pages"
-	^ pages detect: [: page | page next == self ]
 ]

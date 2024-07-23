@@ -27,11 +27,10 @@ SoilSkipList >> close [
 	keySize := nil
 ]
 
-{ #category : #'converting-legacy' }
-SoilSkipList >> convertToNewFormat [
-	SoilNewFormatIndexRewriter new
-		index: self;
-		rewrite
+{ #category : #private }
+SoilSkipList >> compact [ 
+	"Rewrite index file without removed items"
+	self rewriteUsing: [ :item | item ]
 ]
 
 { #category : #deleting }
@@ -60,11 +59,6 @@ SoilSkipList >> initializeParametersFrom: aSoilSkipList [
 		maxLevel: aSoilSkipList maxLevel;
 		keySize: aSoilSkipList keySize;
 		valueSize: aSoilSkipList valueSize
-]
-
-{ #category : #testing }
-SoilSkipList >> isPersistent [
-	^ path notNil
 ]
 
 { #category : #testing }
@@ -111,6 +105,7 @@ SoilSkipList >> newPluggableRewriter [
 
 { #category : #'opening/closing' }
 SoilSkipList >> open [
+	self isOpen ifTrue: [ self error: 'Index already open' ].
 	self store open
 ]
 
@@ -129,6 +124,18 @@ SoilSkipList >> path [
 SoilSkipList >> path: aStringOrFileReference [
 
 	path := aStringOrFileReference asFileReference 
+]
+
+{ #category : #initialization }
+SoilSkipList >> rewriteUsing: aBlock [
+	"write new index file and add all items. Use aBlock to 
+	enable converting items"
+	SoilPluggableIndexRewriter new 
+		index: self;
+		indexBlock: [ :idx | idx  ];
+		itemBlock: aBlock;
+		cleanRemoved;
+		run
 ]
 
 { #category : #converting }

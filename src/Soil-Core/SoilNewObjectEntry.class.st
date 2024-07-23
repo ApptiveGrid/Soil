@@ -22,6 +22,11 @@ SoilNewObjectEntry >> address [
 ]
 
 { #category : #accessing }
+SoilNewObjectEntry >> bytes [ 
+	^ bytes
+]
+
+{ #category : #accessing }
 SoilNewObjectEntry >> bytes: aCollection [ 
 	bytes := aCollection
 ]
@@ -30,7 +35,7 @@ SoilNewObjectEntry >> bytes: aCollection [
 SoilNewObjectEntry >> commitIn: soil [ 
 	position := soil objectRepository  
 		at: objectId 
-		put: bytes.
+		putBytes: bytes.
 	record ifNotNil: [ 
 		record position: position.
 		record := nil ]
@@ -44,11 +49,6 @@ SoilNewObjectEntry >> container [
 { #category : #accessing }
 SoilNewObjectEntry >> context [
 	^ objectId
-]
-
-{ #category : #committing }
-SoilNewObjectEntry >> effect [ 
-	^ 'position: ', position asString
 ]
 
 { #category : #accessing }
@@ -72,6 +72,11 @@ SoilNewObjectEntry >> printOn: aStream [
 	aStream 
 		<< ' objectId: '
 		<< objectId asString 
+]
+
+{ #category : #testing }
+SoilNewObjectEntry >> providesObjectIds [ 
+	^ true
 ]
 
 { #category : #'instance creation' }

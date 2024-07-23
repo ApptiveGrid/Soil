@@ -90,6 +90,11 @@ SoilIndex >> flushCachedPages [
 	store flushCachedPages
 ]
 
+{ #category : #testing }
+SoilIndex >> hasHeaderPage [
+	^ self subclassResponsibility
+]
+
 { #category : #accessing }
 SoilIndex >> headerPage [
 	^ self store headerPage
@@ -103,6 +108,11 @@ SoilIndex >> indexKey: aString [
 { #category : #testing }
 SoilIndex >> isEmpty [
 	^ self store headerPage isEmpty
+]
+
+{ #category : #testing }
+SoilIndex >> isOpen [
+	^ store isNotNil and: [ store isOpen ]
 ]
 
 { #category : #testing }
@@ -192,7 +202,7 @@ SoilIndex >> removeKey: key [
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
-{ #category : #'instance creation' }
+{ #category : #removing }
 SoilIndex >> removeKey: key ifAbsent: aBlock [
 	| page index |
 	page := self newIterator 
@@ -239,4 +249,9 @@ SoilIndex >> valueSize: anInteger [
 { #category : #enumerating }
 SoilIndex >> values [ 
 	^ self newIterator values
+]
+
+{ #category : #writing }
+SoilIndex >> writeContentsToDisk [
+	self store writeContentsToDisk 
 ]

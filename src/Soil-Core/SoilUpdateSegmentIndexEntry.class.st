@@ -20,8 +20,17 @@ SoilUpdateSegmentIndexEntry >> address [
 
 { #category : #committing }
 SoilUpdateSegmentIndexEntry >> commitIn: soil [ 
-	(soil objectRepository segmentAt: segmentId) 
-		lastObjectIndex: index value
+	Error signal: 'this sould not be called'
+]
+
+{ #category : #committing }
+SoilUpdateSegmentIndexEntry >> commitIn: soil recovery: aBoolean [
+	| segment |
+	segment := soil objectRepository segmentAt: segmentId.
+	aBoolean 
+		ifTrue: [ segment updateLastObjectIndex: index value ]
+		ifFalse: [ segment lastObjectIndex: index value ] 
+		
 ]
 
 { #category : #accessing }
@@ -32,11 +41,6 @@ SoilUpdateSegmentIndexEntry >> container [
 { #category : #accessing }
 SoilUpdateSegmentIndexEntry >> context [
 	^ 'segment #', segmentId asString
-]
-
-{ #category : #accessing }
-SoilUpdateSegmentIndexEntry >> effect [
-	^ index
 ]
 
 { #category : #accessing }

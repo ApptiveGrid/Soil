@@ -6,7 +6,7 @@ Class {
 		'journal',
 		'lsn'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Journal'
 }
 
 { #category : #accessing }
@@ -36,7 +36,7 @@ SoilDatabaseRecovery >> readFragmentFile: aSoilJournalFragmentFile [
 			"transaction journals are written always completely so we can read until we 
 			discover a commit entry. "
 			self readTransactionJournal: transactionJournal from: aSoilJournalFragmentFile stream.
-			transactionJournal commitIn: soil ].
+			transactionJournal commitIn: soil recovery: true ].
 		"reading a checkpoint entry is unlikely. It should be possible only if there was an 
 		error after writing the checkpoint entry and before marking that position in the control
 		file. But it is possible it happens so we just need to complete it by updating the 
@@ -86,7 +86,16 @@ SoilDatabaseRecovery >> recover [
 	"read the log sequence number of the last successful checkpoint from the control 
 	file. A successful checkpoint includes writing the transaction logs to disk, 
 	commit the contents to the heap, write the checkpoint entry"
-	lastCheckpoint := soil control checkpoint.
+	lastCheckpoint := soil control lastCheckpoint.
+	"in case the fragment file is missing we restart the journal from the next 
+	fragment file id. 
+	NOTE: This is a deliberate emergency handler at the moment. In case of very strange
+	filesystem inconsistency we can continue to use the database with the last checkpointed
+	state. This may become a configuration option later"
+	(journal existsFragmentFileForLSN: lastCheckpoint) ifFalse: [ 
+		journal cycleFragmentFile.
+		soil checkpoint.
+		^ self ].
 	fragmentFile := journal openFragmentForLSN: lastCheckpoint.
 	"The log sequence number of a successful checkpoint points to the checkpoint 
 	entry that was last written"
@@ -111,7 +120,7 @@ SoilDatabaseRecovery >> recover [
 	"we end up here because the journal needed to be recovered. We create new checkpoint
 	to mark that we covered about the extra entries or bogus data so future reads can
 	proceed from here"
-	journal checkpoint.
+	soil checkpoint.
 ]
 
 { #category : #accessing }

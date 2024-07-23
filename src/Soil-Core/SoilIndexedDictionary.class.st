@@ -45,8 +45,7 @@ SoilIndexedDictionary >> at: key [
 SoilIndexedDictionary >> at: key ifAbsent: aBlock [
 	^ self 
 		basicAt: key 
-		ifAbsent: [ ^ aBlock value ]
-
+		ifAbsent: aBlock
 ]
 
 { #category : #accessing }
@@ -142,6 +141,11 @@ SoilIndexedDictionary >> last [
 	
 ]
 
+{ #category : #accessing }
+SoilIndexedDictionary >> last: anInteger [
+	^ self newIterator last: anInteger
+]
+
 { #category : #private }
 SoilIndexedDictionary >> loadFrom: aFileReference [ 
 	^ SoilSkipList new 
@@ -201,11 +205,11 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 	"remove from newValues as there could be a new at:put: on that
 	key but removing the key will remove the value again"
 	newValues removeKey: key ifAbsent: nil.
-	v := self basicAt: key ifAbsent: [^ aBlock value].
+	v := self newIterator removeKey: key ifAbsent: [^ aBlock value].
 	removedValues 
 			at: key 
 			put: v asSoilObjectId.
-	^ self newIterator removeKey: key
+	^v
 ]
 
 { #category : #accessing }

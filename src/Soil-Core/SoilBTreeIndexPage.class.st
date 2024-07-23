@@ -35,6 +35,20 @@ SoilBTreeIndexPage >> findKey: aKey [
 	^nil
 ]
 
+{ #category : #private }
+SoilBTreeIndexPage >> findPreviousPage: aKey with: aBTree [
+	| item page |
+	item := self findKey: aKey.
+	page := aBTree pageAt: item value.
+		
+	^ page isIndexPage 
+		ifFalse: [
+			"if we get a data page, we know that the prior page is just the page
+			referenced from the index entry before "
+			aBTree pageAt: (self itemBefore: aKey) value]
+		ifTrue:  [ page findPreviousPage: aKey with: aBTree ]
+]
+
 { #category : #utilities }
 SoilBTreeIndexPage >> headerSize [
 	^ super headerSize  
@@ -61,8 +75,20 @@ SoilBTreeIndexPage >> insertItem: item for: iterator [
 		
 	"no space, we have to split"
 	newPage := iterator index splitIndexPage: self.
+	
+	"check that the current and new pages are balanced"
+	self flag: #TODO. "should be moved to a consistency checker"
+	newPage bTreeAssertion.
+	self bTreeAssertion.
+	
+	
 	"we need to add the new page to the index above"
 	^ return indexEntry: (newPage smallestKey -> newPage index)
+]
+
+{ #category : #testing }
+SoilBTreeIndexPage >> isIndexPage [
+	^ true
 ]
 
 { #category : #printing }
@@ -84,6 +110,21 @@ SoilBTreeIndexPage >> readItemsFrom: aStream [
 	items := SortedCollection new: numberOfItems.
 	numberOfItems timesRepeat: [ 
 		items add: (aStream next: self keySize) asInteger -> (aStream next: self pointerSize) asInteger ]
+]
+
+{ #category : #removing }
+SoilBTreeIndexPage >> remove: aKey for: aBTree [
+	| item page ret  |
+	
+	item := self findKey: aKey.
+	page := aBTree pageAt: item value.
+	ret := page remove: aKey for: aBTree.
+	"if the key is in the index, we have to update or remove"
+	(self hasKey: aKey) ifTrue: [
+				(ret notNil and: [page isNotEmpty])
+					ifTrue: [ item key: page items first key]
+				   ifFalse: [self itemRemoveAt: aKey]].
+	^ ret
 ]
 
 { #category : #accessing }

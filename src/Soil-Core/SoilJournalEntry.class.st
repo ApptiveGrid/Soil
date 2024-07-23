@@ -38,6 +38,16 @@ SoilJournalEntry class >> withTypeCode: anInteger [
 		ifNone: [ Error signal: 'cannot find class for journal type code ', anInteger asString ]
 ]
 
+{ #category : #committing }
+SoilJournalEntry >> commitIn: soil [ 
+	self subclassResponsibility 
+]
+
+{ #category : #committing }
+SoilJournalEntry >> commitIn: soil recovery: aBoolean [
+	self commitIn: soil
+]
+
 { #category : #initialization }
 SoilJournalEntry >> initialize [ 
 	super initialize.
@@ -46,6 +56,11 @@ SoilJournalEntry >> initialize [
 
 { #category : #testing }
 SoilJournalEntry >> isTransactionEntry [ 
+	^ false
+]
+
+{ #category : #testing }
+SoilJournalEntry >> providesObjectIds [ 
 	^ false
 ]
 

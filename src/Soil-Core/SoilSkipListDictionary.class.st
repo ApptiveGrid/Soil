@@ -10,6 +10,11 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #rewriting }
+SoilSkipListDictionary >> compact [ 
+	index wrapped compact
+]
+
 { #category : #initialization }
 SoilSkipListDictionary >> createIndex [ 
 	^ SoilSkipList new
@@ -49,4 +54,9 @@ SoilSkipListDictionary >> journalEntries [
 			key: (index indexKey: key); 
 			oldValue: value) ].
 	^ entries
+]
+
+{ #category : #rewriting }
+SoilSkipListDictionary >> rewriteUsing: aBlock [
+	index wrapped rewriteUsing: aBlock
 ]

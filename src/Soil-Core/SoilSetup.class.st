@@ -36,12 +36,12 @@ SoilSetup >> defaultCacheRecordsSize [
 	^ 1000
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #fsync }
 SoilSetup >> disableFsync [ 
 	fsyncEnabled := false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #fsync }
 SoilSetup >> enableFsync [ 
 	fsyncEnabled := true
 ]
@@ -80,6 +80,11 @@ SoilSetup >> initialize [
 { #category : #testing }
 SoilSetup >> isFsyncEnabled [ 
 	^ fsyncEnabled 
+]
+
+{ #category : #caching }
+SoilSetup >> maxFragmentFiles:  anInteger [
+	soil journal maxFragmentFiles: anInteger
 ]
 
 { #category : #accessing }

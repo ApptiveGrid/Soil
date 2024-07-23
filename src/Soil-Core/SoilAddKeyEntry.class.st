@@ -35,11 +35,6 @@ SoilAddKeyEntry >> context [
 ]
 
 { #category : #accessing }
-SoilAddKeyEntry >> effect [
-	^ key -> value 
-]
-
-{ #category : #accessing }
 SoilAddKeyEntry >> key [
 	^ key
 ]
@@ -67,6 +62,11 @@ SoilAddKeyEntry >> oldValue: anObject [
 { #category : #printing }
 SoilAddKeyEntry >> printOn: aStream [ 
 	aStream << 'add key: ' << key printString << ' to index ' << id printString
+]
+
+{ #category : #testing }
+SoilAddKeyEntry >> providesObjectIds [ 
+	^ true
 ]
 
 { #category : #writing }

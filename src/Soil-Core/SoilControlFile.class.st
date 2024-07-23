@@ -55,14 +55,6 @@ SoilControlFile >> basicDatabaseVersion: anInteger [
 ]
 
 { #category : #accessing }
-SoilControlFile >> checkpoint [
-	^ semaphore critical: [  
-		self stream 
-			position: self checkpointPosition.
-		(stream next: self checkpointPositionSize) asInteger asLogSequenceNumber ]
-]
-
-{ #category : #accessing }
 SoilControlFile >> checkpoint: anInteger [
 	semaphore critical: [  
 		self stream 
@@ -159,6 +151,14 @@ SoilControlFile >> inspectionControl [
 ]
 
 { #category : #accessing }
+SoilControlFile >> lastCheckpoint [
+	^ semaphore critical: [  
+		self stream 
+			position: self checkpointPosition.
+		(stream next: self checkpointPositionSize) asInteger asLogSequenceNumber ]
+]
+
+{ #category : #accessing }
 SoilControlFile >> legacyPath [
 	^ soil path / #settings
 ]
@@ -185,7 +185,7 @@ SoilControlFile >> open [
 
 { #category : #accessing }
 SoilControlFile >> parameterNames [
-	^ #( databaseFormatVersion databaseVersion applicationVersion checkpoint ) 
+	^ #( databaseFormatVersion databaseVersion applicationVersion #lastCheckpoint ) 
 ]
 
 { #category : #accessing }
@@ -208,4 +208,21 @@ SoilControlFile >> soil [
 SoilControlFile >> soil: anObject [
 
 	soil := anObject
+]
+
+{ #category : #accessing }
+SoilControlFile >> updateDatabaseVersion: anInteger [
+	(anInteger <= self databaseVersion) ifTrue: [ 
+		"when doing a database recovery it is possible that the version 
+		has been updated already. Prior updates that are replayed will
+		have smaller numbers. We don't want to lower numbers so we just
+		ignore them and let the journal catch up"
+		^ self ].
+	self databaseVersion: anInteger
+]
+
+{ #category : #writing }
+SoilControlFile >> writeContentsToDisk [
+	soil setup isFsyncEnabled ifTrue: [  
+		stream sync ]
 ]

@@ -8,11 +8,6 @@ Class {
 }
 
 { #category : #accessing }
-SoilSkipListDataPage class >> legacyClass [
-	^ SoilSkipListLegacyDataPage 
-]
-
-{ #category : #accessing }
 SoilSkipListDataPage class >> pageCode [ 
 	^ 2
 ]

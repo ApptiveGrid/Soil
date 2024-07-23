@@ -130,10 +130,27 @@ SoilObjectIndexFile >> readHeader [
 	currentLastObjectIndex := 0
 ]
 
+{ #category : #accessing }
+SoilObjectIndexFile >> updateLastObjectIndex: anInteger [ 
+	(anInteger <= currentLastObjectIndex) ifTrue: [ 
+		"when doing a database recovery it is possible that the version 
+		has been updated already. Prior updates that are replayed will
+		have smaller numbers. We don't want to lower numbers so we just
+		ignore them and let the journal catch up"
+		^ self ]. 
+	self lastObjectIndex: anInteger
+]
+
 { #category : #validating }
 SoilObjectIndexFile >> validateLastObjectIndex: anInteger [ 
 	| fileIndex |
 	fileIndex := self lastObjectIndex.
 	(fileIndex < anInteger) ifFalse: [ 
 		SoilInvalidSegmentIndex signal: 'segment indexes can only grow. ', anInteger printString, ' is smaller than the on-disk index ', fileIndex printString ] 
+]
+
+{ #category : #writing }
+SoilObjectIndexFile >> writeContentsToDisk [
+	(segment notNil and: [ segment soil setup isFsyncEnabled  ]) ifTrue: [
+		stream sync ]
 ]

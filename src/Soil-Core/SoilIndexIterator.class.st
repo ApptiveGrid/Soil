@@ -3,7 +3,6 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'index',
-		'nextKey',
 		'currentPage',
 		'currentKey',
 		'itemStrategy'
@@ -21,7 +20,7 @@ SoilIndexIterator >> at: aKeyObject [
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 	| foundValue item |
-	foundValue := self find: aKeyObject ifAbsent: aBlock.
+	foundValue := self find: aKeyObject ifAbsent: [^ aBlock value].
  	item := self restoreItem: currentKey -> foundValue.
 	^ item
 		ifNotNil: [ 
@@ -62,19 +61,12 @@ SoilIndexIterator >> basicAt: indexKey put: anObject [
 { #category : #accessing }
 SoilIndexIterator >> basicNextAssociation [
 	| item |
-	"preliminary support for nextKey. This is useful when iterating via #next 
-	in order not jump over the first search key. nextKey implies the currentPage
-	is on the right spot"
-	nextKey ifNotNil: [ 
-		item := currentPage 
-			itemAt: nextKey 
-			ifAbsent: [ Error signal: 'shoulndt be possible' ].
-		nextKey := nil.
-		^ item ].
 	currentPage ifNil: [ 
 		currentPage := index store headerPage.
 		currentKey := nil ].
 	[ currentPage isNil ] whileFalse: [  
+		"if there is a current key the item after that key is next
+		if present"
 		item := currentKey 
 			ifNotNil: [  
 				(currentPage itemAfter: currentKey)
@@ -82,13 +74,29 @@ SoilIndexIterator >> basicNextAssociation [
 						currentKey := i key. 
 						^ i ]
 					ifNil: [ 
-						(currentPage next = 0) ifTrue: [ ^ nil ].
-						currentPage := index store pageAt: currentPage next.
+						"if we did not find an element after the current key we
+						need to proceed with the next page.
+						For the last page there is no next page and we return nil"
+						(currentPage isLastPage) ifTrue: [ ^ nil ].
+						"if there is a next page we set it to current and restart"
+						currentPage := self nextPage.
 						currentKey := nil ] ]
 			ifNil: [
-				currentPage isEmpty ifTrue: [ ^ nil ].
-				^ currentPage firstItem ifNotNil: [ :item2 | currentKey := item2 key. item2 ] ] ].
-	Error signal: 'shouldnt happen'
+				"without currentKey we are looking for the first item in a page.
+				If the currentPage is empty we advance the page and restart"
+				currentPage isEmpty 
+					ifTrue: [ 
+						currentPage := self nextPage.
+						currentKey := nil ]
+					ifFalse: [
+						"if the currentPage has an item we set currentKey and 
+						return the found item"
+						currentPage firstItem ifNotNil: [ :item2 | 
+							currentKey := item2 key. 
+							^ item2 ] ] ] ].
+	"if we end up here then there was no next page to continue looking for the
+	next item"
+	^ nil 
 ]
 
 { #category : #private }
@@ -123,7 +131,7 @@ SoilIndexIterator >> do: aBlock [
 
 { #category : #private }
 SoilIndexIterator >> find: key [
-	^ self find: key ifAbsent: [ ]
+	^ self find: key ifAbsent: nil
 ]
 
 { #category : #private }
@@ -136,6 +144,14 @@ SoilIndexIterator >> find: key ifAbsent: aBlock [
 { #category : #private }
 SoilIndexIterator >> findPageFor: indexKey [ 
 	^ self subclassResponsibility
+]
+
+{ #category : #private }
+SoilIndexIterator >> findPreviousPageOf: aPage [
+	"Slow approach that searched all pages from the first following the next pointer, only called for empty pages"
+
+	self pagesDo: [ :page | page next == aPage index ifTrue: [ ^page ] ].
+	self error: 'should not happen'
 ]
 
 { #category : #accessing }
@@ -165,6 +181,11 @@ SoilIndexIterator >> firstAssociation [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> firstPage [
+	^ currentPage := index firstPage
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> index [
 	^index
 ]
@@ -190,16 +211,37 @@ SoilIndexIterator >> last [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> last: anInteger [
+	| result |
+	result := OrderedCollection new: anInteger.
+	result add: self last.
+	anInteger - 1 timesRepeat: [
+		| prev |
+		prev := self previous ifNil: [ ^ result].
+		result add: prev ].
+	^ result reversed
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> lastAssociation [
 	"Note: key will be index key"
 	| lastAssociation restoredItem |
-	lastAssociation := self priorAssociation ifNil: [ ^nil ].
-	restoredItem := self restoreItem: lastAssociation.
-	^ restoredItem 
-		ifNotNil: [ restoredItem key -> (self convertValue: restoredItem value) ] 
-		ifNil: [
-			(self restoreItem: self priorAssociation)
-				ifNotNil: [ :item | item key -> (self convertValue: item value) ] ] 
+	currentPage := self lastNonEmptyPage ifNil: [ ^nil ]. 
+	lastAssociation := currentPage lastItem.
+	currentKey := lastAssociation key.
+	[restoredItem := self restoreItem: lastAssociation] whileNil: [   
+			"if the last entry is deleted, we need to take the one before"
+			lastAssociation := self previousAssociation ifNil: [ ^nil ]].
+	^ restoredItem key -> (self convertValue: restoredItem value)
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> lastNonEmptyPage [
+	currentPage := self lastPage.
+	[currentPage isEmpty] whileTrue: [ 
+		"if the page is empty, go to the previous page, if that returns nil all pages are empty"
+		currentPage := self previousPage ifNil: [^nil]].
+	^ currentPage
 ]
 
 { #category : #accessing }
@@ -209,10 +251,12 @@ SoilIndexIterator >> lastPage [
 
 { #category : #accessing }
 SoilIndexIterator >> next [
-	| nextAssociation restoredItem |
+	| nextAssociation |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
-	restoredItem := self restoreItem: nextAssociation.
-	^ self convertValue: (restoredItem value ifNil: [ self next]) 
+	^ (self restoreItem: nextAssociation)
+		ifNotNil: [ :restoredItem | self convertValue: restoredItem value ]
+		ifNil: [ self next ]
+	
 ]
 
 { #category : #accessing }
@@ -253,22 +297,30 @@ SoilIndexIterator >> nextAssociationAfter: key [
 { #category : #private }
 SoilIndexIterator >> nextCloseTo: key [
 	"return the next entry after key, even if key itself is not there"
-	^ self at: (self nextKeyCloseTo: key)
+	| nextExisitingKey |
+	nextExisitingKey := (self nextKeyCloseTo: key) ifNil: [ ^nil ]. 
+	^ self at: nextExisitingKey
 ]
 
 { #category : #private }
 SoilIndexIterator >> nextKeyCloseTo: key [
-	"Note: returnrd key will be an index key"
+	"Note: returned key will be an index key"
 	| indexKey |
 	indexKey := index indexKey: key.
 	self findPageFor: indexKey.
-	nextKey := currentPage keyOrClosestAfter: indexKey.
-	^ nextKey
-		ifNil: [ "if there is no close key found, we position the cursor at the end, so that asking for the next association will return nil" 
-			currentKey := currentPage lastKey ]
-		ifNotNil: [ 
-			"if there is a close key found, we make sure the cursor get properly positioned"
-			currentKey := nextKey ]
+	currentKey := currentPage keyOrClosestAfter: indexKey.
+	"if there is no close key found, we position the cursor at the end, so that asking for the next association will return nil" 
+	^ currentKey
+		ifNil: [ currentKey := currentPage lastKey ]
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> nextPage [ 
+	| nextPageIndex |
+	nextPageIndex := currentPage next.
+	^ (nextPageIndex > 0)
+		ifTrue: [ self pageAt: nextPageIndex ]
+		ifFalse: [ nil ]
 ]
 
 { #category : #accessing }
@@ -276,13 +328,36 @@ SoilIndexIterator >> pageAt: anInteger [
 	^ index store pageAt: anInteger
 ]
 
-{ #category : #private }
-SoilIndexIterator >> priorAssociation [
+{ #category : #enumerating }
+SoilIndexIterator >> pagesDo: aBlock [ 
+	currentPage := index store headerPage.
+	[ currentPage isNil ] whileFalse: [ 
+		aBlock value: currentPage.
+		currentPage := self nextPage ]
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> previous [
+	^ self previousAssociation value
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> previous: anInteger [
+	| result |
+	result := OrderedCollection new: anInteger.
+	anInteger timesRepeat: [
+		| previous |
+		previous := self previous ifNil: [ ^ result].
+		result add: previous ].
+	^ result
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> previousAssociation [
 	| item |
-	"Find the association before, if currentPage is not set we return the last association"
-	currentPage ifNil: [ 
-		currentPage := index lastPage.
-		currentKey := nil ].
+	"Find the association before"
+	currentKey ifNil: [ ^ self error: 'you need to navigate first using find: or last, for example'].
+	currentPage ifNil: [ self findPageFor: currentKey].
 	[ currentPage isNil ] whileFalse: [  
 		item := currentKey 
 			ifNotNil: [  
@@ -291,8 +366,9 @@ SoilIndexIterator >> priorAssociation [
 						currentKey := i key. 
 						^ i ]
 					ifNil: [ 
-						(currentPage next = 0) ifTrue: [ ^ nil ].
-						currentPage := index store pageAt: currentPage priorPage.
+						"are we the first page? if yes, there is no item before"
+						currentPage isHeaderPage ifTrue: [ ^nil ].
+						currentPage := self previousPage.
 						currentKey := nil ] ]
 			ifNil: [
 				currentPage isEmpty ifTrue: [ ^ nil ].
@@ -300,11 +376,48 @@ SoilIndexIterator >> priorAssociation [
 	Error signal: 'shouldnt happen'
 ]
 
+{ #category : #accessing }
+SoilIndexIterator >> previousPage [ 
+	^ self findPreviousPageOf: currentPage
+]
+
 { #category : #removing }
-SoilIndexIterator >> removeKey: key [ 
+SoilIndexIterator >> removeItemsSuchThat: aBlock [ 
+	self pagesDo: [ :page | page items removeAllSuchThat: aBlock ].
+
+]
+
+{ #category : #removing }
+SoilIndexIterator >> removeKey: key [
 	^ self 
-		at: key 
-		put: SoilObjectId removed
+		removeKey: key 
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
+]
+
+{ #category : #removing }
+SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
+	| indexKey item oldValue |
+	indexKey := index indexKey: key.
+	"We search for the data page for the key to update the value with a removed ID
+	and return the prior value just like #at: would do"
+	self findPageFor: indexKey.
+	item :=  self restoreItem: (currentPage itemAt: indexKey ifAbsent: [^ aBlock value]).
+	oldValue := item
+		ifNotNil: [ 
+			(self convertValue: item value) 
+				ifNil: [ aBlock value ] ]
+		ifNil: [ aBlock value ].
+	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
+	(e.g no need to update index pages for the BTree"
+	currentPage 
+		itemAt: indexKey 
+		put: SoilObjectId removed.
+	^ oldValue
+]
+
+{ #category : #initialization }
+SoilIndexIterator >> resetCurrentKey [ 	
+	currentKey := nil
 ]
 
 { #category : #private }

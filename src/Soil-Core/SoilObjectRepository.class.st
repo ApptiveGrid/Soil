@@ -53,7 +53,7 @@ SoilObjectRepository >> at: objectid [
 ]
 
 { #category : #accessing }
-SoilObjectRepository >> at: objectId put: bytes [ 
+SoilObjectRepository >> at: objectId putBytes: bytes [ 
 	| segment position |
 	(objectId index = 0) ifTrue: [ Error signal: 'objectId is not initialized when trying to store' ].
 	segment := self segmentAt: objectId segment.
@@ -89,6 +89,11 @@ SoilObjectRepository >> close [
 { #category : #accessing }
 SoilObjectRepository >> firstSegment [
 	^ segments first
+]
+
+{ #category : #accessing }
+SoilObjectRepository >> flush [
+	self segmentsDo: #flush
 ]
 
 { #category : #accessing }
@@ -207,4 +212,10 @@ SoilObjectRepository >> soil [
 { #category : #accessing }
 SoilObjectRepository >> soil: aSoil [ 
 	soil := aSoil 
+]
+
+{ #category : #writing }
+SoilObjectRepository >> writeContentsToDisk [
+	soil setup isFsyncEnabled ifTrue: [  
+		self segmentsDo: #writeContentsToDisk ]
 ]

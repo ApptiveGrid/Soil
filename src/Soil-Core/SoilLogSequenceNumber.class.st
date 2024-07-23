@@ -39,6 +39,8 @@ SoilLogSequenceNumber >> fileNumber [
 
 { #category : #accessing }
 SoilLogSequenceNumber >> fileNumber: number offset: offset [ 
+	(offset < 16777216) ifFalse: [ 
+		Error signal: 'offset of LSN is to big. Must fit into 24 bits' ].
 	value := number bitShift: 24.
 	value := value bitOr: offset 
 ]
@@ -53,6 +55,11 @@ SoilLogSequenceNumber >> hash [
 	^ value hash
 ]
 
+{ #category : #printing }
+SoilLogSequenceNumber >> hexFileNumber [
+	^ (self fileNumber printStringBase: 16 length: 6 padded: true) asLowercase 
+]
+
 { #category : #accessing }
 SoilLogSequenceNumber >> hexOffset [ 
 	^ (self fileOffset printStringBase: 16 length: 6 padded: true) asLowercase 
@@ -63,16 +70,11 @@ SoilLogSequenceNumber >> isInitial [
 	^ value = 0
 ]
 
-{ #category : #accessing }
-SoilLogSequenceNumber >> nextFilename [
-	^ self filename: self fileNumber + 1
-]
-
 { #category : #printing }
 SoilLogSequenceNumber >> printOn: aStream [ 
 	aStream 
 		<< 'LSN: ' 
-		<< self fileNumber asString
+		<< self hexFileNumber
 		<< '-'
 		<< self hexOffset 
 ]

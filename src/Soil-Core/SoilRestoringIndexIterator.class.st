@@ -102,14 +102,6 @@ SoilRestoringIndexIterator >> returnObjectId [
 ]
 
 { #category : #strategy }
-SoilRestoringIndexIterator >> returnProxyForSoil: aSoil readVersion: aReadVersion [
-	itemStrategy := SoilProxyValueStrategy new 
-		iterator: self;
-		objectRepository: aSoil;
-		yourself
-]
-
-{ #category : #strategy }
 SoilRestoringIndexIterator >> returnProxyForTransaction: aSoilTransaction [ 
 	itemStrategy := SoilProxyValueStrategy new 
 		objectRepository: aSoilTransaction;

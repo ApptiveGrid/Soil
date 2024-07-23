@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilBTreePageTest,
 	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Index'
 }
 
 { #category : #helper }

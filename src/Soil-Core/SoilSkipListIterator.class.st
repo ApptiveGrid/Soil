@@ -23,13 +23,12 @@ SoilSkipListIterator >> atLevel: key put: anObject [
 { #category : #accessing }
 SoilSkipListIterator >> basicAt: indexKey put: anObject [
 
-	|itemIndex |
 	self findPageFor: indexKey.
-	itemIndex := currentPage indexOfKey: indexKey.
+
 	"as an optimization we return the prior value stored in the list. If
 	there was none we return nil"
-	^ itemIndex > 0
-		  ifTrue: [ currentPage itemAt: indexKey put: anObject ]
+	^(currentPage hasKey: indexKey)
+		  ifTrue: [ (currentPage itemAt: indexKey put: anObject) value ]
 		  ifFalse: [
 			  currentPage hasRoom ifFalse: [  | newPage |
 				  newPage := index splitPage: self forKey: indexKey.
@@ -52,6 +51,27 @@ SoilSkipListIterator >> findPageFor: indexKey [
 				candidatePage smallestKey <= indexKey ] ]
 					whileTrue: [ currentPage := candidatePage  ].
 			self atLevel: level put: currentPage. ].
+	^ currentPage 
+]
+
+{ #category : #private }
+SoilSkipListIterator >> findPreviousPageOf: aPage [
+	| pageIndex candidatePage |
+	aPage isHeaderPage ifTrue: [ ^nil ].
+	aPage isEmpty ifTrue: [ ^super findPreviousPageOf: aPage ].
+
+	currentPage := index headerPage.
+	levels size to: 1 by: -1 do: [ :level |
+		[ 
+			pageIndex := currentPage rightAt: level.
+			(pageIndex > 0) and: [ 
+				candidatePage := self pageAt: pageIndex.
+				(candidatePage isLastPage not and: [ (self pageAt: (candidatePage next)) == aPage])]]
+					whileTrue: [ currentPage := candidatePage  ].
+			self atLevel: level put: currentPage. ].
+		
+	self assert: (self nextPage == aPage).
+	
 	^ currentPage 
 ]
 

@@ -38,7 +38,7 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction
 	self loadHistoryForBehaviorWithIndex: objectId index transaction: transaction.
 	chain := versions at: objectId index.
 	chain first isCurrent ifFalse: [ 
-		chain addFirst: ((SoilBehaviorDescription for: aSOBehaviorDescription objectClass) version: (aSOBehaviorDescription version + 1))].
+		chain addFirst: ((SoilBehaviorDescription for: aSOBehaviorDescription objectClass) version: (chain first version + 1))].
 	offset := chain detectIndex: [ :each | each matchesDescription: aSOBehaviorDescription ].
 	^ chain copyFrom: 1 to: offset
 ]
@@ -102,16 +102,14 @@ SoilBehaviorRegistry >> loadHistoryForBehaviorWithIndex: objectIndex transaction
 SoilBehaviorRegistry >> nameAt: classIdentifier ifAbsent: aBlock [
 	^ self newIterator
 		at: classIdentifier 
-		ifAbsent: [ ^ aBlock value ]
+		ifAbsent: aBlock
 ]
 
 { #category : #accessing }
 SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
-	| dict |
 	(objectId index = 0) ifTrue: [ Error signal: 'cannot add non-initialized object id' ].
-	dict := self newIterator
-		at: classIdentifier put: objectId;
-		yourself
+	^ self newIterator
+		at: classIdentifier put: objectId
 ]
 
 { #category : #accessing }
@@ -134,6 +132,31 @@ SoilBehaviorRegistry >> path [
 	^ soil objectRepository metaSegment indexManager path / #identifier , #index
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBehaviorRegistry >> recreateIndex [ 
+	| txn metaSegment record zeroFound |
+	"this is a last resort action to recreate the index in a sane
+	state. It assumes that all behavior descriptions are written 
+	in the meta segement but the entry in the index is bogus. 
+	So we read all from the segment and readd them"
+	txn := soil newTransaction.
+	[
+		metaSegment := soil objectRepository metaSegment.
+		3 to: metaSegment lastObjectIndex do: [ :n |
+			record := txn materializeRecord: (metaSegment at: n). 
+			self nameAt: record object behaviorIdentifier put: record objectId 
+		].
+		txn commit ] 
+			ensure: [ txn abort ].
+	"there are pages with multiple zero entries. The only way right now
+	is to remove the same key until the ifAbsent block is executed"
+	zeroFound := true.
+	[ zeroFound ] whileTrue: [  
+		index removeKey: 0 ifAbsent: [ zeroFound := false ] ].
+	"as we are on it we can also compact the index"
+	index compact
+]
+
 { #category : #accessing }
 SoilBehaviorRegistry >> segment [ 
 
@@ -149,4 +172,10 @@ SoilBehaviorRegistry >> soil [
 { #category : #accessing }
 SoilBehaviorRegistry >> soil: aSoil [ 
 	soil := aSoil
+]
+
+{ #category : #writing }
+SoilBehaviorRegistry >> writeContentsToDisk [
+	soil setup isFsyncEnabled ifTrue: [  
+		self index writeContentsToDisk ]
 ]

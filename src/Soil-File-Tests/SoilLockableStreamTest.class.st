@@ -4,8 +4,14 @@ Class {
 	#instVars : [
 		'stream'
 	],
-	#category : #'Soil-File-Tests'
+	#category : 'Soil-File-Tests'
 }
+
+{ #category : #running }
+SoilLockableStreamTest >> setUp [ 
+	super setUp.
+	SoilFileLockRegistry reset 
+]
 
 { #category : #running }
 SoilLockableStreamTest >> tearDown [ 

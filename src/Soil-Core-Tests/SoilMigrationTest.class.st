@@ -5,7 +5,7 @@ Class {
 		'soil',
 		'migrationClass'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Model'
 }
 
 { #category : #helpers }
@@ -420,6 +420,52 @@ SoilMigrationTest >> testMaterializingObjectWithReOrderedIvars [
 	materializedRoot := tx2 root.
 	self assert: (materializedRoot instVarNamed: #one) equals: 1.
 	self assert: (materializedRoot instVarNamed: #two) equals: 2
+]
+
+{ #category : #tests }
+SoilMigrationTest >> testMaterializingVersionUpdateBug [
+	| tx tx2 object dict object2 tx3 |
+	
+	"create a class with two instVars one and two"
+	object := migrationClass new.
+	object 
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2.
+	dict := SoilPersistentDictionary new.
+	"put the version 1 shaped object under key v1"
+	dict at: #v1 put: object.
+	tx := soil newTransaction.
+	tx root: dict. 
+	"commit the object will write the first version of the behavior description"
+	tx commit.
+
+	"now we change the shape of the class"
+	migrationClass 
+		addSlot: #three asSlot.
+	object2 := migrationClass new.
+	object2 instVarNamed: #three put: 3.
+	tx2 := soil newTransaction.
+	"putting the version 2 shape of the object under key v2 to distinguish from v1"
+	tx2 root at: #v2 put: object2.
+	tx2 markDirty: object2.
+	"committing will write version 2 of the behavior description"
+	tx2 commit.
+	
+	"change the class again so it is distinction to the version 2 shape"
+	migrationClass 
+		 addSlot: #four asSlot.
+	tx3 := soil newTransaction.
+	"materializing the version 1 object caused a mismatch in version tracking. We ended up with 
+	two behavior description that have version 2"
+	(tx3 root at: #v1) yourself.
+	"reading the version 2 object will try to load version 2 of the behavior description but will
+	fail materializing because it gets the third version 2 (which should have been version 3) that
+	has more instVars as version 2 and it will fail reading as the stream is running short"
+	self 
+		shouldnt: [ (tx3 root at: #v2) yourself ]
+		raise: Error.
+	tx3 abort.
+
 ]
 
 { #category : #tests }

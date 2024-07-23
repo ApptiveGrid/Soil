@@ -23,6 +23,11 @@ SoilCopyOnWriteIndexStore >> isCopyOnWrite [
 	^ true
 ]
 
+{ #category : #testing }
+SoilCopyOnWriteIndexStore >> isOpen [ 
+	^ wrappedStore isOpen
+]
+
 { #category : #accessing }
 SoilCopyOnWriteIndexStore >> pageFaultAt: anInteger [ 
 	| page |

@@ -27,6 +27,11 @@ SoilTransactionJournalEntry >> container [
 ]
 
 { #category : #testing }
+SoilTransactionJournalEntry >> includesObjectId: aSoilObjectId [ 	
+	^ self objectIds includes: aSoilObjectId 
+]
+
+{ #category : #testing }
 SoilTransactionJournalEntry >> isCommitEntry [
 	^ false
 ]

@@ -5,7 +5,8 @@ Class {
 		'source',
 		'target',
 		'seen',
-		'toBeProcessed'
+		'toBeProcessed',
+		'version'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -14,11 +15,17 @@ Class {
 SoilBackupVisitor >> backup: aSoil [ 
 	| objectId |
 	source := aSoil.
+	"if there is no version set we take the actual database version. This 
+	is to create a consistent backup regardless if transactions are committed 
+	while we are doing the backup"
+	version ifNil: [
+		version := aSoil control databaseVersion ]. 
+	
 	self visit: source.
 	
 	[ toBeProcessed isEmpty ] whileFalse: [  
 		objectId := toBeProcessed  removeFirst.
-		self visit: (source objectRepository at: objectId) ].
+		self visit: (source objectRepository at: objectId version: version) ].
 	target close
 ]
 
@@ -76,13 +83,19 @@ SoilBackupVisitor >> target: aSoil [
 	target := aSoil
 ]
 
+{ #category : #accessing }
+SoilBackupVisitor >> version: anObject [
+
+	version := anObject
+]
+
 { #category : #visiting }
 SoilBackupVisitor >> visitControl: aSoilControlFile [ 
 	target control 
 		databaseFormatVersion: aSoilControlFile databaseFormatVersion;
 		databaseVersion: aSoilControlFile databaseVersion;
 		applicationVersion: aSoilControlFile applicationVersion;
-		checkpoint: aSoilControlFile checkpoint
+		checkpoint: aSoilControlFile lastCheckpoint
 ]
 
 { #category : #visiting }
@@ -121,7 +134,7 @@ SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersio
 		resetPreviousVersion.
 	target objectRepository 
 		at: backupCluster objectId
-		put: backupCluster serialize.
+		putBytes: backupCluster serialize.
 	backupCluster references do: [ :reference |
 		self process: reference ].
 	aSoilPersistentClusterVersion indexIds do:[ :indexId |

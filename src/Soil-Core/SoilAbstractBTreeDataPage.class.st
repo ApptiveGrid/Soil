@@ -46,18 +46,29 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 
 	| newPage pageWithItem return |
 
-	return := SoilBTreeReturnWrapper new returnValue: ((self associationAt: anItem key ifAbsent: nil) ifNotNil: [:item | item value]).
+	return := SoilBTreeReturnWrapper new returnValue: (self valueAt: anItem key).
 	self addItem: anItem.
 	self hasRoom ifTrue: [  iterator currentPage: self. ^ return ].
 	"We have to split"
 	newPage := iterator index splitPage: self.
 	"newPage is the one with the small values"
-	pageWithItem := ((self smallestKey > anItem key)
+	pageWithItem := ((self smallestKey <= anItem key)
 						ifTrue: [ newPage ]
 						ifFalse: [ self ]).
 	iterator currentPage: pageWithItem.
+	
+	"check that the current and new pages are balanced"
+	self flag: #TODO. "should be moved to a consistency checker"
+	newPage bTreeAssertion.
+	self bTreeAssertion.
+	
 	"we need to add the new page to the index above"
 	^ return indexEntry: (newPage smallestKey -> newPage index)
+]
+
+{ #category : #testing }
+SoilAbstractBTreeDataPage >> isIndexPage [
+	^false
 ]
 
 { #category : #testing }
@@ -84,6 +95,12 @@ SoilAbstractBTreeDataPage >> nextPageIn: btree [
 SoilAbstractBTreeDataPage >> readFrom: aStream [
 	super readFrom: aStream.
 	next := (aStream next: self pointerSize) asInteger
+]
+
+{ #category : #removing }
+SoilAbstractBTreeDataPage >> remove: aKey for: aBTree [
+	"remove and return the item"
+	^ self itemRemoveAt: aKey ifAbsent: nil
 ]
 
 { #category : #accessing }

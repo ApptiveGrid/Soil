@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'index'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Index'
 }
 
 { #category : #running }
@@ -24,6 +24,91 @@ SoilBTreeTest >> tearDown [
 	index ifNotNil: [ 
 		index close ].
 	super tearDown
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testAdd2 [
+	| entries |
+	index := SoilBTree new 
+		path: 'sunit-btree';
+		destroy;
+		initializeFilesystem;
+		initializeHeaderPage;
+		keySize: 1016;
+		valueSize: 8.
+	
+	entries :=  #(6 16 26 36 46 ).
+	
+	index at: 6  put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 6) equals: #[ 1 2 3 4 5 6 7 8 ].
+	
+	index at: 16  put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 6) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 16) equals: #[ 1 2 3 4 5 6 7 8 ].
+	
+	"We have two pages"
+	self assert: index pages size equals: 2.
+	"one index, one data"
+	self assert: index indexPages size equals: 1.
+	self assert: index dataPages size equals: 1.
+	"index page has just the default entry for the smalles possible key"
+	self assert: (index rootPage items collect: #key) size equals: 1.
+	self assert: (index rootPage items collect: #key) first equals: 0. 
+	
+	
+	"with adding 26, we have to split the data page"
+	index at: 26  put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: index pages size equals: 3.
+	self assert: index indexPages size equals: 1.
+	self assert: index dataPages size equals: 2.
+	
+	self assert: (index at: 6) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 16) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 26) equals: #[ 1 2 3 4 5 6 7 8 ].
+	
+	"index page has two entries: 0 and 16"
+	self assert: (index rootPage items collect: #key) size equals: 2.
+	self assert: (index rootPage items collect: #key) first equals: 0. 
+	self assert: (index rootPage items collect: #key) second equals: 16. 
+	
+	"adding 36 causes overlow in data node, have to add the new page to index"
+	index at: 36  put: #[ 1 2 3 4 5 6 7 8 ].
+	
+	self assert: index pages size equals: 4.
+	self assert: index indexPages size equals: 1.
+	self assert: index dataPages size equals: 3.
+	
+	self assert: (index at: 6) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 16) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 26) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 36) equals: #[ 1 2 3 4 5 6 7 8 ].
+	
+	"index page has trhee entries: 0 and 16 and 26"
+	self assert: (index rootPage items collect: #key) size equals: 3.
+	self assert: (index rootPage items collect: #key) first equals: 0. 
+	self assert: (index rootPage items collect: #key) second equals: 16. 
+	self assert: (index rootPage items collect: #key) third equals: 26. 
+	
+	"adding 46 causes overlow in data node and the index node"
+	index at: 46  put: #[ 1 2 3 4 5 6 7 8 ].
+	
+	self assert: index pages size equals: 7.
+	self assert: index indexPages size equals: 3.
+	self assert: index dataPages size equals: 4.
+	
+	self assert: (index at: 6) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 16) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 26) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 36) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 46) equals: #[ 1 2 3 4 5 6 7 8 ].
+	
+	"index page has trhee entries: 0 and 16 and 26"
+
+	self assert: (index rootPage items collect: #key) first equals: 0. 
+	self assert: (index rootPage items collect: #key) second equals: 26. 
+
+	self assert: index indexPages second items second key equals: 16.
+	self assert: index indexPages first items second key equals: 36.
 ]
 
 { #category : #tests }
@@ -82,8 +167,8 @@ SoilBTreeTest >> testAddSecondOverflow [
 	1 to: capacity do: [ :n | index at: capacity + n put: #[ 1 2 3 4 5 6 7 8 ]].
 	self assert: index pages size equals: 4.
 	page := index pageAt: 4.
-	self assert: page numberOfItems equals: 253.
-	self assert: page items first key equals: 256.
+	self assert: page numberOfItems equals: 254.
+	self assert: page items first key equals: 255.
 	"check that the next pointer is correct after split"
 	self assert: ((index headerPage nextPageIn: index) nextPageIn: index) identicalTo: (index pageAt: 4).
 	index writePages.
@@ -101,8 +186,8 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 	1 to: capacity do: [ :n | index at: capacity + n put: #[ 1 2 3 4 5 6 7 8 ]].
 	self assert: index pages size equals: 4.
 	page := index pageAt: 4.
-	self assert: page numberOfItems equals: 253.
-	self assert: page items first key equals: 256.
+	self assert: page numberOfItems equals: 254.
+	self assert: page items first key equals: 255.
 	"check that the next pointer is correct after split"
 	self assert: ((index headerPage nextPageIn: index) nextPageIn: index) identicalTo: (index pageAt: 4).
 
@@ -110,8 +195,7 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 	index close.
 	index := SoilBTree new 
 		path: 'sunit-btree';
-		initializeFilesystem;
-		open. 
+		initializeFilesystem.
 	self assert: (index at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
 ]
 
@@ -222,57 +306,10 @@ SoilBTreeTest >> testIsEmpty [
 ]
 
 { #category : #tests }
-SoilBTreeTest >> testIteratorFindAndNext [
-	
-	| capacity iterator value |
-	capacity := index headerPage itemCapacity * 2.
-	1 to: capacity do: [ :n |
-		index at: n put: (n asByteArrayOfSize: 8) ].
-	self assert: index pages size equals: 4.
-	iterator := index newIterator.
-	value := iterator
-		find: 222;
-		next.
-	self assert: value equals: (223 asByteArrayOfSize: 8)
-]
-
-{ #category : #tests }
-SoilBTreeTest >> testIteratorFindAndNext2 [
-	
-	| capacity iterator values |
-	capacity := index headerPage itemCapacity * 2.
-	1 to: capacity do: [ :n |
-		index at: n put: (n asByteArrayOfSize: 8) ].
-	self assert: index pages size equals: 4.
-	iterator := index newIterator.
-	values := iterator
-		find: 222;
-		next: 3.
-	self assert: values size equals: 3.
-	self assert: values asArray equals: {(223 asByteArrayOfSize: 8). (224 asByteArrayOfSize: 8). (225 asByteArrayOfSize: 8)}.
-	"test requesting more at the end when the are not enough entries"
-	values := iterator
-		find: capacity-1;
-		next: 3.
-	"size is 1"
-	self assert: values size equals: 1.
-	"and we get the right value"
-	self assert: values asArray equals: {(capacity asByteArrayOfSize: 8)}
-
-
-]
-
-{ #category : #tests }
-SoilBTreeTest >> testIteratorFirst [
-	
-	| capacity first |
-	capacity := index headerPage itemCapacity * 2.
-	index at: 1 put: #[ 8 7 6 5 4 3 2 1 ].
-	2 to: capacity do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	self assert: index pages size equals: 4.
-	first := index newIterator first.
-	self assert: first equals: #[ 8 7 6 5 4 3 2 1 ]
+SoilBTreeTest >> testIsOpen [
+ 	self assert: index isOpen.
+ 	index close.
+ 	self deny: index isOpen
 ]
 
 { #category : #tests }
@@ -298,8 +335,8 @@ SoilBTreeTest >> testLastPage [
 	1 to: capacity - 1 do: [ :n |
 		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	index at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
-	self assert: index pages size equals: 199.
-	self assert: index lastPage index equals: 199.
+	self assert: index pages size equals: 200.
+	self assert: index lastPage index equals: 200.
 	self assert: index lastPage isLastPage.
 	lastItem := index lastPage itemAt: capacity ifAbsent: [nil].
 	self assert: lastItem value equals: #[ 8 7 6 5 4 3 2 1 ].
@@ -359,8 +396,7 @@ SoilBTreeTest >> testPageAddFirstAndLoad [
 	index close.
 	index := SoilBTree new 
 		path: 'sunit-btree';
-		initializeFilesystem;
-		open.
+		initializeFilesystem.
 	
 	self assert: page items first key equals:(index indexKey: #foo).
 	"load succeeds"
@@ -369,13 +405,88 @@ SoilBTreeTest >> testPageAddFirstAndLoad [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testRemoveFromIndex [
+	| entries |
+	"We test that removing an entry will update the index"
+	index := SoilBTree new 
+		path: 'sunit-btree';
+		destroy;
+		initializeFilesystem;
+		initializeHeaderPage;
+		keySize: 1016;
+		valueSize: 8.
+	
+	entries :=  #(104 247 56 281 61 286 66 337 308 1 400 272 347 335 45 62 207 7 123 140).
+	
+	
+	entries do: [:toAdd |
+		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	"page 10 is the index page that has the index"
+	self assert: (index pageAt: 10) items last key equals: 335.
+	"now we remove 335"
+	index removeKey: 335.
+	"it is removed"
+	self assert: (index at: 335 ifAbsent: [true]).
+	"and the index is removed, too"
+	self deny: (index pageAt: 10) items last key equals: 335.
+	"we can add it back"
+	index at: 335  put: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index pageAt: 10) items last key equals: 335.
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testRemoveFromIndexAll [
+	| entries remainingEntries |
+	"We test that removing an entry will update the index"
+	index := SoilBTree new 
+		path: 'sunit-btree';
+		destroy;
+		initializeFilesystem;
+		initializeHeaderPage;
+		keySize: 512;
+		valueSize: 512.
+	
+	entries :=  #(104 247 56 281 61 286 66 337 308 1 400 272 347 335 45 62 207 7 123 140).
+	remainingEntries := entries asOrderedCollection.
+	
+	entries do: [:toAdd |
+		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	
+	entries do: [:entry| |removed|
+		removed := index removeKey: entry.
+		self assert: removed equals: #[ 1 2 3 4 5 6 7 8 ].
+		remainingEntries remove: entry.
+		"check that all remaining entries can be found"	
+		remainingEntries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+		"check size, this makes sure we can iterate over all remaining entries"
+		self assert: index values size equals: remainingEntries size.	
+		 ].
+	self assert: index isEmpty.
+	
+	"add data pages are empty"
+	index dataPages do: [ :dataPage | self assert: dataPage isEmpty].
+	
+	"and add back"
+	entries do: [:toAdd |
+		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]]
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testRemoveKey [
 
-	| capacity |
+	| capacity removed |
 	capacity := index headerPage itemCapacity.
 	1 to: capacity do: [ :n | index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	
-	index removeKey: 20.
+	removed := index removeKey: 20.
+	self assert: removed equals: #[ 1 2 3 4 5 6 7 8 ].
 	
 	self assert: (index at: 1) equals: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: (index at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
@@ -416,6 +527,10 @@ SoilBTreeTest >> testSplitIndexPage [
 	
 	"can we find all the keys we added?"
 	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	"check size, this makes sure we can iterate over all remaining entries"
+	self assert: index values size equals: entries size.	
+
 ]
 
 { #category : #tests }
@@ -444,9 +559,12 @@ SoilBTreeTest >> testSplitIndexPageReleoad [
 	index close.
 	index := SoilBTree new 
 		path: 'sunit-btree';
-		initializeFilesystem;
-		open. 
+		initializeFilesystem.
 	
 	"can we find all the keys we added?"
 	entries do: [:each | self assert: (index at: each ) equals: (#[ 1 2 3 4 5 6 7 8 ] asByteArrayOfSize: 512)].
+	
+	"check size, this makes sure we can iterate over all remaining entries"
+	self assert: index values size equals: entries size.	
+
 ]

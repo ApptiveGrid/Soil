@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Journal'
 }
 
 { #category : #helper }
@@ -12,7 +12,7 @@ SoilTransactionJournalTest class >> classUnderTest [
 	^ SoilPersistentDatabaseJournal 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #running }
 SoilTransactionJournalTest >> fillDatabase [ 
 	| tx dict |
 	tx := soil newTransaction.
@@ -77,7 +77,7 @@ SoilTransactionJournalTest >> testNewRootObject [
 	| tx journal |
 	tx := soil newTransaction.
 	tx root: SoilTestClusterRoot new.
-	tx checkpoint.
+	tx basicCommit.
 	journal := tx journal.
 	self assert: journal size equals: 7.
 	self assert: ((journal entryAt: 3) objectId isSameObjectId: (SoilObjectId segment: 1 index: 1)).
@@ -98,7 +98,7 @@ SoilTransactionJournalTest >> testNewRootSkipList [
 		keySize: 16;
 		yourself).
 	tx root at: #foo put: #bar.
-	tx checkpoint.
+	tx basicCommit.
 	journal := tx journal.
 	self assert: journal size equals: 11.
 	self assert: (journal anyEntrySatisfy:[:each | (each isKindOf: SoilNewObjectEntry) and: [ each objectId notNil and: [ each objectId isSameObjectId: (SoilObjectId segment: 1 index: 1) ]]]).
@@ -117,7 +117,7 @@ SoilTransactionJournalTest >> testRootObjectUpdate [
 	tx2 := soil newTransaction.
 	tx2 root nested: #teststring.
 	tx2 markDirty: tx2 root.
-	tx2 checkpoint.
+	tx2 basicCommit.
 	journal := tx2 journal.
 	self assert: journal size equals: 4.
 	self assert: ((journal entryAt: 2) objectId isSameObjectId: (SoilObjectId segment: 1 index: 1)).
@@ -137,7 +137,7 @@ SoilTransactionJournalTest >> testRootObjectUpdateClusterObject [
 	tx2 
 		markDirty: tx2 root;
 		makeRoot: object.
-	tx2 checkpoint.
+	tx2 basicCommit.
 	journal := tx2 journal.
 	self assert: journal size equals: 9.
 	self assert: (journal entries anySatisfy: [:entry | (entry isKindOf: SoilNewObjectEntry) and: [ entry objectId notNil and: [entry objectId isSameObjectId: (SoilObjectId segment: 1 index: 1) ] ] ]).
@@ -159,7 +159,7 @@ SoilTransactionJournalTest >> testRootObjectUpdateClusterPrimitive [
 	tx2 
 		markDirty: tx2 root;
 		makeRoot: string.
-	tx2 checkpoint.
+	tx2 basicCommit.
 	journal := tx2 journal.
 	self assert: journal size equals: 6.
 	self assert: (journal entries anySatisfy: [:entry |(entry isKindOf: SoilNewObjectEntry) and: [ entry objectId notNil and: [entry objectId isSameObjectId: (SoilObjectId segment: 1 index: 1)] ] ]).

@@ -4,12 +4,27 @@ Class {
 	#category : #'Soil-Core-Files'
 }
 
+{ #category : #versions }
+SoilObjectFile >> allRecords [
+	| records pos record |
+	records := OrderedCollection new.
+	stream position: self recordStart.
+	[ stream atEnd ] whileFalse: [ 
+		pos := stream position.
+		record := SoilPersistentClusterVersion readFrom: stream.
+		records add: (pos -> record) ].
+	^ records 
+]
+
 { #category : #writing }
 SoilObjectFile >> appendBytes: aCollection [ 
-	mutex critical: [  
-		stream position: stream size.
+	| position |
+	^ mutex critical: [  
+		position := stream size.
+		stream position: position.
 		stream nextPutAll: aCollection.
-		stream flush ]
+		stream flush.
+		position ]
 ]
 
 { #category : #accessing }
@@ -37,6 +52,12 @@ SoilObjectFile >> initialize [
 	mutex := Mutex new
 ]
 
+{ #category : #initialization }
+SoilObjectFile >> initializeFilesystem [ 
+	super initializeFilesystem.
+	self writeContentsToDisk 
+]
+
 { #category : #accessing }
 SoilObjectFile >> path [
 	^ segment path / #objects
@@ -48,6 +69,13 @@ SoilObjectFile >> prefix [
 ]
 
 { #category : #accessing }
+SoilObjectFile >> recordStart [
+	^ (segment id = 0)
+		ifTrue: [ self headerSize + 16 ]
+		ifFalse: [ self headerSize + 8 ]
+]
+
+{ #category : #accessing }
 SoilObjectFile >> size [ 
 	^ stream size
 ]
@@ -55,4 +83,10 @@ SoilObjectFile >> size [
 { #category : #versions }
 SoilObjectFile >> versionSize [
 	^ 8
+]
+
+{ #category : #initialization }
+SoilObjectFile >> writeContentsToDisk [ 
+	(segment notNil and: [ segment soil setup isFsyncEnabled  ]) ifTrue: [
+		stream sync ]
 ]

@@ -3,7 +3,8 @@ Class {
 	#superclass : #SoilDatabaseJournal,
 	#instVars : [
 		'semaphore',
-		'currentFragmentFile'
+		'currentFragmentFile',
+		'maxFragmentFiles'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -17,33 +18,26 @@ SoilPersistentDatabaseJournal >> addTransactionJournal: aTransactionJournal [
 ]
 
 { #category : #writing }
-SoilPersistentDatabaseJournal >> appendEntry: aSoilNewCheckpointEntry [
+SoilPersistentDatabaseJournal >> appendEntry: aSoilJournalEntry [
 	"append the entry to the current file in order not to split 
 	the transaction journal. Remember the postion where the 
 	entry is stored and return"
 	| entryLSN |
 	entryLSN := currentFragmentFile currentLogSequenceNumber.
-	currentFragmentFile appendEntry: aSoilNewCheckpointEntry.
+	currentFragmentFile appendEntry: aSoilJournalEntry.
 	^ entryLSN
 		
 ]
 
-{ #category : #accessing }
-SoilPersistentDatabaseJournal >> checkpoint [ 
-	| entry checkpointLSN |
-	entry := SoilCheckpointEntry new
-		previousCheckpoint: soil control checkpoint.
-	entry commitIn: soil.
-	"write the checkpoint entry in the journal and get 
-	the position of that entry in the file"
-	checkpointLSN := self writeEntry: entry.
-	"set the checkpoint position so it can be read back"
-	soil control checkpoint: checkpointLSN.
-	^ entry
+{ #category : #'open/close' }
+SoilPersistentDatabaseJournal >> close [
+	currentFragmentFile ifNotNil: [
+		currentFragmentFile close ]
 ]
 
 { #category : #private }
 SoilPersistentDatabaseJournal >> createFragmentFile: filename [
+	self removeFragmentFiles.
 	(self path / filename) ensureCreateFile.
 	^ (self openFragmentFile: filename)
 		initializeFilesystem;
@@ -54,33 +48,52 @@ SoilPersistentDatabaseJournal >> createFragmentFile: filename [
 SoilPersistentDatabaseJournal >> currentFragmentFile [
 	| currentLSN filename |
 	^ currentFragmentFile ifNil: [  
-		currentLSN := soil control checkpoint.
+		currentLSN := soil control lastCheckpoint.
 		filename := self filenameFrom: currentLSN fileNumber.
 		currentFragmentFile := (currentLSN isInitial) 
 			ifTrue: [ self createFragmentFile: filename ]
 			ifFalse: [ self openFragmentFile: filename ] ]
 ]
 
-{ #category : #accessing }
+{ #category : #fragmentfile }
 SoilPersistentDatabaseJournal >> currentFragmentFile: aSoilJournalFragmentFile [ 
 	currentFragmentFile := aSoilJournalFragmentFile
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #fragmentfile }
 SoilPersistentDatabaseJournal >> cycleFragmentFile [
-	currentFragmentFile := self createFragmentFile: (self filenameFrom: self currentFragmentFile fileNumber + 1)
+	| nextFileNumber |
+	nextFileNumber := (self fileNumberFrom: currentFragmentFile filename) + 1.
+	currentFragmentFile 
+		flush;
+		writeContentsToDisk;
+		close.
+	currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber)
 ]
 
 { #category : #enumerating }
-SoilPersistentDatabaseJournal >> do: aBlock [ 
-	semaphore critical: [  
-		transactionJournals do: aBlock ]	
+SoilPersistentDatabaseJournal >> entriesDo: aBlock [
+	self fragmentFiles reverse do: [ :file |
+		file entriesDo: aBlock ]
 ]
 
-{ #category : #searching }
+{ #category : #queries }
 SoilPersistentDatabaseJournal >> entriesMatching: aBlock [
 	^ self fragmentFiles flatCollect: [ :file |
 		file entriesMatching: aBlock  ]
+]
+
+{ #category : #testing }
+SoilPersistentDatabaseJournal >> entriesWithObjectId: aSoilObjectId [ 
+	^ self objectEntriesSelect: [ :entry | 
+		entry includesObjectId: aSoilObjectId ]
+]
+
+{ #category : #testing }
+SoilPersistentDatabaseJournal >> existsFragmentFileForLSN: aSoilLogSequenceNumber [ 
+	| filename |
+	filename := self filenameFrom: aSoilLogSequenceNumber fileNumber.
+	^ (self path / filename) exists
 ]
 
 { #category : #private }
@@ -95,28 +108,44 @@ SoilPersistentDatabaseJournal >> filenameFrom: anInteger [
 
 { #category : #private }
 SoilPersistentDatabaseJournal >> fragmentFileForWriting [
-	| segmentFile nextFileNumber |
-	segmentFile := self currentFragmentFile.
-	^ currentFragmentFile hasSpace 
-		ifTrue: [ currentFragmentFile ]
-		ifFalse: [ 
-			nextFileNumber := (self fileNumberFrom: currentFragmentFile filename).
-			currentFragmentFile close.
-			currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber + 1) ]
+	self currentFragmentFile hasSpace 
+		ifFalse: [ self cycleFragmentFile ].
+	^ currentFragmentFile
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #fragmentfile }
 SoilPersistentDatabaseJournal >> fragmentFileWritten: aSoilFragmentFile [ 
 	soil setup isFsyncEnabled ifTrue: [  
 		aSoilFragmentFile writeContentsToDisk ]
 ]
 
-{ #category : #accessing }
+{ #category : #fragmentfile }
 SoilPersistentDatabaseJournal >> fragmentFiles [
-	^ self path files sorted reverse collect: [ :each | 
+	^ self sortedFiles collect: [ :each | 
 		(SoilJournalFragmentFile path: each)
 			databaseJournal: self;
 			yourself ]
+]
+
+{ #category : #queries }
+SoilPersistentDatabaseJournal >> historyOfObjectId: aSoilObjectId [ 
+	| history objectEntries transactionStart |
+	history := OrderedCollection new.
+	objectEntries := OrderedCollection new.
+	self entriesDo: [ :entry |
+		(entry class = SoilBeginTransactionEntry) ifTrue: [ 
+			transactionStart := entry ].
+		entry providesObjectIds ifTrue: [ 
+			(entry includesObjectId: aSoilObjectId) ifTrue: [ 
+				objectEntries add: entry ] ].
+		(entry class = SoilCommitTransactionEntry) ifTrue: [ 
+			objectEntries ifNotEmpty: [ 
+				 history 
+					add: transactionStart;
+					addAll: objectEntries;
+					add: entry ].
+				objectEntries removeAll ] ].
+	^ history 
 ]
 
 { #category : #adding }
@@ -162,6 +191,18 @@ SoilPersistentDatabaseJournal >> lastFileNumber [
 	^ self fileNumberFrom: self fragmentFiles first basename.
 ]
 
+{ #category : #accessing }
+SoilPersistentDatabaseJournal >> maxFragmentFiles [
+
+	^ maxFragmentFiles
+]
+
+{ #category : #accessing }
+SoilPersistentDatabaseJournal >> maxFragmentFiles: anObject [
+
+	maxFragmentFiles := anObject
+]
+
 { #category : #'instance creation' }
 SoilPersistentDatabaseJournal >> newTransactionJournalForId: anInteger [ 
 	^ semaphore critical: [  
@@ -170,14 +211,31 @@ SoilPersistentDatabaseJournal >> newTransactionJournalForId: anInteger [
 			index: anInteger ]
 ]
 
+{ #category : #enumerating }
+SoilPersistentDatabaseJournal >> objectEntriesDo: aBlock [
+	self fragmentFiles reverse do: [ :file |
+		file entriesDo: [ :entry | 
+			entry providesObjectIds ifTrue: [ 
+				 (aBlock value: entry)  ] ] ]
+]
+
+{ #category : #queries }
+SoilPersistentDatabaseJournal >> objectEntriesSelect: aBlock [
+	| entries |
+	entries := OrderedCollection new.
+	self objectEntriesDo: [ :entry | 
+		 (aBlock value: entry) ifTrue: [ 
+			entries add: entry ] ].
+	^ entries
+]
+
 { #category : #'instance creation' }
 SoilPersistentDatabaseJournal >> open [ 
-	| file lsn |
-	self path hasChildren ifFalse: [ 
-		file := self currentFragmentFile.
-		lsn := self appendEntry: (SoilCheckpointEntry new
-			previousCheckpoint: soil control checkpoint).
-		soil control checkpoint: lsn ]
+	"if there are no fragment files then we create one with 
+	a checkpoint entry to enable consistency with later 
+	operations assuming there is a checkpoint"
+	self sortedFiles ifEmpty: [ 
+		soil checkpoint ]
 	
 ]
 
@@ -216,9 +274,26 @@ SoilPersistentDatabaseJournal >> recover [
 		recover 
 ]
 
+{ #category : #private }
+SoilPersistentDatabaseJournal >> removeFragmentFiles [
+	| files |
+	maxFragmentFiles ifNotNil: [ 
+		((files := self sortedFiles) size >= maxFragmentFiles) ifTrue: [ 
+			(files allButFirst: maxFragmentFiles - 1) do: #delete ] ]
+]
+
 { #category : #initialization }
 SoilPersistentDatabaseJournal >> resetFragmentFile [
 	currentFragmentFile := nil
+]
+
+{ #category : #accessing }
+SoilPersistentDatabaseJournal >> sortedFiles [
+	^ (self path files 
+		select: [ :file | 
+			"a fragment file is always 10 characters long. 
+			40 bit (address space) / 8 (bits in a byte) * 2 (hex characters)"
+			(file basename size = 10) ]) sorted reverse
 ]
 
 { #category : #accessing }
@@ -227,7 +302,7 @@ SoilPersistentDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock
 	fragmentFiles := self fragmentFiles.
 	fileIndex := fragmentFiles 
 		detectIndex: [ :fragment | fragment firstTransactionId <= index  ]
-		ifNone: [ self halt ].
+		ifNone: [ self error: 'fileIndex not found, should not happen' ].
 	(fragmentFiles copyFrom: fileIndex to: fragmentFiles size) do: [ :fragmentFile |
 		fragmentFile transactionJournals do: [ :transactionJournal |
 			aBlock value: transactionJournal ] ].
@@ -239,7 +314,7 @@ SoilPersistentDatabaseJournal >> writeEntry: aSoilNewCheckpointEntry [
 	is exceeded a new one will taken to write the entry. Return the 
 	position of the entry being written"
 	| entryLSN file |
-	file := self currentFragmentFile.
+	file := self fragmentFileForWriting.
 	file setToEnd.
 	entryLSN := file currentLogSequenceNumber.
 	file appendEntry: aSoilNewCheckpointEntry.
@@ -249,10 +324,9 @@ SoilPersistentDatabaseJournal >> writeEntry: aSoilNewCheckpointEntry [
 
 { #category : #writing }
 SoilPersistentDatabaseJournal >> writeTransactionJournal: aSoilTransactionJournal [ 
-	| file |
+	| fragmentFile |
 	^ semaphore critical: [  
 		self verifyNextJournalIndex: aSoilTransactionJournal index.	
-		file := self fragmentFileForWriting.
-		aSoilTransactionJournal entries do: [ :entry |
-			file appendEntry: entry ] ]
+		fragmentFile := self fragmentFileForWriting.
+		fragmentFile appendEntries: aSoilTransactionJournal entries ]
 ]

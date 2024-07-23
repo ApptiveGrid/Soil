@@ -52,11 +52,6 @@ SoilPagedFileIndexStore >> flushPages [
 				self writePage: page ] ] ]
 ]
 
-{ #category : #testing }
-SoilPagedFileIndexStore >> hasStream [
-	^ stream notNil
-]
-
 { #category : #accessing }
 SoilPagedFileIndexStore >> headerPage [ 
 	pages ifEmpty: [ 
@@ -84,16 +79,22 @@ SoilPagedFileIndexStore >> initializeHeaderPage [
 		pages at: page index put: page	]
 ]
 
+{ #category : #testing }
+SoilPagedFileIndexStore >> isOpen [
+	^stream isNotNil and: [ stream isOpen ]
+]
+
 { #category : #'open/close' }
 SoilPagedFileIndexStore >> open [
-	streamSemaphore critical: [  
-		self 
-			openStream ]
+	self isOpen ifTrue: [ self error: 'Index store already open' ].
+	self openStream
 ]
 
 { #category : #'open/close' }
 SoilPagedFileIndexStore >> openStream [
-	stream := SoilLockableStream path: index path.
+	streamSemaphore critical: [  
+		stream := SoilLockableStream path: index path
+	]
 ]
 
 { #category : #accessing }
@@ -102,15 +103,13 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	self ensureStreamIsOpen.
 	streamSemaphore critical: [  
 		stream position: (self positionOfPageIndex: anInteger).
-		page := (index readPageFrom: stream) index: anInteger ].
+		page := (index readPageFrom: stream) 
+			index: anInteger;
+			pageSize:  self filePageSize
+			yourself ].
 	pagesMutex critical: [  
 		pages at: anInteger put: page ].
 	^ page
-]
-
-{ #category : #accessing }
-SoilPagedFileIndexStore >> pagesStart [
-	^ 4096
 ]
 
 { #category : #'instance creation' }
@@ -139,6 +138,12 @@ SoilPagedFileIndexStore >> replace: oldPage with: newPage [
 { #category : #accessing }
 SoilPagedFileIndexStore >> stream [
 	^ stream 
+]
+
+{ #category : #writing }
+SoilPagedFileIndexStore >> writeContentsToDisk [
+	stream ifNotNil: [  
+		stream fileStream fdatasync ]
 ]
 
 { #category : #writing }

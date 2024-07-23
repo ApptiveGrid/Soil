@@ -94,7 +94,7 @@ SoilMaterializer >> nextClass [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextCompiledBlock: aClass [
+SoilMaterializer >> nextCompiledBlock11: aClass [
 
  	| header bytecodesSize compiledBlock |
 
@@ -123,9 +123,39 @@ SoilMaterializer >> nextCompiledBlock: aClass [
 ]
 
 { #category : #reading }
-SoilMaterializer >> nextCompiledMethod: aClass [
+SoilMaterializer >> nextCompiledBlock12: aClass [
 
- 	| header bytecodesPlusTrailerSize compiledMethod trailerSize |
+	| header bytecodesSize compiledBlock |
+	header := self nextSoilObject.
+	bytecodesSize := self nextLengthEncodedInteger.
+
+	compiledBlock := aClass basicNew: bytecodesSize header: header.
+
+	self registerObject: compiledBlock.
+
+	"first the literals
+ 	note: we omit the outer code here as we store clean blocks"
+	1 to: compiledBlock numLiterals - 1 do: [ :i |
+	compiledBlock literalAt: i put: self nextSoilObject ].
+
+	compiledBlock initialPC to: compiledBlock size do: [ :index |
+	compiledBlock at: index put: self nextByte ].
+
+	^ compiledBlock
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextCompiledBlock: aClass [
+	"API changed from version 12 on"
+ 	^ SystemVersion current major < 12
+		ifTrue: [self nextCompiledBlock11: aClass]
+		ifFalse: [self nextCompiledBlock12: aClass]
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextCompiledMethod11: aClass [
+
+ 	| header bytecodesPlusTrailerSize compiledMethod |
 
  	header :=  self nextSoilObject.
  	bytecodesPlusTrailerSize := self nextLengthEncodedInteger.
@@ -142,18 +172,49 @@ SoilMaterializer >> nextCompiledMethod: aClass [
  				compiledMethod literalAt: i  put: self nextSoilObject ].			
 
  	"then the bytecodes, we ignore the trailer for now"
-	trailerSize := 
-	(SystemVersion current major = 12)
-		ifFalse: [  compiledMethod trailer size ] 
-		ifTrue: [  CompiledMethod trailerSize ].
  	compiledMethod initialPC 
- 		to: compiledMethod size - trailerSize
+ 		to: compiledMethod size - compiledMethod trailer size
  		do: [ :index |
  			compiledMethod
  				at: index
  				put: self nextByte ].
 	
  	^compiledMethod
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextCompiledMethod12: aClass [
+
+	| header bytecodesPlusTrailerSize compiledMethod |
+	header := self nextSoilObject.
+	bytecodesPlusTrailerSize := self nextLengthEncodedInteger.
+
+	compiledMethod := aClass
+		                  basicNew: bytecodesPlusTrailerSize
+		                  header: header.
+
+	self registerObject: compiledMethod.
+
+	"first the literals"
+	"for now we do store the class pointer in the last literal"
+	1 to: compiledMethod numLiterals do: [ :i |
+	compiledMethod literalAt: i put: self nextSoilObject ].
+
+	"then the bytecodes, we ignore the trailer for now"
+	compiledMethod initialPC 
+		to: compiledMethod size - CompiledMethod trailerSize 
+		do: [ :index | compiledMethod at: index put: self nextByte ].
+
+	^ compiledMethod
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextCompiledMethod: aClass [
+
+ 	"API changed from version 12 on"
+ 	^ SystemVersion current major < 12
+		ifTrue: [self nextCompiledMethod11: aClass]
+		ifFalse: [self nextCompiledMethod12: aClass]
 ]
 
 { #category : #reading }

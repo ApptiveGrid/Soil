@@ -36,11 +36,6 @@ SoilNewBehaviorEntry >> context [
 ]
 
 { #category : #accessing }
-SoilNewBehaviorEntry >> effect [
-	^ identifier 
-]
-
-{ #category : #accessing }
 SoilNewBehaviorEntry >> identifier: aString [ 
 	identifier := aString 
 ]
@@ -69,6 +64,11 @@ SoilNewBehaviorEntry >> printOn: aStream [
 		<< ' name: ' 
 		<< identifier asString
 		
+]
+
+{ #category : #testing }
+SoilNewBehaviorEntry >> providesObjectIds [ 
+	^ true
 ]
 
 { #category : #'instance creation' }

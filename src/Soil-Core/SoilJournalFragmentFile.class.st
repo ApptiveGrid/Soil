@@ -9,11 +9,6 @@ Class {
 }
 
 { #category : #'file names' }
-SoilJournalFragmentFile class >> filenameFromFilenumber: anInteger [ 
-	^ (anInteger printStringBase: 16 length: 10 padded: true) asLowercase 
-]
-
-{ #category : #'file names' }
 SoilJournalFragmentFile class >> filenumberFromFilename: aString [ 
 	^ (ByteArray readHexFrom: aString) asInteger
 ]
@@ -35,12 +30,30 @@ SoilJournalFragmentFile >> acceptSoil: aSoilVisitor [
 ]
 
 { #category : #writing }
+SoilJournalFragmentFile >> appendEntries: aCollection [ 
+	| position lock |
+	"append all entries in the collection using a single lock, 
+	flush and sync operation."
+	lock := stream lockAppendingFor: self.
+	[ 
+	 	"when the lock is in place it is safe the set the file 
+		to its end"
+		stream setToEnd.
+		position := stream position.
+		aCollection do: [ :entry | entry writeOn: stream ].
+		"after all entries are written we can have a single flush
+		and potential sync to disk"
+		stream flush.
+		databaseJournal fragmentFileWritten: self  ]
+			ensure: [ lock release ].
+	^ position
+
+]
+
+{ #category : #writing }
 SoilJournalFragmentFile >> appendEntry: aSoilJournalEntry [ 
 	| position lock |
-	"lock whole file for appending. The lock context here is
-	the journal entry itself because there is no better 
-	object to use. The lock should be really exclusive"
-	lock := stream lockAppendingFor: aSoilJournalEntry.
+	lock := stream lockAppendingFor: self.
 	[ 
 	 	"when the lock is in place it is safe the set the file 
 		to its end"
@@ -112,6 +125,40 @@ SoilJournalFragmentFile >> databaseJournal: aSoilPersistentDatabaseJournal [
 	databaseJournal := aSoilPersistentDatabaseJournal 
 ]
 
+{ #category : #journal }
+SoilJournalFragmentFile >> entries [
+	| entries |
+	entries := OrderedCollection new.
+	self entriesDo: [ :entry |
+		entries add: entry ].
+	^ entries 
+]
+
+{ #category : #journal }
+SoilJournalFragmentFile >> entriesCollect: aBlock [
+	| col |
+	col := OrderedCollection new.
+	self entriesDo: [ :entry |
+		col add: (aBlock value: entry) ].
+	^ col 
+]
+
+{ #category : #journal }
+SoilJournalFragmentFile >> entriesDo: aBlock [
+	| position oldPosition |
+	self stream position: self dataPosition.
+	oldPosition  := 0.
+	[ stream atEnd ] whileFalse: [ 
+		position := stream position.
+		"call block with three arguments: entry, file position, length"
+		aBlock 
+			cull: (SoilJournalEntry readFrom: stream)
+			cull: position
+			cull: position - oldPosition.
+		oldPosition := position ].
+
+]
+
 { #category : #searching }
 SoilJournalFragmentFile >> entriesMatching: aBlock [
 	^ self transactionJournals flatCollect: [ :journal |
@@ -142,7 +189,7 @@ SoilJournalFragmentFile >> firstTransactionId [
 SoilJournalFragmentFile >> hasSpace [
 	"a fragment file when writing to it must be smaller be with a 
 	file size of 24 bit = 16MB"
-	^ stream position < (2 raisedTo: 24)
+	^ stream size < (2 raisedTo: 24)
 ]
 
 { #category : #initialization }
@@ -194,8 +241,9 @@ SoilJournalFragmentFile >> inspectionTransactionJournals [
 			evaluated: #committedAt)
 ]
 
-{ #category : #'instance creation' }
+{ #category : #'open/close' }
 SoilJournalFragmentFile >> open [
+	self isOpen ifTrue: [ self error: 'File already open' ].
 	stream := SoilLockableStream path: path 
 ]
 
@@ -206,7 +254,7 @@ SoilJournalFragmentFile >> path [
 
 { #category : #accessing }
 SoilJournalFragmentFile >> path: aFileReference [
-	path := aFileReference 
+	path := aFileReference asFileReference 
 ]
 
 { #category : #accessing }
@@ -272,7 +320,8 @@ SoilJournalFragmentFile >> versionSize [
 	^ 1
 ]
 
-{ #category : #'as yet unclassified' }
-SoilJournalFragmentFile >> writeContentsToDisk [
-	stream fileStream fdatasync
+{ #category : #writing }
+SoilJournalFragmentFile >> writeContentsToDisk [ 
+	databaseJournal soil setup isFsyncEnabled ifTrue: [ 
+		stream sync ]
 ]
