@@ -75,6 +75,32 @@ SoilIndexedDictionaryTest >> testAddAndRemoveExistingList [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testAddRandom [
+	| tx numEntries entries|
+	tx := soil newTransaction.
+	tx root: dict.
+	"just some random adding and checking that we can find it, configured to create lots of pages"
+	
+	numEntries := 1000.
+	entries := Set new: numEntries.
+	
+	numEntries timesRepeat: [ | toAdd |
+		toAdd := (numEntries*20) atRandom.
+		entries add: toAdd.
+		dict at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	
+	"check size"
+	self assert: dict size equals: entries size.
+	
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (dict at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	"iterate index, all should be in entries"
+	dict do: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]].
+	dict reverseDo: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]]
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testAddToExistingEmptyList [
 	| tx tx2 tx3 tx4 |
 	"create emtpy skip list dictionary ..."
@@ -601,7 +627,7 @@ SoilIndexedDictionaryTest >> testSecondWithTransaction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testSizeWithTransaction [
+SoilIndexedDictionaryTest >> testSize [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
@@ -615,7 +641,7 @@ SoilIndexedDictionaryTest >> testSizeWithTransaction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testValuesWithTransaction [
+SoilIndexedDictionaryTest >> testValues [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.

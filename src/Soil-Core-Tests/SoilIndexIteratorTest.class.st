@@ -560,15 +560,27 @@ SoilIndexIteratorTest >> testReverseDo [
 { #category : #tests }
 SoilIndexIteratorTest >> testSize [
 	
-	| iterator capacity result |
+	| iterator capacity |
 	iterator := index newIterator.
 	
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n |
 		iterator at: n put: (n asByteArrayOfSize: 8) ].
 	
-	result := OrderedCollection new.
-	iterator do: [ :each | result add: each ].
+	self assert: iterator size equals: capacity
+]
 
-	self assert: result size equals: capacity
+{ #category : #tests }
+SoilIndexIteratorTest >> testValues [
+	
+	| iterator capacity |
+	iterator := index newIterator.
+	
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		iterator at: n put: (n asByteArrayOfSize: 8) ].
+	
+	self assert: iterator values size equals: capacity.
+	self assert: iterator values first equals: (1 asByteArrayOfSize: 8).
+	self assert: iterator values last equals: (capacity asByteArrayOfSize: 8)
 ]
