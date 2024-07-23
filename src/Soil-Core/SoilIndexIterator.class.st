@@ -470,6 +470,6 @@ SoilIndexIterator >> values [
 	| values |
 	values := OrderedCollection new.
 	self do: [ :each |
-		values add: each value ].
+		values add: each ].
 	^ values
 ]
