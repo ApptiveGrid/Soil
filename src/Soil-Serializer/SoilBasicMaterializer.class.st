@@ -10,18 +10,6 @@ SoilBasicMaterializer class >> materializeFromBytes: aByteArray [
 		materialize
 ]
 
-{ #category : #'reading - basic' }
-SoilBasicMaterializer class >> nextLengthEncodedInteger [
-
-	| value aSoilMaterializer |
-	self flag: #TODO. "seems to be not called and does not work"
-	aSoilMaterializer := self new.
-	value := aSoilMaterializer nextByte.
-	value < 128 ifTrue: [ ^ value ].
-	^ (aSoilMaterializer nextLengthEncodedInteger bitShift: 7) bitOr:
-		  (value bitAnd: 127)
-]
-
 { #category : #'instance creation' }
 SoilBasicMaterializer class >> on: aReadStream [
 	^ self new 
