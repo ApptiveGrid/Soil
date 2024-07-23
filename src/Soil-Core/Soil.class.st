@@ -281,6 +281,24 @@ Soil >> materializerClass: anObject [
 	materializerClass := anObject
 ]
 
+{ #category : #actions }
+Soil >> migrate: aClass [ 
+	| txn succeeded |
+	self control applicationVersion to: aClass applicationVersion do: [ :version |
+		succeeded := false.
+		txn := self newTransaction.
+		[ 
+			(aClass new  upgrade: version transaction: txn)
+				ifTrue: [
+					self control applicationVersion: version.
+					succeeded := true ]
+				ifFalse: [ ^ self ] ]
+				ensure: [ 
+					succeeded 
+						ifTrue: [ txn commit ]
+						ifFalse: [ txn abort ] ] ]
+]
+
 { #category : #'instance creation' }
 Soil >> newMaterializer [
 	^ self materializerClass new
