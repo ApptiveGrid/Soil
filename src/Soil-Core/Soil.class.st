@@ -38,7 +38,8 @@ Class {
 		'serializerClass',
 		'materializerClass',
 		'control',
-		'setup'
+		'setup',
+		'globals'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -195,6 +196,20 @@ Soil >> findRecord: aBlock [
 		ensure: [ tx abort ]
 ]
 
+{ #category : #accessing }
+Soil >> globals [
+	^ globals ifNil: [ 
+		globals := SoilGlobals new 
+			path: self path / #globals;
+			open;
+			yourself ] 
+]
+
+{ #category : #testing }
+Soil >> hasGlobals [
+	^ globals notNil
+]
+
 { #category : #initialization }
 Soil >> initialize [ 
 	super initialize.
@@ -233,18 +248,18 @@ Soil >> inspectionControl [
 	^ self control inspectionControl 
 ]
 
+{ #category : #'as yet unclassified' }
+Soil >> inspectionGlobals [
+	<inspectorPresentationOrder: 2200 title: 'globals'>
+
+	^ self globals inspectionFields 
+]
+
 { #category : #inspector }
 Soil >> inspectionJournal [
 	<inspectorPresentationOrder: 2000 title: 'journal'>
 	
 	^ self journal inspectionContent
-]
-
-{ #category : #'as yet unclassified' }
-Soil >> inspectionMetadata [
-	<inspectorPresentationOrder: 2200 title: 'metadata'>
-
-	^ self metadata inspectionMetadata
 ]
 
 { #category : #testing }
@@ -286,15 +301,6 @@ Soil >> materializerClass [
 Soil >> materializerClass: anObject [
 
 	materializerClass := anObject
-]
-
-{ #category : #accessing }
-Soil >> metadata [
-	^ metadata ifNil: [ 
-		metadata := SoilFrame new 
-			path: self path / #metadata;
-			open;
-			yourself ]
 ]
 
 { #category : #'instance creation' }
@@ -396,6 +402,13 @@ Soil >> renameClassNamed: oldName to: newName [
 
 	transaction markDirty: behaviorDescription.
 	transaction commit
+]
+
+{ #category : #public }
+Soil >> reopen [
+	self 
+		close;
+		open 
 ]
 
 { #category : #journal }

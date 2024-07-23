@@ -299,7 +299,7 @@ SoilPersistentDatabaseJournal >> sortedFiles [
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock [ 
 	| fragmentFiles fileIndex |
-	fragmentFiles := self fragmentFiles.
+	fragmentFiles := self fragmentFiles do: #open.
 	fileIndex := fragmentFiles 
 		detectIndex: [ :fragment | fragment firstTransactionId <= index  ]
 		ifNone: [ self error: 'fileIndex not found, should not happen' ].

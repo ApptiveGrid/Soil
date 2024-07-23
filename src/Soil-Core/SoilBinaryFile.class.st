@@ -34,6 +34,8 @@ SoilBinaryFile >> headerSize [
 
 { #category : #initialization }
 SoilBinaryFile >> initializeFilesystem [
+	stream ifNil: [  
+		stream := SoilLockableStream path: self path ].
 	self initializeHeader.
 	self initializeStart.
 	self flush
@@ -93,8 +95,7 @@ SoilBinaryFile >> soil [
 
 { #category : #accessing }
 SoilBinaryFile >> stream [
-	^ stream ifNil: [ 
-		stream := SoilLockableStream path: self path ]
+	^ stream 
 ]
 
 { #category : #accessing }
