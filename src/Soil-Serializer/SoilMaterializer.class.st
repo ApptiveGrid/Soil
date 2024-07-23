@@ -70,6 +70,13 @@ SoilMaterializer >> nextBehaviorDescription [
 ]
 
 { #category : #reading }
+SoilMaterializer >> nextByteArray: aClass [ 
+
+	^ self registerObject: (super nextByteArray: aClass)
+
+]
+
+{ #category : #reading }
 SoilMaterializer >> nextClass [
 	^ Smalltalk 
 		at: self basicNextString asSymbol 
@@ -201,6 +208,12 @@ SoilMaterializer >> nextCompiledMethod: aClass [
 ]
 
 { #category : #reading }
+SoilMaterializer >> nextDate: aClass [ 
+	
+	^ self registerObject: (super nextDate: aClass).
+]
+
+{ #category : #reading }
 SoilMaterializer >> nextDictionary: aClass [ 
 	| size dict key |
 	size := self nextLengthEncodedInteger.
@@ -221,10 +234,41 @@ SoilMaterializer >> nextExternalReference [
 ]
 
 { #category : #reading }
+SoilMaterializer >> nextFloat: aClass [ 
+	| float |
+	float := super nextFloat: aClass.
+	float isImmediateObject ifFalse: [self registerObject: float].
+	^ float
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextFraction: aClass [
+	
+	^ self registerObject: (super nextFraction: aClass).
+]
+
+{ #category : #reading }
 SoilMaterializer >> nextInternalReference [
 	| index |
 	index := self nextLengthEncodedInteger.
 	^ objects at: index
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextLargeNegativeInteger [
+	| integer |
+	"Large Integers are normal objects (need to be registered), small integers are immediate"
+	integer := super nextLargeNegativeInteger.
+	integer isImmediateObject ifFalse: [ self registerObject: integer].
+	^ integer
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextLargePositiveInteger [
+	| integer |
+	integer := super nextLargePositiveInteger.
+	integer isImmediateObject ifFalse: [ self registerObject: integer].
+	^ integer
 ]
 
 { #category : #reading }
@@ -251,30 +295,42 @@ SoilMaterializer >> nextPersistentDictionary: aClass [
 ]
 
 { #category : #reading }
+SoilMaterializer >> nextScaledDecimal: aClass [
+
+	^ self registerObject: (super nextScaledDecimal: aClass)
+
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextString [
+
+	^ self registerObject: super nextString
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextTime [
+
+	^ self registerObject: super nextTime
+]
+
+{ #category : #reading }
 SoilMaterializer >> nextUUID: aClass [ 
-	| uuid size byteArray |
-	size := self nextLengthEncodedInteger.
-	byteArray := SystemVersion current major < 12 
-		ifTrue: [ aClass new: size] 
-		ifFalse: [ ByteArray new: size].
 	
-	
-	stream readInto: byteArray startingAt: 1 count: size.
-	
-	uuid := SystemVersion current major < 12 
-		ifTrue: [byteArray ] 
-		ifFalse: [UUID nilUUID uuidData: byteArray].
-	
-	self registerObject: uuid.
-	
-	^ uuid
+	^ self registerObject: (super nextUUID: aClass)
+]
+
+{ #category : #reading }
+SoilMaterializer >> nextWideString [
+
+	^ self registerObject: super nextWideString 
 ]
 
 { #category : #registry }
 SoilMaterializer >> registerObject: anObject [
 	soil ifNotNil: [  
 		soil notificationHandler objectMaterialized: anObject ].
-	objects add: anObject 
+	objects add: anObject.
+	^ anObject 
 ]
 
 { #category : #accessing }
