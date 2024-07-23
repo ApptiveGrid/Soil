@@ -84,6 +84,15 @@ SoilFileWithLayout >> initializeFields [
 ]
 
 { #category : #'open/close' }
+SoilFileWithLayout >> initializeFilesystem [  
+	self stream
+			position: 0; 
+			nextPutAll: self prefix.
+	self initializeFields.
+	stream flush
+]
+
+{ #category : #'open/close' }
 SoilFileWithLayout >> open [ 
 	| create |
 	create := self path exists.

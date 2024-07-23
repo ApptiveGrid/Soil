@@ -1,6 +1,9 @@
 Class {
 	#name : #SoilGlobals,
 	#superclass : #SoilFileWithLayout,
+	#instVars : [
+		'soil'
+	],
 	#category : #'Soil-Core'
 }
 
@@ -48,9 +51,24 @@ SoilGlobals >> lastOpened: aDateAndTime [
 	self protectedFieldAt: #lastOpened put: aDateAndTime 
 ]
 
+{ #category : #accessing }
+SoilGlobals >> path [ 
+	^ soil path / #globals
+]
+
 { #category : #utilities }
 SoilGlobals >> prefix [
 	^ 'SOIL GLOBALS'
+]
+
+{ #category : #accessing }
+SoilGlobals >> soil [ 
+	^ soil
+]
+
+{ #category : #accessing }
+SoilGlobals >> soil: aSoil [ 
+	soil := aSoil
 ]
 
 { #category : #counting }

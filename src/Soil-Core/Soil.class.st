@@ -120,7 +120,11 @@ Soil >> basicOpen [
 	instance variable first before calling open"
 	journal open.
 	notificationHandler := SoilNotificationHandler new
-		soil: self
+		soil: self.
+	globals := SoilGlobals new 
+			soil: self;
+			open;
+			yourself
 	
 ]
 
@@ -238,7 +242,11 @@ Soil >> initializeFilesystem [
 		initializeFilesystem;
 		yourself.
 	notificationHandler := SoilNotificationHandler new
-		soil: self
+		soil: self.
+	globals := SoilGlobals new 
+			soil: self;
+			initializeFilesystem;
+			yourself
 ]
 
 { #category : #inspector }

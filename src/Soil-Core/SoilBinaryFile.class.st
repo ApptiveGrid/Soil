@@ -95,7 +95,8 @@ SoilBinaryFile >> soil [
 
 { #category : #accessing }
 SoilBinaryFile >> stream [
-	^ stream 
+	^ stream ifNil: [ 
+		stream := SoilLockableStream path: self path ]
 ]
 
 { #category : #accessing }
