@@ -276,6 +276,62 @@ SoilTest >> testMetricsWithRecordCache [
 ]
 
 { #category : #tests }
+SoilTest >> testMigrationFull [
+	| txn |
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationFull.
+	soil newApplicationMigration migrate.
+	txn := soil newTransaction. 
+	self assert: (txn root at: #four) equals: 4.
+	txn abort.
+]
+
+{ #category : #tests }
+SoilTest >> testMigrationHalf [
+	| txn |
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationHalf.
+	soil newApplicationMigration migrate.
+	txn := soil newTransaction. 
+	self assert: (txn root at: #two) equals: 2.
+	self deny: (txn root includesKey: #three).
+	txn abort.
+]
+
+{ #category : #tests }
+SoilTest >> testMigrationHalfForced [
+	| txn |
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationHalf.
+	soil newApplicationMigration useAll; migrate.
+	txn := soil newTransaction. 
+	self assert: (txn root at: #four) equals: 4.
+	txn abort.
+]
+
+{ #category : #tests }
+SoilTest >> testMigrationVersionsFull [
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationFull.
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 2 3 4 ).
+	
+	soil control applicationVersion: 2.
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 3 4 ).
+	
+
+]
+
+{ #category : #tests }
+SoilTest >> testMigrationVersionsHalf [
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationHalf.
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 2 ).
+	
+	soil control applicationVersion: 2.
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( ).
+	
+	self assertCollection: (soil newApplicationMigration forceMigration: true;availableVersions) hasSameElements: #( 3 4 ).
+	
+	
+
+]
+
+{ #category : #tests }
 SoilTest >> testSerializingClassDescription [
 	| obj bytes obj2 stream transaction |
 	self skip.

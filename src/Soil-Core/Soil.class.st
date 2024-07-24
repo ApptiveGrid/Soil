@@ -84,6 +84,12 @@ Soil >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSoil: self 
 ]
 
+{ #category : #accessing }
+Soil >> applicationMigrationClass [
+
+	^ self fabric applicationMigrationClass
+]
+
 { #category : #visiting }
 Soil >> backupTo: aStringOrFileReference [ 
 	| backupSoil |
@@ -278,6 +284,13 @@ Soil >> lockableStreamClass [
 { #category : #'instance creation' }
 Soil >> materializerClass [
 	^ self fabric materializerClass
+]
+
+{ #category : #actions }
+Soil >> newApplicationMigration [  
+	^ self applicationMigrationClass new 
+		soil: self;
+		yourself
 ]
 
 { #category : #'instance creation' }
