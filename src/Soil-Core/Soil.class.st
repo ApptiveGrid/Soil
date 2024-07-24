@@ -35,10 +35,9 @@ Class {
 		'semaphore',
 		'journal',
 		'notificationHandler',
-		'serializerClass',
-		'materializerClass',
 		'control',
-		'setup'
+		'setup',
+		'fabric'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -170,14 +169,9 @@ Soil >> critical: aBlock [
 	semaphore critical: aBlock
 ]
 
-{ #category : #'instance creation' }
-Soil >> defaultMaterializerClass [
-	^ SoilMaterializer
-]
-
-{ #category : #'instance creation' }
-Soil >> defaultSerializerClass [
-	^ SoilSerializer
+{ #category : #accessing }
+Soil >> defaultFabricClass [ 
+	^ SoilFabric 
 ]
 
 { #category : #public }
@@ -185,6 +179,17 @@ Soil >> destroy [
 	path exists ifFalse: [ ^ self ].
 	path children do: #deleteAll.
 	path delete
+]
+
+{ #category : #accessing }
+Soil >> fabric [
+	^ fabric ifNil: [ 
+		fabric := self defaultFabricClass new ]
+]
+
+{ #category : #accessing }
+Soil >> fabric: anObject [ 
+	fabric := anObject 
 ]
 
 { #category : #public }
@@ -272,13 +277,7 @@ Soil >> lockableStreamClass [
 
 { #category : #'instance creation' }
 Soil >> materializerClass [
-	^ materializerClass ifNil: [ self defaultMaterializerClass ]
-]
-
-{ #category : #accessing }
-Soil >> materializerClass: anObject [
-
-	materializerClass := anObject
+	^ self fabric materializerClass
 ]
 
 { #category : #'instance creation' }
@@ -403,13 +402,7 @@ Soil >> replayTransactionJournal: aSoilTransactionJournal [
 
 { #category : #'instance creation' }
 Soil >> serializerClass [
-	^ serializerClass ifNil: [ self defaultSerializerClass ]
-]
-
-{ #category : #accessing }
-Soil >> serializerClass: anObject [
-
-	serializerClass := anObject
+	^ self fabric serializerClass 
 ]
 
 { #category : #accessing }
@@ -422,7 +415,7 @@ Soil >> setup [
 
 { #category : #transactions }
 Soil >> transactionClass [
-	^ SoilTransaction 
+	^ self fabric transactionClass
 ]
 
 { #category : #writing }
