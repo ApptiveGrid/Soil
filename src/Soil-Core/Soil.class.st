@@ -107,6 +107,7 @@ Soil >> backupTo: aStringOrFileReference [
 
 { #category : #'opening/closing' }
 Soil >> basicOpen [
+	self isOpen ifTrue: [ self error: 'Database already open' ].
 	('open soil database at ', path asString) soilEmit.
 	control := SoilControlFile new
 		soil: self;
@@ -366,7 +367,13 @@ Soil >> objectRepository [
 
 { #category : #'opening/closing' }
 Soil >> open [
-	self isOpen ifTrue: [ self error: 'Database already open' ].
+	self basicOpen.
+	journal recover.
+	self metadata updateLastOpened
+]
+
+{ #category : #'as yet unclassified' }
+Soil >> openUnlogged [
 	self basicOpen.
 	journal recover
 ]
