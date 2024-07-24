@@ -5,11 +5,6 @@ Class {
 }
 
 { #category : #accessing }
-SoilTestApplicationMigrationFull class >> applicationVersion [
-	^ 4
-]
-
-{ #category : #accessing }
 SoilTestApplicationMigrationFull >> v1: transaction [
 	<applicationVersion: 1 auto: true>
 	transaction root: SoilPersistentDictionary new

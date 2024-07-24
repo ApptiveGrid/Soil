@@ -286,12 +286,6 @@ Soil >> materializerClass [
 	^ self fabric materializerClass
 ]
 
-{ #category : #accessing }
-Soil >> migrationClass [
-
-	^ self fabric migrationClass
-]
-
 { #category : #actions }
 Soil >> newApplicationMigration [  
 	^ self applicationMigrationClass new 
