@@ -27,7 +27,8 @@ SoilFabric >> defaultTransactionClass [
 { #category : #accessing }
 SoilFabric >> materializerClass [
 
-	^ materializerClass
+	^ materializerClass ifNil: [ 
+		materializerClass := self defaultMaterializerClass ]
 ]
 
 { #category : #accessing }
@@ -39,7 +40,8 @@ SoilFabric >> materializerClass: anObject [
 { #category : #accessing }
 SoilFabric >> serializerClass [
 
-	^ serializerClass
+	^ serializerClass ifNil: [ 
+		serializerClass := self defaultSerializerClass  ]
 ]
 
 { #category : #accessing }
