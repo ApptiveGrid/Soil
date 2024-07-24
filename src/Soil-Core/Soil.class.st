@@ -86,6 +86,12 @@ Soil >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSoil: self 
 ]
 
+{ #category : #accessing }
+Soil >> applicationMigrationClass [
+
+	^ self fabric applicationMigrationClass
+]
+
 { #category : #visiting }
 Soil >> backupTo: aStringOrFileReference [ 
 	| backupSoil |
@@ -175,14 +181,9 @@ Soil >> critical: aBlock [
 	semaphore critical: aBlock
 ]
 
-{ #category : #'instance creation' }
-Soil >> defaultMaterializerClass [
-	^ SoilMaterializer
-]
-
-{ #category : #'instance creation' }
-Soil >> defaultSerializerClass [
-	^ SoilSerializer
+{ #category : #accessing }
+Soil >> defaultFabricClass [ 
+	^ SoilFabric 
 ]
 
 { #category : #public }
@@ -190,6 +191,17 @@ Soil >> destroy [
 	path exists ifFalse: [ ^ self ].
 	path children do: #deleteAll.
 	path delete
+]
+
+{ #category : #accessing }
+Soil >> fabric [
+	^ fabric ifNil: [ 
+		fabric := self defaultFabricClass new ]
+]
+
+{ #category : #accessing }
+Soil >> fabric: anObject [ 
+	fabric := anObject 
 ]
 
 { #category : #public }
@@ -302,13 +314,14 @@ Soil >> lockableStreamClass [
 
 { #category : #'instance creation' }
 Soil >> materializerClass [
-	^ materializerClass ifNil: [ self defaultMaterializerClass ]
+	^ self fabric materializerClass
 ]
 
-{ #category : #accessing }
-Soil >> materializerClass: anObject [
-
-	materializerClass := anObject
+{ #category : #actions }
+Soil >> newApplicationMigration [  
+	^ self applicationMigrationClass new 
+		soil: self;
+		yourself
 ]
 
 { #category : #'instance creation' }
@@ -440,13 +453,7 @@ Soil >> replayTransactionJournal: aSoilTransactionJournal [
 
 { #category : #'instance creation' }
 Soil >> serializerClass [
-	^ serializerClass ifNil: [ self defaultSerializerClass ]
-]
-
-{ #category : #accessing }
-Soil >> serializerClass: anObject [
-
-	serializerClass := anObject
+	^ self fabric serializerClass 
 ]
 
 { #category : #accessing }
@@ -459,7 +466,7 @@ Soil >> setup [
 
 { #category : #transactions }
 Soil >> transactionClass [
-	^ SoilTransaction 
+	^ self fabric transactionClass
 ]
 
 { #category : #writing }
