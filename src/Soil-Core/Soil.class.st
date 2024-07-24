@@ -38,7 +38,8 @@ Class {
 		'serializerClass',
 		'materializerClass',
 		'control',
-		'setup'
+		'setup',
+		'migrationClass'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -283,20 +284,28 @@ Soil >> materializerClass: anObject [
 
 { #category : #actions }
 Soil >> migrate: aClass [ 
-	| txn succeeded |
-	self control applicationVersion to: aClass applicationVersion do: [ :version |
-		succeeded := false.
-		txn := self newTransaction.
-		[ 
-			(aClass new  upgrade: version transaction: txn)
-				ifTrue: [
-					self control applicationVersion: version.
-					succeeded := true ]
-				ifFalse: [ ^ self ] ]
-				ensure: [ 
-					succeeded 
-						ifTrue: [ txn commit ]
-						ifFalse: [ txn abort ] ] ]
+	aClass new 
+		soil: self;
+		migrate
+]
+
+{ #category : #actions }
+Soil >> migration [ 
+	^ self migrationClass new 
+		soil: self;
+		yourself
+]
+
+{ #category : #accessing }
+Soil >> migrationClass [
+
+	^ migrationClass
+]
+
+{ #category : #accessing }
+Soil >> migrationClass: anObject [
+
+	migrationClass := anObject
 ]
 
 { #category : #'instance creation' }

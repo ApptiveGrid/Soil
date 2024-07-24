@@ -2,32 +2,99 @@ Class {
 	#name : #SoilApplicationMigration,
 	#superclass : #Object,
 	#instVars : [
-		'forceUpgrade'
+		'soil',
+		'all'
 	],
 	#category : #'Soil-Core'
 }
 
-{ #category : #accessing }
-SoilApplicationMigration >> forceUpgrade: anObject [
+{ #category : #'as yet unclassified' }
+SoilApplicationMigration >> availableVersions [
+	| versions persistentVersion stop |
+	stop := false.
+	versions := OrderedCollection new.
+	persistentVersion := self persistentVersion.
+	self versionPragmas do: [ :pragma |
+		(pragma arguments second | all) ifFalse: [ stop := true ].
+		stop ifFalse: [  
+			(pragma arguments first > persistentVersion) ifTrue: [ 
+				versions add: pragma ] ] ].
+	^ versions collect: [ :pragma | pragma arguments first ]
+]
 
-	forceUpgrade := anObject
+{ #category : #accessing }
+SoilApplicationMigration >> forceMigration: anObject [
+
+	all := anObject
 ]
 
 { #category : #initialization }
 SoilApplicationMigration >> initialize [ 
 	super initialize.
-	forceUpgrade := false
+	all := false
+]
+
+{ #category : #accessing }
+SoilApplicationMigration >> lastVersion [
+	^ self availableVersions last
 ]
 
 { #category : #'as yet unclassified' }
-SoilApplicationMigration >> upgrade: version transaction: aSoilTransaction [ 
+SoilApplicationMigration >> migrate [
+	self migrateUpToVersion: self lastVersion
+]
+
+{ #category : #'as yet unclassified' }
+SoilApplicationMigration >> migrateUpToVersion: applicationVersion [  
+	| txn succeeded |
+	self persistentVersion to: applicationVersion do: [ :version |
+		succeeded := false.
+		txn := soil newTransaction.
+		[ 
+			(self migrateVersion: version transaction: txn)
+				ifTrue: [ succeeded := true ]
+				ifFalse: [ ^ self ] ]
+				ensure: [ 
+					succeeded 
+						ifTrue: [ 
+							txn commit.
+							self persistentVersion: version ]
+						ifFalse: [ txn abort ] ] ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilApplicationMigration >> migrateVersion: version transaction: aSoilTransaction [ 
 	| pragma |
 	pragma := self versionPragmaAt: version.
-	^ (pragma arguments second | forceUpgrade) 
+	^ (pragma arguments second | all) 
 		ifTrue: [  
 			self perform: pragma method selector with: aSoilTransaction.
 			true ]
 		ifFalse: [ false ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilApplicationMigration >> persistentVersion [
+	
+	^ soil control applicationVersion 
+]
+
+{ #category : #'as yet unclassified' }
+SoilApplicationMigration >> persistentVersion: version [ 
+	
+	^ soil control applicationVersion: version 
+]
+
+{ #category : #accessing }
+SoilApplicationMigration >> soil: anObject [
+
+	soil := anObject
+]
+
+{ #category : #accessing }
+SoilApplicationMigration >> useAll [
+	"migrate all versions even if auto is false"
+	all := true
 ]
 
 { #category : #accessing }
