@@ -1,9 +1,6 @@
 Class {
 	#name : #SoilTestApplicationMigrationFull,
 	#superclass : #SoilApplicationMigration,
-	#instVars : [
-		'method'
-	],
 	#category : #'Soil-Core'
 }
 
