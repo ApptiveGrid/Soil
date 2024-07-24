@@ -104,3 +104,23 @@ SoilMetadata >> transactionCommitted: aSoilTransaction [
 	aSoilTransaction hasModifications ifTrue: [ 
 		self lastModified: DateAndTime now  ]
 ]
+
+{ #category : #accessing }
+SoilMetadata >> updateLastBackup [ 
+	self lastBackup: DateAndTime now
+]
+
+{ #category : #accessing }
+SoilMetadata >> updateLastGarbageCollect [ 
+	self lastGarbageCollect: DateAndTime now
+]
+
+{ #category : #accessing }
+SoilMetadata >> updateLastModified [
+	self lastModified: DateAndTime now
+]
+
+{ #category : #accessing }
+SoilMetadata >> updateLastOpened [ 
+	self lastOpened: DateAndTime now
+]
