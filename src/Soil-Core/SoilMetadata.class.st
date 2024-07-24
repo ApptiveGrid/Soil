@@ -18,6 +18,14 @@ SoilMetadata class >> fileLayout [
 ]
 
 { #category : #'as yet unclassified' }
+SoilMetadata >> ensurePresent [ 
+	"this is a legacy method to create for older databases that do not
+	have the metadata file already"
+	self path exists ifFalse: [ 
+		self initializeFilesystem ]
+]
+
+{ #category : #'as yet unclassified' }
 SoilMetadata >> inspectionMetadata [
 	<inspectorPresentationOrder: 1000 title: 'metadata'>
 
@@ -53,12 +61,12 @@ SoilMetadata >> lastOpened: aDateAndTime [
 
 { #category : #accessing }
 SoilMetadata >> path [ 
-	^ soil path / #globals
+	^ soil path / #metadata
 ]
 
 { #category : #utilities }
 SoilMetadata >> prefix [
-	^ 'SOIL GLOBALS'
+	^ 'SOIL METADATA'
 ]
 
 { #category : #accessing }

@@ -128,6 +128,7 @@ Soil >> basicOpen [
 		soil: self.
 	metadata := SoilMetadata new 
 			soil: self;
+			ensurePresent;
 			open;
 			yourself
 	
@@ -248,23 +249,23 @@ Soil >> initializeFilesystem [
 
 { #category : #inspector }
 Soil >> inspectionControl [
-	<inspectorPresentationOrder: 2100 title: 'control'>
+	<inspectorPresentationOrder: 2000 title: 'control'>
 
 	^ self control inspectionControl 
 ]
 
-{ #category : #'as yet unclassified' }
-Soil >> inspectionGlobals [
-	<inspectorPresentationOrder: 2200 title: 'globals'>
-
-	^ self globals inspectionFields 
-]
-
 { #category : #inspector }
 Soil >> inspectionJournal [
-	<inspectorPresentationOrder: 2000 title: 'journal'>
+	<inspectorPresentationOrder: 2200 title: 'journal'>
 	
 	^ self journal inspectionContent
+]
+
+{ #category : #'as yet unclassified' }
+Soil >> inspectionMetadata [
+	<inspectorPresentationOrder: 2100 title: 'metadata'>
+
+	^ self metadata inspectionMetadata
 ]
 
 { #category : #testing }
