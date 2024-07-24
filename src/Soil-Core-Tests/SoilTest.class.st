@@ -279,8 +279,7 @@ SoilTest >> testMetricsWithRecordCache [
 SoilTest >> testMigrationFull [
 	| txn |
 	soil migrationClass: SoilTestApplicationMigrationFull.
-	self halt.
-	soil migration migrate.
+	soil newApplicationMigration migrate.
 	txn := soil newTransaction. 
 	self assert: (txn root at: #four) equals: 4.
 	txn abort.
@@ -290,7 +289,7 @@ SoilTest >> testMigrationFull [
 SoilTest >> testMigrationHalf [
 	| txn |
 	soil migrationClass: SoilTestApplicationMigrationHalf.
-	soil migration migrate.
+	soil newApplicationMigration migrate.
 	txn := soil newTransaction. 
 	self assert: (txn root at: #two) equals: 2.
 	self deny: (txn root includesKey: #three).
@@ -301,7 +300,7 @@ SoilTest >> testMigrationHalf [
 SoilTest >> testMigrationHalfForced [
 	| txn |
 	soil migrationClass: SoilTestApplicationMigrationHalf.
-	soil migration useAll; migrate.
+	soil newApplicationMigration useAll; migrate.
 	txn := soil newTransaction. 
 	self assert: (txn root at: #four) equals: 4.
 	txn abort.
@@ -310,10 +309,10 @@ SoilTest >> testMigrationHalfForced [
 { #category : #tests }
 SoilTest >> testMigrationVersionsFull [
 	soil migrationClass: SoilTestApplicationMigrationFull.
-	self assertCollection: soil migration availableVersions hasSameElements: #( 2 3 4 ).
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 2 3 4 ).
 	
 	soil control applicationVersion: 2.
-	self assertCollection: soil migration availableVersions hasSameElements: #( 3 4 ).
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 3 4 ).
 	
 
 ]
@@ -321,12 +320,12 @@ SoilTest >> testMigrationVersionsFull [
 { #category : #tests }
 SoilTest >> testMigrationVersionsHalf [
 	soil migrationClass: SoilTestApplicationMigrationHalf.
-	self assertCollection: soil migration availableVersions hasSameElements: #( 2 ).
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 2 ).
 	
 	soil control applicationVersion: 2.
-	self assertCollection: soil migration availableVersions hasSameElements: #( ).
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( ).
 	
-	self assertCollection: (soil migration forceMigration: true;availableVersions) hasSameElements: #( 3 4 ).
+	self assertCollection: (soil newApplicationMigration forceMigration: true;availableVersions) hasSameElements: #( 3 4 ).
 	
 	
 

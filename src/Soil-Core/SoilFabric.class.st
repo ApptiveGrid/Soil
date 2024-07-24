@@ -4,10 +4,29 @@ Class {
 	#instVars : [
 		'transactionClass',
 		'materializerClass',
-		'serializerClass'
+		'serializerClass',
+		'applicationMigrationClass'
 	],
 	#category : #'Soil-Core-Model'
 }
+
+{ #category : #accessing }
+SoilFabric >> applicationMigrationClass [
+
+	^ applicationMigrationClass ifNil: [ 
+		applicationMigrationClass := self defaultApplicationMigrationClass ]
+]
+
+{ #category : #accessing }
+SoilFabric >> applicationMigrationClass: aClass [
+
+	applicationMigrationClass := aClass
+]
+
+{ #category : #'instance creation' }
+SoilFabric >> defaultApplicationMigrationClass [
+	^ SoilApplicationMigration 
+]
 
 { #category : #'instance creation' }
 SoilFabric >> defaultMaterializerClass [

@@ -35,11 +35,9 @@ Class {
 		'semaphore',
 		'journal',
 		'notificationHandler',
-		'serializerClass',
-		'materializerClass',
 		'control',
 		'setup',
-		'migrationClass'
+		'fabric'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -84,6 +82,12 @@ Soil class >> path: aString [
 { #category : #visiting }
 Soil >> acceptSoil: aSoilVisitor [ 
 	^ aSoilVisitor visitSoil: self 
+]
+
+{ #category : #accessing }
+Soil >> applicationMigrationClass [
+
+	^ self fabric applicationMigrationClass
 ]
 
 { #category : #visiting }
@@ -282,30 +286,17 @@ Soil >> materializerClass [
 	^ self fabric materializerClass
 ]
 
-{ #category : #actions }
-Soil >> migrate: aClass [ 
-	aClass new 
-		soil: self;
-		migrate
-]
-
-{ #category : #actions }
-Soil >> migration [ 
-	^ self migrationClass new 
-		soil: self;
-		yourself
-]
-
 { #category : #accessing }
 Soil >> migrationClass [
 
-	^ migrationClass
+	^ self fabric migrationClass
 ]
 
-{ #category : #accessing }
-Soil >> migrationClass: anObject [
-
-	migrationClass := anObject
+{ #category : #actions }
+Soil >> newApplicationMigration [  
+	^ self applicationMigrationClass new 
+		soil: self;
+		yourself
 ]
 
 { #category : #'instance creation' }
