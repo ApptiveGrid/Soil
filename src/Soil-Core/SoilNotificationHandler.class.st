@@ -37,8 +37,8 @@ SoilNotificationHandler >> transactionAborted: aSoilTransaction [
 
 { #category : #counting }
 SoilNotificationHandler >> transactionCommitted: aSoilTransaction [ 
-	soil hasGlobals ifTrue: [ 
-		soil globals transactionCommitted: aSoilTransaction ]
+	 
+	soil metadata transactionCommitted: aSoilTransaction
 ]
 
 { #category : #counting }

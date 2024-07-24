@@ -35,11 +35,10 @@ Class {
 		'semaphore',
 		'journal',
 		'notificationHandler',
-		'serializerClass',
-		'materializerClass',
 		'control',
 		'setup',
-		'globals'
+		'fabric',
+		'metadata'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -127,7 +126,7 @@ Soil >> basicOpen [
 	journal open.
 	notificationHandler := SoilNotificationHandler new
 		soil: self.
-	globals := SoilGlobals new 
+	metadata := SoilMetadata new 
 			soil: self;
 			open;
 			yourself
@@ -212,20 +211,6 @@ Soil >> findRecord: aBlock [
 		ensure: [ tx abort ]
 ]
 
-{ #category : #accessing }
-Soil >> globals [
-	^ globals ifNil: [ 
-		globals := SoilGlobals new 
-			path: self path / #globals;
-			open;
-			yourself ] 
-]
-
-{ #category : #testing }
-Soil >> hasGlobals [
-	^ globals notNil
-]
-
 { #category : #initialization }
 Soil >> initialize [ 
 	super initialize.
@@ -255,7 +240,7 @@ Soil >> initializeFilesystem [
 		yourself.
 	notificationHandler := SoilNotificationHandler new
 		soil: self.
-	globals := SoilGlobals new 
+	metadata := SoilMetadata new 
 			soil: self;
 			initializeFilesystem;
 			yourself
@@ -315,6 +300,11 @@ Soil >> lockableStreamClass [
 { #category : #'instance creation' }
 Soil >> materializerClass [
 	^ self fabric materializerClass
+]
+
+{ #category : #accessing }
+Soil >> metadata [
+	^ metadata
 ]
 
 { #category : #actions }

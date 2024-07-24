@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilGlobals,
+	#name : #SoilMetadata,
 	#superclass : #SoilFileWithLayout,
 	#instVars : [
 		'soil'
@@ -8,7 +8,7 @@ Class {
 }
 
 { #category : #formatting }
-SoilGlobals class >> fileLayout [ 
+SoilMetadata class >> fileLayout [ 
 	^ { 
 		SoilFileField name: #lastOpened size: 16 initialBlock: [ DateAndTime epoch ] .
 		SoilFileField name: #lastModified size: 16 initialBlock: [ DateAndTime epoch ] .
@@ -18,8 +18,8 @@ SoilGlobals class >> fileLayout [
 ]
 
 { #category : #'as yet unclassified' }
-SoilGlobals >> inspectionFields [
-	<inspectorPresentationOrder: 1000 title: 'fields'>
+SoilMetadata >> inspectionMetadata [
+	<inspectorPresentationOrder: 1000 title: 'metadata'>
 
 	^ SpTablePresenter new
 		items: self fields keys;
@@ -32,47 +32,47 @@ SoilGlobals >> inspectionFields [
 ]
 
 { #category : #accessing }
-SoilGlobals >> lastModified [
+SoilMetadata >> lastModified [
 	^ self fieldAt: #lastModified
 ]
 
 { #category : #accessing }
-SoilGlobals >> lastModified: aDateAndTime [ 
+SoilMetadata >> lastModified: aDateAndTime [ 
 	self fieldAt: #lastModified put: aDateAndTime 
 ]
 
 { #category : #accessing }
-SoilGlobals >> lastOpened [
+SoilMetadata >> lastOpened [
 	^ self fieldAt: #lastOpened
 ]
 
 { #category : #accessing }
-SoilGlobals >> lastOpened: aDateAndTime [ 
+SoilMetadata >> lastOpened: aDateAndTime [ 
 	self protectedFieldAt: #lastOpened put: aDateAndTime 
 ]
 
 { #category : #accessing }
-SoilGlobals >> path [ 
+SoilMetadata >> path [ 
 	^ soil path / #globals
 ]
 
 { #category : #utilities }
-SoilGlobals >> prefix [
+SoilMetadata >> prefix [
 	^ 'SOIL GLOBALS'
 ]
 
 { #category : #accessing }
-SoilGlobals >> soil [ 
+SoilMetadata >> soil [ 
 	^ soil
 ]
 
 { #category : #accessing }
-SoilGlobals >> soil: aSoil [ 
+SoilMetadata >> soil: aSoil [ 
 	soil := aSoil
 ]
 
 { #category : #counting }
-SoilGlobals >> transactionCommitted: aSoilTransaction [ 
+SoilMetadata >> transactionCommitted: aSoilTransaction [ 
 	aSoilTransaction hasModifications ifTrue: [ 
 		self lastModified: DateAndTime now  ]
 ]
