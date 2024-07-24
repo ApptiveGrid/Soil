@@ -40,6 +40,26 @@ SoilMetadata >> inspectionMetadata [
 ]
 
 { #category : #accessing }
+SoilMetadata >> lastBackup [
+	^ self fieldAt: #lastBackup
+]
+
+{ #category : #accessing }
+SoilMetadata >> lastBackup: aDateAndTime [
+	^ self fieldAt: #lastBackup put: aDateAndTime 
+]
+
+{ #category : #accessing }
+SoilMetadata >> lastGarbageCollect [
+	^ self fieldAt: #lastGarbageCollect
+]
+
+{ #category : #accessing }
+SoilMetadata >> lastGarbageCollect: aDateAndTime [ 
+	^ self fieldAt: #lastGarbageCollect put: aDateAndTime 
+]
+
+{ #category : #accessing }
 SoilMetadata >> lastModified [
 	^ self fieldAt: #lastModified
 ]
@@ -56,7 +76,7 @@ SoilMetadata >> lastOpened [
 
 { #category : #accessing }
 SoilMetadata >> lastOpened: aDateAndTime [ 
-	self protectedFieldAt: #lastOpened put: aDateAndTime 
+	self fieldAt: #lastOpened put: aDateAndTime 
 ]
 
 { #category : #accessing }
