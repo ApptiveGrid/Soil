@@ -45,7 +45,9 @@ SoilVisitor >> visitIndexManager: aSoilIndexManager [
 
 { #category : #visiting }
 SoilVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
-	self visitAll: aSoilJournalFragmentFile transactionJournals.
+	aSoilJournalFragmentFile open.
+	[ self visitAll: aSoilJournalFragmentFile transactionJournals ]
+		ensure: [ aSoilJournalFragmentFile close ].
 	^ aSoilJournalFragmentFile 
 ]
 

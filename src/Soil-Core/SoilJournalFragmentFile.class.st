@@ -223,7 +223,7 @@ SoilJournalFragmentFile >> inspectionTransactionJournals [
 		items: (self transactionJournals reverse);
 		addColumn: (SpCompositeTableColumn new
 			title: '#';
-			width: 30;
+			width: 80;
 			addColumn: (SpStringTableColumn evaluated: [:each | each index ]));
 		addColumn: (SpStringTableColumn new 
 			title: #read;

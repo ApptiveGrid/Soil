@@ -37,6 +37,8 @@ SoilNotificationHandler >> transactionAborted: aSoilTransaction [
 
 { #category : #counting }
 SoilNotificationHandler >> transactionCommitted: aSoilTransaction [ 
+	 
+	soil metadata transactionCommitted: aSoilTransaction
 ]
 
 { #category : #counting }

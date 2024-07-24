@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilFileLockRegistryTest,
 	#superclass : #TestCase,
-	#category : 'Soil-File-Tests'
+	#category : #'Soil-File-Tests'
 }
 
 { #category : #initialization }

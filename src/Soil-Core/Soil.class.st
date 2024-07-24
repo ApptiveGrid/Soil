@@ -37,7 +37,8 @@ Class {
 		'notificationHandler',
 		'control',
 		'setup',
-		'fabric'
+		'fabric',
+		'metadata'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -124,7 +125,12 @@ Soil >> basicOpen [
 	instance variable first before calling open"
 	journal open.
 	notificationHandler := SoilNotificationHandler new
-		soil: self
+		soil: self.
+	metadata := SoilMetadata new 
+			soil: self;
+			ensurePresent;
+			open;
+			yourself
 	
 ]
 
@@ -234,21 +240,32 @@ Soil >> initializeFilesystem [
 		initializeFilesystem;
 		yourself.
 	notificationHandler := SoilNotificationHandler new
-		soil: self
+		soil: self.
+	metadata := SoilMetadata new 
+			soil: self;
+			initializeFilesystem;
+			yourself
 ]
 
 { #category : #inspector }
 Soil >> inspectionControl [
-	<inspectorPresentationOrder: 2100 title: 'control'>
+	<inspectorPresentationOrder: 2000 title: 'control'>
 
 	^ self control inspectionControl 
 ]
 
 { #category : #inspector }
 Soil >> inspectionJournal [
-	<inspectorPresentationOrder: 2000 title: 'journal'>
+	<inspectorPresentationOrder: 2200 title: 'journal'>
 	
 	^ self journal inspectionContent
+]
+
+{ #category : #'as yet unclassified' }
+Soil >> inspectionMetadata [
+	<inspectorPresentationOrder: 2100 title: 'metadata'>
+
+	^ self metadata inspectionMetadata
 ]
 
 { #category : #testing }
@@ -284,6 +301,11 @@ Soil >> lockableStreamClass [
 { #category : #'instance creation' }
 Soil >> materializerClass [
 	^ self fabric materializerClass
+]
+
+{ #category : #accessing }
+Soil >> metadata [
+	^ metadata
 ]
 
 { #category : #actions }
@@ -392,6 +414,13 @@ Soil >> renameClassNamed: oldName to: newName [
 
 	transaction markDirty: behaviorDescription.
 	transaction commit
+]
+
+{ #category : #public }
+Soil >> reopen [
+	self 
+		close;
+		open 
 ]
 
 { #category : #journal }

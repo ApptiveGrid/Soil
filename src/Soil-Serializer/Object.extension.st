@@ -22,7 +22,7 @@ Object >> soilLoadedIn: aTransaction [
 
 { #category : #'*Soil-Serializer' }
 Object >> soilMaterialize: materializer [
-	^ self
+	^ self 
 ]
 
 { #category : #'*Soil-Serializer' }
