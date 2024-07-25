@@ -101,6 +101,47 @@ SoilIndexedDictionaryTest >> testAddRandom [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testAddRandomRemove [
+	| tx numEntries entries removed numRemoved|
+	tx := soil newTransaction.
+	tx root: dict.
+	"just some random adding/removing and checking state after"
+	
+	numEntries := 1000.
+	entries := Set new: numEntries.
+	
+	numEntries timesRepeat: [ | toAdd |
+		toAdd := (numEntries*20) atRandom.
+		entries add: toAdd.
+		dict at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	
+	"check size"
+	self assert: dict size equals: entries size.
+	
+	"can we find all the keys we added?"
+	entries do: [:each | self assert: (dict at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	"iterate index, all should be in entries"
+	dict do: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]].
+	dict reverseDo: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	"we remove half randomly"
+	numRemoved := numEntries quo: 2.
+	removed := Set new: numRemoved.
+	numRemoved timesRepeat: [ | toRemove |
+			toRemove := entries atRandom.
+			(removed includes: toRemove) ifFalse: [  
+				removed add: toRemove.
+				dict removeKey: toRemove]].
+		
+	"can we find all the keys that should still be there?"
+	(entries copyWithoutAll: removed) do: [:each | self assert: (dict at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	
+	"all the removed ones are gone"
+	removed do: [ :each | self assert: (dict at: each ifAbsent: [ true ]) ]
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testAddToExistingEmptyList [
 	| tx tx2 tx3 tx4 |
 	"create emtpy skip list dictionary ..."
