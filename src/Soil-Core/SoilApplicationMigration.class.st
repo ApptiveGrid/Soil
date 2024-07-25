@@ -8,7 +8,7 @@ Class {
 	#category : #'Soil-Core'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #versions }
 SoilApplicationMigration >> availableVersions [
 	| versions persistentVersion stop |
 	stop := false.
@@ -39,12 +39,12 @@ SoilApplicationMigration >> lastVersion [
 	^ self availableVersions last
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #API }
 SoilApplicationMigration >> migrate [
 	self migrateUpToVersion: self lastVersion
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #API }
 SoilApplicationMigration >> migrateUpToVersion: applicationVersion [  
 	| txn succeeded |
 	self persistentVersion to: applicationVersion do: [ :version |
@@ -62,7 +62,7 @@ SoilApplicationMigration >> migrateUpToVersion: applicationVersion [
 						ifFalse: [ txn abort ] ] ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #API }
 SoilApplicationMigration >> migrateVersion: version transaction: aSoilTransaction [ 
 	| pragma |
 	pragma := self versionPragmaAt: version.
@@ -73,13 +73,13 @@ SoilApplicationMigration >> migrateVersion: version transaction: aSoilTransactio
 		ifFalse: [ false ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #versions }
 SoilApplicationMigration >> persistentVersion [
 	
 	^ soil control applicationVersion 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #versions }
 SoilApplicationMigration >> persistentVersion: version [ 
 	
 	^ soil control applicationVersion: version 

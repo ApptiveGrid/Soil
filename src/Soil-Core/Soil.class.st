@@ -262,7 +262,7 @@ Soil >> inspectionJournal [
 	^ self journal inspectionContent
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #inspector }
 Soil >> inspectionMetadata [
 	<inspectorPresentationOrder: 2100 title: 'metadata'>
 
@@ -372,7 +372,7 @@ Soil >> open [
 	self metadata updateLastOpened
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'opening/closing' }
 Soil >> openUnlogged [
 	self basicOpen.
 	journal recover

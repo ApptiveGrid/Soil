@@ -10,7 +10,7 @@ Class {
 	#category : #'Soil-Core'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SoilFileField class >> name: aName size: anInteger initialBlock: aBlock [
 	^ self new 
 		name: aName;
