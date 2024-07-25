@@ -17,7 +17,7 @@ SoilMetadata class >> fileLayout [
 		 }
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'open/close' }
 SoilMetadata >> ensurePresent [ 
 	"this is a legacy method to create for older databases that do not
 	have the metadata file already"
@@ -25,7 +25,7 @@ SoilMetadata >> ensurePresent [
 		self initializeFilesystem ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #inspector }
 SoilMetadata >> inspectionMetadata [
 	<inspectorPresentationOrder: 1000 title: 'metadata'>
 

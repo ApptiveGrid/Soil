@@ -132,7 +132,7 @@ SoilBehaviorRegistry >> path [
 	^ soil objectRepository metaSegment indexManager path / #identifier , #index
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SoilBehaviorRegistry >> recreateIndex [ 
 	| txn metaSegment record zeroFound |
 	"this is a last resort action to recreate the index in a sane

@@ -25,14 +25,14 @@ SoilObjectProxy >> doesNotUnderstand: aMessage [
 	^ aMessage sendTo: self soilRealObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #fuel }
 SoilObjectProxy >> fuelAccept: aGeneralMapper [ 	
 	^ aGeneralMapper 
 		visitSubstitution: self 
 		by: (object ifNil: [ self asUnresolvedProxy ])
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #fuel }
 SoilObjectProxy >> fuelReplacement [
 	"proxies should not be serialized. If the object has already been
 	resolved then we can replace the proxy with the object. If the object 
