@@ -132,6 +132,11 @@ SoilSkipListHeaderPage >> smallestKey [
 	^ 0
 ]
 
+{ #category : #initialization }
+SoilSkipListHeaderPage >> version [
+	^ 1
+]
+
 { #category : #writing }
 SoilSkipListHeaderPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.

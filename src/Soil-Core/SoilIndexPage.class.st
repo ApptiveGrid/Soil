@@ -69,7 +69,7 @@ SoilIndexPage >> index: anInteger [
 { #category : #initialization }
 SoilIndexPage >> initialize [ 
 	super initialize.
-	version := 1
+	version := self version
 ]
 
 { #category : #testing }
@@ -114,6 +114,11 @@ SoilIndexPage >> readFrom: aStream [
 	dirty := false.
 	"we do not read the pageCode here as it was read already"
 	version := aStream next
+]
+
+{ #category : #initialization }
+SoilIndexPage >> version [
+	self subclassResponsibility 
 ]
 
 { #category : #writing }

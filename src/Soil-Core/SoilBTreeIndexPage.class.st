@@ -137,3 +137,8 @@ SoilBTreeIndexPage >> valueSize [
 SoilBTreeIndexPage >> valueSize: anInteger [
 	"ignore, not used, the index pages store the pageID as the value, size is static defined in #pointerSize"
 ]
+
+{ #category : #initialization }
+SoilBTreeIndexPage >> version [
+	^ 1
+]

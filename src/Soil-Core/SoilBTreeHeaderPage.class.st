@@ -83,6 +83,11 @@ SoilBTreeHeaderPage >> readFrom: aStream [
 	self readItemsFrom: aStream
 ]
 
+{ #category : #initialization }
+SoilBTreeHeaderPage >> version [
+	^ 1
+]
+
 { #category : #writing }
 SoilBTreeHeaderPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.

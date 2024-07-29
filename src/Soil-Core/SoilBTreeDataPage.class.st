@@ -24,3 +24,8 @@ SoilBTreeDataPage >> readFrom: aStream [
 	self
 		readItemsFrom: aStream
 ]
+
+{ #category : #initialization }
+SoilBTreeDataPage >> version [
+	^ 1
+]

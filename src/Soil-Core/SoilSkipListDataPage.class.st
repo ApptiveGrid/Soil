@@ -34,6 +34,11 @@ SoilSkipListDataPage >> readFrom: aStream [
 		readItemsFrom: aStream
 ]
 
+{ #category : #initialization }
+SoilSkipListDataPage >> version [
+	^ 1 
+]
+
 { #category : #writing }
 SoilSkipListDataPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
