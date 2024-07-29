@@ -20,6 +20,12 @@ SoilBTreeHeaderPage class >> pageCode [
 	^ 3
 ]
 
+{ #category : #accessing }
+SoilBTreeHeaderPage >> firstFreePageIndex: anObject [
+
+	lastFreePageIndex := anObject
+]
+
 { #category : #utilities }
 SoilBTreeHeaderPage >> headerSize [
 	^ super headerSize  
@@ -42,12 +48,6 @@ SoilBTreeHeaderPage >> initializeInIndex: aSoilSkipList [
 { #category : #testing }
 SoilBTreeHeaderPage >> isHeaderPage [
 	^ true
-]
-
-{ #category : #accessing }
-SoilBTreeHeaderPage >> lastFreePageIndex: anObject [
-
-	lastFreePageIndex := anObject
 ]
 
 { #category : #accessing }
