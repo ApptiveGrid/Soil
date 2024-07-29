@@ -49,7 +49,7 @@ SoilSkipListHeaderPage >> firstFreePageIndex: anObject [
 { #category : #utilities }
 SoilSkipListHeaderPage >> headerSize [
 	^ super headerSize 
-		+ 14 "keySize(2), valueSize(2), maxLevel(2), lastPageIndex(4), lastFreePageIndex(4)" 
+		+ 20 "keySize(2), valueSize(2), maxLevel(2), lastPageIndex(4), lastFreePageIndex(4) size(6)" 
 		+ 1 "level" 
 		+ (self level * self rightSize)
 		+ 2 "items size"

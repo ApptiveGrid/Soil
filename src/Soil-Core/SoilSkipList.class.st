@@ -33,11 +33,6 @@ SoilSkipList >> compact [
 	self rewriteUsing: [ :item | item ]
 ]
 
-{ #category : #'as yet unclassified' }
-SoilSkipList >> decreaseSize [
-	self headerPage decreaseSize 
-]
-
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
@@ -46,11 +41,6 @@ SoilSkipList >> destroy [
 { #category : #deleting }
 SoilSkipList >> flush [
 	self store flush
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipList >> increaseSize [
-	self headerPage increaseSize 
 ]
 
 { #category : #initialization }
