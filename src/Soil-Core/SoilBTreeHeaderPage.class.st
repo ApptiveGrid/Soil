@@ -61,6 +61,11 @@ SoilBTreeHeaderPage >> lastPageIndex: anObject [
 	dirty := true
 ]
 
+{ #category : #initialization }
+SoilBTreeHeaderPage >> latestVersion [
+	^ 1
+]
+
 { #category : #accessing }
 SoilBTreeHeaderPage >> nextPageIndex [
 	lastPageIndex := lastPageIndex + 1.
@@ -81,11 +86,6 @@ SoilBTreeHeaderPage >> readFrom: aStream [
 	lastPageIndex :=(aStream next: self pointerSize) asInteger.
 	firstFreePageIndex :=(aStream next: 4) asInteger.
 	self readItemsFrom: aStream
-]
-
-{ #category : #initialization }
-SoilBTreeHeaderPage >> version [
-	^ 1
 ]
 
 { #category : #writing }

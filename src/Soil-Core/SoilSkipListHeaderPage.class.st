@@ -88,6 +88,11 @@ SoilSkipListHeaderPage >> lastPageIndex: anObject [
 	dirty := true
 ]
 
+{ #category : #initialization }
+SoilSkipListHeaderPage >> latestVersion [
+	^ 1
+]
+
 { #category : #accessing }
 SoilSkipListHeaderPage >> maxLevel [
 
@@ -130,11 +135,6 @@ SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 { #category : #accessing }
 SoilSkipListHeaderPage >> smallestKey [ 
 	^ 0
-]
-
-{ #category : #initialization }
-SoilSkipListHeaderPage >> version [
-	^ 1
 ]
 
 { #category : #writing }

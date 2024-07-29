@@ -18,14 +18,14 @@ SoilBTreeDataPage >> initializeInIndex: aSoilSkipList [
 	valueSize := aSoilSkipList valueSize 
 ]
 
+{ #category : #initialization }
+SoilBTreeDataPage >> latestVersion [
+	^ 1
+]
+
 { #category : #reading }
 SoilBTreeDataPage >> readFrom: aStream [ 
 	super readFrom: aStream.
 	self
 		readItemsFrom: aStream
-]
-
-{ #category : #initialization }
-SoilBTreeDataPage >> version [
-	^ 1
 ]

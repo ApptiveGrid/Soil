@@ -91,6 +91,11 @@ SoilBTreeIndexPage >> isIndexPage [
 	^ true
 ]
 
+{ #category : #initialization }
+SoilBTreeIndexPage >> latestVersion [
+	^ 1
+]
+
 { #category : #printing }
 SoilBTreeIndexPage >> printOn: aStream [ 
 	aStream << 'index page : #' << index asString
@@ -136,9 +141,4 @@ SoilBTreeIndexPage >> valueSize [
 { #category : #accessing }
 SoilBTreeIndexPage >> valueSize: anInteger [
 	"ignore, not used, the index pages store the pageID as the value, size is static defined in #pointerSize"
-]
-
-{ #category : #initialization }
-SoilBTreeIndexPage >> version [
-	^ 1
 ]
