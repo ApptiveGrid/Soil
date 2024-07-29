@@ -32,6 +32,7 @@ SoilSkipListHeaderPage class >> pageCode [
 SoilSkipListHeaderPage >> decreaseSize [
 	(size = -1) ifTrue: [ ^ self ].
 	size := size - 1.
+	dirty := true
 ]
 
 { #category : #accessing }
@@ -58,7 +59,8 @@ SoilSkipListHeaderPage >> headerSize [
 { #category : #'as yet unclassified' }
 SoilSkipListHeaderPage >> increaseSize [
 	(size = -1) ifTrue: [ ^ self ].
-	size := size + 1
+	size := size + 1.
+	dirty := true
 ]
 
 { #category : #initialization }

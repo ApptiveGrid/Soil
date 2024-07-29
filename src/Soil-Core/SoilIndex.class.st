@@ -215,6 +215,13 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 		ifFalse: [ aBlock value ]
 ]
 
+{ #category : #public }
+SoilIndex >> reopen [
+	self 
+		close;
+		open
+]
+
 { #category : #enumerating }
 SoilIndex >> reverseDo: aBlock [
 	self newIterator reverseDo: aBlock
