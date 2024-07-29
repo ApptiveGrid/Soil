@@ -199,3 +199,28 @@ SoilSkipListPageTest >> testHeaderPageWriteAndRead [
 	self assert: readPage lastPageIndex equals: 2.
 	self deny: readPage isDirty 
 ]
+
+{ #category : #tests }
+SoilSkipListPageTest >> testWriteOldVersion [
+	| page bytes readPage |
+	page := SoilSkipListHeaderPage new 
+		keySize: 8;
+		valueSize: 8;
+		maxLevel: 16;
+		index: 1;
+		level: 8;
+		pageSize: 4096;
+		lastPageIndex: 2;
+		instVarNamed: #version put: 1;
+		yourself.
+	1 to: 10 do: [ :n |
+		page addItem: (n -> n) ].
+	self assert: page isDirty.
+	bytes := ByteArray streamContents: [ :stream |
+		page writeOn: stream ].
+	self deny: page isDirty.
+	readPage := self readPageFrom: bytes readStream.
+	self assert: readPage version equals: 1.
+	self assert: (readPage instVarNamed: #size) equals: -1 
+
+]
