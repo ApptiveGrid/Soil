@@ -26,17 +26,17 @@ SoilSkipListDataPage >> initializeInIndex: aSoilSkipList [
 	valueSize := aSoilSkipList valueSize 
 ]
 
+{ #category : #initialization }
+SoilSkipListDataPage >> latestVersion [
+	^ 1 
+]
+
 { #category : #'instance creation' }
 SoilSkipListDataPage >> readFrom: aStream [ 
 	super readFrom: aStream.
 	self 
 		readLevelsFrom: aStream;
 		readItemsFrom: aStream
-]
-
-{ #category : #initialization }
-SoilSkipListDataPage >> version [
-	^ 1 
 ]
 
 { #category : #writing }
