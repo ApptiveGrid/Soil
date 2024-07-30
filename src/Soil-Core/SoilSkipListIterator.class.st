@@ -135,7 +135,7 @@ SoilSkipListIterator >> size [
 	the header page is newer than the current transaction we need to scan
 	the index for the size"
 	headerPage := index headerPage.
-	^ (headerPage lastTransaction <= readVersion) 
-		ifTrue: [ headerPage size ] 
-		ifFalse: [ super size ]
+	^ (readVersion isNil or: [ headerPage lastTransaction > readVersion ]) 
+		ifTrue: [ super size] 
+		ifFalse: [ headerPage size  ]
 ]
