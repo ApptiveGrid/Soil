@@ -126,3 +126,16 @@ SoilSkipListIterator >> removeKey: key ifAbsent: aBlock [
 	index decreaseSize.
 	^ value
 ]
+
+{ #category : #accessing }
+SoilSkipListIterator >> size [ 
+	| headerPage |
+	"size in the header page is only correct if the current transaction
+	read version is bigger than the last modification of the page. If 
+	the header page is newer than the current transaction we need to scan
+	the index for the size"
+	headerPage := index headerPage.
+	^ (headerPage lastTransaction <= readVersion) 
+		ifTrue: [ headerPage size ] 
+		ifFalse: [ super size ]
+]

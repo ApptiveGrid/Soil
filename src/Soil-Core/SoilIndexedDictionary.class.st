@@ -225,7 +225,7 @@ SoilIndexedDictionary >> second [
 
 { #category : #accessing }
 SoilIndexedDictionary >> size [ 
-	^ index size
+	^ self newIterator size
 
 ]
 
