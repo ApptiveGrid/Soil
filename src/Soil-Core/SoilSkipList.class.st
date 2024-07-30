@@ -138,17 +138,6 @@ SoilSkipList >> rewriteUsing: aBlock [
 		run
 ]
 
-{ #category : #accessing }
-SoilSkipList >> size [ 
-	"if size is -1 the page has been converted from version 1 format and
-	size is uninitialized. We scan the size in order to write it properly"
-	| size |
-	size := self headerPage size.
-	^ (size = -1) 
-		ifTrue: [ super size  ]
-		ifFalse: [ size ]
-]
-
 { #category : #converting }
 SoilSkipList >> thePersistentInstance [
 	^ self

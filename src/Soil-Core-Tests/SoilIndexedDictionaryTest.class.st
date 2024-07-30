@@ -71,6 +71,7 @@ SoilIndexedDictionaryTest >> testAddAndRemoveExistingList [
 	tx2 commit.
 	tx3 := soil newTransaction.
 	self assert: (tx3 root at: #foo ifAbsent: [ nil ]) equals: nil.
+	self assert: tx3 root size equals: 0
 
 ]
 
