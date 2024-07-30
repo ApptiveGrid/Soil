@@ -17,7 +17,7 @@ Class {
 	#instVars : [
 		'maxLevel',
 		'lastPageIndex',
-		'lastFreePageIndex'
+		'firstFreePageIndex'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -25,6 +25,18 @@ Class {
 { #category : #accessing }
 SoilSkipListHeaderPage class >> pageCode [ 
 	^ 1 
+]
+
+{ #category : #accessing }
+SoilSkipListHeaderPage >> firstFreePageIndex [
+
+	^ firstFreePageIndex
+]
+
+{ #category : #accessing }
+SoilSkipListHeaderPage >> firstFreePageIndex: anObject [
+
+	firstFreePageIndex := anObject
 ]
 
 { #category : #utilities }
@@ -40,7 +52,7 @@ SoilSkipListHeaderPage >> headerSize [
 SoilSkipListHeaderPage >> initialize [ 
 	super initialize.
 	lastPageIndex := 1.
-	lastFreePageIndex := 0
+	firstFreePageIndex := 0
 ]
 
 { #category : #initialization }
@@ -62,18 +74,6 @@ SoilSkipListHeaderPage >> keySize: anInteger [
 	dirty := true
 	
 
-]
-
-{ #category : #accessing }
-SoilSkipListHeaderPage >> lastFreePageIndex [
-
-	^ lastFreePageIndex
-]
-
-{ #category : #accessing }
-SoilSkipListHeaderPage >> lastFreePageIndex: anObject [
-
-	lastFreePageIndex := anObject
 ]
 
 { #category : #accessing }
@@ -129,7 +129,7 @@ SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	valueSize := (aStream next: 2) asInteger.
 	maxLevel := (aStream next: 2) asInteger.
 	lastPageIndex :=(aStream next: 4) asInteger.
-	lastFreePageIndex :=(aStream next: 4) asInteger 
+	firstFreePageIndex :=(aStream next: 4) asInteger 
 ]
 
 { #category : #accessing }
@@ -145,7 +145,7 @@ SoilSkipListHeaderPage >> writeHeaderOn: aStream [
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
 		nextPutAll: (maxLevel asByteArrayOfSize: 2);
 		nextPutAll: (lastPageIndex asByteArrayOfSize: 4);
-		nextPutAll: (lastFreePageIndex asByteArrayOfSize: 4).
+		nextPutAll: (firstFreePageIndex asByteArrayOfSize: 4).
 	self 
 		writeLevelsOn: aStream.
 	aStream nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).

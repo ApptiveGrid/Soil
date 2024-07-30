@@ -71,7 +71,7 @@ SoilBasicBTree >> newHeaderPage [
 	^ SoilBTreeHeaderPage new
 		index: 1;
 		lastPageIndex: 2;
-		lastFreePageIndex: 0;
+		firstFreePageIndex: 0;
 		pageSize: self pageSize
 ]
 
