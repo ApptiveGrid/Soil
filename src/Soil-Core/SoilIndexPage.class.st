@@ -69,7 +69,7 @@ SoilIndexPage >> index: anInteger [
 { #category : #initialization }
 SoilIndexPage >> initialize [ 
 	super initialize.
-	version := 1
+	version := self latestVersion
 ]
 
 { #category : #testing }
@@ -92,6 +92,11 @@ SoilIndexPage >> itemsSizeSize [
 	"as long as we target 65536 bytes as maximum page size a two-byte 
 	number of items is sufficient"
 	^ 2
+]
+
+{ #category : #initialization }
+SoilIndexPage >> latestVersion [
+	self subclassResponsibility 
 ]
 
 { #category : #accessing }

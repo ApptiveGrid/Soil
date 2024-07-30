@@ -91,6 +91,11 @@ SoilBTreeIndexPage >> isIndexPage [
 	^ true
 ]
 
+{ #category : #initialization }
+SoilBTreeIndexPage >> latestVersion [
+	^ 1
+]
+
 { #category : #printing }
 SoilBTreeIndexPage >> printOn: aStream [ 
 	aStream << 'index page : #' << index asString
