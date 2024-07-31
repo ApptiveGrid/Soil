@@ -201,14 +201,17 @@ SoilIndexedDictionary >> removeKey: key [
 
 { #category : #removing }
 SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
-	 | v |
+	 | v newValueRemoved |
 	"remove from newValues as there could be a new at:put: on that
 	key but removing the key will remove the value again"
-	newValues removeKey: key ifAbsent: nil.
+	newValueRemoved := (newValues removeKey: key ifAbsent: nil) notNil.
 	v := self newIterator removeKey: key ifAbsent: [^ aBlock value].
-	removedValues 
+	"remove value and therefor create a journal entry only if it has not been 
+	in newValues which removes just a freshly added key again"
+	newValueRemoved ifFalse: [
+		removedValues 
 			at: key 
-			put: v asSoilObjectId.
+			put: v asSoilObjectId ].
 	^v
 ]
 
