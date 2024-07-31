@@ -39,8 +39,8 @@ SoilSkipListTest >> testAddFirstOverflowAppending [
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
 	self assert: page numberOfItems equals: 1.
-	self assert: page items first key equals: 254.
-	self assert: page items last key asByteArray equals: #[ 254 ]
+	self assert: page items first key equals: 253.
+	self assert: page items last key asByteArray equals: #[ 253 ]
 ]
 
 { #category : #tests }
@@ -55,8 +55,8 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
 	self assert: page numberOfItems equals: 1.
-	self assert: page items first key equals: 254.
-	self assert: page items last key asByteArray equals: #[ 254 ].
+	self assert: page items first key equals: 253.
+	self assert: page items last key asByteArray equals: #[ 253 ].
 	
 	"write it and then read it back with a new SoilSkipList"
 	index writePages.
@@ -76,12 +76,12 @@ SoilSkipListTest >> testAddFirstOverflowSplitting [
 	1 to: capacity * 2 by: 2 do: [ :n | 
 		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: index pages size equals: 1.
-	index at: capacity - 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	index at: capacity - 2 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
 	self assert: page numberOfItems equals: 126.
-	self assert: page items first key equals: 255.
-	self assert: page items last key asByteArray equals: #[ 1 249 ]
+	self assert: page items first key equals: 253.
+	self assert: page items last key asByteArray equals: #[ 1 247 ]
 ]
 
 { #category : #tests }
@@ -95,7 +95,7 @@ SoilSkipListTest >> testAddInBetween [
 	index at: (capacity / 2) floor put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: index pages size equals: 1.
 	page := index pageAt: 1.
-	self assert: page numberOfItems equals: 253.
+	self assert: page numberOfItems equals: 252.
 	self assert: (page items at: (capacity / 2) floor) key equals: 126
 ]
 
@@ -111,8 +111,8 @@ SoilSkipListTest >> testAddInBetweenOverflowing [
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
 	self assert: page numberOfItems equals: 126.
-	self assert: (page items first) key equals: 255.
-	self assert: (page items last) key asByteArray equals: #[ 1 249 ].
+	self assert: (page items first) key equals: 253.
+	self assert: (page items last) key asByteArray equals: #[ 1 247 ].
 	index writePages 
 ]
 
@@ -127,7 +127,7 @@ SoilSkipListTest >> testAddInBetweenOverwriting [
 	index at: 31 put: #[ 8 7 6 5 4 3 2 1 ].
 	self assert: index pages size equals: 1.
 	page := index pageAt: 1.
-	self assert: page numberOfItems equals: 253.
+	self assert: page numberOfItems equals: 252.
 	self assert: (page items at: 16) value equals: #[ 8 7 6 5 4 3 2 1 ] 
 ]
 
@@ -336,11 +336,30 @@ SoilSkipListTest >> testLastPage [
 	1 to: capacity - 1 do: [ :n |
 		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	index at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
-	self assert: index pages size equals: 100.
-	self assert: index lastPage index equals: 100.
+	self assert: index pages size equals: 99.
+	self assert: index lastPage index equals: 99.
 	self assert: index lastPage isLastPage.
 	lastItem := index lastPage itemAt: capacity ifAbsent: [nil].
 	self assert: lastItem value equals: #[ 8 7 6 5 4 3 2 1 ].
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testLatestVersionRoundtrip [
+	
+	1 to: 10 do: [ :n | 
+		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	index removeKey: 4.
+	self assert: index pages size equals: 1.
+	self assert: index size equals: 9.
+	
+	"write it and then read it back with a new SoilSkipList"
+	index writePages.
+	index close.
+	index := SoilSkipList new 
+		path: 'sunit-skiplist';
+		open.
+	self assert: index size equals: 9.
+
 ]
 
 { #category : #tests }
@@ -364,8 +383,8 @@ SoilSkipListTest >> testOverflowCopyOnWriteAppending [
 	self assert: copyOnWrite pages size equals: 2.
 	page := copyOnWrite pageAt: 2.
 	self assert: page numberOfItems equals: 1.
-	self assert: page items first key equals: 254.
-	self assert: page items last key asByteArray equals: #[ 254 ]
+	self assert: page items first key equals: 253.
+	self assert: page items last key asByteArray equals: #[ 253 ]
 ]
 
 { #category : #tests }
@@ -381,8 +400,8 @@ SoilSkipListTest >> testOverflowCopyOnWriteSplitting [
 	self assert: copyOnWrite pages size equals: 2.
 	page := copyOnWrite pageAt: 2.
 	self assert: page numberOfItems equals: 126.
-	self assert: page items first key equals: 255.
-	self assert: page items last key asByteArray equals: #[ 1 249 ]
+	self assert: page items first key equals: 253.
+	self assert: page items last key asByteArray equals: #[ 1 247 ]
 ]
 
 { #category : #tests }
@@ -472,4 +491,44 @@ SoilSkipListTest >> testSplitLastPage [
 	"another page split which should be appending"
 	index at: 3000 put: 3000.
 	
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testVersionOneRoundtrip [
+	index headerPage 
+		instVarNamed: #version put: 1;
+		size: -1.
+	1 to: 10 do: [ :n | 
+		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	index removeKey: 4.
+	self assert: index pages size equals: 1.
+	self assert: index size equals: 9.
+	
+	"write it and then read it back with a new SoilSkipList"
+	index writePages.
+	index close.
+	index := SoilSkipList new 
+		path: 'sunit-skiplist';
+		open.
+	self assert: index size equals: 9.
+
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testVersionOneRoundtripAndCompact [
+	index headerPage 
+		instVarNamed: #version put: 1;
+		size: -1.
+	1 to: 10 do: [ :n | 
+		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+	index removeKey: 4.
+	self assert: index pages size equals: 1.
+	self assert: index size equals: 9.
+	
+	index writePages.
+	index 
+		reopen;
+		compact.
+	self assert: index headerPage version equals: 2.
+	self assert: (index headerPage instVarNamed: #size) equals: 9
 ]

@@ -190,7 +190,7 @@ SoilIndex >> readPageClassFrom: aStream [
 { #category : #'instance creation' }
 SoilIndex >> readPageFrom: aStream [
 	| page |
-	page := (self readPageClassFrom: aStream) new.
+	page := (self readPageClassFrom: aStream) basicNew.
 	page initializeInIndex: self. 
 	^ page readFrom: aStream 
 ]
@@ -209,8 +209,17 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 		find: key;
 		currentPage.
 	^ ((index := page indexOfKey: (self indexKey: key)) > 0)
-		ifTrue: [ (page itemRemoveIndex: index) value ]
+		ifTrue: [ 
+			self decreaseSize.
+			(page itemRemoveIndex: index) value ]
 		ifFalse: [ aBlock value ]
+]
+
+{ #category : #public }
+SoilIndex >> reopen [
+	self 
+		close;
+		open
 ]
 
 { #category : #enumerating }

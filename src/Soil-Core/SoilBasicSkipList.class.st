@@ -17,9 +17,19 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBasicSkipList >> decreaseSize [
+	self headerPage decreaseSize 
+]
+
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
+]
+
+{ #category : #'as yet unclassified' }
+SoilBasicSkipList >> increaseSize [
+	self headerPage increaseSize 
 ]
 
 { #category : #accessing }
@@ -37,6 +47,17 @@ SoilBasicSkipList >> maxLevel: anInteger [
 { #category : #'instance creation' }
 SoilBasicSkipList >> newIterator [ 
 	^ SoilSkipListIterator on: self 
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> size [ 
+	"if size is -1 the page has been converted from version 1 format and
+	size is uninitialized. We scan the size in order to write it properly"
+	| size |
+	size := self headerPage size.
+	^ (size = -1) 
+		ifTrue: [ super size  ]
+		ifFalse: [ size ]
 ]
 
 { #category : #private }

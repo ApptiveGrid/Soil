@@ -121,6 +121,11 @@ SoilIndexPage >> readFrom: aStream [
 	version := aStream next
 ]
 
+{ #category : #accessing }
+SoilIndexPage >> version [
+	^ version
+]
+
 { #category : #writing }
 SoilIndexPage >> writeHeaderOn: aStream [ 
 	aStream

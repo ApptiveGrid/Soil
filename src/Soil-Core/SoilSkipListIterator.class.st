@@ -28,7 +28,9 @@ SoilSkipListIterator >> basicAt: indexKey put: anObject [
 	"as an optimization we return the prior value stored in the list. If
 	there was none we return nil"
 	^(currentPage hasKey: indexKey)
-		  ifTrue: [ (currentPage itemAt: indexKey put: anObject) value ]
+		  ifTrue: [ 
+			"overwriting a key does not change the size of an index"
+			(currentPage itemAt: indexKey put: anObject) value ]
 		  ifFalse: [
 			  currentPage hasRoom ifFalse: [  | newPage |
 				  newPage := index splitPage: self forKey: indexKey.
@@ -36,6 +38,7 @@ SoilSkipListIterator >> basicAt: indexKey put: anObject [
 					                 ifTrue: [ newPage ]
 					                 ifFalse: [ currentPage ] ].
 			  currentPage addItem: indexKey -> anObject.
+			  index increaseSize.
 			  nil ]
 ]
 
@@ -114,4 +117,25 @@ SoilSkipListIterator >> levelAt: anInteger [
 { #category : #printing }
 SoilSkipListIterator >> printOn: aStream [ 
 	aStream << 'path: ' << levels asString
+]
+
+{ #category : #removing }
+SoilSkipListIterator >> removeKey: key ifAbsent: aBlock [
+	| value |
+	value := super removeKey: key ifAbsent: aBlock.
+	index decreaseSize.
+	^ value
+]
+
+{ #category : #accessing }
+SoilSkipListIterator >> size [ 
+	| headerPage |
+	"size in the header page is only correct if the current transaction
+	read version is bigger than the last modification of the page. If 
+	the header page is newer than the current transaction we need to scan
+	the index for the size"
+	headerPage := index headerPage.
+	^ (readVersion isNil or: [ headerPage lastTransaction > readVersion ]) 
+		ifTrue: [ super size] 
+		ifFalse: [ headerPage size  ]
 ]
