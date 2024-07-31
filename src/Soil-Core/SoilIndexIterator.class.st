@@ -48,6 +48,8 @@ SoilIndexIterator >> atIndex: anInteger [
 { #category : #enumerating }
 SoilIndexIterator >> basicAssociationsDo: aBlock [
 	| item |
+	"set currentPage to nil to force starting at the first element"
+	currentPage := nil.
 	[ (item := self basicNextAssociation ) notNil ] whileTrue: [
 		(self restoreItem: item) ifNotNil: [ :assoc | 
  			aBlock value: assoc key -> (self convertValue: assoc value) ] ] 
