@@ -214,6 +214,11 @@ SoilMaterializer >> nextDate: aClass [
 ]
 
 { #category : #reading }
+SoilMaterializer >> nextDateAndTime [ 
+	^ self registerObject: super nextDateAndTime
+]
+
+{ #category : #reading }
 SoilMaterializer >> nextDictionary: aClass [ 
 	| size dict key |
 	size := self nextLengthEncodedInteger.
