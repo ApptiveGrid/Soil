@@ -584,3 +584,21 @@ SoilIndexIteratorTest >> testValues [
 	self assert: iterator values first equals: (1 asByteArrayOfSize: 8).
 	self assert: iterator values last equals: (capacity asByteArrayOfSize: 8)
 ]
+
+{ #category : #tests }
+SoilIndexIteratorTest >> testbasicAssociationsDo [
+	
+	| iterator capacity result |
+	iterator := index newIterator.
+	
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		iterator at: n put: (n asByteArrayOfSize: 8) ].
+	
+	result := OrderedCollection new.
+	iterator basicAssociationsDo: [ :each | result add: each ].
+
+	self assert: result size equals: capacity.
+	self assert: result first value equals: (1 asByteArrayOfSize: 8).
+	self assert: result last value equals: (capacity asByteArrayOfSize: 8)
+]
