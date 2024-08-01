@@ -233,7 +233,8 @@ SoilPrimitiveSerializationTest >> testSerializationDateAndTime [
 SoilPrimitiveSerializationTest >> testSerializationDateAndTime2 [
 	| object serialized materialized |
 	"test were julianDayNumberUTC is 1"
-	object := (Date today + 1 day) asDateAndTime.
+	object := ('1 August 2024' asDate + 1 day) asDateAndTime.
+	self assert: object julianDayOffset equals: 1.
 	serialized := SoilBasicSerializer  serializeToBytes: object.
 	self assert: serialized equals: #[29 5 210 224 2 224 234 4 0 5 120].
 	self assert: (serialized at: 1) equals: TypeCodeDateAndTime.
