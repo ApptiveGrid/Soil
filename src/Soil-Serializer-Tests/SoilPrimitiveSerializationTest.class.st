@@ -230,6 +230,19 @@ SoilPrimitiveSerializationTest >> testSerializationDateAndTime [
 ]
 
 { #category : #tests }
+SoilPrimitiveSerializationTest >> testSerializationDateAndTime2 [
+	| object serialized materialized |
+	"test were julianDayNumberUTC is 1"
+	object := (Date today + 1 day) asDateAndTime.
+	serialized := SoilBasicSerializer  serializeToBytes: object.
+	self assert: serialized equals: #[29 5 210 224 2 224 234 4 0 5 120].
+	self assert: (serialized at: 1) equals: TypeCodeDateAndTime.
+
+	materialized := SoilBasicMaterializer materializeFromBytes: serialized.
+	self assert: materialized equals: object
+]
+
+{ #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationDateAndTimeLargeNegativeDays [
 	| object serialized materialized |
 	object := DateAndTime epoch - (2 raisedTo: 33) days.
