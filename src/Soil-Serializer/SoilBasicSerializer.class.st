@@ -69,7 +69,7 @@ SoilBasicSerializer >> nextPutDate: aDate [
 SoilBasicSerializer >> nextPutDateAndTime: aDateAndTime [ 
 	self 
 		nextPutByte: TypeCodeDateAndTime; 
-		nextPutInteger: aDateAndTime julianDayNumber - 2415386; 
+		nextPutInteger: aDateAndTime julianDayNumberUTC - 2415386; 
 		nextPutLengthEncodedInteger: aDateAndTime secondsSinceMidnightUTC;
 		nextPutLengthEncodedInteger: aDateAndTime nanoSecond;
 		nextPutInteger: ((aDateAndTime offset hours * 60) + aDateAndTime offset minutes)
