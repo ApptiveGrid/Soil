@@ -118,14 +118,14 @@ SoilBTreeTest >> testAddFirstOverflow [
 	capacity := index headerPage itemCapacity.
 	1 to: capacity do: [ :n | index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: index pages size equals: 3.
-	self assert: (index pageAt: 1) numberOfItems equals: 127.
+	self assert: (index pageAt: 1) numberOfItems equals: 126.
 	"if we add a page, the current one is split and half is moved there"
 	index at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: index pages size equals: 3.
 	page := index pageAt: 3.
 	self assert: page numberOfItems equals: 128.
-	self assert: page items first key equals: 128.
-	self assert: page items last key asByteArray equals: #[ 255 ].
+	self assert: page items first key equals: 127.
+	self assert: page items last key asByteArray equals: #[ 254 ].
 	"check that the next pointer is correct after split"
 	self assert: (index pageAt:((index headerPage) next)) identicalTo: (index pageAt: 3)
 ]
@@ -170,13 +170,13 @@ SoilBTreeTest >> testAddSecondOverflow [
 	capacity := index headerPage itemCapacity.
 	1 to: capacity do: [ :n | index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: index pages size equals: 3.
-	self assert: (index pageAt: 1) numberOfItems equals: 127.
+	self assert: (index pageAt: 1) numberOfItems equals: 126.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n | index at: capacity + n put: #[ 1 2 3 4 5 6 7 8 ]].
 	self assert: index pages size equals: 4.
 	page := index pageAt: 4.
-	self assert: page numberOfItems equals: 254.
-	self assert: page items first key equals: 255.
+	self assert: page numberOfItems equals: 253.
+	self assert: page items first key equals: 254.
 	"check that the next pointer is correct after split"
 	self assert: ((index headerPage nextPageIn: index) nextPageIn: index) identicalTo: (index pageAt: 4).
 	index writePages.
@@ -189,13 +189,13 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 	capacity := index headerPage itemCapacity.
 	1 to: capacity do: [ :n | index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: index pages size equals: 3.
-	self assert: (index pageAt: 1) numberOfItems equals: 127.
+	self assert: (index pageAt: 1) numberOfItems equals: 126.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n | index at: capacity + n put: #[ 1 2 3 4 5 6 7 8 ]].
 	self assert: index pages size equals: 4.
 	page := index pageAt: 4.
-	self assert: page numberOfItems equals: 254.
-	self assert: page items first key equals: 255.
+	self assert: page numberOfItems equals: 253.
+	self assert: page items first key equals: 254.
 	"check that the next pointer is correct after split"
 	self assert: ((index headerPage nextPageIn: index) nextPageIn: index) identicalTo: (index pageAt: 4).
 
@@ -214,7 +214,7 @@ SoilBTreeTest >> testAt [
 	capacity := index headerPage itemCapacity.
 	1 to: capacity do: [ :n | index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: index pages size equals: 3.
-	self assert: (index pageAt: 1) numberOfItems equals: 127.
+	self assert: (index pageAt: 1) numberOfItems equals: 126.
 	"if we add a page, the current one is split and half is moved there"
 	index at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
 	self assert: index pages size equals: 3.
@@ -232,7 +232,7 @@ SoilBTreeTest >> testAtSecondOverflow [
 	capacity := index headerPage itemCapacity.
 	1 to: capacity*2 do: [ :n | index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: index pages size equals: 4.
-	self assert: (index pageAt: 1) numberOfItems equals: 127.
+	self assert: (index pageAt: 1) numberOfItems equals: 126.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n | index at: capacity + n put: #[ 1 2 3 4 5 6 7 8 ] ].
 	self assert: index pages size equals: 4.
@@ -277,12 +277,12 @@ SoilBTreeTest >> testIndexRewriting [
 	index flush.
 	self assert: index headerPage lastPageIndex equals: 3.
 	self assert: (index pageAt: 3) items size equals: 128.
-	self assert: (index pageAt: 1) items size equals: 127.
+	self assert: (index pageAt: 1) items size equals: 126.
 	fileSizeBefore := index path size.
 	index newPluggableRewriter rewrite.
 	self assert: index headerPage lastPageIndex equals: 3.
 	self assert: (index pageAt: 3) items size equals: 128.
-	self assert: (index pageAt: 1) items size equals: 127.
+	self assert: (index pageAt: 1) items size equals: 126.
 	
 	self assert: index path size equals: fileSizeBefore
 
@@ -362,8 +362,8 @@ SoilBTreeTest >> testOverflowCopyOnWriteSplitting [
 
 	page := copyOnWrite pageAt: 3.
 	self assert: page numberOfItems equals: 127.
-	self assert: page items first key equals: 255.
-	self assert: page items last key asByteArray equals: #[1 251]
+	self assert: page items first key equals: 253.
+	self assert: page items last key asByteArray equals: #[1 249]
 ]
 
 { #category : #tests }

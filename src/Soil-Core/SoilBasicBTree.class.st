@@ -132,6 +132,11 @@ SoilBasicBTree >> rootPage [
 	^ self store pageAt: 2
 ]
 
+{ #category : #accessing }
+SoilBasicBTree >> size [
+	^ self headerPage size
+]
+
 { #category : #splitting }
 SoilBasicBTree >> splitIndexPage: page [ 
 	| newPage |

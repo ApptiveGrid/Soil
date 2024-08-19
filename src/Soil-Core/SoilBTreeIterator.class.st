@@ -16,6 +16,7 @@ SoilBTreeIterator >> basicAt: indexKey put: anObject [
 	| possiblePriorValue |
 	possiblePriorValue := index rootPage insertItem: (indexKey -> anObject) for: self.
 	"as an optimization we return the prior value stored in the list. If there was none we return nil"
+	 index increaseSize.
 	^ possiblePriorValue returnValue
 ]
 

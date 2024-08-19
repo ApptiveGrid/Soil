@@ -59,6 +59,11 @@ SoilIndex >> close [
 	store := nil
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndex >> decreaseSize [
+	self headerPage decreaseSize 
+]
+
 { #category : #enumerating }
 SoilIndex >> do: aBlock [
 	self newIterator do: aBlock
@@ -98,6 +103,11 @@ SoilIndex >> hasHeaderPage [
 { #category : #accessing }
 SoilIndex >> headerPage [
 	^ self store headerPage
+]
+
+{ #category : #'as yet unclassified' }
+SoilIndex >> increaseSize [
+	self headerPage increaseSize 
 ]
 
 { #category : #accessing }
