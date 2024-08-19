@@ -10,6 +10,15 @@ Class {
 	#category : #'Soil-Core-Index-Common'
 }
 
+{ #category : #enumerating }
+SoilIndexIterator >> associationsDo: aBlock [
+	| item |
+	"set currentPage to nil to force starting at the first element"
+	currentPage := nil.
+	[ (item := self nextAssociation ) notNil ] 
+		whileTrue: [ aBlock value: item ]
+]
+
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject [
 	^ self 
@@ -43,16 +52,6 @@ SoilIndexIterator >> atIndex: anInteger [
 	2 to: anInteger do: [ :idx |
 		current := self nextAssociation ].
 	^ current value
-]
-
-{ #category : #enumerating }
-SoilIndexIterator >> basicAssociationsDo: aBlock [
-	| item |
-	"set currentPage to nil to force starting at the first element"
-	currentPage := nil.
-	[ (item := self basicNextAssociation ) notNil ] whileTrue: [
-		(self restoreItem: item) ifNotNil: [ :assoc | 
- 			aBlock value: assoc key -> (self convertValue: assoc value) ] ] 
 ]
 
 { #category : #accessing }
