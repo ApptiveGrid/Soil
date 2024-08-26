@@ -15,10 +15,15 @@ on:
   
 jobs:
   build:
+    continue-on-error: ${{ matrix.in-development }}
     strategy:
       fail-fast: false
       matrix:
-        pharoversion: [ Pharo64-alpha, Pharo64-12, Pharo64-11 ]
+        pharoversion: [ Pharo64-12, Pharo64-11 ]
+        in-development: false
+        include:
+          - pharoversion: Pharo64-alpha
+            in-development: true
     name: ${{ matrix.pharoversion }}
     runs-on: ubuntu-latest
     steps:
