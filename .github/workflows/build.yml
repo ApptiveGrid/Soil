@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
       matrix:
         pharoversion: [ Pharo64-12, Pharo64-11 ]
-        in-development: false
+        in-development: [ false ]
         include:
           - pharoversion: Pharo64-alpha
             in-development: true
