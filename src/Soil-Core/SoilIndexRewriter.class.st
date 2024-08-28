@@ -30,7 +30,7 @@ SoilIndexRewriter >> convertIndex [
 
 { #category : #running }
 SoilIndexRewriter >> convertItems [
-	index newIterator basicAssociationsDo: [ :item |
+	index newIterator associationsDo: [ :item |
 		self storeItem: (self restoreItem: item) ] 
 ]
 
