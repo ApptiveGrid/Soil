@@ -390,7 +390,7 @@ SoilIndexIteratorTest >> testPrevious [
 		index at: n put: (n asByteArrayOfSize: 8) ].
 	iterator := index newIterator.
 	"select a key where we have to cross over to another page"
-	toFind := index class == SoilSkipList ifTrue: [ 253 ] ifFalse: [ 255 ].
+	toFind := index class == SoilSkipList ifTrue: [ 253 ] ifFalse: [ 254 ].
 	"the key is indeed the first one in the page"
 	self assert: (iterator findPageFor: toFind) firstItem key equals: toFind.
 	
@@ -425,7 +425,7 @@ SoilIndexIteratorTest >> testPreviousAssociation [
 	iterator := index newIterator.
 	
 	"select a key where we have to cross over to another page"
-	toFind := index class == SoilSkipList ifTrue: [ 253 ] ifFalse: [ 255 ].
+	toFind := index class == SoilSkipList ifTrue: [ 253 ] ifFalse: [ 254 ].
 	"the key is indeed the first one in the page"
 	self assert: (iterator findPageFor: toFind) firstItem key equals: toFind.
 	
@@ -490,7 +490,7 @@ SoilIndexIteratorTest >> testPreviousPage [
 		index at: n put: (n asByteArrayOfSize: 8) ].
 	iterator := index newIterator.
 	"select a key where we have to cross over to another page"
-	toFind := index class == SoilSkipList ifTrue: [ 253 ] ifFalse: [ 255 ].
+	toFind := index class == SoilSkipList ifTrue: [ 253 ] ifFalse: [ 254 ].
 	"the key is indeed the first one in the page"
 	self assert: (iterator findPageFor: toFind) firstItem key equals: toFind.
 	

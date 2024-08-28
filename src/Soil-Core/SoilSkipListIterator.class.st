@@ -119,14 +119,6 @@ SoilSkipListIterator >> printOn: aStream [
 	aStream << 'path: ' << levels asString
 ]
 
-{ #category : #removing }
-SoilSkipListIterator >> removeKey: key ifAbsent: aBlock [
-	| value |
-	value := super removeKey: key ifAbsent: aBlock.
-	index decreaseSize.
-	^ value
-]
-
 { #category : #accessing }
 SoilSkipListIterator >> size [ 
 	| headerPage |

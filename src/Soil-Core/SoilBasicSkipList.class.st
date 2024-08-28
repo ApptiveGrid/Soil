@@ -17,19 +17,9 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
-{ #category : #'as yet unclassified' }
-SoilBasicSkipList >> decreaseSize [
-	self headerPage decreaseSize 
-]
-
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
-]
-
-{ #category : #'as yet unclassified' }
-SoilBasicSkipList >> increaseSize [
-	self headerPage increaseSize 
 ]
 
 { #category : #accessing }
