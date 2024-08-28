@@ -19,6 +19,7 @@ release date: **2024-07-19**
 
 **corresponding commits**
 
+```
 b7a06b7 fixed time serialization to include nano seconds
 25a7d93 use fsync instead of fdatasync to be sure file metadata is up to date
 fb489e2 moved methods from apptive grid to soil that are preventing fuel to serialize the whole database
@@ -37,8 +38,7 @@ fee12b4 Fix checkpoint. Before it was syncing files first and then creating a ch
 6799369 Update build.yml: add Pharo13
 baaf170 added support for keeping only n fragment files on disk
 ab3edf0 fix leaking locks in SoilLockableStream. Now having the lock at hand is sufficient to release it properly
-
-- lots of btree improvements
+```
 
 ## v1 
 
