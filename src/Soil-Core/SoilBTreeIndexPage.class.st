@@ -36,17 +36,13 @@ SoilBTreeIndexPage >> findKey: aKey [
 ]
 
 { #category : #private }
-SoilBTreeIndexPage >> findPreviousPage: aKey with: aBTree [
-	| item page |
+SoilBTreeIndexPage >> findPreviousPage: aKey with: aBTree path: aPath [
+	| item page  |
+	"we record the path of all index pages taken to find the key"
+	aPath add: self.
 	item := self findKey: aKey.
 	page := aBTree pageAt: item value.
-		
-	^ page isIndexPage 
-		ifFalse: [
-			"if we get a data page, we know that the prior page is just the page
-			referenced from the index entry before "
-			aBTree pageAt: (self itemBefore: aKey) value]
-		ifTrue:  [ page findPreviousPage: aKey with: aBTree ]
+	^ page findPreviousPage: aKey with: aBTree path: aPath
 ]
 
 { #category : #utilities }

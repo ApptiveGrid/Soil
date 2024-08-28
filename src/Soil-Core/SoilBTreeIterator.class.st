@@ -33,10 +33,10 @@ SoilBTreeIterator >> findPreviousPageOf: aPage [
 	
 	aPage isHeaderPage ifTrue: [ ^nil ].
 	aPage isEmpty ifTrue: [ ^super findPreviousPageOf: aPage ].
-	"faster search not yet working"
-	self flag: #TOOD.
-	^ super findPreviousPageOf: aPage.
-	"currentPage := index rootPage findPreviousPage: aPage firstItem key with: index"
+	currentPage := index rootPage findPreviousPage: aPage firstItem key with: index path: OrderedCollection new.
+	"for now use assert to make sure this is correct"
+	self assert: (self nextPage == aPage).
+	^currentPage
 ]
 
 { #category : #accessing }
