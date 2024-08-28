@@ -6,6 +6,7 @@ release date: **2024-07-19**
 
 **improvements for thi release**
 
+- BTree received lots of improvements and should be usable now
 - time serialization now includes nano seconds
 - fsync() system call is used instead of fdatasync to make sure file sizes get reported correctly
 - behavior registry can be recreated completely from the objects in segment #0 (#recreateIndex)
