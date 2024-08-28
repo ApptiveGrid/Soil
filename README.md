@@ -28,7 +28,7 @@ The latest release is [v2](https://github.com/ApptiveGrid/Soil/tree/v2) which yo
 
 ```smalltalk
 Metacello new 
-	repository: 'github://ApptiveGrid/Soil:v1/src';
+	repository: 'github://ApptiveGrid/Soil:v2/src';
 	baseline: 'Soil';
 	load.
 ```
