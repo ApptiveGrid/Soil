@@ -10,7 +10,7 @@ To read more please have a look at the [documentation](./docs/soil.md)
 
 ## Loading
 
-Load it in 64bit Pharo 11/12 with Metacello:
+Load it in 64bit Pharo 11/12/13 with Metacello:
 
 ```smalltalk
 Metacello new 
@@ -24,14 +24,16 @@ Note: For now, Windows is not supported. Contact us if you want to help!
 
 ## Latest release
 
-The latest release is [v1](https://github.com/ApptiveGrid/Soil/tree/v1) which you can load via
+The latest release is [v2](https://github.com/ApptiveGrid/Soil/tree/v2) which you can load via
 
 ```smalltalk
 Metacello new 
-	repository: 'github://ApptiveGrid/Soil:v1/src';
+	repository: 'github://ApptiveGrid/Soil:v2/src';
 	baseline: 'Soil';
 	load.
 ```
+
+The changelog can be found [here](https://github.com/ApptiveGrid/Soil/blob/v2/docs/changelog.md)
 
 *note*: Releases in Soil are branches. Loading it with a release tag will get the hot fixes of that release. If you do not want this please use the commit hash as version instead
 
