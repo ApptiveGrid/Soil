@@ -2,7 +2,6 @@ Class {
 	#name : #SoilGarbageCollectVisitor,
 	#superclass : #SoilCloneVisitor,
 	#instVars : [
-		'newRepository',
 		'newSegment',
 		'indexIds',
 		'behaviorDescriptions',
