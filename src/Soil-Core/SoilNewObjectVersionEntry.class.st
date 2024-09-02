@@ -14,6 +14,11 @@ SoilNewObjectVersionEntry class >> journalTypeCode [
 ]
 
 { #category : #accessing }
+SoilNewObjectVersionEntry >> oldBytes [
+	^ oldBytes
+]
+
+{ #category : #accessing }
 SoilNewObjectVersionEntry >> oldBytes: aCollection [ 
 	oldBytes := aCollection
 ]
