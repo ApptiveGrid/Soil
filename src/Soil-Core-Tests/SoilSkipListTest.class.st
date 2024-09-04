@@ -33,9 +33,9 @@ SoilSkipListTest >> testAddFirstOverflowAppending [
 	| page capacity |
 	capacity := index firstPage itemCapacity.
 	1 to: capacity do: [ :n | 
-		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n put: (n asByteArrayOfSize: 8) ].
 	self assert: index pages size equals: 1.
-	index at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	index at: capacity + 1 put: ((capacity + 1) asByteArrayOfSize: 8).
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
 	self assert: page numberOfItems equals: 1.
@@ -49,9 +49,9 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 	| page capacity |
 	capacity := index firstPage itemCapacity.
 	1 to: capacity do: [ :n | 
-		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n  put:(n asByteArrayOfSize: 8)  ].
 	self assert: index pages size equals: 1.
-	index at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	index at: capacity + 1 put: (capacity + 1 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
 	self assert: page numberOfItems equals: 1.
@@ -65,7 +65,7 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 		path: 'sunit-skiplist';
 		initializeFilesystem.
 	"we should be able to do a lookup"
-	self assert: ((index at: capacity) asByteArrayOfSize: 8) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: ((index at: capacity) asByteArrayOfSize: 8) equals: (capacity asByteArrayOfSize: 8).
 ]
 
 { #category : #tests }
@@ -74,9 +74,9 @@ SoilSkipListTest >> testAddFirstOverflowSplitting [
 	| page capacity |
 	capacity := index firstPage itemCapacity.
 	1 to: capacity * 2 by: 2 do: [ :n | 
-		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n  put: (n asByteArrayOfSize: 8)].
 	self assert: index pages size equals: 1.
-	index at: capacity - 2 put: #[ 1 2 3 4 5 6 7 8 ].
+	index at: capacity - 2 put: (capacity - 2 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
 	self assert: page numberOfItems equals: 126.
@@ -90,9 +90,9 @@ SoilSkipListTest >> testAddInBetween [
 	| page capacity |
 	capacity := index firstPage itemCapacity.
 	1 to: capacity do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n put: (n asByteArrayOfSize: 8) ].
 	self assert: index pages size equals: 1.
-	index at: (capacity / 2) floor put: #[ 1 2 3 4 5 6 7 8 ].
+	index at: (capacity / 2) floor put: ((capacity / 2) floor asByteArrayOfSize: 8).
 	self assert: index pages size equals: 1.
 	page := index pageAt: 1.
 	self assert: page numberOfItems equals: 252.
@@ -105,9 +105,9 @@ SoilSkipListTest >> testAddInBetweenOverflowing [
 	| page capacity |
 	capacity := index firstPage itemCapacity.
 	1 to: capacity * 2 by: 2 do: [ :n | 
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n put: (n asByteArrayOfSize: 8) ].
 	self assert: index pages size equals: 1.
-	index at: 32 put: #[ 8 7 6 5 4 3 2 1 ].
+	index at: 32 put: (32 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
 	self assert: page numberOfItems equals: 126.
@@ -122,7 +122,7 @@ SoilSkipListTest >> testAddInBetweenOverwriting [
 	| page capacity |
 	capacity := index firstPage itemCapacity.
 	1 to: capacity * 2 by: 2 do: [ :n | 
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n put: (n asByteArrayOfSize: 8) ].
 	self assert: index pages size equals: 1.
 	index at: 31 put: #[ 8 7 6 5 4 3 2 1 ].
 	self assert: index pages size equals: 1.
@@ -136,9 +136,9 @@ SoilSkipListTest >> testAddLastFitting [
 	
 	| page |
 	1 to: 61 do: [ :n | 
-		index at: (index indexKey: n asString ) put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: (index indexKey: n asString ) put: (n asByteArrayOfSize: 8) ].
 	self assert: index pages size equals: 1.
-	index at: (index indexKey: 63 asString) put: #[ 1 2 3 4 5 6 7 8 ].
+	index at: (index indexKey: 63 asString) put: (63 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 1.
 	page := index pageAt: 1.
 	self assert: page numberOfItems equals: 62.
@@ -165,17 +165,17 @@ SoilSkipListTest >> testAddRandom [
 	numEntries timesRepeat: [ | toAdd |
 		toAdd := (numEntries*20) atRandom.
 		entries add: toAdd.
-		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: toAdd  put: (toAdd asByteArrayOfSize: 8) ].
 	
 	"check size"
 	self assert: index size equals: entries size.
 	
 	"can we find all the keys we added?"
-	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	entries do: [:each | self assert: (index at: each ) equals: (each asByteArrayOfSize: 8)].
 	
 	"iterate index, all should be in entries"
-	index do: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]].
-	index reverseDo: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]]
+	index do: [:each | self assert: each equals: (each asByteArrayOfSize: 8)].
+	index reverseDo: [:each | self assert: each equals: (each asByteArrayOfSize: 8)]
 ]
 
 { #category : #tests }
@@ -184,13 +184,13 @@ SoilSkipListTest >> testAt [
 	| capacity |
 	capacity := index firstPage itemCapacity.
 	1 to: capacity do: [ :n | 
-		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n  put: (n asByteArrayOfSize: 8)  ].
 	self assert: index pages size equals: 1.
-	index at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	index at: capacity + 1 put: (capacity + 1  asByteArrayOfSize: 8).
 	self assert: index pages size equals: 2.
 	
 	"we should be able to find the key that is on the second page"
-	self assert: (index at: capacity + 1) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: capacity + 1) equals:  (capacity + 1  asByteArrayOfSize: 8).
 	self should: [ index at: capacity + 2  ] raise: KeyNotFound
 ]
 
@@ -213,14 +213,13 @@ SoilSkipListTest >> testDo [
 	
 	| capacity col |
 	capacity := index firstPage itemCapacity.
-	index at: 1 put: #[ 8 7 6 5 4 3 2 1 ].
-	2 to: capacity do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	index at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	1 to: capacity do: [ :n |
+		index at: n put:  (n asByteArrayOfSize: 8) ].
+	index at: capacity + 1 put:  (capacity + 1 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 2.
 	col := OrderedCollection new.
 	index do: [ :item | col add: item ].
-	self assert: col first equals: #[ 8 7 6 5 4 3 2 1 ].
+	self assert: col first equals: (1 asByteArrayOfSize: 8).
 	self assert: col size equals: capacity + 1
 ]
 
@@ -228,19 +227,19 @@ SoilSkipListTest >> testDo [
 SoilSkipListTest >> testFindKey [
 	| value |
 	1 to: 200 do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n put: (n asByteArrayOfSize: 8)].
 	value := index find: 133. 
-	self assert: value equals: #[ 1 2 3 4 5 6 7 8 ]
+	self assert: value equals: (133 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
 SoilSkipListTest >> testFindKeyReverse [
 	| value |
 	200 to: 1 by: -1 do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n put: (n asByteArrayOfSize: 8) ].
 	"skipList writePages."
 	value := index find: 133. 
-	self assert: value equals: #[ 1 2 3 4 5 6 7 8 ]
+	self assert: value equals: (133 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
@@ -250,18 +249,18 @@ SoilSkipListTest >> testFirst [
 	capacity := index firstPage itemCapacity * 2.
 
 	2 to: capacity do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	index at: 1 put: #[ 8 7 6 5 4 3 2 1 ].
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	index at: 1 put: (1 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 3.
-	self assert: index first equals: #[ 8 7 6 5 4 3 2 1 ].
-	self assert: (index first: 2) second equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: index first equals: (1 asByteArrayOfSize: 8).
+	self assert: (index first: 2) second equals:(2 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
 SoilSkipListTest >> testFirstArgLargerThenSize [
 
 	1 to: 4 do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n put: (n asByteArrayOfSize: 8)].
 	self assert: index pages size equals: 1.
 	self assert: (index first: 5) size equals: 4
 ]
@@ -272,7 +271,7 @@ SoilSkipListTest >> testIndexRewriting [
 	| capacity fileSizeBefore |
 	capacity := index firstPage itemCapacity.
 	1 to: capacity + 1 do: [ :n | 
-		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n  put: (n asByteArrayOfSize: 8) ].
 	index flush.
 	fileSizeBefore := index path size.
 	index newPluggableRewriter rewrite.
@@ -287,7 +286,7 @@ SoilSkipListTest >> testIndexRewritingWithCleaning [
 	| capacity |
 	capacity := index firstPage itemCapacity.
 	1 to: capacity + 1 do: [ :n | 
-		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n  put: (n asByteArrayOfSize: 8) ].
 	index flush.
 	1 to: capacity do: [ :n | 
 		index at: n  put: SoilObjectId removed ].
@@ -295,7 +294,7 @@ SoilSkipListTest >> testIndexRewritingWithCleaning [
 	index newPluggableRewriter cleanRemoved rewrite.
 	self assert: index headerPage lastPageIndex equals: 1.
 	self assert: (index pageAt: 1) items size equals: 1.
-	self assert: (index at: capacity + 1) asByteArray equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: capacity + 1) equals: (capacity + 1 asByteArrayOfSize: 8).
 
 ]
 
@@ -320,10 +319,10 @@ SoilSkipListTest >> testLast [
 	capacity := index firstPage itemCapacity * 2.
 
 	1 to: capacity - 1 do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	index at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
+		index at: n put: (n asByteArrayOfSize: 8)].
+	index at: capacity put: (capacity asByteArrayOfSize: 8).
 	self assert: index pages size equals: 2.
-	self assert: index last equals: #[ 8 7 6 5 4 3 2 1 ]
+	self assert: index last equals: (capacity asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
@@ -334,20 +333,20 @@ SoilSkipListTest >> testLastPage [
 	capacity := index firstPage itemCapacity * 100.
 
 	1 to: capacity - 1 do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	index at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
+		index at: n put: (n asByteArrayOfSize: 8)].
+	index at: capacity put: (capacity asByteArrayOfSize: 8).
 	self assert: index pages size equals: 99.
 	self assert: index lastPage index equals: 99.
 	self assert: index lastPage isLastPage.
 	lastItem := index lastPage itemAt: capacity ifAbsent: [nil].
-	self assert: lastItem value equals: #[ 8 7 6 5 4 3 2 1 ].
+	self assert: lastItem value equals: (capacity asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
 SoilSkipListTest >> testLatestVersionRoundtrip [
 	
 	1 to: 10 do: [ :n | 
-		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n  put: (n asByteArrayOfSize: 8) ].
 	index removeKey: 4.
 	self assert: index pages size equals: 1.
 	self assert: index size equals: 9.
@@ -365,7 +364,7 @@ SoilSkipListTest >> testLatestVersionRoundtrip [
 { #category : #tests }
 SoilSkipListTest >> testMorePages [
 	1 to: 512 do: [ :n |
-		index at: (index indexKey: n asString) put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: (index indexKey: n asString) put: (n asByteArrayOfSize: 8) ].
 	index writePages.
 	self assert: index pages size equals: 3
 ]
@@ -377,9 +376,9 @@ SoilSkipListTest >> testOverflowCopyOnWriteAppending [
 	copyOnWrite := index asCopyOnWrite.
 	capacity := copyOnWrite firstPage itemCapacity.
 	1 to: capacity do: [ :n | 
-		copyOnWrite at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		copyOnWrite at: n  put: (n asByteArrayOfSize: 8) ].
 	self assert: copyOnWrite pages size equals: 1.
-	copyOnWrite at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
+	copyOnWrite at: capacity + 1 put: (capacity + 1 asByteArrayOfSize: 8).
 	self assert: copyOnWrite pages size equals: 2.
 	page := copyOnWrite pageAt: 2.
 	self assert: page numberOfItems equals: 1.
@@ -394,9 +393,9 @@ SoilSkipListTest >> testOverflowCopyOnWriteSplitting [
 	copyOnWrite := index asCopyOnWrite.
 	capacity := copyOnWrite firstPage itemCapacity.
 	1 to: capacity * 2 by: 2 do: [ :n | 
-		copyOnWrite at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		copyOnWrite at: n  put:  (n asByteArrayOfSize: 8) ].
 	self assert: copyOnWrite pages size equals: 1.
-	copyOnWrite at: 2 put: #[ 1 2 3 4 5 6 7 8 ].
+	copyOnWrite at: 2 put: (2 asByteArrayOfSize: 8).
 	self assert: copyOnWrite pages size equals: 2.
 	page := copyOnWrite pageAt: 2.
 	self assert: page numberOfItems equals: 126.
@@ -426,10 +425,10 @@ SoilSkipListTest >> testRemoveAllFromPage [
 	
 	
 	entries do: [:toAdd |
-		index at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: toAdd  put:  (toAdd asByteArrayOfSize: 8) ].
 
 	"can we find all the keys we added?"
-	entries do: [:each | self assert: (index at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	entries do: [:each | self assert: (index at: each ) equals: (each asByteArrayOfSize: 8)].
 	"#values iterates using #basicNextAssociation"
 	self assert: index values size equals: entries size.
 	
@@ -445,16 +444,16 @@ SoilSkipListTest >> testRemoveKey [
 
 	| capacity removed |
 	capacity := index headerPage itemCapacity.
-	1 to: capacity do: [ :n | index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	1 to: capacity do: [ :n | index at: n put:  (n asByteArrayOfSize: 8) ].
 	
 	removed := index removeKey: 20.
-	self assert: removed equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: removed equals: (20 asByteArrayOfSize: 8).
 	
-	self assert: (index at: 1) equals: #[ 1 2 3 4 5 6 7 8 ].
-	self assert: (index at: capacity) equals: #[ 1 2 3 4 5 6 7 8 ].
+	self assert: (index at: 1) equals: (1 asByteArrayOfSize: 8).
+	self assert: (index at: capacity) equals: (capacity asByteArrayOfSize: 8).
 	self should: [ index at: 20  ] raise: KeyNotFound.
-	index at: 20 put: #[ 1 2 3 4 5 6 7 8 ].
-	self assert: (index at: 20) equals: #[ 1 2 3 4 5 6 7 8 ].
+	index at: 20 put: (20 asByteArrayOfSize: 8).
+	self assert: (index at: 20) equals:(20 asByteArrayOfSize: 8).
 	
 	self should: [ index removeKey: capacity + 1 ] raise: KeyNotFound
 ]
@@ -464,10 +463,10 @@ SoilSkipListTest >> testSize [
 	
 	| capacity |
 	capacity := index firstPage itemCapacity.
-	index at: 1 put: #[ 8 7 6 5 4 3 2 1 ].
+	index at: 1 put:  (1 asByteArrayOfSize: 8).
 	2 to: capacity do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	index at: capacity + 1 put: #[ 1 2 3 4 5 6 7 8 ].
+		index at: n put:  (n asByteArrayOfSize: 8) ].
+	index at: capacity + 1 put: (capacity + 1 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 2.
 	self assert: index size equals: capacity + 1.
 ]
@@ -499,7 +498,7 @@ SoilSkipListTest >> testVersionOneRoundtrip [
 		instVarNamed: #version put: 1;
 		size: -1.
 	1 to: 10 do: [ :n | 
-		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n  put:  (n asByteArrayOfSize: 8) ].
 	index removeKey: 4.
 	self assert: index pages size equals: 1.
 	self assert: index size equals: 9.
@@ -520,7 +519,7 @@ SoilSkipListTest >> testVersionOneRoundtripAndCompact [
 		instVarNamed: #version put: 1;
 		size: -1.
 	1 to: 10 do: [ :n | 
-		index at: n  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		index at: n  put:  (n asByteArrayOfSize: 8) ].
 	index removeKey: 4.
 	self assert: index pages size equals: 1.
 	self assert: index size equals: 9.
