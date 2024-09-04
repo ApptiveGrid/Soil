@@ -88,17 +88,17 @@ SoilIndexedDictionaryTest >> testAddRandom [
 	numEntries timesRepeat: [ | toAdd |
 		toAdd := (numEntries*20) atRandom.
 		entries add: toAdd.
-		dict at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		dict at: toAdd  put: (toAdd asByteArrayOfSize: 8)].
 	
 	"check size"
 	self assert: dict size equals: entries size.
 	
 	"can we find all the keys we added?"
-	entries do: [:each | self assert: (dict at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	entries do: [:each | self assert: (dict at: each ) equals: (each asByteArrayOfSize: 8)].
 	
 	"iterate index, all should be in entries"
-	dict do: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]].
-	dict reverseDo: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]]
+	dict do: [:each | self assert: each equals: (each asByteArrayOfSize: 8)].
+	dict reverseDo: [:each | self assert: each equals: (each asByteArrayOfSize: 8)]
 ]
 
 { #category : #tests }
@@ -114,17 +114,17 @@ SoilIndexedDictionaryTest >> testAddRandomRemove [
 	numEntries timesRepeat: [ | toAdd |
 		toAdd := (numEntries*20) atRandom.
 		entries add: toAdd.
-		dict at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		dict at: toAdd  put:  (toAdd asByteArrayOfSize: 8) ].
 	
 	"check size"
 	self assert: dict size equals: entries size.
 	
 	"can we find all the keys we added?"
-	entries do: [:each | self assert: (dict at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	entries do: [:each | self assert: (dict at: each ) equals:  (each asByteArrayOfSize: 8)].
 	
 	"iterate index, all should be in entries"
-	dict do: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]].
-	dict reverseDo: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]].
+	dict do: [:each | self assert: each equals: (each asByteArrayOfSize: 8)].
+	dict reverseDo: [:each | self assert: each equals: (each asByteArrayOfSize: 8)].
 	
 	"we remove half randomly"
 	numRemoved := numEntries quo: 2.
@@ -136,7 +136,7 @@ SoilIndexedDictionaryTest >> testAddRandomRemove [
 				dict removeKey: toRemove]].
 		
 	"can we find all the keys that should still be there?"
-	(entries copyWithoutAll: removed) do: [:each | self assert: (dict at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	(entries copyWithoutAll: removed) do: [:each | self assert: (dict at: each ) equals: (each asByteArrayOfSize: 8)].
 	
 	"all the removed ones are gone"
 	removed do: [ :each | self assert: (dict at: each ifAbsent: [ true ]) ]

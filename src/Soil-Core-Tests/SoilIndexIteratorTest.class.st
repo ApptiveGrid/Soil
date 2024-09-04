@@ -64,17 +64,17 @@ SoilIndexIteratorTest >> testAddRandom [
 	numEntries timesRepeat: [ | toAdd |
 		toAdd := (numEntries*20) atRandom.
 		entries add: toAdd.
-		iterator at: toAdd  put: #[ 1 2 3 4 5 6 7 8 ] ].
+		iterator at: toAdd  put: (toAdd asByteArrayOfSize: 8)].
 	
 	"check size"
 	self assert: iterator size equals: entries size.
 	
 	"can we find all the keys we added?"
-	entries do: [:each | self assert: (iterator at: each ) equals: #[ 1 2 3 4 5 6 7 8 ]].
+	entries do: [:each | self assert: (iterator at: each ) equals:(each asByteArrayOfSize: 8)].
 	
 	"iterate index, all should be in entries"
-	iterator do: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]].
-	iterator reverseDo: [:each | self assert: each equals: #[ 1 2 3 4 5 6 7 8 ]]
+	iterator do: [:each | self assert: each equals: (each asByteArrayOfSize: 8)].
+	iterator reverseDo: [:each | self assert: each equals: (each asByteArrayOfSize: 8)]
 ]
 
 { #category : #tests }
@@ -202,18 +202,17 @@ SoilIndexIteratorTest >> testFirst [
 	
 	| capacity first |
 	capacity := index headerPage itemCapacity * 2.
-	index at: 1 put: #[ 8 7 6 5 4 3 2 1 ].
-	2 to: capacity do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
 	first := index newIterator first.
-	self assert: first equals: #[ 8 7 6 5 4 3 2 1 ].
+	self assert: first equals:  (1 asByteArrayOfSize: 8).
 	"we get always the first"
-	self assert: first equals: #[ 8 7 6 5 4 3 2 1 ].
+	self assert: first equals: (1 asByteArrayOfSize: 8).
 	
 	first := index newIterator first: 3.
 	self assert: first size equals: 3.
-	self assert: first third equals: #[ 1 2 3 4 5 6 7 8 ].
-	self assert: first first equals: #[ 8 7 6 5 4 3 2 1 ]
+	self assert: first third equals: (3 asByteArrayOfSize: 8).
+	self assert: first first equals: (1 asByteArrayOfSize: 8).
 ]
 
 { #category : #tests }
@@ -271,16 +270,15 @@ SoilIndexIteratorTest >> testLast [
 	"check last on empty iterator"
 	self assert: index newIterator last equals: nil.
 	
-	1 to: capacity - 1  do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	index at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
 	last := index newIterator last.
-	self assert: last equals: #[ 8 7 6 5 4 3 2 1 ].
+	self assert: last equals: (capacity asByteArrayOfSize: 8).
 	
 	last := index newIterator last: 3.
 	self assert: last size equals: 3.
-	self assert: last first equals: #[ 1 2 3 4 5 6 7 8 ].
-	self assert: last third equals: #[ 8 7 6 5 4 3 2 1 ]
+	self assert: last first equals: (capacity - 2 asByteArrayOfSize: 8). 
+	self assert: last third equals: (capacity asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
@@ -309,11 +307,10 @@ SoilIndexIteratorTest >> testLastPage [
 	"check last on empty iterator"
 	self assert: index newIterator lastPage identicalTo: index headerPage.
 	
-	1 to: capacity - 1  do: [ :n |
-		index at: n put: #[ 1 2 3 4 5 6 7 8 ] ].
-	index at: capacity put: #[ 8 7 6 5 4 3 2 1 ].
+	1 to: capacity  do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
 	lastPage := index newIterator lastPage.
-	self assert: lastPage lastItem value equals: #[ 8 7 6 5 4 3 2 1 ]
+	self assert: lastPage lastItem value equals: (capacity asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
