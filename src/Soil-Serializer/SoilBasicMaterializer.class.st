@@ -111,10 +111,7 @@ SoilBasicMaterializer >> nextLargePositiveInteger [
 
 { #category : #'reading - basic' }
 SoilBasicMaterializer >> nextLengthEncodedInteger [
-	| value |
-	value := self nextByte.
-	(value < 128) ifTrue: [ ^ value ].
-	^ (self nextLengthEncodedInteger bitShift: 7) bitOr: (value bitAnd: 127)
+	^ stream nextLengthEncodedInteger
 ]
 
 { #category : #reading }

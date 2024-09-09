@@ -531,7 +531,7 @@ SoilIndexedDictionaryTest >> testLastWithTransactionRemoved [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testNextAfterWithTransaction [
+SoilIndexedDictionaryTest >> testNextAfter [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
@@ -547,7 +547,7 @@ SoilIndexedDictionaryTest >> testNextAfterWithTransaction [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testNextcloseToWithTransaction [
+SoilIndexedDictionaryTest >> testNextCloseTo [
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.
