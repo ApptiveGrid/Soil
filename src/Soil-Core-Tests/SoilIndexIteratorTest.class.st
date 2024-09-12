@@ -579,6 +579,31 @@ SoilIndexIteratorTest >> testNextKeyCloseTo [
 ]
 
 { #category : #tests }
+SoilIndexIteratorTest >> testNextPage [
+	
+	| capacity iterator value expected |
+	iterator := index newIterator.
+	
+	"empty case"
+	iterator findPageFor: 1.
+	value := iterator nextPage.
+	self assert: value isNil.
+	
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n |
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	
+	expected := index class == SoilBTree ifTrue: [ 4 ] ifFalse: [ 2 ].
+	value := iterator
+		findPageFor: 222.
+	self assert: iterator nextPage index equals: expected.
+	
+	value := iterator
+		findPageFor: capacity + 1.
+	self assert: iterator nextPage isNil
+]
+
+{ #category : #tests }
 SoilIndexIteratorTest >> testPrevious [
 	
 	| capacity iterator value toFind |
@@ -776,8 +801,12 @@ SoilIndexIteratorTest >> testReverseDo [
 	
 	| capacity result |
 	
+	"empty case"	
 	result := OrderedCollection new.
-	
+	index newIterator reverseDo: [ :each | result add: each ].
+	self assert: result size equals: 0.
+
+	result := OrderedCollection new.
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n |
 		index at: n put: (n asByteArrayOfSize: 8) ].

@@ -444,7 +444,7 @@ SoilIndexIterator >> restoreItem: anItem [
 { #category : #enumerating }
 SoilIndexIterator >> reverseDo: aBlock [ 
 	| item |
-	aBlock value: self lastAssociation value.
+	self lastAssociation ifNotNil: [ :last |  aBlock value: last value ] ifNil: [ ^self ].
 	
 	"We use basicNextAssociation to avoid the creation of intermediate associations of nextAssociation"
 	[ (item := self basicPreviousAssociation ) notNil ] whileTrue: [ 
