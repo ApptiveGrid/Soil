@@ -55,6 +55,14 @@ SoilPersistentDictionary >> at: key ifAbsentPut: aBlock [
 		ifAbsent: [ self at: key put: aBlock value ]
 ]
 
+{ #category : #accessing }
+SoilPersistentDictionary >> at: key ifPresent: aPresentBlock ifAbsent: anAbsentBlock [
+
+	^ aPresentBlock value: (self 
+		at: key 
+		ifAbsent: [ ^ anAbsentBlock value ])
+]
+
 { #category : #forwarded }
 SoilPersistentDictionary >> at: key put: value [
 	| return |
