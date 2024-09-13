@@ -3,6 +3,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'soil',
+		'path',
 		'metaSegment',
 		'segments'
 	],
@@ -105,7 +106,7 @@ SoilObjectRepository >> heapPositionOf: anObjectId [
 { #category : #initialization }
 SoilObjectRepository >> initializeFilesystem [
 	| firstSegment |
-	(soil path / #segments) ensureCreateDirectory.
+	(self path / #segments) ensureCreateDirectory.
 	segments := OrderedCollection new.
 	metaSegment := self newMetaSegment
 		initializeFilesystem;
@@ -123,10 +124,10 @@ SoilObjectRepository >> initializeFilesystem [
 
 { #category : #initialization }
 SoilObjectRepository >> loadSegments [
-	| path directories |
-	path := soil path / #segments.
-	path exists ifFalse: [ SoilSoilNotInitialized signal: 'soil instance on ', path pathString, ' has not been initialized' ].
-	directories := path directories.
+	| segmentPath directories |
+	segmentPath := self path / #segments.
+	segmentPath exists ifFalse: [ SoilSoilNotInitialized signal: 'soil instance on ', segmentPath pathString, ' has not been initialized' ].
+	directories := segmentPath directories.
 	segments := Array new: directories size - 1.
 	directories do: [ :directory | | segmentId segment |
 		segmentId := directory basename asInteger.
@@ -153,6 +154,14 @@ SoilObjectRepository >> loadSegments [
 SoilObjectRepository >> lockObjectId: aSOObjectId for: lockContext [
 	^ (self segmentAt: aSOObjectId segment)
 		lockObjectId: aSOObjectId for: lockContext
+]
+
+{ #category : #'as yet unclassified' }
+SoilObjectRepository >> makeGCClone [
+	^ self class new
+		soil: soil; 
+		path: path, #gc;
+		initializeFilesystem 
 ]
 
 { #category : #accessing }
@@ -183,6 +192,19 @@ SoilObjectRepository >> newSegment [
 	^ SoilObjectSegment new 
 		objectRepository: self;
 		yourself
+]
+
+{ #category : #accessing }
+SoilObjectRepository >> path [
+
+	^ path ifNil: [ 
+		path := soil path ]
+]
+
+{ #category : #accessing }
+SoilObjectRepository >> path: anObject [
+
+	path := anObject
 ]
 
 { #category : #accessing }
