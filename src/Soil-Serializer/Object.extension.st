@@ -35,6 +35,11 @@ Object class >> soilPersistentInstVars [
 ]
 
 { #category : #'*Soil-Serializer' }
+Object >> soilReplacement [
+	^ self
+]
+
+{ #category : #'*Soil-Serializer' }
 Object >> soilSerialize [
 	^ ByteArray streamContents: [ :stream |
 		self soilSerializeOn: stream ]
