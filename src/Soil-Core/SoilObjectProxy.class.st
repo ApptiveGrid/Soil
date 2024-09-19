@@ -114,6 +114,11 @@ SoilObjectProxy >> soilRealObject [
 		object := transaction objectWithId: objectId ]
 ]
 
+{ #category : #serializing }
+SoilObjectProxy >> soilReplacement [
+	^ self
+]
+
 { #category : #soil }
 SoilObjectProxy >> soilSerialize: aSerializer [ 
 	^ self soilRealObject soilSerialize: aSerializer 
