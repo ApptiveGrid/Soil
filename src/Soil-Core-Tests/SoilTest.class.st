@@ -405,7 +405,7 @@ SoilTest >> testSerializingToSavedRoot [
 	tx3 := soil3 newTransaction.
 	materializedRoot := tx3 root.
 	materializedModelMap := materializedRoot at: modelName.
-	self assert: materializedModelMap class equals: SoilObjectProxy.
+	self assert: materializedModelMap isSoilProxy.
 	self assert: materializedModelMap soilRealObject class equals: Dictionary.
 	self assert: (materializedModelMap soilRealObject at: 'foo') class equals: SoilTestGraphRoot.
 	self assert: (materializedModelMap soilRealObject at: 'foo') nested reference nested label equals: 'nested under cluster'
