@@ -92,7 +92,7 @@ SoilPersistentDictionaryTest >> testCommitAndRead [
 
 	"should this not be transparently load it?"
 	"if the Proxy inherits from ProtoObject, it works"
-	self assert: (materialized at: #test) class equals: SoilObjectProxy
+	self assert: (materialized at: #test) isSoilProxy
 ]
 
 { #category : #tests }
