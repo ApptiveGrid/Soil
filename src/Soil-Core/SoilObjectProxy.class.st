@@ -20,6 +20,12 @@ SoilObjectProxy >> asUnresolvedProxy [
 		objectId: objectId 
 ]
 
+{ #category : #'class membership' }
+SoilObjectProxy >> class [
+	"we override it here as else the superclass version would be uses, returning SoilObjectProxy"
+    ^ self soilRealObject class
+]
+
 { #category : #'reflective operations' }
 SoilObjectProxy >> doesNotUnderstand: aMessage [ 
 	^ aMessage sendTo: self soilRealObject
