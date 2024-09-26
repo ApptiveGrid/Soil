@@ -332,6 +332,32 @@ SoilTest >> testMigrationVersionsHalf [
 ]
 
 { #category : #tests }
+SoilTest >> testRootSendingClass [
+	"We have a root in a Dictionary and that object overrides #= that checks using #class.
+	This tests that the proxy forwards #class correctly"
+
+	| tx collection objectUsingClassinQueals |
+	tx := soil newTransaction.
+	collection := OrderedCollection new.
+	tx root: collection.
+	objectUsingClassinQueals := RBComment with:
+		                            (RBCommentToken
+			                             value: 'Some sample text'
+			                             start: 5
+			                             stop: 21).
+	tx makeRoot: objectUsingClassinQueals.
+	collection add: objectUsingClassinQueals.
+	tx markDirty: objectUsingClassinQueals.
+	tx markDirty: collection.
+	tx commit.
+
+	"now lets try to remove the object in a new transaction, note that the #remove uses #= which sends #class"
+	tx := soil newTransaction.
+	tx root remove: objectUsingClassinQueals.
+	tx commit
+]
+
+{ #category : #tests }
 SoilTest >> testSerializingClassDescription [
 	| obj bytes obj2 stream transaction |
 	self skip.
