@@ -130,10 +130,11 @@ SoilBasicMaterializer >> nextSoilObject [
 	| byte |
 
 	byte := self nextByte.
-	^ (TypeCodeMapping 
+	^ ((TypeCodeMapping 
 		at: byte
 		ifAbsent: [ Error signal: 'cannot find type code for ', byte asString]) 
-			soilMaterialize: self 
+			soilMaterialize: self)
+			soilReplacement
 ]
 
 { #category : #reading }
