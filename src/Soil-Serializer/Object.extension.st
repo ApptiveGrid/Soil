@@ -53,9 +53,11 @@ Object >> soilSerialize [
 
 { #category : #'*Soil-Serializer' }
 Object >> soilSerialize: aSoilSerializer [ 
+	| object |
+	object := self soilSerializationReplacement.
 	aSoilSerializer 
-		registerObject: self 
-		ifAbsent: [ self soilBasicSerialize: aSoilSerializer ].
+		registerObject: object 
+		ifAbsent: [ object soilBasicSerialize: aSoilSerializer ].
 	
 ]
 
