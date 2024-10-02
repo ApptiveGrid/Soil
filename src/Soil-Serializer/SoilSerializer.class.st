@@ -215,7 +215,9 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 
 { #category : #private }
 SoilSerializer >> serialize: anObject [
-	clusterRoot := anObject.
+	| objectToSerialize |
+	objectToSerialize := anObject soilSerializationReplacement.
+	clusterRoot := objectToSerialize.
 	clusterRoot soilSerialize: self.
 	stream flush.
 	^ stream contents

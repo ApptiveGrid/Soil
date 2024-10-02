@@ -21,6 +21,11 @@ Object >> soilLoadedIn: aTransaction [
 ]
 
 { #category : #'*Soil-Serializer' }
+Object >> soilMaterializationReplacement [
+	^ self
+]
+
+{ #category : #'*Soil-Serializer' }
 Object >> soilMaterialize: materializer [
 	^ self 
 ]
@@ -35,7 +40,7 @@ Object class >> soilPersistentInstVars [
 ]
 
 { #category : #'*Soil-Serializer' }
-Object >> soilReplacement [
+Object >> soilSerializationReplacement [
 	^ self
 ]
 

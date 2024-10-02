@@ -114,15 +114,15 @@ SoilObjectProxy >> soilLoadedIn: aTransaction [
 	transaction := aTransaction  
 ]
 
+{ #category : #serializing }
+SoilObjectProxy >> soilMaterializationReplacement [
+	^ self
+]
+
 { #category : #'reflective operations' }
 SoilObjectProxy >> soilRealObject [
 	^ object ifNil: [  
 		object := transaction objectWithId: objectId ]
-]
-
-{ #category : #serializing }
-SoilObjectProxy >> soilReplacement [
-	^ self
 ]
 
 { #category : #soil }
