@@ -99,7 +99,16 @@ SoilDatabaseRecovery >> recover [
 	fragmentFile := journal openFragmentForLSN: lastCheckpoint.
 	"The log sequence number of a successful checkpoint points to the checkpoint 
 	entry that was last written"
-	checkpointEntry := SoilJournalEntry readFrom: fragmentFile stream.
+	checkpointEntry := [ SoilJournalEntry readFrom: fragmentFile stream ]
+		on: Error 
+		do: [ :error | 
+			"in case of a bogus checkpoint position we cannot recover the file but 
+			create a new one and continue"
+			journal 
+				currentFragmentFile: fragmentFile;
+				cycleFragmentFile.
+			soil checkpoint.
+			^ self ].
 	"If the last checkpoint was successful we are at the end of the file and 
 	can return because the database is in a sane state"
 	fragmentFile atEnd ifTrue: [ ^ self ].

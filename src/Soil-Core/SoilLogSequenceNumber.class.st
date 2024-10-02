@@ -67,7 +67,7 @@ SoilLogSequenceNumber >> hexOffset [
 
 { #category : #testing }
 SoilLogSequenceNumber >> isInitial [
-	^ value = 0
+	^ self fileOffset = 0
 ]
 
 { #category : #printing }
