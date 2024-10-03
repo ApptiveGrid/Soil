@@ -127,13 +127,14 @@ SoilBasicMaterializer >> nextScaledDecimal: aClass [
 
 { #category : #reading }
 SoilBasicMaterializer >> nextSoilObject [ 
-	| byte |
+	| byte object |
 
 	byte := self nextByte.
-	^ (TypeCodeMapping 
+	object := (TypeCodeMapping 
 		at: byte
 		ifAbsent: [ Error signal: 'cannot find type code for ', byte asString]) 
-			soilMaterialize: self 
+			soilMaterialize: self.
+	^ object soilMaterializationReplacement 
 ]
 
 { #category : #reading }

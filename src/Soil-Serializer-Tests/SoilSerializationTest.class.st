@@ -52,6 +52,29 @@ SoilSerializationTest >> setUp [
 	transaction := soil newTransaction
 ]
 
+{ #category : #tests }
+SoilSerializationTest >> testMaterializationWithReplacement [
+	| object serialized materialized |
+	object := SoilTestObject new 
+		reference: (SoilReplacmentTestObject new 
+			replaceOnMaterialization: SoilBaseTestObject new).	
+				
+	serialized := self serializeToBytes: object.
+
+	materialized := self materializeFromBytes: serialized.
+	self assert: materialized reference class  equals: SoilBaseTestObject 
+]
+
+{ #category : #tests }
+SoilSerializationTest >> testMaterializationWithReplacementRoot [
+	| object serialized materialized |
+	object := SoilReplacmentTestObject new replaceOnMaterialization: SoilBaseTestObject new.
+	serialized := self serializeToBytes: object.
+
+	materialized := self materializeFromBytes: serialized.
+	self assert: materialized class equals: SoilBaseTestObject 
+]
+
 { #category : #'test-blocks' }
 SoilSerializationTest >> testSerializationCleanBlockClosure [
 	<compilerOptions: #(+ optionCleanBlockClosure)>
@@ -311,6 +334,27 @@ SoilSerializationTest >> testSerializationWeakLayout [
 	self assert: materialized equals: object.
 	self assert: materialized class equals: WeakArray.
 	self assert: materialized class classLayout class equals: WeakLayout.
+]
+
+{ #category : #tests }
+SoilSerializationTest >> testSerializationWithReplacement [
+	| object serialized materialized |
+	object := SoilTestObject new 
+		reference: (SoilReplacmentTestObject new 
+			replaceOnSerialization: SoilBaseTestObject new).	serialized := self serializeToBytes: object.
+
+	materialized := self materializeFromBytes: serialized.
+	self assert: materialized reference class  equals: SoilBaseTestObject 
+]
+
+{ #category : #tests }
+SoilSerializationTest >> testSerializationWithReplacementRoot [
+	| object serialized materialized |
+	object := SoilReplacmentTestObject new replaceOnSerialization: SoilBaseTestObject new.
+	serialized := self serializeToBytes: object.
+
+	materialized := self materializeFromBytes: serialized.
+	self assert: materialized class equals: SoilBaseTestObject 
 ]
 
 { #category : #'tests-layouts' }
