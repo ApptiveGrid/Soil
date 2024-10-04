@@ -68,6 +68,11 @@ SoilObjectProxy >> isIdenticalTo: anObject [
 ]
 
 { #category : #testing }
+SoilObjectProxy >> isNil [ 
+	^ self soilRealObject isNil
+]
+
+{ #category : #testing }
 SoilObjectProxy >> isSoilProxy [ 
 	^ true
 ]
