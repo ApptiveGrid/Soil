@@ -242,14 +242,16 @@ SoilTransaction >> buildWriteVersion [
 { #category : #accessing }
 SoilTransaction >> commit [
 	self basicCommit.
-	soil checkpoint.
+	recordsToCommit ifNotEmpty: [ 
+		soil checkpoint ].
 	self basicAbort.
 ]
 
 { #category : #actions }
 SoilTransaction >> commitAndContinue [
 	self basicCommit.
-	soil checkpoint.
+	recordsToCommit ifNotEmpty: [ 
+		soil checkpoint ].
 	self continue
 ]
 
