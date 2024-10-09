@@ -39,6 +39,37 @@ SoilBasicSkipList >> newIterator [
 	^ SoilSkipListIterator on: self 
 ]
 
+{ #category : #removing }
+SoilBasicSkipList >> removePage: aPage [
+	| iterator previousPage seen page |
+	(aPage index > 1) ifFalse: [ Error signal: 'cannot remove header page' ].
+	"we use an iterator to scan pages on all levels that are just right
+	before the page to remove"
+	iterator := self newIterator. 
+	previousPage := iterator findPreviousPageOf: aPage. 
+	"on each level up to max level the iterator has a reference to a 
+	page. We remember the pages processed in order not to process the
+	same page multiple times"
+	seen := Set new.	
+	1 to: self maxLevel do: [ :level |
+		page := iterator levelAt: level.
+		(seen includes: page) ifFalse: [  
+			seen add: page.
+			1 to: page level do: [ :lvl |
+				"each previous page's next pointer might point to the page 
+				to be removed."
+				((page rightAt: lvl) = aPage index) ifTrue: [ 
+					"We overwrite the next pointer of the previous page with 
+					the next pointer of the page to be removed"
+					page rightAt: lvl put: (aPage rightAt: lvl).
+					page markDirty ] ] ] ].
+	"finally remove the page from the store"
+	store removePageAt: aPage index.
+	^ aPage 
+
+
+]
+
 { #category : #accessing }
 SoilBasicSkipList >> size [ 
 	"if size is -1 the page has been converted from version 1 format and

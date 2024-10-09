@@ -128,6 +128,12 @@ SoilPagedFileIndexStore >> readHeaderPage [
 ]
 
 { #category : #accessing }
+SoilPagedFileIndexStore >> removePageAt: anIndex [ 
+	^ pagesMutex critical: [  
+		pages removeKey: anIndex ]
+]
+
+{ #category : #accessing }
 SoilPagedFileIndexStore >> replace: oldPage with: newPage [ 
 	pagesMutex critical: [  
 		pages
