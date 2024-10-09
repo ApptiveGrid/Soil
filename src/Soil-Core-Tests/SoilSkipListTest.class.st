@@ -476,6 +476,10 @@ SoilSkipListTest >> testRemovePage [
 		offset := offset + capacity ].
 	self assert: index pages size equals: 6.
 	index removePage: (index pages at: 3).
+	self assert: index pages size equals: 5.
+
+	
+	
 	
 ]
 
