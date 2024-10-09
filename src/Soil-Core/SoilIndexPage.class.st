@@ -100,6 +100,11 @@ SoilIndexPage >> latestVersion [
 ]
 
 { #category : #accessing }
+SoilIndexPage >> markDirty [
+	dirty := true 
+]
+
+{ #category : #accessing }
 SoilIndexPage >> pageSize [
 	^ pageSize
 ]

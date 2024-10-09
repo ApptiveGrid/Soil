@@ -459,6 +459,27 @@ SoilSkipListTest >> testRemoveKey [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testRemovePage [
+	
+	| capacityFirst offset capacity iterator |
+	capacityFirst := index firstPage itemCapacity.
+	1 to: capacityFirst do: [ :n | 
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	self assert: index pages size equals: 1.
+	offset := capacityFirst.
+	iterator := index newIterator.
+	2 to: 6 do: [ :p | 
+		index at: offset + 1 put: ((offset + 1) asByteArrayOfSize: 8).
+		capacity := index lastPage itemCapacity.
+		offset + 2 to:  (offset + capacity) do: [:n | .
+			index at: n put: (n asByteArrayOfSize: 8) ].
+		offset := offset + capacity ].
+	self assert: index pages size equals: 6.
+	index removePage: (index pages at: 3).
+	
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testSize [
 	
 	| capacity |
