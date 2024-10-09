@@ -58,6 +58,20 @@ SoilPersistentDictionaryTest >> testAtIfAbsent [
 ]
 
 { #category : #tests }
+SoilPersistentDictionaryTest >> testAtIfPresentIfAbsent [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	dict at: #test1 put: 1.
+	transaction makeRoot: dict.
+	transaction commit.
+		
+	self assert: (dict at: #test2 ifPresent: [#present] ifAbsent: [#missing]) equals: #missing.
+	self assert: (dict at: #test1 ifPresent: [:pr | #present] ifAbsent: [#missing]) equals: #present.
+]
+
+{ #category : #tests }
 SoilPersistentDictionaryTest >> testAtPut [
 
 	| dict transaction |
@@ -135,6 +149,28 @@ SoilPersistentDictionaryTest >> testRemoveKey [
 	self assert: (dict at: #test2) equals: 'string2'.
 	self deny: (dict includesKey: #test)
 	
+	
+
+
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testRemoveKeyIfAbsent [
+
+	| dict transaction removed removed2|
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	dict at: #test put: 'string'.
+	dict at: #test2 put: 'string2'.
+	removed := dict removeKey: #test ifAbsent: [ self error ].
+	removed2 :=  dict removeKey: #tt ifAbsent: [ #absent ].
+	transaction commit.
+	
+	self assert: removed equals: 'string'.
+	self assert: (dict at: #test2) equals: 'string2'.
+	self deny: (dict includesKey: #test).
+	self assert: removed2 equals: #absent.
 	
 
 
