@@ -200,3 +200,14 @@ SoilCleanCodeTest >> testNoUnusedTemporaryVariablesLeft [
 		assert: found isEmpty 
 		description: ('the following methods have unused temporary variables and should be cleaned: ', found asString)
 ]
+
+{ #category : #tests }
+SoilCleanCodeTest >> testNoVarsDefinedByClassesShadow [
+	"make sure no class vars or ivars shadow"
+	| classes |
+	classes := Soil package definedClasses select: [ :class |
+		           class definedVariables anySatisfy: [ :var |
+			           var isShadowing ] ].
+
+	self assert: classes isEmpty description: classes asArray asString
+]
