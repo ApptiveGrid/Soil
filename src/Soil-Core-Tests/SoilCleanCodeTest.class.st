@@ -85,6 +85,25 @@ SoilCleanCodeTest >> testNoDuplicatedMethodInHierarchy [
 ]
 
 { #category : #tests }
+SoilCleanCodeTest >> testNoShadowedVariablesInMethods [
+	"Fail if there are methods who define shadowed temps or args"
+	| found validExceptions remaining |
+	found := Soil package methods select: [ :m |
+		m isQuick not and: [ "quick methods do not define variables"
+			m ast variableDefinitionNodes anySatisfy: [ :node | node variable isShadowing ] ]].
+	"No other exceptions beside the ones mentioned here should be allowed"
+	validExceptions := { }.
+
+	remaining := found asOrderedCollection
+								removeAll: validExceptions;
+								yourself.
+
+	self
+		assert: remaining isEmpty
+		description: ('the following methods have shadowing variable definitions and should be cleaned: ', remaining asString)
+]
+
+{ #category : #tests }
 SoilCleanCodeTest >> testNoUncategorizedMethods [
 	"Check that we have no #'as yet unclassified' protocols left"
 
@@ -180,4 +199,15 @@ SoilCleanCodeTest >> testNoUnusedTemporaryVariablesLeft [
 	self 
 		assert: found isEmpty 
 		description: ('the following methods have unused temporary variables and should be cleaned: ', found asString)
+]
+
+{ #category : #tests }
+SoilCleanCodeTest >> testNoVarsDefinedByClassesShadow [
+	"make sure no class vars or ivars shadow"
+	| classes |
+	classes := Soil package definedClasses select: [ :class |
+		           class definedVariables anySatisfy: [ :var |
+			           var isShadowing ] ].
+
+	self assert: classes isEmpty description: classes asArray asString
 ]
