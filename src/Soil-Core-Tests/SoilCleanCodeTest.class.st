@@ -27,6 +27,44 @@ SoilCleanCodeTest class >> cleanupWhiteSpaceTrimRight [
 		refactoring execute ]
 ]
 
+{ #category : #running }
+SoilCleanCodeTest >> assertValidLintRule: aLintRule [
+	self assertValidLintRule: aLintRule withExceptions: #()
+]
+
+{ #category : #running }
+SoilCleanCodeTest >> assertValidLintRule: aLintRule withExceptions: someNames [
+	| runner results |
+	runner := ReSmalllintChecker new.
+	runner
+		rule: {aLintRule};
+		environment: ( RBBrowserEnvironment new
+		forClasses: self packageToCheck definedClasses);
+		run.
+
+	results := (runner criticsOf: aLintRule) reject: [ :critique | someNames includes: critique entity name ].
+	self
+		assert: results isEmpty
+		description: [ String
+				streamContents: [ :s |
+					s
+						<< aLintRule rationale;
+						lf;
+						<< 'Violations: ';
+						lf.
+					results
+						do: [ :e |
+							s
+								<< '- ';
+								print: e entity ]
+						separatedBy: [ s lf ] ] ]
+]
+
+{ #category : #running }
+SoilCleanCodeTest >> packageToCheck [
+	^ Soil package
+]
+
 { #category : #tests }
 SoilCleanCodeTest >> testCodeCoverage [
 
@@ -36,7 +74,7 @@ SoilCleanCodeTest >> testCodeCoverage [
 	"take care: this test interferes with the run coverage feature in the testRunner, we should improve
 	it to not run test tagged <ignoreForCoverage>"
 	collector :=Smalltalk globals at: #CoverageCollector ifPresent: [:class | class new] ifAbsent: [self error: 'class CoverageCollector not found' ].
-	methods := Soil package methods.
+	methods := self packageToCheck methods.
 	"Remove all the methods and classes we are not interested in"
 	
 	"subclassResponsibility methods"
@@ -72,7 +110,7 @@ SoilCleanCodeTest >> testNoDuplicatedMethodInHierarchy [
 	"There should be no methods in the hierachy that are already in a superclass"
 	
 	| methods |
-	methods :=  Soil package methods reject: [:method | method isFromTrait].
+	methods := self packageToCheck methods reject: [:method | method isFromTrait].
 	methods := methods select: [:method |
 	method methodClass superclass
  		ifNotNil: [ :superclass | (superclass lookupSelector: method selector)
@@ -88,7 +126,7 @@ SoilCleanCodeTest >> testNoDuplicatedMethodInHierarchy [
 SoilCleanCodeTest >> testNoShadowedVariablesInMethods [
 	"Fail if there are methods who define shadowed temps or args"
 	| found validExceptions remaining |
-	found := Soil package methods select: [ :m |
+	found := self packageToCheck methods select: [ :m |
 		m isQuick not and: [ "quick methods do not define variables"
 			m ast variableDefinitionNodes anySatisfy: [ :node | node variable isShadowing ] ]].
 	"No other exceptions beside the ones mentioned here should be allowed"
@@ -109,8 +147,8 @@ SoilCleanCodeTest >> testNoUncategorizedMethods [
 
 	| violating classes |
 	self skip.
-	classes := Soil package definedClasses
-	           , (Soil package definedClasses collect: [ :each | each classSide ]).
+	classes := self packageToCheck definedClasses
+	           , (self packageToCheck definedClasses collect: [ :each | each classSide ]).
 
 	violating := classes select: [ :class | 
 		             class protocolNames includes: #'as yet unclassified' ].
@@ -127,7 +165,7 @@ SoilCleanCodeTest >> testNoUnimplementedCalls [
 	<ignoreNotImplementedSelectors: #(selector:to:be:ignored)>"
 	
 	self skip.
-	remaining := Soil package methods select: [ :meth | 
+	remaining := self packageToCheck methods select: [ :meth | 
 		             | ignored |
 		             ignored := meth allIgnoredNotImplementedSelectors.
 						 meth messages anySatisfy: [ :m | 
@@ -145,8 +183,8 @@ SoilCleanCodeTest >> testNoUnsentMessages [
 	| found methods|
 	"As this is not critical, we skip this test. If you are want to cleanup, just run it!"
 	self skip.
-	found := Soil package allUnsentMessages.
-	methods := Soil package methods select: [ :method | found includes: method selector ].
+	found := self packageToCheck allUnsentMessages.
+	methods := self packageToCheck methods select: [ :method | found includes: method selector ].
 	methods := methods reject: [:method | method hasPragmaNamed: #inspectorPresentationOrder:title:
   ].
 	
@@ -162,7 +200,7 @@ SoilCleanCodeTest >> testNoUnusedClasses [
 	| found  knownviolations |
 	"As this is not critical, we skip this test. If you are want to cleanup, just run it!"
 	self skip.
-	found := Soil package definedClasses reject: [ :class | class isUsed]. 
+	found := self packageToCheck definedClasses reject: [ :class | class isUsed]. 
 	
 	knownviolations := #( ).
 	found := found reject: [:class | knownviolations includes: class name  ].
@@ -175,8 +213,8 @@ SoilCleanCodeTest >> testNoUnusedClasses [
 { #category : #tests }
 SoilCleanCodeTest >> testNoUnusedInstanceVariablesLeft [
 	| variables classes validExceptions remaining |
-	classes := Soil package definedClasses
-	           , (Soil package definedClasses collect: [ :each | each classSide ]).
+	classes := self packageToCheck definedClasses
+	           , (self packageToCheck definedClasses collect: [ :each | each classSide ]).
 	
 	variables := classes flatCollect: [ :each | each instanceVariables ].
 	variables := variables reject: [ :each | each isReferenced ].
@@ -193,7 +231,7 @@ SoilCleanCodeTest >> testNoUnusedInstanceVariablesLeft [
 SoilCleanCodeTest >> testNoUnusedTemporaryVariablesLeft [
 	"Fail if there are methods who have unused temporary variables"
 	| found  |
-	found := Soil package methods select: [ :m | 
+	found := self packageToCheck methods select: [ :m | 
 		m hasTemporaries and: [ m ast temporaries anySatisfy: [ :x | x binding isUsed not] ] ].
 							
 	self 
@@ -205,9 +243,19 @@ SoilCleanCodeTest >> testNoUnusedTemporaryVariablesLeft [
 SoilCleanCodeTest >> testNoVarsDefinedByClassesShadow [
 	"make sure no class vars or ivars shadow"
 	| classes |
-	classes := Soil package definedClasses select: [ :class |
+	classes := self packageToCheck definedClasses select: [ :class |
 		           class definedVariables anySatisfy: [ :var |
 			           var isShadowing ] ].
 
 	self assert: classes isEmpty description: classes asArray asString
+]
+
+{ #category : #tests }
+SoilCleanCodeTest >> testReDoNotSendSuperInitializeInClassSideRule [
+	self assertValidLintRule: ReDoNotSendSuperInitializeInClassSideRule new
+]
+
+{ #category : #tests }
+SoilCleanCodeTest >> testReInstanceVariableCapitalizationRule [
+	self assertValidLintRule: ReInstanceVariableCapitalizationRule new
 ]
