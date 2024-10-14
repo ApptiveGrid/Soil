@@ -119,6 +119,11 @@ SoilBasicBTree >> pageClass [
 	^ SoilBTreeDataPage
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBasicBTree >> pageIsEmpty: aSoilBTreeHeaderPage [ 
+	
+]
+
 { #category : #removing }
 SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
 	| removedItem |

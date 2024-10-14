@@ -39,6 +39,12 @@ SoilBasicSkipList >> newIterator [
 	^ SoilSkipListIterator on: self 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBasicSkipList >> pageIsEmpty: aPage [ 
+	aPage isHeaderPage ifTrue: [ ^ self ].
+	self removePage: aPage 
+]
+
 { #category : #removing }
 SoilBasicSkipList >> removePage: aPage [
 	| iterator previousPage seen page |

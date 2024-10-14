@@ -240,6 +240,12 @@ SoilIndexItemsPage >> readLastTransactionFrom: aStream [
 ]
 
 { #category : #accessing }
+SoilIndexItemsPage >> removeItemAt: key [ 
+	^ self itemRemoveAt: key ifAbsent: [ ]
+
+]
+
+{ #category : #accessing }
 SoilIndexItemsPage >> setItems: aCollection [ 
 	items := aCollection
 ]

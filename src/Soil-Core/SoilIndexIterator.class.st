@@ -29,7 +29,7 @@ SoilIndexIterator >> at: aKeyObject [
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 	| foundValue item |
-	foundValue := self find: aKeyObject ifAbsent: [^ aBlock value].
+	foundValue := self find: aKeyObject ifAbsent: [ nil ].
  	item := self restoreItem: currentKey -> foundValue.
 	^ item
 		ifNotNil: [ 
@@ -225,12 +225,12 @@ SoilIndexIterator >> index: anIndex [
 
 { #category : #testing }
 SoilIndexIterator >> isEmpty [
- 
-	^ index isEmpty or: [  
-		self currentPage: index firstPage.
-		"all items might be removed and not restorable"
- 		self index firstPage items allSatisfy: [ :each |
- 		  	(self restoreItem: each) isNil ]]
+ | entries |
+	self pagesDo: [ :p |
+		p isEmpty ifFalse: [ ^ false  ].
+		entries := self journalEntriesSince: p lastTransaction.
+		entries ifNotEmpty: [ :e | ^ false ] ].
+	^ true
 ]
 
 { #category : #accessing }
@@ -424,9 +424,9 @@ SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 		ifNil: [ aBlock value ].
 	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
 	(e.g no need to update index pages for the BTree"
-	currentPage 
-		itemAt: indexKey 
-		put: SoilObjectId removed.
+	(currentPage numberOfItems = 1) ifTrue: [  
+		index pageIsEmpty: currentPage ].
+	currentPage removeItemAt: indexKey.
 	index decreaseSize.
 	^ oldValue
 ]

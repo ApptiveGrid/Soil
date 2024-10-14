@@ -72,6 +72,21 @@ SoilRestoringIndexIterator >> journalEntriesFor: key startingAt: anInteger [
 ]
 
 { #category : #accessing }
+SoilRestoringIndexIterator >> journalEntriesSince: anInteger [ 
+	| transactionId entries |
+	readVersion ifNil: [ ^ #() ].
+	entries := OrderedCollection new.
+	transactionId := anInteger.
+	[ transactionId > readVersion ] whileTrue: [  
+		(journal transactionJournalAt: transactionId) entries do: [ :each | 
+			((each class = SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
+				entries add: each ] ] .
+		transactionId := transactionId - 1.
+	].
+   ^ entries
+]
+
+{ #category : #accessing }
 SoilRestoringIndexIterator >> readVersion: anInteger [ 
 	readVersion := anInteger
 ]
@@ -81,7 +96,7 @@ SoilRestoringIndexIterator >> restoreItem: item [
 	"restore a value that has been removed by a later transaction"
 	| newItem |
 	item ifNil: [ ^ nil ].
-	newItem :=  item value isRemoved 
+	newItem :=  item value isNil 
 		ifTrue: [
 			self 
 				historicValueAt: item key 

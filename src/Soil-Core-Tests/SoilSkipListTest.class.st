@@ -484,6 +484,30 @@ SoilSkipListTest >> testRemovePage [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testRemovePageWhenEmpty [
+	
+	| page capacity iterator |
+	capacity := index firstPage itemCapacity.
+	1 to: 1000 do: [ :n | 
+		index at: n  put:(n asByteArrayOfSize: 8)  ].
+	self assert: index pages size equals: 4.
+	page := index pageAt: 3.
+	iterator := index newIterator.
+	(page smallestKey asInteger) to: (page lastKey asInteger) do: [ :k |
+		iterator removeKey: k ].
+	self assert: index pages size equals: 3.
+	
+	"write it and then read it back with a new SoilSkipList"
+	index writePages.
+	index close.
+	index ":= SoilSkipList new 
+		path: 'sunit-skiplist';"
+		open.
+	"we should be able to do a lookup"
+	self assert: ((index pageAt: 2) rightAt: 1) equals: 3
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testSize [
 	
 	| capacity |
