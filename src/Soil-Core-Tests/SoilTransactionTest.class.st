@@ -78,7 +78,7 @@ SoilTransactionTest >> testConflictingReadVersion [
 { #category : #tests }
 SoilTransactionTest >> testEmptyAbort [
 	| tx |
-	tx := SoilTransaction new.
+	tx := soil newTransaction.
 	tx root: Object new.
 	tx abort.
 	self assert: tx isAborted
