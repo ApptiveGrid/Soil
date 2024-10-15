@@ -2,10 +2,48 @@ Class {
 	#name : #SoilTransactionManager,
 	#superclass : #Object,
 	#instVars : [
-		'soil'
+		'soil',
+		'transactions'
 	],
 	#category : #'Soil-Core-Model'
 }
+
+{ #category : #'as yet unclassified' }
+SoilTransactionManager >> abortTransaction: aTransaction [ 	
+	soil ifNotNil: [  
+		soil notificationHandler transactionAborted: self ].
+	aTransaction basicAbort.
+	self removeTransaction: aTransaction 
+
+]
+
+{ #category : #adding }
+SoilTransactionManager >> addTransaction: aSoilTransaction [ 
+	transactions add: aSoilTransaction 
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransactionManager >> commitAndContinueTransaction: aTransaction [ 	
+	aTransaction basicCommit.
+	aTransaction hasRecordsToCommit ifTrue: [ 
+		soil checkpoint ].
+	aTransaction continue
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransactionManager >> commitTransaction: aTransaction [ 	
+	aTransaction basicCommit.
+	aTransaction hasRecordsToCommit ifTrue: [ 
+		soil checkpoint ].
+	aTransaction basicAbort.
+	self removeTransaction: aTransaction 
+]
+
+{ #category : #initialization }
+SoilTransactionManager >> initialize [ 
+	super initialize.
+	transactions := OrderedCollection new
+]
 
 { #category : #'instance creation' }
 SoilTransactionManager >> newTransaction: aClass readVersion: version [ 
@@ -16,7 +54,13 @@ SoilTransactionManager >> newTransaction: aClass readVersion: version [
 		start;
 		yourself.
 	soil notificationHandler transactionCreated: txn.
+	self addTransaction: txn.
 	^ txn
+]
+
+{ #category : #removing }
+SoilTransactionManager >> removeTransaction: aSoilTransaction [ 
+	transactions remove: aSoilTransaction 
 ]
 
 { #category : #accessing }
