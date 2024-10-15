@@ -3,7 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'soil',
-		'transactions'
+		'transactions',
+		'semaphore'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -19,7 +20,8 @@ SoilTransactionManager >> abortTransaction: aTransaction [
 
 { #category : #adding }
 SoilTransactionManager >> addTransaction: aSoilTransaction [ 
-	transactions add: aSoilTransaction 
+	semaphore critical: [  
+		transactions add: aSoilTransaction ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -42,7 +44,8 @@ SoilTransactionManager >> commitTransaction: aTransaction [
 { #category : #initialization }
 SoilTransactionManager >> initialize [ 
 	super initialize.
-	transactions := OrderedCollection new
+	transactions := OrderedCollection new.
+	semaphore := Semaphore forMutualExclusion 
 ]
 
 { #category : #'instance creation' }
@@ -60,7 +63,8 @@ SoilTransactionManager >> newTransaction: aClass readVersion: version [
 
 { #category : #removing }
 SoilTransactionManager >> removeTransaction: aSoilTransaction [ 
-	transactions remove: aSoilTransaction 
+	semaphore critical: [  
+		transactions remove: aSoilTransaction ]
 ]
 
 { #category : #accessing }
