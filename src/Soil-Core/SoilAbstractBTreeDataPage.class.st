@@ -41,7 +41,7 @@ SoilAbstractBTreeDataPage >> findPreviousPage: aKey with: aBTree path: aPath [
 SoilAbstractBTreeDataPage >> headerSize [
 	^ super headerSize  
 		+ self pointerSize "next"
-		+ 2 "items size"
+
 ]
 
 { #category : #initialization }

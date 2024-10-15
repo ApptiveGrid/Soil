@@ -97,13 +97,6 @@ SoilBTreePage >> writeHeaderOn: aStream [
 ]
 
 { #category : #writing }
-SoilBTreePage >> writeItemsOn: aStream [ 
-	aStream
-		nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
-	super writeItemsOn: aStream
-]
-
-{ #category : #writing }
 SoilBTreePage >> writeOn: aStream [ 
 	super writeOn: aStream.
 	self writeItemsOn: aStream
