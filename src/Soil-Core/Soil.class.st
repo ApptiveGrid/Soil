@@ -38,7 +38,8 @@ Class {
 		'control',
 		'setup',
 		'fabric',
-		'metadata'
+		'metadata',
+		'transactionManager'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -120,6 +121,9 @@ Soil >> basicOpen [
 			soil: self;
 			open;
 			yourself.
+	transactionManager := SoilTransactionManager new
+		soil: self;
+		yourself.
 	journal := SoilPersistentDatabaseJournal new
 		soil: self.
 	"journal open might checkpoint so we set the journal 
@@ -236,6 +240,9 @@ Soil >> initializeFilesystem [
 		soil: self;
 		initializeFilesystem;
 		yourself.
+	transactionManager := SoilTransactionManager new
+		soil: self;
+		yourself.
 	journal := SoilPersistentDatabaseJournal new
 		soil: self;
 		initializeFilesystem;
@@ -332,7 +339,9 @@ Soil >> newSerializer [
 
 { #category : #transactions }
 Soil >> newTransaction [
-	^ self newTransaction: self transactionClass
+	^ self transactionManager 
+		newTransaction: self transactionClass
+		readVersion: self control databaseVersion 
 ]
 
 { #category : #transactions }
@@ -465,6 +474,12 @@ Soil >> setup [
 { #category : #transactions }
 Soil >> transactionClass [
 	^ self fabric transactionClass
+]
+
+{ #category : #accessing }
+Soil >> transactionManager [
+
+	^ transactionManager
 ]
 
 { #category : #writing }
