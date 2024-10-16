@@ -58,7 +58,7 @@ SoilIndexItemsPage >> hasKey: aKey [
 SoilIndexItemsPage >> hasRoom [
 	| used itemSize |
 	itemSize := self keySize + self valueSize.
-	used := self headerSize + (items size * itemSize).
+	used := self headerSize + 2 "items size" +(items size * itemSize).
 	^ used <= (self pageSize - itemSize)
 ]
 
@@ -131,7 +131,7 @@ SoilIndexItemsPage >> itemBefore: key [
 
 { #category : #accessing }
 SoilIndexItemsPage >> itemCapacity [
-	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
+	^ ((self pageSize - (self headerSize + 2 "items size" )) / (self keySize + self valueSize)) floor
 ]
 
 { #category : #accessing }
@@ -275,6 +275,7 @@ SoilIndexItemsPage >> valueSize: anInteger [
 
 { #category : #writing }
 SoilIndexItemsPage >> writeItemsOn: aStream [ 
+	aStream nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
 	items do: [ :assoc |
 		aStream 
 			nextPutAll: (assoc key asByteArrayOfSize: self keySize);

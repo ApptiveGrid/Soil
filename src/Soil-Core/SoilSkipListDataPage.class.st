@@ -17,7 +17,7 @@ SoilSkipListDataPage >> headerSize [
 	^ super headerSize  
 		+ 1 "level"
 		+ (self level * self rightSize)
-		+ 2 "items size"
+
 ]
 
 { #category : #initialization }
@@ -43,6 +43,5 @@ SoilSkipListDataPage >> readFrom: aStream [
 SoilSkipListDataPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
 	self writeLevelsOn: aStream.
-	aStream nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
 
 ]

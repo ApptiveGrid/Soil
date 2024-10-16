@@ -45,12 +45,6 @@ SoilBTreeIndexPage >> findPreviousPage: aKey with: aBTree path: aPath [
 	^ page findPreviousPage: aKey with: aBTree path: aPath
 ]
 
-{ #category : #utilities }
-SoilBTreeIndexPage >> headerSize [
-	^ super headerSize  
-		+ 2 "items size"
-]
-
 { #category : #initialization }
 SoilBTreeIndexPage >> initializeInIndex: aSoilSkipList [ 
 	keySize := aSoilSkipList keySize
