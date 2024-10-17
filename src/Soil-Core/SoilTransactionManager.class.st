@@ -27,7 +27,7 @@ SoilTransactionManager >> addTransaction: aSoilTransaction [
 { #category : #'as yet unclassified' }
 SoilTransactionManager >> commitAndContinueTransaction: aTransaction [ 	
 	aTransaction basicCommit.
-	aTransaction hasRecordsToCommit ifTrue: [ 
+	aTransaction hasModifications ifTrue: [ 
 		soil checkpoint ].
 	aTransaction continue
 ]
@@ -35,7 +35,7 @@ SoilTransactionManager >> commitAndContinueTransaction: aTransaction [
 { #category : #'as yet unclassified' }
 SoilTransactionManager >> commitTransaction: aTransaction [ 	
 	aTransaction basicCommit.
-	aTransaction hasRecordsToCommit ifTrue: [ 
+	aTransaction hasModifications ifTrue: [ 
 		soil checkpoint ].
 	aTransaction basicAbort.
 	self removeTransaction: aTransaction 

@@ -86,7 +86,7 @@ SoilTransaction >> basicCommit [
 	self prepareRecordsForCommit.
 	"if there are no records to commit we can just return and don't allocate any
 	resources"
-	(recordsToCommit isEmpty and: [indexUpdatesToCommit isEmpty ]) ifTrue: [ 
+	self isReadOnly ifTrue: [ 
 		soil notificationHandler transactionCommitted: self.
 		^ self ].
 	"only one transactions is allowed at a time. We use the critical block of the database
@@ -311,12 +311,7 @@ SoilTransaction >> findRecords: aBlock [
 
 { #category : #testing }
 SoilTransaction >> hasModifications [ 
-	^ self dirtyObjects notEmpty
-]
-
-{ #category : #testing }
-SoilTransaction >> hasRecordsToCommit [ 
-	^  recordsToCommit notEmpty
+	^ recordsToCommit isEmptyOrNil not or: [ indexUpdatesToCommit isEmptyOrNil not ]
 ]
 
 { #category : #accessing }
@@ -360,6 +355,11 @@ SoilTransaction >> isAborted [
 { #category : #testing }
 SoilTransaction >> isPersistent: anObject [
 	^ self isRoot: anObject
+]
+
+{ #category : #testing }
+SoilTransaction >> isReadOnly [ 
+	^ self hasModifications not
 ]
 
 { #category : #testing }
