@@ -46,12 +46,12 @@ SoilIndexManager >> at: indexId put: aSoilIndex [
 ]
 
 { #category : #'as yet unclassified' }
-SoilIndexManager >> cleanPagesModifiedBefore: smallestReadVersion [ 
+SoilIndexManager >> cleanPagesModifiedNotAfter: readVersion [ 
 	| keysToRemove |
 	keysToRemove := OrderedCollection new.
 	pagesToMaintain keysAndValuesDo: [ :index :pages |
 		pages copy do: [ :page |
-			(smallestReadVersion isNil or: [ smallestReadVersion >= page lastTransaction ]) ifTrue: [  
+			(readVersion isNil or: [ readVersion >= page lastTransaction ]) ifTrue: [  
 				(page presentItemCount = 0) 
 					ifTrue: [ index removePage: page ]
 					ifFalse: [ page cleanRemoved  ].

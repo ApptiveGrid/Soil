@@ -63,15 +63,21 @@ SoilTransactionManager >> newTransaction: aClass readVersion: version [
 
 { #category : #removing }
 SoilTransactionManager >> removeTransaction: aSoilTransaction [ 
+	| readVersion |
 	semaphore critical: [  
 		transactions remove: aSoilTransaction ].
-	soil objectRepository firstSegment indexManager cleanPagesModifiedBefore: (self smallestTransactionId)
+	readVersion := self smallestReadVersion.
+	"clean all indexes that haven't been modified since the 
+	smallest read version"
+	soil objectRepository segments do: [ :segment | 
+		segment indexManager cleanPagesModifiedNotAfter: readVersion]
 ]
 
 { #category : #'as yet unclassified' }
-SoilTransactionManager >> smallestTransactionId [ 
+SoilTransactionManager >> smallestReadVersion [ 
+	"detect the smallest read version currently in use"
 	^ transactions
-		ifNotEmpty: [self halt.  transactions min: #readVersion ]
+		ifNotEmpty: [ transactions min: #readVersion ]
 		ifEmpty: [ nil  ]
 ]
 

@@ -644,11 +644,13 @@ SoilTransaction >> transactionManager [
 
 { #category : #'as yet unclassified' }
 SoilTransaction >> updatedIndexDictionary: indexedDictionary [ 
-	| objectId segment |
-	objectId := self objectIdOf: indexedDictionary.
-	segment := self segmentAt: objectId segment.
+	|  segment |
+	segment := self segmentAt: (self objectIdOf: indexedDictionary) segment.
+	
 	segment indexManager 
-		maintainIndex: indexedDictionary persistentIndex id: indexedDictionary id.
+		maintainIndex: indexedDictionary persistentIndex 
+		id: indexedDictionary id.
+	
 	indexedDictionary persistentIndex resetPagesToMaintain 
 ]
 
