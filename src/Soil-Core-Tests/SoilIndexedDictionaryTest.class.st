@@ -634,6 +634,7 @@ SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 	tx4 := soil newTransaction.
 	300 to: 500 do: [ :n | tx2 root removeKey: n ].
 	tx2 commit.
+	Transcript show: indexManager pagesToMaintain printString; cr.
 	self assert: indexManager pagesToMaintain size = 1 description: 'after second transaction should have 1 to maintain'.
 	self assert: (index pages select: #needsCleanup) size equals: 2.
 	501 to: 700 do: [ :n | tx3 root removeKey: n ].
