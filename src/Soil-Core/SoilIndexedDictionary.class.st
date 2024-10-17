@@ -179,6 +179,11 @@ SoilIndexedDictionary >> nextCloseTo: aKey [
 	^ self newIterator nextCloseTo: aKey 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndexedDictionary >> persistentIndex [
+	^ index persistentIndex 
+]
+
 { #category : #private }
 SoilIndexedDictionary >> prepareNewValues [
 	newValues copy keysAndValuesDo: [ :key :object |

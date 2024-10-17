@@ -64,7 +64,15 @@ SoilTransactionManager >> newTransaction: aClass readVersion: version [
 { #category : #removing }
 SoilTransactionManager >> removeTransaction: aSoilTransaction [ 
 	semaphore critical: [  
-		transactions remove: aSoilTransaction ]
+		transactions remove: aSoilTransaction ].
+	soil objectRepository firstSegment indexManager cleanPagesModifiedBefore: (self smallestTransactionId)
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransactionManager >> smallestTransactionId [ 
+	^ transactions
+		ifNotEmpty: [self halt.  transactions min: #readVersion ]
+		ifEmpty: [ nil  ]
 ]
 
 { #category : #accessing }

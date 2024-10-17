@@ -14,6 +14,11 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSkipList: self
 ]
 
+{ #category : #adding }
+SoilSkipList >> addPageToMaintain: aPage [ 
+	pagesToMaintain add: aPage
+]
+
 { #category : #converting }
 SoilSkipList >> asCopyOnWrite [
 	^ SoilCopyOnWriteSkipList new
@@ -124,6 +129,11 @@ SoilSkipList >> path [
 SoilSkipList >> path: aStringOrFileReference [
 
 	path := aStringOrFileReference asFileReference 
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipList >> persistentIndex [
+	^ self 
 ]
 
 { #category : #initialization }

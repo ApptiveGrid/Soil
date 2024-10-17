@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'segment',
 		'indexes',
-		'semaphore'
+		'semaphore',
+		'pagesToMaintain'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -42,6 +43,24 @@ SoilIndexManager >> at: indexId put: aSoilIndex [
 		indexes 
 			at: indexId
 			put: aSoilIndex thePersistentInstance ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilIndexManager >> cleanPagesModifiedBefore: smallestReadVersion [ 
+	| keysToRemove |
+	keysToRemove := OrderedCollection new.
+	pagesToMaintain keysAndValuesDo: [ :index :pages |
+		pages copy do: [ :page |
+			(smallestReadVersion isNil or: [ smallestReadVersion >= page lastTransaction ]) ifTrue: [  
+				(page presentItemCount = 0) 
+					ifTrue: [ index removePage: page ]
+					ifFalse: [ page cleanRemoved  ].
+				pages remove: page ] ].
+		pages ifEmpty: [ keysToRemove add: index ].
+		index writePages ].
+	keysToRemove do: [ :index | 
+		pagesToMaintain removeKey: index  ]
+	
 ]
 
 { #category : #'open/close' }
@@ -85,7 +104,8 @@ SoilIndexManager >> indexes [
 SoilIndexManager >> initialize [ 
 	super initialize.
 	indexes := Dictionary new.
-	semaphore := Semaphore forMutualExclusion 
+	semaphore := Semaphore forMutualExclusion.
+	pagesToMaintain := Dictionary new 
 ]
 
 { #category : #initialization }
@@ -104,9 +124,23 @@ SoilIndexManager >> loadIndexWithId: indexId ifNone: aBlock [
 		ifFalse: [ aBlock value ]
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndexManager >> maintainIndex: aSoilIndex id: aString [ 
+	aSoilIndex hasPagesToMaintain ifTrue: [  
+		(pagesToMaintain 
+			at: (self at: aString ifAbsent: [Error signal: 'index not found'])
+			ifAbsentPut: [ Set new ])
+				addAll: aSoilIndex pagesToMaintain ]
+]
+
 { #category : #'open/close' }
 SoilIndexManager >> open [
 	
+]
+
+{ #category : #accessing }
+SoilIndexManager >> pagesToMaintain [
+	^ pagesToMaintain
 ]
 
 { #category : #accessing }

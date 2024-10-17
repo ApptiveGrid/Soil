@@ -613,9 +613,30 @@ SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 	self assert: (tx root at: #two) equals: #twovalue.
 	"but removeKey: does not see it, we can remove it without error"
 	tx root removeKey: #two ifAbsent: [ self fail ].
+	self halt.
 	self assert: tx root size equals: 1.
 	"but commiting it will fail, as we have commited the remove in t2"
 	self should: [tx commit] raise: SoilObjectHasConcurrentChange
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testRemovePagesSequential [
+	| tx tx2 index indexManager |
+	tx := soil newTransaction.
+	tx root: dict.
+	1 to: 1000 do: [ :n | dict at: n put: n asString ].
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	300 to: 700 do: [ :n | tx2 root removeKey: n ].
+	tx2 commit.
+	indexManager := soil objectRepository firstSegment indexManager.
+	index := indexManager indexes anyOne.
+	self assert: index pagesToMaintain size equals: 0.
+	self assert: indexManager pagesToMaintain size equals: 0.
+	self assert: (index pages select: #isDirty) size equals: 0
+	
+
 ]
 
 { #category : #tests }

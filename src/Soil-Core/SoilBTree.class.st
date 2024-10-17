@@ -64,6 +64,11 @@ SoilBTree >> path: aStringOrFileReference [
 	path := aStringOrFileReference asFileReference 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBTree >> persistentIndex [
+	^ self 
+]
+
 { #category : #converting }
 SoilBTree >> thePersistentInstance [
 	^ self

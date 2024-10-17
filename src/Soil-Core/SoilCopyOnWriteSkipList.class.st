@@ -17,6 +17,11 @@ SoilCopyOnWriteSkipList >> newPage [
 	^ wrapped newPage
 ]
 
+{ #category : #'as yet unclassified' }
+SoilCopyOnWriteSkipList >> persistentIndex [
+	^ wrapped persistentIndex 
+]
+
 { #category : #converting }
 SoilCopyOnWriteSkipList >> thePersistentInstance [
 	^ wrapped

@@ -42,6 +42,11 @@ SoilIndexItemsPage >> associationAt: anInteger ifAbsent: aBlock [
 		ifNone: [ aBlock value ].
 ]
 
+{ #category : #running }
+SoilIndexItemsPage >> cleanRemoved [
+	items removeAllSuchThat: [ :each | each value isRemoved ]
+]
+
 { #category : #accessing }
 SoilIndexItemsPage >> firstItem [
 
@@ -222,6 +227,11 @@ SoilIndexItemsPage >> numberOfItems [
 SoilIndexItemsPage >> postCopy [ 
 	super postCopy.
 	items := items copy.
+]
+
+{ #category : #'as yet unclassified' }
+SoilIndexItemsPage >> presentItemCount [
+	^ (items reject: [ :each | each value isRemoved ]) size 
 ]
 
 { #category : #reading }
