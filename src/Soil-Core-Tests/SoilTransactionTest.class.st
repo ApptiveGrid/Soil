@@ -85,13 +85,11 @@ SoilTransactionTest >> testEmptyAbort [
 ]
 
 { #category : #tests }
-SoilTransactionTest >> testRootObjectModifies [ 
+SoilTransactionTest >> testRootObject [ 
 	| tx obj |
 	obj := Object new.
 	tx := soil newTransaction.
 	tx root: obj.
-	self assert: tx hasModifications.
-	self assert: tx hasModifications.
 	self assert: (tx isRoot: obj).
 	self assert: (tx isPersistent: obj)
 	 

@@ -27,7 +27,7 @@ SoilTransactionManager >> addTransaction: aSoilTransaction [
 { #category : #'as yet unclassified' }
 SoilTransactionManager >> commitAndContinueTransaction: aTransaction [ 	
 	aTransaction basicCommit.
-	aTransaction hasRecordsToCommit ifTrue: [ 
+	aTransaction hasModifications ifTrue: [ 
 		soil checkpoint ].
 	aTransaction continue
 ]
@@ -35,7 +35,7 @@ SoilTransactionManager >> commitAndContinueTransaction: aTransaction [
 { #category : #'as yet unclassified' }
 SoilTransactionManager >> commitTransaction: aTransaction [ 	
 	aTransaction basicCommit.
-	aTransaction hasRecordsToCommit ifTrue: [ 
+	aTransaction hasModifications ifTrue: [ 
 		soil checkpoint ].
 	aTransaction basicAbort.
 	self removeTransaction: aTransaction 
@@ -63,8 +63,22 @@ SoilTransactionManager >> newTransaction: aClass readVersion: version [
 
 { #category : #removing }
 SoilTransactionManager >> removeTransaction: aSoilTransaction [ 
+	| readVersion |
 	semaphore critical: [  
-		transactions remove: aSoilTransaction ]
+		transactions remove: aSoilTransaction ].
+	readVersion := self smallestReadVersion.
+	"clean all indexes that haven't been modified since the 
+	smallest read version"
+	soil objectRepository segments do: [ :segment | 
+		segment indexManager cleanPagesModifiedNotAfter: readVersion]
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransactionManager >> smallestReadVersion [ 
+	"detect the smallest read version currently in use"
+	^ transactions
+		ifNotEmpty: [ transactions min: #readVersion ]
+		ifEmpty: [ nil  ]
 ]
 
 { #category : #accessing }

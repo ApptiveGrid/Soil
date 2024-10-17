@@ -8,6 +8,9 @@ See SoilSkipList for more information
 Class {
 	#name : #SoilBasicSkipList,
 	#superclass : #SoilIndex,
+	#instVars : [
+		'pagesToMaintain'
+	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
@@ -20,6 +23,17 @@ SoilBasicSkipList class >> isAbstract [
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
+]
+
+{ #category : #testing }
+SoilBasicSkipList >> hasPagesToMaintain [ 
+	^ pagesToMaintain notEmpty
+]
+
+{ #category : #initialization }
+SoilBasicSkipList >> initialize [ 
+	super initialize.
+	pagesToMaintain := Set new
 ]
 
 { #category : #accessing }
@@ -39,10 +53,15 @@ SoilBasicSkipList >> newIterator [
 	^ SoilSkipListIterator on: self 
 ]
 
+{ #category : #accessing }
+SoilBasicSkipList >> pagesToMaintain [
+	^ pagesToMaintain 
+]
+
 { #category : #removing }
 SoilBasicSkipList >> removePage: aPage [
 	| iterator previousPage seen page |
-	(aPage index > 1) ifFalse: [ Error signal: 'cannot remove header page' ].
+	(aPage index > 1) ifFalse: [ ^ aPage ].
 	"we use an iterator to scan pages on all levels that are just right
 	before the page to remove"
 	iterator := self newIterator. 
@@ -68,6 +87,11 @@ SoilBasicSkipList >> removePage: aPage [
 	^ aPage 
 
 
+]
+
+{ #category : #initialization }
+SoilBasicSkipList >> resetPagesToMaintain [
+	pagesToMaintain := Set new
 ]
 
 { #category : #accessing }

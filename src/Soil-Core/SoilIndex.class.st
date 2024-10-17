@@ -20,6 +20,11 @@ Class {
 	#category : #'Soil-Core-Index-Common'
 }
 
+{ #category : #adding }
+SoilIndex >> addPageToMaintain: aPage [ 
+	
+]
+
 { #category : #private }
 SoilIndex >> at: key [ 
 	^ self 
@@ -98,6 +103,11 @@ SoilIndex >> flushCachedPages [
 { #category : #testing }
 SoilIndex >> hasHeaderPage [
 	^ self subclassResponsibility
+]
+
+{ #category : #testing }
+SoilIndex >> hasPagesToMaintain [
+	^ false 	
 ]
 
 { #category : #accessing }
@@ -190,6 +200,11 @@ SoilIndex >> pageSize [
 { #category : #accessing }
 SoilIndex >> pages [
 	^ self store pages
+]
+
+{ #category : #accessing }
+SoilIndex >> pagesToMaintain [ 
+	^ #()
 ]
 
 { #category : #'instance creation' }
