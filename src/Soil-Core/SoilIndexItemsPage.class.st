@@ -218,6 +218,11 @@ SoilIndexItemsPage >> lastTransaction: anInteger [
 	lastTransaction := anInteger
 ]
 
+{ #category : #testing }
+SoilIndexItemsPage >> needsCleanup [ 
+	^ items size > self presentItemCount 
+]
+
 { #category : #accessing }
 SoilIndexItemsPage >> numberOfItems [
 	^ items size
