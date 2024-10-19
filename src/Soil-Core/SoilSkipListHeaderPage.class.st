@@ -44,7 +44,8 @@ SoilSkipListHeaderPage >> firstFreePageIndex [
 { #category : #accessing }
 SoilSkipListHeaderPage >> firstFreePageIndex: anObject [
 
-	firstFreePageIndex := anObject
+	firstFreePageIndex := anObject.
+	dirty := true
 ]
 
 { #category : #utilities }

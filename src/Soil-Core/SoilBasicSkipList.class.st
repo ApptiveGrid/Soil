@@ -59,6 +59,14 @@ SoilBasicSkipList >> pagesToMaintain [
 ]
 
 { #category : #removing }
+SoilBasicSkipList >> recyclePage: aPage [
+	"remove page from chain of item pages"
+	self removePage: aPage. 
+	"add page to free list chain"
+	self addToFreePages: aPage
+]
+
+{ #category : #removing }
 SoilBasicSkipList >> removePage: aPage [
 	| iterator previousPage seen page |
 	(aPage index > 1) ifFalse: [ ^ aPage ].

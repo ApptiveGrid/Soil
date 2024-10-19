@@ -421,6 +421,24 @@ SoilIndexedDictionaryTest >> testFlushIndexPages [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testFreePages [ 
+	| tx tx2 index indexManager |
+	tx := soil newTransaction.
+	tx root: dict.
+	1 to: 1300 do: [ :n | dict at: n put: n asString ].
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	300 to: 1200 do: [ :n | tx2 root removeKey: n ].
+	tx2 commit.
+	indexManager := soil objectRepository firstSegment indexManager.
+	index := indexManager indexes anyOne.
+	self deny: index headerPage firstFreePageIndex isZero.
+	self assert: index firstFreePage pageIndexes size equals: 2
+
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testIndexCreation [ 
 	| tx obj1 obj2 |
 	tx := soil newTransaction.

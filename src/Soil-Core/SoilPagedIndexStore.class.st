@@ -102,7 +102,7 @@ SoilPagedIndexStore >> pageAt: anInteger [
 
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger put: aPage [ 
-	pagesMutex critical: [  
+	^ pagesMutex critical: [  
 		pages 
 			at: anInteger 
 			put: aPage ]

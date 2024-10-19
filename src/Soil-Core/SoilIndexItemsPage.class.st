@@ -28,6 +28,14 @@ SoilIndexItemsPage >> addItem: anAssociation [
 	^ self subclassResponsibility
 ]
 
+{ #category : #converting }
+SoilIndexItemsPage >> asSoilFreePage [
+	^ SoilFreePage new 
+		index: index;
+		pageSize: pageSize;
+		markDirty 
+]
+
 { #category : #accessing }
 SoilIndexItemsPage >> associationAt: anInteger [ 
 	^ self
@@ -194,6 +202,11 @@ SoilIndexItemsPage >> keySize [
 SoilIndexItemsPage >> keySize: anInteger [ 
 	(anInteger = 0) ifTrue: [ Error signal: 'cannot use key size 0' ].
 	keySize := anInteger
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> label [ 
+	^ 'items page'
 ]
 
 { #category : #accessing }

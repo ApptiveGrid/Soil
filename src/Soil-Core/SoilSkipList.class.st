@@ -19,6 +19,35 @@ SoilSkipList >> addPageToMaintain: aPage [
 	pagesToMaintain add: aPage
 ]
 
+{ #category : #adding }
+SoilSkipList >> addToFreePages: aPage [  
+	| nextFreePage newFreePage |
+	newFreePage := aPage asSoilFreePage.
+	nextFreePage := self firstFreePage
+		ifNil: [ 
+			"if there is no first free page yet make aPage the
+			first free page"
+			store pageAt: aPage index put: newFreePage.
+			self headerPage firstFreePageIndex: newFreePage index.
+			^ newFreePage ].
+	"if there is a first free page start scanning from here for a
+	free page that has room to store another free page"
+	[ nextFreePage hasRoom ] whileFalse: [ 
+		"if there is no room for the page to store and the current
+		free page does not have a next pointer we make aPage the 
+		next"
+		nextFreePage next isZero 
+			ifTrue: [
+				store pageAt: aPage index put: newFreePage.
+				nextFreePage next: newFreePage index.
+				^ newFreePage  ]
+			ifFalse: [ nextFreePage := store pageAt: nextFreePage next ]].
+	(nextFreePage index = newFreePage index) ifTrue: [ self halt ].
+	store 
+		pageAt: aPage index 
+		put: (nextFreePage addPage: newFreePage) 
+]
+
 { #category : #converting }
 SoilSkipList >> asCopyOnWrite [
 	^ SoilCopyOnWriteSkipList new
@@ -41,6 +70,15 @@ SoilSkipList >> compact [
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
+]
+
+{ #category : #accessing }
+SoilSkipList >> firstFreePage [
+	| index | 
+	index := self headerPage firstFreePageIndex.
+	^ index isZero 
+		ifTrue: [ ^ nil ]
+		ifFalse: [ store pageAt: index ]
 ]
 
 { #category : #deleting }

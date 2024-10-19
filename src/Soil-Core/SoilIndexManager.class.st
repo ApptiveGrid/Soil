@@ -53,7 +53,7 @@ SoilIndexManager >> cleanPagesModifiedNotAfter: readVersion [
 		pages copy do: [ :page |
 			(readVersion isNil or: [ readVersion >= page lastTransaction ]) ifTrue: [  
 				(page presentItemCount = 0) 
-					ifTrue: [ index removePage: page ]
+					ifTrue: [ index recyclePage: page ]
 					ifFalse: [ page cleanRemoved  ].
 				pages remove: page ] ].
 		pages ifEmpty: [ keysToRemove add: index ].
