@@ -110,8 +110,8 @@ SoilTransaction >> basicCommit [
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
-		"indexUpdatesToCommit do: [:indexDict | 
-			self updatedIndexDictionary: indexDict] ."
+		indexUpdatesToCommit do: [:indexDict | 
+			self updatedIndexDictionary: indexDict] .
 		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self

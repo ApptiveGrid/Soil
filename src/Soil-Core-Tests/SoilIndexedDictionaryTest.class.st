@@ -640,7 +640,6 @@ SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 	| tx tx2 index indexManager tx3 tx4 |
-	self skip.
 	(classToTest = SoilBTreeDictionary ) ifTrue: [ self skip ].
 	indexManager := soil objectRepository firstSegment indexManager.
 	tx := soil newTransaction.
