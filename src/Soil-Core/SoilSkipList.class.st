@@ -21,31 +21,27 @@ SoilSkipList >> addPageToMaintain: aPage [
 
 { #category : #adding }
 SoilSkipList >> addToFreePages: aPage [  
-	| nextFreePage newFreePage |
+	| currentFreePage newFreePage |
 	newFreePage := aPage asSoilFreePage.
-	nextFreePage := self firstFreePage
+	store pageAt: aPage index put: newFreePage.
+	currentFreePage := self firstFreePage
 		ifNil: [ 
 			"if there is no first free page yet make aPage the
 			first free page"
-			store pageAt: aPage index put: newFreePage.
 			self headerPage firstFreePageIndex: newFreePage index.
 			^ newFreePage ].
 	"if there is a first free page start scanning from here for a
 	free page that has room to store another free page"
-	[ nextFreePage hasRoom ] whileFalse: [ 
+	[ currentFreePage hasRoom ] whileFalse: [ 
 		"if there is no room for the page to store and the current
 		free page does not have a next pointer we make aPage the 
 		next"
-		nextFreePage next isZero 
+		currentFreePage next isZero 
 			ifTrue: [
-				store pageAt: aPage index put: newFreePage.
-				nextFreePage next: newFreePage index.
+				currentFreePage next: newFreePage index.
 				^ newFreePage  ]
-			ifFalse: [ nextFreePage := store pageAt: nextFreePage next ]].
-	(nextFreePage index = newFreePage index) ifTrue: [ self halt ].
-	store 
-		pageAt: aPage index 
-		put: (nextFreePage addPage: newFreePage) 
+			ifFalse: [ currentFreePage := store pageAt: currentFreePage next ]].
+	currentFreePage addPage: newFreePage
 ]
 
 { #category : #converting }
