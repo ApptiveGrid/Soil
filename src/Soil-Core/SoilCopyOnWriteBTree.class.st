@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Index-BTree'
 }
 
+{ #category : #'as yet unclassified' }
+SoilCopyOnWriteBTree >> allocatePage [
+	^ self newPage
+]
+
 { #category : #testing }
 SoilCopyOnWriteBTree >> isRegistered [
 	^ wrapped isRegistered
@@ -14,7 +19,7 @@ SoilCopyOnWriteBTree >> isRegistered [
 
 { #category : #'instance creation' }
 SoilCopyOnWriteBTree >> newPage [ 
-	^ wrapped newPage
+	^ wrapped allocatePage
 ]
 
 { #category : #'as yet unclassified' }

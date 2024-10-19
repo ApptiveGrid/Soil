@@ -15,6 +15,11 @@ SoilPagedIndexStore class >> isAbstract [
 	^ self == SoilPagedIndexStore
 ]
 
+{ #category : #'as yet unclassified' }
+SoilPagedIndexStore >> allocatePage [
+	^ index allocatePage 
+]
+
 { #category : #flushing }
 SoilPagedIndexStore >> flush [
 	^ self subclassResponsibility
@@ -70,7 +75,7 @@ SoilPagedIndexStore >> lastPageIndex [
 
 { #category : #'instance creation' }
 SoilPagedIndexStore >> newPage [
-	^ index newPage
+	^ index allocatePage
 ]
 
 { #category : #accessing }
