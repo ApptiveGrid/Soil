@@ -94,6 +94,11 @@ SoilSkipListHeaderPage >> keySize: anInteger [
 ]
 
 { #category : #accessing }
+SoilSkipListHeaderPage >> label [ 
+	^ 'header page'
+]
+
+{ #category : #accessing }
 SoilSkipListHeaderPage >> lastPageIndex [
 
 	^ lastPageIndex

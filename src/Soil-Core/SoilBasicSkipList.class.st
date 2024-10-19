@@ -60,6 +60,8 @@ SoilBasicSkipList >> pagesToMaintain [
 
 { #category : #removing }
 SoilBasicSkipList >> recyclePage: aPage [
+	"the header stays untouched even it it gets empty"
+	aPage isHeaderPage ifTrue: [ ^ self ].
 	"remove page from chain of item pages"
 	self removePage: aPage. 
 	"add page to free list chain"

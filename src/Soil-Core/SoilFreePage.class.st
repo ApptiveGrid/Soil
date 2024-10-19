@@ -56,6 +56,11 @@ SoilFreePage >> latestVersion [
 	^ 1
 ]
 
+{ #category : #testing }
+SoilFreePage >> needsCleanup [
+	^ false
+]
+
 { #category : #accessing }
 SoilFreePage >> next [
 

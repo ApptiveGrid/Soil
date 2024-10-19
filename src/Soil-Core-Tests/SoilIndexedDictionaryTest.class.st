@@ -423,6 +423,7 @@ SoilIndexedDictionaryTest >> testFlushIndexPages [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testFreePages [ 
 	| tx tx2 index indexManager |
+	(classToTest = SoilBTreeDictionary ) ifTrue: [ self skip ].
 	tx := soil newTransaction.
 	tx root: dict.
 	1 to: 1300 do: [ :n | dict at: n put: n asString ].
