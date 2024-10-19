@@ -124,9 +124,8 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 	there. If the key is in between or the page is not the last we
 	split the page with each containing half of the items"
 	newPage := (page isLastPage and: [ page lastKey < aKey ])
-		ifTrue: [ store newPage ] 
-		ifFalse: [ page split: store newPage ].
-	newPage index: self store nextPageIndex.
+		ifTrue: [ store allocatePage ] 
+		ifFalse: [ page split: store allocatePage ].
 	newPage level to: 1 by: -1  do: [ :level |
 		(level > page level)
 			ifTrue: [ 

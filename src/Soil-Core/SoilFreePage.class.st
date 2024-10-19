@@ -20,6 +20,16 @@ SoilFreePage >> addPage: aPage [
 	^ aPage
 ]
 
+{ #category : #converting }
+SoilFreePage >> asSoilItemsPage [
+	self shouldBeImplemented.
+]
+
+{ #category : #testing }
+SoilFreePage >> hasFreePages [
+	^ pageIndexes notEmpty
+]
+
 { #category : #testing }
 SoilFreePage >> hasRoom [
 	| used |
@@ -86,6 +96,13 @@ SoilFreePage >> readFrom: aStream [
 	freePagesSize := (aStream next: 2) asInteger.
 	1 to: freePagesSize do: [ :n |
 		pageIndexes add: (aStream next: 4) asInteger ]
+]
+
+{ #category : #removing }
+SoilFreePage >> removeFirstIndex [
+	index := pageIndexes removeFirst.
+	dirty := true.
+	^ index 
 ]
 
 { #category : #writing }
