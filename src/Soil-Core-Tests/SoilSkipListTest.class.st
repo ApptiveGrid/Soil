@@ -336,7 +336,7 @@ SoilSkipListTest >> testLastPage [
 		index at: n put: (n asByteArrayOfSize: 8)].
 	index at: capacity put: (capacity asByteArrayOfSize: 8).
 	self assert: index pages size equals: 99.
-	self assert: index lastPage index equals: 99.
+	self assert: index lastPage offset equals: 99.
 	self assert: index lastPage isLastPage.
 	lastItem := index lastPage itemAt: capacity ifAbsent: [nil].
 	self assert: lastItem value equals: (capacity asByteArrayOfSize: 8)

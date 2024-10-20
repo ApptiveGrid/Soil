@@ -18,7 +18,7 @@ SoilSkipListPageTest >> readPageFrom: aStream [
 SoilSkipListPageTest >> testCreation [ 
 	| page |
 	page := SoilSkipListDataPage new 
-		index: 1;
+		offset: 1;
 		level: 8;
 		pageSize: 4096;
 		keySize: 16;
@@ -33,7 +33,7 @@ SoilSkipListPageTest >> testDataPageFull [
 	page := SoilSkipListDataPage new 
 		keySize: 8;
 		valueSize: 8;
-		index: 1;
+		offset: 1;
 		level: 8;
 		pageSize: 4096.
 	1 to: 255 do: [ :n |
@@ -55,7 +55,7 @@ SoilSkipListPageTest >> testDataPageFullStreamSize [
 	page := SoilSkipListDataPage new 
 		keySize: 8;
 		valueSize: 8;
-		index: 1;
+		offset: 1;
 		level: 5;
 		pageSize: 4096.
 	number := 1.
@@ -75,7 +75,7 @@ SoilSkipListPageTest >> testDataPageSizeOfHeader [
 	page := SoilSkipListDataPage new 
 		keySize: 8;
 		valueSize: 8;
-		index: 1;
+		offset: 1;
 		level: 8;
 		pageSize: 4096.
 	bytes := ByteArray streamContents: [ :stream |
@@ -87,7 +87,7 @@ SoilSkipListPageTest >> testDataPageSizeOfHeader [
 SoilSkipListPageTest >> testDataPageWriteAndRead [
 	| page bytes readPage |
 	page := SoilSkipListDataPage new 
-		index: 1;
+		offset: 1;
 		level: 8.
 	self assert: page isDirty.
 	bytes := ByteArray streamContents: [ :stream |
@@ -102,7 +102,7 @@ SoilSkipListPageTest >> testDataPageWriteAndRead [
 SoilSkipListPageTest >> testDataPageWriteAndReadRightArray [
 	| page bytes readPage |
 	page := SoilSkipListDataPage new 
-		index: 1;
+		offset: 1;
 		level: 8;
 		setRight: #( 1 2 3 4 5 6 7 8 ).
 	self assert: page isDirty.
@@ -122,7 +122,7 @@ SoilSkipListPageTest >> testHeaderPageFull [
 		keySize: 8;
 		valueSize: 8;
 		maxLevel: 16;
-		index: 1;
+		offset: 1;
 		level: 8;
 		pageSize: 4096;
 		lastPageIndex: 2.
@@ -147,7 +147,7 @@ SoilSkipListPageTest >> testHeaderPageFullStreamSize [
 		valueSize: 8;
 		maxLevel: 8;
 		lastPageIndex: 1;
-		index: 1;
+		offset: 1;
 		level: 6;
 		pageSize: 4096.
 	number := 1.
@@ -168,7 +168,7 @@ SoilSkipListPageTest >> testHeaderPageSizeOfHeader [
 		keySize: 8;
 		valueSize: 8;
 		maxLevel: 16;
-		index: 1;
+		offset: 1;
 		level: 8;
 		pageSize: 4096;
 		lastPageIndex: 2.
@@ -184,7 +184,7 @@ SoilSkipListPageTest >> testHeaderPageWriteAndRead [
 		keySize: 16;
 		valueSize: 8;
 		maxLevel: 12;
-		index: 1;
+		offset: 1;
 		level: 8;
 		lastPageIndex: 2.
 	self assert: page isDirty.
@@ -207,7 +207,7 @@ SoilSkipListPageTest >> testWriteOldVersion [
 		keySize: 8;
 		valueSize: 8;
 		maxLevel: 16;
-		index: 1;
+		offset: 1;
 		level: 8;
 		pageSize: 4096;
 		lastPageIndex: 2;

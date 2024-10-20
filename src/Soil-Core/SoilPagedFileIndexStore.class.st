@@ -76,7 +76,7 @@ SoilPagedFileIndexStore >> initializeHeaderPage [
 	| page |
 	page := index newHeaderPage.
 	pagesMutex critical: [  
-		pages at: page index put: page	]
+		pages at: page offset put: page	]
 ]
 
 { #category : #testing }
@@ -104,7 +104,7 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	streamSemaphore critical: [  
 		stream position: (self positionOfPageIndex: anInteger).
 		page := (index readPageFrom: stream) 
-			index: anInteger;
+			offset: anInteger;
 			pageSize:  self filePageSize
 			yourself ].
 	pagesMutex critical: [  
@@ -157,7 +157,7 @@ SoilPagedFileIndexStore >> writePage: aPage [
 	| pagePosition |
 	self ensureStreamIsOpen.
 	streamSemaphore critical: [  
-		pagePosition := self positionOfPageIndex: aPage index.  
+		pagePosition := self positionOfPageIndex: aPage offset.  
 		stream position: pagePosition.
 		aPage writeOn: stream.
 		stream flush ]

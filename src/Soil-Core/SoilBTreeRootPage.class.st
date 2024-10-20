@@ -39,12 +39,12 @@ SoilBTreeRootPage >> insertItem: item for: iterator [
 	newIndexPage2 := iterator index splitIndexPage: newIndexPage1.
 	
 	"here now add entries for newIndexPage1 and newIndexPage2 to self"
-	self addItem: newIndexPage1 smallestKey -> newIndexPage1 index.
-	self addItem: newIndexPage2 smallestKey -> newIndexPage2 index.
+	self addItem: newIndexPage1 smallestKey -> newIndexPage1 offset.
+	self addItem: newIndexPage2 smallestKey -> newIndexPage2 offset.
 	^ return
 ]
 
 { #category : #printing }
 SoilBTreeRootPage >> printOn: aStream [ 
-	aStream << 'root index page : #' << index asString
+	aStream << 'root index page : #' << offset asString
 ]

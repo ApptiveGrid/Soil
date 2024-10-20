@@ -82,7 +82,7 @@ SoilBTreeHeaderPage >> latestVersion [
 ]
 
 { #category : #accessing }
-SoilBTreeHeaderPage >> nextPageIndex [
+SoilBTreeHeaderPage >> nextPageOffset [
 	lastPageIndex := lastPageIndex + 1.
 	dirty := true.
 	^ lastPageIndex 
@@ -90,7 +90,7 @@ SoilBTreeHeaderPage >> nextPageIndex [
 
 { #category : #printing }
 SoilBTreeHeaderPage >> printOn: aStream [ 
-	aStream << 'header page : #' << index asString
+	aStream << 'header page : #' << offset asString
 ]
 
 { #category : #reading }

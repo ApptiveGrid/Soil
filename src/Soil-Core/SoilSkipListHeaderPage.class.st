@@ -124,7 +124,7 @@ SoilSkipListHeaderPage >> maxLevel: anInteger [
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> nextPageIndex [
+SoilSkipListHeaderPage >> nextPageOffset [
 	lastPageIndex := lastPageIndex + 1.
 	dirty := true.
 	^ lastPageIndex 

@@ -7,10 +7,10 @@ Class {
 	#name : #SoilIndexPage,
 	#superclass : #Object,
 	#instVars : [
-		'index',
 		'version',
 		'dirty',
-		'pageSize'
+		'pageSize',
+		'offset'
 	],
 	#classInstVars : [
 		'random'
@@ -58,12 +58,14 @@ SoilIndexPage >> headerSize [
 
 { #category : #accessing }
 SoilIndexPage >> index [
-	^ index
+	self halt.
+	^ offset
 ]
 
 { #category : #accessing }
 SoilIndexPage >> index: anInteger [ 
-	index := anInteger
+	self halt.
+	offset := anInteger
 ]
 
 { #category : #initialization }
@@ -105,6 +107,16 @@ SoilIndexPage >> markDirty [
 ]
 
 { #category : #accessing }
+SoilIndexPage >> offset [
+	^ offset
+]
+
+{ #category : #accessing }
+SoilIndexPage >> offset: anInteger [ 
+	offset := anInteger
+]
+
+{ #category : #accessing }
 SoilIndexPage >> pageSize [
 	^ pageSize
 ]
@@ -116,7 +128,7 @@ SoilIndexPage >> pageSize: anInteger [
 
 { #category : #printing }
 SoilIndexPage >> printOn: aStream [ 
-	aStream << 'page : #' << index asString
+	aStream << 'page : #' << offset asString
 ]
 
 { #category : #reading }

@@ -18,7 +18,7 @@ SoilBTreePageTest >> readPageFrom: aStream [
 SoilBTreePageTest >> testCreation [ 
 	| page |
 	page := SoilBTreeDataPage new 
-		index: 1;
+		offset: 1;
 		pageSize: 4096;
 		keySize: 16;
 		valueSize: 8.
@@ -29,7 +29,7 @@ SoilBTreePageTest >> testCreation [
 SoilBTreePageTest >> testCreationIndex [
 	| page |
 	page := SoilBTreeIndexPage new 
-		index: 1;
+		offset: 1;
 		pageSize: 4096;
 		keySize: 16.
 	self assert: page hasRoom
@@ -39,7 +39,7 @@ SoilBTreePageTest >> testCreationIndex [
 SoilBTreePageTest >> testWriteAndRead [
 	| page bytes readPage |
 	page := SoilBTreeDataPage new 
-		index: 1;
+		offset: 1;
 		valueSize: 8;
 		keySize: 8.
 		
@@ -59,7 +59,7 @@ SoilBTreePageTest >> testWriteAndRead [
 SoilBTreePageTest >> testWriteAndReadIndex [
 	| page bytes readPage |
 	page := SoilBTreeIndexPage new 
-		index: 1;
+		offset: 1;
 		keySize: 8.
 	self assert: page isDirty.
 	bytes := ByteArray streamContents: [ :stream |
@@ -73,7 +73,7 @@ SoilBTreePageTest >> testWriteAndReadIndex [
 SoilBTreePageTest >> testWriteAndReadPageCode [
 	| page bytes readPage |
 	page := SoilBTreeDataPage new 
-		index: 1;
+		offset: 1;
 		valueSize: 8;
 		keySize: 8.
 		
