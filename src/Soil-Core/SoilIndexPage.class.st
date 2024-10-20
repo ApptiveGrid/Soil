@@ -56,18 +56,6 @@ SoilIndexPage >> headerSize [
 	^ 2 "pageCode, version" 
 ]
 
-{ #category : #accessing }
-SoilIndexPage >> index [
-	self halt.
-	^ offset
-]
-
-{ #category : #accessing }
-SoilIndexPage >> index: anInteger [ 
-	self halt.
-	offset := anInteger
-]
-
 { #category : #initialization }
 SoilIndexPage >> initialize [ 
 	super initialize.

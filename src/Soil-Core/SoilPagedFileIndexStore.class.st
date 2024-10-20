@@ -137,7 +137,7 @@ SoilPagedFileIndexStore >> removePageAt: anIndex [
 SoilPagedFileIndexStore >> replace: oldPage with: newPage [ 
 	pagesMutex critical: [  
 		pages
-			at: oldPage index 
+			at: oldPage offset 
 			put:newPage ]
 ]
 
