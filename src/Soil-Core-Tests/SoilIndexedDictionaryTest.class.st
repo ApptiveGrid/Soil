@@ -659,9 +659,10 @@ SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 	501 to: 700 do: [ :n | tx3 root removeKey: n ].
 	tx3 commit.
 	self assert: (index pages select: #needsCleanup) size equals: 3.
+	701 to: 702 do: [ :n | tx4 root removeKey: n ].
 	tx4 commit.
 	self assert: indexManager dirtyIndexes size equals: 0.
-	self assert: (index pages select: #needsCleanup) size equals: 3.
+	self assert: (index pages select: #needsCleanup) size equals: 0.
 
 	
 

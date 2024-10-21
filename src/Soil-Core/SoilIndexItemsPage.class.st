@@ -50,6 +50,11 @@ SoilIndexItemsPage >> associationAt: anInteger ifAbsent: aBlock [
 		ifNone: [ aBlock value ].
 ]
 
+{ #category : #testing }
+SoilIndexItemsPage >> canBeRemoved [
+	^ self presentItemCount isZero
+]
+
 { #category : #running }
 SoilIndexItemsPage >> cleanRemoved [
 	items removeAllSuchThat: [ :each | each value isRemoved ]
@@ -95,7 +100,7 @@ SoilIndexItemsPage >> initialize [
 
 { #category : #testing }
 SoilIndexItemsPage >> isDirty [
-	^ self needsWrite 
+	^ self needsWrite or: [ self needsCleanup ] 
 ]
 
 { #category : #testing }

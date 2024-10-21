@@ -28,6 +28,11 @@ SoilSkipListHeaderPage class >> pageCode [
 	^ 1 
 ]
 
+{ #category : #testing }
+SoilSkipListHeaderPage >> canBeRemoved [ 
+	^ false
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipListHeaderPage >> decreaseSize [
 	(size = -1) ifTrue: [ ^ self ].

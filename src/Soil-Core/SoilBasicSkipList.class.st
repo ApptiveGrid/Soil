@@ -61,7 +61,7 @@ SoilBasicSkipList >> newIterator [
 { #category : #removing }
 SoilBasicSkipList >> recyclePage: aPage [
 	"the header stays untouched even it it gets empty"
-	aPage isHeaderPage ifTrue: [ ^ self ].
+	aPage isHeaderPage ifTrue: [ ^ aPage ].
 	"remove page from chain of item pages"
 	self removePage: aPage. 
 	"add page to free list chain"
@@ -70,7 +70,7 @@ SoilBasicSkipList >> recyclePage: aPage [
 
 { #category : #removing }
 SoilBasicSkipList >> removeDirtyPage: aPage [ 
-	dirtyPages remove: aPage ifAbsent: [  ]
+	dirtyPages remove: aPage 
 ]
 
 { #category : #removing }
