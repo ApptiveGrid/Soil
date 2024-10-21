@@ -22,8 +22,7 @@ SoilBasicSkipList class >> isAbstract [
 
 { #category : #adding }
 SoilBasicSkipList >> addDirtyPage: aPage [ 
-	"dirtyPages add: aPage."
-	self flag: #todo
+	dirtyPages add: aPage
 ]
 
 { #category : #accessing }

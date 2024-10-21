@@ -644,11 +644,19 @@ SoilTransaction >> transactionManager [
 
 { #category : #'as yet unclassified' }
 SoilTransaction >> updatedIndexDictionary: indexedDictionary [ 
-	|  segment |
+	|  segment realIndex |
 	segment := self segmentAt: (self objectIdOf: indexedDictionary) segment.
-	
+	"when indexed dictionaries created the first time the journal creates the 
+	real index with path. In this case we request the real index from the index
+	manager"
+	realIndex := indexedDictionary index store isOpen 
+		ifTrue: [ indexedDictionary persistentIndex ]
+		ifFalse: [ 
+			segment indexManager 
+				at: indexedDictionary id 
+				ifAbsent: [ Error signal: 'cannot find index which should have been added before' ] ].
 	segment indexManager 
-		addDirtyIndex: indexedDictionary persistentIndex 
+		addDirtyIndex: realIndex 
 	
 ]
 
