@@ -91,8 +91,9 @@ SoilIndexManager >> dirtyIndexes [
 
 { #category : #accessing }
 SoilIndexManager >> flush [
-self indexes do: #flush.
-dirtyIndexes removeAll
+	self indexes do: #flush.
+	dirtyIndexes removeAll.
+	
 	"dirtyIndexes do: [ :index | 
 		index dirtyPages copy do: [ :page | 
 			page needsWrite ifTrue: [ 
