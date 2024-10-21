@@ -42,6 +42,11 @@ SoilIndexItemsPage >> associationAt: anInteger ifAbsent: aBlock [
 		ifNone: [ aBlock value ].
 ]
 
+{ #category : #running }
+SoilIndexItemsPage >> cleanRemoved [
+	items removeAllSuchThat: [ :each | each value isRemoved ]
+]
+
 { #category : #accessing }
 SoilIndexItemsPage >> firstItem [
 
@@ -81,6 +86,11 @@ SoilIndexItemsPage >> initialize [
 ]
 
 { #category : #testing }
+SoilIndexItemsPage >> isDirty [
+	^ self needsWrite 
+]
+
+{ #category : #testing }
 SoilIndexItemsPage >> isEmpty [
 	^ items isEmpty 
 ]
@@ -117,7 +127,7 @@ SoilIndexItemsPage >> itemAt: key put: anObject [
 	| removedItem |
 	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
 	items add: (key -> anObject).
-	dirty := true.
+	needWrite := true.
 	^ removedItem
 ]
 
@@ -148,7 +158,7 @@ SoilIndexItemsPage >> itemRemoveAt: anInteger ifAbsent: aBlock [
 		findBinaryIndex: [ :each |  anInteger - each key ] 
 		do: [:ind | item := items removeAt: ind ]
 		ifNone: [ ^ aBlock value ].
-	dirty := true.
+	needWrite := true.
 	^ item
 ]
 
@@ -157,7 +167,7 @@ SoilIndexItemsPage >> itemRemoveIndex: anInteger [
 	| item |
 	item := items at: anInteger.
 	items removeAt: anInteger.
-	dirty := true.
+	needWrite := true.
 	^ item
 ]
 
@@ -213,6 +223,11 @@ SoilIndexItemsPage >> lastTransaction: anInteger [
 	lastTransaction := anInteger
 ]
 
+{ #category : #testing }
+SoilIndexItemsPage >> needsCleanup [ 
+	^ items size > self presentItemCount 
+]
+
 { #category : #accessing }
 SoilIndexItemsPage >> numberOfItems [
 	^ items size
@@ -222,6 +237,11 @@ SoilIndexItemsPage >> numberOfItems [
 SoilIndexItemsPage >> postCopy [ 
 	super postCopy.
 	items := items copy.
+]
+
+{ #category : #'as yet unclassified' }
+SoilIndexItemsPage >> presentItemCount [
+	^ (items reject: [ :each | each value isRemoved ]) size 
 ]
 
 { #category : #reading }

@@ -20,6 +20,11 @@ SoilBTree >> destroy [
 	path ensureDelete 
 ]
 
+{ #category : #accessing }
+SoilBTree >> dirtyPages [
+	^ #()
+]
+
 { #category : #testing }
 SoilBTree >> isRegistered [
 	^ path notNil
@@ -62,6 +67,11 @@ SoilBTree >> path [
 SoilBTree >> path: aStringOrFileReference [
 
 	path := aStringOrFileReference asFileReference 
+]
+
+{ #category : #'as yet unclassified' }
+SoilBTree >> persistentIndex [
+	^ self 
 ]
 
 { #category : #converting }

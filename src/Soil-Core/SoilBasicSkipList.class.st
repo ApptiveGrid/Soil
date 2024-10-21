@@ -8,6 +8,9 @@ See SoilSkipList for more information
 Class {
 	#name : #SoilBasicSkipList,
 	#superclass : #SoilIndex,
+	#instVars : [
+		'dirtyPages'
+	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
@@ -17,9 +20,26 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
+{ #category : #adding }
+SoilBasicSkipList >> addDirtyPage: aPage [ 
+	"dirtyPages add: aPage."
+	self flag: #todo
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> dirtyPages [
+	^ dirtyPages
+]
+
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
+]
+
+{ #category : #initialization }
+SoilBasicSkipList >> initialize [ 
+	super initialize.
+	dirtyPages := Set new
 ]
 
 { #category : #accessing }
@@ -40,9 +60,14 @@ SoilBasicSkipList >> newIterator [
 ]
 
 { #category : #removing }
+SoilBasicSkipList >> removeDirtyPage: aPage [ 
+	dirtyPages remove: aPage
+]
+
+{ #category : #removing }
 SoilBasicSkipList >> removePage: aPage [
 	| iterator previousPage seen page |
-	(aPage index > 1) ifFalse: [ Error signal: 'cannot remove header page' ].
+	(aPage offset > 1) ifFalse: [ ^ aPage ].
 	"we use an iterator to scan pages on all levels that are just right
 	before the page to remove"
 	iterator := self newIterator. 
@@ -58,13 +83,13 @@ SoilBasicSkipList >> removePage: aPage [
 			1 to: page level do: [ :lvl |
 				"each previous page's next pointer might point to the page 
 				to be removed."
-				((page rightAt: lvl) = aPage index) ifTrue: [ 
+				((page rightAt: lvl) = aPage offset) ifTrue: [ 
 					"We overwrite the next pointer of the previous page with 
 					the next pointer of the page to be removed"
 					page rightAt: lvl put: (aPage rightAt: lvl).
-					page markDirty ] ] ] ].
+					page markForWrite ] ] ] ].
 	"finally remove the page from the store"
-	store removePageAt: aPage index.
+	store removePageAt: aPage offset.
 	^ aPage 
 
 
@@ -92,16 +117,16 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 	newPage := (page isLastPage and: [ page lastKey < aKey ])
 		ifTrue: [ store newPage ] 
 		ifFalse: [ page split: store newPage ].
-	newPage index: self store nextPageIndex.
+	newPage offset: self store nextPageOffset.
 	newPage level to: 1 by: -1  do: [ :level |
 		(level > page level)
 			ifTrue: [ 
 				newPage rightAt: level put: ((aIterator levelAt: level) rightAt: level).
-				(aIterator levelAt: level) rightAt: level put: newPage index ]
+				(aIterator levelAt: level) rightAt: level put: newPage offset ]
 			ifFalse: [ 
 				(page rightAt: level) ifNotNil: [ :r | 
 					newPage rightAt: level put: r ].
-				page rightAt: level put: newPage index ]].
-	self store pageAt: newPage index put: newPage.
+				page rightAt: level put: newPage offset ]].
+	self store pageAt: newPage offset put: newPage.
 	^ newPage 
 ]

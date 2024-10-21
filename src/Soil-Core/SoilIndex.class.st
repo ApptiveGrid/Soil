@@ -15,10 +15,16 @@ Class {
 	#name : #SoilIndex,
 	#superclass : #Object,
 	#instVars : [
+		'id',
 		'store'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
+
+{ #category : #adding }
+SoilIndex >> addDirtyPage: aPage [ 
+	
+]
 
 { #category : #private }
 SoilIndex >> at: key [ 
@@ -103,6 +109,18 @@ SoilIndex >> hasHeaderPage [
 { #category : #accessing }
 SoilIndex >> headerPage [
 	^ self store headerPage
+]
+
+{ #category : #accessing }
+SoilIndex >> id [
+
+	^ id
+]
+
+{ #category : #accessing }
+SoilIndex >> id: anObject [
+
+	id := anObject
 ]
 
 { #category : #'as yet unclassified' }

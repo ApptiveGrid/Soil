@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'segment',
 		'indexes',
-		'semaphore'
+		'semaphore',
+		'dirtyIndexes'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -22,6 +23,11 @@ SoilIndexManager class >> indexClassFromFile: aFileReference [
 { #category : #visiting }
 SoilIndexManager >> acceptSoil: aSoilVisitor [ 
 	^ aSoilVisitor visitIndexManager: self 
+]
+
+{ #category : #adding }
+SoilIndexManager >> addDirtyIndex: anIndex [
+	dirtyIndexes add: anIndex 
 ]
 
 { #category : #accessing }
@@ -44,6 +50,24 @@ SoilIndexManager >> at: indexId put: aSoilIndex [
 			put: aSoilIndex thePersistentInstance ]
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndexManager >> cleanPagesModifiedNotAfter: readVersion [ 
+	"| keysToRemove |"
+	"keysToRemove := OrderedCollection new.
+	pagesToMaintain keysAndValuesDo: [ :index :pages |
+		pages copy do: [ :page |
+			(readVersion isNil or: [ readVersion >= page lastTransaction ]) ifTrue: [  
+				(page presentItemCount = 0) 
+					ifTrue: [ index removePage: page ]
+					ifFalse: [ page cleanRemoved  ].
+				pages remove: page ] ].
+		pages ifEmpty: [ keysToRemove add: index ].
+		index writePages ].
+	keysToRemove do: [ :index | 
+		pagesToMaintain removeKey: index  ]
+	"
+]
+
 { #category : #'open/close' }
 SoilIndexManager >> close [
 	semaphore critical: [  
@@ -61,8 +85,21 @@ SoilIndexManager >> createIndexWithId: indexId class: aClass [
 ]
 
 { #category : #accessing }
+SoilIndexManager >> dirtyIndexes [
+	^ dirtyIndexes
+]
+
+{ #category : #accessing }
 SoilIndexManager >> flush [
-	self indexes do: #flush
+	self indexes do: #flush.
+	dirtyIndexes removeAll.
+	
+	"dirtyIndexes do: [ :index | 
+		index dirtyPages copy do: [ :page | 
+			page needsWrite ifTrue: [ 
+				index store writePage: page.
+				page isDirty ifFalse: [ 
+					index removeDirtyPage: page ] ] ] ]"
 ]
 
 { #category : #flushing }
@@ -85,7 +122,8 @@ SoilIndexManager >> indexes [
 SoilIndexManager >> initialize [ 
 	super initialize.
 	indexes := Dictionary new.
-	semaphore := Semaphore forMutualExclusion 
+	semaphore := Semaphore forMutualExclusion.
+	dirtyIndexes := Set new 
 ]
 
 { #category : #initialization }
@@ -127,6 +165,11 @@ SoilIndexManager >> segment [
 { #category : #accessing }
 SoilIndexManager >> segment: aSOObjectSegment [ 
 	segment := aSOObjectSegment 
+]
+
+{ #category : #accessing }
+SoilIndexManager >> soil [ 
+	^ segment soil 
 ]
 
 { #category : #writing }

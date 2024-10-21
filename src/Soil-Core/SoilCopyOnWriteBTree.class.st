@@ -17,6 +17,11 @@ SoilCopyOnWriteBTree >> newPage [
 	^ wrapped newPage
 ]
 
+{ #category : #'as yet unclassified' }
+SoilCopyOnWriteBTree >> persistentIndex [
+	^ wrapped persistentIndex 
+]
+
 { #category : #converting }
 SoilCopyOnWriteBTree >> thePersistentInstance [
 	^ wrapped

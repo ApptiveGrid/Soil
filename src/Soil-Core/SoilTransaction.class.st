@@ -86,7 +86,7 @@ SoilTransaction >> basicCommit [
 	self prepareRecordsForCommit.
 	"if there are no records to commit we can just return and don't allocate any
 	resources"
-	(recordsToCommit isEmpty and: [indexUpdatesToCommit isEmpty ]) ifTrue: [ 
+	self isReadOnly ifTrue: [ 
 		soil notificationHandler transactionCommitted: self.
 		^ self ].
 	"only one transactions is allowed at a time. We use the critical block of the database
@@ -110,6 +110,8 @@ SoilTransaction >> basicCommit [
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
+		indexUpdatesToCommit do: [:indexDict | 
+			self updatedIndexDictionary: indexDict] .
 		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
@@ -309,12 +311,7 @@ SoilTransaction >> findRecords: aBlock [
 
 { #category : #testing }
 SoilTransaction >> hasModifications [ 
-	^ self dirtyObjects notEmpty
-]
-
-{ #category : #testing }
-SoilTransaction >> hasRecordsToCommit [ 
-	^  recordsToCommit notEmpty
+	^ recordsToCommit isEmptyOrNil not or: [ indexUpdatesToCommit isEmptyOrNil not ]
 ]
 
 { #category : #accessing }
@@ -358,6 +355,11 @@ SoilTransaction >> isAborted [
 { #category : #testing }
 SoilTransaction >> isPersistent: anObject [
 	^ self isRoot: anObject
+]
+
+{ #category : #testing }
+SoilTransaction >> isReadOnly [ 
+	^ self hasModifications not
 ]
 
 { #category : #testing }
@@ -638,6 +640,16 @@ SoilTransaction >> start [
 { #category : #accessing }
 SoilTransaction >> transactionManager [ 
 	^ soil transactionManager
+]
+
+{ #category : #'as yet unclassified' }
+SoilTransaction >> updatedIndexDictionary: indexedDictionary [ 
+	|  segment |
+	segment := self segmentAt: (self objectIdOf: indexedDictionary) segment.
+	
+	segment indexManager 
+		addDirtyIndex: indexedDictionary persistentIndex 
+	
 ]
 
 { #category : #accessing }
