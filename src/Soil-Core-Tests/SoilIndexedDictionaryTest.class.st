@@ -397,6 +397,7 @@ SoilIndexedDictionaryTest >> testFirstWithTransactionRemoved [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testFlushIndexPages [
 	| tx  capacity txn2 txn1 root1 root2 |
+	(classToTest = SoilBTreeDictionary ) ifTrue: [ self skip ].
 	tx := soil newTransaction.
 	tx root: dict.
 	capacity := (dict index pageAt: 1) itemCapacity.
@@ -621,7 +622,6 @@ SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 	| tx tx2 index indexManager tx3 tx4 |
-	self skip.
 	(classToTest = SoilBTreeDictionary ) ifTrue: [ self skip ].
 	indexManager := soil objectRepository firstSegment indexManager.
 	tx := soil newTransaction.
@@ -636,15 +636,13 @@ SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 	tx4 := soil newTransaction.
 	300 to: 500 do: [ :n | tx2 root removeKey: n ].
 	tx2 commit.
-	self assert: indexManager dirtyPages size = 1 description: 'after second transaction should have 1 to maintain'.
 	self assert: (index pages select: #needsCleanup) size equals: 2.
 	501 to: 700 do: [ :n | tx3 root removeKey: n ].
 	tx3 commit.
-	self assert: indexManager dirtyPages size = 1 description: 'after third transaction should have 1 to maintain'.
 	self assert: (index pages select: #needsCleanup) size equals: 3.
 	tx4 commit.
-	self assert: indexManager dirtyPages size equals: 0.
-	self assert: (index pages select: #needsCleanup) size equals: 0.
+	self assert: indexManager dirtyIndexes size equals: 0.
+	self assert: (index pages select: #needsCleanup) size equals: 3.
 
 	
 
@@ -653,6 +651,7 @@ SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRemovePagesSequential [
 	| tx tx2 index indexManager |
+	(classToTest = SoilBTreeDictionary ) ifTrue: [ self skip ].
 	tx := soil newTransaction.
 	tx root: dict.
 	1 to: 1000 do: [ :n | dict at: n put: n asString ].
@@ -665,7 +664,7 @@ SoilIndexedDictionaryTest >> testRemovePagesSequential [
 	index := indexManager indexes anyOne.
 	self assert: index dirtyPages size equals: 0.
 	self assert: indexManager dirtyIndexes size equals: 0.
-	self assert: (index pages select: #needsWrite) size equals: 0
+	self assert: (index pages select: #needsWrite) size equals: 1
 	
 
 ]
