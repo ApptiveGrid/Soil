@@ -14,11 +14,6 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSkipList: self
 ]
 
-{ #category : #adding }
-SoilSkipList >> addPageToMaintain: aPage [ 
-	pagesToMaintain add: aPage
-]
-
 { #category : #converting }
 SoilSkipList >> asCopyOnWrite [
 	^ SoilCopyOnWriteSkipList new
@@ -95,6 +90,7 @@ SoilSkipList >> newHeaderPage [
 { #category : #'instance creation' }
 SoilSkipList >> newPage [
 	^ self pageClass new 
+		index: self;
 		initializeLevel: self maxLevel;
 		keySize: self keySize;
 		valueSize: self valueSize;

@@ -48,7 +48,7 @@ SoilPagedFileIndexStore >> flush [
 SoilPagedFileIndexStore >> flushPages [
 	pagesMutex critical: [  
 		pages valuesDo: [ :page |
-			page isDirty ifTrue: [ 
+			page needsWrite ifTrue: [ 
 				self writePage: page ] ] ]
 ]
 

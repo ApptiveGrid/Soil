@@ -427,7 +427,7 @@ SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 	currentPage 
 		itemAt: indexKey 
 		put: SoilObjectId removed.
-	"index addPageToMaintain: currentPage. "
+	index addDirtyPage: currentPage.
 	index decreaseSize.
 	^ oldValue
 ]

@@ -636,14 +636,14 @@ SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 	tx4 := soil newTransaction.
 	300 to: 500 do: [ :n | tx2 root removeKey: n ].
 	tx2 commit.
-	self assert: indexManager pagesToMaintain size = 1 description: 'after second transaction should have 1 to maintain'.
+	self assert: indexManager dirtyPages size = 1 description: 'after second transaction should have 1 to maintain'.
 	self assert: (index pages select: #needsCleanup) size equals: 2.
 	501 to: 700 do: [ :n | tx3 root removeKey: n ].
 	tx3 commit.
-	self assert: indexManager pagesToMaintain size = 1 description: 'after third transaction should have 1 to maintain'.
+	self assert: indexManager dirtyPages size = 1 description: 'after third transaction should have 1 to maintain'.
 	self assert: (index pages select: #needsCleanup) size equals: 3.
 	tx4 commit.
-	self assert: indexManager pagesToMaintain size equals: 0.
+	self assert: indexManager dirtyPages size equals: 0.
 	self assert: (index pages select: #needsCleanup) size equals: 0.
 
 	
@@ -663,9 +663,9 @@ SoilIndexedDictionaryTest >> testRemovePagesSequential [
 	tx2 commit.
 	indexManager := soil objectRepository firstSegment indexManager.
 	index := indexManager indexes anyOne.
-	self assert: index pagesToMaintain size equals: 0.
-	self assert: indexManager pagesToMaintain size equals: 0.
-	self assert: (index pages select: #isDirty) size equals: 0
+	self assert: index dirtyPages size equals: 0.
+	self assert: indexManager dirtyIndexes size equals: 0.
+	self assert: (index pages select: #needsWrite) size equals: 0
 	
 
 ]

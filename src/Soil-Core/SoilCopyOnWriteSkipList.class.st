@@ -7,6 +7,11 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #adding }
+SoilCopyOnWriteSkipList >> addDirtyPage: aPage [ 
+	
+]
+
 { #category : #testing }
 SoilCopyOnWriteSkipList >> isRegistered [
 	^ wrapped isRegistered

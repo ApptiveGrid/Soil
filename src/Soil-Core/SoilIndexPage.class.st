@@ -8,9 +8,10 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'version',
-		'dirty',
 		'pageSize',
-		'offset'
+		'offset',
+		'index',
+		'needWrite'
 	],
 	#classInstVars : [
 		'random'
@@ -56,15 +57,15 @@ SoilIndexPage >> headerSize [
 	^ 2 "pageCode, version" 
 ]
 
+{ #category : #accessing }
+SoilIndexPage >> index: aSoilIndex [
+	index := aSoilIndex 
+]
+
 { #category : #initialization }
 SoilIndexPage >> initialize [ 
 	super initialize.
 	version := self latestVersion
-]
-
-{ #category : #testing }
-SoilIndexPage >> isDirty [
-	^ dirty 
 ]
 
 { #category : #testing }
@@ -90,8 +91,13 @@ SoilIndexPage >> latestVersion [
 ]
 
 { #category : #accessing }
-SoilIndexPage >> markDirty [
-	dirty := true 
+SoilIndexPage >> markForWrite [
+	needWrite := true 
+]
+
+{ #category : #testing }
+SoilIndexPage >> needsWrite [
+	^ needWrite 
 ]
 
 { #category : #accessing }
@@ -121,7 +127,7 @@ SoilIndexPage >> printOn: aStream [
 
 { #category : #reading }
 SoilIndexPage >> readFrom: aStream [ 
-	dirty := false.
+	needWrite := false.
 	"we do not read the pageCode here as it was read already"
 	version := aStream next
 ]
@@ -140,6 +146,6 @@ SoilIndexPage >> writeHeaderOn: aStream [
 
 { #category : #writing }
 SoilIndexPage >> writeOn: aStream [ 
-	dirty := false.
+	needWrite := false.
 	self writeHeaderOn: aStream
 ]

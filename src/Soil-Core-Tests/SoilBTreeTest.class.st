@@ -249,8 +249,8 @@ SoilBTreeTest >> testCreation [
 	"we alwaus create one data page and the root index"
 	self assert: index pages size equals: 2.
 	"both pages start as dirty"
-	self assert: (index pages at: 1) isDirty.
-	self assert: (index pages at: 2) isDirty
+	self assert: (index pages at: 1) needsWrite.
+	self assert: (index pages at: 2) needsWrite
 ]
 
 { #category : #tests }

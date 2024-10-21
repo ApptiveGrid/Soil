@@ -39,10 +39,10 @@ SoilSkipListPageTest >> testDataPageFull [
 	1 to: 255 do: [ :n |
 		page addItem: (n -> n) ].
 	self assert: page hasRoom equals: false.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	1 to: 255 do: [ :n |
 		self assert: (page itemAt: n ifAbsent: nil) value equals: n ]
@@ -63,7 +63,7 @@ SoilSkipListPageTest >> testDataPageFullStreamSize [
 		page addItem: (number -> number).
 		number := number + 1 ].
 	self assert: page hasRoom equals: false.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self assert: bytes size <= page pageSize
@@ -89,13 +89,13 @@ SoilSkipListPageTest >> testDataPageWriteAndRead [
 	page := SoilSkipListDataPage new 
 		offset: 1;
 		level: 8.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	self assert: readPage level equals: 8.
-	self deny: readPage isDirty 
+	self deny: readPage needsWrite 
 ]
 
 { #category : #tests }
@@ -105,14 +105,14 @@ SoilSkipListPageTest >> testDataPageWriteAndReadRightArray [
 		offset: 1;
 		level: 8;
 		setRight: #( 1 2 3 4 5 6 7 8 ).
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream. 
 	self assert: readPage level equals: 8.
 	self assert: readPage right equals: #( 1 2 3 4 5 6 7 8).
-	self deny: readPage isDirty 
+	self deny: readPage needsWrite 
 ]
 
 { #category : #tests }
@@ -129,10 +129,10 @@ SoilSkipListPageTest >> testHeaderPageFull [
 	1 to: 253 do: [ :n |
 		page addItem: (n -> n) ].
 	self assert: page hasRoom equals: false.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	1 to: 253 do: [ :n |
 		self assert: (page itemAt: n ifAbsent: nil) value equals: n ]
@@ -155,7 +155,7 @@ SoilSkipListPageTest >> testHeaderPageFullStreamSize [
 		page addItem: (number -> number).
 		number := number + 1 ].
 	self assert: page hasRoom equals: false.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self assert: bytes size <= page pageSize
@@ -187,17 +187,17 @@ SoilSkipListPageTest >> testHeaderPageWriteAndRead [
 		offset: 1;
 		level: 8;
 		lastPageIndex: 2.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	self assert: readPage level equals: 8.
 	self assert: readPage keySize equals: 16.
 	self assert: readPage valueSize equals: 8.
 	self assert: readPage maxLevel equals: 12.
 	self assert: readPage lastPageIndex equals: 2.
-	self deny: readPage isDirty 
+	self deny: readPage needsWrite 
 ]
 
 { #category : #tests }
@@ -215,10 +215,10 @@ SoilSkipListPageTest >> testWriteOldVersion [
 		yourself.
 	1 to: 10 do: [ :n |
 		page addItem: (n -> n) ].
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	self assert: readPage version equals: 1.
 	self assert: (readPage instVarNamed: #size) equals: -1 

@@ -43,16 +43,16 @@ SoilBTreePageTest >> testWriteAndRead [
 		valueSize: 8;
 		keySize: 8.
 		
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	self assert: readPage next equals: page next.
 	self assert: readPage valueSize equals: page valueSize.
 	self assert: readPage keySize equals: page keySize.
 	
-	self deny: readPage isDirty 
+	self deny: readPage needsWrite 
 ]
 
 { #category : #tests }
@@ -61,12 +61,12 @@ SoilBTreePageTest >> testWriteAndReadIndex [
 	page := SoilBTreeIndexPage new 
 		offset: 1;
 		keySize: 8.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
-	self deny: readPage isDirty
+	self deny: readPage needsWrite
 ]
 
 { #category : #tests }
@@ -77,14 +77,14 @@ SoilBTreePageTest >> testWriteAndReadPageCode [
 		valueSize: 8;
 		keySize: 8.
 		
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	self assert: readPage next equals: page next.
 	self assert: readPage valueSize equals: page valueSize.
 	self assert: readPage keySize equals: page keySize.
 	
-	self deny: readPage isDirty 
+	self deny: readPage needsWrite 
 ]

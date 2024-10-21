@@ -110,8 +110,8 @@ SoilTransaction >> basicCommit [
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
-		"indexUpdatesToCommit do: [:indexDict | 
-			self updatedIndexDictionary: indexDict] ."
+		indexUpdatesToCommit do: [:indexDict | 
+			self updatedIndexDictionary: indexDict] .
 		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
@@ -648,10 +648,8 @@ SoilTransaction >> updatedIndexDictionary: indexedDictionary [
 	segment := self segmentAt: (self objectIdOf: indexedDictionary) segment.
 	
 	segment indexManager 
-		maintainIndex: indexedDictionary persistentIndex 
-		id: indexedDictionary id.
+		addDirtyIndex: indexedDictionary persistentIndex 
 	
-	indexedDictionary persistentIndex resetPagesToMaintain 
 ]
 
 { #category : #accessing }

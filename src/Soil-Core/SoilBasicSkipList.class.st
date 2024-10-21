@@ -9,7 +9,7 @@ Class {
 	#name : #SoilBasicSkipList,
 	#superclass : #SoilIndex,
 	#instVars : [
-		'pagesToMaintain'
+		'dirtyPages'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -20,20 +20,25 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
+{ #category : #adding }
+SoilBasicSkipList >> addDirtyPage: aPage [ 
+	dirtyPages add: aPage.
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> dirtyPages [
+	^ dirtyPages
+]
+
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
 ]
 
-{ #category : #testing }
-SoilBasicSkipList >> hasPagesToMaintain [ 
-	^ pagesToMaintain notEmpty
-]
-
 { #category : #initialization }
 SoilBasicSkipList >> initialize [ 
 	super initialize.
-	pagesToMaintain := Set new
+	dirtyPages := Set new
 ]
 
 { #category : #accessing }
@@ -53,9 +58,9 @@ SoilBasicSkipList >> newIterator [
 	^ SoilSkipListIterator on: self 
 ]
 
-{ #category : #accessing }
-SoilBasicSkipList >> pagesToMaintain [
-	^ pagesToMaintain 
+{ #category : #removing }
+SoilBasicSkipList >> removeDirtyPage: aPage [ 
+	dirtyPages remove: aPage
 ]
 
 { #category : #removing }
@@ -81,17 +86,12 @@ SoilBasicSkipList >> removePage: aPage [
 					"We overwrite the next pointer of the previous page with 
 					the next pointer of the page to be removed"
 					page rightAt: lvl put: (aPage rightAt: lvl).
-					page markDirty ] ] ] ].
+					page markForWrite ] ] ] ].
 	"finally remove the page from the store"
 	store removePageAt: aPage offset.
 	^ aPage 
 
 
-]
-
-{ #category : #initialization }
-SoilBasicSkipList >> resetPagesToMaintain [
-	pagesToMaintain := Set new
 ]
 
 { #category : #accessing }
