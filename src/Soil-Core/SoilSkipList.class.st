@@ -90,7 +90,6 @@ SoilSkipList >> newHeaderPage [
 { #category : #'instance creation' }
 SoilSkipList >> newPage [
 	^ self pageClass new 
-		index: self;
 		initializeLevel: self maxLevel;
 		keySize: self keySize;
 		valueSize: self valueSize;
