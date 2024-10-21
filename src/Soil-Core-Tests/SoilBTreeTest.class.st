@@ -249,8 +249,8 @@ SoilBTreeTest >> testCreation [
 	"we alwaus create one data page and the root index"
 	self assert: index pages size equals: 2.
 	"both pages start as dirty"
-	self assert: (index pages at: 1) isDirty.
-	self assert: (index pages at: 2) isDirty
+	self assert: (index pages at: 1) needsWrite.
+	self assert: (index pages at: 2) needsWrite
 ]
 
 { #category : #tests }
@@ -341,7 +341,7 @@ SoilBTreeTest >> testLastPage [
 	1 to: capacity do: [ :n |
 		index at: n put: (n asByteArrayOfSize: 8) ].
 	self assert: index pages size equals: 200.
-	self assert: index lastPage index equals: 200.
+	self assert: index lastPage offset equals: 200.
 	self assert: index lastPage isLastPage.
 	lastItem := index lastPage itemAt: capacity ifAbsent: [nil].
 	self assert: lastItem value equals: (capacity asByteArrayOfSize: 8)

@@ -24,7 +24,7 @@ SoilBTreeHeaderPage class >> pageCode [
 { #category : #utilities }
 SoilBTreeHeaderPage >> decreaseSize [
  	size := size - 1.
- 	dirty := true
+ 	needWrite := true
 ]
 
 { #category : #accessing }
@@ -46,7 +46,7 @@ SoilBTreeHeaderPage >> headerSize [
 { #category : #utilities }
 SoilBTreeHeaderPage >> increaseSize [
  	size := size + 1.
- 	dirty := true
+ 	needWrite := true
 ]
 
 { #category : #initialization }
@@ -73,7 +73,7 @@ SoilBTreeHeaderPage >> lastPageIndex [
 { #category : #accessing }
 SoilBTreeHeaderPage >> lastPageIndex: anObject [
 	lastPageIndex := anObject.
-	dirty := true
+	needWrite := true
 ]
 
 { #category : #initialization }
@@ -82,15 +82,15 @@ SoilBTreeHeaderPage >> latestVersion [
 ]
 
 { #category : #accessing }
-SoilBTreeHeaderPage >> nextPageIndex [
+SoilBTreeHeaderPage >> nextPageOffset [
 	lastPageIndex := lastPageIndex + 1.
-	dirty := true.
+	needWrite := true.
 	^ lastPageIndex 
 ]
 
 { #category : #printing }
 SoilBTreeHeaderPage >> printOn: aStream [ 
-	aStream << 'header page : #' << index asString
+	aStream << 'header page : #' << offset asString
 ]
 
 { #category : #reading }

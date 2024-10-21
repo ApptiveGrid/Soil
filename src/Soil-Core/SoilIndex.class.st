@@ -15,13 +15,14 @@ Class {
 	#name : #SoilIndex,
 	#superclass : #Object,
 	#instVars : [
+		'id',
 		'store'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
 
 { #category : #adding }
-SoilIndex >> addPageToMaintain: aPage [ 
+SoilIndex >> addDirtyPage: aPage [ 
 	
 ]
 
@@ -105,14 +106,21 @@ SoilIndex >> hasHeaderPage [
 	^ self subclassResponsibility
 ]
 
-{ #category : #testing }
-SoilIndex >> hasPagesToMaintain [
-	^ false 	
-]
-
 { #category : #accessing }
 SoilIndex >> headerPage [
 	^ self store headerPage
+]
+
+{ #category : #accessing }
+SoilIndex >> id [
+
+	^ id
+]
+
+{ #category : #accessing }
+SoilIndex >> id: anObject [
+
+	id := anObject
 ]
 
 { #category : #'as yet unclassified' }
@@ -200,11 +208,6 @@ SoilIndex >> pageSize [
 { #category : #accessing }
 SoilIndex >> pages [
 	^ self store pages
-]
-
-{ #category : #accessing }
-SoilIndex >> pagesToMaintain [ 
-	^ #()
 ]
 
 { #category : #'instance creation' }

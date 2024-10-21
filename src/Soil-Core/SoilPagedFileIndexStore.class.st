@@ -48,7 +48,7 @@ SoilPagedFileIndexStore >> flush [
 SoilPagedFileIndexStore >> flushPages [
 	pagesMutex critical: [  
 		pages valuesDo: [ :page |
-			page isDirty ifTrue: [ 
+			page needsWrite ifTrue: [ 
 				self writePage: page ] ] ]
 ]
 
@@ -76,7 +76,7 @@ SoilPagedFileIndexStore >> initializeHeaderPage [
 	| page |
 	page := index newHeaderPage.
 	pagesMutex critical: [  
-		pages at: page index put: page	]
+		pages at: page offset put: page	]
 ]
 
 { #category : #testing }
@@ -143,7 +143,7 @@ SoilPagedFileIndexStore >> removePageAt: anIndex [
 SoilPagedFileIndexStore >> replace: oldPage with: newPage [ 
 	pagesMutex critical: [  
 		pages
-			at: oldPage index 
+			at: oldPage offset 
 			put:newPage ]
 ]
 
@@ -163,7 +163,7 @@ SoilPagedFileIndexStore >> writePage: aPage [
 	| pagePosition |
 	self ensureStreamIsOpen.
 	streamSemaphore critical: [  
-		pagePosition := self positionOfPageIndex: aPage index.  
+		pagePosition := self positionOfPageIndex: aPage offset.  
 		stream position: pagePosition.
 		aPage writeOn: stream.
 		stream flush ]

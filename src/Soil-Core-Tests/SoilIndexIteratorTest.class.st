@@ -252,7 +252,7 @@ SoilIndexIteratorTest >> testFindPageFor [
 	"empty case"
 	value := iterator
 		findPageFor: 1.
-	self assert: value index equals: 1.
+	self assert: value offset equals: 1.
 	
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n |
@@ -261,12 +261,12 @@ SoilIndexIteratorTest >> testFindPageFor [
 	expected := index class == SoilBTree ifTrue: [ 3 ] ifFalse: [ 1 ].
 	value := iterator
 		findPageFor: 222.
-	self assert: value index equals: expected.
+	self assert: value offset equals: expected.
 	
 	expected := index class == SoilBTree ifTrue: [ 4 ] ifFalse: [ 2 ].
 	value := iterator
 		findPageFor: capacity + 1.
-	self assert: value index equals: expected
+	self assert: value offset equals: expected
 
 ]
 
@@ -596,7 +596,7 @@ SoilIndexIteratorTest >> testNextPage [
 	expected := index class == SoilBTree ifTrue: [ 4 ] ifFalse: [ 2 ].
 	value := iterator
 		findPageFor: 222.
-	self assert: iterator nextPage index equals: expected.
+	self assert: iterator nextPage offset equals: expected.
 	
 	value := iterator
 		findPageFor: capacity + 1.
@@ -724,7 +724,7 @@ SoilIndexIteratorTest >> testPreviousPage [
 	iterator := index newIterator.
 	page := iterator findPageFor: toFind.
 			
-	self assert: priorPage next equals: page index
+	self assert: priorPage next equals: page offset
 ]
 
 { #category : #tests }

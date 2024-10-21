@@ -32,7 +32,7 @@ SoilSkipListHeaderPage class >> pageCode [
 SoilSkipListHeaderPage >> decreaseSize [
 	(size = -1) ifTrue: [ ^ self ].
 	size := size - 1.
-	dirty := true
+	needWrite := true
 ]
 
 { #category : #accessing }
@@ -61,7 +61,7 @@ SoilSkipListHeaderPage >> headerSize [
 SoilSkipListHeaderPage >> increaseSize [
 	(size = -1) ifTrue: [ ^ self ].
 	size := size + 1.
-	dirty := true
+	needWrite := true
 ]
 
 { #category : #initialization }
@@ -88,7 +88,7 @@ SoilSkipListHeaderPage >> keySize: anInteger [
 	((self lastPageIndex = 1) and: [ items isEmpty ]) ifFalse: [ 
 		keySize ifNotNil: [ Error signal: 'key size has been set already' ] ].
 	super keySize: anInteger.
-	dirty := true
+	needWrite := true
 	
 
 ]
@@ -107,7 +107,7 @@ SoilSkipListHeaderPage >> lastPageIndex [
 { #category : #accessing }
 SoilSkipListHeaderPage >> lastPageIndex: anObject [
 	lastPageIndex := anObject.
-	dirty := true
+	needWrite := true
 ]
 
 { #category : #initialization }
@@ -126,13 +126,13 @@ SoilSkipListHeaderPage >> maxLevel: anInteger [
 
 	maxLevel := anInteger.
 	right := Array new: anInteger withAll: 0.
-	dirty := true
+	needWrite := true
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> nextPageIndex [
+SoilSkipListHeaderPage >> nextPageOffset [
 	lastPageIndex := lastPageIndex + 1.
-	dirty := true.
+	needWrite := true.
 	^ lastPageIndex 
 ]
 

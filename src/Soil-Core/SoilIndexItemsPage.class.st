@@ -94,6 +94,11 @@ SoilIndexItemsPage >> initialize [
 ]
 
 { #category : #testing }
+SoilIndexItemsPage >> isDirty [
+	^ self needsWrite 
+]
+
+{ #category : #testing }
 SoilIndexItemsPage >> isEmpty [
 	^ items isEmpty 
 ]
@@ -130,7 +135,7 @@ SoilIndexItemsPage >> itemAt: key put: anObject [
 	| removedItem |
 	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
 	items add: (key -> anObject).
-	dirty := true.
+	needWrite := true.
 	^ removedItem
 ]
 
@@ -161,7 +166,7 @@ SoilIndexItemsPage >> itemRemoveAt: anInteger ifAbsent: aBlock [
 		findBinaryIndex: [ :each |  anInteger - each key ] 
 		do: [:ind | item := items removeAt: ind ]
 		ifNone: [ ^ aBlock value ].
-	dirty := true.
+	needWrite := true.
 	^ item
 ]
 
@@ -170,7 +175,7 @@ SoilIndexItemsPage >> itemRemoveIndex: anInteger [
 	| item |
 	item := items at: anInteger.
 	items removeAt: anInteger.
-	dirty := true.
+	needWrite := true.
 	^ item
 ]
 

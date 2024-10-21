@@ -30,7 +30,7 @@ SoilSkipListPage class >> isAbstract [
 SoilSkipListPage >> addItem: anAssociation [
 	"Note: this can only be called for new items, client has to check first and update if an entry for the key is already there, different to SoilBTreePage>>#addItem:"
 	items add: anAssociation.
-	dirty := true
+	needWrite := true
 ]
 
 { #category : #accessing }
@@ -44,7 +44,7 @@ SoilSkipListPage >> biggestKey [
 SoilSkipListPage >> initialize [ 
 	super initialize.
 	lastTransaction := 0.
-	dirty := true.
+	needWrite := true.
 
 ]
 
@@ -109,7 +109,7 @@ SoilSkipListPage >> rightAt: anInteger [
 { #category : #accessing }
 SoilSkipListPage >> rightAt: anInteger put: anObject [ 
 	self right at: anInteger put: anObject.
-	dirty := true
+	needWrite := true
 ]
 
 { #category : #writing }
@@ -130,7 +130,7 @@ SoilSkipListPage >> split: newPage [
 	middle := (items size / 2) ceiling.
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.
-	dirty := true.
+	needWrite := true.
 	^ newPage
 	
 ]
