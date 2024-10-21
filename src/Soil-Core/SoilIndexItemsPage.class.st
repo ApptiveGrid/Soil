@@ -31,9 +31,9 @@ SoilIndexItemsPage >> addItem: anAssociation [
 { #category : #converting }
 SoilIndexItemsPage >> asSoilFreePage [
 	^ SoilFreePage new 
-		index: index;
+		offset: offset;
 		pageSize: pageSize;
-		markDirty 
+		markDirty
 ]
 
 { #category : #accessing }

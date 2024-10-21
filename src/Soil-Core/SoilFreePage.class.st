@@ -56,6 +56,11 @@ SoilFreePage >> latestVersion [
 	^ 1
 ]
 
+{ #category : #accessing }
+SoilFreePage >> markDirty [
+	needWrite := true
+]
+
 { #category : #testing }
 SoilFreePage >> needsCleanup [
 	^ false

@@ -128,7 +128,7 @@ SoilPagedFileIndexStore >> readPageAt: anInteger [
 	^ streamSemaphore critical: [  
 		stream position: (self positionOfPageIndex: anInteger).
 		(index readPageFrom: stream) 
-			index: anInteger;
+			offset: anInteger;
 			pageSize:  self filePageSize
 			yourself ]
 ]

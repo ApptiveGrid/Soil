@@ -14,17 +14,16 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSkipList: self
 ]
 
-
 { #category : #adding }
 SoilSkipList >> addToFreePages: aPage [  
 	| currentFreePage newFreePage |
 	newFreePage := aPage asSoilFreePage.
-	store pageAt: aPage index put: newFreePage.
+	store pageAt: aPage offset put: newFreePage.
 	currentFreePage := self firstFreePage
 		ifNil: [ 
 			"if there is no first free page yet make aPage the
 			first free page"
-			self headerPage firstFreePageIndex: newFreePage index.
+			self headerPage firstFreePageIndex: newFreePage offset.
 			^ newFreePage ].
 	"if there is a first free page start scanning from here for a
 	free page that has room to store another free page"
@@ -34,7 +33,7 @@ SoilSkipList >> addToFreePages: aPage [
 		next"
 		currentFreePage next isZero 
 			ifTrue: [
-				currentFreePage next: newFreePage index.
+				currentFreePage next: newFreePage offset.
 				^ newFreePage  ]
 			ifFalse: [ currentFreePage := store pageAt: currentFreePage next ]].
 	currentFreePage addPage: newFreePage
