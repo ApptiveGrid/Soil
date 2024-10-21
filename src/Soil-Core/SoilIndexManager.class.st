@@ -93,11 +93,16 @@ SoilIndexManager >> dirtyIndexes [
 SoilIndexManager >> flush [
 	
 	dirtyIndexes copy do: [ :index | 
-		index dirtyPages copy do: [ :page | 
+		index dirtyPages copy do: [ :p | | page |
+			page := p.
+			page needsCleanup ifTrue: [
+				page presentItemCount isZero 
+					ifTrue: [ page := index recyclePage: page ]
+					ifFalse: [ page cleanRemoved ] ] .
 			page needsWrite ifTrue: [ 
-				index store writePage: page.
-				page isDirty ifFalse: [ 
-					index removeDirtyPage: page ] ] ].
+				index store writePage: page ].
+			page isDirty ifFalse: [ 
+					index removeDirtyPage: page ] ].
 		index dirtyPages ifEmpty: [ dirtyIndexes remove: index ] ]
 ]
 

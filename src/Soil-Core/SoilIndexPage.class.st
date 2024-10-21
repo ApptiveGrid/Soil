@@ -124,7 +124,7 @@ SoilIndexPage >> printOn: aStream [
 	aStream 
 		<< self label 
 		<< ' #' 
-		<< index asString
+		<< offset asString
 ]
 
 { #category : #reading }

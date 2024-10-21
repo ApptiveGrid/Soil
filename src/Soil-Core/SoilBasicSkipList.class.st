@@ -65,12 +65,12 @@ SoilBasicSkipList >> recyclePage: aPage [
 	"remove page from chain of item pages"
 	self removePage: aPage. 
 	"add page to free list chain"
-	self addToFreePages: aPage
+	^ self addToFreePages: aPage
 ]
 
 { #category : #removing }
 SoilBasicSkipList >> removeDirtyPage: aPage [ 
-	dirtyPages remove: aPage
+	dirtyPages remove: aPage ifAbsent: [  ]
 ]
 
 { #category : #removing }

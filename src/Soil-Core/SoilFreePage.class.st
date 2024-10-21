@@ -15,8 +15,8 @@ SoilFreePage class >> pageCode [
 
 { #category : #adding }
 SoilFreePage >> addPage: aPage [ 
-	pageIndexes add: aPage index.
-	dirty := true.
+	pageIndexes add: aPage offset.
+	needWrite := true.
 	^ aPage
 ]
 
@@ -44,6 +44,11 @@ SoilFreePage >> initialize [
 SoilFreePage >> initializeInIndex: anIndex [
 	pageIndexes := SortedCollection new.
 	next := 0
+]
+
+{ #category : #testing }
+SoilFreePage >> isDirty [
+	^ needWrite 
 ]
 
 { #category : #accessing }

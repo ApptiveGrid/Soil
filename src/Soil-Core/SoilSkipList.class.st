@@ -36,7 +36,8 @@ SoilSkipList >> addToFreePages: aPage [
 				currentFreePage next: newFreePage offset.
 				^ newFreePage  ]
 			ifFalse: [ currentFreePage := store pageAt: currentFreePage next ]].
-	currentFreePage addPage: newFreePage
+	currentFreePage addPage: newFreePage.
+	^ newFreePage 
 ]
 
 { #category : #converting }
