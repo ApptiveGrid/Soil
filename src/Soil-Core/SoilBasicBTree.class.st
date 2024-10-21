@@ -127,10 +127,6 @@ SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
 	^removedItem value 
 ]
 
-{ #category : #initialization }
-SoilBasicBTree >> resetPagesToMaintain [
-]
-
 { #category : #accessing }
 SoilBasicBTree >> rootPage [
 	^ self store pageAt: 2

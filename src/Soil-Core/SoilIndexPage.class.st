@@ -10,7 +10,6 @@ Class {
 		'version',
 		'pageSize',
 		'offset',
-		'index',
 		'needWrite'
 	],
 	#classInstVars : [
@@ -55,11 +54,6 @@ SoilIndexPage class >> readPageCodeFrom: aStream [
 { #category : #utilities }
 SoilIndexPage >> headerSize [ 
 	^ 2 "pageCode, version" 
-]
-
-{ #category : #accessing }
-SoilIndexPage >> index: aSoilIndex [
-	index := aSoilIndex 
 ]
 
 { #category : #initialization }

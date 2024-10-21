@@ -106,11 +106,6 @@ SoilIndex >> hasHeaderPage [
 	^ self subclassResponsibility
 ]
 
-{ #category : #testing }
-SoilIndex >> hasPagesToMaintain [
-	^ false 	
-]
-
 { #category : #accessing }
 SoilIndex >> headerPage [
 	^ self store headerPage
@@ -213,11 +208,6 @@ SoilIndex >> pageSize [
 { #category : #accessing }
 SoilIndex >> pages [
 	^ self store pages
-]
-
-{ #category : #accessing }
-SoilIndex >> pagesToMaintain [ 
-	^ #()
 ]
 
 { #category : #'instance creation' }
