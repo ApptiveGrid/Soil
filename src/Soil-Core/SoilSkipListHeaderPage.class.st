@@ -50,7 +50,7 @@ SoilSkipListHeaderPage >> firstFreePageIndex [
 SoilSkipListHeaderPage >> firstFreePageIndex: anObject [
 
 	firstFreePageIndex := anObject.
-	dirty := true
+	needWrite := true
 ]
 
 { #category : #utilities }
