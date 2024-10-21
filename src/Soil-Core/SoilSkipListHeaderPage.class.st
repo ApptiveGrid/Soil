@@ -44,7 +44,8 @@ SoilSkipListHeaderPage >> firstFreePageIndex [
 { #category : #accessing }
 SoilSkipListHeaderPage >> firstFreePageIndex: anObject [
 
-	firstFreePageIndex := anObject
+	firstFreePageIndex := anObject.
+	dirty := true
 ]
 
 { #category : #utilities }
@@ -90,6 +91,11 @@ SoilSkipListHeaderPage >> keySize: anInteger [
 	needWrite := true
 	
 
+]
+
+{ #category : #accessing }
+SoilSkipListHeaderPage >> label [ 
+	^ 'header page'
 ]
 
 { #category : #accessing }

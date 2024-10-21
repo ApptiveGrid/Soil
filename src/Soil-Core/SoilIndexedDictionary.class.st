@@ -146,13 +146,6 @@ SoilIndexedDictionary >> last: anInteger [
 	^ self newIterator last: anInteger
 ]
 
-{ #category : #private }
-SoilIndexedDictionary >> loadFrom: aFileReference [ 
-	^ SoilSkipList new 
-		path: aFileReference;
-		open
-]
-
 { #category : #accessing }
 SoilIndexedDictionary >> maxLevel: anInteger [
 	"Implemented here to allow to switch between SkipList and BTree easily in tests"
