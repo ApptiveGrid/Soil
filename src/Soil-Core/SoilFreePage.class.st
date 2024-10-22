@@ -110,8 +110,9 @@ SoilFreePage >> readFrom: aStream [
 
 { #category : #removing }
 SoilFreePage >> removeFirstIndex [
+	| index |
 	index := pageIndexes removeFirst.
-	dirty := true.
+	needWrite := true.
 	^ index 
 ]
 
