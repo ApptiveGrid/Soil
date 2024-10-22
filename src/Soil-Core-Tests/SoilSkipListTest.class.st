@@ -416,6 +416,13 @@ SoilSkipListTest >> testPageAddFirst [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testPageCodeNoDuplicates [ 
+	| pageCodes |
+	pageCodes := (SoilIndexPage allSubclasses collect: #pageCode) reject: [:each | each isZero ].
+	self assert: pageCodes size equals: pageCodes asSet size 
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testRemoveAllFromPage [
 	| entries |
 	"We test that after removing all entries from one page, #nextAssociation will continue to the next page"
@@ -475,8 +482,8 @@ SoilSkipListTest >> testRemovePage [
 			index at: n put: (n asByteArrayOfSize: 8) ].
 		offset := offset + capacity ].
 	self assert: index pages size equals: 6.
-	index removePage: (index pages at: 3).
-	self assert: index pages size equals: 5.
+	index recyclePage: (index pages at: 3).
+	self assert: index pages size equals: 6.
 
 	
 	

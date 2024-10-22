@@ -28,6 +28,14 @@ SoilIndexItemsPage >> addItem: anAssociation [
 	^ self subclassResponsibility
 ]
 
+{ #category : #converting }
+SoilIndexItemsPage >> asSoilFreePage [
+	^ SoilFreePage new 
+		offset: offset;
+		pageSize: pageSize;
+		markDirty
+]
+
 { #category : #accessing }
 SoilIndexItemsPage >> associationAt: anInteger [ 
 	^ self
@@ -40,6 +48,11 @@ SoilIndexItemsPage >> associationAt: anInteger ifAbsent: aBlock [
 	^ items 
 		findBinary: [ :each | anInteger - each key] 
 		ifNone: [ aBlock value ].
+]
+
+{ #category : #testing }
+SoilIndexItemsPage >> canBeRemoved [
+	^ self presentItemCount isZero
 ]
 
 { #category : #running }
@@ -87,7 +100,7 @@ SoilIndexItemsPage >> initialize [
 
 { #category : #testing }
 SoilIndexItemsPage >> isDirty [
-	^ self needsWrite 
+	^ self needsWrite or: [ self needsCleanup ] 
 ]
 
 { #category : #testing }
@@ -199,6 +212,11 @@ SoilIndexItemsPage >> keySize [
 SoilIndexItemsPage >> keySize: anInteger [ 
 	(anInteger = 0) ifTrue: [ Error signal: 'cannot use key size 0' ].
 	keySize := anInteger
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> label [ 
+	^ 'items page'
 ]
 
 { #category : #accessing }

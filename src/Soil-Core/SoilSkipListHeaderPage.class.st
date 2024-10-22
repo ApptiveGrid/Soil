@@ -28,6 +28,11 @@ SoilSkipListHeaderPage class >> pageCode [
 	^ 1 
 ]
 
+{ #category : #testing }
+SoilSkipListHeaderPage >> canBeRemoved [ 
+	^ false
+]
+
 { #category : #'as yet unclassified' }
 SoilSkipListHeaderPage >> decreaseSize [
 	(size = -1) ifTrue: [ ^ self ].
@@ -44,7 +49,8 @@ SoilSkipListHeaderPage >> firstFreePageIndex [
 { #category : #accessing }
 SoilSkipListHeaderPage >> firstFreePageIndex: anObject [
 
-	firstFreePageIndex := anObject
+	firstFreePageIndex := anObject.
+	needWrite := true
 ]
 
 { #category : #utilities }
@@ -90,6 +96,11 @@ SoilSkipListHeaderPage >> keySize: anInteger [
 	needWrite := true
 	
 
+]
+
+{ #category : #accessing }
+SoilSkipListHeaderPage >> label [ 
+	^ 'header page'
 ]
 
 { #category : #accessing }

@@ -422,6 +422,25 @@ SoilIndexedDictionaryTest >> testFlushIndexPages [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testFreePages [ 
+	| tx tx2 index indexManager |
+	(classToTest = SoilBTreeDictionary ) ifTrue: [ self skip ].
+	tx := soil newTransaction.
+	tx root: dict.
+	1 to: 1300 do: [ :n | dict at: n put: n asString ].
+	tx commit.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	300 to: 1200 do: [ :n | tx2 root removeKey: n ].
+	tx2 commit.
+	indexManager := soil objectRepository firstSegment indexManager.
+	index := indexManager indexes anyOne.
+	self deny: index headerPage firstFreePageIndex isZero.
+	self assert: index firstFreePage pageIndexes size equals: 2
+
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testIndexCreation [ 
 	| tx obj1 obj2 |
 	tx := soil newTransaction.
@@ -640,9 +659,10 @@ SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 	501 to: 700 do: [ :n | tx3 root removeKey: n ].
 	tx3 commit.
 	self assert: (index pages select: #needsCleanup) size equals: 3.
+	701 to: 702 do: [ :n | tx4 root removeKey: n ].
 	tx4 commit.
 	self assert: indexManager dirtyIndexes size equals: 0.
-	self assert: (index pages select: #needsCleanup) size equals: 3.
+	self assert: (index pages select: #needsCleanup) size equals: 0.
 
 	
 

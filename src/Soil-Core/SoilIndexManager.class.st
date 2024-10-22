@@ -58,7 +58,7 @@ SoilIndexManager >> cleanPagesModifiedNotAfter: readVersion [
 		pages copy do: [ :page |
 			(readVersion isNil or: [ readVersion >= page lastTransaction ]) ifTrue: [  
 				(page presentItemCount = 0) 
-					ifTrue: [ index removePage: page ]
+					ifTrue: [ index recyclePage: page ]
 					ifFalse: [ page cleanRemoved  ].
 				pages remove: page ] ].
 		pages ifEmpty: [ keysToRemove add: index ].
@@ -93,11 +93,10 @@ SoilIndexManager >> dirtyIndexes [
 SoilIndexManager >> flush [
 	
 	dirtyIndexes copy do: [ :index | 
-		index dirtyPages copy do: [ :page | 
-			page needsWrite ifTrue: [ 
-				index store writePage: page.
-				page isDirty ifFalse: [ 
-					index removeDirtyPage: page ] ] ].
+		SoilIndexCleaner new 
+			index: index;
+			readVersion: (self soil transactionManager smallestReadVersion);
+			clean.
 		index dirtyPages ifEmpty: [ dirtyIndexes remove: index ] ]
 ]
 

@@ -79,6 +79,11 @@ SoilIndexPage >> itemsSizeSize [
 	^ 2
 ]
 
+{ #category : #accessing }
+SoilIndexPage >> label [ 
+	self subclassResponsibility 
+]
+
 { #category : #initialization }
 SoilIndexPage >> latestVersion [
 	self subclassResponsibility 
@@ -116,7 +121,10 @@ SoilIndexPage >> pageSize: anInteger [
 
 { #category : #printing }
 SoilIndexPage >> printOn: aStream [ 
-	aStream << 'page : #' << offset asString
+	aStream 
+		<< self label 
+		<< ' #' 
+		<< offset asString
 ]
 
 { #category : #reading }
