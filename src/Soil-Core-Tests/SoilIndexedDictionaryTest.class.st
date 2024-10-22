@@ -422,8 +422,8 @@ SoilIndexedDictionaryTest >> testFlushIndexPages [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testFreePages [ 
-	| tx tx2 index indexManager |
+SoilIndexedDictionaryTest >> testFreePageReuse [
+	| tx tx2 index indexManager tx3 |
 	(classToTest = SoilBTreeDictionary ) ifTrue: [ self skip ].
 	tx := soil newTransaction.
 	tx root: dict.
@@ -433,10 +433,33 @@ SoilIndexedDictionaryTest >> testFreePages [
 	tx2 := soil newTransaction.
 	300 to: 1200 do: [ :n | tx2 root removeKey: n ].
 	tx2 commit.
+	tx3 := soil newTransaction.
+	300 to: 1200 do: [ :n | tx3 root at: n put: n asString ].
+	tx3 commit.
 	indexManager := soil objectRepository firstSegment indexManager.
 	index := indexManager indexes anyOne.
+	self assert: index headerPage firstFreePageIndex isZero.
+	self assert: index firstFreePage isNil
+
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testFreePages [ 
+	| tx tx2 index indexManager |
+	(classToTest = SoilBTreeDictionary ) ifTrue: [ self skip ].
+	indexManager := soil objectRepository firstSegment indexManager.
+	tx := soil newTransaction.
+	tx root: dict.
+	1 to: 1300 do: [ :n | dict at: n put: n asString ].
+	tx commit.
+	self assert: indexManager indexes anyOne pages size equals: 6.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	300 to: 1100 do: [ :n | tx2 root removeKey: n ].
+	tx2 commit.
+	index := indexManager indexes anyOne.
 	self deny: index headerPage firstFreePageIndex isZero.
-	self assert: index firstFreePage pageIndexes size equals: 2
+	self assert: index firstFreePage pageIndexes size equals: 1
 
 ]
 

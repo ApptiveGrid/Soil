@@ -40,6 +40,14 @@ SoilSkipList >> addToFreePages: aPage [
 	^ newFreePage 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipList >> allocatePage [
+	^ self newPage 
+		offset: (self nextFreePage 
+			ifNotNil: [ :freePage | freePage offset ]
+			ifNil: [ store nextPageOffset ])
+]
+
 { #category : #converting }
 SoilSkipList >> asCopyOnWrite [
 	^ SoilCopyOnWriteSkipList new
@@ -66,11 +74,11 @@ SoilSkipList >> destroy [
 
 { #category : #accessing }
 SoilSkipList >> firstFreePage [
-	| index | 
-	index := self headerPage firstFreePageIndex.
-	^ index isZero 
+	| offset | 
+	offset := self headerPage firstFreePageIndex.
+	^ offset isZero 
 		ifTrue: [ ^ nil ]
-		ifFalse: [ store pageAt: index ]
+		ifFalse: [ store pageAt: offset ]
 ]
 
 { #category : #deleting }
@@ -136,6 +144,23 @@ SoilSkipList >> newPage [
 SoilSkipList >> newPluggableRewriter [
 	^ SoilPluggableIndexRewriter new 
 		index: self
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipList >> nextFreePage [
+	| firstPage freePage |
+	firstPage := self firstFreePage ifNil: [ 
+		^ nil ].
+	^ firstPage hasFreePages 
+		ifTrue: [ 
+			freePage := store pageAt: firstPage removeFirstIndex.
+			self addDirtyPage: freePage.
+			freePage  ] 
+		ifFalse: [ 
+			self headerPage firstFreePageIndex: 0.
+			self addDirtyPage: self headerPage.
+			firstPage ]
+				
 ]
 
 { #category : #'opening/closing' }

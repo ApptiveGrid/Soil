@@ -148,7 +148,7 @@ SoilBasicBTree >> splitIndexPage: page [
 { #category : #splitting }
 SoilBasicBTree >> splitPage: page [ 
 	| newPage |
-	newPage := page split: store newPage.
+	newPage := page split: store allocatePage.
 	newPage offset: self store nextPageOffset.
 	newPage next: page next.
 	page next: newPage offset.
