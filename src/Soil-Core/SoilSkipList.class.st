@@ -43,7 +43,7 @@ SoilSkipList >> addToFreePages: aPage [
 { #category : #'as yet unclassified' }
 SoilSkipList >> allocatePage [
 	^ self newPage 
-		index: (self nextFreePage 
+		offset: (self nextFreePage 
 			ifNotNil: [ :freePage | freePage offset ]
 			ifNil: [ store nextPageOffset ])
 ]
