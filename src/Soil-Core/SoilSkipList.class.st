@@ -44,8 +44,8 @@ SoilSkipList >> addToFreePages: aPage [
 SoilSkipList >> allocatePage [
 	^ self newPage 
 		index: (self nextFreePage 
-			ifNotNil: [ :freePage | freePage index ]
-			ifNil: [ store nextPageIndex ])
+			ifNotNil: [ :freePage | freePage offset ]
+			ifNil: [ store nextPageOffset ])
 ]
 
 { #category : #converting }
