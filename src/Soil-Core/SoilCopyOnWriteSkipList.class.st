@@ -10,6 +10,7 @@ Class {
 { #category : #'as yet unclassified' }
 SoilCopyOnWriteSkipList >> allocatePage [
 	^ wrapped allocatePage 
+]
 
   { #category : #adding }
 SoilCopyOnWriteSkipList >> addDirtyPage: aPage [ 
