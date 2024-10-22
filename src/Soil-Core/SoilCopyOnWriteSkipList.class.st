@@ -12,6 +12,11 @@ SoilCopyOnWriteSkipList >> addDirtyPage: aPage [
 	
 ]
 
+{ #category : #'as yet unclassified' }
+SoilCopyOnWriteSkipList >> allocatePage [
+	^ wrapped allocatePage 
+]
+
 { #category : #testing }
 SoilCopyOnWriteSkipList >> isRegistered [
 	^ wrapped isRegistered
@@ -19,7 +24,7 @@ SoilCopyOnWriteSkipList >> isRegistered [
 
 { #category : #'instance creation' }
 SoilCopyOnWriteSkipList >> newPage [ 
-	^ wrapped newPage
+	^ wrapped allocatePage
 ]
 
 { #category : #'as yet unclassified' }

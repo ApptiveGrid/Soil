@@ -3,40 +3,56 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'index',
-		'readVersion'
+		'readVersion',
+		'dirtyPages'
 	],
 	#category : #'Soil-Core-Model'
 }
 
 { #category : #testing }
-SoilIndexCleaner >> canBeModified: aPage [ 
+SoilIndexCleaner >> canDiscardOldState: aPage [ 
+	"if no transaction is in parallel or has a read version old enough
+	we can discard removed items from a page"
 	^ readVersion isNil or: [ readVersion >= aPage lastTransaction ]
 ]
 
 { #category : #cleaning }
 SoilIndexCleaner >> clean [ 
-	index dirtyPages do: [ :p | | page |
-		page := p.
-		(self canBeModified: page) ifTrue: [  
-			page := self cleanPage: page ] ].
+	"clean all pages first because the cleaning could produce new pages
+	that need to be written"
+	self dirtyPages do: [ :page |
+		"if no transaction needs old state and the page needs cleaning"
+		((self canDiscardOldState: page) and: [ page needsCleanup ]) ifTrue: [  
+			self cleanPage: page ] ].
+	"Now we have a final set if dirty pages"
 	index dirtyPages copy do: [ :page | 
 		page needsWrite ifTrue: [ 
 			index store writePage: page ].
+		"pages at this point could still need cleanup"
 		page isDirty ifFalse: [ 
-				index removeDirtyPage: page ] ].
+			index removeDirtyPage: page ] ].
 ]
 
 { #category : #cleaning }
-SoilIndexCleaner >> cleanPage: aPage [
-	| page |
-	page := aPage.
-	page needsCleanup ifTrue: [
-		^ page canBeRemoved 
-			ifTrue: [ 
-				index removeDirtyPage: page.
-				index addDirtyPage: (index recyclePage: page) ]
-			ifFalse: [ page cleanRemoved ] ].
-	^ aPage
+SoilIndexCleaner >> cleanPage: page [
+	
+	^ page canBeRemoved 
+		ifTrue: [ 
+			"swap the removed page with its free page counterpart 
+			in the dirty list of the index"
+			index 
+				removeDirtyPage: page;
+				addDirtyPage: (index recyclePage: page) ]
+		ifFalse: [ 
+			"just clean the page"
+			page cleanRemoved.
+			page ]
+]
+
+{ #category : #accessing }
+SoilIndexCleaner >> dirtyPages [ 
+	^ dirtyPages ifNil: [ 
+		dirtyPages := index dirtyPages copy ]
 ]
 
 { #category : #accessing }

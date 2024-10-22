@@ -14,6 +14,14 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSkipList: self
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipList >> allocatePage [
+	^ self newPage 
+		offset: (self nextFreePage 
+			ifNotNil: [ :freePage | freePage offset ]
+			ifNil: [ store nextPageOffset ])
+]
+
 { #category : #converting }
 SoilSkipList >> asCopyOnWrite [
 	^ SoilCopyOnWriteSkipList new
@@ -101,6 +109,23 @@ SoilSkipList >> newPage [
 SoilSkipList >> newPluggableRewriter [
 	^ SoilPluggableIndexRewriter new 
 		index: self
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipList >> nextFreePage [
+	| firstPage freePage |
+	firstPage := self firstFreePage ifNil: [ 
+		^ nil ].
+	^ firstPage hasFreePages 
+		ifTrue: [ 
+			freePage := store pageAt: firstPage removeFirstIndex.
+			self addDirtyPage: freePage.
+			freePage  ] 
+		ifFalse: [ 
+			self headerPage firstFreePageIndex: 0.
+			self addDirtyPage: self headerPage.
+			firstPage ]
+				
 ]
 
 { #category : #'opening/closing' }
