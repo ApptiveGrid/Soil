@@ -501,6 +501,30 @@ SoilBTreeTest >> testRemoveKey [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testRemovePage [
+	
+	| capacityFirst offset capacity iterator |
+	capacityFirst := index firstPage itemCapacity.
+	1 to: capacityFirst do: [ :n | 
+		index at: n put: (n asByteArrayOfSize: 8) ].
+	self assert: index pages size equals: 3.
+	offset := capacityFirst.
+	iterator := index newIterator.
+	2 to: 6 do: [ :p | 
+		index at: offset + 1 put: ((offset + 1) asByteArrayOfSize: 8).
+		capacity := index lastPage itemCapacity.
+		offset + 2 to:  (offset + capacity) do: [:n | .
+			index at: n put: (n asByteArrayOfSize: 8) ].
+		offset := offset + capacity ].
+	self assert: index pages size equals: 13.
+	index recyclePage: (index pages at: 3).
+	self assert: index pages size equals: 13.
+	"after, index 3 should not be a value in any index page item"
+	index indexPages do: [ :indexPage | self assert: (indexPage items noneSatisfy: [ :item | item value == 3 ]) ]
+
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testSize [
 	
 	| capacity |

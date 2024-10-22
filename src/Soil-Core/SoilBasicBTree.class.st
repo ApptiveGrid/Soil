@@ -120,11 +120,41 @@ SoilBasicBTree >> pageClass [
 ]
 
 { #category : #removing }
+SoilBasicBTree >> recyclePage: aPage [
+	"the header stays untouched even it it gets empty"
+	aPage isHeaderPage ifTrue: [ ^ aPage ].
+	"remove page from chain of item pages"
+	self removePage: aPage. 
+	"add page to free list chain"
+	^ self addToFreePages: aPage
+]
+
+{ #category : #removing }
 SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
 	| removedItem |
 	removedItem := self rootPage remove: key for: self.
 	removedItem ifNil: [aBlock value].
 	^removedItem value 
+]
+
+{ #category : #removing }
+SoilBasicBTree >> removePage: aPage [
+	| iterator previousPage |
+	(aPage offset > 1) ifFalse: [ ^ aPage ].
+
+	"We use the iterator to find the previousPage, to change it's next pointer to my next"
+	iterator := self newIterator. 
+	previousPage := iterator findPreviousPageOf: aPage. 
+	previousPage next: aPage next.
+	
+	"now remove all keys, this will update the index pages"
+	
+	aPage items reverseDo: [ :item | item ifNotNil: [self removeKey: item key]  ].
+	
+	"finally remove the page from the store"
+	store removePageAt: aPage offset.
+	^ aPage 
+
 ]
 
 { #category : #accessing }

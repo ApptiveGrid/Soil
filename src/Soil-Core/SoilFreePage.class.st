@@ -56,6 +56,11 @@ SoilFreePage >> isDirty [
 	^ needWrite 
 ]
 
+{ #category : #testing }
+SoilFreePage >> isIndexPage [
+	^ false
+]
+
 { #category : #accessing }
 SoilFreePage >> label [ 
 	^ 'free page'

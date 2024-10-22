@@ -14,32 +14,6 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSkipList: self
 ]
 
-{ #category : #adding }
-SoilSkipList >> addToFreePages: aPage [  
-	| currentFreePage newFreePage |
-	newFreePage := aPage asSoilFreePage.
-	store pageAt: aPage offset put: newFreePage.
-	currentFreePage := self firstFreePage
-		ifNil: [ 
-			"if there is no first free page yet make aPage the
-			first free page"
-			self headerPage firstFreePageIndex: newFreePage offset.
-			^ newFreePage ].
-	"if there is a first free page start scanning from here for a
-	free page that has room to store another free page"
-	[ currentFreePage hasRoom ] whileFalse: [ 
-		"if there is no room for the page to store and the current
-		free page does not have a next pointer we make aPage the 
-		next"
-		currentFreePage next isZero 
-			ifTrue: [
-				currentFreePage next: newFreePage offset.
-				^ newFreePage  ]
-			ifFalse: [ currentFreePage := store pageAt: currentFreePage next ]].
-	currentFreePage addPage: newFreePage.
-	^ newFreePage 
-]
-
 { #category : #'as yet unclassified' }
 SoilSkipList >> allocatePage [
 	^ self newPage 
@@ -70,15 +44,6 @@ SoilSkipList >> compact [
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
-]
-
-{ #category : #accessing }
-SoilSkipList >> firstFreePage [
-	| offset | 
-	offset := self headerPage firstFreePageIndex.
-	^ offset isZero 
-		ifTrue: [ ^ nil ]
-		ifFalse: [ store pageAt: offset ]
 ]
 
 { #category : #deleting }

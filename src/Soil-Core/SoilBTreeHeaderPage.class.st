@@ -28,6 +28,12 @@ SoilBTreeHeaderPage >> decreaseSize [
 ]
 
 { #category : #accessing }
+SoilBTreeHeaderPage >> firstFreePageIndex [
+
+	^ firstFreePageIndex
+]
+
+{ #category : #accessing }
 SoilBTreeHeaderPage >> firstFreePageIndex: anObject [
 
 	firstFreePageIndex := anObject
