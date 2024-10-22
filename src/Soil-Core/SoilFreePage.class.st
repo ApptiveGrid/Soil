@@ -20,11 +20,6 @@ SoilFreePage >> addPage: aPage [
 	^ aPage
 ]
 
-{ #category : #converting }
-SoilFreePage >> asSoilItemsPage [
-	self shouldBeImplemented.
-]
-
 { #category : #testing }
 SoilFreePage >> hasFreePages [
 	^ pageIndexes notEmpty

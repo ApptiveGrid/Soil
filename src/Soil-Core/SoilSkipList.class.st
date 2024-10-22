@@ -74,11 +74,11 @@ SoilSkipList >> destroy [
 
 { #category : #accessing }
 SoilSkipList >> firstFreePage [
-	| index | 
-	index := self headerPage firstFreePageIndex.
-	^ index isZero 
+	| offset | 
+	offset := self headerPage firstFreePageIndex.
+	^ offset isZero 
 		ifTrue: [ ^ nil ]
-		ifFalse: [ store pageAt: index ]
+		ifFalse: [ store pageAt: offset ]
 ]
 
 { #category : #deleting }
@@ -148,13 +148,17 @@ SoilSkipList >> newPluggableRewriter [
 
 { #category : #'as yet unclassified' }
 SoilSkipList >> nextFreePage [
-	| firstPage |
+	| firstPage freePage |
 	firstPage := self firstFreePage ifNil: [ 
 		^ nil ].
 	^ firstPage hasFreePages 
-		ifTrue: [ store pageAt: firstPage removeFirstIndex ] 
+		ifTrue: [ 
+			freePage := store pageAt: firstPage removeFirstIndex.
+			self addDirtyPage: freePage.
+			freePage  ] 
 		ifFalse: [ 
 			self headerPage firstFreePageIndex: 0.
+			self addDirtyPage: self headerPage.
 			firstPage ]
 				
 ]
