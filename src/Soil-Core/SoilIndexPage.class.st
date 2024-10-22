@@ -7,10 +7,10 @@ Class {
 	#name : #SoilIndexPage,
 	#superclass : #Object,
 	#instVars : [
-		'index',
 		'version',
-		'dirty',
-		'pageSize'
+		'pageSize',
+		'offset',
+		'needWrite'
 	],
 	#classInstVars : [
 		'random'
@@ -56,25 +56,10 @@ SoilIndexPage >> headerSize [
 	^ 2 "pageCode, version" 
 ]
 
-{ #category : #accessing }
-SoilIndexPage >> index [
-	^ index
-]
-
-{ #category : #accessing }
-SoilIndexPage >> index: anInteger [ 
-	index := anInteger
-]
-
 { #category : #initialization }
 SoilIndexPage >> initialize [ 
 	super initialize.
 	version := self latestVersion
-]
-
-{ #category : #testing }
-SoilIndexPage >> isDirty [
-	^ dirty 
 ]
 
 { #category : #testing }
@@ -105,8 +90,23 @@ SoilIndexPage >> latestVersion [
 ]
 
 { #category : #accessing }
-SoilIndexPage >> markDirty [
-	dirty := true 
+SoilIndexPage >> markForWrite [
+	needWrite := true 
+]
+
+{ #category : #testing }
+SoilIndexPage >> needsWrite [
+	^ needWrite 
+]
+
+{ #category : #accessing }
+SoilIndexPage >> offset [
+	^ offset
+]
+
+{ #category : #accessing }
+SoilIndexPage >> offset: anInteger [ 
+	offset := anInteger
 ]
 
 { #category : #accessing }
@@ -124,12 +124,12 @@ SoilIndexPage >> printOn: aStream [
 	aStream 
 		<< self label 
 		<< ' #' 
-		<< index asString
+		<< offset asString
 ]
 
 { #category : #reading }
 SoilIndexPage >> readFrom: aStream [ 
-	dirty := false.
+	needWrite := false.
 	"we do not read the pageCode here as it was read already"
 	version := aStream next
 ]
@@ -148,6 +148,6 @@ SoilIndexPage >> writeHeaderOn: aStream [
 
 { #category : #writing }
 SoilIndexPage >> writeOn: aStream [ 
-	dirty := false.
+	needWrite := false.
 	self writeHeaderOn: aStream
 ]

@@ -31,9 +31,9 @@ SoilIndexItemsPage >> addItem: anAssociation [
 { #category : #converting }
 SoilIndexItemsPage >> asSoilFreePage [
 	^ SoilFreePage new 
-		index: index;
+		offset: offset;
 		pageSize: pageSize;
-		markDirty 
+		markDirty
 ]
 
 { #category : #accessing }
@@ -48,6 +48,11 @@ SoilIndexItemsPage >> associationAt: anInteger ifAbsent: aBlock [
 	^ items 
 		findBinary: [ :each | anInteger - each key] 
 		ifNone: [ aBlock value ].
+]
+
+{ #category : #testing }
+SoilIndexItemsPage >> canBeRemoved [
+	^ self presentItemCount isZero
 ]
 
 { #category : #running }
@@ -94,6 +99,11 @@ SoilIndexItemsPage >> initialize [
 ]
 
 { #category : #testing }
+SoilIndexItemsPage >> isDirty [
+	^ self needsWrite or: [ self needsCleanup ] 
+]
+
+{ #category : #testing }
 SoilIndexItemsPage >> isEmpty [
 	^ items isEmpty 
 ]
@@ -130,7 +140,7 @@ SoilIndexItemsPage >> itemAt: key put: anObject [
 	| removedItem |
 	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
 	items add: (key -> anObject).
-	dirty := true.
+	needWrite := true.
 	^ removedItem
 ]
 
@@ -161,7 +171,7 @@ SoilIndexItemsPage >> itemRemoveAt: anInteger ifAbsent: aBlock [
 		findBinaryIndex: [ :each |  anInteger - each key ] 
 		do: [:ind | item := items removeAt: ind ]
 		ifNone: [ ^ aBlock value ].
-	dirty := true.
+	needWrite := true.
 	^ item
 ]
 
@@ -170,7 +180,7 @@ SoilIndexItemsPage >> itemRemoveIndex: anInteger [
 	| item |
 	item := items at: anInteger.
 	items removeAt: anInteger.
-	dirty := true.
+	needWrite := true.
 	^ item
 ]
 

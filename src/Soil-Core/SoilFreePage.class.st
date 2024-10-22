@@ -15,8 +15,8 @@ SoilFreePage class >> pageCode [
 
 { #category : #adding }
 SoilFreePage >> addPage: aPage [ 
-	pageIndexes add: aPage index.
-	dirty := true.
+	pageIndexes add: aPage offset.
+	needWrite := true.
 	^ aPage
 ]
 
@@ -56,6 +56,11 @@ SoilFreePage >> initializeInIndex: anIndex [
 	next := 0
 ]
 
+{ #category : #testing }
+SoilFreePage >> isDirty [
+	^ needWrite 
+]
+
 { #category : #accessing }
 SoilFreePage >> label [ 
 	^ 'free page'
@@ -64,6 +69,11 @@ SoilFreePage >> label [
 { #category : #initialization }
 SoilFreePage >> latestVersion [
 	^ 1
+]
+
+{ #category : #accessing }
+SoilFreePage >> markDirty [
+	needWrite := true
 ]
 
 { #category : #testing }

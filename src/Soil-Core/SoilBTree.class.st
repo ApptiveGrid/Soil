@@ -25,6 +25,11 @@ SoilBTree >> destroy [
 	path ensureDelete 
 ]
 
+{ #category : #accessing }
+SoilBTree >> dirtyPages [
+	^ #()
+]
+
 { #category : #testing }
 SoilBTree >> isRegistered [
 	^ path notNil

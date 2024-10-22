@@ -109,7 +109,6 @@ SoilBackupTest >> testBackupWithIndex [
 	dict at: #foo put: (SoilTestNestedObject new label: #indexed).
 	object := SoilTestClusterRoot new 
 		nested: dict.
-
 	tx commit.
 	soil backupTo: self backupPath.
 	backup := Soil new 

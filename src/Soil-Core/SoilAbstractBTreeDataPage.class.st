@@ -73,7 +73,7 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 	self bTreeAssertion.
 	
 	"we need to add the new page to the index above"
-	^ return indexEntry: (newPage smallestKey -> newPage index)
+	^ return indexEntry: (newPage smallestKey -> newPage offset)
 ]
 
 { #category : #testing }

@@ -9,7 +9,7 @@ Class {
 	#name : #SoilBasicSkipList,
 	#superclass : #SoilIndex,
 	#instVars : [
-		'pagesToMaintain'
+		'dirtyPages'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -20,20 +20,25 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
+{ #category : #adding }
+SoilBasicSkipList >> addDirtyPage: aPage [ 
+	dirtyPages add: aPage
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> dirtyPages [
+	^ dirtyPages
+]
+
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
 ]
 
-{ #category : #testing }
-SoilBasicSkipList >> hasPagesToMaintain [ 
-	^ pagesToMaintain notEmpty
-]
-
 { #category : #initialization }
 SoilBasicSkipList >> initialize [ 
 	super initialize.
-	pagesToMaintain := Set new
+	dirtyPages := Set new
 ]
 
 { #category : #accessing }
@@ -53,25 +58,25 @@ SoilBasicSkipList >> newIterator [
 	^ SoilSkipListIterator on: self 
 ]
 
-{ #category : #accessing }
-SoilBasicSkipList >> pagesToMaintain [
-	^ pagesToMaintain 
-]
-
 { #category : #removing }
 SoilBasicSkipList >> recyclePage: aPage [
 	"the header stays untouched even it it gets empty"
-	aPage isHeaderPage ifTrue: [ ^ self ].
+	aPage isHeaderPage ifTrue: [ ^ aPage ].
 	"remove page from chain of item pages"
 	self removePage: aPage. 
 	"add page to free list chain"
-	self addToFreePages: aPage
+	^ self addToFreePages: aPage
+]
+
+{ #category : #removing }
+SoilBasicSkipList >> removeDirtyPage: aPage [ 
+	dirtyPages remove: aPage 
 ]
 
 { #category : #removing }
 SoilBasicSkipList >> removePage: aPage [
 	| iterator previousPage seen page |
-	(aPage index > 1) ifFalse: [ ^ aPage ].
+	(aPage offset > 1) ifFalse: [ ^ aPage ].
 	"we use an iterator to scan pages on all levels that are just right
 	before the page to remove"
 	iterator := self newIterator. 
@@ -87,21 +92,16 @@ SoilBasicSkipList >> removePage: aPage [
 			1 to: page level do: [ :lvl |
 				"each previous page's next pointer might point to the page 
 				to be removed."
-				((page rightAt: lvl) = aPage index) ifTrue: [ 
+				((page rightAt: lvl) = aPage offset) ifTrue: [ 
 					"We overwrite the next pointer of the previous page with 
 					the next pointer of the page to be removed"
 					page rightAt: lvl put: (aPage rightAt: lvl).
-					page markDirty ] ] ] ].
+					page markForWrite ] ] ] ].
 	"finally remove the page from the store"
-	store removePageAt: aPage index.
+	store removePageAt: aPage offset.
 	^ aPage 
 
 
-]
-
-{ #category : #initialization }
-SoilBasicSkipList >> resetPagesToMaintain [
-	pagesToMaintain := Set new
 ]
 
 { #category : #accessing }
@@ -130,11 +130,11 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 		(level > page level)
 			ifTrue: [ 
 				newPage rightAt: level put: ((aIterator levelAt: level) rightAt: level).
-				(aIterator levelAt: level) rightAt: level put: newPage index ]
+				(aIterator levelAt: level) rightAt: level put: newPage offset ]
 			ifFalse: [ 
 				(page rightAt: level) ifNotNil: [ :r | 
 					newPage rightAt: level put: r ].
-				page rightAt: level put: newPage index ]].
-	self store pageAt: newPage index put: newPage.
+				page rightAt: level put: newPage offset ]].
+	self store pageAt: newPage offset put: newPage.
 	^ newPage 
 ]

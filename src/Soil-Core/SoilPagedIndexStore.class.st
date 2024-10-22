@@ -79,8 +79,8 @@ SoilPagedIndexStore >> newPage [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> nextPageIndex [
-	^ self headerPage nextPageIndex
+SoilPagedIndexStore >> nextPageOffset [
+	^ self headerPage nextPageOffset
 ]
 
 { #category : #private }

@@ -56,7 +56,7 @@ SoilBasicBTree >> initializeHeaderPage [
 		initializeHeaderPage.
 	"we create the first index page as the root here"	
 	rootIndexPage := self newRootPage.
-	self store pageAt: rootIndexPage index put: rootIndexPage
+	self store pageAt: rootIndexPage offset put: rootIndexPage
 ]
 
 { #category : #accessing }
@@ -69,7 +69,7 @@ SoilBasicBTree >> keySize: anInteger [
 { #category : #'instance creation' }
 SoilBasicBTree >> newHeaderPage [
 	^ SoilBTreeHeaderPage new
-		index: 1;
+		offset: 1;
 		lastPageIndex: 2;
 		firstFreePageIndex: 0;
 		pageSize: self pageSize
@@ -80,7 +80,7 @@ SoilBasicBTree >> newIndexPage [
 	^ SoilBTreeIndexPage new 
 		keySize: self keySize;
 		pageSize: self pageSize;
-		index: self store nextPageIndex;
+		offset: self store nextPageOffset;
 		yourself
 ]
 
@@ -88,7 +88,7 @@ SoilBasicBTree >> newIndexPage [
 SoilBasicBTree >> newIndexPageFromRoot: rootIndexPage [
 	| newPage |
 	newPage := self newIndexPage.
-	self store pageAt: newPage index put: newPage.
+	self store pageAt: newPage offset put: newPage.
 	"now move over all items"
 	newPage setItems: rootIndexPage items.
 	rootIndexPage setItems: SortedCollection new.
@@ -103,7 +103,7 @@ SoilBasicBTree >> newIterator [
 { #category : #'instance creation' }
 SoilBasicBTree >> newRootPage [
 	^ SoilBTreeRootPage new
-		index: 2;
+		offset: 2;
 		keySize: self keySize;
 		pageSize: self pageSize
 ]
@@ -127,10 +127,6 @@ SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
 	^removedItem value 
 ]
 
-{ #category : #initialization }
-SoilBasicBTree >> resetPagesToMaintain [
-]
-
 { #category : #accessing }
 SoilBasicBTree >> rootPage [
 	^ self store pageAt: 2
@@ -145,7 +141,7 @@ SoilBasicBTree >> size [
 SoilBasicBTree >> splitIndexPage: page [ 
 	| newPage |
 	newPage := page split: self newIndexPage.
-	self store pageAt: newPage index put: newPage.
+	self store pageAt: newPage offset put: newPage.
 	^ newPage 
 ]
 
@@ -153,10 +149,10 @@ SoilBasicBTree >> splitIndexPage: page [
 SoilBasicBTree >> splitPage: page [ 
 	| newPage |
 	newPage := page split: store allocatePage.
-	newPage index: self store nextPageIndex.
+	newPage offset: self store nextPageOffset.
 	newPage next: page next.
-	page next: newPage index.
-	self store pageAt: newPage index put: newPage.
+	page next: newPage offset.
+	self store pageAt: newPage offset put: newPage.
 	^ newPage 
 ]
 

@@ -5,7 +5,7 @@ Class {
 		'segment',
 		'indexes',
 		'semaphore',
-		'pagesToMaintain'
+		'dirtyIndexes'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -23,6 +23,11 @@ SoilIndexManager class >> indexClassFromFile: aFileReference [
 { #category : #visiting }
 SoilIndexManager >> acceptSoil: aSoilVisitor [ 
 	^ aSoilVisitor visitIndexManager: self 
+]
+
+{ #category : #adding }
+SoilIndexManager >> addDirtyIndex: anIndex [
+	dirtyIndexes add: anIndex 
 ]
 
 { #category : #accessing }
@@ -47,8 +52,8 @@ SoilIndexManager >> at: indexId put: aSoilIndex [
 
 { #category : #'as yet unclassified' }
 SoilIndexManager >> cleanPagesModifiedNotAfter: readVersion [ 
-	| keysToRemove |
-	keysToRemove := OrderedCollection new.
+	"| keysToRemove |"
+	"keysToRemove := OrderedCollection new.
 	pagesToMaintain keysAndValuesDo: [ :index :pages |
 		pages copy do: [ :page |
 			(readVersion isNil or: [ readVersion >= page lastTransaction ]) ifTrue: [  
@@ -60,7 +65,7 @@ SoilIndexManager >> cleanPagesModifiedNotAfter: readVersion [
 		index writePages ].
 	keysToRemove do: [ :index | 
 		pagesToMaintain removeKey: index  ]
-	
+	"
 ]
 
 { #category : #'open/close' }
@@ -80,8 +85,19 @@ SoilIndexManager >> createIndexWithId: indexId class: aClass [
 ]
 
 { #category : #accessing }
+SoilIndexManager >> dirtyIndexes [
+	^ dirtyIndexes
+]
+
+{ #category : #accessing }
 SoilIndexManager >> flush [
-	self indexes do: #flush
+	
+	dirtyIndexes copy do: [ :index | 
+		SoilIndexCleaner new 
+			index: index;
+			readVersion: (self soil transactionManager smallestReadVersion);
+			clean.
+		index dirtyPages ifEmpty: [ dirtyIndexes remove: index ] ]
 ]
 
 { #category : #flushing }
@@ -105,7 +121,7 @@ SoilIndexManager >> initialize [
 	super initialize.
 	indexes := Dictionary new.
 	semaphore := Semaphore forMutualExclusion.
-	pagesToMaintain := Dictionary new 
+	dirtyIndexes := Set new 
 ]
 
 { #category : #initialization }
@@ -124,23 +140,9 @@ SoilIndexManager >> loadIndexWithId: indexId ifNone: aBlock [
 		ifFalse: [ aBlock value ]
 ]
 
-{ #category : #'as yet unclassified' }
-SoilIndexManager >> maintainIndex: aSoilIndex id: aString [ 
-	aSoilIndex hasPagesToMaintain ifTrue: [  
-		(pagesToMaintain 
-			at: (self at: aString ifAbsent: [Error signal: 'index not found'])
-			ifAbsentPut: [ Set new ])
-				addAll: aSoilIndex pagesToMaintain ]
-]
-
 { #category : #'open/close' }
 SoilIndexManager >> open [
 	
-]
-
-{ #category : #accessing }
-SoilIndexManager >> pagesToMaintain [
-	^ pagesToMaintain
 ]
 
 { #category : #accessing }
@@ -161,6 +163,11 @@ SoilIndexManager >> segment [
 { #category : #accessing }
 SoilIndexManager >> segment: aSOObjectSegment [ 
 	segment := aSOObjectSegment 
+]
+
+{ #category : #accessing }
+SoilIndexManager >> soil [ 
+	^ segment soil 
 ]
 
 { #category : #writing }

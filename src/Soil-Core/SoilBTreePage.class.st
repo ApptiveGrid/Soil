@@ -24,7 +24,7 @@ SoilBTreePage >> addItem: anAssociation [
 	(items anySatisfy: [ :item | item key = anAssociation key ])
 		ifFalse: [ items add: anAssociation ]
 		ifTrue:  [ self itemAt: anAssociation key put: anAssociation value ].
-	dirty := true
+	needWrite := true
 ]
 
 { #category : #assertions }
@@ -49,7 +49,7 @@ SoilBTreePage >> hasUnderflow [
 SoilBTreePage >> initialize [ 
 	super initialize.
 	lastTransaction := 0.
-	dirty := true
+	needWrite := true
 ]
 
 { #category : #adding }
@@ -86,7 +86,7 @@ SoilBTreePage >> split: newPage [
 	middle := (items size - 1 / 2) ceiling.
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.
-	dirty := true.
+	needWrite := true.
 	^ newPage
 ]
 
