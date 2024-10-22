@@ -26,6 +26,32 @@ SoilIndex >> addDirtyPage: aPage [
 	
 ]
 
+{ #category : #adding }
+SoilIndex >> addToFreePages: aPage [  
+	| currentFreePage newFreePage |
+	newFreePage := aPage asSoilFreePage.
+	store pageAt: aPage offset put: newFreePage.
+	currentFreePage := self firstFreePage
+		ifNil: [ 
+			"if there is no first free page yet make aPage the
+			first free page"
+			self headerPage firstFreePageIndex: newFreePage offset.
+			^ newFreePage ].
+	"if there is a first free page start scanning from here for a
+	free page that has room to store another free page"
+	[ currentFreePage hasRoom ] whileFalse: [ 
+		"if there is no room for the page to store and the current
+		free page does not have a next pointer we make aPage the 
+		next"
+		currentFreePage next isZero 
+			ifTrue: [
+				currentFreePage next: newFreePage offset.
+				^ newFreePage  ]
+			ifFalse: [ currentFreePage := store pageAt: currentFreePage next ]].
+	currentFreePage addPage: newFreePage.
+	^ newFreePage 
+]
+
 { #category : #private }
 SoilIndex >> at: key [ 
 	^ self 
@@ -89,6 +115,15 @@ SoilIndex >> first [
 { #category : #accessing }
 SoilIndex >> first: anInteger [
 	^ self newIterator first: anInteger
+]
+
+{ #category : #accessing }
+SoilIndex >> firstFreePage [
+	| index | 
+	index := self headerPage firstFreePageIndex.
+	^ index isZero 
+		ifTrue: [ ^ nil ]
+		ifFalse: [ store pageAt: index ]
 ]
 
 { #category : #accessing }
