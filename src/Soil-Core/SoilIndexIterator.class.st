@@ -254,22 +254,15 @@ SoilIndexIterator >> last: anInteger [
 SoilIndexIterator >> lastAssociation [
 	"Note: key will be index key"
 	| lastAssociation restoredItem |
-	currentPage := self lastNonEmptyPage ifNil: [ ^nil ]. 
+	currentPage := self lastPage.
+	"the index could be empty, currentPage (the headerpage) is empty in this case"
+	currentPage isEmpty ifTrue: [ ^nil ]. 
 	lastAssociation := currentPage lastItem.
 	currentKey := lastAssociation key.
 	[restoredItem := self restoreItem: lastAssociation] whileNil: [   
 			"if the last entry is deleted, we need to take the one before"
 			lastAssociation := self basicPreviousAssociation ifNil: [ ^nil ]].
 	^ restoredItem key -> (self convertValue: restoredItem value)
-]
-
-{ #category : #accessing }
-SoilIndexIterator >> lastNonEmptyPage [
-	currentPage := self lastPage.
-	[currentPage isEmpty] whileTrue: [ 
-		"if the page is empty, go to the previous page, if that returns nil all pages are empty"
-		currentPage := self previousPage ifNil: [^nil]].
-	^ currentPage
 ]
 
 { #category : #accessing }
