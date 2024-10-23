@@ -19,7 +19,7 @@ SoilBTreeIterator >> basicAt: indexKey put: anObject [
 	 possiblePriorValue returnValue ifNil: [
 		"only increase size if there was no prior value"
 		index increaseSize].
-	
+	index addDirtyPage: currentPage.
 	^ possiblePriorValue returnValue
 ]
 

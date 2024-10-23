@@ -694,20 +694,26 @@ SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRemovePagesSequential [
 	| tx tx2 index indexManager |
-	(classToTest = SoilBTreeDictionary ) ifTrue: [ self skip ].
+	
 	tx := soil newTransaction.
 	tx root: dict.
 	1 to: 1000 do: [ :n | dict at: n put: n asString ].
+	
 	tx commit.
+	
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
-	300 to: 700 do: [ :n | tx2 root removeKey: n ].
+	"we remove all keys from one page to make it empty"
+	(classToTest = SoilBTreeDictionary) 
+		ifTrue: [339 to: 451 do: [ :n | tx2 root removeKey: n ]]
+		ifFalse: [ 300 to: 700 do: [ :n | tx2 root removeKey: n ]].
+	
 	tx2 commit.
 	indexManager := soil objectRepository firstSegment indexManager.
 	index := indexManager indexes anyOne.
 	self assert: index dirtyPages size equals: 0.
 	self assert: indexManager dirtyIndexes size equals: 0.
-	self assert: (index pages select: #needsWrite) size equals: 1
+	self assert: (index pages select: #needsWrite) size equals: (	(classToTest = SoilBTreeDictionary) ifTrue: [2] ifFalse: [1])
 	
 
 ]
