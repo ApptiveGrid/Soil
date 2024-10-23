@@ -503,7 +503,7 @@ SoilBTreeTest >> testRemoveKey [
 { #category : #tests }
 SoilBTreeTest >> testRemovePage [
 	
-	| capacityFirst offset capacity iterator |
+	| capacityFirst offset capacity iterator counter |
 	capacityFirst := index firstPage itemCapacity.
 	1 to: capacityFirst do: [ :n | 
 		index at: n put: (n asByteArrayOfSize: 8) ].
@@ -519,9 +519,18 @@ SoilBTreeTest >> testRemovePage [
 	self assert: index pages size equals: 13.
 	index recyclePage: (index pages at: 3).
 	self assert: index pages size equals: 13.
+	"page 3 is the recycled page"
+	self assert: index firstFreePage offset equals: 3.
+	"the page is a free page"
+	self assert: index firstFreePage class equals: SoilFreePage.
 	"after, index 3 should not be a value in any index page item"
-	index indexPages do: [ :indexPage | self assert: (indexPage items noneSatisfy: [ :item | item value == 3 ]) ]
-
+	index indexPages do: [ :indexPage | self assert: (indexPage items noneSatisfy: [ :item | item value == 3 ]) ].
+	"if we follow the next pointer, we find only the non-recyled data pages"
+	iterator := index newIterator.
+	counter := 0.
+	iterator pagesDo: [ :page |  counter := counter + 1].
+	"13 - 1 indexPage - 1 recycled page"
+	self assert: counter equals: 11.
 ]
 
 { #category : #tests }

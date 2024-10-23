@@ -7,6 +7,10 @@ Class {
 	#category : #'Soil-Core-Index-BTree'
 }
 
+{ #category : #adding }
+SoilCopyOnWriteBTree >> addDirtyPage: aPage [ 
+]
+
 { #category : #'as yet unclassified' }
 SoilCopyOnWriteBTree >> allocatePage [
 	^ self newPage

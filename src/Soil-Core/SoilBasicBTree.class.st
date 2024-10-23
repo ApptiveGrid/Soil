@@ -8,6 +8,9 @@ See SoilBTree for more information
 Class {
 	#name : #SoilBasicBTree,
 	#superclass : #SoilIndex,
+	#instVars : [
+		'dirtyPages'
+	],
 	#category : #'Soil-Core-Index-BTree'
 }
 
@@ -15,6 +18,11 @@ Class {
 SoilBasicBTree class >> isAbstract [
 	<ignoreForCoverage>
 	^ self == SoilBasicBTree
+]
+
+{ #category : #adding }
+SoilBasicBTree >> addDirtyPage: aPage [ 
+	dirtyPages add: aPage
 ]
 
 { #category : #converting }
@@ -30,6 +38,11 @@ SoilBasicBTree >> dataPages [
 ]
 
 { #category : #accessing }
+SoilBasicBTree >> dirtyPages [
+	^ dirtyPages
+]
+
+{ #category : #accessing }
 SoilBasicBTree >> flush [
 	self store flush
 ]
@@ -42,6 +55,12 @@ SoilBasicBTree >> hasHeaderPage [
 { #category : #accessing }
 SoilBasicBTree >> indexPages [
 	^ (self pages select: [ :page | page isIndexPage ]) asArray
+]
+
+{ #category : #initialization }
+SoilBasicBTree >> initialize [ 
+	super initialize.
+	dirtyPages := Set new
 ]
 
 { #category : #initialization }
@@ -130,11 +149,16 @@ SoilBasicBTree >> recyclePage: aPage [
 ]
 
 { #category : #removing }
+SoilBasicBTree >> removeDirtyPage: aPage [ 
+	dirtyPages remove: aPage 
+]
+
+{ #category : #removing }
 SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
-	| removedItem |
-	removedItem := self rootPage remove: key for: self.
-	removedItem ifNil: [aBlock value].
-	^removedItem value 
+
+	^ (self rootPage remove: key for: self)
+		  ifNil: [ aBlock value ]
+		  ifNotNil: [ :removedItem | removedItem value ]
 ]
 
 { #category : #removing }

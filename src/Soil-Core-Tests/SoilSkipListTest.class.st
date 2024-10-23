@@ -468,7 +468,7 @@ SoilSkipListTest >> testRemoveKey [
 { #category : #tests }
 SoilSkipListTest >> testRemovePage [
 	
-	| capacityFirst offset capacity iterator |
+	| capacityFirst offset capacity iterator counter |
 	capacityFirst := index firstPage itemCapacity.
 	1 to: capacityFirst do: [ :n | 
 		index at: n put: (n asByteArrayOfSize: 8) ].
@@ -484,6 +484,17 @@ SoilSkipListTest >> testRemovePage [
 	self assert: index pages size equals: 6.
 	index recyclePage: (index pages at: 3).
 	self assert: index pages size equals: 6.
+	
+	"page 3 is the recycled page"
+	self assert: index firstFreePage offset equals: 3.
+	"and it is a FreePage"
+	self assert: index firstFreePage class equals: SoilFreePage.
+	"if we follow the next pointer, we find only the non-recyled data pages"
+	iterator := index newIterator.
+	counter := 0.
+	iterator pagesDo: [ :page |  counter := counter + 1].
+	"6 minus 1 recycled page"
+	self assert: counter equals: 5
 
 	
 	
