@@ -64,7 +64,6 @@ SoilSkipListIterator >> findPageFor: indexKey [
 SoilSkipListIterator >> findPreviousPageOf: aPage [
 	| pageIndex candidatePage keyOfPage |
 	aPage isHeaderPage ifTrue: [ ^nil ].
-	aPage isEmpty ifTrue: [ ^super findPreviousPageOf: aPage ].
 	keyOfPage := aPage smallestKey.
 	
 	currentPage := index headerPage.
