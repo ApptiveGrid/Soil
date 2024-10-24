@@ -359,20 +359,22 @@ SoilTest >> testRootSendingClass [
 
 { #category : #tests }
 SoilTest >> testSerializingClassDescription [
-	| obj bytes obj2 stream transaction |
-	self skip.
+	| obj bytes obj2 stream transaction registry |
 	obj :=  { #C -> (SoilBehaviorDescription for: SOTestClusterAlwaysRoot ) } asDictionary.
 	stream := ByteArray new writeStream.
+	registry := SoilStandaloneObjectRegistry new.
 	transaction := soil newTransaction.
 	SoilSerializer new
 		soil: soil;
 		transaction: transaction;
 		stream: stream; 
+		externalObjectRegistry: registry;
 		serialize: obj.
 	bytes := stream contents.
 	obj2 := SoilMaterializer new 
 		soil: soil;
 		transaction: transaction;
+		externalObjectRegistry: registry;
 		stream: bytes readStream;
 		materialize.
 	self assert: (obj2 at: #C) class equals: SoilBehaviorDescription   
