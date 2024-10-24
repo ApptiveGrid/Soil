@@ -51,6 +51,11 @@ SoilSkipList >> flush [
 	self store flush
 ]
 
+{ #category : #accessing }
+SoilSkipList >> indexId [ 
+	^ self path withoutExtension basename 
+]
+
 { #category : #initialization }
 SoilSkipList >> initializeFilesystem [ 
 	self store initializeFilesystem

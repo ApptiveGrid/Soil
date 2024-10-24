@@ -1,11 +1,8 @@
 Class {
 	#name : #SoilBackupVisitor,
-	#superclass : #SoilVisitor,
+	#superclass : #SoilCloneVisitor,
 	#instVars : [
-		'source',
 		'target',
-		'seen',
-		'toBeProcessed',
 		'version'
 	],
 	#category : #'Soil-Core-Visitor'
@@ -13,19 +10,15 @@ Class {
 
 { #category : #api }
 SoilBackupVisitor >> backup: aSoil [ 
-	| objectId |
-	source := aSoil.
+	soil := aSoil.
 	"if there is no version set we take the actual database version. This 
 	is to create a consistent backup regardless if transactions are committed 
 	while we are doing the backup"
 	version ifNil: [
 		version := aSoil control databaseVersion ]. 
 	
-	self visit: source.
-	
-	[ toBeProcessed isEmpty ] whileFalse: [  
-		objectId := toBeProcessed  removeFirst.
-		self visit: (source objectRepository at: objectId version: version) ].
+	self visit: soil.
+	self traverseGraph.
 	target close
 ]
 
@@ -33,7 +26,7 @@ SoilBackupVisitor >> backup: aSoil [
 SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	| sourceSegment sourceIndex targetSegment targetIndex iterator assoc |
 	
-	sourceSegment := source objectRepository segmentAt: segmentId.
+	sourceSegment := soil objectRepository segmentAt: segmentId.
 	sourceIndex := sourceSegment indexManager 
 		loadIndexWithId: indexId 
 		ifNone: [ ^ self indexNotFound: indexId ].
@@ -51,7 +44,7 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 		assoc value isRemoved ifFalse: [ 
 			targetIndex basicAt: assoc key put: assoc value.
 			"recurse further into the values of the index"
-			self process: assoc value asSoilObjectId ] ].
+			self processObjectId: assoc value asSoilObjectId ] ].
 	targetIndex
 		flush; 
 		close.
@@ -62,25 +55,18 @@ SoilBackupVisitor >> indexNotFound: indexId [
 	 Error signal: 'cannot find index with id ', indexId printString
 ]
 
-{ #category : #initialization }
-SoilBackupVisitor >> initialize [ 
-	super initialize.
-	seen := Set new.
-	toBeProcessed := OrderedCollection new
-]
-
-{ #category : #accessing }
-SoilBackupVisitor >> process: aSoilObjectId [ 
-	"don't continue if the objectId is the behavior description meta object"
-	((aSoilObjectId segment = 0) and: [ aSoilObjectId index = 2 ]) ifTrue: [ ^ self ].
-	(seen includes: aSoilObjectId) ifTrue: [ ^ self ].
-	seen add: aSoilObjectId.
-	toBeProcessed add: aSoilObjectId  
-]
-
 { #category : #accessing }
 SoilBackupVisitor >> target: aSoil [ 
 	target := aSoil
+]
+
+{ #category : #api }
+SoilBackupVisitor >> traverseGraph [ 
+	| objectId |
+	[ toBeProcessed isEmpty ] whileFalse: [  
+		objectId := toBeProcessed  removeFirst.
+		self visit: (soil objectRepository at: objectId version: version) ].
+	target close
 ]
 
 { #category : #accessing }
@@ -119,7 +105,7 @@ SoilBackupVisitor >> visitMetaSegment: aSoilMetaSegment [
 
 { #category : #visiting }
 SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [ 
-	self process: SoilObjectId root.
+	self processObjectId: SoilObjectId root.
 	super visitObjectSegment: aSoilObjectSegment.
 ]
 
@@ -136,7 +122,7 @@ SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersio
 		at: backupCluster objectId
 		putBytes: backupCluster serialize.
 	backupCluster references do: [ :reference |
-		self process: reference ].
+		self processObjectId: reference ].
 	aSoilPersistentClusterVersion indexIds do:[ :indexId |
 		self copyIndexAt: indexId segment: aSoilPersistentClusterVersion segment ].
 
