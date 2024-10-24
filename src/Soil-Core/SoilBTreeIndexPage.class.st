@@ -86,6 +86,11 @@ SoilBTreeIndexPage >> latestVersion [
 	^ 1
 ]
 
+{ #category : #testing }
+SoilBTreeIndexPage >> needsCleanup [
+	^ false
+]
+
 { #category : #printing }
 SoilBTreeIndexPage >> printOn: aStream [ 
 	aStream << 'index page : #' << offset asString

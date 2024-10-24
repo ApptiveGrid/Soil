@@ -666,7 +666,6 @@ SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 	| tx tx2 index indexManager tx3 tx4 |
-	(classToTest = SoilBTreeDictionary ) ifTrue: [ self skip ].
 	indexManager := soil objectRepository firstSegment indexManager.
 	tx := soil newTransaction.
 	tx root: dict.
@@ -674,16 +673,21 @@ SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 	tx commit.
 	self assert: indexManager indexes size equals: 1.
 	index := indexManager indexes anyOne.
-	"open a second transaction ..."
+	"open more transactions ..."
 	tx2 := soil newTransaction.
 	tx3 := soil newTransaction.
 	tx4 := soil newTransaction.
 	300 to: 500 do: [ :n | tx2 root removeKey: n ].
 	tx2 commit.
-	self assert: (index pages select: #needsCleanup) size equals: 2.
+	(classToTest = SoilBTreeDictionary) 
+		ifTrue: [self assert: (index pages select: #needsCleanup) size equals: 3]
+		ifFalse: [self assert: (index pages select: #needsCleanup) size equals: 2].
 	501 to: 700 do: [ :n | tx3 root removeKey: n ].
 	tx3 commit.
-	self assert: (index pages select: #needsCleanup) size equals: 3.
+	(classToTest = SoilBTreeDictionary) 
+		ifTrue: [self assert: (index pages select: #needsCleanup) size equals: 5]
+		ifFalse: [self assert: (index pages select: #needsCleanup) size equals: 3].
+	
 	701 to: 702 do: [ :n | tx4 root removeKey: n ].
 	tx4 commit.
 	self assert: indexManager dirtyIndexes size equals: 0.
