@@ -642,7 +642,7 @@ SoilTransaction >> transactionManager [
 	^ soil transactionManager
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #indexes }
 SoilTransaction >> updatedIndexDictionary: indexedDictionary [ 
 	|  segment realIndex |
 	segment := self segmentAt: (self objectIdOf: indexedDictionary) segment.

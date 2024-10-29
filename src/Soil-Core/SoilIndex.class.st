@@ -97,7 +97,7 @@ SoilIndex >> close [
 	store := nil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #utilities }
 SoilIndex >> decreaseSize [
 	self headerPage decreaseSize 
 ]
@@ -169,7 +169,7 @@ SoilIndex >> id: anObject [
 	id := anObject
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #utilities }
 SoilIndex >> increaseSize [
 	self headerPage increaseSize 
 ]
@@ -256,7 +256,7 @@ SoilIndex >> pages [
 	^ self store pages
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilIndex >> persistentIndex [
 	^ self 
 ]

@@ -27,7 +27,7 @@ SoilCopyOnWriteSkipList >> newPage [
 	^ wrapped allocatePage
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilCopyOnWriteSkipList >> persistentIndex [
 	^ wrapped persistentIndex 
 ]

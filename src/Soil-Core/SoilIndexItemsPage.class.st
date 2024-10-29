@@ -257,7 +257,7 @@ SoilIndexItemsPage >> postCopy [
 	items := items copy.
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #utilities }
 SoilIndexItemsPage >> presentItemCount [
 	^ (items reject: [ :each | each value isRemoved ]) size 
 ]
