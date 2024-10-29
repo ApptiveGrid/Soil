@@ -8,9 +8,6 @@ See SoilSkipList for more information
 Class {
 	#name : #SoilBasicSkipList,
 	#superclass : #SoilIndex,
-	#instVars : [
-		'dirtyPages'
-	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
@@ -23,11 +20,6 @@ SoilBasicSkipList class >> isAbstract [
 { #category : #adding }
 SoilBasicSkipList >> addDirtyPage: aPage [ 
 	dirtyPages add: aPage
-]
-
-{ #category : #accessing }
-SoilBasicSkipList >> dirtyPages [
-	^ dirtyPages
 ]
 
 { #category : #testing }
@@ -56,21 +48,6 @@ SoilBasicSkipList >> maxLevel: anInteger [
 { #category : #'instance creation' }
 SoilBasicSkipList >> newIterator [ 
 	^ SoilSkipListIterator on: self 
-]
-
-{ #category : #removing }
-SoilBasicSkipList >> recyclePage: aPage [
-	"the header stays untouched even it it gets empty"
-	aPage isHeaderPage ifTrue: [ ^ aPage ].
-	"remove page from chain of item pages"
-	self removePage: aPage. 
-	"add page to free list chain"
-	^ self addToFreePages: aPage
-]
-
-{ #category : #removing }
-SoilBasicSkipList >> removeDirtyPage: aPage [ 
-	dirtyPages remove: aPage 
 ]
 
 { #category : #removing }

@@ -62,10 +62,6 @@ SoilBTreeHeaderPage >> initialize [
 	size := 0
 ]
 
-{ #category : #initialization }
-SoilBTreeHeaderPage >> initializeInIndex: aSoilSkipList [
-]
-
 { #category : #testing }
 SoilBTreeHeaderPage >> isHeaderPage [
 	^ true

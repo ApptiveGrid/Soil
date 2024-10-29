@@ -51,6 +51,11 @@ SoilIndexPage class >> readPageCodeFrom: aStream [
 	
 ]
 
+{ #category : #testing }
+SoilIndexPage >> hasRoom [
+	^ self subclassResponsibility
+]
+
 { #category : #utilities }
 SoilIndexPage >> headerSize [ 
 	^ 2 "pageCode, version" 
@@ -60,6 +65,11 @@ SoilIndexPage >> headerSize [
 SoilIndexPage >> initialize [ 
 	super initialize.
 	version := self latestVersion
+]
+
+{ #category : #testing }
+SoilIndexPage >> isDirty [
+	^ self subclassResponsibility
 ]
 
 { #category : #testing }
@@ -92,6 +102,11 @@ SoilIndexPage >> latestVersion [
 { #category : #accessing }
 SoilIndexPage >> markForWrite [
 	needWrite := true 
+]
+
+{ #category : #testing }
+SoilIndexPage >> needsCleanup [
+	^ self subclassResponsibility
 ]
 
 { #category : #testing }

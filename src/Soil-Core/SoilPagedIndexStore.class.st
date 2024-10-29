@@ -15,7 +15,7 @@ SoilPagedIndexStore class >> isAbstract [
 	^ self == SoilPagedIndexStore
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #initialization }
 SoilPagedIndexStore >> allocatePage [
 	^ index allocatePage 
 ]

@@ -77,11 +77,6 @@ SoilSkipListHeaderPage >> initialize [
 	size := 0
 ]
 
-{ #category : #initialization }
-SoilSkipListHeaderPage >> initializeInIndex: aSoilSkipList [ 
-	
-]
-
 { #category : #testing }
 SoilSkipListHeaderPage >> isHeaderPage [
 	^ true

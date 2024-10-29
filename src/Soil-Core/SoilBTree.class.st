@@ -9,11 +9,6 @@ Class {
 	#category : #'Soil-Core-Index-BTree'
 }
 
-{ #category : #'as yet unclassified' }
-SoilBTree >> allocatePage [ 
-	^ self newPage 
-]
-
 { #category : #'open/close' }
 SoilBTree >> close [ 
 	super close.
@@ -67,11 +62,6 @@ SoilBTree >> path [
 SoilBTree >> path: aStringOrFileReference [
 
 	path := aStringOrFileReference asFileReference 
-]
-
-{ #category : #'as yet unclassified' }
-SoilBTree >> persistentIndex [
-	^ self 
 ]
 
 { #category : #converting }
