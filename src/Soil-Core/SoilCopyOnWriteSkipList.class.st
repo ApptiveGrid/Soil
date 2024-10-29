@@ -12,7 +12,7 @@ SoilCopyOnWriteSkipList >> addDirtyPage: aPage [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SoilCopyOnWriteSkipList >> allocatePage [
 	^ wrapped allocatePage 
 ]

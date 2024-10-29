@@ -40,6 +40,11 @@ SoilBTreePage >> find: aKey with: aBTree [
 	^ self subclassResponsibility
 ]
 
+{ #category : #private }
+SoilBTreePage >> findPreviousPage: aKey with: aBTree path: aPath [ 
+	^ self subclassResponsibility
+]
+
 { #category : #assertions }
 SoilBTreePage >> hasUnderflow [
 	^ self numberOfItems < ((self itemCapacity  / 2) ceiling - 1)
@@ -50,6 +55,10 @@ SoilBTreePage >> initialize [
 	super initialize.
 	lastTransaction := 0.
 	needWrite := true
+]
+
+{ #category : #initialization }
+SoilBTreePage >> initializeInIndex: aSoilSkipList [
 ]
 
 { #category : #adding }

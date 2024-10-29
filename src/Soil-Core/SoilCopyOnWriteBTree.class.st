@@ -11,11 +11,6 @@ Class {
 SoilCopyOnWriteBTree >> addDirtyPage: aPage [ 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilCopyOnWriteBTree >> allocatePage [
-	^ self newPage
-]
-
 { #category : #testing }
 SoilCopyOnWriteBTree >> isRegistered [
 	^ wrapped isRegistered

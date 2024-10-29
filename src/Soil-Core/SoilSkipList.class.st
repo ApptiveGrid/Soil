@@ -14,7 +14,7 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSkipList: self
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'instance creation' }
 SoilSkipList >> allocatePage [
 	^ self newPage 
 		offset: (self nextFreePage 
@@ -149,11 +149,6 @@ SoilSkipList >> path [
 SoilSkipList >> path: aStringOrFileReference [
 
 	path := aStringOrFileReference asFileReference 
-]
-
-{ #category : #'as yet unclassified' }
-SoilSkipList >> persistentIndex [
-	^ self 
 ]
 
 { #category : #initialization }

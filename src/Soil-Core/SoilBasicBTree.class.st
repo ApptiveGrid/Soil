@@ -8,9 +8,6 @@ See SoilBTree for more information
 Class {
 	#name : #SoilBasicBTree,
 	#superclass : #SoilIndex,
-	#instVars : [
-		'dirtyPages'
-	],
 	#category : #'Soil-Core-Index-BTree'
 }
 
@@ -25,6 +22,11 @@ SoilBasicBTree >> addDirtyPage: aPage [
 	dirtyPages add: aPage
 ]
 
+{ #category : #'instance creation' }
+SoilBasicBTree >> allocatePage [ 
+	^ self newPage
+]
+
 { #category : #converting }
 SoilBasicBTree >> asCopyOnWrite [
 	^ SoilCopyOnWriteBTree new
@@ -35,11 +37,6 @@ SoilBasicBTree >> asCopyOnWrite [
 { #category : #accessing }
 SoilBasicBTree >> dataPages [
 	^ (self pages reject: [ :page | page isIndexPage ]) asArray
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> dirtyPages [
-	^ dirtyPages
 ]
 
 { #category : #accessing }
@@ -136,21 +133,6 @@ SoilBasicBTree >> open [
 { #category : #initialization }
 SoilBasicBTree >> pageClass [
 	^ SoilBTreeDataPage
-]
-
-{ #category : #removing }
-SoilBasicBTree >> recyclePage: aPage [
-	"the header stays untouched even it it gets empty"
-	aPage isHeaderPage ifTrue: [ ^ aPage ].
-	"remove page from chain of item pages"
-	self removePage: aPage. 
-	"add page to free list chain"
-	^ self addToFreePages: aPage
-]
-
-{ #category : #removing }
-SoilBasicBTree >> removeDirtyPage: aPage [ 
-	dirtyPages remove: aPage 
 ]
 
 { #category : #removing }
