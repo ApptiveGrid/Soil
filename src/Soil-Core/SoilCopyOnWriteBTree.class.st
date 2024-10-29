@@ -21,7 +21,7 @@ SoilCopyOnWriteBTree >> newPage [
 	^ wrapped allocatePage
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilCopyOnWriteBTree >> persistentIndex [
 	^ wrapped persistentIndex 
 ]

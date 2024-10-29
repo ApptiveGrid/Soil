@@ -111,7 +111,7 @@ SoilSkipList >> newPluggableRewriter [
 		index: self
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilSkipList >> nextFreePage [
 	| firstPage freePage |
 	firstPage := self firstFreePage ifNil: [ 

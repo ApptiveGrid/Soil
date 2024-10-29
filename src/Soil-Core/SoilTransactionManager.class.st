@@ -9,7 +9,7 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #'commit/abort' }
 SoilTransactionManager >> abortTransaction: aTransaction [ 	
 	soil ifNotNil: [  
 		soil notificationHandler transactionAborted: self ].
@@ -24,7 +24,7 @@ SoilTransactionManager >> addTransaction: aSoilTransaction [
 		transactions add: aSoilTransaction ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'commit/abort' }
 SoilTransactionManager >> commitAndContinueTransaction: aTransaction [ 	
 	aTransaction basicCommit.
 	aTransaction hasModifications ifTrue: [ 
@@ -32,7 +32,7 @@ SoilTransactionManager >> commitAndContinueTransaction: aTransaction [
 	aTransaction continue
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'commit/abort' }
 SoilTransactionManager >> commitTransaction: aTransaction [ 	
 	| modified |
 	aTransaction basicCommit.
@@ -70,7 +70,7 @@ SoilTransactionManager >> removeTransaction: aSoilTransaction [
 		transactions remove: aSoilTransaction ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #versions }
 SoilTransactionManager >> smallestReadVersion [ 
 	"detect the smallest read version currently in use"
 	^ transactions

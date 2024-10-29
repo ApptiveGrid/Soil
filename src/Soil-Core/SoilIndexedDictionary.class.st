@@ -172,7 +172,7 @@ SoilIndexedDictionary >> nextCloseTo: aKey [
 	^ self newIterator nextCloseTo: aKey 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilIndexedDictionary >> persistentIndex [
 	^ index persistentIndex 
 ]

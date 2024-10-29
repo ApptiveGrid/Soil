@@ -33,7 +33,7 @@ SoilSkipListHeaderPage >> canBeRemoved [
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #utilities }
 SoilSkipListHeaderPage >> decreaseSize [
 	(size = -1) ifTrue: [ ^ self ].
 	size := size - 1.
@@ -62,7 +62,7 @@ SoilSkipListHeaderPage >> headerSize [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #utilities }
 SoilSkipListHeaderPage >> increaseSize [
 	(size = -1) ifTrue: [ ^ self ].
 	size := size + 1.
