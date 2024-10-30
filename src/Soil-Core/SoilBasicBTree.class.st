@@ -23,8 +23,11 @@ SoilBasicBTree >> addDirtyPage: aPage [
 ]
 
 { #category : #'instance creation' }
-SoilBasicBTree >> allocatePage [ 
-	^ self newPage
+SoilBasicBTree >> allocatePage [
+	^ self newPage 
+		offset: (self nextFreePage 
+			ifNotNil: [ :freePage | freePage offset ]
+			ifNil: [ store nextPageOffset ])
 ]
 
 { #category : #converting }
@@ -124,6 +127,22 @@ SoilBasicBTree >> newRootPage [
 		pageSize: self pageSize
 ]
 
+{ #category : #private }
+SoilBasicBTree >> nextFreePage [
+	| firstPage freePage |
+	firstPage := self firstFreePage ifNil: [ 
+		^ nil ].
+	^ firstPage hasFreePages 
+		ifTrue: [ 
+			freePage := store pageAt: firstPage removeFirstIndex.
+			self addDirtyPage: freePage.
+			freePage  ] 
+		ifFalse: [ 
+			self headerPage firstFreePageIndex: 0.
+			self addDirtyPage: self headerPage.
+			firstPage ]
+]
+
 { #category : #'open/close' }
 SoilBasicBTree >> open [
  	self isOpen ifTrue: [ self error: 'Index already open' ].
@@ -185,7 +204,6 @@ SoilBasicBTree >> splitIndexPage: page [
 SoilBasicBTree >> splitPage: page [ 
 	| newPage |
 	newPage := page split: store allocatePage.
-	newPage offset: self store nextPageOffset.
 	newPage next: page next.
 	page next: newPage offset.
 	self store pageAt: newPage offset put: newPage.

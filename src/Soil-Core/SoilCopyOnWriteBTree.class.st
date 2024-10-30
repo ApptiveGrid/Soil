@@ -11,6 +11,11 @@ Class {
 SoilCopyOnWriteBTree >> addDirtyPage: aPage [ 
 ]
 
+{ #category : #'instance creation' }
+SoilCopyOnWriteBTree >> allocatePage [
+	^ wrapped allocatePage 
+]
+
 { #category : #testing }
 SoilCopyOnWriteBTree >> isRegistered [
 	^ wrapped isRegistered
