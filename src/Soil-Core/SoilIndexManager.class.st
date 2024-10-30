@@ -50,24 +50,6 @@ SoilIndexManager >> at: indexId put: aSoilIndex [
 			put: aSoilIndex thePersistentInstance ]
 ]
 
-{ #category : #'as yet unclassified' }
-SoilIndexManager >> cleanPagesModifiedNotAfter: readVersion [ 
-	"| keysToRemove |"
-	"keysToRemove := OrderedCollection new.
-	pagesToMaintain keysAndValuesDo: [ :index :pages |
-		pages copy do: [ :page |
-			(readVersion isNil or: [ readVersion >= page lastTransaction ]) ifTrue: [  
-				(page presentItemCount = 0) 
-					ifTrue: [ index recyclePage: page ]
-					ifFalse: [ page cleanRemoved  ].
-				pages remove: page ] ].
-		pages ifEmpty: [ keysToRemove add: index ].
-		index writePages ].
-	keysToRemove do: [ :index | 
-		pagesToMaintain removeKey: index  ]
-	"
-]
-
 { #category : #'open/close' }
 SoilIndexManager >> close [
 	semaphore critical: [  
