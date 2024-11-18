@@ -3,7 +3,8 @@ Class {
 	#superclass : #TestCase,
 	#instVars : [
 		'soil',
-		'backupSoil'
+		'backupSoil',
+		'migrationClass'
 	],
 	#category : #'Soil-Core-Tests-Visitor'
 }
@@ -37,6 +38,8 @@ SoilBackupTest >> setUp [
 
 { #category : #running }
 SoilBackupTest >> tearDown [ 
+	migrationClass ifNotNil: [ 
+		migrationClass removeFromSystem ].
 	super tearDown.
 	soil ifNotNil: [ 
 		soil close ].
@@ -77,9 +80,9 @@ SoilBackupTest >> testBackupCurrentVersion [
 
 { #category : #tests }
 SoilBackupTest >> testBackupOldBehavior [ 
-	| tx visitor tx3 class object objectId versions object2 |
-	class := self createMigrationClass.
-	object := class new
+	| tx visitor tx3 object objectId versions object2 |
+	migrationClass := self createMigrationClass.
+	object := migrationClass new
 		instVarNamed: #one put: #onevalue;
 		yourself .
 	
@@ -90,8 +93,8 @@ SoilBackupTest >> testBackupOldBehavior [
 		yourself).
 	tx commit.
 	
-	class addSlot: #two.
-	object2 := class new
+	migrationClass addSlot: #two.
+	object2 := migrationClass new
 		instVarNamed: #two put: #twovalue;
 		yourself .
 	
