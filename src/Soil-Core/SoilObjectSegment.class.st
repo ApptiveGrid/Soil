@@ -25,12 +25,14 @@ SoilObjectSegment >> allRecords [
 
 { #category : #accessing }
 SoilObjectSegment >> allVersionsAt: index [ 
-	| obj versions |
+	| obj versions objectId |
 	obj := self at: index.
 	versions := OrderedCollection new.
 	versions add: obj.
+	objectId := obj objectId.
 	[ obj previousVersionPosition isZero ] whileFalse: [ 
 		obj := objectFile atPosition: obj previousVersionPosition.
+		obj objectId: objectId.
 		versions add: obj ].
 	^ versions
 ]
