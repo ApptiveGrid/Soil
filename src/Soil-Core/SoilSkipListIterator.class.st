@@ -129,5 +129,5 @@ SoilSkipListIterator >> size [
 	headerPage := index headerPage.
 	^ (readVersion isNil or: [ headerPage lastTransaction > readVersion ]) 
 		ifTrue: [ super size] 
-		ifFalse: [ headerPage size  ]
+		ifFalse: [ index size  ]
 ]
