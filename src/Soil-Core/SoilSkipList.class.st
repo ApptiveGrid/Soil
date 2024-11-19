@@ -9,7 +9,7 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #visiting }
+{ #category : #accessing }
 SoilSkipList >> acceptSoil: aSoilVisitor [ 
 	^ aSoilVisitor visitSkipList: self
 ]
