@@ -718,7 +718,7 @@ SoilIndexedDictionaryTest >> testRemovePagesSequential [
 	index := indexManager indexes anyOne.
 	self assert: index dirtyPages size equals: 0.
 	self assert: indexManager dirtyIndexes size equals: 0.
-	self assert: (index pages select: #needsWrite) size equals: (	(classToTest = SoilBTreeDictionary) ifTrue: [2] ifFalse: [1])
+	self assert: (index pages select: #needsWrite) size equals: (	(classToTest = SoilBTreeDictionary) ifTrue: [1] ifFalse: [0])
 	
 
 ]

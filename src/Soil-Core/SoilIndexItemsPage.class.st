@@ -243,6 +243,7 @@ SoilIndexItemsPage >> lastTransaction: anInteger [
 
 { #category : #testing }
 SoilIndexItemsPage >> needsCleanup [ 
+	items size isZero ifTrue: [ ^ true ].
 	^ items size > self presentItemCount 
 ]
 
