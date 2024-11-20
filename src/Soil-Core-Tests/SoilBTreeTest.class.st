@@ -274,12 +274,12 @@ SoilBTreeTest >> testIndexRewriting [
 	1 to: capacity + 1 do: [ :n | 
 		index at: n put: (n asByteArrayOfSize: 8) ].
 	index flush.
-	self assert: index headerPage lastPageIndex equals: 3.
+	self assert: index headerPage lastPageOffset equals: 3.
 	self assert: (index pageAt: 3) items size equals: 128.
 	self assert: (index pageAt: 1) items size equals: 126.
 	fileSizeBefore := index path size.
 	index newPluggableRewriter rewrite.
-	self assert: index headerPage lastPageIndex equals: 3.
+	self assert: index headerPage lastPageOffset equals: 3.
 	self assert: (index pageAt: 3) items size equals: 128.
 	self assert: (index pageAt: 1) items size equals: 126.
 	
@@ -299,7 +299,7 @@ SoilBTreeTest >> testIndexRewritingWithCleaning [
 		index at: n  put: SoilObjectId removed ].
 	
 	index newPluggableRewriter cleanRemoved run.
-	self assert: index headerPage lastPageIndex equals: 2.
+	self assert: index headerPage lastPageOffset equals: 2.
 	self assert: (index pageAt: 1) items size equals: 1.
 	self assert: (index at: capacity + 1) asByteArray equals: (capacity + 1 asByteArrayOfSize: 8).
 

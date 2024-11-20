@@ -266,6 +266,112 @@ SoilSkipListTest >> testFirstArgLargerThenSize [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testFreePageAdd [
+	| iterator |
+	iterator := index newIterator.
+	1 to: 2500 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	self assert: index headerPage lastPageOffset equals: 10.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	500 to: 1500 do: [ : n |
+		iterator removeKey: n ].
+	self assert: index headerPage lastPageOffset equals: 10.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	index cleanUpToVersion: nil.
+	self assert: index headerPage lastPageOffset equals: 10.
+	"the first page that gets empty is reused as free list page"
+	self assert: index headerPage firstFreePageIndex equals: 3.
+	"subsequent removed pages are added to the first page"
+	self assertCollection: (index store pageAt: 3) pageIndexes hasSameElements: #( 4 5 ).
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testFreePageAddNested [
+	| iterator nestedFreeIndexes |
+	index
+		maxLevel: 8; 
+		valueSize: 512.
+	iterator := index newIterator.
+	"create enough pages to test"
+	1 to: 9000 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	self assert: index headerPage lastPageOffset equals: 1286.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	"now we free more pages than a free page list has capacity"
+	10 to: 8990 do: [ : n |
+		iterator removeKey: n ].
+	index cleanUpToVersion: nil.
+	self assert: index headerPage firstFreePageIndex equals: 3.
+	self assert: (index store pageAt: 3) pageIndexes size equals: 1018.
+	"as there were more than free list capacity there is a next free
+	list page"
+	self assert: (index store pageAt: 3) next equals: 1022.
+	nestedFreeIndexes := ((index store pageAt: 1022) pageIndexes copy) copyWith: 1022.
+	"we fill the index with enough elements to use all free pages including the nested 
+	ones"
+	1 to: 15*1018 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	"there should be no more free page"
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	"and all pageIndexes of the next free page should be included"
+	self assert: ((index store pages collect: #offset) includesAll: nestedFreeIndexes) 
+	
+	
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testFreePageReuse [
+	| iterator |
+	iterator := index newIterator.
+	1 to: 2500 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	self assert: index headerPage lastPageOffset equals: 10.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	500 to: 1500 do: [ : n |
+		iterator removeKey: n ].
+	index cleanUpToVersion: nil.
+	self assert: index headerPage lastPageOffset equals: 10.
+	2501 to: 2750 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	index cleanUpToVersion: nil.
+	"first free page is #3 with content #( 4 5 ). Adding 250 entries should remove 
+	one page #4 for reuse"
+	self assertCollection: (index store pageAt: 3) pageIndexes hasSameElements: #( 5 ).
+
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testFreePageReuseAtEndAppend [
+	| iterator |
+	iterator := index newIterator.
+	1 to: 2500 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	self assert: index headerPage lastPageOffset equals: 10.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	500 to: 1500 do: [ : n |
+		iterator removeKey: n ].
+	index cleanUpToVersion: nil.
+	self assert: index headerPage lastPageOffset equals: 10.
+	self assertCollection: (index store pageAt: 3) pageIndexes hasSameElements: #( 4 5 ).
+	iterator := index newIterator.
+	2501 to: 3500 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	index cleanUpToVersion: nil.
+	"readding the same amount of entries but at the end should reuse all 
+	free pages making first free 0."
+	self assert: index headerPage firstFreePageIndex  equals: 0.
+	"as the new entries did not fit exactly we have one more page at the 
+	end which should have update the header page"
+	self assert: index headerPage lastPageOffset equals: 11.
+	"page #3 was the first free page so it was recycled last. Therefor the 
+	page #3 should point to page #11 which should be the last"
+	self assert: (index store pageAt: 3) right first equals: 11.
+	self assert: (index store pageAt: 11) right first equals: 0.
+
+	
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testIndexRewriting [
 	
 	| capacity fileSizeBefore |
@@ -275,7 +381,7 @@ SoilSkipListTest >> testIndexRewriting [
 	index flush.
 	fileSizeBefore := index path size.
 	index newPluggableRewriter rewrite.
-	self assert: index headerPage lastPageIndex equals: 2.
+	self assert: index headerPage lastPageOffset equals: 2.
 	self assert: (index pageAt: 2) items size equals: 1.
 	"self assert: index path size equals: fileSizeBefore"
 ]
@@ -292,7 +398,7 @@ SoilSkipListTest >> testIndexRewritingWithCleaning [
 		index at: n  put: SoilObjectId removed ].
 	
 	index newPluggableRewriter cleanRemoved rewrite.
-	self assert: index headerPage lastPageIndex equals: 1.
+	self assert: index headerPage lastPageOffset equals: 1.
 	self assert: (index pageAt: 1) items size equals: 1.
 	self assert: (index at: capacity + 1) equals: (capacity + 1 asByteArrayOfSize: 8).
 

@@ -9,6 +9,12 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #'as yet unclassified' }
+SoilTransactionManager >> abortAll [
+	transactions copy do: [ :transaction |
+		transaction abort ]
+]
+
 { #category : #'commit/abort' }
 SoilTransactionManager >> abortTransaction: aTransaction [ 	
 	soil ifNotNil: [  

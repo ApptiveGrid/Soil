@@ -16,9 +16,9 @@ Class {
 	#superclass : #SoilSkipListPage,
 	#instVars : [
 		'maxLevel',
-		'lastPageIndex',
 		'firstFreePageIndex',
-		'size'
+		'size',
+		'lastPageOffset'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -72,7 +72,7 @@ SoilSkipListHeaderPage >> increaseSize [
 { #category : #initialization }
 SoilSkipListHeaderPage >> initialize [ 
 	super initialize.
-	lastPageIndex := 1.
+	lastPageOffset := 1.
 	firstFreePageIndex := 0.
 	size := 0
 ]
@@ -85,7 +85,7 @@ SoilSkipListHeaderPage >> isHeaderPage [
 { #category : #accessing }
 SoilSkipListHeaderPage >> keySize: anInteger [
 	"as long as no items have been added the key size can be changed"
-	((self lastPageIndex = 1) and: [ items isEmpty ]) ifFalse: [ 
+	((self lastPageOffset = 1) and: [ items isEmpty ]) ifFalse: [ 
 		keySize ifNotNil: [ Error signal: 'key size has been set already' ] ].
 	super keySize: anInteger.
 	needWrite := true
@@ -99,14 +99,14 @@ SoilSkipListHeaderPage >> label [
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> lastPageIndex [
+SoilSkipListHeaderPage >> lastPageOffset [
 
-	^ lastPageIndex
+	^ lastPageOffset
 ]
 
 { #category : #accessing }
-SoilSkipListHeaderPage >> lastPageIndex: anObject [
-	lastPageIndex := anObject.
+SoilSkipListHeaderPage >> lastPageOffset: anObject [
+	lastPageOffset := anObject.
 	needWrite := true
 ]
 
@@ -131,9 +131,9 @@ SoilSkipListHeaderPage >> maxLevel: anInteger [
 
 { #category : #accessing }
 SoilSkipListHeaderPage >> nextPageOffset [
-	lastPageIndex := lastPageIndex + 1.
+	lastPageOffset := lastPageOffset + 1.
 	needWrite := true.
-	^ lastPageIndex 
+	^ lastPageOffset 
 ]
 
 { #category : #reading }
@@ -150,7 +150,7 @@ SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	maxLevel := (aStream next: 2) asInteger.
-	lastPageIndex :=(aStream next: 4) asInteger.
+	lastPageOffset :=(aStream next: 4) asInteger.
 	firstFreePageIndex :=(aStream next: 4) asInteger.
 	size := (version > 1) 
 		ifTrue: [ (aStream next: 6) asInteger ]
@@ -179,7 +179,7 @@ SoilSkipListHeaderPage >> writeHeaderOn: aStream [
 		nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
 		nextPutAll: (maxLevel asByteArrayOfSize: 2);
-		nextPutAll: (lastPageIndex asByteArrayOfSize: 4);
+		nextPutAll: (lastPageOffset asByteArrayOfSize: 4);
 		nextPutAll: (firstFreePageIndex asByteArrayOfSize: 4).
 		(version > 1) ifTrue: [ 
 			aStream nextPutAll: (self size asByteArrayOfSize: 6) ].

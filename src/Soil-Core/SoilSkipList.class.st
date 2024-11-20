@@ -16,10 +16,12 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 
 { #category : #'instance creation' }
 SoilSkipList >> allocatePage [
-	^ self newPage 
-		offset: (self nextFreePage 
-			ifNotNil: [ :freePage | freePage offset ]
-			ifNil: [ store nextPageOffset ])
+	| page |
+	page := self newPage 
+		offset: (self nextFreePageIndex
+			ifNil: [ store nextPageOffset ]).
+	self addDirtyPage: page.
+	^ page
 ]
 
 { #category : #converting }
@@ -90,7 +92,7 @@ SoilSkipList >> keySize: anInteger [
 SoilSkipList >> newHeaderPage [
 	^ SoilSkipListHeaderPage new
 		offset: 1;
-		lastPageIndex: 1;
+		lastPageOffset: 1;
 		firstFreePageIndex: 0;
 		pageSize: self pageSize
 ]
@@ -112,19 +114,22 @@ SoilSkipList >> newPluggableRewriter [
 ]
 
 { #category : #private }
-SoilSkipList >> nextFreePage [
-	| firstPage freePage |
-	firstPage := self firstFreePage ifNil: [ 
+SoilSkipList >> nextFreePageIndex [ 
+	| firstFreePage freePageIndex |
+	firstFreePage := self firstFreePage ifNil: [ 
 		^ nil ].
-	^ firstPage hasFreePages 
+	^ firstFreePage hasFreePages 
 		ifTrue: [ 
-			freePage := store pageAt: firstPage removeFirstIndex.
-			self addDirtyPage: freePage.
-			freePage  ] 
+			freePageIndex := firstFreePage removeFirstIndex.
+			self addDirtyPage: firstFreePage.
+			freePageIndex  ] 
 		ifFalse: [ 
-			self headerPage firstFreePageIndex: 0.
+			"if firstFreePage has a next pointer we set that as 
+			new first free page. Next will return 0 if there is no
+			next page"
+			self headerPage firstFreePageIndex: firstFreePage next.
 			self addDirtyPage: self headerPage.
-			firstPage ]
+			firstFreePage offset ]
 				
 ]
 

@@ -19,7 +19,16 @@ SoilBasicSkipList class >> isAbstract [
 
 { #category : #adding }
 SoilBasicSkipList >> addDirtyPage: aPage [ 
-	dirtyPages add: aPage
+	dirtyPages at: aPage offset put: aPage
+]
+
+{ #category : #'as yet unclassified' }
+SoilBasicSkipList >> cleanUpToVersion: aNumberOrNil [ 
+		SoilIndexCleaner new 
+			index: self;
+			readVersion: aNumberOrNil;
+			clean.
+
 ]
 
 { #category : #testing }
@@ -30,7 +39,7 @@ SoilBasicSkipList >> hasHeaderPage [
 { #category : #initialization }
 SoilBasicSkipList >> initialize [ 
 	super initialize.
-	dirtyPages := Set new
+	dirtyPages := OrderedDictionary new
 ]
 
 { #category : #accessing }

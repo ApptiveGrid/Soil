@@ -286,7 +286,7 @@ SoilIndex >> recyclePage: aPage [
 
 { #category : #removing }
 SoilIndex >> removeDirtyPage: aPage [ 
-	dirtyPages remove: aPage
+	dirtyPages removeKey: aPage offset
 ]
 
 { #category : #removing }
