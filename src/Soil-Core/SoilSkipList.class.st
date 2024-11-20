@@ -115,18 +115,21 @@ SoilSkipList >> newPluggableRewriter [
 
 { #category : #private }
 SoilSkipList >> nextFreePageIndex [ 
-	| firstPage freePageIndex |
-	firstPage := self firstFreePage ifNil: [ 
+	| firstFreePage freePageIndex |
+	firstFreePage := self firstFreePage ifNil: [ 
 		^ nil ].
-	^ firstPage hasFreePages 
+	^ firstFreePage hasFreePages 
 		ifTrue: [ 
-			freePageIndex := firstPage removeFirstIndex.
-			self addDirtyPage: firstPage.
+			freePageIndex := firstFreePage removeFirstIndex.
+			self addDirtyPage: firstFreePage.
 			freePageIndex  ] 
 		ifFalse: [ 
-			self headerPage firstFreePageIndex: 0.
+			"if firstFreePage has a next pointer we set that as 
+			new first free page. Next will return 0 if there is no
+			next page"
+			self headerPage firstFreePageIndex: firstFreePage next.
 			self addDirtyPage: self headerPage.
-			firstPage offset ]
+			firstFreePage offset ]
 				
 ]
 

@@ -286,6 +286,40 @@ SoilSkipListTest >> testFreePageAdd [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testFreePageAddNested [
+	| iterator nestedFreeIndexes |
+	index
+		maxLevel: 8; 
+		valueSize: 512.
+	iterator := index newIterator.
+	"create enough pages to test"
+	1 to: 9000 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	self assert: index headerPage lastPageOffset equals: 1286.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	"now we free more pages than a free page list has capacity"
+	10 to: 8990 do: [ : n |
+		iterator removeKey: n ].
+	index cleanUpToVersion: nil.
+	self assert: index headerPage firstFreePageIndex equals: 3.
+	self assert: (index store pageAt: 3) pageIndexes size equals: 1018.
+	"as there were more than free list capacity there is a next free
+	list page"
+	self assert: (index store pageAt: 3) next equals: 1022.
+	nestedFreeIndexes := ((index store pageAt: 1022) pageIndexes copy) copyWith: 1022.
+	"we fill the index with enough elements to use all free pages including the nested 
+	ones"
+	1 to: 15*1018 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	"there should be no more free page"
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	"and all pageIndexes of the next free page should be included"
+	self assert: ((index store pages collect: #offset) includesAll: nestedFreeIndexes) 
+	
+	
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testFreePageReuse [
 	| iterator |
 	iterator := index newIterator.
