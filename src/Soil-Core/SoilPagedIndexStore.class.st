@@ -69,8 +69,8 @@ SoilPagedIndexStore >> isOpen [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> lastPageIndex [
-	^ self headerPage lastPageIndex
+SoilPagedIndexStore >> lastPageOffset [
+	^ self headerPage lastPageOffset
 ]
 
 { #category : #'instance creation' }

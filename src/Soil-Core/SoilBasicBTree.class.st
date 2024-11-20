@@ -89,7 +89,7 @@ SoilBasicBTree >> keySize: anInteger [
 SoilBasicBTree >> newHeaderPage [
 	^ SoilBTreeHeaderPage new
 		offset: 1;
-		lastPageIndex: 2;
+		lastPageOffset: 2;
 		firstFreePageIndex: 0;
 		pageSize: self pageSize
 ]
@@ -135,7 +135,7 @@ SoilBasicBTree >> nextFreePage [
 	^ firstPage hasFreePages 
 		ifTrue: [ 
 			freePage := store pageAt: firstPage removeFirstIndex.
-			self addDirtyPage: freePage.
+			self addDirtyPage: firstPage.
 			freePage  ] 
 		ifFalse: [ 
 			self headerPage firstFreePageIndex: 0.

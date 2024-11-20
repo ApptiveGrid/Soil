@@ -125,7 +125,7 @@ SoilSkipListPageTest >> testHeaderPageFull [
 		offset: 1;
 		level: 8;
 		pageSize: 4096;
-		lastPageIndex: 2.
+		lastPageOffset: 2.
 	1 to: 253 do: [ :n |
 		page addItem: (n -> n) ].
 	self assert: page hasRoom equals: false.
@@ -146,7 +146,7 @@ SoilSkipListPageTest >> testHeaderPageFullStreamSize [
 		keySize: 7;
 		valueSize: 8;
 		maxLevel: 8;
-		lastPageIndex: 1;
+		lastPageOffset: 1;
 		offset: 1;
 		level: 6;
 		pageSize: 4096.
@@ -171,7 +171,7 @@ SoilSkipListPageTest >> testHeaderPageSizeOfHeader [
 		offset: 1;
 		level: 8;
 		pageSize: 4096;
-		lastPageIndex: 2.
+		lastPageOffset: 2.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeHeaderOn: stream ].
 	self assert: bytes size equals: page headerSize 
@@ -186,7 +186,7 @@ SoilSkipListPageTest >> testHeaderPageWriteAndRead [
 		maxLevel: 12;
 		offset: 1;
 		level: 8;
-		lastPageIndex: 2.
+		lastPageOffset: 2.
 	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
@@ -196,7 +196,7 @@ SoilSkipListPageTest >> testHeaderPageWriteAndRead [
 	self assert: readPage keySize equals: 16.
 	self assert: readPage valueSize equals: 8.
 	self assert: readPage maxLevel equals: 12.
-	self assert: readPage lastPageIndex equals: 2.
+	self assert: readPage lastPageOffset equals: 2.
 	self deny: readPage needsWrite 
 ]
 
@@ -210,7 +210,7 @@ SoilSkipListPageTest >> testWriteOldVersion [
 		offset: 1;
 		level: 8;
 		pageSize: 4096;
-		lastPageIndex: 2;
+		lastPageOffset: 2;
 		instVarNamed: #version put: 1;
 		yourself.
 	1 to: 10 do: [ :n |

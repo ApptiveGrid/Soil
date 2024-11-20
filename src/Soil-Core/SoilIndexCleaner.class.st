@@ -22,7 +22,7 @@ SoilIndexCleaner >> clean [
 	that need to be written"
 	self dirtyPages do: [ :page |
 		"if no transaction needs old state and the page needs cleaning"
-		((self canDiscardOldState: page) and: [ page needsCleanup ]) ifTrue: [  
+		(page needsCleanup and: [ self canDiscardOldState: page ]) ifTrue: [  
 			self cleanPage: page ] ].
 	"Now we have a final set if dirty pages"
 	index dirtyPages copy do: [ :page | 

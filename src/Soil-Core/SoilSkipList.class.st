@@ -16,10 +16,12 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 
 { #category : #'instance creation' }
 SoilSkipList >> allocatePage [
-	^ self newPage 
-		offset: (self nextFreePage 
-			ifNotNil: [ :freePage | freePage offset ]
-			ifNil: [ store nextPageOffset ])
+	| page |
+	page := self newPage 
+		offset: (self nextFreePageIndex
+			ifNil: [ store nextPageOffset ]).
+	self addDirtyPage: page.
+	^ page
 ]
 
 { #category : #converting }
@@ -90,7 +92,7 @@ SoilSkipList >> keySize: anInteger [
 SoilSkipList >> newHeaderPage [
 	^ SoilSkipListHeaderPage new
 		offset: 1;
-		lastPageIndex: 1;
+		lastPageOffset: 1;
 		firstFreePageIndex: 0;
 		pageSize: self pageSize
 ]
@@ -112,19 +114,19 @@ SoilSkipList >> newPluggableRewriter [
 ]
 
 { #category : #private }
-SoilSkipList >> nextFreePage [
-	| firstPage freePage |
+SoilSkipList >> nextFreePageIndex [ 
+	| firstPage freePageIndex |
 	firstPage := self firstFreePage ifNil: [ 
 		^ nil ].
 	^ firstPage hasFreePages 
 		ifTrue: [ 
-			freePage := store pageAt: firstPage removeFirstIndex.
-			self addDirtyPage: freePage.
-			freePage  ] 
+			freePageIndex := firstPage removeFirstIndex.
+			self addDirtyPage: firstPage.
+			freePageIndex  ] 
 		ifFalse: [ 
 			self headerPage firstFreePageIndex: 0.
 			self addDirtyPage: self headerPage.
-			firstPage ]
+			firstPage offset ]
 				
 ]
 
