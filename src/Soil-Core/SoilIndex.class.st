@@ -99,7 +99,8 @@ SoilIndex >> close [
 
 { #category : #utilities }
 SoilIndex >> decreaseSize [
-	self headerPage decreaseSize 
+	self headerPage decreaseSize.
+	self addDirtyPage: self headerPage.
 ]
 
 { #category : #accessing }
@@ -171,7 +172,8 @@ SoilIndex >> id: anObject [
 
 { #category : #utilities }
 SoilIndex >> increaseSize [
-	self headerPage increaseSize 
+	self headerPage increaseSize.
+	self addDirtyPage: self headerPage. 
 ]
 
 { #category : #accessing }
