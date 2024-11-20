@@ -155,6 +155,11 @@ SoilBasicBTree >> pageClass [
 ]
 
 { #category : #removing }
+SoilBasicBTree >> removeDirtyPage: aPage [ 
+	dirtyPages remove: aPage
+]
+
+{ #category : #removing }
 SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
 
 	^ (self rootPage remove: key for: self)
