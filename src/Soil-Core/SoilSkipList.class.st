@@ -14,16 +14,6 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSkipList: self
 ]
 
-{ #category : #'instance creation' }
-SoilSkipList >> allocatePage [
-	| page |
-	page := self newPage 
-		offset: (self nextFreePageIndex
-			ifNil: [ store nextPageOffset ]).
-	self addDirtyPage: page.
-	^ page
-]
-
 { #category : #converting }
 SoilSkipList >> asCopyOnWrite [
 	^ SoilCopyOnWriteSkipList new
@@ -97,51 +87,16 @@ SoilSkipList >> newHeaderPage [
 		pageSize: self pageSize
 ]
 
-{ #category : #'instance creation' }
-SoilSkipList >> newPage [
-	^ self pageClass new 
-		initializeLevel: self maxLevel;
-		keySize: self keySize;
-		valueSize: self valueSize;
-		pageSize: self pageSize;
-		yourself
-]
-
 { #category : #reindexing }
 SoilSkipList >> newPluggableRewriter [
 	^ SoilPluggableIndexRewriter new 
 		index: self
 ]
 
-{ #category : #private }
-SoilSkipList >> nextFreePageIndex [ 
-	| firstFreePage freePageIndex |
-	firstFreePage := self firstFreePage ifNil: [ 
-		^ nil ].
-	^ firstFreePage hasFreePages 
-		ifTrue: [ 
-			freePageIndex := firstFreePage removeFirstIndex.
-			self addDirtyPage: firstFreePage.
-			freePageIndex  ] 
-		ifFalse: [ 
-			"if firstFreePage has a next pointer we set that as 
-			new first free page. Next will return 0 if there is no
-			next page"
-			self headerPage firstFreePageIndex: firstFreePage next.
-			self addDirtyPage: self headerPage.
-			firstFreePage offset ]
-				
-]
-
 { #category : #'opening/closing' }
 SoilSkipList >> open [
 	self isOpen ifTrue: [ self error: 'Index already open' ].
 	self store open
-]
-
-{ #category : #'instance creation' }
-SoilSkipList >> pageClass [
-	^ SoilSkipListDataPage
 ]
 
 { #category : #accessing }

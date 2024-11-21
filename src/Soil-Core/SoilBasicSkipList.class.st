@@ -22,6 +22,16 @@ SoilBasicSkipList >> addDirtyPage: aPage [
 	dirtyPages at: aPage offset put: aPage
 ]
 
+{ #category : #'instance creation' }
+SoilBasicSkipList >> allocatePage [
+	| page |
+	page := self newPage 
+		offset: (self nextFreePageIndex
+			ifNil: [ self nextPageOffset ]).
+	self addDirtyPage: page.
+	^ page
+]
+
 { #category : #'as yet unclassified' }
 SoilBasicSkipList >> cleanUpToVersion: aNumberOrNil [ 
 		SoilIndexCleaner new 
@@ -57,6 +67,49 @@ SoilBasicSkipList >> maxLevel: anInteger [
 { #category : #'instance creation' }
 SoilBasicSkipList >> newIterator [ 
 	^ SoilSkipListIterator on: self 
+]
+
+{ #category : #'instance creation' }
+SoilBasicSkipList >> newPage [
+	^ self pageClass new 
+		initializeLevel: self maxLevel;
+		keySize: self keySize;
+		valueSize: self valueSize;
+		pageSize: self pageSize;
+		yourself
+]
+
+{ #category : #private }
+SoilBasicSkipList >> nextFreePageIndex [ 
+	| firstFreePage freePageIndex |
+	firstFreePage := self firstFreePage ifNil: [ 
+		^ nil ].
+	^ firstFreePage hasFreePages 
+		ifTrue: [ 
+			freePageIndex := firstFreePage removeFirstIndex.
+			self addDirtyPage: firstFreePage.
+			freePageIndex  ] 
+		ifFalse: [ 
+			"if firstFreePage has a next pointer we set that as 
+			new first free page. Next will return 0 if there is no
+			next page"
+			self headerPage firstFreePageIndex: firstFreePage next.
+			self addDirtyPage: self headerPage.
+			firstFreePage offset ]
+				
+]
+
+{ #category : #'instance creation' }
+SoilBasicSkipList >> nextPageOffset [
+	| offset |
+	offset := store nextPageOffset.
+	self addDirtyPage: store headerPage.
+	^ offset 
+]
+
+{ #category : #'instance creation' }
+SoilBasicSkipList >> pageClass [
+	^ SoilSkipListDataPage
 ]
 
 { #category : #removing }

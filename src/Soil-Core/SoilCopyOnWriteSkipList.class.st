@@ -12,19 +12,9 @@ SoilCopyOnWriteSkipList >> addDirtyPage: aPage [
 	
 ]
 
-{ #category : #'instance creation' }
-SoilCopyOnWriteSkipList >> allocatePage [
-	^ wrapped allocatePage 
-]
-
 { #category : #testing }
 SoilCopyOnWriteSkipList >> isRegistered [
 	^ wrapped isRegistered
-]
-
-{ #category : #'instance creation' }
-SoilCopyOnWriteSkipList >> newPage [ 
-	^ wrapped allocatePage
 ]
 
 { #category : #accessing }

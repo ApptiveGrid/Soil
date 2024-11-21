@@ -57,7 +57,8 @@ SoilIndexItemsPage >> canBeRemoved [
 
 { #category : #running }
 SoilIndexItemsPage >> cleanRemoved [
-	items removeAllSuchThat: [ :each | each value isRemoved ]
+	items removeAllSuchThat: [ :each | each value isRemoved ].
+	needWrite := true
 ]
 
 { #category : #accessing }
@@ -243,7 +244,6 @@ SoilIndexItemsPage >> lastTransaction: anInteger [
 
 { #category : #testing }
 SoilIndexItemsPage >> needsCleanup [ 
-	items size isZero ifTrue: [ ^ true ].
 	^ items size > self presentItemCount 
 ]
 
