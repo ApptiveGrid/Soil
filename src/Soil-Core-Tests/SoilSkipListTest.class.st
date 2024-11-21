@@ -286,6 +286,23 @@ SoilSkipListTest >> testFreePageAdd [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testFreePageAddAndDelete [
+	| iterator |
+	iterator := index newIterator.
+	1 to: 280 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	self assert: index headerPage lastPageOffset equals: 2.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	1 to: 2000 do: [ : n |
+		iterator at: 280+n put: ((200+n) asByteArrayOfSize: 8).
+		iterator removeKey: n.
+		index cleanUpToVersion: nil. ].
+	
+	self assert: index headerPage lastPageOffset equals: 4.
+	self assert: (index store pageAt: 4) pageIndexes isEmpty
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testFreePageAddNested [
 	| iterator nestedFreeIndexes |
 	index
