@@ -107,10 +107,12 @@ SoilPagedIndexStore >> pageAt: anInteger [
 
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger put: aPage [ 
+	
 	^ pagesMutex critical: [  
 		pages 
 			at: anInteger 
-			put: aPage ]
+			ifPresent: [ self error: 'Page already there, should not happen!' ]
+			ifAbsentPut: aPage ] 
 ]
 
 { #category : #accessing }
