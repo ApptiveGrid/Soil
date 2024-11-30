@@ -28,6 +28,7 @@ SoilBasicSkipList >> allocatePage [
 	page := self newPage 
 		offset: (self nextFreePageIndex
 			ifNil: [ self nextPageOffset ]).
+	self store pageAt: page offset put: page.
 	self addDirtyPage: page.
 	^ page
 ]
@@ -184,6 +185,5 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 				(page rightAt: level) ifNotNil: [ :r | 
 					newPage rightAt: level put: r ].
 				page rightAt: level put: newPage offset ]].
-	self store pageAt: newPage offset put: newPage.
 	^ newPage 
 ]
