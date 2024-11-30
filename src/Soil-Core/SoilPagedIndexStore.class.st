@@ -41,6 +41,11 @@ SoilPagedIndexStore >> headerPage [
 ]
 
 { #category : #accessing }
+SoilPagedIndexStore >> includesPageAt: anInteger [ 
+	^ pages includesKey: anInteger 
+]
+
+{ #category : #accessing }
 SoilPagedIndexStore >> index [
 	^ index
 ]
@@ -108,6 +113,8 @@ SoilPagedIndexStore >> pageAt: anInteger [
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger put: aPage [ 
 	^ pagesMutex critical: [  
+		(pages includesKey: anInteger) 
+			ifTrue: [ ^ Error signal: 'store already has page with key ', anInteger asString ].
 		pages 
 			at: anInteger 
 			put: aPage ]
@@ -121,4 +128,9 @@ SoilPagedIndexStore >> pageFaultAt: anInteger [
 { #category : #accessing }
 SoilPagedIndexStore >> pages [
 	^ pages
+]
+
+{ #category : #accessing }
+SoilPagedIndexStore >> removePageAt: anInteger [ 
+	pages removeKey: anInteger 
 ]
