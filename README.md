@@ -42,7 +42,11 @@ The changelog can be found [here](https://github.com/ApptiveGrid/Soil/blob/v2/do
 We use github for organizing our development. You can see what we are doing right now on the [project board](https://github.com/orgs/ApptiveGrid/projects/2). An up-to-date list of milestones you can find in [milestones](https://github.com/ApptiveGrid/Soil/milestones?direction=desc&sort=completeness&state=open). 
 
 **NEWS** 
-- Slides from the ESUG2023 talk: [Download PDF](http://old.esug.org/data/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf)
+- The Soil Database has now an entry in [HAL](https://hal.science/hal-04726251) and is archived by [https://www.softwareheritage.org](https://www.softwareheritage.org)
+- [ANN] Release V2 of Soil, the object oriented database for Pharo implemented in Pharo 2024-08-28
+- ESUG2023 talk
+	- [Slides PDF](http://old.esug.org/data/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/soil-a-fresh-look-on-object-oriented-databases/260898335)
+ 	- Video on [Youtube](https://www.youtube.com/watch?v=ui4TXcv7tus) 
 - Soil got the second prize in the [2023 ESUG Innovation Technology Awards](https://esug.github.io/2023-Conference/awardsSubmissions.html) !
 
 ![esug medal](https://esug.github.io/2022-Conference/esugAwards2ndSilverRoundMedal.png)
