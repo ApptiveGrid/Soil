@@ -442,6 +442,35 @@ SoilIndexedDictionaryTest >> testFreePageReuse [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testFreePageReuseExact [
+	| tx tx2 tx3 blockTx tx4 tx5 tx15 |
+	tx := soil newTransaction.
+	tx root: dict.
+	1 to: 674 do: [ :n | dict at: n put: n asString ].
+	tx commit.
+	
+	
+	tx15 := soil newTransaction.
+	1 to: 223 do: [ :n | tx15 root removeKey: n ].
+	tx15 commit.
+	"open a second transaction ..."
+	blockTx := soil newTransaction.
+	tx2 := soil newTransaction.
+	224 to: 448 do: [ :n | tx2 root removeKey: n ].
+	tx2 commit.
+	tx3 := soil newTransaction.
+	449 to: 449 do: [ :n | tx3 root removeKey: n ].
+	tx3 commit.
+	blockTx abort.
+	tx4 := soil newTransaction.
+	tx4 root at: 675 put: 675 asString.
+	tx4 root removeKey: 450.
+	tx4 commit.
+	tx5 := soil newTransaction.
+	self deny: (tx5 root index wrapped store headerPage right includes: 2)
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testFreePages [ 
 	| tx tx2 index indexManager |
 	indexManager := soil objectRepository firstSegment indexManager.

@@ -36,7 +36,7 @@ SoilIndexCleaner >> clean [
 { #category : #cleaning }
 SoilIndexCleaner >> cleanPage: page [
 	
-	^ page canBeRemoved 
+	page canBeRemoved 
 		ifTrue: [ 
 			"swap the removed page with its free page counterpart 
 			in the dirty list of the index"
@@ -46,7 +46,7 @@ SoilIndexCleaner >> cleanPage: page [
 		ifFalse: [ 
 			"just clean the page"
 			page cleanRemoved.
-			page ]
+			index addDirtyPage: page ]
 ]
 
 { #category : #accessing }
