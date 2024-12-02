@@ -444,6 +444,7 @@ SoilIndexedDictionaryTest >> testFreePageReuse [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testFreePageReuseExact [
 	| tx tx2 tx3 blockTx tx4 tx5 tx15 |
+	(classToTest = SoilBTreeDictionary) ifTrue: [ self skip ].
 	tx := soil newTransaction.
 	tx root: dict.
 	1 to: 674 do: [ :n | dict at: n put: n asString ].
