@@ -44,9 +44,13 @@ We use github for organizing our development. You can see what we are doing righ
 **NEWS** 
 - The Soil Database has now an entry in [HAL](https://hal.science/hal-04726251) and is archived by [https://www.softwareheritage.org](https://www.softwareheritage.org)
 - [ANN] Release V2 of Soil, the object oriented database for Pharo implemented in Pharo 2024-08-28
-- ESUG2023 talk
-	- [Slides PDF](http://old.esug.org/data/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/soil-a-fresh-look-on-object-oriented-databases/260898335)
- 	- Video on [Youtube](https://www.youtube.com/watch?v=ui4TXcv7tus) 
+- [ANN] Soil release v1 [Mail](https://lists.pharo.org/empathy/thread/6VYPN7R6TQPWDKQTRXUV7S6UU5AEMPV7) 2024-04-24
+- ESUG2023 talk "Soil:a fresh look on object oriented databases"
+	- [Slides PDF](http://archive.esug.org/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/soil-a-fresh-look-on-object-oriented-databases/260898335)
+ 	- Video on [Youtube](https://www.youtube.com/watch?v=ui4TXcv7tus)
+- ESUG 2023 talk "Soil and Pharo"
+  	- [Slides PDF](http://archive.esug.org/ESUG2023/day3/02_2%20-%20Soil%20and%20Pharo.pdf)
+	- [Slides SlideShare](https://www.slideshare.net/esug/soil-and-pharo-260898369)
 - Soil got the second prize in the [2023 ESUG Innovation Technology Awards](https://esug.github.io/2023-Conference/awardsSubmissions.html) !
 
 ![esug medal](https://esug.github.io/2022-Conference/esugAwards2ndSilverRoundMedal.png)
