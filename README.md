@@ -41,6 +41,16 @@ The changelog can be found [here](https://github.com/ApptiveGrid/Soil/blob/v2/do
 
 We use github for organizing our development. You can see what we are doing right now on the [project board](https://github.com/orgs/ApptiveGrid/projects/2). An up-to-date list of milestones you can find in [milestones](https://github.com/ApptiveGrid/Soil/milestones?direction=desc&sort=completeness&state=open). 
 
+### Soil in Action
+
+If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is using it to persist all data. (You can create a free accout). 
+
+More info:
+- Pharo Success Story: [ApptiveGrid - Digitize and Automatize Business Processes](https://www.pharo.org/success/ApptiveGrid.html)
+- Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
+- create your account [here](https://www.apptivegrid.de)
+
+
 **NEWS** 
 - The Soil Database has now an entry in [HAL](https://hal.science/hal-04726251) and is archived by [https://www.softwareheritage.org](https://www.softwareheritage.org) 2024-11-22
 - [ANN] Release V2 of Soil, the object oriented database for Pharo implemented in Pharo [Mail](https://lists.pharo.org/empathy/thread/OE434T74GYE74GUNP3GLKYAZGGBXUSWT) 2024-08-28
@@ -54,6 +64,6 @@ We use github for organizing our development. You can see what we are doing righ
 - Soil got the second prize in the [2023 ESUG Innovation Technology Awards](https://esug.github.io/2023-Conference/awardsSubmissions.html) !
 - 06/2023: [ApptiveGrid](https://www.apptivegrid.de) starts using Soil
 - Development of Soil announced at ESUG 2022
-	- Talk "here's no magic... until you talk about databases"  [Slides PDF](http://archive.esug.org/ESUG2022/02Tuesday/08-hartl-deployment.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/theres-no-magic-until-you-talk-about-databases/253132135)
+	- Talk "there's no magic... until you talk about databases"  [Slides PDF](http://archive.esug.org/ESUG2022/02Tuesday/08-hartl-deployment.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/theres-no-magic-until-you-talk-about-databases/253132135), [Video youtube](https://www.youtube.com/watch?v=MLtaHeFgbNo)
 
 ![esug medal](https://esug.github.io/2022-Conference/esugAwards2ndSilverRoundMedal.png)
