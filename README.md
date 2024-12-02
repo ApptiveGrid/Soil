@@ -45,7 +45,6 @@ We use github for organizing our development. You can see what we are doing righ
 - The Soil Database has now an entry in [HAL](https://hal.science/hal-04726251) and is archived by [https://www.softwareheritage.org](https://www.softwareheritage.org) 2024-11-22
 - [ANN] Release V2 of Soil, the object oriented database for Pharo implemented in Pharo [Mail](https://lists.pharo.org/empathy/thread/OE434T74GYE74GUNP3GLKYAZGGBXUSWT) 2024-08-28
 - [ANN] Soil release v1 [Mail](https://lists.pharo.org/empathy/thread/6VYPN7R6TQPWDKQTRXUV7S6UU5AEMPV7) 2024-04-24
-- Jun2 2023: [ApptiveGrid](https://www.apptivegrid.de) starts using Soil
 - ESUG2023 talk "Soil:a fresh look on object oriented databases"
 	- [Slides PDF](http://archive.esug.org/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/soil-a-fresh-look-on-object-oriented-databases/260898335)
  	- Video on [Youtube](https://www.youtube.com/watch?v=ui4TXcv7tus)
@@ -53,6 +52,7 @@ We use github for organizing our development. You can see what we are doing righ
   	- [Slides PDF](http://archive.esug.org/ESUG2023/day3/02_2%20-%20Soil%20and%20Pharo.pdf)
 	- [Slides SlideShare](https://www.slideshare.net/esug/soil-and-pharo-260898369)
 - Soil got the second prize in the [2023 ESUG Innovation Technology Awards](https://esug.github.io/2023-Conference/awardsSubmissions.html) !
+- 06/2023: [ApptiveGrid](https://www.apptivegrid.de) starts using Soil
 - Development of Soil announced at ESUG 2022
 	- Talk "here's no magic... until you talk about databases"  [Slides PDF](http://archive.esug.org/ESUG2022/02Tuesday/08-hartl-deployment.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/theres-no-magic-until-you-talk-about-databases/253132135)
 
