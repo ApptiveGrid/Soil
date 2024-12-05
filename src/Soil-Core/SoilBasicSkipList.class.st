@@ -19,7 +19,11 @@ SoilBasicSkipList class >> isAbstract [
 
 { #category : #adding }
 SoilBasicSkipList >> addDirtyPage: aPage [ 
-	dirtyPages at: aPage offset put: aPage
+	dirtyPages 
+		at: aPage offset 
+		ifAbsentPut: [
+			('add to dirty pages #', aPage offset asString) apptiveEmit. 
+			aPage ]
 ]
 
 { #category : #'instance creation' }
@@ -28,6 +32,7 @@ SoilBasicSkipList >> allocatePage [
 	page := self newPage 
 		offset: (self nextFreePageIndex
 			ifNil: [ self nextPageOffset ]).
+	('allocated page #', page offset asString) apptiveEmit.
 	self store pageAt: page offset put: page.
 	self addDirtyPage: page.
 	^ page
@@ -121,6 +126,7 @@ SoilBasicSkipList >> pageClass [
 SoilBasicSkipList >> removePage: aPage [
 	| iterator seen previousPage |
 	(aPage offset > 1) ifFalse: [ ^ aPage ].
+	('removing page #', aPage offset asString) apptiveEmit. 
 	"we use an iterator to scan pages on all levels that are just right
 	before the page to remove"
 	iterator := self newIterator. 
