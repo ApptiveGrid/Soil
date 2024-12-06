@@ -25,6 +25,7 @@ SoilBackupVisitor >> backup: aSoil [
 	
 	[ toBeProcessed isEmpty ] whileFalse: [  
 		objectId := toBeProcessed  removeFirst.
+		(objectId segment > 1 ) ifTrue: [ self halt ].
 		self visit: (source objectRepository at: objectId version: version) ].
 	target close
 ]
@@ -119,6 +120,7 @@ SoilBackupVisitor >> makeCopy: aSoilPersistentClusterVersion [
 
 { #category : #accessing }
 SoilBackupVisitor >> process: aSoilObjectId [ 
+	"(aSoilObjectId index = 384525) ifTrue: [ self halt ]."
 	"don't continue if the objectId is the behavior description meta object"
 	((aSoilObjectId segment = 0) and: [ aSoilObjectId index = 2 ]) ifTrue: [ ^ self ].
 	(seen includes: aSoilObjectId) ifTrue: [ ^ self ].
