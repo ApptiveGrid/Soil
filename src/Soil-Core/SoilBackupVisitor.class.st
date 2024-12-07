@@ -1,32 +1,23 @@
 Class {
 	#name : #SoilBackupVisitor,
-	#superclass : #SoilVisitor,
+	#superclass : #SoilInstanceVisitor,
 	#instVars : [
-		'source',
-		'target',
-		'seen',
-		'toBeProcessed',
-		'version'
+		'target'
 	],
 	#category : #'Soil-Core-Visitor'
 }
 
 { #category : #api }
 SoilBackupVisitor >> backup: aSoil [ 
-	| objectId |
-	source := aSoil.
+	soil := aSoil.
 	"if there is no version set we take the actual database version. This 
 	is to create a consistent backup regardless if transactions are committed 
 	while we are doing the backup"
-	version ifNil: [
-		version := aSoil control databaseVersion ]. 
+	databaseVersion ifNil: [
+		databaseVersion := aSoil control databaseVersion ]. 
 	
-	self visit: source.
-	
-	[ toBeProcessed isEmpty ] whileFalse: [  
-		objectId := toBeProcessed  removeFirst.
-		(objectId segment > 1 ) ifTrue: [ self halt ].
-		self visit: (source objectRepository at: objectId version: version) ].
+	self visit: soil.
+	self traverse. 
 	target close
 ]
 
@@ -36,7 +27,7 @@ SoilBackupVisitor >> copyAllClusterVersions: aSoilPersistentClusterVersion [
 	"if there is no previous version is a single copy"
 	aSoilPersistentClusterVersion hasPreviousVersion 
 		ifFalse: [ ^ self copySourceCluster: aSoilPersistentClusterVersion  ].
-	versions := (source objectRepository segmentAt: aSoilPersistentClusterVersion objectId segment)
+	versions := (soil objectRepository segmentAt: aSoilPersistentClusterVersion objectId segment)
 		allVersionsAt: aSoilPersistentClusterVersion objectId index.
 	position := 0.
 	"for multiple versions we need to iterate from oldest to newest to set the
@@ -65,7 +56,7 @@ SoilBackupVisitor >> copyCluster: aSoilPersistentClusterVersion [
 SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	| sourceSegment sourceIndex targetSegment targetIndex iterator assoc |
 	
-	sourceSegment := source objectRepository segmentAt: segmentId.
+	sourceSegment := soil objectRepository segmentAt: segmentId.
 	sourceIndex := sourceSegment indexManager 
 		loadIndexWithId: indexId 
 		ifNone: [ ^ self indexNotFound: indexId ].
@@ -101,13 +92,6 @@ SoilBackupVisitor >> indexNotFound: indexId [
 	 Error signal: 'cannot find index with id ', indexId printString
 ]
 
-{ #category : #initialization }
-SoilBackupVisitor >> initialize [ 
-	super initialize.
-	seen := Set new.
-	toBeProcessed := OrderedCollection new
-]
-
 { #category : #visiting }
 SoilBackupVisitor >> makeCopy: aSoilPersistentClusterVersion [ 
 	^ aSoilPersistentClusterVersion copy
@@ -119,16 +103,6 @@ SoilBackupVisitor >> makeCopy: aSoilPersistentClusterVersion [
 ]
 
 { #category : #accessing }
-SoilBackupVisitor >> process: aSoilObjectId [ 
-	"(aSoilObjectId index = 384525) ifTrue: [ self halt ]."
-	"don't continue if the objectId is the behavior description meta object"
-	((aSoilObjectId segment = 0) and: [ aSoilObjectId index = 2 ]) ifTrue: [ ^ self ].
-	(seen includes: aSoilObjectId) ifTrue: [ ^ self ].
-	seen add: aSoilObjectId.
-	toBeProcessed add: aSoilObjectId  
-]
-
-{ #category : #accessing }
 SoilBackupVisitor >> target: aSoil [ 
 	target := aSoil
 ]
@@ -136,7 +110,7 @@ SoilBackupVisitor >> target: aSoil [
 { #category : #accessing }
 SoilBackupVisitor >> version: anObject [
 
-	version := anObject
+	databaseVersion := anObject
 ]
 
 { #category : #visiting }

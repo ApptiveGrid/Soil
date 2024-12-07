@@ -1,12 +1,18 @@
 Class {
 	#name : #SoilInstanceVisitor,
-	#superclass : #SoilVisitor,
+	#superclass : #SoilBreadthFirstVisitor,
 	#instVars : [
 		'soil',
-		'seen'
+		'databaseVersion'
 	],
 	#category : #'Soil-Core-Visitor'
 }
+
+{ #category : #accessing }
+SoilInstanceVisitor >> databaseVersion [
+	^ databaseVersion ifNil: [ 
+		databaseVersion := soil control databaseVersion  ]
+]
 
 { #category : #initialization }
 SoilInstanceVisitor >> initialize [ 
@@ -29,6 +35,14 @@ SoilInstanceVisitor >> soil [
 SoilInstanceVisitor >> soil: anObject [
 
 	soil := anObject
+]
+
+{ #category : #api }
+SoilInstanceVisitor >> traverse [
+	| objectId |
+	[ toBeProcessed isEmpty ] whileFalse: [  
+		objectId := toBeProcessed  removeFirst.
+		self visit: (soil objectRepository at: objectId version: self databaseVersion) ]
 ]
 
 { #category : #visiting }

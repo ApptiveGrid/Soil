@@ -9,7 +9,8 @@ Class {
 
 { #category : #checking }
 SoilConsistencyVisitor >> check [
-	self visit: soil 
+	self visit: soil.
+	self traverse 
 ]
 
 { #category : #'as yet unclassified' }
@@ -61,15 +62,16 @@ SoilConsistencyVisitor >> lastIndexOfSegment: anInteger [
 
 { #category : #visiting }
 SoilConsistencyVisitor >> processIndexId: indexId segment: aSegment [  
-	| index iterator assoc |
+	| index iterator assoc objectId |
 	index := aSegment indexManager 
 		at: indexId
 		ifAbsent: [ Error signal: 'index not found' ].
 	self checkPagesOfIndex: index.
 	iterator := index newIterator.
 	[ (assoc := iterator nextAssociation) isNil ] whileFalse: [ 
-		self checkObjectId: assoc value asSoilObjectId.
-		self process: assoc value. ]
+		objectId := assoc value asSoilObjectId.
+		self checkObjectId: objectId.
+		self process: objectId. ]
 ]
 
 { #category : #visiting }

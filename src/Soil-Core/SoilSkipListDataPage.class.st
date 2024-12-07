@@ -39,16 +39,6 @@ SoilSkipListDataPage >> readFrom: aStream [
 		readItemsFrom: aStream
 ]
 
-{ #category : #accessing }
-SoilSkipListDataPage >> validate [
-	(version > 1) ifTrue: [ 
-		Error signal: 'bogus page version' ].
-	(pageSize = 4096) ifFalse: [ 
-		Error signal: 'bogus page size' ].
-	(offset >= 1) ifFalse: [ 
-		Error signal: 'bogus offset' ].	
-]
-
 { #category : #writing }
 SoilSkipListDataPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
