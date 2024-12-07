@@ -133,6 +133,7 @@ SoilBasicSkipList >> removePage: aPage [
 		previousPage := iterator levelAt: level.
 		(seen includes: previousPage) ifFalse: [  
 			seen add: previousPage.
+			self addDirtyPage: previousPage.
 			1 to: previousPage level do: [ :lvl |
 				"each previous page's next pointer might point to the page 
 				to be removed."

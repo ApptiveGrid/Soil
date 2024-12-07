@@ -421,6 +421,46 @@ SoilIndexedDictionaryTest >> testFlushIndexPages [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testFreePageNotSavedRegression [
+	| tx blockTx iterator |
+	(classToTest = SoilBTreeDictionary) ifTrue: [ self skip ].
+	tx := soil newTransaction.
+	tx root: dict.
+	"fill a 5 pages"
+	1 to: 1000 do: [ :n |
+		tx root at: n put: n asString ].
+	tx commit.
+	"open transaction that blocks page cleanup"
+   blockTx := soil newTransaction.
+	tx := soil newTransaction.
+	"remove all items of page #2 and almost all from page #3"
+	224 to: 672 do: [ :n |
+		tx root removeKey: n ].
+	tx commit.
+	"remove blocking transaction"
+	blockTx abort.
+	"now close database so that the pages are written uncleaned"
+	soil close; open.
+	tx := soil newTransaction.
+	"now remove the remaining items of page#3 which make page #3
+	dirty"
+	673 to: 676 do: [ :n |
+		tx root removeKey: n ].
+	"now page#3 will be written, page #2 is only altered in memory 
+	without going to disk"
+	tx commit.
+	"close the database and that makes the page #2 state get lost"
+	soil close; open.
+	tx := soil newTransaction.
+	"on next access before the fix we bumped into a free page appearing
+	in the items page chain"
+	iterator := tx root newIterator.
+	self shouldnt: [ 1 to: 700 do: [ :n| iterator basicNextAssociation ] ]
+		raise: Error.
+
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testFreePageReuse [
 	| tx tx2 index indexManager tx3 |
 	tx := soil newTransaction.
