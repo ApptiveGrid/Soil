@@ -102,6 +102,11 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	| page |
 	self ensureStreamIsOpen.
 	page := self readPageAt: anInteger.
+	"when there are transactions blocking clean up, those pages
+	get written with the removed items. When the page is read from
+	disk we can determine if it should undergo maintenance. This can
+	also be done while reading. Cleanup will happen on commit"
+	page needsCleanup ifTrue: [ index addDirtyPage: page ].
 	pagesMutex critical: [  
 		pages at: anInteger put: page ].
 	^ page
