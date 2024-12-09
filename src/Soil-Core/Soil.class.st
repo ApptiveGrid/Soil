@@ -377,14 +377,13 @@ Soil >> objectRepository [
 { #category : #'opening/closing' }
 Soil >> open [
 	self basicOpen.
-	journal recover.
-	self metadata updateLastOpened
+	journal recover
 ]
 
 { #category : #'opening/closing' }
-Soil >> openUnlogged [
-	self basicOpen.
-	journal recover
+Soil >> openLogged [
+	self open.
+	self metadata updateLastOpened
 ]
 
 { #category : #accessing }
