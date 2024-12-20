@@ -85,7 +85,7 @@ SoilGarbageCollectVisitor >> visitSkipList: aSoilSkipList [
 		class: aSoilSkipList class. 
 	newSkipList initializeParametersFrom: aSoilSkipList. 
 	
-	aSoilSkipList newIterator basicAssociationsDo: [ :item |
+	aSoilSkipList newIterator associationsDo: [ :item |
 		item value isRemoved ifFalse: [ 
 			newSkipList at: item key put: item value.
 			self processObjectId: item value asSoilObjectId  ]  ].
