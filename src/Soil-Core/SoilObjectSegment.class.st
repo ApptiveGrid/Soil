@@ -6,7 +6,8 @@ Class {
 		'objectRepository',
 		'indexFile',
 		'objectFile',
-		'indexManager'
+		'indexManager',
+		'path'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -192,6 +193,15 @@ SoilObjectSegment >> lockObjectId: aSOObjectId for: lockContext [
 	^ indexFile lockObjectId: aSOObjectId for: lockContext 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilObjectSegment >> makeGCClone [
+	^ self class new 
+		id: id;
+		objectRepository: objectRepository;
+		path: self path, #gc;
+		initializeFilesystem 
+]
+
 { #category : #ids }
 SoilObjectSegment >> newObjectId [
 	^ SoilObjectId segment: id index: 0 
@@ -222,7 +232,14 @@ SoilObjectSegment >> open [
 
 { #category : #accessing }
 SoilObjectSegment >> path [
-	^ objectRepository soil path / #segments / self id asString
+	^ path ifNil: [
+		path := objectRepository soil path / #segments / self id asString ]
+]
+
+{ #category : #accessing }
+SoilObjectSegment >> path: anObject [
+
+	path := anObject
 ]
 
 { #category : #printing }

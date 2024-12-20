@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'stream'
 	],
-	#category : 'Soil-File-Tests'
+	#category : #'Soil-File-Tests'
 }
 
 { #category : #running }
