@@ -28,7 +28,7 @@ SoilBackupVisitor >> copyAllClusterVersions: aSoilPersistentClusterVersion [
 	"if there is no previous version is a single copy"
 	aSoilPersistentClusterVersion hasPreviousVersion 
 		ifFalse: [ ^ self copySourceCluster: aSoilPersistentClusterVersion  ].
-	versions := (source objectRepository segmentAt: aSoilPersistentClusterVersion objectId segment)
+	versions := (soil objectRepository segmentAt: aSoilPersistentClusterVersion objectId segment)
 		allVersionsAt: aSoilPersistentClusterVersion objectId index.
 	position := 0.
 	"for multiple versions we need to iterate from oldest to newest to set the
@@ -159,20 +159,13 @@ SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [
 
 { #category : #visiting }
 SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
-	| backupCluster |
-	backupCluster := aSoilPersistentClusterVersion copy
-		behaviorDescriptions: aSoilPersistentClusterVersion behaviorDescriptions;
-		references: aSoilPersistentClusterVersion references;
-		bytes: aSoilPersistentClusterVersion bytes;
-		version: aSoilPersistentClusterVersion version;
-		resetPreviousVersion.
-	target objectRepository 
-		at: backupCluster objectId
-		putBytes: backupCluster serialize.
-	backupCluster references do: [ :reference |
-		self processObjectId: reference ].
-	aSoilPersistentClusterVersion indexIds do:[ :indexId |
-		self copyIndexAt: indexId segment: aSoilPersistentClusterVersion segment ].
+	(aSoilPersistentClusterVersion objectId segment = 0)
+		ifTrue: [ 
+			"as there could be very old objects we need to copy all  versions of 
+			the behavior descriptions"
+			self copyAllClusterVersions: aSoilPersistentClusterVersion  ]
+		ifFalse: [  
+			self copySourceCluster: (self makeCopy: aSoilPersistentClusterVersion) ].
 
 	^ aSoilPersistentClusterVersion 
 ]
