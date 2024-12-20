@@ -56,6 +56,14 @@ SoilPersistentDictionary >> at: key ifAbsentPut: aBlock [
 ]
 
 { #category : #forwarded }
+SoilPersistentDictionary >> at: key ifPresent: aPresentBlock ifAbsent: anAbsentBlock [
+
+	^ aPresentBlock cull: (self 
+		at: key 
+		ifAbsent: [ ^ anAbsentBlock value ])
+]
+
+{ #category : #forwarded }
 SoilPersistentDictionary >> at: key put: value [
 	| return |
 	transaction ifNotNil: [:tr | tr makeRoot: value].

@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Model'
 }
 
 { #category : #accessing }
@@ -78,20 +78,18 @@ SoilTransactionTest >> testConflictingReadVersion [
 { #category : #tests }
 SoilTransactionTest >> testEmptyAbort [
 	| tx |
-	tx := SoilTransaction new.
+	tx := soil newTransaction.
 	tx root: Object new.
 	tx abort.
 	self assert: tx isAborted
 ]
 
 { #category : #tests }
-SoilTransactionTest >> testRootObjectModifies [ 
+SoilTransactionTest >> testRootObject [ 
 	| tx obj |
 	obj := Object new.
 	tx := soil newTransaction.
 	tx root: obj.
-	self assert: tx hasModifications.
-	self assert: tx hasModifications.
 	self assert: (tx isRoot: obj).
 	self assert: (tx isPersistent: obj)
 	 

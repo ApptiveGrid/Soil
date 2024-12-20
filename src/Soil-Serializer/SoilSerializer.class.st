@@ -2,23 +2,25 @@ Class {
 	#name : #SoilSerializer,
 	#superclass : #SoilBasicSerializer,
 	#instVars : [
-		'clusterRoot'
+		'clusterRoot',
+		'transaction',
+		'objectIdTable',
+		'externalObjectRegistry',
+		'soil'
 	],
 	#category : #'Soil-Serializer-Serializer/Materializer'
 }
 
-{ #category : #'instance creation' }
-SoilSerializer class >> on: aStream [ 
-	^ self new 
-		stream: aStream 
+{ #category : #accessing }
+SoilSerializer >> externalObjectRegistry: anObject [
+
+	externalObjectRegistry := anObject
 ]
 
-{ #category : #public }
-SoilSerializer class >> serializeToBytes: anObject [ 
-
-	^ (self on: ByteArray new writeStream) 
-		serialize: anObject
-
+{ #category : #initialization }
+SoilSerializer >> initialize [ 
+	super initialize.
+	objectIdTable := SoilObjectTable new
 ]
 
 { #category : #writing }
@@ -213,7 +215,9 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 
 { #category : #private }
 SoilSerializer >> serialize: anObject [
-	clusterRoot := anObject.
+	| objectToSerialize |
+	objectToSerialize := anObject soilSerializationReplacement.
+	clusterRoot := objectToSerialize.
 	clusterRoot soilSerialize: self.
 	stream flush.
 	^ stream contents
@@ -237,6 +241,23 @@ SoilSerializer >> serializeToBytes: anObject [
 ]
 
 { #category : #accessing }
+SoilSerializer >> soil [
+
+	^ soil
+]
+
+{ #category : #accessing }
+SoilSerializer >> soil: anObject [
+
+	soil := anObject
+]
+
+{ #category : #accessing }
 SoilSerializer >> transaction [
 	^ transaction 
+]
+
+{ #category : #accessing }
+SoilSerializer >> transaction: aSOTransaction [ 
+	transaction := aSOTransaction 
 ]

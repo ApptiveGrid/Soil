@@ -20,9 +20,30 @@ SoilObjectProxy >> asUnresolvedProxy [
 		objectId: objectId 
 ]
 
+{ #category : #'class membership' }
+SoilObjectProxy >> class [
+	"we override it here as else the superclass version would be uses, returning SoilObjectProxy"
+    ^ self soilRealObject class
+]
+
 { #category : #'reflective operations' }
 SoilObjectProxy >> doesNotUnderstand: aMessage [ 
 	^ aMessage sendTo: self soilRealObject
+]
+
+{ #category : #fuel }
+SoilObjectProxy >> fuelAccept: aGeneralMapper [ 	
+	^ aGeneralMapper 
+		visitSubstitution: self 
+		by: (object ifNil: [ self asUnresolvedProxy ])
+]
+
+{ #category : #fuel }
+SoilObjectProxy >> fuelReplacement [
+	"proxies should not be serialized. If the object has already been
+	resolved then we can replace the proxy with the object. If the object 
+	is not loaded we replace it with an unresolved proxy keepig the objectId"
+	^ object ifNil: [ self asUnresolvedProxy ]
 ]
 
 { #category : #inspector }
@@ -44,6 +65,11 @@ SoilObjectProxy >> isIdenticalTo: anObject [
 	anObject isSoilProxy ifTrue: [^ objectId = anObject objectId].
 	(anObject isNil or: [ self objectIsNotLoaded ]) ifTrue: [^false].
 	^ object == anObject
+]
+
+{ #category : #testing }
+SoilObjectProxy >> isNil [ 
+	^ self soilRealObject isNil
 ]
 
 { #category : #testing }
@@ -91,6 +117,11 @@ SoilObjectProxy >> printString [
 { #category : #soil }
 SoilObjectProxy >> soilLoadedIn: aTransaction [ 
 	transaction := aTransaction  
+]
+
+{ #category : #serializing }
+SoilObjectProxy >> soilMaterializationReplacement [
+	^ self
 ]
 
 { #category : #'reflective operations' }

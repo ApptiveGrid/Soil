@@ -7,10 +7,10 @@ Class {
 	#name : #SoilIndexPage,
 	#superclass : #Object,
 	#instVars : [
-		'index',
 		'version',
-		'dirty',
-		'pageSize'
+		'pageSize',
+		'offset',
+		'needWrite'
 	],
 	#classInstVars : [
 		'random'
@@ -51,30 +51,30 @@ SoilIndexPage class >> readPageCodeFrom: aStream [
 	
 ]
 
+{ #category : #testing }
+SoilIndexPage >> hasRoom [
+	^ self subclassResponsibility
+]
+
 { #category : #utilities }
 SoilIndexPage >> headerSize [ 
 	^ 2 "pageCode, version" 
 ]
 
-{ #category : #accessing }
-SoilIndexPage >> index [
-	^ index
-]
-
-{ #category : #accessing }
-SoilIndexPage >> index: anInteger [ 
-	index := anInteger
-]
-
 { #category : #initialization }
 SoilIndexPage >> initialize [ 
 	super initialize.
-	version := 1
+	version := self latestVersion
 ]
 
 { #category : #testing }
 SoilIndexPage >> isDirty [
-	^ dirty 
+	^ self subclassResponsibility
+]
+
+{ #category : #testing }
+SoilIndexPage >> isHeaderPage [
+	^ false
 ]
 
 { #category : #testing }
@@ -90,6 +90,41 @@ SoilIndexPage >> itemsSizeSize [
 ]
 
 { #category : #accessing }
+SoilIndexPage >> label [ 
+	self subclassResponsibility 
+]
+
+{ #category : #initialization }
+SoilIndexPage >> latestVersion [
+	self subclassResponsibility 
+]
+
+{ #category : #accessing }
+SoilIndexPage >> markForWrite [
+	needWrite := true 
+]
+
+{ #category : #testing }
+SoilIndexPage >> needsCleanup [
+	^ self subclassResponsibility
+]
+
+{ #category : #testing }
+SoilIndexPage >> needsWrite [
+	^ needWrite 
+]
+
+{ #category : #accessing }
+SoilIndexPage >> offset [
+	^ offset
+]
+
+{ #category : #accessing }
+SoilIndexPage >> offset: anInteger [ 
+	offset := anInteger
+]
+
+{ #category : #accessing }
 SoilIndexPage >> pageSize [
 	^ pageSize
 ]
@@ -101,14 +136,22 @@ SoilIndexPage >> pageSize: anInteger [
 
 { #category : #printing }
 SoilIndexPage >> printOn: aStream [ 
-	aStream << 'page : #' << index asString
+	aStream 
+		<< self label 
+		<< ' #' 
+		<< offset asString
 ]
 
 { #category : #reading }
 SoilIndexPage >> readFrom: aStream [ 
-	dirty := false.
+	needWrite := false.
 	"we do not read the pageCode here as it was read already"
 	version := aStream next
+]
+
+{ #category : #accessing }
+SoilIndexPage >> version [
+	^ version
 ]
 
 { #category : #writing }
@@ -120,6 +163,6 @@ SoilIndexPage >> writeHeaderOn: aStream [
 
 { #category : #writing }
 SoilIndexPage >> writeOn: aStream [ 
-	dirty := false.
+	needWrite := false.
 	self writeHeaderOn: aStream
 ]

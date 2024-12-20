@@ -59,7 +59,7 @@ SoilJournalEntry >> isTransactionEntry [
 	^ false
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilJournalEntry >> providesObjectIds [ 
 	^ false
 ]

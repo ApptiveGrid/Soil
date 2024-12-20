@@ -35,10 +35,14 @@ SoilBTreeIndexPage >> findKey: aKey [
 	^nil
 ]
 
-{ #category : #utilities }
-SoilBTreeIndexPage >> headerSize [
-	^ super headerSize  
-		+ 2 "items size"
+{ #category : #private }
+SoilBTreeIndexPage >> findPreviousPage: aKey with: aBTree path: aPath [
+	| item page  |
+	"we record the path of all index pages taken to find the key"
+	aPath add: self.
+	item := self findKey: aKey.
+	page := aBTree pageAt: item value.
+	^ page findPreviousPage: aKey with: aBTree path: aPath
 ]
 
 { #category : #initialization }
@@ -61,8 +65,15 @@ SoilBTreeIndexPage >> insertItem: item for: iterator [
 		
 	"no space, we have to split"
 	newPage := iterator index splitIndexPage: self.
+	
+	"check that the current and new pages are balanced"
+	self flag: #TODO. "should be moved to a consistency checker"
+	newPage bTreeAssertion.
+	self bTreeAssertion.
+	
+	
 	"we need to add the new page to the index above"
-	^ return indexEntry: (newPage smallestKey -> newPage index)
+	^ return indexEntry: (newPage smallestKey -> newPage offset)
 ]
 
 { #category : #testing }
@@ -70,9 +81,19 @@ SoilBTreeIndexPage >> isIndexPage [
 	^ true
 ]
 
+{ #category : #initialization }
+SoilBTreeIndexPage >> latestVersion [
+	^ 1
+]
+
+{ #category : #testing }
+SoilBTreeIndexPage >> needsCleanup [
+	^ false
+]
+
 { #category : #printing }
 SoilBTreeIndexPage >> printOn: aStream [ 
-	aStream << 'index page : #' << index asString
+	aStream << 'index page : #' << offset asString
 ]
 
 { #category : #reading }

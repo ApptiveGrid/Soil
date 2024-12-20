@@ -35,10 +35,11 @@ Class {
 		'semaphore',
 		'journal',
 		'notificationHandler',
-		'serializerClass',
-		'materializerClass',
 		'control',
-		'setup'
+		'setup',
+		'fabric',
+		'metadata',
+		'transactionManager'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -85,6 +86,12 @@ Soil >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSoil: self 
 ]
 
+{ #category : #accessing }
+Soil >> applicationMigrationClass [
+
+	^ self fabric applicationMigrationClass
+]
+
 { #category : #visiting }
 Soil >> backupTo: aStringOrFileReference [ 
 	| backupSoil |
@@ -101,6 +108,7 @@ Soil >> backupTo: aStringOrFileReference [
 
 { #category : #'opening/closing' }
 Soil >> basicOpen [
+	self isOpen ifTrue: [ self error: 'Database already open' ].
 	('open soil database at ', path asString) soilEmit.
 	control := SoilControlFile new
 		soil: self;
@@ -113,13 +121,21 @@ Soil >> basicOpen [
 			soil: self;
 			open;
 			yourself.
+	transactionManager := SoilTransactionManager new
+		soil: self;
+		yourself.
 	journal := SoilPersistentDatabaseJournal new
 		soil: self.
 	"journal open might checkpoint so we set the journal 
 	instance variable first before calling open"
 	journal open.
 	notificationHandler := SoilNotificationHandler new
-		soil: self
+		soil: self.
+	metadata := SoilMetadata new 
+			soil: self;
+			ensurePresent;
+			open;
+			yourself
 	
 ]
 
@@ -154,7 +170,9 @@ Soil >> close [
 	behaviorRegistry ifNotNil: [ 
 		behaviorRegistry close ].
 	control ifNotNil: [ 
-		control close ]
+		control close ].
+	journal ifNotNil: [ 
+		journal close ]
 ]
 
 { #category : #accessing }
@@ -168,14 +186,9 @@ Soil >> critical: aBlock [
 	semaphore critical: aBlock
 ]
 
-{ #category : #'instance creation' }
-Soil >> defaultMaterializerClass [
-	^ SoilMaterializer
-]
-
-{ #category : #'instance creation' }
-Soil >> defaultSerializerClass [
-	^ SoilSerializer
+{ #category : #accessing }
+Soil >> defaultFabricClass [ 
+	^ SoilFabric 
 ]
 
 { #category : #public }
@@ -183,6 +196,17 @@ Soil >> destroy [
 	path exists ifFalse: [ ^ self ].
 	path children do: #deleteAll.
 	path delete
+]
+
+{ #category : #accessing }
+Soil >> fabric [
+	^ fabric ifNil: [ 
+		fabric := self defaultFabricClass new ]
+]
+
+{ #category : #accessing }
+Soil >> fabric: anObject [ 
+	fabric := anObject 
 ]
 
 { #category : #public }
@@ -223,26 +247,40 @@ Soil >> initializeFilesystem [
 		soil: self;
 		initializeFilesystem;
 		yourself.
+	transactionManager := SoilTransactionManager new
+		soil: self;
+		yourself.
 	journal := SoilPersistentDatabaseJournal new
 		soil: self;
 		initializeFilesystem;
 		yourself.
 	notificationHandler := SoilNotificationHandler new
-		soil: self
+		soil: self.
+	metadata := SoilMetadata new 
+			soil: self;
+			initializeFilesystem;
+			yourself
 ]
 
 { #category : #inspector }
 Soil >> inspectionControl [
-	<inspectorPresentationOrder: 2100 title: 'control'>
+	<inspectorPresentationOrder: 2000 title: 'control'>
 
 	^ self control inspectionControl 
 ]
 
 { #category : #inspector }
 Soil >> inspectionJournal [
-	<inspectorPresentationOrder: 2000 title: 'journal'>
+	<inspectorPresentationOrder: 2200 title: 'journal'>
 	
 	^ self journal inspectionContent
+]
+
+{ #category : #inspector }
+Soil >> inspectionMetadata [
+	<inspectorPresentationOrder: 2100 title: 'metadata'>
+
+	^ self metadata inspectionMetadata
 ]
 
 { #category : #testing }
@@ -277,13 +315,19 @@ Soil >> lockableStreamClass [
 
 { #category : #'instance creation' }
 Soil >> materializerClass [
-	^ materializerClass ifNil: [ self defaultMaterializerClass ]
+	^ self fabric materializerClass
 ]
 
 { #category : #accessing }
-Soil >> materializerClass: anObject [
+Soil >> metadata [
+	^ metadata
+]
 
-	materializerClass := anObject
+{ #category : #actions }
+Soil >> newApplicationMigration [  
+	^ self applicationMigrationClass new 
+		soil: self;
+		yourself
 ]
 
 { #category : #'instance creation' }
@@ -302,7 +346,9 @@ Soil >> newSerializer [
 
 { #category : #transactions }
 Soil >> newTransaction [
-	^ self newTransaction: self transactionClass
+	^ self transactionManager 
+		newTransaction: self transactionClass
+		readVersion: self control databaseVersion 
 ]
 
 { #category : #transactions }
@@ -337,9 +383,14 @@ Soil >> objectRepository [
 
 { #category : #'opening/closing' }
 Soil >> open [
-	self isOpen ifTrue: [ self error: 'Database already open' ].
 	self basicOpen.
 	journal recover
+]
+
+{ #category : #'opening/closing' }
+Soil >> openLogged [
+	self open.
+	self metadata updateLastOpened
 ]
 
 { #category : #accessing }
@@ -387,6 +438,13 @@ Soil >> renameClassNamed: oldName to: newName [
 	transaction commit
 ]
 
+{ #category : #public }
+Soil >> reopen [
+	self 
+		close;
+		open 
+]
+
 { #category : #journal }
 Soil >> replayJournal: aSoilJournal [ 
 	| journals databaseVersion |
@@ -408,13 +466,7 @@ Soil >> replayTransactionJournal: aSoilTransactionJournal [
 
 { #category : #'instance creation' }
 Soil >> serializerClass [
-	^ serializerClass ifNil: [ self defaultSerializerClass ]
-]
-
-{ #category : #accessing }
-Soil >> serializerClass: anObject [
-
-	serializerClass := anObject
+	^ self fabric serializerClass 
 ]
 
 { #category : #accessing }
@@ -427,7 +479,13 @@ Soil >> setup [
 
 { #category : #transactions }
 Soil >> transactionClass [
-	^ SoilTransaction 
+	^ self fabric transactionClass
+]
+
+{ #category : #accessing }
+Soil >> transactionManager [
+
+	^ transactionManager
 ]
 
 { #category : #writing }

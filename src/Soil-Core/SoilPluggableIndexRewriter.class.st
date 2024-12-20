@@ -27,7 +27,7 @@ SoilPluggableIndexRewriter >> convertIndex [
 
 { #category : #running }
 SoilPluggableIndexRewriter >> convertItems [ 
-	index newIterator basicAssociationsDo: [ :item |
+	index newIterator associationsDo: [ :item |
 		self restoreItem: item ]
 ]
 
@@ -78,7 +78,7 @@ SoilPluggableIndexRewriter >> run [
 	self validatePath.
 	self prepareNewIndex.
 	[  
-		index newIterator basicAssociationsDo: [ :item |
+		index newIterator associationsDo: [ :item |
 				item ifNotNil: [  
 				(itemBlock value: item) ifNotNil: [ :newItem | 
 					self newIndexIterator at: newItem key put: newItem value ] ] ] ]

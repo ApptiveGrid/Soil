@@ -21,10 +21,7 @@ Class {
 
 { #category : #aborting }
 SoilTransaction >> abort [
-	soil ifNotNil: [  
-		soil notificationHandler transactionAborted: self ].
-	self basicAbort.
-
+	self transactionManager abortTransaction: self
 ]
 
 { #category : #accessing }
@@ -37,7 +34,7 @@ SoilTransaction >> acquireLocksAndDetectWriteSkew [
 		"check if the version we've read is still actual. Another transaction could have
 		committed since we last read. Checking for the position in the index is sufficient
 		as each version relates to a unique position"
-		locks add: record lockIndex.
+		self addLock: record lockIndex.
 		record validateReadVersion ].
 	"idMap is keyed by objectIds which could have changed by now so we rehash in order
 	not to miss lookups"
@@ -54,6 +51,11 @@ SoilTransaction >> addClusterObject: anObject [
 		putObject: anObject.
 	^ objectId
 
+]
+
+{ #category : #adding }
+SoilTransaction >> addLock: aLock [ 
+	locks add: aLock
 ]
 
 { #category : #accessing }
@@ -84,7 +86,7 @@ SoilTransaction >> basicCommit [
 	self prepareRecordsForCommit.
 	"if there are no records to commit we can just return and don't allocate any
 	resources"
-	(recordsToCommit isEmpty and: [indexUpdatesToCommit isEmpty ]) ifTrue: [ 
+	self isReadOnly ifTrue: [ 
 		soil notificationHandler transactionCommitted: self.
 		^ self ].
 	"only one transactions is allowed at a time. We use the critical block of the database
@@ -101,13 +103,15 @@ SoilTransaction >> basicCommit [
 		"lastObjectIndexes contains the highest allocated index number per segment. We
 		lock all positions in order to update the index numbers in the database."
 		lastObjectIndexes keysDo: [ :segment |
-			locks add: (segment lockAppendingFor: self) ].
+			self addLock: (segment lockAppendingFor: self) ].
 		"convert the records into journal entries, write the journal to disk and then
 		execute the journal on the database"
 		journal := self buildJournal.
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
+		indexUpdatesToCommit do: [:indexDict | 
+			self updatedIndexDictionary: indexDict] .
 		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
@@ -228,7 +232,7 @@ SoilTransaction >> buildJournal [
 SoilTransaction >> buildWriteVersion [
 	"first we lock the database version so it cannot be modified while we are 
 	checkpointing"
-	locks add: (soil lockDatabaseVersionFor: self).
+	self addLock: (soil lockDatabaseVersionFor: self).
 	"Now the version is locked. We can read it again to have the real version and
 	increment"
 	^ soil control databaseVersion + 1 
@@ -236,16 +240,12 @@ SoilTransaction >> buildWriteVersion [
 
 { #category : #accessing }
 SoilTransaction >> commit [
-	self basicCommit.
-	soil checkpoint.
-	self basicAbort.
+	self transactionManager commitTransaction: self 
 ]
 
 { #category : #actions }
 SoilTransaction >> commitAndContinue [
-	self basicCommit.
-	soil checkpoint.
-	self continue
+	self transactionManager commitAndContinueTransaction: self 
 ]
 
 { #category : #actions }
@@ -311,15 +311,7 @@ SoilTransaction >> findRecords: aBlock [
 
 { #category : #testing }
 SoilTransaction >> hasModifications [ 
-	^ self dirtyObjects notEmpty
-]
-
-{ #category : #accessing }
-SoilTransaction >> indexAt: indexId segment: segmentIndex [ 
-	^ indexes 
-		at: indexId 
-		ifAbsentPut: [ 
-			(self segmentAt: segmentIndex) indexAt: indexId  ]
+	^ recordsToCommit isEmptyOrNil not or: [ indexUpdatesToCommit isEmptyOrNil not ]
 ]
 
 { #category : #accessing }
@@ -347,7 +339,7 @@ SoilTransaction >> initializeObjectId: anObjectId [
 	assoc := lastObjectIndexes 
 		at: segment 
 		ifAbsentPut: [ 
-			locks add: (segment lockLastObjectIndexFor: self).
+			self addLock: (segment lockLastObjectIndexFor: self).
 			segment lastObjectIndex -> segment lastObjectIndex ].
 	"we use an association here to keep the version read from database
 	as well as the new version"
@@ -363,6 +355,11 @@ SoilTransaction >> isAborted [
 { #category : #testing }
 SoilTransaction >> isPersistent: anObject [
 	^ self isRoot: anObject
+]
+
+{ #category : #testing }
+SoilTransaction >> isReadOnly [ 
+	^ self hasModifications not
 ]
 
 { #category : #testing }
@@ -471,7 +468,7 @@ SoilTransaction >> objectAt: anObjectId ifAbsent: aBlock [
 
 { #category : #api }
 SoilTransaction >> objectIdOf: anObject [ 
-	^ (anObject class = SoilObjectProxy)
+	^ anObject isSoilProxy
 		ifTrue: [ anObject objectId ]
 		ifFalse: [ (objectMap at: anObject) objectId ].
 	
@@ -572,8 +569,13 @@ SoilTransaction >> registerRecord: record [
 
 { #category : #api }
 SoilTransaction >> releaseLocks [
-	locks do: [ :lock | lock release ].
-	locks := OrderedCollection new
+	locks copy do: [ :lock | self removeLock: lock ]
+]
+
+{ #category : #adding }
+SoilTransaction >> removeLock: aLock [ 
+	aLock release.
+	locks remove: aLock
 ]
 
 { #category : #accessing }
@@ -633,6 +635,29 @@ SoilTransaction >> soil: aSoil [
 { #category : #accessing }
 SoilTransaction >> start [
 	createdAt := DateAndTime now
+]
+
+{ #category : #accessing }
+SoilTransaction >> transactionManager [ 
+	^ soil transactionManager
+]
+
+{ #category : #indexes }
+SoilTransaction >> updatedIndexDictionary: indexedDictionary [ 
+	|  segment realIndex |
+	segment := self segmentAt: (self objectIdOf: indexedDictionary) segment.
+	"when indexed dictionaries created the first time the journal creates the 
+	real index with path. In this case we request the real index from the index
+	manager"
+	realIndex := indexedDictionary index store isOpen 
+		ifTrue: [ indexedDictionary persistentIndex ]
+		ifFalse: [ 
+			segment indexManager 
+				at: indexedDictionary id 
+				ifAbsent: [ Error signal: 'cannot find index which should have been added before' ] ].
+	segment indexManager 
+		addDirtyIndex: realIndex 
+	
 ]
 
 { #category : #accessing }

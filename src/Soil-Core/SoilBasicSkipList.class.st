@@ -17,9 +17,40 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
+{ #category : #adding }
+SoilBasicSkipList >> addDirtyPage: aPage [ 
+	dirtyPages at: aPage offset put: aPage
+]
+
+{ #category : #'instance creation' }
+SoilBasicSkipList >> allocatePage [
+	| page |
+	page := self newPage 
+		offset: (self nextFreePageIndex
+			ifNil: [ self nextPageOffset ]).
+	self store pageAt: page offset put: page.
+	self addDirtyPage: page.
+	^ page
+]
+
+{ #category : #'as yet unclassified' }
+SoilBasicSkipList >> cleanUpToVersion: aNumberOrNil [ 
+		SoilIndexCleaner new 
+			index: self;
+			readVersion: aNumberOrNil;
+			clean.
+
+]
+
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
+]
+
+{ #category : #initialization }
+SoilBasicSkipList >> initialize [ 
+	super initialize.
+	dirtyPages := OrderedDictionary new
 ]
 
 { #category : #accessing }
@@ -39,6 +70,102 @@ SoilBasicSkipList >> newIterator [
 	^ SoilSkipListIterator on: self 
 ]
 
+{ #category : #'instance creation' }
+SoilBasicSkipList >> newPage [
+	^ self pageClass new 
+		initializeLevel: self maxLevel;
+		keySize: self keySize;
+		valueSize: self valueSize;
+		pageSize: self pageSize;
+		yourself
+]
+
+{ #category : #private }
+SoilBasicSkipList >> nextFreePageIndex [ 
+	| firstFreePage freePageIndex |
+	firstFreePage := self firstFreePage ifNil: [ 
+		^ nil ].
+	^ firstFreePage hasFreePages 
+		ifTrue: [ 
+			freePageIndex := firstFreePage removeFirstIndex.
+			self removePageWithIndexIfPresent: freePageIndex.
+			self addDirtyPage: firstFreePage.
+			freePageIndex  ] 
+		ifFalse: [ 
+			"if firstFreePage has a next pointer we set that as 
+			new first free page. Next will return 0 if there is no
+			next page"
+			freePageIndex := firstFreePage next.
+			self headerPage firstFreePageIndex: firstFreePage next.
+			self removePageWithIndexIfPresent: firstFreePage offset.
+
+			self addDirtyPage: self headerPage.
+			firstFreePage offset ]
+				
+]
+
+{ #category : #'instance creation' }
+SoilBasicSkipList >> nextPageOffset [
+	| offset |
+	offset := store nextPageOffset.
+	self addDirtyPage: store headerPage.
+	^ offset 
+]
+
+{ #category : #'instance creation' }
+SoilBasicSkipList >> pageClass [
+	^ SoilSkipListDataPage
+]
+
+{ #category : #removing }
+SoilBasicSkipList >> removePage: aPage [
+	| iterator seen previousPage |
+	(aPage offset > 1) ifFalse: [ ^ aPage ].
+	"we use an iterator to scan pages on all levels that are just right
+	before the page to remove"
+	iterator := self newIterator. 
+	iterator findPreviousPageOf: aPage. 
+	"on each level up to max level the iterator has a reference to a 
+	page. We remember the pages processed in order not to process the
+	same page multiple times"
+	seen := Set new.	
+	1 to: self maxLevel do: [ :level |
+		previousPage := iterator levelAt: level.
+		(seen includes: previousPage) ifFalse: [  
+			seen add: previousPage.
+			self addDirtyPage: previousPage.
+			1 to: previousPage level do: [ :lvl |
+				"each previous page's next pointer might point to the page 
+				to be removed."
+				((previousPage rightAt: lvl) = aPage offset) ifTrue: [ 
+					"We overwrite the next pointer of the previous page with 
+					the next pointer of the page to be removed"
+					previousPage rightAt: lvl put: (aPage rightAt: lvl).
+					previousPage markForWrite ] ] ] ].
+	"finally remove the page from the store"
+	store removePageAt: aPage offset.
+	^ aPage 
+
+
+]
+
+{ #category : #removing }
+SoilBasicSkipList >> removePageWithIndexIfPresent: anInteger [ 
+	(store includesPageAt: anInteger) ifTrue: [ 
+		store removePageAt: anInteger ]
+]
+
+{ #category : #accessing }
+SoilBasicSkipList >> size [ 
+	"if size is -1 the page has been converted from version 1 format and
+	size is uninitialized. We scan the size in order to write it properly"
+	| size |
+	size := self headerPage size.
+	^ (size = -1) 
+		ifTrue: [ super size  ]
+		ifFalse: [ size ]
+]
+
 { #category : #private }
 SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 	| newPage page |
@@ -48,18 +175,16 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 	there. If the key is in between or the page is not the last we
 	split the page with each containing half of the items"
 	newPage := (page isLastPage and: [ page lastKey < aKey ])
-		ifTrue: [ store newPage ] 
-		ifFalse: [ page split: store newPage ].
-	newPage index: self store nextPageIndex.
+		ifTrue: [ store allocatePage ] 
+		ifFalse: [ page split: store allocatePage ].
 	newPage level to: 1 by: -1  do: [ :level |
 		(level > page level)
 			ifTrue: [ 
 				newPage rightAt: level put: ((aIterator levelAt: level) rightAt: level).
-				(aIterator levelAt: level) rightAt: level put: newPage index ]
+				(aIterator levelAt: level) rightAt: level put: newPage offset ]
 			ifFalse: [ 
 				(page rightAt: level) ifNotNil: [ :r | 
 					newPage rightAt: level put: r ].
-				page rightAt: level put: newPage index ]].
-	self store pageAt: newPage index put: newPage.
+				page rightAt: level put: newPage offset ]].
 	^ newPage 
 ]

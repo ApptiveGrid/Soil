@@ -44,11 +44,6 @@ SoilUpdateSegmentIndexEntry >> context [
 ]
 
 { #category : #accessing }
-SoilUpdateSegmentIndexEntry >> effect [
-	^ index
-]
-
-{ #category : #accessing }
 SoilUpdateSegmentIndexEntry >> index: anInteger [ 
 	index := anInteger 
 ]

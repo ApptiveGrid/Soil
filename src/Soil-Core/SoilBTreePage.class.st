@@ -24,7 +24,15 @@ SoilBTreePage >> addItem: anAssociation [
 	(items anySatisfy: [ :item | item key = anAssociation key ])
 		ifFalse: [ items add: anAssociation ]
 		ifTrue:  [ self itemAt: anAssociation key put: anAssociation value ].
-	dirty := true
+	needWrite := true
+]
+
+{ #category : #assertions }
+SoilBTreePage >> bTreeAssertion [
+	self assert: self hasRoom.
+	"each node has a maximum of M children and at least ceil(M/2) - 1 children"
+	self assert: (self numberOfItems <= self itemCapacity).
+	items isEmpty ifFalse: [ self assert:  self hasUnderflow not  ]
 ]
 
 { #category : #private }
@@ -32,11 +40,25 @@ SoilBTreePage >> find: aKey with: aBTree [
 	^ self subclassResponsibility
 ]
 
+{ #category : #private }
+SoilBTreePage >> findPreviousPage: aKey with: aBTree path: aPath [ 
+	^ self subclassResponsibility
+]
+
+{ #category : #assertions }
+SoilBTreePage >> hasUnderflow [
+	^ self numberOfItems < ((self itemCapacity  / 2) ceiling - 1)
+]
+
 { #category : #initialization }
 SoilBTreePage >> initialize [ 
 	super initialize.
 	lastTransaction := 0.
-	dirty := true
+	needWrite := true
+]
+
+{ #category : #initialization }
+SoilBTreePage >> initializeInIndex: aSoilSkipList [
 ]
 
 { #category : #adding }
@@ -46,7 +68,7 @@ SoilBTreePage >> insertItem: anItem for: iterator [
 
 { #category : #testing }
 SoilBTreePage >> isIndexPage [
-	^ self subclassResponsibility
+ 	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
@@ -73,6 +95,7 @@ SoilBTreePage >> split: newPage [
 	middle := (items size - 1 / 2) ceiling.
 	newPage setItems: (items copyFrom: middle + 1 to: items size).
 	items removeLast: items size - middle.
+	needWrite := true.
 	^ newPage
 ]
 
@@ -80,13 +103,6 @@ SoilBTreePage >> split: newPage [
 SoilBTreePage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
 	aStream nextPutAll: (lastTransaction asByteArrayOfSize: 8)
-]
-
-{ #category : #writing }
-SoilBTreePage >> writeItemsOn: aStream [ 
-	aStream
-		nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
-	super writeItemsOn: aStream
 ]
 
 { #category : #writing }

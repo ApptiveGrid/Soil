@@ -8,8 +8,32 @@ Class {
 		'lockRegistry',
 		'locks'
 	],
+	#classInstVars : [
+		'defaultImageLocked',
+		'defaultFileLocked'
+	],
 	#category : #'Soil-File'
 }
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultFileLocked [
+	^ defaultFileLocked ifNil: [ true ]
+]
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultFileLocked: aBoolean [ 
+	defaultFileLocked := aBoolean 
+]
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultImageLocked [
+	^ defaultImageLocked ifNil: [ true ]
+]
+
+{ #category : #accessing }
+SoilLockableStream class >> defaultImageLocked: aBoolean [ 
+	defaultImageLocked := aBoolean 
+]
 
 { #category : #'instance creation' }
 SoilLockableStream class >> path: aStringOrFileReference [ 
@@ -29,7 +53,24 @@ SoilLockableStream >> close [
 	fileStream ifNotNil: [  
 		fileStream closed 
 			ifFalse: [ fileStream close ] ].
+	lockRegistry := nil 
 
+]
+
+{ #category : #accessing }
+SoilLockableStream >> defaultFileLocked [
+	^ self class defaultFileLocked 
+]
+
+{ #category : #accessing }
+SoilLockableStream >> defaultImageLocked [
+	^ self class defaultImageLocked 
+]
+
+{ #category : #accessing }
+SoilLockableStream >> fileLocked [ 
+	^ fileLocked ifNil: [ 
+		fileLocked := self defaultFileLocked  ]
 ]
 
 { #category : #accessing }
@@ -47,13 +88,17 @@ SoilLockableStream >> flush [
 	^ fileStream flush
 ]
 
+{ #category : #accessing }
+SoilLockableStream >> imageLocked [ 
+	^ imageLocked ifNil: [ 
+		imageLocked := self defaultImageLocked  ]
+]
+
 { #category : #initialization }
 SoilLockableStream >> initialize [ 
 	super initialize.
 	locks := OrderedCollection new.
-	self class finalizationRegistry add: self.
-	imageLocked := true.
-	fileLocked := true.
+	self class finalizationRegistry add: self
 ]
 
 { #category : #initialization }
@@ -159,10 +204,10 @@ SoilLockableStream >> readInto: aCollection startingAt: startIndex count: count 
 { #category : #locking }
 SoilLockableStream >> registerLock: lock [
 	
-	imageLocked ifTrue: [ 
+	self imageLocked ifTrue: [ 
 		lock lockInMemory: lockRegistry ].
 	
-	fileLocked ifTrue: [ 
+	self fileLocked ifTrue: [ 
 		lock lockOn: self  ].
 	
 	^ locks add: lock
@@ -184,6 +229,11 @@ SoilLockableStream >> setToEnd [
 { #category : #accessing }
 SoilLockableStream >> size [ 
 	^ fileStream size
+]
+
+{ #category : #public }
+SoilLockableStream >> sync [
+	fileStream wrappedStream fsync 
 ]
 
 { #category : #locking }

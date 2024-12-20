@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilBTreePageTest,
 	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Index'
 }
 
 { #category : #helper }
@@ -18,7 +18,7 @@ SoilBTreePageTest >> readPageFrom: aStream [
 SoilBTreePageTest >> testCreation [ 
 	| page |
 	page := SoilBTreeDataPage new 
-		index: 1;
+		offset: 1;
 		pageSize: 4096;
 		keySize: 16;
 		valueSize: 8.
@@ -29,7 +29,7 @@ SoilBTreePageTest >> testCreation [
 SoilBTreePageTest >> testCreationIndex [
 	| page |
 	page := SoilBTreeIndexPage new 
-		index: 1;
+		offset: 1;
 		pageSize: 4096;
 		keySize: 16.
 	self assert: page hasRoom
@@ -39,52 +39,52 @@ SoilBTreePageTest >> testCreationIndex [
 SoilBTreePageTest >> testWriteAndRead [
 	| page bytes readPage |
 	page := SoilBTreeDataPage new 
-		index: 1;
+		offset: 1;
 		valueSize: 8;
 		keySize: 8.
 		
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	self assert: readPage next equals: page next.
 	self assert: readPage valueSize equals: page valueSize.
 	self assert: readPage keySize equals: page keySize.
 	
-	self deny: readPage isDirty 
+	self deny: readPage needsWrite 
 ]
 
 { #category : #tests }
 SoilBTreePageTest >> testWriteAndReadIndex [
 	| page bytes readPage |
 	page := SoilBTreeIndexPage new 
-		index: 1;
+		offset: 1;
 		keySize: 8.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
-	self deny: readPage isDirty
+	self deny: readPage needsWrite
 ]
 
 { #category : #tests }
 SoilBTreePageTest >> testWriteAndReadPageCode [
 	| page bytes readPage |
 	page := SoilBTreeDataPage new 
-		index: 1;
+		offset: 1;
 		valueSize: 8;
 		keySize: 8.
 		
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	self assert: readPage next equals: page next.
 	self assert: readPage valueSize equals: page valueSize.
 	self assert: readPage keySize equals: page keySize.
 	
-	self deny: readPage isDirty 
+	self deny: readPage needsWrite 
 ]

@@ -1,0 +1,39 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Soil
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Norbert
+    family-names: Hartl
+    affiliation: ApptiveGrid GmbH
+    email: norbert@hartl.name
+  - given-names: Marcus
+    family-names: Denker
+    email: marcus.denker@inria.fr
+    affiliation: Inria
+    orcid: 'https://orcid.org/0000-0003-2549-4222'
+identifiers:
+  - type: swh
+    value: 'swh:1:dir:7ab481741958af9189981e1c557aacfad5d78d7c'
+  - type: url
+    value: 'https://hal.science/hal-04726251'
+    description: HAL
+repository-code: 'https://github.com/ApptiveGrid/Soil'
+abstract: >-
+  Soil is an object oriented database in pharo. It is
+  transaction based having ACID transactions. It has binary
+  search capabilities with SkipList and BTree+ indexes. It
+  aims to be a simple yet powerful database making it easy
+  to develop with, easy to debug with and easy to inspect.
+keywords:
+  - db
+  - object database
+  - OO
+license: MIT
+version: v2
+date-released: '2024-08-28'

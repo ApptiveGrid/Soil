@@ -35,11 +35,6 @@ SoilAddKeyEntry >> context [
 ]
 
 { #category : #accessing }
-SoilAddKeyEntry >> effect [
-	^ key -> value 
-]
-
-{ #category : #accessing }
 SoilAddKeyEntry >> key [
 	^ key
 ]
@@ -69,7 +64,7 @@ SoilAddKeyEntry >> printOn: aStream [
 	aStream << 'add key: ' << key printString << ' to index ' << id printString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilAddKeyEntry >> providesObjectIds [ 
 	^ true
 ]

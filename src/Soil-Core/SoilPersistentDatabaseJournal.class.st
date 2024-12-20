@@ -29,6 +29,12 @@ SoilPersistentDatabaseJournal >> appendEntry: aSoilJournalEntry [
 		
 ]
 
+{ #category : #'open/close' }
+SoilPersistentDatabaseJournal >> close [
+	currentFragmentFile ifNotNil: [
+		currentFragmentFile close ]
+]
+
 { #category : #private }
 SoilPersistentDatabaseJournal >> createFragmentFile: filename [
 	self removeFragmentFiles.
@@ -49,40 +55,41 @@ SoilPersistentDatabaseJournal >> currentFragmentFile [
 			ifFalse: [ self openFragmentFile: filename ] ]
 ]
 
-{ #category : #accessing }
+{ #category : #fragmentfile }
 SoilPersistentDatabaseJournal >> currentFragmentFile: aSoilJournalFragmentFile [ 
 	currentFragmentFile := aSoilJournalFragmentFile
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #fragmentfile }
 SoilPersistentDatabaseJournal >> cycleFragmentFile [
 	| nextFileNumber |
 	nextFileNumber := (self fileNumberFrom: currentFragmentFile filename) + 1.
 	currentFragmentFile 
 		flush;
+		writeContentsToDisk;
 		close.
 	currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #enumerating }
 SoilPersistentDatabaseJournal >> entriesDo: aBlock [
 	self fragmentFiles reverse do: [ :file |
 		file entriesDo: aBlock ]
 ]
 
-{ #category : #searching }
+{ #category : #queries }
 SoilPersistentDatabaseJournal >> entriesMatching: aBlock [
 	^ self fragmentFiles flatCollect: [ :file |
 		file entriesMatching: aBlock  ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilPersistentDatabaseJournal >> entriesWithObjectId: aSoilObjectId [ 
 	^ self objectEntriesSelect: [ :entry | 
 		entry includesObjectId: aSoilObjectId ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilPersistentDatabaseJournal >> existsFragmentFileForLSN: aSoilLogSequenceNumber [ 
 	| filename |
 	filename := self filenameFrom: aSoilLogSequenceNumber fileNumber.
@@ -106,13 +113,13 @@ SoilPersistentDatabaseJournal >> fragmentFileForWriting [
 	^ currentFragmentFile
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #fragmentfile }
 SoilPersistentDatabaseJournal >> fragmentFileWritten: aSoilFragmentFile [ 
 	soil setup isFsyncEnabled ifTrue: [  
 		aSoilFragmentFile writeContentsToDisk ]
 ]
 
-{ #category : #accessing }
+{ #category : #fragmentfile }
 SoilPersistentDatabaseJournal >> fragmentFiles [
 	^ self sortedFiles collect: [ :each | 
 		(SoilJournalFragmentFile path: each)
@@ -120,7 +127,7 @@ SoilPersistentDatabaseJournal >> fragmentFiles [
 			yourself ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 SoilPersistentDatabaseJournal >> historyOfObjectId: aSoilObjectId [ 
 	| history objectEntries transactionStart |
 	history := OrderedCollection new.
@@ -184,6 +191,19 @@ SoilPersistentDatabaseJournal >> lastFileNumber [
 	^ self fileNumberFrom: self fragmentFiles first basename.
 ]
 
+{ #category : #enumerating }
+SoilPersistentDatabaseJournal >> lastObjectVersionEntriesWithObjectId: anObjectId [
+	| entries |
+	entries := OrderedCollection new.
+	self fragmentFiles do: [ :file |
+		file entriesDo: [ :entry | 
+			(entry class = SoilNewObjectVersionEntry  
+				and: [ entry objectIds includes: anObjectId]) ifTrue: [ 
+					entries add: entry  ] ].
+		entries ifNotEmpty: [ ^ entries  ] ].
+	^ #()
+]
+
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> maxFragmentFiles [
 
@@ -204,7 +224,7 @@ SoilPersistentDatabaseJournal >> newTransactionJournalForId: anInteger [
 			index: anInteger ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #enumerating }
 SoilPersistentDatabaseJournal >> objectEntriesDo: aBlock [
 	self fragmentFiles reverse do: [ :file |
 		file entriesDo: [ :entry | 
@@ -212,7 +232,7 @@ SoilPersistentDatabaseJournal >> objectEntriesDo: aBlock [
 				 (aBlock value: entry)  ] ] ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #queries }
 SoilPersistentDatabaseJournal >> objectEntriesSelect: aBlock [
 	| entries |
 	entries := OrderedCollection new.
@@ -292,7 +312,7 @@ SoilPersistentDatabaseJournal >> sortedFiles [
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock [ 
 	| fragmentFiles fileIndex |
-	fragmentFiles := self fragmentFiles.
+	fragmentFiles := self fragmentFiles do: #open.
 	fileIndex := fragmentFiles 
 		detectIndex: [ :fragment | fragment firstTransactionId <= index  ]
 		ifNone: [ self error: 'fileIndex not found, should not happen' ].

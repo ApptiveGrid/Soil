@@ -9,7 +9,7 @@ Class {
 		'two',
 		'three'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-TestData'
 }
 
 { #category : #accessing }

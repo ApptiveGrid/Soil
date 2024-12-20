@@ -4,7 +4,7 @@ Class {
 	#category : #'Soil-Core-Files'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #versions }
 SoilObjectFile >> allRecords [
 	| records pos record |
 	records := OrderedCollection new.
@@ -52,6 +52,12 @@ SoilObjectFile >> initialize [
 	mutex := Mutex new
 ]
 
+{ #category : #initialization }
+SoilObjectFile >> initializeFilesystem [ 
+	super initializeFilesystem.
+	self writeContentsToDisk 
+]
+
 { #category : #accessing }
 SoilObjectFile >> path [
 	^ segment path / #objects
@@ -62,7 +68,7 @@ SoilObjectFile >> prefix [
 	^ 'SOIL|OBJECT ' asByteArray
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilObjectFile >> recordStart [
 	^ (segment id = 0)
 		ifTrue: [ self headerSize + 16 ]
@@ -77,4 +83,10 @@ SoilObjectFile >> size [
 { #category : #versions }
 SoilObjectFile >> versionSize [
 	^ 8
+]
+
+{ #category : #initialization }
+SoilObjectFile >> writeContentsToDisk [ 
+	(segment notNil and: [ segment soil setup isFsyncEnabled  ]) ifTrue: [
+		stream sync ]
 ]

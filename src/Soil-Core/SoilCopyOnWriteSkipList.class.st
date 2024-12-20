@@ -7,14 +7,19 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #adding }
+SoilCopyOnWriteSkipList >> addDirtyPage: aPage [ 
+	
+]
+
 { #category : #testing }
 SoilCopyOnWriteSkipList >> isRegistered [
 	^ wrapped isRegistered
 ]
 
-{ #category : #'instance creation' }
-SoilCopyOnWriteSkipList >> newPage [ 
-	^ wrapped newPage
+{ #category : #accessing }
+SoilCopyOnWriteSkipList >> persistentIndex [
+	^ wrapped persistentIndex 
 ]
 
 { #category : #converting }

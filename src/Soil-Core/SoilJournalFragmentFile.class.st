@@ -9,11 +9,6 @@ Class {
 }
 
 { #category : #'file names' }
-SoilJournalFragmentFile class >> filenameFromFilenumber: anInteger [ 
-	^ (anInteger printStringBase: 16 length: 10 padded: true) asLowercase 
-]
-
-{ #category : #'file names' }
 SoilJournalFragmentFile class >> filenumberFromFilename: aString [ 
 	^ (ByteArray readHexFrom: aString) asInteger
 ]
@@ -228,7 +223,7 @@ SoilJournalFragmentFile >> inspectionTransactionJournals [
 		items: (self transactionJournals reverse);
 		addColumn: (SpCompositeTableColumn new
 			title: '#';
-			width: 30;
+			width: 80;
 			addColumn: (SpStringTableColumn evaluated: [:each | each index ]));
 		addColumn: (SpStringTableColumn new 
 			title: #read;
@@ -323,4 +318,10 @@ SoilJournalFragmentFile >> versionPosition [
 { #category : #versions }
 SoilJournalFragmentFile >> versionSize [
 	^ 1
+]
+
+{ #category : #writing }
+SoilJournalFragmentFile >> writeContentsToDisk [ 
+	databaseJournal soil setup isFsyncEnabled ifTrue: [ 
+		stream sync ]
 ]

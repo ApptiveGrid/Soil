@@ -21,7 +21,7 @@ SoilRemoveKeyEntry >> address [
 { #category : #committing }
 SoilRemoveKeyEntry >> commitIn: soil [ 
 	((soil objectRepository segmentAt: segment) indexAt: id) newIterator 
-		at: key put: SoilObjectId removed;
+		removeKey: key;
 		updateCurrentTransaction: transactionId 
 ]
 
@@ -57,7 +57,7 @@ SoilRemoveKeyEntry >> oldValue: aString [
 	oldValue := aString
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilRemoveKeyEntry >> providesObjectIds [ 
 	^ true
 ]

@@ -36,11 +36,6 @@ SoilNewBehaviorEntry >> context [
 ]
 
 { #category : #accessing }
-SoilNewBehaviorEntry >> effect [
-	^ identifier 
-]
-
-{ #category : #accessing }
 SoilNewBehaviorEntry >> identifier: aString [ 
 	identifier := aString 
 ]
@@ -71,7 +66,7 @@ SoilNewBehaviorEntry >> printOn: aStream [
 		
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilNewBehaviorEntry >> providesObjectIds [ 
 	^ true
 ]

@@ -14,13 +14,13 @@ SoilNewObjectVersionEntry class >> journalTypeCode [
 ]
 
 { #category : #accessing }
-SoilNewObjectVersionEntry >> oldBytes: aCollection [ 
-	oldBytes := aCollection
+SoilNewObjectVersionEntry >> oldBytes [
+	^ oldBytes
 ]
 
-{ #category : #'as yet unclassified' }
-SoilNewObjectVersionEntry >> oldObjectIn: aSoilTransaction [
-	^ (aSoilTransaction materializeRecord: oldBytes asSoilClusterVersion) object
+{ #category : #accessing }
+SoilNewObjectVersionEntry >> oldBytes: aCollection [ 
+	oldBytes := aCollection
 ]
 
 { #category : #'instance creation' }

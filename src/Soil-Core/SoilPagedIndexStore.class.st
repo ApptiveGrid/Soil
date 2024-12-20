@@ -15,6 +15,11 @@ SoilPagedIndexStore class >> isAbstract [
 	^ self == SoilPagedIndexStore
 ]
 
+{ #category : #initialization }
+SoilPagedIndexStore >> allocatePage [
+	^ index allocatePage 
+]
+
 { #category : #flushing }
 SoilPagedIndexStore >> flush [
 	^ self subclassResponsibility
@@ -36,8 +41,8 @@ SoilPagedIndexStore >> headerPage [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> highestPageIndex [ 
-	^ pages size
+SoilPagedIndexStore >> includesPageAt: anInteger [ 
+	^ pages includesKey: anInteger 
 ]
 
 { #category : #accessing }
@@ -69,18 +74,32 @@ SoilPagedIndexStore >> isOpen [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> lastPageIndex [
-	^ self headerPage lastPageIndex
+SoilPagedIndexStore >> lastPageOffset [
+	^ self headerPage lastPageOffset
 ]
 
 { #category : #'instance creation' }
 SoilPagedIndexStore >> newPage [
-	^ index newPage
+	^ index allocatePage
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> nextPageIndex [
-	^ self headerPage nextPageIndex
+SoilPagedIndexStore >> nextPageOffset [
+	^ self headerPage nextPageOffset
+]
+
+{ #category : #private }
+SoilPagedIndexStore >> orderedPages [
+	| page orderedPages |
+	page := self pageAt: 1.
+	orderedPages := OrderedCollection new.
+	orderedPages add: page.
+	[ page isLastPage ] whileFalse: [ 
+	   page := self pageAt: page next.
+		orderedPages add: page
+	].
+	^ orderedPages
+		
 ]
 
 { #category : #accessing }
@@ -93,7 +112,9 @@ SoilPagedIndexStore >> pageAt: anInteger [
 
 { #category : #accessing }
 SoilPagedIndexStore >> pageAt: anInteger put: aPage [ 
-	pagesMutex critical: [  
+	^ pagesMutex critical: [  
+		(pages includesKey: anInteger) 
+			ifTrue: [ ^ Error signal: 'store already has page with key ', anInteger asString ].
 		pages 
 			at: anInteger 
 			put: aPage ]
@@ -110,7 +131,6 @@ SoilPagedIndexStore >> pages [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> priorPage [
-	"this is slow as it checks all pages"
-	^ pages detect: [: page | page next == self ]
+SoilPagedIndexStore >> removePageAt: anInteger [ 
+	pages removeKey: anInteger 
 ]

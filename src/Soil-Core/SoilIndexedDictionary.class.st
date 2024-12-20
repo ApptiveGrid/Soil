@@ -45,8 +45,7 @@ SoilIndexedDictionary >> at: key [
 SoilIndexedDictionary >> at: key ifAbsent: aBlock [
 	^ self 
 		basicAt: key 
-		ifAbsent: [ ^ aBlock value ]
-
+		ifAbsent: aBlock
 ]
 
 { #category : #accessing }
@@ -142,11 +141,9 @@ SoilIndexedDictionary >> last [
 	
 ]
 
-{ #category : #private }
-SoilIndexedDictionary >> loadFrom: aFileReference [ 
-	^ SoilSkipList new 
-		path: aFileReference;
-		open
+{ #category : #accessing }
+SoilIndexedDictionary >> last: anInteger [
+	^ self newIterator last: anInteger
 ]
 
 { #category : #accessing }
@@ -175,6 +172,11 @@ SoilIndexedDictionary >> nextCloseTo: aKey [
 	^ self newIterator nextCloseTo: aKey 
 ]
 
+{ #category : #accessing }
+SoilIndexedDictionary >> persistentIndex [
+	^ index persistentIndex 
+]
+
 { #category : #private }
 SoilIndexedDictionary >> prepareNewValues [
 	newValues copy keysAndValuesDo: [ :key :object |
@@ -197,15 +199,24 @@ SoilIndexedDictionary >> removeKey: key [
 
 { #category : #removing }
 SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
-	 | v |
+	 | v newValueRemoved |
 	"remove from newValues as there could be a new at:put: on that
 	key but removing the key will remove the value again"
-	newValues removeKey: key ifAbsent: nil.
-	v := self basicAt: key ifAbsent: [^ aBlock value].
-	removedValues 
+	newValueRemoved := (newValues removeKey: key ifAbsent: nil) notNil.
+	v := self newIterator removeKey: key ifAbsent: [^ aBlock value].
+	"remove value and therefor create a journal entry only if it has not been 
+	in newValues which removes just a freshly added key again"
+	newValueRemoved ifFalse: [
+		removedValues 
 			at: key 
-			put: v asSoilObjectId.
-	^ self newIterator removeKey: key
+			put: v asSoilObjectId ].
+	^v
+]
+
+{ #category : #enumerating }
+SoilIndexedDictionary >> reverseDo: aBlock [
+ 	self newIterator reverseDo: [ :objectId | 
+ 				aBlock value: objectId ]
 ]
 
 { #category : #accessing }

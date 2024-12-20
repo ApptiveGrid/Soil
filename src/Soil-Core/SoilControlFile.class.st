@@ -224,5 +224,5 @@ SoilControlFile >> updateDatabaseVersion: anInteger [
 { #category : #writing }
 SoilControlFile >> writeContentsToDisk [
 	soil setup isFsyncEnabled ifTrue: [  
-		super writeContentsToDisk ]
+		stream sync ]
 ]

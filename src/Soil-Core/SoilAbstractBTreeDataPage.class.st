@@ -27,11 +27,21 @@ SoilAbstractBTreeDataPage >> find: aKey with: aBTree [
 
 ]
 
+{ #category : #private }
+SoilAbstractBTreeDataPage >> findPreviousPage: aKey with: aBTree path: aPath [
+	| pageToCheck |
+	pageToCheck := aPath reverse detect: [:each | (each itemBefore: aKey) isNotNil].
+	pageToCheck := aBTree pageAt: (pageToCheck itemBefore: aKey) value.
+	"if we get an index page, follow the last till reaching the data page"
+	[pageToCheck isIndexPage ] whileTrue: [ pageToCheck := aBTree pageAt: pageToCheck lastItem value].
+	^ pageToCheck 
+]
+
 { #category : #utilities }
 SoilAbstractBTreeDataPage >> headerSize [
 	^ super headerSize  
 		+ self pointerSize "next"
-		+ 2 "items size"
+
 ]
 
 { #category : #initialization }
@@ -46,7 +56,7 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 
 	| newPage pageWithItem return |
 
-	return := SoilBTreeReturnWrapper new returnValue: ((self associationAt: anItem key ifAbsent: nil) ifNotNil: [:item | item value]).
+	return := SoilBTreeReturnWrapper new returnValue: (self valueAt: anItem key).
 	self addItem: anItem.
 	self hasRoom ifTrue: [  iterator currentPage: self. ^ return ].
 	"We have to split"
@@ -56,13 +66,19 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 						ifTrue: [ newPage ]
 						ifFalse: [ self ]).
 	iterator currentPage: pageWithItem.
+	
+	"check that the current and new pages are balanced"
+	self flag: #TODO. "should be moved to a consistency checker"
+	newPage bTreeAssertion.
+	self bTreeAssertion.
+	
 	"we need to add the new page to the index above"
-	^ return indexEntry: (newPage smallestKey -> newPage index)
+	^ return indexEntry: (newPage smallestKey -> newPage offset)
 ]
 
 { #category : #testing }
 SoilAbstractBTreeDataPage >> isIndexPage [
-	^ false
+	^false
 ]
 
 { #category : #testing }

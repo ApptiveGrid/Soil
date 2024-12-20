@@ -42,7 +42,7 @@ SoilInstanceVisitor >> visitObjectId: aSoilObjectId [
 { #category : #visiting }
 SoilInstanceVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [ 
 	| numberOfPages |
-	numberOfPages := aSoilPagedFileIndexStore headerPage lastPageIndex.
+	numberOfPages := aSoilPagedFileIndexStore headerPage lastPageOffset.
 	1 to: numberOfPages do: [ :pageIndex | | page |
 		page := aSoilPagedFileIndexStore pageAt: pageIndex.
 		page items do: [ :item |

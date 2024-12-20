@@ -51,11 +51,6 @@ SoilNewObjectEntry >> context [
 	^ objectId
 ]
 
-{ #category : #committing }
-SoilNewObjectEntry >> effect [ 
-	^ 'position: ', position asString
-]
-
 { #category : #accessing }
 SoilNewObjectEntry >> objectId [
 	^ objectId
@@ -71,11 +66,6 @@ SoilNewObjectEntry >> objectIds [
 	^ { objectId }
 ]
 
-{ #category : #'as yet unclassified' }
-SoilNewObjectEntry >> objectIn: aSoilTransaction [
-	^ (aSoilTransaction materializeRecord: bytes asSoilClusterVersion) object 
-]
-
 { #category : #printing }
 SoilNewObjectEntry >> printOn: aStream [ 
 	super printOn: aStream.
@@ -84,7 +74,7 @@ SoilNewObjectEntry >> printOn: aStream [
 		<< objectId asString 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilNewObjectEntry >> providesObjectIds [ 
 	^ true
 ]

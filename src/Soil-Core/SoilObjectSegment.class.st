@@ -19,19 +19,21 @@ SoilObjectSegment >> acceptSoil: aSoilVisitor [
 		ifFalse: [ aSoilVisitor visitObjectSegment: self ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilObjectSegment >> allRecords [
 	^ objectFile allRecords
 ]
 
 { #category : #accessing }
 SoilObjectSegment >> allVersionsAt: index [ 
-	| obj versions |
+	| obj versions objectId |
 	obj := self at: index.
 	versions := OrderedCollection new.
 	versions add: obj.
+	objectId := obj objectId.
 	[ obj previousVersionPosition isZero ] whileFalse: [ 
 		obj := objectFile atPosition: obj previousVersionPosition.
+		obj objectId: objectId.
 		versions add: obj ].
 	^ versions
 ]
@@ -134,12 +136,6 @@ SoilObjectSegment >> indexAt: indexId ifAbsent: aBlock [
 	^ self indexManager 
 		at: indexId 
 		ifAbsent: aBlock
-]
-
-{ #category : #accessing }
-SoilObjectSegment >> indexAt: indexId put: aSoilIndex [
-
-	^ self indexManager at: indexId put: aSoilIndex
 ]
 
 { #category : #accessing }

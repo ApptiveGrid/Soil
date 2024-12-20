@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilSkipListPageTest,
 	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Index'
 }
 
 { #category : #'instance creation' }
@@ -18,7 +18,7 @@ SoilSkipListPageTest >> readPageFrom: aStream [
 SoilSkipListPageTest >> testCreation [ 
 	| page |
 	page := SoilSkipListDataPage new 
-		index: 1;
+		offset: 1;
 		level: 8;
 		pageSize: 4096;
 		keySize: 16;
@@ -33,16 +33,16 @@ SoilSkipListPageTest >> testDataPageFull [
 	page := SoilSkipListDataPage new 
 		keySize: 8;
 		valueSize: 8;
-		index: 1;
+		offset: 1;
 		level: 8;
 		pageSize: 4096.
 	1 to: 255 do: [ :n |
 		page addItem: (n -> n) ].
 	self assert: page hasRoom equals: false.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	1 to: 255 do: [ :n |
 		self assert: (page itemAt: n ifAbsent: nil) value equals: n ]
@@ -55,7 +55,7 @@ SoilSkipListPageTest >> testDataPageFullStreamSize [
 	page := SoilSkipListDataPage new 
 		keySize: 8;
 		valueSize: 8;
-		index: 1;
+		offset: 1;
 		level: 5;
 		pageSize: 4096.
 	number := 1.
@@ -63,7 +63,7 @@ SoilSkipListPageTest >> testDataPageFullStreamSize [
 		page addItem: (number -> number).
 		number := number + 1 ].
 	self assert: page hasRoom equals: false.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self assert: bytes size <= page pageSize
@@ -75,7 +75,7 @@ SoilSkipListPageTest >> testDataPageSizeOfHeader [
 	page := SoilSkipListDataPage new 
 		keySize: 8;
 		valueSize: 8;
-		index: 1;
+		offset: 1;
 		level: 8;
 		pageSize: 4096.
 	bytes := ByteArray streamContents: [ :stream |
@@ -87,32 +87,32 @@ SoilSkipListPageTest >> testDataPageSizeOfHeader [
 SoilSkipListPageTest >> testDataPageWriteAndRead [
 	| page bytes readPage |
 	page := SoilSkipListDataPage new 
-		index: 1;
+		offset: 1;
 		level: 8.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	self assert: readPage level equals: 8.
-	self deny: readPage isDirty 
+	self deny: readPage needsWrite 
 ]
 
 { #category : #tests }
 SoilSkipListPageTest >> testDataPageWriteAndReadRightArray [
 	| page bytes readPage |
 	page := SoilSkipListDataPage new 
-		index: 1;
+		offset: 1;
 		level: 8;
 		setRight: #( 1 2 3 4 5 6 7 8 ).
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream. 
 	self assert: readPage level equals: 8.
 	self assert: readPage right equals: #( 1 2 3 4 5 6 7 8).
-	self deny: readPage isDirty 
+	self deny: readPage needsWrite 
 ]
 
 { #category : #tests }
@@ -122,17 +122,17 @@ SoilSkipListPageTest >> testHeaderPageFull [
 		keySize: 8;
 		valueSize: 8;
 		maxLevel: 16;
-		index: 1;
+		offset: 1;
 		level: 8;
 		pageSize: 4096;
-		lastPageIndex: 2.
+		lastPageOffset: 2.
 	1 to: 253 do: [ :n |
 		page addItem: (n -> n) ].
 	self assert: page hasRoom equals: false.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	1 to: 253 do: [ :n |
 		self assert: (page itemAt: n ifAbsent: nil) value equals: n ]
@@ -146,8 +146,8 @@ SoilSkipListPageTest >> testHeaderPageFullStreamSize [
 		keySize: 7;
 		valueSize: 8;
 		maxLevel: 8;
-		lastPageIndex: 1;
-		index: 1;
+		lastPageOffset: 1;
+		offset: 1;
 		level: 6;
 		pageSize: 4096.
 	number := 1.
@@ -155,7 +155,7 @@ SoilSkipListPageTest >> testHeaderPageFullStreamSize [
 		page addItem: (number -> number).
 		number := number + 1 ].
 	self assert: page hasRoom equals: false.
-	self assert: page isDirty.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
 	self assert: bytes size <= page pageSize
@@ -168,10 +168,10 @@ SoilSkipListPageTest >> testHeaderPageSizeOfHeader [
 		keySize: 8;
 		valueSize: 8;
 		maxLevel: 16;
-		index: 1;
+		offset: 1;
 		level: 8;
 		pageSize: 4096;
-		lastPageIndex: 2.
+		lastPageOffset: 2.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeHeaderOn: stream ].
 	self assert: bytes size equals: page headerSize 
@@ -184,18 +184,43 @@ SoilSkipListPageTest >> testHeaderPageWriteAndRead [
 		keySize: 16;
 		valueSize: 8;
 		maxLevel: 12;
-		index: 1;
+		offset: 1;
 		level: 8;
-		lastPageIndex: 2.
-	self assert: page isDirty.
+		lastPageOffset: 2.
+	self assert: page needsWrite.
 	bytes := ByteArray streamContents: [ :stream |
 		page writeOn: stream ].
-	self deny: page isDirty.
+	self deny: page needsWrite.
 	readPage := self readPageFrom: bytes readStream.
 	self assert: readPage level equals: 8.
 	self assert: readPage keySize equals: 16.
 	self assert: readPage valueSize equals: 8.
 	self assert: readPage maxLevel equals: 12.
-	self assert: readPage lastPageIndex equals: 2.
-	self deny: readPage isDirty 
+	self assert: readPage lastPageOffset equals: 2.
+	self deny: readPage needsWrite 
+]
+
+{ #category : #tests }
+SoilSkipListPageTest >> testWriteOldVersion [
+	| page bytes readPage |
+	page := SoilSkipListHeaderPage new 
+		keySize: 8;
+		valueSize: 8;
+		maxLevel: 16;
+		offset: 1;
+		level: 8;
+		pageSize: 4096;
+		lastPageOffset: 2;
+		instVarNamed: #version put: 1;
+		yourself.
+	1 to: 10 do: [ :n |
+		page addItem: (n -> n) ].
+	self assert: page needsWrite.
+	bytes := ByteArray streamContents: [ :stream |
+		page writeOn: stream ].
+	self deny: page needsWrite.
+	readPage := self readPageFrom: bytes readStream.
+	self assert: readPage version equals: 1.
+	self assert: (readPage instVarNamed: #size) equals: -1 
+
 ]

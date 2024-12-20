@@ -6,6 +6,8 @@ Soil is an object oriented database in pharo. It is transaction based having ACI
 - [Controlling the lifecycle of a database instance](database-lifecycle-management.md)
 - [Store and retrieve a model with transactions](model-management.md)
 - [FAQ - frequently asked questions](faq.md)
+- [Changelog - releases and changes](changelog.md)
+
 # Additional 
 
 - [Initial plan](initial-plan.md)

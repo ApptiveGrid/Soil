@@ -28,6 +28,14 @@ SoilIndexItemsPage >> addItem: anAssociation [
 	^ self subclassResponsibility
 ]
 
+{ #category : #converting }
+SoilIndexItemsPage >> asSoilFreePage [
+	^ SoilFreePage new 
+		offset: offset;
+		pageSize: pageSize;
+		markDirty
+]
+
 { #category : #accessing }
 SoilIndexItemsPage >> associationAt: anInteger [ 
 	^ self
@@ -40,6 +48,17 @@ SoilIndexItemsPage >> associationAt: anInteger ifAbsent: aBlock [
 	^ items 
 		findBinary: [ :each | anInteger - each key] 
 		ifNone: [ aBlock value ].
+]
+
+{ #category : #testing }
+SoilIndexItemsPage >> canBeRemoved [
+	^ self presentItemCount isZero
+]
+
+{ #category : #running }
+SoilIndexItemsPage >> cleanRemoved [
+	items removeAllSuchThat: [ :each | each value isRemoved ].
+	needWrite := true
 ]
 
 { #category : #accessing }
@@ -58,7 +77,7 @@ SoilIndexItemsPage >> hasKey: aKey [
 SoilIndexItemsPage >> hasRoom [
 	| used itemSize |
 	itemSize := self keySize + self valueSize.
-	used := self headerSize + (items size * itemSize).
+	used := self headerSize + 2 "items size" +(items size * itemSize).
 	^ used <= (self pageSize - itemSize)
 ]
 
@@ -78,6 +97,11 @@ SoilIndexItemsPage >> indexOfKey: anInteger [
 SoilIndexItemsPage >> initialize [
 	super initialize.
 	items := SortedCollection new
+]
+
+{ #category : #testing }
+SoilIndexItemsPage >> isDirty [
+	^ self needsWrite or: [ self needsCleanup ] 
 ]
 
 { #category : #testing }
@@ -117,7 +141,7 @@ SoilIndexItemsPage >> itemAt: key put: anObject [
 	| removedItem |
 	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
 	items add: (key -> anObject).
-	dirty := true.
+	needWrite := true.
 	^ removedItem
 ]
 
@@ -131,7 +155,7 @@ SoilIndexItemsPage >> itemBefore: key [
 
 { #category : #accessing }
 SoilIndexItemsPage >> itemCapacity [
-	^ ((self pageSize - self headerSize) / (self keySize + self valueSize)) floor
+	^ ((self pageSize - (self headerSize + 2 "items size" )) / (self keySize + self valueSize)) floor
 ]
 
 { #category : #accessing }
@@ -148,7 +172,7 @@ SoilIndexItemsPage >> itemRemoveAt: anInteger ifAbsent: aBlock [
 		findBinaryIndex: [ :each |  anInteger - each key ] 
 		do: [:ind | item := items removeAt: ind ]
 		ifNone: [ ^ aBlock value ].
-	dirty := true.
+	needWrite := true.
 	^ item
 ]
 
@@ -157,7 +181,7 @@ SoilIndexItemsPage >> itemRemoveIndex: anInteger [
 	| item |
 	item := items at: anInteger.
 	items removeAt: anInteger.
-	dirty := true.
+	needWrite := true.
 	^ item
 ]
 
@@ -192,6 +216,11 @@ SoilIndexItemsPage >> keySize: anInteger [
 ]
 
 { #category : #accessing }
+SoilIndexItemsPage >> label [ 
+	^ 'items page'
+]
+
+{ #category : #accessing }
 SoilIndexItemsPage >> lastItem [
 
 	^ items isNotEmpty ifTrue: [ items last ] ifFalse: [ nil ]
@@ -213,6 +242,11 @@ SoilIndexItemsPage >> lastTransaction: anInteger [
 	lastTransaction := anInteger
 ]
 
+{ #category : #testing }
+SoilIndexItemsPage >> needsCleanup [ 
+	^ items size > self presentItemCount 
+]
+
 { #category : #accessing }
 SoilIndexItemsPage >> numberOfItems [
 	^ items size
@@ -222,6 +256,11 @@ SoilIndexItemsPage >> numberOfItems [
 SoilIndexItemsPage >> postCopy [ 
 	super postCopy.
 	items := items copy.
+]
+
+{ #category : #utilities }
+SoilIndexItemsPage >> presentItemCount [
+	^ (items reject: [ :each | each value isRemoved ]) size 
 ]
 
 { #category : #reading }
@@ -275,6 +314,7 @@ SoilIndexItemsPage >> valueSize: anInteger [
 
 { #category : #writing }
 SoilIndexItemsPage >> writeItemsOn: aStream [ 
+	aStream nextPutAll: (items size asByteArrayOfSize: self itemsSizeSize).
 	items do: [ :assoc |
 		aStream 
 			nextPutAll: (assoc key asByteArrayOfSize: self keySize);

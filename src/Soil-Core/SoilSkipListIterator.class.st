@@ -27,15 +27,21 @@ SoilSkipListIterator >> basicAt: indexKey put: anObject [
 
 	"as an optimization we return the prior value stored in the list. If
 	there was none we return nil"
+	index addDirtyPage: currentPage.
 	^(currentPage hasKey: indexKey)
-		  ifTrue: [ currentPage itemAt: indexKey put: anObject ]
-		  ifFalse: [
-			  currentPage hasRoom ifFalse: [  | newPage |
-				  newPage := index splitPage: self forKey: indexKey.
-				  currentPage := currentPage biggestKey < indexKey
+		ifTrue: [ 
+			"overwriting a key does not change the size of an index"
+			
+			(currentPage itemAt: indexKey put: anObject) value ]
+		ifFalse: [
+			currentPage hasRoom ifFalse: [  | newPage |
+				newPage := index splitPage: self forKey: indexKey.
+				index addDirtyPage: newPage.	
+				currentPage := currentPage biggestKey < indexKey
 					                 ifTrue: [ newPage ]
 					                 ifFalse: [ currentPage ] ].
 			  currentPage addItem: indexKey -> anObject.
+			  index increaseSize.
 			  nil ]
 ]
 
@@ -52,6 +58,27 @@ SoilSkipListIterator >> findPageFor: indexKey [
 					whileTrue: [ currentPage := candidatePage  ].
 			self atLevel: level put: currentPage. ].
 	^ currentPage 
+]
+
+{ #category : #private }
+SoilSkipListIterator >> findPreviousPageOf: aPage [
+	| pageIndex candidatePage keyOfPage |
+	aPage isHeaderPage ifTrue: [ ^nil ].
+	keyOfPage := aPage smallestKey.
+	
+	currentPage := index headerPage.
+	levels size to: 1 by: -1 do: [ :level |
+		[ 
+			pageIndex := currentPage rightAt: level.
+			(pageIndex > 0) and: [ 
+				candidatePage := self pageAt: pageIndex.
+				candidatePage smallestKey < keyOfPage ] ]
+					whileTrue: [ currentPage := candidatePage  ].
+			self atLevel: level put: currentPage. ].
+	
+	"for now keep an assert here to be sure this works correctly"
+	self assert: (self nextPage == aPage).
+	^ currentPage
 ]
 
 { #category : #accessing }
@@ -90,4 +117,17 @@ SoilSkipListIterator >> levelAt: anInteger [
 { #category : #printing }
 SoilSkipListIterator >> printOn: aStream [ 
 	aStream << 'path: ' << levels asString
+]
+
+{ #category : #accessing }
+SoilSkipListIterator >> size [ 
+	| headerPage |
+	"size in the header page is only correct if the current transaction
+	read version is bigger than the last modification of the page. If 
+	the header page is newer than the current transaction we need to scan
+	the index for the size"
+	headerPage := index headerPage.
+	^ (readVersion isNil or: [ headerPage lastTransaction > readVersion ]) 
+		ifTrue: [ super size] 
+		ifFalse: [ index size  ]
 ]

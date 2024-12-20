@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Model'
 }
 
 { #category : #accessing }
@@ -127,6 +127,17 @@ SoilTest >> testDisabledFsync [
 ]
 
 { #category : #tests }
+SoilTest >> testEnabledFsync [
+	| tx |
+	soil setup enableFsync.
+	tx := soil newTransaction.
+	tx root: self simpleGraph.
+	self 
+		shouldnt: [ tx commit ]
+		raise: Error
+]
+
+{ #category : #tests }
 SoilTest >> testFindRecordWithIndex [ 
 	| tx skipList rec |
 	tx := soil newTransaction.
@@ -202,8 +213,16 @@ SoilTest >> testMetricsUncached [
 	self assert: metrics metaRecordCacheHits equals: 0.
 	self assert: metrics metaRecordsWritten equals: 3.
 	self assert: metrics metaRecordCacheHitRatio equals: 0.
-
-
+	
+	"test some more metrics here"
+	self assert: metrics objectRecordCacheMaximumSize equals: 0.
+	self assert: metrics metaRecordCacheMaximumSize equals: 0.
+	self assert: metrics metaRecordCacheSize equals: 0.
+	self assert: metrics objectRecordCacheSize equals: 0.
+	
+	self assert: metrics objectsMaterialized equals: 12.
+	self assert: metrics objectsSerialized equals: 8.
+	self assert: metrics transactionsAborted equals: 0
 ]
 
 { #category : #tests }
@@ -246,26 +265,116 @@ SoilTest >> testMetricsWithRecordCache [
 	self assert: metrics metaRecordCacheMisses equals: 0.
 	self assert: metrics metaRecordCacheHitRatio equals: 1.
 	self assert: metrics metaRecordsWritten equals: 3.
+	
+	"test some more metrics here"
+	self assert: metrics objectRecordCacheMaximumSize equals: 1000.
+	self assert: metrics metaRecordCacheMaximumSize equals: 1000.
+	self assert: metrics metaRecordCacheSize equals: 3.
+	self assert: metrics objectRecordCacheSize equals: 1.
 
 
 ]
 
 { #category : #tests }
+SoilTest >> testMigrationFull [
+	| txn |
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationFull.
+	soil newApplicationMigration migrate.
+	txn := soil newTransaction. 
+	self assert: (txn root at: #four) equals: 4.
+	txn abort.
+]
+
+{ #category : #tests }
+SoilTest >> testMigrationHalf [
+	| txn |
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationHalf.
+	soil newApplicationMigration migrate.
+	txn := soil newTransaction. 
+	self assert: (txn root at: #two) equals: 2.
+	self deny: (txn root includesKey: #three).
+	txn abort.
+]
+
+{ #category : #tests }
+SoilTest >> testMigrationHalfForced [
+	| txn |
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationHalf.
+	soil newApplicationMigration useAll; migrate.
+	txn := soil newTransaction. 
+	self assert: (txn root at: #four) equals: 4.
+	txn abort.
+]
+
+{ #category : #tests }
+SoilTest >> testMigrationVersionsFull [
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationFull.
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 2 3 4 ).
+	
+	soil control applicationVersion: 2.
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 3 4 ).
+	
+
+]
+
+{ #category : #tests }
+SoilTest >> testMigrationVersionsHalf [
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationHalf.
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 2 ).
+	
+	soil control applicationVersion: 2.
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( ).
+	
+	self assertCollection: (soil newApplicationMigration forceMigration: true;availableVersions) hasSameElements: #( 3 4 ).
+	
+	
+
+]
+
+{ #category : #tests }
+SoilTest >> testRootSendingClass [
+	"We have a root in a Dictionary and that object overrides #= that checks using #class.
+	This tests that the proxy forwards #class correctly"
+
+	| tx collection objectUsingClassinQueals |
+	tx := soil newTransaction.
+	collection := OrderedCollection new.
+	tx root: collection.
+	objectUsingClassinQueals := RBComment with:
+		                            (RBCommentToken
+			                             value: 'Some sample text'
+			                             start: 5
+			                             stop: 21).
+	tx makeRoot: objectUsingClassinQueals.
+	collection add: objectUsingClassinQueals.
+	tx markDirty: objectUsingClassinQueals.
+	tx markDirty: collection.
+	tx commit.
+
+	"now lets try to remove the object in a new transaction, note that the #remove uses #= which sends #class"
+	tx := soil newTransaction.
+	tx root remove: objectUsingClassinQueals.
+	tx commit
+]
+
+{ #category : #tests }
 SoilTest >> testSerializingClassDescription [
-	| obj bytes obj2 stream transaction |
-	self skip.
+	| obj bytes obj2 stream transaction registry |
 	obj :=  { #C -> (SoilBehaviorDescription for: SOTestClusterAlwaysRoot ) } asDictionary.
 	stream := ByteArray new writeStream.
+	registry := SoilStandaloneObjectRegistry new.
 	transaction := soil newTransaction.
 	SoilSerializer new
 		soil: soil;
 		transaction: transaction;
 		stream: stream; 
+		externalObjectRegistry: registry;
 		serialize: obj.
 	bytes := stream contents.
 	obj2 := SoilMaterializer new 
 		soil: soil;
 		transaction: transaction;
+		externalObjectRegistry: registry;
 		stream: bytes readStream;
 		materialize.
 	self assert: (obj2 at: #C) class equals: SoilBehaviorDescription   
@@ -324,7 +433,7 @@ SoilTest >> testSerializingToSavedRoot [
 	tx3 := soil3 newTransaction.
 	materializedRoot := tx3 root.
 	materializedModelMap := materializedRoot at: modelName.
-	self assert: materializedModelMap class equals: SoilObjectProxy.
+	self assert: materializedModelMap isSoilProxy.
 	self assert: materializedModelMap soilRealObject class equals: Dictionary.
 	self assert: (materializedModelMap soilRealObject at: 'foo') class equals: SoilTestGraphRoot.
 	self assert: (materializedModelMap soilRealObject at: 'foo') nested reference nested label equals: 'nested under cluster'

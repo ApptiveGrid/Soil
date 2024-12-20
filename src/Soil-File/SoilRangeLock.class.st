@@ -99,7 +99,9 @@ SoilRangeLock >> printOn: aStream [
 	path := registry ifNotNil: [ registry path pathString ].
 	stream ifNotNil: [ 
 		path := stream fileStream name asString ].
-	aStream << ' @ ' << path
+	aStream << ' @ ' << path.
+	aStream << ' -> '.
+	context printOn: aStream 
 ]
 
 { #category : #accessing }
