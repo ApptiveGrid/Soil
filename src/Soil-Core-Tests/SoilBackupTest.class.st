@@ -160,6 +160,39 @@ SoilBackupTest >> testBackupOldVersion [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testBackupTheBackup [
+	| tx visitor dict secondBackup txn |
+	dict := SoilSkipListDictionary  new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+	tx := soil newTransaction.
+	tx root: dict.
+	1 to: 100 do: [ :n | dict at: n put: n asString ].
+	tx commit.
+	
+	backupSoil := Soil createOnPath: self path, #backup1.
+	visitor := SoilBackupVisitor new 
+		target: backupSoil;
+		backup: soil.
+
+	backupSoil close; open.
+	
+	secondBackup := Soil createOnPath: self path, #backup2.
+	visitor := SoilBackupVisitor new 
+		target: secondBackup;
+		backup: backupSoil.
+	secondBackup open.
+
+	txn := secondBackup newTransaction.
+	self assert: txn root values size equals: 100.
+	txn abort.
+	
+	secondBackup close; destroy
+		
+]
+
+{ #category : #tests }
 SoilBackupTest >> testBackupWithIndex [ 
 	| tx backup tx2 dict object |
 	tx := soil newTransaction.

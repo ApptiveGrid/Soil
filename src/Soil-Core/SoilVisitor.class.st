@@ -10,9 +10,49 @@ SoilVisitor class >> isAbstract [
 	^ self == SoilVisitor
 ]
 
-{ #category : #visiting }
-SoilVisitor >> processReference: reference [
-	self visit: reference
+{ #category : #'as yet unclassified' }
+SoilVisitor >> inspectionGraph [
+	<inspectorPresentationOrder: 800 title: 'graph'>
+
+	^ SpRoassalPresenter new canvas: self roassalCanvas 
+]
+
+{ #category : #'as yet unclassified' }
+SoilVisitor >> roassalCanvas [ 
+	| canvas allNodes shapes nodes |
+	canvas := RSCanvas new.
+	allNodes := self allNodes.
+	shapes := nodes values collect: [ :node | | box lbl |
+		lbl := RSLabel new
+			text: node asString;
+			yourself.
+		box := RSBox new
+			withBorder;
+			color: node graphColor;
+			cornerRadius: (RSCornerRadius new right: 20; left: 20);
+			extent: lbl extent + 10.
+		RSComposite new
+			draggable;
+			model: node;
+			shapes: (RSGroup with: box with: lbl );
+			yourself ].
+	canvas addAll: shapes.
+	canvas @ RSCanvasController.
+	RSLineBuilder orthoVertical   
+		markerEnd: (RSMarker new
+			offset: 3;
+			shape: (RSShapeFactory triangle
+				color: Color black;
+				size: 6;
+				yourself));
+		attachPoint: RSVerticalAttachPoint new;
+		canvas: canvas;
+		shapes: canvas nodes;
+		connectFrom: #parent.
+	RSTreeLayout new 
+		"verticallyReverse;"
+		on: canvas nodes.
+	^ canvas
 ]
 
 { #category : #visiting }

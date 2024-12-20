@@ -483,6 +483,39 @@ SoilIndexedDictionaryTest >> testFreePageReuse [
 
 { #category : #tests }
 SoilIndexedDictionaryTest >> testFreePageReuseExact [
+	| tx tx2 tx3 blockTx tx4 tx5 |
+	(classToTest = SoilBTreeDictionary) ifTrue: [ self skip ].
+	tx := soil newTransaction.
+	tx root: dict.
+	1 to: 1125 do: [ :n | dict at: n put: n asString ].
+	tx commit.
+	
+	"open a second transaction ..."
+	blockTx := soil newTransaction.
+	tx2 := soil newTransaction.
+	224 to: 899 do: [ :n |tx2 root removeKey: n ].
+	tx2 commit.
+	blockTx abort. 
+		
+	soil 
+		close; 
+		reopen.
+	"	soil checkpoint ."
+	tx3 := soil newTransaction.
+	900 to: 905 do: [ :n | tx3 root removeKey: n ].
+	tx3 root index wrapped markAllDirty.
+	tx3 commit.
+	self halt.
+	tx4 := soil newTransaction.
+	tx4 root at: 675 put: 675 asString.
+	tx4 root removeKey: 450.
+	tx4 commit.
+	tx5 := soil newTransaction.
+	self deny: (tx5 root index wrapped store headerPage right includes: 2)
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testFreePageReuseExact2 [
 	| tx tx2 tx3 blockTx tx4 tx5 tx15 |
 	(classToTest = SoilBTreeDictionary) ifTrue: [ self skip ].
 	tx := soil newTransaction.
@@ -509,6 +542,42 @@ SoilIndexedDictionaryTest >> testFreePageReuseExact [
 	tx4 commit.
 	tx5 := soil newTransaction.
 	self deny: (tx5 root index wrapped store headerPage right includes: 2)
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testFreePageReuseExact3 [
+	| tx blockTx |
+	(classToTest = SoilBTreeDictionary) ifTrue: [ self skip ].
+	'---start---' apptiveEmit.
+	tx := soil newTransaction.
+	tx root: dict.
+	tx commit.
+	1 to: 1500 do: [ :n |
+	'--- tx begin ---' apptiveEmit.
+	tx := soil newTransaction.
+	tx root at: n put: n asString.
+	(n > 250) ifTrue: [ 
+		tx root removeKey: n - 250 ].
+	'--- tx commit ---' apptiveEmit.
+	tx commit.
+	'--- tx end ---' apptiveEmit.
+	].
+   blockTx := soil newTransaction.
+	1501 to: 3000 do: [ :n |
+	tx := soil newTransaction.
+	tx root at: n put: n asString.
+	(n > 250) ifTrue: [ 
+		tx root removeKey: n - 250 ].
+	tx commit ].
+	blockTx abort.
+	soil close; open.
+	3001 to: 5000 do: [ :n |
+	tx := soil newTransaction.
+	tx root at: n put: n asString.
+	(n > 250) ifTrue: [ 
+		tx root removeKey: n - 250 ].
+	tx commit ].
+	self halt.
 ]
 
 { #category : #tests }

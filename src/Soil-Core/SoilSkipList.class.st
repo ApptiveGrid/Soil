@@ -83,6 +83,11 @@ SoilSkipList >> keySize: anInteger [
 	keySize := anInteger
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipList >> markAllDirty [ 
+	store pages do: [ :page | self addDirtyPage: page ]
+]
+
 { #category : #'instance creation' }
 SoilSkipList >> newHeaderPage [
 	^ SoilSkipListHeaderPage new

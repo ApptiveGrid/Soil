@@ -120,7 +120,7 @@ SoilBackupVisitor >> traverseGraph [
 { #category : #accessing }
 SoilBackupVisitor >> version: anObject [
 
-	version := anObject
+	databaseVersion := anObject
 ]
 
 { #category : #visiting }
