@@ -18,7 +18,6 @@ SoilBackupVisitor >> backup: aSoil [
 		databaseVersion := aSoil control databaseVersion ]. 
 	
 	self visit: soil.
-	self traverseGraph.
 	target close
 ]
 

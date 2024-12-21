@@ -38,7 +38,7 @@ SoilInstanceVisitor >> soil: anObject [
 ]
 
 { #category : #api }
-SoilInstanceVisitor >> traverse [
+SoilInstanceVisitor >> traverseGraph [ 
 	| objectId |
 	[ toBeProcessed isEmpty ] whileFalse: [  
 		objectId := toBeProcessed  removeFirst.

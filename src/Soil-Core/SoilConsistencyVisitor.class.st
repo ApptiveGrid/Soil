@@ -9,8 +9,7 @@ Class {
 
 { #category : #checking }
 SoilConsistencyVisitor >> check [
-	self visit: soil.
-	self traverse 
+	self visit: soil
 ]
 
 { #category : #'as yet unclassified' }

@@ -16,14 +16,6 @@ SoilBreadthFirstVisitor >> initialize [
 ]
 
 { #category : #accessing }
-SoilBreadthFirstVisitor >> process: aSoilObjectId [ 
-	((aSoilObjectId segment = 0) and: [ aSoilObjectId index = 2 ]) ifTrue: [ ^ self ].
-	(seen includes: aSoilObjectId) ifTrue: [ ^ self ].
-	seen add: aSoilObjectId.
-	toBeProcessed add: aSoilObjectId  
-]
-
-{ #category : #accessing }
 SoilBreadthFirstVisitor >> processObjectId: aSoilObjectId [ 
 	((aSoilObjectId segment = 0) and: [ aSoilObjectId index = 2 ]) ifTrue: [ ^ self ].
 	(seen includes: aSoilObjectId) ifTrue: [ ^ self ].
@@ -39,4 +31,10 @@ SoilBreadthFirstVisitor >> processReference: aSoilObjectId [
 { #category : #visiting }
 SoilBreadthFirstVisitor >> visitObjectId: anObjectId [ 
 	self halt.
+]
+
+{ #category : #visiting }
+SoilBreadthFirstVisitor >> visitSoil: aSoil [ 
+	super visitSoil: aSoil.
+	self traverseGraph 
 ]
