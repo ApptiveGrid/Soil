@@ -3,7 +3,7 @@ Class {
 	#superclass : #SoilCloneVisitor,
 	#instVars : [
 		'target',
-		'version'
+		'databaseVersion'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -14,8 +14,8 @@ SoilBackupVisitor >> backup: aSoil [
 	"if there is no version set we take the actual database version. This 
 	is to create a consistent backup regardless if transactions are committed 
 	while we are doing the backup"
-	version ifNil: [
-		version := aSoil control databaseVersion ]. 
+	databaseVersion ifNil: [
+		databaseVersion := aSoil control databaseVersion ]. 
 	
 	self visit: soil.
 	self traverseGraph.
@@ -88,6 +88,12 @@ SoilBackupVisitor >> copySourceCluster: aSoilPersistentClusterVersion [
 	^ self copyCluster: clusterCopy
 ]
 
+{ #category : #accessing }
+SoilBackupVisitor >> databaseVersion: anObject [
+
+	databaseVersion := anObject
+]
+
 { #category : #visiting }
 SoilBackupVisitor >> indexNotFound: indexId [ 
 	 Error signal: 'cannot find index with id ', indexId printString
@@ -113,7 +119,7 @@ SoilBackupVisitor >> traverseGraph [
 	| objectId |
 	[ toBeProcessed isEmpty ] whileFalse: [  
 		objectId := toBeProcessed  removeFirst.
-		self visit: (soil objectRepository at: objectId version: version) ].
+		self visit: (soil objectRepository at: objectId version: databaseVersion) ].
 	target close
 ]
 
