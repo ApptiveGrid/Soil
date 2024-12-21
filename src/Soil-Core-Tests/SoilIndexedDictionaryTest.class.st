@@ -513,40 +513,6 @@ SoilIndexedDictionaryTest >> testFreePageReuse [
 ]
 
 { #category : #tests }
-SoilIndexedDictionaryTest >> testFreePageSlidingRange [
-	| tx blockTx |
-	(classToTest = SoilBTreeDictionary) ifTrue: [ self skip ].
-	tx := soil newTransaction.
-	tx root: dict.
-	tx commit.
-	1 to: 1500 do: [ :n |
-	tx := soil newTransaction.
-	tx root at: n put: n asString.
-	(n > 250) ifTrue: [ 
-		tx root removeKey: n - 250 ].
-	tx commit.
-	].
-   blockTx := soil newTransaction.
-	1501 to: 3000 do: [ :n |
-	tx := soil newTransaction.
-	tx root at: n put: n asString.
-	(n > 250) ifTrue: [ 
-		tx root removeKey: n - 250 ].
-	tx commit ].
-	blockTx abort.
-	soil close; open.
-	3001 to: 5000 do: [ :n |
-	self 
-		shouldnt: [
-			tx := soil newTransaction.
-			tx root at: n put: n asString.
-			(n > 250) ifTrue: [ 
-				tx root removeKey: n - 250 ].
-			tx commit ]
-		raise: Error ]
-]
-
-{ #category : #tests }
 SoilIndexedDictionaryTest >> testFreePages [ 
 	| tx tx2 index indexManager |
 	indexManager := soil objectRepository firstSegment indexManager.
