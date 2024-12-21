@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilJournalConsistencyVisitor,
-	#superclass : #SoilVisitor,
+	#superclass : #SoilBasicVisitor,
 	#instVars : [
 		'databaseVersion',
 		'segments'

@@ -24,6 +24,13 @@ SoilConsistencyInspectorVisitor >> initialize [
 	nodes := Dictionary new 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilConsistencyInspectorVisitor >> inspectionGraph [
+	<inspectorPresentationOrder: 800 title: 'graph'>
+
+	^ SpRoassalPresenter new canvas: self roassalCanvas 
+]
+
 { #category : #accessing }
 SoilConsistencyInspectorVisitor >> nodeAt: aSoilObjectId [ 
 	^ nodes at: aSoilObjectId 

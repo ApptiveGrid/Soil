@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilCompareVersionsVisitor,
-	#superclass : #SoilInstanceVisitor,
+	#superclass : #SoilVisitor,
 	#instVars : [
 		'maxVersion'
 	],

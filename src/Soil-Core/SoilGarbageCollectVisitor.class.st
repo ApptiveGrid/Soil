@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilGarbageCollectVisitor,
-	#superclass : #SoilCloneVisitor,
+	#superclass : #SoilVisitor,
 	#instVars : [
 		'newSegment',
 		'indexIds',
@@ -27,7 +27,7 @@ SoilGarbageCollectVisitor >> garbageCollectHeap [
 	indexIds := Set new.
 	behaviorDescriptions := Set new.
 	self processObjectId: SoilObjectId root.
-	self traverseGraph.
+	self processLoop.
 	newSegment := nil 
 ]
 
@@ -36,7 +36,7 @@ SoilGarbageCollectVisitor >> garbageCollectMeta [
 self halt.
 	newSegment := soil objectRepository metaSegment makeGCClone.
 	toBeProcessed := behaviorDescriptions asOrderedCollection.
-	self traverseGraph.
+	self processLoop.
 	newSegment := nil 
 ]
 

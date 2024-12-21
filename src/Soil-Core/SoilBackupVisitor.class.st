@@ -1,9 +1,8 @@
 Class {
 	#name : #SoilBackupVisitor,
-	#superclass : #SoilCloneVisitor,
+	#superclass : #SoilVisitor,
 	#instVars : [
-		'target',
-		'databaseVersion'
+		'target'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -108,18 +107,15 @@ SoilBackupVisitor >> makeCopy: aSoilPersistentClusterVersion [
 		resetPreviousVersion.
 ]
 
+{ #category : #api }
+SoilBackupVisitor >> processLoop [ 
+	super processLoop.
+	target close
+]
+
 { #category : #accessing }
 SoilBackupVisitor >> target: aSoil [ 
 	target := aSoil
-]
-
-{ #category : #api }
-SoilBackupVisitor >> traverseGraph [ 
-	| objectId |
-	[ toBeProcessed isEmpty ] whileFalse: [  
-		objectId := toBeProcessed  removeFirst.
-		self visit: (soil objectRepository at: objectId version: databaseVersion) ].
-	target close
 ]
 
 { #category : #accessing }
