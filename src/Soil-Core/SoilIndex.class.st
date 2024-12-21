@@ -30,7 +30,6 @@ SoilIndex >> addDirtyPage: aPage [
 { #category : #adding }
 SoilIndex >> addToFreePages: aPage [  
 	| currentFreePage newFreePage |
-	('add to free pages #', aPage offset asString) apptiveEmit. 
 	newFreePage := aPage asSoilFreePage.
 	store pageAt: aPage offset put: newFreePage.
 	currentFreePage := self firstFreePage
