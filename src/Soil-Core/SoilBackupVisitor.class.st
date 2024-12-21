@@ -46,7 +46,7 @@ SoilBackupVisitor >> copyCluster: aSoilPersistentClusterVersion [
 		at: aSoilPersistentClusterVersion objectId
 		putBytes: aSoilPersistentClusterVersion serialize.
 	aSoilPersistentClusterVersion references do: [ :reference |
-		self process: reference ].
+		self processObjectId: reference ].
 	aSoilPersistentClusterVersion indexIds do:[ :indexId |
 		self copyIndexAt: indexId segment: aSoilPersistentClusterVersion segment ].
 	^ position 
