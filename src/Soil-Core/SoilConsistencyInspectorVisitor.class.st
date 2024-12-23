@@ -14,7 +14,7 @@ SoilConsistencyInspectorVisitor >> addCluster: aSoilPersistentClusterVersion [
 	^ nodes 
 		at: aSoilPersistentClusterVersion objectId 
 		ifAbsentPut: [
-			SoilVisualNode new 
+			SoilModelGraphNode new 
 				objectId: aSoilPersistentClusterVersion objectId;
 				yourself ]
 ]
@@ -24,8 +24,7 @@ SoilConsistencyInspectorVisitor >> check: anObject using: aBlock proceed: aBoole
 	aBlock 
 		on: Error 
 		do: [ :error | 
-			errors at: anObject put: (error -> currentNode).
-			proceed := aBoolean ]
+			errors at: anObject put: (error -> currentNode) ]
 ]
 
 { #category : #accessing }

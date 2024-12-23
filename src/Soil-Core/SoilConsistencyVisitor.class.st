@@ -3,8 +3,7 @@ Class {
 	#superclass : #SoilTransactionalVisitor,
 	#instVars : [
 		'lastIndexes',
-		'errors',
-		'proceed'
+		'errors'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -19,8 +18,7 @@ SoilConsistencyVisitor >> check: anObject using: aBlock proceed: aBoolean [
 	aBlock 
 		on: Error 
 		do: [ :error | 
-			errors at: anObject put: error.
-			proceed := aBoolean ]
+			errors at: anObject put: error ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -63,8 +61,7 @@ SoilConsistencyVisitor >> checkPagesOfIndex: index [
 SoilConsistencyVisitor >> initialize [ 
 	super initialize.
 	lastIndexes := Dictionary new.
-	errors := Dictionary new.
-	proceed := true
+	errors := Dictionary new
 ]
 
 { #category : #accessing }
