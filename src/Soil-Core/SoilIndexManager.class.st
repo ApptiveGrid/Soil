@@ -75,10 +75,7 @@ SoilIndexManager >> dirtyIndexes [
 SoilIndexManager >> flush [
 	
 	dirtyIndexes copy do: [ :index | 
-		SoilIndexCleaner new 
-			index: index;
-			readVersion: (self soil transactionManager smallestReadVersion);
-			clean.
+		index cleanUpToVersion: (self soil transactionManager smallestReadVersion).
 		index dirtyPages ifEmpty: [ dirtyIndexes remove: index ] ]
 ]
 
