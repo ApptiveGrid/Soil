@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'objectId',
 		'errors',
-		'outgoing'
+		'outgoing',
+		'incoming'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -16,7 +17,7 @@ SoilVisualNode >> addError: anError [
 
 { #category : #adding }
 SoilVisualNode >> addIncoming: aSoilObjectId [ 
-	incoming add: aSoilObjectId 
+	incoming add: aSoilObjectId  
 ]
 
 { #category : #adding }
@@ -37,6 +38,26 @@ SoilVisualNode >> extent [
 ]
 
 { #category : #'as yet unclassified' }
+SoilVisualNode >> findRoot: path seen: seen [
+	(seen includes: objectId) ifTrue: [ ^ nil ].
+	seen add: objectId.
+	path add: objectId.
+	incoming do: [ :node | 
+		(node objectId index = 1) ifTrue: [ 
+			path add: node objectId.
+			^ path ].
+		(node findRoot: path copy seen: seen) ifNotNil: [ :p2 | ^ p2 ] ].
+	^ nil 
+]
+
+{ #category : #'as yet unclassified' }
+SoilVisualNode >> findRootPath [
+	^ self 
+		findRoot: OrderedCollection new
+		seen: Set new
+]
+
+{ #category : #'as yet unclassified' }
 SoilVisualNode >> graphColor [
 	^ self hasErrors 
 		ifTrue: [  Color lightRed ] 
@@ -52,6 +73,7 @@ SoilVisualNode >> hasErrors [
 SoilVisualNode >> initialize [ 
 	super initialize.
 	outgoing := Set new.
+	incoming := Set new.
 	errors := OrderedCollection new 
 ]
 
@@ -78,4 +100,10 @@ SoilVisualNode >> printOn: aStream [
 { #category : #accessing }
 SoilVisualNode >> references [
 	^ outgoing
+]
+
+{ #category : #'as yet unclassified' }
+SoilVisualNode >> resolveObjectIdsIn: anObject [ 
+	outgoing := outgoing collect: [ :each |
+		anObject nodeAt: each  ]
 ]

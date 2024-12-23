@@ -16,6 +16,11 @@ SoilBasicVisitor >> processIndexId: indexId segment: aSegment [
 ]
 
 { #category : #visiting }
+SoilBasicVisitor >> processIndexValue: objectId [
+	self processObjectId: objectId 
+]
+
+{ #category : #visiting }
 SoilBasicVisitor >> processObjectId: aSoilObjectId [ 
 	^ aSoilObjectId 
 ]
@@ -46,6 +51,15 @@ SoilBasicVisitor >> visitControl: aSoilControlFile [
 SoilBasicVisitor >> visitDatabaseJournal: aSoilJournal [ 
 	self visitAll: aSoilJournal fragmentFiles.
 	^ aSoilJournal 
+]
+
+{ #category : #visiting }
+SoilBasicVisitor >> visitIndex: anIndex [ 
+	| iterator assoc objectId |
+	iterator := anIndex newIterator.
+	[ (assoc := iterator nextAssociation) isNil ] whileFalse: [ 
+		objectId := assoc value asSoilObjectId.
+		self processIndexValue: objectId. ]
 ]
 
 { #category : #visiting }
@@ -95,7 +109,7 @@ SoilBasicVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [
 		page := aSoilPagedFileIndexStore pageAt: pageOffset.
 		page items do: [ :item |
 			item value isRemoved ifFalse: [ 
-				self processObjectId: item value asSoilObjectId ] ].
+				self processIndexValue: item value asSoilObjectId ] ].
 		pageOffset := page next ].
 	^ aSoilPagedFileIndexStore 
 ]
@@ -108,8 +122,8 @@ SoilBasicVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion
 ]
 
 { #category : #visiting }
-SoilBasicVisitor >> visitSkipList: aSoilSkipList [ 
-	self visit: aSoilSkipList store
+SoilBasicVisitor >> visitSkipList: aSkiplist [ 
+	self visitIndex: aSkiplist
 ]
 
 { #category : #visiting }

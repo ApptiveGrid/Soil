@@ -13,9 +13,24 @@ SoilConsistencyInspectorVisitor >> addCluster: aSoilPersistentClusterVersion [
 	nodes at: aSoilPersistentClusterVersion objectId ifPresent: [ Error signal ].
 	^ nodes 
 		at: aSoilPersistentClusterVersion objectId 
-		ifAbsentPut: (SoilVisualNode new 
-			objectId: aSoilPersistentClusterVersion objectId;
-			yourself)
+		ifAbsentPut: [
+			SoilVisualNode new 
+				objectId: aSoilPersistentClusterVersion objectId;
+				yourself ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilConsistencyInspectorVisitor >> check: anObject using: aBlock proceed: aBoolean [
+	aBlock 
+		on: Error 
+		do: [ :error | 
+			errors at: anObject put: (error -> currentNode).
+			proceed := aBoolean ]
+]
+
+{ #category : #accessing }
+SoilConsistencyInspectorVisitor >> errors [
+	^ errors 
 ]
 
 { #category : #initialization }
@@ -26,7 +41,7 @@ SoilConsistencyInspectorVisitor >> initialize [
 
 { #category : #'as yet unclassified' }
 SoilConsistencyInspectorVisitor >> inspectionGraph [
-	<inspectorPresentationOrder: 800 title: 'graph'>
+	<inspectorPresentationOrder: 1800 title: 'graph'>
 
 	^ SpRoassalPresenter new canvas: self roassalCanvas 
 ]
@@ -36,10 +51,31 @@ SoilConsistencyInspectorVisitor >> nodeAt: aSoilObjectId [
 	^ nodes at: aSoilObjectId 
 ]
 
+{ #category : #visiting }
+SoilConsistencyInspectorVisitor >> processIndexValue: aSoilObjectId [ 
+	self processOutgoing: aSoilObjectId.
+	super processIndexValue: aSoilObjectId 
+]
+
+{ #category : #'as yet unclassified' }
+SoilConsistencyInspectorVisitor >> processOutgoing: aSoilObjectId [ 
+	currentNode addOutgoing: aSoilObjectId.
+
+]
+
 { #category : #'as yet unclassified' }
 SoilConsistencyInspectorVisitor >> processReference: aSoilObjectId [ 
-	currentNode addOutgoing: aSoilObjectId.
+	self processOutgoing: aSoilObjectId.
 	super processReference: aSoilObjectId 
+]
+
+{ #category : #'as yet unclassified' }
+SoilConsistencyInspectorVisitor >> resolveNodes [
+	nodes valuesDo: [ :each | 
+		each resolveObjectIdsIn: self ].
+	nodes keysAndValuesDo: [ :objectId :node | 
+		node outgoing do: [ :outgoing |
+			outgoing addIncoming: node ] ]
 ]
 
 { #category : #'as yet unclassified' }

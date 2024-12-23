@@ -219,6 +219,7 @@ Soil >> findRecord: aBlock [
 
 { #category : #'memory space' }
 Soil >> garbageCollect [
+	Error signal: 'garbage collect is not ready to be used, yet'.
 	SoilGarbageCollectVisitor new 
 		soil: self;
 		run
