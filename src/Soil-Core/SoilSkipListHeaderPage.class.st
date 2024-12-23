@@ -174,10 +174,7 @@ SoilSkipListHeaderPage >> smallestKey [
 
 { #category : #accessing }
 SoilSkipListHeaderPage >> validate [
-	(version > 2) ifTrue: [ 
-		Error signal: 'bogus page version' ].
-	(pageSize = 4096) ifFalse: [ 
-		Error signal: 'bogus page size' ].
+	super validate.
 	(offset >= 1) ifFalse: [ 
 		Error signal: 'bogus offset' ].
 	(maxLevel > 256) ifTrue: [ 
