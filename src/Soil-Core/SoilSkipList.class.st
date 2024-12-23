@@ -43,6 +43,11 @@ SoilSkipList >> flush [
 	self store flush
 ]
 
+{ #category : #accessing }
+SoilSkipList >> indexId [ 
+	^ self path withoutExtension basename 
+]
+
 { #category : #initialization }
 SoilSkipList >> initializeFilesystem [ 
 	self store initializeFilesystem
@@ -76,6 +81,11 @@ SoilSkipList >> keySize [
 SoilSkipList >> keySize: anInteger [
 	super keySize: anInteger.
 	keySize := anInteger
+]
+
+{ #category : #'as yet unclassified' }
+SoilSkipList >> markAllDirty [ 
+	store pages do: [ :page | self addDirtyPage: page ]
 ]
 
 { #category : #'instance creation' }

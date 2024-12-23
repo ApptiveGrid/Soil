@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilIndexConsistencyVisitor,
-	#superclass : #SoilInstanceVisitor,
+	#superclass : #SoilVisitor,
 	#category : #'Soil-Core-Visitor'
 }
 

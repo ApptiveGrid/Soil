@@ -421,6 +421,37 @@ SoilIndexedDictionaryTest >> testFlushIndexPages [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testFreePageAfterReopen [
+	| tx tx2 tx3 blockTx tx4 tx5 |
+	(classToTest = SoilBTreeDictionary) ifTrue: [ self skip ].
+	tx := soil newTransaction.
+	tx root: dict.
+	1 to: 1125 do: [ :n | dict at: n put: n asString ].
+	tx commit.
+	
+	"open a second transaction ..."
+	blockTx := soil newTransaction.
+	tx2 := soil newTransaction.
+	224 to: 899 do: [ :n |tx2 root removeKey: n ].
+	tx2 commit.
+	blockTx abort. 
+		
+	soil 
+		close; 
+		reopen.
+	tx3 := soil newTransaction.
+	900 to: 905 do: [ :n | tx3 root removeKey: n ].
+	tx3 root index wrapped markAllDirty.
+	tx3 commit.
+	tx4 := soil newTransaction.
+	tx4 root at: 906 put: 906 asString.
+	tx4 root removeKey: 223.
+	tx4 commit.
+	tx5 := soil newTransaction.
+	self deny: (tx5 root index wrapped store headerPage right includes: 2)
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testFreePageNotSavedRegression [
 	| tx blockTx iterator |
 	(classToTest = SoilBTreeDictionary) ifTrue: [ self skip ].
@@ -479,36 +510,6 @@ SoilIndexedDictionaryTest >> testFreePageReuse [
 	self assert: index headerPage firstFreePageIndex isZero.
 	self assert: index firstFreePage isNil
 
-]
-
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testFreePageReuseExact [
-	| tx tx2 tx3 blockTx tx4 tx5 tx15 |
-	(classToTest = SoilBTreeDictionary) ifTrue: [ self skip ].
-	tx := soil newTransaction.
-	tx root: dict.
-	1 to: 674 do: [ :n | dict at: n put: n asString ].
-	tx commit.
-	
-	
-	tx15 := soil newTransaction.
-	1 to: 223 do: [ :n | tx15 root removeKey: n ].
-	tx15 commit.
-	"open a second transaction ..."
-	blockTx := soil newTransaction.
-	tx2 := soil newTransaction.
-	224 to: 448 do: [ :n | tx2 root removeKey: n ].
-	tx2 commit.
-	tx3 := soil newTransaction.
-	449 to: 449 do: [ :n | tx3 root removeKey: n ].
-	tx3 commit.
-	blockTx abort.
-	tx4 := soil newTransaction.
-	tx4 root at: 675 put: 675 asString.
-	tx4 root removeKey: 450.
-	tx4 commit.
-	tx5 := soil newTransaction.
-	self deny: (tx5 root index wrapped store headerPage right includes: 2)
 ]
 
 { #category : #tests }

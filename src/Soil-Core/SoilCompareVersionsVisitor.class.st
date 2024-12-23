@@ -1,8 +1,8 @@
 Class {
 	#name : #SoilCompareVersionsVisitor,
-	#superclass : #SoilInstanceVisitor,
+	#superclass : #SoilVisitor,
 	#instVars : [
-		'version'
+		'maxVersion'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -10,32 +10,32 @@ Class {
 { #category : #initialization }
 SoilCompareVersionsVisitor >> initialize [ 
 	super initialize.
-	version := 0
+	maxVersion := 0
 ]
 
 { #category : #validation }
 SoilCompareVersionsVisitor >> print: aSoil [ 
 	soil := aSoil.
 	self visit: aSoil.
-	^ (version = aSoil control databaseVersion) 
+	^ (maxVersion = aSoil control databaseVersion) 
 		ifTrue: [ 
-			'highest scanned version ', version printString, ' is the same as database version ' ]
+			'highest scanned version ', maxVersion printString, ' is the same as database version ' ]
 		ifFalse: [ 
-			'version=', version printString, ', database version=',aSoil databaseVersion printString ]
+			'version=', maxVersion printString, ', database version=',aSoil databaseVersion printString ]
 ]
 
 { #category : #validation }
 SoilCompareVersionsVisitor >> validate: aSoil [ 
 	soil := aSoil.
 	self visit: aSoil.
-	(version = aSoil control databaseVersion) 
+	(maxVersion = aSoil control databaseVersion) 
 		ifFalse: [ 
-			Error signal: 'highest scanned version ', version printString, ' is not the same as database version ',aSoil databaseVersion printString ]
+			Error signal: 'highest scanned version ', maxVersion printString, ' is not the same as database version ',aSoil databaseVersion printString ]
 ]
 
 { #category : #accessing }
 SoilCompareVersionsVisitor >> version [
-	^ version 
+	^ maxVersion 
 ]
 
 { #category : #visiting }
@@ -44,7 +44,7 @@ SoilCompareVersionsVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile
 
 { #category : #visiting }
 SoilCompareVersionsVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
-	(aSoilPersistentClusterVersion version > version) ifTrue: [ 
-		version := aSoilPersistentClusterVersion version ].
+	(aSoilPersistentClusterVersion version > maxVersion) ifTrue: [ 
+		maxVersion := aSoilPersistentClusterVersion version ].
 	super visitPersistentClusterVersion: aSoilPersistentClusterVersion 
 ]

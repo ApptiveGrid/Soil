@@ -172,6 +172,23 @@ SoilSkipListHeaderPage >> smallestKey [
 	^ 0
 ]
 
+{ #category : #accessing }
+SoilSkipListHeaderPage >> validate [
+	(version > 2) ifTrue: [ 
+		Error signal: 'bogus page version' ].
+	(pageSize = 4096) ifFalse: [ 
+		Error signal: 'bogus page size' ].
+	(offset >= 1) ifFalse: [ 
+		Error signal: 'bogus offset' ].
+	(maxLevel > 256) ifTrue: [ 
+		Error signal: 'unusual hight maxLevel' ].
+	(right size = maxLevel) ifFalse: [ 
+		Error signal: 'right array and max level are not aligned' ].
+	(firstFreePageIndex <= lastPageOffset) ifFalse: [ 
+		Error signal: 'first free index is bogus' ] 
+	
+]
+
 { #category : #writing }
 SoilSkipListHeaderPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.

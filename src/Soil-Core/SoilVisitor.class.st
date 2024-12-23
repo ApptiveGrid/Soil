@@ -1,108 +1,88 @@
 Class {
 	#name : #SoilVisitor,
-	#superclass : #Object,
+	#superclass : #SoilBasicVisitor,
+	#instVars : [
+		'toBeProcessed',
+		'seen',
+		'depthFirst',
+		'databaseVersion',
+		'soil'
+	],
 	#category : #'Soil-Core-Visitor'
 }
 
-{ #category : #testing }
-SoilVisitor class >> isAbstract [
-	<ignoreForCoverage>
-	^ self == SoilVisitor
+{ #category : #'as yet unclassified' }
+SoilVisitor >> beBreadthFirst [ 
+	depthFirst := false.
+	seen := Set new.
+	toBeProcessed := OrderedCollection new
 ]
 
-{ #category : #visiting }
-SoilVisitor >> processReference: reference [
-	self visit: reference
+{ #category : #'as yet unclassified' }
+SoilVisitor >> beDepthFirst [ 
+	depthFirst := true.
+	seen := nil.
+	toBeProcessed := nil
 ]
 
-{ #category : #visiting }
-SoilVisitor >> visit: anObject [ 
-	^ anObject acceptSoil: self 
-	
+{ #category : #accessing }
+SoilVisitor >> databaseVersion [
+	^ databaseVersion ifNil: [ 
+		databaseVersion := soil control databaseVersion  ]
 ]
 
-{ #category : #visiting }
-SoilVisitor >> visitAll: aCollection [ 
-	^ aCollection collect: [ :each |
-		self visit: each ]
+{ #category : #initialization }
+SoilVisitor >> initialize [ 
+	super initialize.
+	self beBreadthFirst 
 ]
 
-{ #category : #visiting }
-SoilVisitor >> visitControl: aSoilControlFile [ 
-
+{ #category : #api }
+SoilVisitor >> processLoop [ 
+	| objectId |
+	[ toBeProcessed isEmpty ] whileFalse: [  
+		objectId := toBeProcessed  removeFirst.
+		self visit: (soil objectRepository at: objectId version: self databaseVersion ) ]
 ]
 
-{ #category : #visiting }
-SoilVisitor >> visitDatabaseJournal: aSoilJournal [ 
-	self visitAll: aSoilJournal fragmentFiles.
-	^ aSoilJournal 
+{ #category : #accessing }
+SoilVisitor >> processObjectId: aSoilObjectId [ 
+	((aSoilObjectId segment = 0) and: [ aSoilObjectId index = 2 ]) ifTrue: [ ^ self ].
+	(seen includes: aSoilObjectId) ifTrue: [ ^ aSoilObjectId ].
+	seen add: aSoilObjectId.
+	^ depthFirst 
+		ifTrue: [
+			self visit: (soil objectRepository at: aSoilObjectId).
+			aSoilObjectId ]
+		ifFalse: [  
+			toBeProcessed add: aSoilObjectId ]
 ]
 
-{ #category : #visiting }
-SoilVisitor >> visitIndexManager: aSoilIndexManager [ 
-	^ aSoilIndexManager 
+{ #category : #accessing }
+SoilVisitor >> soil [
+
+	^ soil
 ]
 
-{ #category : #visiting }
-SoilVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
-	aSoilJournalFragmentFile open.
-	[ self visitAll: aSoilJournalFragmentFile transactionJournals ]
-		ensure: [ aSoilJournalFragmentFile close ].
-	^ aSoilJournalFragmentFile 
-]
+{ #category : #accessing }
+SoilVisitor >> soil: anObject [
 
-{ #category : #visiting }
-SoilVisitor >> visitMetaSegment: aSoilMetaSegment [ 
-	self visit: aSoilMetaSegment indexManager.
-	^ aSoilMetaSegment 
-]
-
-{ #category : #visiting }
-SoilVisitor >> visitObjectId: aSoilObjectId [ 
-	^ aSoilObjectId 
-]
-
-{ #category : #visiting }
-SoilVisitor >> visitObjectRepository: aSoilObjectRepository [ 
-	self visitAll: aSoilObjectRepository allSegments.
-	^ aSoilObjectRepository 
-]
-
-{ #category : #visiting }
-SoilVisitor >> visitObjectSegment: aSoilObjectSegment [ 
-	(aSoilObjectSegment id = 1) ifTrue: [ 
-		self visit: (aSoilObjectSegment at: 1) ].
-	self visit: aSoilObjectSegment indexManager.
-
-	^ aSoilObjectSegment 
-]
-
-{ #category : #visiting }
-SoilVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [ 
-	
+	soil := anObject
 ]
 
 { #category : #visiting }
 SoilVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
-	aSoilPersistentClusterVersion references 
-		do: [ :reference | self processReference: reference ].
+	super visitPersistentClusterVersion: aSoilPersistentClusterVersion.
+	aSoilPersistentClusterVersion indexIds do:[ :indexId |
+		self 
+			processIndexId: indexId 
+			segment: (soil objectRepository segmentAt: aSoilPersistentClusterVersion segment) ].
 	^ aSoilPersistentClusterVersion 
 ]
 
 { #category : #visiting }
-SoilVisitor >> visitSkipList: aSoilSkipList [ 
-	self visit: aSoilSkipList store
-]
-
-{ #category : #visiting }
 SoilVisitor >> visitSoil: aSoil [ 
-	self visit: aSoil control.
-	self visit: aSoil objectRepository.
-	self visit: aSoil journal.
-	^ aSoil
-]
-
-{ #category : #visiting }
-SoilVisitor >> visitTransactionJournal: aSoilTransactionJournal [ 
-	^ aSoilTransactionJournal 
+	super visitSoil: aSoil.
+	depthFirst ifFalse: [  
+		self processLoop ]
 ]

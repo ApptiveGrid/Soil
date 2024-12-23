@@ -19,7 +19,9 @@ SoilBasicSkipList class >> isAbstract [
 
 { #category : #adding }
 SoilBasicSkipList >> addDirtyPage: aPage [ 
-	dirtyPages at: aPage offset put: aPage
+	dirtyPages 
+		at: aPage offset 
+		ifAbsentPut: [ aPage ]
 ]
 
 { #category : #'instance creation' }

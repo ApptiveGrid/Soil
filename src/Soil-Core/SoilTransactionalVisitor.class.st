@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilTransactionalVisitor,
-	#superclass : #SoilInstanceVisitor,
+	#superclass : #SoilVisitor,
 	#instVars : [
 		'transaction'
 	],

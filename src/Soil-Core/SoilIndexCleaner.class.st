@@ -3,8 +3,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'index',
-		'readVersion',
-		'dirtyPages'
+		'readVersion'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -20,7 +19,7 @@ SoilIndexCleaner >> canDiscardOldState: aPage [
 SoilIndexCleaner >> clean [ 
 	"clean all pages first because the cleaning could produce new pages
 	that need to be written"
-	self dirtyPages do: [ :page |
+	index dirtyPages copy do: [ :page |
 		"if no transaction needs old state and the page needs cleaning"
 		(page needsCleanup and: [ self canDiscardOldState: page ]) ifTrue: [  
 			self cleanPage: page ] ].
@@ -47,12 +46,6 @@ SoilIndexCleaner >> cleanPage: page [
 			"just clean the page"
 			page cleanRemoved.
 			index addDirtyPage: page ]
-]
-
-{ #category : #accessing }
-SoilIndexCleaner >> dirtyPages [ 
-	^ dirtyPages ifNil: [ 
-		dirtyPages := index dirtyPages copy ]
 ]
 
 { #category : #accessing }
