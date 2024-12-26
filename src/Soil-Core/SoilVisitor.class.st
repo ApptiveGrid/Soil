@@ -71,6 +71,14 @@ SoilVisitor >> soil: anObject [
 ]
 
 { #category : #visiting }
+SoilVisitor >> visitFirstSegment: aSoilObjectSegment [ 
+	depthFirst 
+		ifTrue: [ self visit: (aSoilObjectSegment at: 1) ] 
+		ifFalse: [ self processObjectId: SoilObjectId root ].			
+	self visitObjectSegment: aSoilObjectSegment 
+]
+
+{ #category : #visiting }
 SoilVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	super visitPersistentClusterVersion: aSoilPersistentClusterVersion.
 	aSoilPersistentClusterVersion indexIds do:[ :indexId |

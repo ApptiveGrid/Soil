@@ -85,6 +85,11 @@ SoilConsistencyVisitor >> processObjectId: aSoilObjectId [
 ]
 
 { #category : #visiting }
+SoilConsistencyVisitor >> visitDatabaseJournal: aJournal [ 
+
+]
+
+{ #category : #visiting }
 SoilConsistencyVisitor >> visitIndex: anIndex [ 
 	self checkPagesOfIndex: anIndex.
 	^ super visitIndex: anIndex 

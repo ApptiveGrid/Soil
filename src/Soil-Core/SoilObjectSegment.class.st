@@ -14,9 +14,9 @@ Class {
 
 { #category : #visiting }
 SoilObjectSegment >> acceptSoil: aSoilVisitor [ 
-	^ self isMeta 
-		ifTrue: [ aSoilVisitor visitMetaSegment: self ]
-		ifFalse: [ aSoilVisitor visitObjectSegment: self ]
+	self isMetaSegment ifTrue: [ ^ aSoilVisitor visitMetaSegment: self ].
+	self isFirstSegment ifTrue: [ ^ aSoilVisitor visitFirstSegment: self ].
+	^ aSoilVisitor visitObjectSegment: self
 ]
 
 { #category : #accessing }
@@ -164,7 +164,17 @@ SoilObjectSegment >> initializeFilesystem [
 ]
 
 { #category : #testing }
+SoilObjectSegment >> isFirstSegment [
+	^ id = 1
+]
+
+{ #category : #testing }
 SoilObjectSegment >> isMeta [ 
+	^ id = 0
+]
+
+{ #category : #testing }
+SoilObjectSegment >> isMetaSegment [
 	^ id = 0
 ]
 

@@ -86,68 +86,33 @@ SoilPersistentClusterVersion >> printOn: aStream [
 
 { #category : #'instance creation' }
 SoilPersistentClusterVersion >> readFrom: stream [ 
-	| numberOfReferences objectSize materializer numberOfBehaviorDescriptions numberOfIndexIds |
-	materializer := SoilBasicMaterializer new stream: stream.
+	| numberOfReferences objectSize numberOfBehaviorDescriptions numberOfIndexIds |
 	position := stream position.
-	version := materializer nextLengthEncodedInteger.
-	previousVersionPosition := materializer nextLengthEncodedInteger.
+	version := stream nextLengthEncodedInteger.
+	previousVersionPosition := stream nextLengthEncodedInteger.
 	
 	"behavior descriptions"
-	numberOfBehaviorDescriptions := materializer nextLengthEncodedInteger.
+	numberOfBehaviorDescriptions := stream nextLengthEncodedInteger.
 	behaviorDescriptions := OrderedCollection new: numberOfBehaviorDescriptions.
 	1 to: numberOfBehaviorDescriptions do: [:n |
-		behaviorDescriptions add: ((SoilVersionedObjectId segment: 0 index: materializer nextLengthEncodedInteger)
-			version: materializer nextLengthEncodedInteger) ]. 
+		behaviorDescriptions add: ((SoilVersionedObjectId segment: 0 index: stream nextLengthEncodedInteger)
+			version: stream nextLengthEncodedInteger) ]. 
 	"references"
-	numberOfReferences := materializer nextLengthEncodedInteger.
+	numberOfReferences := stream nextLengthEncodedInteger.
 	references := OrderedCollection new: numberOfReferences.
 	1 to: numberOfReferences do: [:n | 
 		"reading without guard"
 		self basicAddReference: (SoilObjectId readFrom: stream)]. 
 	"indexes"
-	numberOfIndexIds := materializer nextLengthEncodedInteger.
+	numberOfIndexIds := stream nextLengthEncodedInteger.
 	indexIds := OrderedCollection new: numberOfIndexIds.
 	1 to: numberOfIndexIds do: [:n | | idSize |
 		idSize := stream next.
 		indexIds add: (stream next: idSize) asString ]. 
 	"object in bytes"
-	objectSize := materializer nextLengthEncodedInteger.
+	objectSize := stream nextLengthEncodedInteger.
 	bytes := stream next: objectSize.
 		
-]
-
-{ #category : #serializing }
-SoilPersistentClusterVersion >> serializeOn: stream [
-	| serializer |
-	bytes ifNil: [ self serializeObject ].
-	self flag: #todo.
-	serializer := SoilBasicSerializer new stream: stream.
-	serializer 
-		nextPutLengthEncodedInteger: version;
-		nextPutLengthEncodedInteger: previousVersionPosition.
-	"behavior description"
-	serializer nextPutLengthEncodedInteger: behaviorDescriptions size.
-	behaviorDescriptions do: [ :behavior |
-		serializer 
-			nextPutLengthEncodedInteger: behavior objectId index;
-			nextPutLengthEncodedInteger: behavior version ].
-	serializer
-		nextPutLengthEncodedInteger: references size.
-	"references"
-	references do: [ :ref |
-		"do not write zero index, try to allocate a new index before"
-		(ref index = 0) ifTrue: [ 
-			Error signal: 'there should be no uninitialized reference' ].
-		ref writeOn: stream ].
-	"indexes"
-	serializer nextPutLengthEncodedInteger: indexIds size.
-	indexIds do: [ :indexId |	
-		stream 
-			nextPut: indexId size;
-			nextPutAll: indexId asByteArray].
-	"objects in bytes"
-	serializer nextPutLengthEncodedInteger: bytes size.
-	stream nextPutAll: bytes .
 ]
 
 { #category : #asserting }

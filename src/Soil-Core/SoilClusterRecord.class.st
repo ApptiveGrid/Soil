@@ -216,8 +216,34 @@ SoilClusterRecord >> serialize [
 
 { #category : #serializing }
 SoilClusterRecord >> serializeOn: stream [
-	self subclassResponsibility 
-				
+	bytes ifNil: [ self serializeObject ].
+	stream 
+		nextPutLengthEncodedInteger: version;
+		nextPutLengthEncodedInteger: previousVersionPosition.
+	"behavior description"
+	stream nextPutLengthEncodedInteger: behaviorDescriptions size.
+	behaviorDescriptions do: [ :behavior |
+		stream 
+			nextPutLengthEncodedInteger: behavior objectId index;
+			nextPutLengthEncodedInteger: behavior version ].
+	stream
+		nextPutLengthEncodedInteger: references size.
+	"references"
+	references do: [ :ref |
+		"do not write zero index, try to allocate a new index before"
+		(ref index = 0) ifTrue: [ 
+			Error signal: 'there should be no uninitialized reference' ].
+		ref writeOn: stream ].
+	"indexes"
+	stream nextPutLengthEncodedInteger: indexIds size.
+	indexIds do: [ :indexId |	
+		stream 
+			nextPut: indexId size;
+			nextPutAll: indexId asByteArray].
+	"objects in bytes"
+	stream 
+		nextPutLengthEncodedInteger: bytes size;
+		nextPutAll: bytes .
 ]
 
 { #category : #testing }

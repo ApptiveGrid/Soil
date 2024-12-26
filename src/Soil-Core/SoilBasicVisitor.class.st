@@ -10,6 +10,11 @@ SoilBasicVisitor class >> isAbstract [
 	^ self == SoilBasicVisitor
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBasicVisitor >> processBehaviorDescription: aSoilObjectId [ 
+	self processObjectId: aSoilObjectId 
+]
+
 { #category : #visiting }
 SoilBasicVisitor >> processIndexId: indexId segment: aSegment [  
 	self visit: (aSegment indexAt: indexId)
@@ -54,6 +59,12 @@ SoilBasicVisitor >> visitDatabaseJournal: aSoilJournal [
 ]
 
 { #category : #visiting }
+SoilBasicVisitor >> visitFirstSegment: aSoilObjectSegment [ 
+	self visit: (aSoilObjectSegment at: 1).
+	self visitObjectSegment: aSoilObjectSegment
+]
+
+{ #category : #visiting }
 SoilBasicVisitor >> visitIndex: anIndex [ 
 	| iterator assoc objectId |
 	iterator := anIndex newIterator.
@@ -77,8 +88,8 @@ SoilBasicVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [
 
 { #category : #visiting }
 SoilBasicVisitor >> visitMetaSegment: aSoilMetaSegment [ 
-	self visit: aSoilMetaSegment indexManager.
-	^ aSoilMetaSegment 
+	self visitObjectSegment: aSoilMetaSegment
+
 ]
 
 { #category : #visiting }
@@ -94,8 +105,6 @@ SoilBasicVisitor >> visitObjectRepository: aSoilObjectRepository [
 
 { #category : #visiting }
 SoilBasicVisitor >> visitObjectSegment: aSoilObjectSegment [ 
-	(aSoilObjectSegment id = 1) ifTrue: [ 
-		self visit: (aSoilObjectSegment at: 1) ].
 	self visit: aSoilObjectSegment indexManager.
 
 	^ aSoilObjectSegment 
@@ -118,6 +127,8 @@ SoilBasicVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [
 SoilBasicVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	aSoilPersistentClusterVersion references 
 		do: [ :reference | self processReference: reference ].
+	aSoilPersistentClusterVersion behaviorDescriptions 
+		do: [ :description | self processBehaviorDescription: description ].
 	^ aSoilPersistentClusterVersion 
 ]
 
