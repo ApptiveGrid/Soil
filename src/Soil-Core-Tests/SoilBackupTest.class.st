@@ -245,12 +245,14 @@ SoilBackupTest >> testBackupWithIndexRemoval [
 
 { #category : #tests }
 SoilBackupTest >> testSimpleBackup [ 
-	| tx backup tx2 |
+	| tx backup tx2 nested |
 	soil control
 		databaseFormatVersion: 1; 
 		applicationVersion: 5.
 	tx := soil newTransaction.
-	tx root: 'simple'.
+	nested := SoilTestClusterRoot new.
+	tx root: (SoilTestGraphRoot new nested: nested).
+	tx makeRoot: nested.
 	tx commit.
 	soil backupTo: self backupPath.
 	backup := Soil new 
