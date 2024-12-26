@@ -2,7 +2,8 @@ Class {
 	#name : #SoilConsistencyVisitor,
 	#superclass : #SoilTransactionalVisitor,
 	#instVars : [
-		'lastIndexes'
+		'lastIndexes',
+		'errors'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -10,6 +11,14 @@ Class {
 { #category : #checking }
 SoilConsistencyVisitor >> check [
 	self visit: soil
+]
+
+{ #category : #'as yet unclassified' }
+SoilConsistencyVisitor >> check: anObject using: aBlock proceed: aBoolean [
+	aBlock 
+		on: Error 
+		do: [ :error | 
+			errors at: anObject put: error ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -34,7 +43,10 @@ SoilConsistencyVisitor >> checkObjectId: aSoilObjectId [
 
 { #category : #'as yet unclassified' }
 SoilConsistencyVisitor >> checkPage: aPage [ 
-	aPage validate
+	self 
+		check: aPage 
+		using: [ aPage validate ] 
+		proceed: true
 ]
 
 { #category : #'as yet unclassified' }
@@ -46,9 +58,10 @@ SoilConsistencyVisitor >> checkPagesOfIndex: index [
 ]
 
 { #category : #initialization }
-SoilConsistencyVisitor >> initialize [ 	
+SoilConsistencyVisitor >> initialize [ 
 	super initialize.
 	lastIndexes := Dictionary new.
+	errors := Dictionary new
 ]
 
 { #category : #accessing }
@@ -60,17 +73,26 @@ SoilConsistencyVisitor >> lastIndexOfSegment: anInteger [
 ]
 
 { #category : #visiting }
-SoilConsistencyVisitor >> processIndexId: indexId segment: aSegment [  
-	| index iterator assoc objectId |
-	index := aSegment indexManager 
-		at: indexId
-		ifAbsent: [ Error signal: 'index not found' ].
-	self checkPagesOfIndex: index.
-	iterator := index newIterator.
-	[ (assoc := iterator nextAssociation) isNil ] whileFalse: [ 
-		objectId := assoc value asSoilObjectId.
-		self checkObjectId: objectId.
-		self process: objectId. ]
+SoilConsistencyVisitor >> processIndexValue: aSoilObjectId [ 
+	self checkObjectId: aSoilObjectId.
+	^ super processIndexValue: aSoilObjectId 
+]
+
+{ #category : #accessing }
+SoilConsistencyVisitor >> processObjectId: aSoilObjectId [ 
+	self checkObjectId: aSoilObjectId.
+	super processObjectId: aSoilObjectId 
+]
+
+{ #category : #visiting }
+SoilConsistencyVisitor >> visitDatabaseJournal: aJournal [ 
+
+]
+
+{ #category : #visiting }
+SoilConsistencyVisitor >> visitIndex: anIndex [ 
+	self checkPagesOfIndex: anIndex.
+	^ super visitIndex: anIndex 
 ]
 
 { #category : #visiting }

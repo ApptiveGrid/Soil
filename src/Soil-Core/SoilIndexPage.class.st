@@ -150,6 +150,14 @@ SoilIndexPage >> readFrom: aStream [
 ]
 
 { #category : #accessing }
+SoilIndexPage >> validate [
+	(version > 2) ifTrue: [ 
+		Error signal: 'bogus page version' ].
+	(pageSize = 4096) ifFalse: [ 
+		Error signal: 'bogus page size' ]
+]
+
+{ #category : #accessing }
 SoilIndexPage >> version [
 	^ version
 ]

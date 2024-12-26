@@ -10,9 +10,19 @@ SoilBasicVisitor class >> isAbstract [
 	^ self == SoilBasicVisitor
 ]
 
+{ #category : #'as yet unclassified' }
+SoilBasicVisitor >> processBehaviorDescription: aSoilObjectId [ 
+	self processObjectId: aSoilObjectId 
+]
+
 { #category : #visiting }
 SoilBasicVisitor >> processIndexId: indexId segment: aSegment [  
 	self visit: (aSegment indexAt: indexId)
+]
+
+{ #category : #visiting }
+SoilBasicVisitor >> processIndexValue: objectId [
+	self processObjectId: objectId 
 ]
 
 { #category : #visiting }
@@ -49,6 +59,21 @@ SoilBasicVisitor >> visitDatabaseJournal: aSoilJournal [
 ]
 
 { #category : #visiting }
+SoilBasicVisitor >> visitFirstSegment: aSoilObjectSegment [ 
+	self visit: (aSoilObjectSegment at: 1).
+	self visitObjectSegment: aSoilObjectSegment
+]
+
+{ #category : #visiting }
+SoilBasicVisitor >> visitIndex: anIndex [ 
+	| iterator assoc objectId |
+	iterator := anIndex newIterator.
+	[ (assoc := iterator nextAssociation) isNil ] whileFalse: [ 
+		objectId := assoc value asSoilObjectId.
+		self processIndexValue: objectId. ]
+]
+
+{ #category : #visiting }
 SoilBasicVisitor >> visitIndexManager: aSoilIndexManager [ 
 	^ aSoilIndexManager 
 ]
@@ -63,8 +88,8 @@ SoilBasicVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [
 
 { #category : #visiting }
 SoilBasicVisitor >> visitMetaSegment: aSoilMetaSegment [ 
-	self visit: aSoilMetaSegment indexManager.
-	^ aSoilMetaSegment 
+	self visitObjectSegment: aSoilMetaSegment
+
 ]
 
 { #category : #visiting }
@@ -80,8 +105,6 @@ SoilBasicVisitor >> visitObjectRepository: aSoilObjectRepository [
 
 { #category : #visiting }
 SoilBasicVisitor >> visitObjectSegment: aSoilObjectSegment [ 
-	(aSoilObjectSegment id = 1) ifTrue: [ 
-		self visit: (aSoilObjectSegment at: 1) ].
 	self visit: aSoilObjectSegment indexManager.
 
 	^ aSoilObjectSegment 
@@ -95,7 +118,7 @@ SoilBasicVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [
 		page := aSoilPagedFileIndexStore pageAt: pageOffset.
 		page items do: [ :item |
 			item value isRemoved ifFalse: [ 
-				self processObjectId: item value asSoilObjectId ] ].
+				self processIndexValue: item value asSoilObjectId ] ].
 		pageOffset := page next ].
 	^ aSoilPagedFileIndexStore 
 ]
@@ -104,12 +127,14 @@ SoilBasicVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [
 SoilBasicVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	aSoilPersistentClusterVersion references 
 		do: [ :reference | self processReference: reference ].
+	aSoilPersistentClusterVersion behaviorDescriptions 
+		do: [ :description | self processBehaviorDescription: description ].
 	^ aSoilPersistentClusterVersion 
 ]
 
 { #category : #visiting }
-SoilBasicVisitor >> visitSkipList: aSoilSkipList [ 
-	self visit: aSoilSkipList store
+SoilBasicVisitor >> visitSkipList: aSkiplist [ 
+	self visitIndex: aSkiplist
 ]
 
 { #category : #visiting }

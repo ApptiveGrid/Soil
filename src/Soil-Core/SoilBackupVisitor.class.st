@@ -140,6 +140,12 @@ SoilBackupVisitor >> visitDatabaseJournal: aSoilJournal [
 ]
 
 { #category : #visiting }
+SoilBackupVisitor >> visitFirstSegment: aSoilObjectSegment [ 
+	self processObjectId: SoilObjectId root.
+	self visitObjectSegment: aSoilObjectSegment 
+]
+
+{ #category : #visiting }
 SoilBackupVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
 	aSoilJournalFragmentFile copyTo: target journal path / aSoilJournalFragmentFile basename.
 	^ aSoilJournalFragmentFile 
@@ -147,19 +153,21 @@ SoilBackupVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [
 
 { #category : #visiting }
 SoilBackupVisitor >> visitMetaSegment: aSoilMetaSegment [ 
-	self visit: aSoilMetaSegment indexManager.
+	super visitMetaSegment: aSoilMetaSegment.
 	self copyIndexAt: #identifier segment: 0. 
 	^ aSoilMetaSegment  
 ]
 
 { #category : #visiting }
 SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [ 
-	self processObjectId: SoilObjectId root.
 	super visitObjectSegment: aSoilObjectSegment.
+	(target objectRepository segmentAt: aSoilObjectSegment id)
+		lastObjectIndex: aSoilObjectSegment lastObjectIndex  
 ]
 
 { #category : #visiting }
 SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
+	super visitPersistentClusterVersion: aSoilPersistentClusterVersion.
 	(aSoilPersistentClusterVersion objectId segment = 0)
 		ifTrue: [ 
 			"as there could be very old objects we need to copy all  versions of 

@@ -91,6 +91,14 @@ SoilIndex >> basicAt: key put: anObject [
 		put: anObject 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndex >> cleanUpToVersion: version [
+	SoilIndexCleaner new 
+			index: self;
+			readVersion: version;
+			clean.
+]
+
 { #category : #'open/close' }
 SoilIndex >> close [
 	self store close.
