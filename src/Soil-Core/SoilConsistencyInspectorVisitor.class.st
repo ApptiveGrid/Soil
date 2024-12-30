@@ -20,7 +20,7 @@ SoilConsistencyInspectorVisitor >> addCluster: aSoilPersistentClusterVersion [
 ]
 
 { #category : #'as yet unclassified' }
-SoilConsistencyInspectorVisitor >> check: anObject using: aBlock proceed: aBoolean [
+SoilConsistencyInspectorVisitor >> check: anObject using: aBlock [
 	aBlock 
 		on: Error 
 		do: [ :error | 

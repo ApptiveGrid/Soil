@@ -48,6 +48,7 @@ SoilObjectSegment >> asCachedSegment [
 SoilObjectSegment >> at: anInteger [ 
 	| position |
 	position := indexFile positionAt: anInteger.
+	position isZero ifTrue: [  SoilIndexOutOfRange signal: 'no entry for object at ', id asString, ':', anInteger asString ].
 	^ (objectFile atPosition: position) ifNotNil: [ :record | 
 		record objectId: (SoilObjectId segment: id index: anInteger).
 		self soil notificationHandler recordRead: record.
