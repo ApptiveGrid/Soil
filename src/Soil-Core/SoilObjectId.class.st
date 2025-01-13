@@ -176,6 +176,14 @@ SoilObjectId >> setIndex: anInteger [
 	index := anInteger 
 ]
 
+{ #category : #comparing }
+SoilObjectId >> soilSizeInMemory [
+	^ self sizeInMemory 
+		+ segment sizeInMemory 
+		+ index sizeInMemory 
+
+]
+
 { #category : #writing }
 SoilObjectId >> writeOn: aStream [ 
 	"for now fix the segment id to be the 16 upper bits and the index 
