@@ -10,11 +10,11 @@ Class {
 
 { #category : #checking }
 SoilConsistencyVisitor >> check [
-	self visit: soil
+	self visitWithTransaction: soil
 ]
 
 { #category : #'as yet unclassified' }
-SoilConsistencyVisitor >> check: anObject using: aBlock proceed: aBoolean [
+SoilConsistencyVisitor >> check: anObject using: aBlock [
 	aBlock 
 		on: Error 
 		do: [ :error | 
@@ -22,15 +22,22 @@ SoilConsistencyVisitor >> check: anObject using: aBlock proceed: aBoolean [
 ]
 
 { #category : #'as yet unclassified' }
-SoilConsistencyVisitor >> checkCluster: cluster [
-	self checkObjectId: cluster objectId.
-	cluster references do: [ :ref | 
-		self checkObjectId: ref ]
+SoilConsistencyVisitor >> checkBehaviorDescription: objectId [
+	| description |
+	description := transaction objectWithId: objectId.
+	self check: description using: [  
+		soil behaviorRegistry 
+			nameAt: description behaviorIdentifier 
+			ifAbsent: [ Error signal: 'description for ', description behaviorIdentifier asString , ' cannot not be found in identifier index' ] ]
 ]
 
 { #category : #'as yet unclassified' }
-SoilConsistencyVisitor >> checkHeaderPage: headerPage [ 
-	self shouldBeImplemented.
+SoilConsistencyVisitor >> checkCluster: cluster [
+	self checkObjectId: cluster objectId.
+	cluster references do: [ :ref | 
+		self checkObjectId: ref ].
+	cluster behaviorDescriptions do: [ :description |
+		self checkBehaviorDescription: description ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -46,7 +53,7 @@ SoilConsistencyVisitor >> checkPage: aPage [
 	self 
 		check: aPage 
 		using: [ aPage validate ] 
-		proceed: true
+	
 ]
 
 { #category : #'as yet unclassified' }
