@@ -20,6 +20,14 @@ SoilSetup >> cacheObjectRecords: anInteger [
 ]
 
 { #category : #caching }
+SoilSetup >> cacheObjectRecordsUsing: aBlock [
+	1 to: soil objectRepository segments size do: [:n |
+		soil objectRepository 
+			cacheSegmentAt: n 
+			using: aBlock  ]
+]
+
+{ #category : #caching }
 SoilSetup >> cacheRecords [
 	self cacheRecords: self defaultCacheRecordsSize
 ]
@@ -29,6 +37,23 @@ SoilSetup >> cacheRecords: anInteger [
 	self 
 		cacheMetaRecords: anInteger;
 		cacheObjectRecords: anInteger
+]
+
+{ #category : #caching }
+SoilSetup >> cacheSegmentAt: index maximumBytes: anInteger [
+	self 
+		cacheSegmentAt: index 
+		using: [ :cache | 
+			cache 
+				computeWeight: #soilSizeInMemory;
+				maximumWeight: anInteger ]
+]
+
+{ #category : #caching }
+SoilSetup >> cacheSegmentAt: index using: aBlock [
+	soil objectRepository 
+		cacheSegmentAt: index
+		using: aBlock
 ]
 
 { #category : #accessing }

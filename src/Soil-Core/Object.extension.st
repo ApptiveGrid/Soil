@@ -36,6 +36,11 @@ Object >> soilEmit [
 ]
 
 { #category : #'*Soil-Core' }
+Object >> soilSizeInMemory [ 
+	^ self sizeInMemory 
+]
+
+{ #category : #'*Soil-Core' }
 Object >> theNonSoilProxy [
 	^ self 
 ]
