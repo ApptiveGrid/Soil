@@ -81,6 +81,23 @@ SoilObjectRepository >> cacheSegmentAt: index upTo: limit [
 				put: ((segments at: index) asCachedSegment weight: limit) ]
 ]
 
+{ #category : #setting }
+SoilObjectRepository >> cacheSegmentAt: index using: aBlock [ 
+	| segment |
+	"exchange object segment with a LRU cached segment. The LRU cache
+	can be setup within aBlock"
+	(index = 0) 
+		ifTrue: [ 
+			metaSegment := metaSegment asCachedSegment.
+			aBlock value: metaSegment ]
+		ifFalse: [ 
+			segment := (segments at: index) asCachedSegment.
+			aBlock value: segment.
+			segments 	
+				at: index 
+				put: segment ]
+]
+
 { #category : #'opening/closing' }
 SoilObjectRepository >> close [
 	metaSegment close.
