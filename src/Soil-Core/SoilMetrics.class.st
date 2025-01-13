@@ -83,6 +83,15 @@ SoilMetrics >> metaRecordCacheSize [
 ]
 
 { #category : #metrics }
+SoilMetrics >> metaRecordCacheTotalWeight [
+	| metaSegment |
+	metaSegment := soil objectRepository metaSegment.
+	^ (metaSegment isKindOf: SoilCachedObjectSegment)
+		ifTrue: [ metaSegment cache totalWeight ]
+		ifFalse: [ 0 ]
+]
+
+{ #category : #metrics }
 SoilMetrics >> metaRecordsRead [
 	^ metaRecordsRead
 ]
@@ -131,6 +140,14 @@ SoilMetrics >> objectRecordCacheMisses [
 SoilMetrics >> objectRecordCacheSize [
 	^ self cachedSegments 
 		ifNotEmpty: [:segments | (segments collect: [ :each | each cache size ]) average ]
+		ifEmpty: 0
+	
+]
+
+{ #category : #metrics }
+SoilMetrics >> objectRecordCacheTotalWeight [
+	^ self cachedSegments 
+		ifNotEmpty: [:segments | (segments collect: [ :each | each cache totalWeight ]) average ]
 		ifEmpty: 0
 	
 ]

@@ -271,6 +271,7 @@ SoilTest >> testMetricsWithRecordCache [
 	self assert: metrics metaRecordCacheMaximumSize equals: 1000.
 	self assert: metrics metaRecordCacheSize equals: 3.
 	self assert: metrics objectRecordCacheSize equals: 1.
+	self assert: metrics objectRecordCacheTotalWeight equals: 1.
 
 
 ]
