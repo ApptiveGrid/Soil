@@ -124,7 +124,7 @@ SoilMetrics >> objectRecordCacheHits [
 { #category : #metrics }
 SoilMetrics >> objectRecordCacheMaximumSize [
 	^ self cachedSegments 
-		ifNotEmpty: [:segments | (segments collect: [ :each | (each cache instVarNamed: #weight) maximum ]) average ]
+		ifNotEmpty: [:segments | (segments collect: [ :each | (each cache instVarNamed: #weight) maximum ]) sum ]
 		ifEmpty: 0
 	
 ]
@@ -139,7 +139,7 @@ SoilMetrics >> objectRecordCacheMisses [
 { #category : #metrics }
 SoilMetrics >> objectRecordCacheSize [
 	^ self cachedSegments 
-		ifNotEmpty: [:segments | (segments collect: [ :each | each cache size ]) average ]
+		ifNotEmpty: [:segments | (segments collect: [ :each | each cache size ]) sum ]
 		ifEmpty: 0
 	
 ]
@@ -147,7 +147,7 @@ SoilMetrics >> objectRecordCacheSize [
 { #category : #metrics }
 SoilMetrics >> objectRecordCacheTotalWeight [
 	^ self cachedSegments 
-		ifNotEmpty: [:segments | (segments collect: [ :each | each cache totalWeight ]) average ]
+		ifNotEmpty: [:segments | (segments collect: [ :each | each cache totalWeight ]) sum ]
 		ifEmpty: 0
 	
 ]
