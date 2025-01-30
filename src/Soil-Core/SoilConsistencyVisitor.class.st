@@ -3,7 +3,8 @@ Class {
 	#superclass : #SoilTransactionalVisitor,
 	#instVars : [
 		'lastIndexes',
-		'errors'
+		'errors',
+		'shouldMaterializeObjects'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -13,7 +14,7 @@ SoilConsistencyVisitor >> check [
 	self visitWithTransaction: soil
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #checking }
 SoilConsistencyVisitor >> check: anObject using: aBlock [
 	aBlock 
 		on: Error 
@@ -21,7 +22,7 @@ SoilConsistencyVisitor >> check: anObject using: aBlock [
 			errors at: anObject put: error ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #checking }
 SoilConsistencyVisitor >> checkBehaviorDescription: objectId [
 	| description |
 	description := transaction objectWithId: objectId.
@@ -31,16 +32,20 @@ SoilConsistencyVisitor >> checkBehaviorDescription: objectId [
 			ifAbsent: [ Error signal: 'description for ', description behaviorIdentifier asString , ' cannot not be found in identifier index' ] ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #checking }
 SoilConsistencyVisitor >> checkCluster: cluster [
 	self checkObjectId: cluster objectId.
 	cluster references do: [ :ref | 
 		self checkObjectId: ref ].
 	cluster behaviorDescriptions do: [ :description |
-		self checkBehaviorDescription: description ]
+		self checkBehaviorDescription: description ].
+	shouldMaterializeObjects ifTrue: [  
+		self 
+			check: cluster 
+			using: [ (cluster transaction: transaction) materializeObject ] ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #checking }
 SoilConsistencyVisitor >> checkObjectId: aSoilObjectId [ 
 	(aSoilObjectId segment > 1) ifTrue: [ 
 		Error signal: 'segment cannot be greater than 1' ].
@@ -48,7 +53,7 @@ SoilConsistencyVisitor >> checkObjectId: aSoilObjectId [
 		Error signal: 'index is greater than last index in the segment #', aSoilObjectId segment asString  ] 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #checking }
 SoilConsistencyVisitor >> checkPage: aPage [ 
 	self 
 		check: aPage 
@@ -56,7 +61,7 @@ SoilConsistencyVisitor >> checkPage: aPage [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #checking }
 SoilConsistencyVisitor >> checkPagesOfIndex: index [ 
 	| iterator |
 	iterator := index newIterator.
@@ -68,7 +73,8 @@ SoilConsistencyVisitor >> checkPagesOfIndex: index [
 SoilConsistencyVisitor >> initialize [ 
 	super initialize.
 	lastIndexes := Dictionary new.
-	errors := Dictionary new
+	errors := Dictionary new.
+	shouldMaterializeObjects := false
 ]
 
 { #category : #accessing }
@@ -77,6 +83,11 @@ SoilConsistencyVisitor >> lastIndexOfSegment: anInteger [
 		at: anInteger 
 		ifAbsentPut: [ 
 			(soil objectRepository segmentAt: anInteger) lastObjectIndex  ]
+]
+
+{ #category : #setting }
+SoilConsistencyVisitor >> materializeObjects [ 
+	shouldMaterializeObjects := true
 ]
 
 { #category : #visiting }
