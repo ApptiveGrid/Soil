@@ -77,11 +77,6 @@ SoilJournalFragmentFile >> basename [
 	^ path basename
 ]
 
-{ #category : #'open/close' }
-SoilJournalFragmentFile >> close [
-	stream close
-]
-
 { #category : #copying }
 SoilJournalFragmentFile >> copyTo: aPath [ 
 	path copyTo: aPath
