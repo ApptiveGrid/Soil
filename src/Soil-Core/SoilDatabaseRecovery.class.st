@@ -116,6 +116,7 @@ SoilDatabaseRecovery >> recover [
 	"the fragment file contains more entries after the last checkpoint. Read the
 	current fragment file to its end and apply all transaction logs/checkpoints found"
 	self readFragmentFileProtected: fragmentFile.
+	fragmentFile close.
 	
 	"it is possible there are more fragment files after that of the last checkpoint.
 	This is due to multiple transactions have been written to the journal and there
@@ -124,7 +125,8 @@ SoilDatabaseRecovery >> recover [
 	lastCheckpoint fileNumber + 1 to: journal lastFileNumber do: [ :fileNumber |
 		fragmentFile := journal openFragmentFileNumber: fileNumber.
 		fragmentFile setToStart.
-		self readFragmentFileProtected: fragmentFile ].
+		self readFragmentFileProtected: fragmentFile.
+		fragmentFile close ].
 	
 	"we end up here because the journal needed to be recovered. We create new checkpoint
 	to mark that we covered about the extra entries or bogus data so future reads can
