@@ -172,7 +172,9 @@ Soil >> close [
 	control ifNotNil: [ 
 		control close ].
 	journal ifNotNil: [ 
-		journal close ]
+		journal close ].
+	metadata ifNotNil: [ 
+		metadata close ]
 ]
 
 { #category : #accessing }
