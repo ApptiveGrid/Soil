@@ -17,13 +17,6 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
-{ #category : #adding }
-SoilBasicSkipList >> addDirtyPage: aPage [ 
-	dirtyPages 
-		at: aPage offset 
-		ifAbsentPut: [ aPage ]
-]
-
 { #category : #'instance creation' }
 SoilBasicSkipList >> allocatePage [
 	| page |
@@ -33,15 +26,6 @@ SoilBasicSkipList >> allocatePage [
 	self store pageAt: page offset put: page.
 	self addDirtyPage: page.
 	^ page
-]
-
-{ #category : #'as yet unclassified' }
-SoilBasicSkipList >> cleanUpToVersion: aNumberOrNil [ 
-		SoilIndexCleaner new 
-			index: self;
-			readVersion: aNumberOrNil;
-			clean.
-
 ]
 
 { #category : #testing }
