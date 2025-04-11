@@ -118,27 +118,20 @@ SoilBasicBTree >> newIterator [
 ]
 
 { #category : #'instance creation' }
+SoilBasicBTree >> newPage [
+	^ self pageClass new 
+		keySize: self keySize;
+		valueSize: self valueSize;
+		pageSize: self pageSize;
+		yourself
+]
+
+{ #category : #'instance creation' }
 SoilBasicBTree >> newRootPage [
 	^ SoilBTreeRootPage new
 		offset: 2;
 		keySize: self keySize;
 		pageSize: self pageSize
-]
-
-{ #category : #private }
-SoilBasicBTree >> nextFreePage [
-	| firstPage freePage |
-	firstPage := self firstFreePage ifNil: [ 
-		^ nil ].
-	^ firstPage hasFreePages 
-		ifTrue: [ 
-			freePage := store pageAt: firstPage removeFirstIndex.
-			self addDirtyPage: firstPage.
-			freePage  ] 
-		ifFalse: [ 
-			self headerPage firstFreePageIndex: 0.
-			self addDirtyPage: self headerPage.
-			firstPage ]
 ]
 
 { #category : #private }
@@ -200,7 +193,7 @@ SoilBasicBTree >> removePage: aPage [
 	iterator := self newIterator. 
 	previousPage := iterator findPreviousPageOf: aPage. 
 	previousPage next: aPage next.
-	
+	self addDirtyPage: previousPage.
 	"now remove all keys, this will update the index pages"
 	
 	aPage items reverseDo: [ :item | item ifNotNil: [self removeKey: item key]  ].
@@ -232,6 +225,7 @@ SoilBasicBTree >> splitIndexPage: page [
 	| newPage |
 	newPage := page split: self newIndexPage.
 	self store pageAt: newPage offset put: newPage.
+	self addDirtyPage: newPage.
 	^ newPage 
 ]
 
@@ -241,6 +235,8 @@ SoilBasicBTree >> splitPage: page [
 	newPage := page split: store allocatePage.
 	newPage next: page next.
 	page next: newPage offset.
+	self addDirtyPage: page.
+	self addDirtyPage: newPage.
 	^ newPage 
 ]
 
