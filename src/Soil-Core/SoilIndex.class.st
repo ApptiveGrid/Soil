@@ -24,7 +24,9 @@ Class {
 
 { #category : #adding }
 SoilIndex >> addDirtyPage: aPage [ 
-	
+	dirtyPages 
+		at: aPage offset 
+		ifAbsentPut: [ aPage ]
 ]
 
 { #category : #adding }
@@ -92,10 +94,10 @@ SoilIndex >> basicAt: key put: anObject [
 ]
 
 { #category : #'as yet unclassified' }
-SoilIndex >> cleanUpToVersion: version [
-	SoilIndexCleaner new 
+SoilIndex >> cleanUpToVersion: aNumberOrNil [ 
+		SoilIndexCleaner new 
 			index: self;
-			readVersion: version;
+			readVersion: aNumberOrNil;
 			clean.
 ]
 

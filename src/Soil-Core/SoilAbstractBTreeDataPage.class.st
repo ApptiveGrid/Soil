@@ -30,8 +30,8 @@ SoilAbstractBTreeDataPage >> find: aKey with: aBTree [
 { #category : #private }
 SoilAbstractBTreeDataPage >> findPreviousPage: aKey with: aBTree path: aPath [
 	| pageToCheck |
-	pageToCheck := aPath reverse detect: [:each | (each itemBefore: aKey) isNotNil].
-	pageToCheck := aBTree pageAt: (pageToCheck itemBefore: aKey) value.
+	pageToCheck := aPath reverse detect: [:each | (each findItemBefore: aKey) isNotNil].
+	pageToCheck := aBTree pageAt: (pageToCheck findItemBefore: aKey) value.
 	"if we get an index page, follow the last till reaching the data page"
 	[pageToCheck isIndexPage ] whileTrue: [ pageToCheck := aBTree pageAt: pageToCheck lastItem value].
 	^ pageToCheck 

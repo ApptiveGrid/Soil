@@ -267,6 +267,103 @@ SoilBTreeTest >> testFirst [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testFreePageAdd [
+	| iterator |
+	iterator := index newIterator.
+	1 to: 2500 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	self assert: index headerPage lastPageOffset equals: 20.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	500 to: 1500 do: [ : n |
+		iterator removeKey: n ].
+	self assert: index headerPage lastPageOffset equals: 20.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	index cleanUpToVersion: nil.
+	self assert: index headerPage lastPageOffset equals: 20.
+	"the first page that gets empty is reused as free list page"
+	self assert: index headerPage firstFreePageIndex equals: 6.
+	"subsequent removed pages are added to the first page"
+	self assertCollection: (index store pageAt: 6) pageIndexes hasSameElements: #( 7 8 9 10 11 12).
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testFreePageAddNested [
+	| iterator nestedFreeIndexes |
+	index
+		maxLevel: 8; 
+		valueSize: 512.
+	iterator := index newIterator.
+	"create enough pages to test"
+	1 to: 9000 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	self assert: index headerPage lastPageOffset equals: 3017.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	"now we free more pages than a free page list has capacity"
+	10 to: 8990 do: [ : n |
+		iterator removeKey: n ].
+	index cleanUpToVersion: nil.
+	self assert: index headerPage firstFreePageIndex equals: 5.
+	self assert: (index store pageAt: 5) pageIndexes size equals: 1018.
+	"as there were more than free list capacity there is a next free
+	list page"
+	self assert: (index store pageAt: 5) next equals: 1030.
+	nestedFreeIndexes := ((index store pageAt: 1030) pageIndexes copy) copyWith: 1030.
+	"we fill the index with enough elements to use all free pages including the nested 
+	ones"
+	1 to: 15*1018 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	"there should be no more free page"
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	"and all pageIndexes of the next free page should be included"
+	self assert: ((index store pages collect: #offset) includesAll: nestedFreeIndexes)
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testFreePageReuse [
+	| iterator |
+	iterator := index newIterator.
+	1 to: 2500 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	self assert: index headerPage lastPageOffset equals: 20.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	500 to: 1500 do: [ : n |
+		iterator removeKey: n ].
+	index cleanUpToVersion: nil.
+	self assert: index headerPage lastPageOffset equals: 20.
+	2501 to: 2750+250 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	index cleanUpToVersion: nil.
+	"first free page is #6 with content #( 9 10 11 12 ). Adding 500 entries should remove 
+	two pages for reuse"
+	self assertCollection: (index store pageAt: 6) pageIndexes hasSameElements: #( 11 12 ).
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testFreePageReuseAtEndAppend [
+	| iterator |
+	iterator := index newIterator.
+	1 to: 2500 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	self assert: index headerPage lastPageOffset equals: 20.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	500 to: 1500 do: [ : n |
+		iterator removeKey: n ].
+	index cleanUpToVersion: nil.
+	self assert: index headerPage lastPageOffset equals: 20.
+	self assertCollection: (index store pageAt: 6) pageIndexes hasSameElements: #( 7 8 9 10 11 12).
+	iterator := index newIterator.
+	2501 to: 3500 do: [ :n | 
+		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	index cleanUpToVersion: nil.
+	"readding the same amount of entries but at the end should reuse all 
+	free pages making first free 0."
+	self assert: index headerPage firstFreePageIndex  equals: 0.
+	"as the new entries did not fit exactly we have one more page at the 
+	end which should have update the header page"
+	self assert: index headerPage lastPageOffset equals: 21.
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testIndexRewriting [
 	
 	| capacity fileSizeBefore |
@@ -355,7 +452,7 @@ SoilBTreeTest >> testOverflowCopyOnWriteSplitting [
 	capacity := copyOnWrite headerPage itemCapacity.
 	1 to: capacity * 2 by: 2 do: [ :n | 
 		copyOnWrite at: n  put: (n asByteArrayOfSize: 8) ].
-	self assert: copyOnWrite pages size equals: 3.
+	self assert: copyOnWrite pages size equals: 2.
 
 	page := copyOnWrite pageAt: 3.
 	self assert: page numberOfItems equals: 127.

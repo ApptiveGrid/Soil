@@ -41,6 +41,16 @@ SoilBTreePage >> find: aKey with: aBTree [
 ]
 
 { #category : #private }
+SoilBTreePage >> findItemBefore: aKey [
+	"like #itemBefore:, but comparung #<= like #find:with:"
+	| item |
+	item := items
+	 		reversed detect: [ :each |
+	 			each key <= aKey].
+	^ items before: item ifAbsent: nil
+]
+
+{ #category : #private }
 SoilBTreePage >> findPreviousPage: aKey with: aBTree path: aPath [ 
 	^ self subclassResponsibility
 ]
