@@ -227,6 +227,11 @@ SoilIndex >> lastPage [
 	^ self newIterator lastPage
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndex >> markAllDirty [ 
+	store pages do: [ :page | self addDirtyPage: page ]
+]
+
 { #category : #accessing }
 SoilIndex >> maxLevel [
 	"ignored, this allows to switch SkiList and BTree easily"

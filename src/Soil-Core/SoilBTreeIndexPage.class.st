@@ -61,6 +61,7 @@ SoilBTreeIndexPage >> insertItem: item for: iterator [
 	
 	"We need to add to this index page"
 	self addItem: return indexEntry.
+	iterator index addDirtyPage: self.
 	self hasRoom ifTrue: [  ^ return indexEntry: nil].
 		
 	"no space, we have to split"
