@@ -24,6 +24,11 @@ SoilNewBTreeListIndexEntry >> commitIn: soil [
 	indexManager at: id put: index
 ]
 
+{ #category : #accessing }
+SoilNewBTreeListIndexEntry >> maxLevel: aSoilBTree [ 
+	"Do nothing, for compatibility with SkipList"
+]
+
 { #category : #'instance creation' }
 SoilNewBTreeListIndexEntry >> readFrom: aStream [ 
 	| idSize |
