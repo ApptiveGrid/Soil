@@ -248,6 +248,11 @@ SoilIndex >> newFileStore [
 		index: self
 ]
 
+{ #category : #utilities }
+SoilIndex >> newIndexEntryClass [
+	self subclassResponsibility
+]
+
 { #category : #'instance creation' }
 SoilIndex >> newIterator [
 	^ self subclassResponsibility

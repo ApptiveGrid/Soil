@@ -51,6 +51,11 @@ SoilBasicSkipList >> maxLevel: anInteger [
 	self headerPage maxLevel: anInteger 
 ]
 
+{ #category : #utilities }
+SoilBasicSkipList >> newIndexEntryClass [
+	^ SoilNewSkipListIndexEntry
+]
+
 { #category : #'instance creation' }
 SoilBasicSkipList >> newIterator [ 
 	^ SoilSkipListIterator on: self 

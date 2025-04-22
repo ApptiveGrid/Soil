@@ -92,6 +92,11 @@ SoilBasicBTree >> newHeaderPage [
 		pageSize: self pageSize
 ]
 
+{ #category : #utilities }
+SoilBasicBTree >> newIndexEntryClass [
+	^ SoilNewBTreeListIndexEntry
+]
+
 { #category : #'instance creation' }
 SoilBasicBTree >> newIndexPage [
 	^ SoilBTreeIndexPage new 
