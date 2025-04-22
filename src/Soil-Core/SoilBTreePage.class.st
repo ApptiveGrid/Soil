@@ -35,6 +35,13 @@ SoilBTreePage >> bTreeAssertion [
 	items isEmpty ifFalse: [ self assert:  self hasUnderflow not  ]
 ]
 
+{ #category : #removing }
+SoilBTreePage >> cleanRemovedIn: index [
+	(items select: [ :each | each value isRemoved ])
+		do: [:removedItem | self remove: removedItem key for: index].
+	needWrite := true
+]
+
 { #category : #private }
 SoilBTreePage >> find: aKey with: aBTree [ 
 	^ self subclassResponsibility

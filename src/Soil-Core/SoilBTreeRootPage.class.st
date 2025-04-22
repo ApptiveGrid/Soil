@@ -20,7 +20,7 @@ SoilBTreeRootPage >> initialize [
 	self addItem: 0 -> 1 "headPage id"
 ]
 
-{ #category : #searching }
+{ #category : #adding }
 SoilBTreeRootPage >> insertItem: item for: iterator [
 	| foundItem return newIndexPage1 newIndexPage2 |
 	

@@ -44,8 +44,9 @@ SoilIndexCleaner >> cleanPage: page [
 				addDirtyPage: (index recyclePage: page) ]
 		ifFalse: [ 
 			"just clean the page"
-			page cleanRemoved.
-			index addDirtyPage: page ]
+			index 
+				cleanRemoved: page;
+				addDirtyPage: page ]
 ]
 
 { #category : #accessing }

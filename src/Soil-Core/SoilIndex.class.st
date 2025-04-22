@@ -93,6 +93,11 @@ SoilIndex >> basicAt: key put: anObject [
 		put: anObject 
 ]
 
+{ #category : #removing }
+SoilIndex >> cleanRemoved: aPage [
+	aPage cleanRemovedIn: self
+]
+
 { #category : #'as yet unclassified' }
 SoilIndex >> cleanUpToVersion: aNumberOrNil [ 
 		SoilIndexCleaner new 
