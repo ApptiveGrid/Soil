@@ -37,12 +37,6 @@ SoilBTree >> keySize: anInteger [
 	keySize := anInteger
 ]
 
-{ #category : #reindexing }
-SoilBTree >> newPluggableRewriter [
-	^ SoilPluggableIndexRewriter new 
-		index: self
-]
-
 { #category : #accessing }
 SoilBTree >> path [
 

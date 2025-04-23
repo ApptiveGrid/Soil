@@ -27,12 +27,6 @@ SoilSkipList >> close [
 	keySize := nil
 ]
 
-{ #category : #private }
-SoilSkipList >> compact [ 
-	"Rewrite index file without removed items"
-	self rewriteUsing: [ :item | item ]
-]
-
 { #category : #deleting }
 SoilSkipList >> destroy [
 	path ensureDelete 
@@ -92,12 +86,6 @@ SoilSkipList >> newHeaderPage [
 		pageSize: self pageSize
 ]
 
-{ #category : #reindexing }
-SoilSkipList >> newPluggableRewriter [
-	^ SoilPluggableIndexRewriter new 
-		index: self
-]
-
 { #category : #'opening/closing' }
 SoilSkipList >> open [
 	self isOpen ifTrue: [ self error: 'Index already open' ].
@@ -114,18 +102,6 @@ SoilSkipList >> path [
 SoilSkipList >> path: aStringOrFileReference [
 
 	path := aStringOrFileReference asFileReference 
-]
-
-{ #category : #initialization }
-SoilSkipList >> rewriteUsing: aBlock [
-	"write new index file and add all items. Use aBlock to 
-	enable converting items"
-	SoilPluggableIndexRewriter new 
-		index: self;
-		indexBlock: [ :idx | idx  ];
-		itemBlock: aBlock;
-		cleanRemoved;
-		run
 ]
 
 { #category : #converting }

@@ -72,6 +72,11 @@ SoilIndexedDictionary >> basicAt: aString ifAbsent: aBlock [
 	^ self newIterator at: aString ifAbsent: aBlock
 ]
 
+{ #category : #rewriting }
+SoilIndexedDictionary >> compact [ 
+	index wrapped compact
+]
+
 { #category : #initialization }
 SoilIndexedDictionary >> createIndex [
 	^ self subclassResponsibility
@@ -250,6 +255,11 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 SoilIndexedDictionary >> reverseDo: aBlock [
  	self newIterator reverseDo: [ :objectId | 
  				aBlock value: objectId ]
+]
+
+{ #category : #rewriting }
+SoilIndexedDictionary >> rewriteUsing: aBlock [
+	index wrapped rewriteUsing: aBlock
 ]
 
 { #category : #accessing }

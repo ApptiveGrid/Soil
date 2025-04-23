@@ -107,6 +107,12 @@ SoilIndex >> close [
 	store := nil
 ]
 
+{ #category : #private }
+SoilIndex >> compact [ 
+	"Rewrite index file without removed items"
+	self rewriteUsing: [ :item | item ]
+]
+
 { #category : #utilities }
 SoilIndex >> decreaseSize [
 	self headerPage decreaseSize.
@@ -263,6 +269,12 @@ SoilIndex >> newPage [
 	^ self subclassResponsibility
 ]
 
+{ #category : #reindexing }
+SoilIndex >> newPluggableRewriter [
+	^ SoilPluggableIndexRewriter new 
+		index: self
+]
+
 { #category : #accessing }
 SoilIndex >> pageAt: anInteger [ 
 	^ self store pageAt: anInteger 
@@ -346,6 +358,17 @@ SoilIndex >> reopen [
 { #category : #enumerating }
 SoilIndex >> reverseDo: aBlock [
 	self newIterator reverseDo: aBlock
+]
+
+{ #category : #initialization }
+SoilIndex >> rewriteUsing: aBlock [
+	"write new index file and add all items. Use aBlock to 
+	enable converting items"
+	self newPluggableRewriter
+		indexBlock: [ :idx | idx  ];
+		itemBlock: aBlock;
+		cleanRemoved;
+		run
 ]
 
 { #category : #accessing }
