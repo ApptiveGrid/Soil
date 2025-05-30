@@ -9,6 +9,7 @@ SoilSkipListPageTest >> readPageFrom: aStream [
 	| page |
 	page := (SoilIndexPage readPageClassFrom: aStream) new.
 	page 
+		pageSize: 4096;
 		keySize: 8;
 		valueSize: 8.
 	^ page readFrom: aStream

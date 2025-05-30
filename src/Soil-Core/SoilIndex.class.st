@@ -309,7 +309,9 @@ SoilIndex >> readPageClassFrom: aStream [
 SoilIndex >> readPageFrom: aStream [
 	| page |
 	page := (self readPageClassFrom: aStream) basicNew.
-	page initializeInIndex: self. 
+	page 
+		pageSize: self pageSize;
+		initializeInIndex: self. 
 	^ page readFrom: aStream 
 ]
 

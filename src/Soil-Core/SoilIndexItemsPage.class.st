@@ -262,6 +262,16 @@ SoilIndexItemsPage >> presentItemCount [
 	^ (items reject: [ :each | each value isRemoved ]) size 
 ]
 
+{ #category : #testing }
+SoilIndexItemsPage >> rawCapacity [
+	| headerSize itemSize |
+	"Calculate the raw capacity for an empty page so we can figure
+	out how man items could be stored"
+	itemSize := self keySize + self valueSize.
+	headerSize := self headerSize + 2 "items size".
+	^ ((self pageSize - headerSize) / itemSize) floor 
+]
+
 { #category : #reading }
 SoilIndexItemsPage >> readItemsFrom: aStream [ 
 	| numberOfItems |
