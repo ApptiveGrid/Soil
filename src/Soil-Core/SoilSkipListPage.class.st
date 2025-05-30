@@ -148,7 +148,7 @@ SoilSkipListPage >> readItemsFrom: aStream [
 	"calculate the maximum number of items that can be stored in this
 	page so we spend that amount removing the need for the collection 
 	to grow"
-	items := OrderedCollection new: self rawCapacity.
+	items := OrderedCollection new: self itemCapacity.
 	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
 	numberOfItems timesRepeat: [ 
 		items add: ((aStream next: self keySize) asInteger -> (aStream next: self valueSize) ) ]
