@@ -40,6 +40,18 @@ SoilSkipListPage >> biggestKey [
 		ifFalse: [ self lastKey ]
 ]
 
+{ #category : #removing }
+SoilSkipListPage >> cleanRemoved [
+	items removeAllSuchThat: [ :each | each value isRemoved ].
+	needWrite := true
+]
+
+{ #category : #removing }
+SoilSkipListPage >> cleanRemovedIn: index [
+	"index not needed for the SkipList"
+	self cleanRemoved
+]
+
 { #category : #initialization }
 SoilSkipListPage >> initialize [ 
 	super initialize.

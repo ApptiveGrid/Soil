@@ -55,10 +55,9 @@ SoilIndexItemsPage >> canBeRemoved [
 	^ self presentItemCount isZero
 ]
 
-{ #category : #running }
-SoilIndexItemsPage >> cleanRemoved [
-	items removeAllSuchThat: [ :each | each value isRemoved ].
-	needWrite := true
+{ #category : #removing }
+SoilIndexItemsPage >> cleanRemovedIn: index [
+	self subclassResponsibility
 ]
 
 { #category : #accessing }

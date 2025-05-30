@@ -21,6 +21,11 @@ SoilBTreeHeaderPage class >> pageCode [
 	^ 3
 ]
 
+{ #category : #testing }
+SoilBTreeHeaderPage >> canBeRemoved [ 
+	^ false
+]
+
 { #category : #utilities }
 SoilBTreeHeaderPage >> decreaseSize [
  	size := size - 1.
