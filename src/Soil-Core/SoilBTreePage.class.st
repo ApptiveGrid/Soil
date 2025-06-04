@@ -18,15 +18,6 @@ SoilBTreePage class >> isAbstract [
 	^ self == SoilBTreePage
 ]
 
-{ #category : #adding }
-SoilBTreePage >> addItem: anAssociation [
-	"Updates entry if already there (different to SoilSkipListPage>>#addItem:)"
-	(items anySatisfy: [ :item | item key = anAssociation key ])
-		ifFalse: [ items add: anAssociation ]
-		ifTrue:  [ self itemAt: anAssociation key put: anAssociation value ].
-	needWrite := true
-]
-
 { #category : #assertions }
 SoilBTreePage >> bTreeAssertion [
 	self assert: self hasRoom.
