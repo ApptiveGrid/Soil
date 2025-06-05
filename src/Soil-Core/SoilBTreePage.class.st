@@ -65,10 +65,6 @@ SoilBTreePage >> initialize [
 	needWrite := true
 ]
 
-{ #category : #initialization }
-SoilBTreePage >> initializeInIndex: aSoilSkipList [
-]
-
 { #category : #adding }
 SoilBTreePage >> insertItem: anItem for: iterator [ 
 	^ self subclassResponsibility
