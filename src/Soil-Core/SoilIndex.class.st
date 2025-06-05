@@ -280,6 +280,14 @@ SoilIndex >> newPluggableRewriter [
 		index: self
 ]
 
+{ #category : #initialization }
+SoilIndex >> nextPageOffset [
+	| offset |
+	offset := store nextPageOffset.
+	self addDirtyPage: store headerPage.
+	^ offset 
+]
+
 { #category : #accessing }
 SoilIndex >> pageAt: anInteger [ 
 	^ self store pageAt: anInteger 
@@ -353,6 +361,12 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 { #category : #removing }
 SoilIndex >> removePage: aPage [ 
 	^ self subclassResponsibility
+]
+
+{ #category : #removing }
+SoilIndex >> removePageWithIndexIfPresent: anInteger [ 
+	(store includesPageAt: anInteger) ifTrue: [ 
+		store removePageAt: anInteger ]
 ]
 
 { #category : #public }

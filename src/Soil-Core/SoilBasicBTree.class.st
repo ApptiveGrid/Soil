@@ -139,37 +139,6 @@ SoilBasicBTree >> newRootPage [
 		pageSize: self pageSize
 ]
 
-{ #category : #private }
-SoilBasicBTree >> nextFreePageIndex [
-	| firstFreePage freePageIndex |
-	firstFreePage := self firstFreePage ifNil: [ 
-		^ nil ].
-	^ firstFreePage hasFreePages 
-		ifTrue: [ 
-			freePageIndex := firstFreePage removeFirstIndex.
-			self removePageWithIndexIfPresent: freePageIndex.
-			self addDirtyPage: firstFreePage.
-			freePageIndex  ] 
-		ifFalse: [ 
-			"if firstFreePage has a next pointer we set that as 
- 			new first free page. Next will return 0 if there is no
- 			next page"
-			freePageIndex := firstFreePage next.
-			self headerPage firstFreePageIndex: firstFreePage next.
-			self removePageWithIndexIfPresent: firstFreePage offset.
-
-			self addDirtyPage: self headerPage.
-			firstFreePage offset ]
-]
-
-{ #category : #accessing }
-SoilBasicBTree >> nextPageOffset [
-	| offset |
-	offset := store nextPageOffset.
-	self addDirtyPage: store headerPage.
-	^ offset 
-]
-
 { #category : #'open/close' }
 SoilBasicBTree >> open [
  	self isOpen ifTrue: [ self error: 'Index already open' ].
@@ -207,12 +176,6 @@ SoilBasicBTree >> removePage: aPage [
 	store removePageAt: aPage offset.
 	^ aPage 
 
-]
-
-{ #category : #removing }
-SoilBasicBTree >> removePageWithIndexIfPresent: anInteger [ 
-	(store includesPageAt: anInteger) ifTrue: [ 
-		store removePageAt: anInteger ]
 ]
 
 { #category : #accessing }
