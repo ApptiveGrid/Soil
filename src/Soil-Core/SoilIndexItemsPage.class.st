@@ -123,6 +123,10 @@ SoilIndexItemsPage >> initialize [
 	items := OrderedCollection new
 ]
 
+{ #category : #initialization }
+SoilIndexItemsPage >> initializeInIndex: aSoilSkipList [
+]
+
 { #category : #testing }
 SoilIndexItemsPage >> isDirty [
 	^ self needsWrite or: [ self needsCleanup ] 
