@@ -145,7 +145,7 @@ SoilBasicBTree >> open [
 	self store open
 ]
 
-{ #category : #initialization }
+{ #category : #'instance creation' }
 SoilBasicBTree >> pageClass [
 	^ SoilBTreeDataPage
 ]
