@@ -53,10 +53,6 @@ SoilSkipListPage >> initialize [
 ]
 
 { #category : #initialization }
-SoilSkipListPage >> initializeInIndex: aSoilSkipList [
-]
-
-{ #category : #initialization }
 SoilSkipListPage >> initializeLevel: maxLevel [
 	| promote level |
 	level := 1. 

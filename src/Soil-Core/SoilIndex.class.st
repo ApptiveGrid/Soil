@@ -280,9 +280,45 @@ SoilIndex >> newPluggableRewriter [
 		index: self
 ]
 
+{ #category : #private }
+SoilIndex >> nextFreePageIndex [ 
+	| firstFreePage freePageIndex |
+	firstFreePage := self firstFreePage ifNil: [ 
+		^ nil ].
+	^ firstFreePage hasFreePages 
+		ifTrue: [ 
+			freePageIndex := firstFreePage removeFirstIndex.
+			self removePageWithIndexIfPresent: freePageIndex.
+			self addDirtyPage: firstFreePage.
+			freePageIndex  ] 
+		ifFalse: [ 
+			"if firstFreePage has a next pointer we set that as 
+			new first free page. Next will return 0 if there is no
+			next page"
+			freePageIndex := firstFreePage next.
+			self headerPage firstFreePageIndex: firstFreePage next.
+			self removePageWithIndexIfPresent: firstFreePage offset.
+
+			self addDirtyPage: self headerPage.
+			firstFreePage offset ]
+]
+
+{ #category : #initialization }
+SoilIndex >> nextPageOffset [
+	| offset |
+	offset := store nextPageOffset.
+	self addDirtyPage: store headerPage.
+	^ offset 
+]
+
 { #category : #accessing }
 SoilIndex >> pageAt: anInteger [ 
 	^ self store pageAt: anInteger 
+]
+
+{ #category : #'instance creation' }
+SoilIndex >> pageClass [
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
@@ -353,6 +389,12 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 { #category : #removing }
 SoilIndex >> removePage: aPage [ 
 	^ self subclassResponsibility
+]
+
+{ #category : #removing }
+SoilIndex >> removePageWithIndexIfPresent: anInteger [ 
+	(store includesPageAt: anInteger) ifTrue: [ 
+		store removePageAt: anInteger ]
 ]
 
 { #category : #public }
