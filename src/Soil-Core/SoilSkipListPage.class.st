@@ -26,6 +26,41 @@ SoilSkipListPage class >> isAbstract [
 	^ self == SoilSkipListPage 
 ]
 
+{ #category : #adding }
+SoilSkipListPage >> addItem: anAssociation [
+
+	| index |
+	needWrite := true.
+
+	items 
+		findBinaryIndex: [ :each | anAssociation key - each key ] 
+		do: [:idx | | removedItem |
+			"replace the found index with the new value and return 
+			the removed value"
+			index := idx.
+			[ index < items size and: [ (items at: index + 1) key = anAssociation key ] ] whileTrue: [ 
+				index := index + 1 ].
+			items add: anAssociation afterIndex: index.
+			"removedItem := items at: index.
+			items at: index put: anAssociation."
+			^ removedItem ]
+		ifNone: [ :lower :upper |
+			"upper will be an index bigger than collection size if 
+			the element needs to be appended"
+			(upper > items size) ifTrue: [
+				items addLast: anAssociation.
+				^ nil ].
+			"if lower is greater than zero than lower and upper are 
+			valid indexes where we need to insert in between"
+			(lower > 0) ifTrue: [ 
+				items add: anAssociation afterIndex: lower.
+				^ nil ].
+			"lower will be zero if the element needs to be added to 
+			the front of the page"
+			items addFirst: anAssociation.
+			^ nil ]
+]
+
 { #category : #accessing }
 SoilSkipListPage >> biggestKey [
 	^ self isLastPage 
@@ -43,6 +78,18 @@ SoilSkipListPage >> cleanRemoved [
 SoilSkipListPage >> cleanRemovedIn: index [
 	"index not needed for the SkipList"
 	self cleanRemoved
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> firstItemIndexForKey: key [ 
+	| index |
+	index := items 
+		findBinaryIndex: [ :each | key - each key ] 
+		do: [ :idx | idx ] 
+		ifNone: [ :l :u | ^ 0 ].
+	[ index > 1 and: [ (items at: index - 1) key = key ] ] whileTrue: [ 
+		index := index - 1 ].
+	^ index 
 ]
 
 { #category : #initialization }
@@ -66,6 +113,69 @@ SoilSkipListPage >> initializeLevel: maxLevel [
 { #category : #testing }
 SoilSkipListPage >> isLastPage [
 	^ (right at: 1) = 0
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> itemAt: key put: anObject [ 
+
+	self flag: #todo.
+	"this needs to be improved. For itemAt:put: we search twice for the index. This 
+	is to keep the assumption about replacing items. The way this is enforced might 
+	be a strategy object instead soonish"
+	items 
+		findBinaryIndex: [ :each |  key - each key ] 
+		do: [:ind | 	| removedItem |
+			removedItem := items at: ind.
+			items at: ind put: (key -> anObject).
+			^ removedItem ]
+		ifNone: [ KeyNotFound signal: 'this method is just for replacing items' ].
+
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> itemIndexForKey: key [ 
+	| index prevIndex |
+	index := items 
+		findBinaryIndex: [ :each | key - each key ] 
+		do: [ :idx |  ^ idx ] 
+		ifNone: [ ^ 0 ].
+	"we are at a position where the key is present but we want to
+	resolve the first key occurrence so we scan left"
+	prevIndex := index.
+	[ prevIndex > 1 ] whileTrue: [ 
+		((items at: prevIndex - 1) key = key) ifFalse: [ ^ prevIndex ].
+		prevIndex := prevIndex - 1.
+  ].
+	^ 0 
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> itemIndexForKey: key value: anObject [  
+	| index prevIndex nextIndex |
+	index := items 
+		findBinaryIndex: [ :each | key - each key ] 
+		do: [ :idx | 
+			"now that we've found the key let's check if the value does
+			match as well"
+			((items at: idx) = anObject) 
+				ifTrue: [ ^ idx ].
+			idx] 
+		ifNone: [ ^ 0 ].
+	"we've found the key but not anObject as value. We scan backward to find 
+	all keys that are the same to find anObject"
+	prevIndex := index.
+	[ prevIndex > 1 and: [ (items at: prevIndex - 1) key = key] ] whileTrue: [ 
+		prevIndex := prevIndex - 1.
+		((items at: prevIndex) = anObject) ifTrue: [ 
+			^ prevIndex ] ].
+	"backward scanning didn't help so we scan forward to find the same key in 
+	the other direction still looking for anObject"
+	nextIndex := index.
+	[ nextIndex < items size and: [ (items at: nextIndex + 1) key = key] ] whileTrue: [ 
+		nextIndex := nextIndex + 1.
+		((items at: nextIndex) = anObject) ifTrue: [ 
+			^ nextIndex ] ].
+	^ 0 
 ]
 
 { #category : #accessing }
