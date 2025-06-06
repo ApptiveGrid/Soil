@@ -26,6 +26,7 @@ SoilSkipListPage class >> isAbstract [
 	^ self == SoilSkipListPage 
 ]
 
+
 { #category : #adding }
 SoilSkipListPage >> addItem: anAssociation [
 
@@ -96,16 +97,7 @@ SoilSkipListPage >> firstItemIndexForKey: key [
 SoilSkipListPage >> initialize [ 
 	super initialize.
 	lastTransaction := 0.
-	needWrite := true.
-	self flag: #hack.
-	"this is a newly initialization for the skip list as long as the
-	BTree code has not been adjusted"
-	items := OrderedCollection new
-
-]
-
-{ #category : #initialization }
-SoilSkipListPage >> initializeInIndex: aSoilSkipList [
+	needWrite := true
 ]
 
 { #category : #initialization }
@@ -207,18 +199,6 @@ SoilSkipListPage >> postCopy [
 SoilSkipListPage >> readFrom: aStream [ 
 	super readFrom: aStream.
 	self readLastTransactionFrom: aStream
-]
-
-{ #category : #reading }
-SoilSkipListPage >> readItemsFrom: aStream [ 
-	| numberOfItems |
-	"calculate the maximum number of items that can be stored in this
-	page so we spend that amount removing the need for the collection 
-	to grow"
-	items := OrderedCollection new: self itemCapacity.
-	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
-	numberOfItems timesRepeat: [ 
-		items add: ((aStream next: self keySize) asInteger -> (aStream next: self valueSize) ) ]
 ]
 
 { #category : #reading }

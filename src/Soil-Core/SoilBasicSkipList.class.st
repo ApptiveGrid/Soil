@@ -71,38 +71,6 @@ SoilBasicSkipList >> newPage [
 		yourself
 ]
 
-{ #category : #private }
-SoilBasicSkipList >> nextFreePageIndex [ 
-	| firstFreePage freePageIndex |
-	firstFreePage := self firstFreePage ifNil: [ 
-		^ nil ].
-	^ firstFreePage hasFreePages 
-		ifTrue: [ 
-			freePageIndex := firstFreePage removeFirstIndex.
-			self removePageWithIndexIfPresent: freePageIndex.
-			self addDirtyPage: firstFreePage.
-			freePageIndex  ] 
-		ifFalse: [ 
-			"if firstFreePage has a next pointer we set that as 
-			new first free page. Next will return 0 if there is no
-			next page"
-			freePageIndex := firstFreePage next.
-			self headerPage firstFreePageIndex: firstFreePage next.
-			self removePageWithIndexIfPresent: firstFreePage offset.
-
-			self addDirtyPage: self headerPage.
-			firstFreePage offset ]
-				
-]
-
-{ #category : #'instance creation' }
-SoilBasicSkipList >> nextPageOffset [
-	| offset |
-	offset := store nextPageOffset.
-	self addDirtyPage: store headerPage.
-	^ offset 
-]
-
 { #category : #'instance creation' }
 SoilBasicSkipList >> pageClass [
 	^ SoilSkipListDataPage
@@ -138,12 +106,6 @@ SoilBasicSkipList >> removePage: aPage [
 	^ aPage 
 
 
-]
-
-{ #category : #removing }
-SoilBasicSkipList >> removePageWithIndexIfPresent: anInteger [ 
-	(store includesPageAt: anInteger) ifTrue: [ 
-		store removePageAt: anInteger ]
 ]
 
 { #category : #accessing }

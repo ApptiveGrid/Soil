@@ -24,8 +24,33 @@ SoilIndexItemsPage class >> isAbstract [
 ]
 
 { #category : #adding }
-SoilIndexItemsPage >> addItem: anAssociation [ 
-	^ self subclassResponsibility
+SoilIndexItemsPage >> addItem: anAssociation [
+
+	needWrite := true.
+
+	items 
+		findBinaryIndex: [ :each |  anAssociation key - each key ] 
+		do: [:index | | removedItem |
+			"replace the found index with the new value and return 
+			the removed value"
+			removedItem := items at: index.
+			items at: index put: anAssociation.
+			^ removedItem ]
+		ifNone: [ :lower :upper |
+			"upper will be an index bigger than collection size if 
+			the element needs to be appended"
+			(upper > items size) ifTrue: [
+				items addLast: anAssociation.
+				^ nil ].
+			"if lower is greater than zero than lower and upper are 
+			valid indexes where we need to insert in between"
+			(lower > 0) ifTrue: [ 
+				items add: anAssociation afterIndex: lower.
+				^ nil ].
+			"lower will be zero if the element needs to be added to 
+			the front of the page"
+			items addFirst: anAssociation.
+			^ nil ]
 ]
 
 { #category : #converting }
@@ -96,7 +121,11 @@ SoilIndexItemsPage >> indexOfKey: anInteger [
 { #category : #initialization }
 SoilIndexItemsPage >> initialize [
 	super initialize.
-	items := SortedCollection new
+	items := OrderedCollection new
+]
+
+{ #category : #initialization }
+SoilIndexItemsPage >> initializeInIndex: aSoilSkipList [
 ]
 
 { #category : #testing }
@@ -147,11 +176,15 @@ SoilIndexItemsPage >> itemAt: anInteger ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexItemsPage >> itemAt: key put: anObject [ 
-	| removedItem |
-	removedItem := self itemRemoveAt: key ifAbsent: [ KeyNotFound signal: 'this method is just for replacing items'].
-	items add: (key -> anObject).
-	needWrite := true.
-	^ removedItem
+	self flag: #todo.
+	"this needs to be improved. For itemAt:put: we search twice for the index. This 
+	is to keep the assumption about replacing items. The way this is enforced might 
+	be a strategy object instead soonish"
+	items 
+		findBinaryIndex: [ :each |  key - each key ] 
+		do: [:ind | ind ]
+		ifNone: [ KeyNotFound signal: 'this method is just for replacing items' ].
+	^ self addItem: key -> anObject 
 ]
 
 { #category : #accessing }
@@ -287,8 +320,11 @@ SoilIndexItemsPage >> presentItemCount [
 { #category : #reading }
 SoilIndexItemsPage >> readItemsFrom: aStream [ 
 	| numberOfItems |
+	"calculate the maximum number of items that can be stored in this
+	page so we spend that amount removing the need for the collection 
+	to grow"
+	items := OrderedCollection new: self itemCapacity.
 	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
-	items := SortedCollection new: numberOfItems.
 	numberOfItems timesRepeat: [ 
 		items add: ((aStream next: self keySize) asInteger -> (aStream next: self valueSize) ) ]
 ]
