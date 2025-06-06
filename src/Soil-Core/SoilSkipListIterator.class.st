@@ -23,21 +23,27 @@ SoilSkipListIterator >> atLevel: key put: anObject [
 { #category : #accessing }
 SoilSkipListIterator >> basicAt: indexKey put: anObject [
 
+	| keyIndex |
 	self findPageFor: indexKey.
 
 	"as an optimization we return the prior value stored in the list. If
 	there was none we return nil"
 	index addDirtyPage: currentPage.
-	^(currentPage hasKey: indexKey)
+	keyIndex := index hasUniqueKeys 
+		ifTrue: [ currentPage itemIndexForKey: indexKey ] 
+		ifFalse: [ currentPage itemIndexForKey: indexKey value: anObject ]. 
+	
+	^ keyIndex > 0
 		ifTrue: [ 
 			"overwriting a key does not change the size of an index"
-			
 			(currentPage itemAt: indexKey put: anObject) value ]
 		ifFalse: [
 			currentPage hasRoom ifFalse: [  | newPage |
 				newPage := index splitPage: self forKey: indexKey.
 				index addDirtyPage: newPage.	
-				currentPage := currentPage biggestKey < indexKey
+				self flag: #todo.
+				"another <= case"
+				currentPage := currentPage biggestKey <= indexKey
 					                 ifTrue: [ newPage ]
 					                 ifFalse: [ currentPage ] ].
 			  currentPage addItem: indexKey -> anObject.
@@ -57,6 +63,7 @@ SoilSkipListIterator >> findPageFor: indexKey [
 				candidatePage smallestKey <= indexKey ] ]
 					whileTrue: [ currentPage := candidatePage  ].
 			self atLevel: level put: currentPage. ].
+	currentPageIndex := 0.
 	^ currentPage 
 ]
 

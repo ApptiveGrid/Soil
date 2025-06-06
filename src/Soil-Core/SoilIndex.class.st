@@ -17,7 +17,8 @@ Class {
 	#instVars : [
 		'id',
 		'store',
-		'dirtyPages'
+		'dirtyPages',
+		'keysAreUnique'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -58,6 +59,11 @@ SoilIndex >> addToFreePages: aPage [
 { #category : #'instance creation' }
 SoilIndex >> allocatePage [
 	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+SoilIndex >> allowDuplicateKeys [
+	keysAreUnique := false
 ]
 
 { #category : #private }
@@ -175,6 +181,11 @@ SoilIndex >> hasHeaderPage [
 ]
 
 { #category : #accessing }
+SoilIndex >> hasUniqueKeys [
+	^ keysAreUnique 
+]
+
+{ #category : #accessing }
 SoilIndex >> headerPage [
 	^ self store headerPage
 ]
@@ -200,6 +211,12 @@ SoilIndex >> increaseSize [
 { #category : #accessing }
 SoilIndex >> indexKey: aString [
 	^ aString asIndexKeyOfSize: self keySize
+]
+
+{ #category : #initialization }
+SoilIndex >> initialize [ 
+	super initialize.
+	keysAreUnique := true
 ]
 
 { #category : #testing }

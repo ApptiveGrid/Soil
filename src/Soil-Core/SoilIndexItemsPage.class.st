@@ -87,9 +87,10 @@ SoilIndexItemsPage >> headerSize [
 
 { #category : #accessing }
 SoilIndexItemsPage >> indexOfKey: anInteger [ 
-	items withIndexDo: [ :each :idx |
-		(each key = anInteger) ifTrue: [ ^ idx ] ].
-	^ 0
+	anInteger ifNil: [ ^ 0 ].
+	^ items 
+		findBinaryIndex: [ :each | anInteger - each key] 
+		ifNone: [ 0 ]
 ]
 
 { #category : #initialization }
@@ -128,6 +129,15 @@ SoilIndexItemsPage >> itemAfter: key [
 ]
 
 { #category : #accessing }
+SoilIndexItemsPage >> itemAfterIndex: index [ 
+	| item |
+	(index >= items size) ifTrue: [ ^ nil].
+	
+	item := items at: index + 1.
+	^ item
+]
+
+{ #category : #accessing }
 SoilIndexItemsPage >> itemAt: anInteger ifAbsent: aBlock [
 	^ items 
 		findBinaryIndex: [ :each |  anInteger - each key ] 
@@ -145,11 +155,23 @@ SoilIndexItemsPage >> itemAt: key put: anObject [
 ]
 
 { #category : #accessing }
+SoilIndexItemsPage >> itemAtIndex: index [
+	^ items at: index 
+]
+
+{ #category : #accessing }
 SoilIndexItemsPage >> itemBefore: key [
 
 	| item |
 	item := items findBinary: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
 	^ items before: item ifAbsent: nil
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> itemBeforeIndex: index [
+
+	(index = 1) ifTrue: [ ^ nil ].
+	^ items at: index - 1
 ]
 
 { #category : #accessing }
