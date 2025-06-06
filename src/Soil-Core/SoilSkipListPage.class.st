@@ -26,7 +26,6 @@ SoilSkipListPage class >> isAbstract [
 	^ self == SoilSkipListPage 
 ]
 
-
 { #category : #adding }
 SoilSkipListPage >> addItem: anAssociation [
 
@@ -128,6 +127,7 @@ SoilSkipListPage >> itemAt: key put: anObject [
 		do: [:ind | 	| removedItem |
 			removedItem := items at: ind.
 			items at: ind put: (key -> anObject).
+			needWrite := true.
 			^ removedItem ]
 		ifNone: [ KeyNotFound signal: 'this method is just for replacing items' ].
 
