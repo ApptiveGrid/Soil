@@ -172,10 +172,11 @@ SoilSkipListPage >> itemIndexForKey: key value: anObject [
 	"backward scanning didn't help so we scan forward to find the same key in 
 	the other direction still looking for anObject"
 	nextIndex := index.
-	[ nextIndex < items size and: [ (items at: nextIndex + 1) key = key] ] whileTrue: [ 
-		nextIndex := nextIndex + 1.
-		((items at: nextIndex) = anObject) ifTrue: [ 
-			^ nextIndex ] ].
+	[ nextIndex <= items size and: [ (items at: nextIndex) key = key] ] whileTrue: [ 
+		((items at: nextIndex) value = anObject) ifTrue: [ 
+			^ nextIndex ] .
+		nextIndex := nextIndex + 1 ].
+		
 	^ 0 
 ]
 
