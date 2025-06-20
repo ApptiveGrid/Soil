@@ -681,6 +681,34 @@ SoilIndexedDictionaryTest >> testNextCloseTo [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
+	| tx tx2 blockedTx |
+	
+	tx := soil newTransaction.
+	dict index allowDuplicateKeys.
+	tx root: dict.
+	dict 
+		at: #testkey put: 1;
+		at: #testkey put: 2;
+		at: #testkey put: 3.
+	tx commit.
+	
+	blockedTx := soil newTransaction.
+	self halt.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	tx2 root index allowDuplicateKeys.
+	tx2 root 
+		removeKey: #testkey;
+		removeKey: #testkey;
+		removeKey: #testkey.
+	tx2 commit.
+	"and test last, note: keyorder"
+	self assert: (blockedTx root at: #testkey) equals: 1.
+
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testRemoveKey [
 	| tx tx2 tag return |
 	tx := soil newTransaction.
