@@ -19,7 +19,7 @@ SoilIndexRewriter class >> index: anIndex [
 
 { #category : #testing }
 SoilIndexRewriter class >> isAbstract [
-
+	<ignoreForCoverage>
 	^ self == SoilIndexRewriter
 ]
 
