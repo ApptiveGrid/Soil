@@ -17,17 +17,6 @@ SoilBasicBTree class >> isAbstract [
 	^ self == SoilBasicBTree
 ]
 
-{ #category : #'instance creation' }
-SoilBasicBTree >> allocatePage [
-	| page |
-	page := self newPage 
-		offset: (self nextFreePageIndex
-			ifNil: [ self nextPageOffset ]).
-	self store pageAt: page offset put: page.
-	self addDirtyPage: page.
-	^ page
-]
-
 { #category : #converting }
 SoilBasicBTree >> asCopyOnWrite [
 	^ SoilCopyOnWriteBTree new

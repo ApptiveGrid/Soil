@@ -17,7 +17,7 @@ Class {
 
 { #category : #testing }
 SoilAbstractBTreeDataPage class >> isAbstract [
-
+	<ignoreForCoverage>
 	^ self == SoilAbstractBTreeDataPage
 ]
 

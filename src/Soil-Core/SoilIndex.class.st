@@ -57,7 +57,13 @@ SoilIndex >> addToFreePages: aPage [
 
 { #category : #'instance creation' }
 SoilIndex >> allocatePage [
-	^ self subclassResponsibility
+	| page |
+	page := self newPage 
+		offset: (self nextFreePageIndex
+			ifNil: [ self nextPageOffset ]).
+	self store pageAt: page offset put: page.
+	self addDirtyPage: page.
+	^ page
 ]
 
 { #category : #private }
