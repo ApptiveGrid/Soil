@@ -190,11 +190,14 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 
 { #category : #accessing }
 SoilTransaction >> buildJournal [
-	journal := soil journal newTransactionJournalForId: writeVersion.
-	journal addEntry: (SoilBeginTransactionEntry new
-		readVersion: readVersion; 
-		transactionId: writeVersion;
-		createdAt: createdAt).
+	journal 
+		ifNotNil: [ journal entries do: [ :entry | entry transactionId: writeVersion ]. ]
+		ifNil: [  
+			journal := soil journal newTransactionJournalForId: writeVersion.
+			journal addEntry: (SoilBeginTransactionEntry new
+				readVersion: readVersion; 
+				transactionId: writeVersion;
+				createdAt: createdAt) ].
 	"add entries for updating the last index of each modified 
 	segment"
 	lastObjectIndexes keysAndValuesDo: [ :segment :index |
@@ -372,8 +375,9 @@ SoilTransaction >> isRoot: anObject [
 ]
 
 { #category : #accessing }
-SoilTransaction >> journal [
-	^ journal
+SoilTransaction >> journal [ 
+	^ journal ifNil: [ 
+		journal := self newJournal ]
 ]
 
 { #category : #api }
@@ -422,6 +426,16 @@ SoilTransaction >> newClusterVersion [
 	^ SoilNewClusterVersion new
 		changed: true; 
 		transaction: self.
+]
+
+{ #category : #accessing }
+SoilTransaction >> newJournal [
+	journal := SoilTransactionJournal new.
+	journal addEntry: (SoilBeginTransactionEntry new
+		readVersion: readVersion; 
+		createdAt: createdAt).
+	^ journal
+
 ]
 
 { #category : #'instance creation' }

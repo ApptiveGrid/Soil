@@ -260,6 +260,11 @@ SoilIndex >> newFileStore [
 ]
 
 { #category : #utilities }
+SoilIndex >> newIndexEntry [
+	^ self newIndexEntryClass new
+]
+
+{ #category : #utilities }
 SoilIndex >> newIndexEntryClass [
 	self subclassResponsibility
 ]
