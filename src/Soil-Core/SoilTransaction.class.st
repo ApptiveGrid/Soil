@@ -195,7 +195,7 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 
 { #category : #accessing }
 SoilTransaction >> buildJournal [
-	journal index: writeVersion.
+	self journal index: writeVersion.
 	journal entries do: [ :entry | entry transactionId: writeVersion ].
 	"journal 
 		ifNotNil: [ journal entries do: [ :entry | entry transactionId: writeVersion ]. ]
@@ -217,8 +217,6 @@ SoilTransaction >> buildJournal [
 		record version: writeVersion.
 		journal addEntries: (record asJournalEntry do: [:each | each transactionId: writeVersion ]).
 		record committed  ].
-	indexUpdatesToCommit do: [ :object | 
-		journal addEntries: object journalEntries  ].
 	"for all new objects with a new behavior we create an entry to
 	add the behavior"
 	behaviorDescriptions do: [ :description |
