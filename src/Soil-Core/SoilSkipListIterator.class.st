@@ -126,6 +126,34 @@ SoilSkipListIterator >> printOn: aStream [
 	aStream << 'path: ' << levels asString
 ]
 
+{ #category : #removing }
+SoilSkipListIterator >> removeKey: key ifAbsent: aBlock [
+	| indexKey item oldValue assoc |
+	indexKey := index indexKey: key.
+	"We search for the data page for the key to update the value with a removed ID
+	and return the prior value just like #at: would do"
+	self findPageFor: indexKey.
+	currentPageIndex := currentPage indexOfKey: indexKey.
+	currentKey := (currentPage items at: currentPageIndex) key. 
+	assoc := self previousAssociation.
+	[ assoc notNil and: [ assoc key = key ] ] whileTrue: [ 
+		assoc := self previousAssociation ].
+	
+	item :=  self restoreItem: (currentPage itemAtIndex: currentPageIndex).
+	oldValue := item
+		ifNotNil: [ 
+			(self convertValue: item value) 
+				ifNil: [ aBlock value ] ]
+		ifNil: [ aBlock value ].
+	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
+	(e.g no need to update index pages for the BTree"
+	currentPage items at: currentPageIndex put:  key -> SoilObjectId removed.
+	index addDirtyPage: currentPage.
+
+	index decreaseSize.
+	^ oldValue
+]
+
 { #category : #accessing }
 SoilSkipListIterator >> size [ 
 	| headerPage |

@@ -24,6 +24,7 @@ SoilNewSkipListIndexEntry >> commitIn: soil [
 		maxLevel: maxLevel;
 		keySize: keySize;
 		valueSize: valueSize;
+		allowDuplicateKeys;
 		flush.
 	indexManager at: id put: index
 ]

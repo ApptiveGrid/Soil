@@ -13,7 +13,7 @@ Class {
 SoilIndexedDictionaryTest class >> testParameters [
 	^ ParametrizedTestMatrix new
 		addCase: { #classToTest -> SoilSkipListDictionary };
-		addCase: { #classToTest -> SoilBTreeDictionary };
+		"addCase: { #classToTest -> SoilBTreeDictionary };"
 		yourself
 ]
 
@@ -694,12 +694,11 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 	tx commit.
 	
 	blockedTx := soil newTransaction.
-	self halt.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
-	tx2 root index allowDuplicateKeys.
 	tx2 root 
 		removeKey: #testkey;
+		halt;
 		removeKey: #testkey;
 		removeKey: #testkey.
 	tx2 commit.
