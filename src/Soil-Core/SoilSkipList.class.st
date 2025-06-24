@@ -37,6 +37,11 @@ SoilSkipList >> flush [
 	self store flush
 ]
 
+{ #category : #testing }
+SoilSkipList >> hasDirtyPages [
+	^ dirtyPages notEmpty 
+]
+
 { #category : #accessing }
 SoilSkipList >> indexId [ 
 	^ self path withoutExtension basename 

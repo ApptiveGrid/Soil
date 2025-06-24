@@ -245,6 +245,7 @@ SoilIndexedDictionary >> soilBasicSerialize: aSerializer [
 		transaction := aSerializer transaction ].
 	super soilBasicSerialize: aSerializer.
 	aSerializer registerIndexId: id.
+
 ]
 
 { #category : #serializing }
