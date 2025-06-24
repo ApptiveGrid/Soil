@@ -463,7 +463,7 @@ Soil >> replayTransactionJournal: aSoilTransactionJournal [
 	| databaseVersion |
 	databaseVersion := self control databaseVersion.
 	(aSoilTransactionJournal index > databaseVersion) ifTrue: [ 
-		aSoilTransactionJournal asSortedJournal commitIn: self.
+		aSoilTransactionJournal commitIn: self.
 		self journal importTransactionJournal: aSoilTransactionJournal ]
 ]
 

@@ -15,9 +15,7 @@ Class {
 		'id',
 		'transaction',
 		'index',
-		'newValues',
-		'removedValues',
-		'oldValues'
+		'segment'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -30,7 +28,7 @@ SoilIndexedDictionary class >> isAbstract [
 
 { #category : #accessing }
 SoilIndexedDictionary class >> soilTransientInstVars [ 
-	^ #( index transaction newValues removedValues oldValues)
+	^ #( index transaction segment)
 ]
 
 { #category : #accessing }
@@ -50,16 +48,19 @@ SoilIndexedDictionary >> at: key ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexedDictionary >> at: key put: anObject [
-	| objectId |
+	| objectId oldValue |
 	objectId := transaction makeRoot: anObject.
 	(self newIterator at: key put: objectId) ifNotNil: [ :value |
-		oldValues 
-			at: key
-			ifAbsentPut: objectId ].
-	"if there has been a prior removal of the key this new addition invalidates it"
-	removedValues removeKey: key ifAbsent: nil.
-	^ newValues at: key put: objectId
+		oldValue := value ].
 
+	transaction addJournalEntry: (SoilAddKeyEntry new 
+		segment: self segment;
+		id: id;
+		key: (index indexKey: key);
+		value: objectId;
+		oldValue: oldValue).
+
+	^ objectId 
 ]
 
 { #category : #accessing }
@@ -99,12 +100,6 @@ SoilIndexedDictionary >> first: anInteger [
 	^ self newIterator first: anInteger
 ]
 
-{ #category : #testing }
-SoilIndexedDictionary >> hasIndexUpdates [
-	self isRegistered ifFalse: [ ^ true ].
-	^ newValues notEmpty or: [ removedValues notEmpty ]
-]
-
 { #category : #accessing }
 SoilIndexedDictionary >> id [
 	^ id
@@ -118,54 +113,18 @@ SoilIndexedDictionary >> index [
 { #category : #initialization }
 SoilIndexedDictionary >> initialize [ 
 	super initialize.
-	newValues := OrderedDictionary new.
-	oldValues := Dictionary new.
-	removedValues := OrderedDictionary new.
 	id := UUID new asString36.
 	index := self createIndex.
 ]
 
 { #category : #testing }
 SoilIndexedDictionary >> isEmpty [
-	^ newValues isEmpty and: [ self newIterator isEmpty ]
+	^ self newIterator isEmpty
 ]
 
 { #category : #testing }
 SoilIndexedDictionary >> isRegistered [
 	^ index isRegistered 
-]
-
-{ #category : #journal }
-SoilIndexedDictionary >> journalEntries [
-	| entries segment |
-	entries := OrderedCollection new.
-	segment := (transaction objectIdOf: self) segment.
-	self isRegistered ifFalse: [
-		entries add: (index newIndexEntryClass new 
-			transactionId: transaction writeVersion;
-			segment: segment;
-			id: id;
-			maxLevel: index maxLevel;
-			keySize: index keySize;
-			valueSize: index valueSize) ].
-	newValues keysAndValuesDo: [ :key :value |
-		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
-		entries add: (SoilAddKeyEntry new 
-			transactionId: transaction writeVersion;
-			segment: segment;
-			id: id;
-			key: (index indexKey: key);
-			value: value;
-			oldValue: (oldValues at: key ifAbsent: nil)) ].
-	removedValues keysAndValuesDo: [ :key :value |
-		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
-		entries add: (SoilRemoveKeyEntry new 
-			transactionId: transaction writeVersion;
-			segment: segment;
-			id: id;
-			key: (index indexKey: key); 
-			oldValue: value) ].
-	^ entries
 ]
 
 { #category : #accessing }
@@ -215,13 +174,6 @@ SoilIndexedDictionary >> persistentIndex [
 	^ index persistentIndex 
 ]
 
-{ #category : #private }
-SoilIndexedDictionary >> prepareNewValues [
-	newValues copy keysAndValuesDo: [ :key :object |
-		object isObjectId ifFalse: [
-			newValues at: key put: (transaction makeRoot: object) ] ]
-]
-
 { #category : #printing }
 SoilIndexedDictionary >> printOn: aStream [ 
 	super printOn: aStream.
@@ -237,18 +189,16 @@ SoilIndexedDictionary >> removeKey: key [
 
 { #category : #removing }
 SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
-	 | v newValueRemoved |
-	"remove from newValues as there could be a new at:put: on that
-	key but removing the key will remove the value again"
-	newValueRemoved := (newValues removeKey: key ifAbsent: nil) notNil.
-	v := self newIterator removeKey: key ifAbsent: [^ aBlock value].
-	"remove value and therefor create a journal entry only if it has not been 
-	in newValues which removes just a freshly added key again"
-	newValueRemoved ifFalse: [
-		removedValues 
-			at: key 
-			put: v asSoilObjectId ].
-	^v
+	| oldValue |
+	oldValue := self newIterator removeKey: key ifAbsent: [^ aBlock value].
+
+	transaction addJournalEntry: (SoilRemoveKeyEntry new 
+			segment: self segment;
+			id: id;
+			key: (index indexKey: key); 
+			oldValue: oldValue asSoilObjectId ) .
+
+	^ oldValue
 ]
 
 { #category : #enumerating }
@@ -267,6 +217,12 @@ SoilIndexedDictionary >> second [
 	^ self newIterator first; next
 ]
 
+{ #category : #journal }
+SoilIndexedDictionary >> segment [
+	^ segment ifNil: [
+		segment := (transaction objectIdOf: self) segment ]
+]
+
 { #category : #accessing }
 SoilIndexedDictionary >> size [ 
 	^ self newIterator size
@@ -276,34 +232,27 @@ SoilIndexedDictionary >> size [
 { #category : #serializing }
 SoilIndexedDictionary >> soilBasicSerialize: aSerializer [ 
 	transaction ifNil: [ 
-		transaction := aSerializer transaction.
-		self prepareNewValues ].
+		transaction := aSerializer transaction ].
 	super soilBasicSerialize: aSerializer.
 	aSerializer registerIndexId: id.
+
 ]
 
 { #category : #serializing }
 SoilIndexedDictionary >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
-	newValues copy keysAndValuesDo: [ :key :object | | obj |
-		obj := object isObjectId
-			ifTrue: [ object ] 
-			ifFalse: [
-				newValues 
-					at: key 
-					put: (transaction makeRoot: object) ].
-		self newIterator at: key put: obj ].
-	transaction markDirty: self
+	transaction markDirty: self.
+	self isRegistered ifFalse: [ 
+		aTransaction addJournalEntry: (index newIndexEntry 
+			id: id;
+			segment: (aTransaction objectIdOf: self) segment) ]
 ]
 
 { #category : #serializing }
 SoilIndexedDictionary >> soilLoadedIn: aTransaction [
 	transaction := aTransaction.
-	"when being materialized newValues is not initialized so we do it here"
-	newValues := Dictionary new.
-	removedValues := Dictionary new.
-	oldValues := Dictionary new
+
 ]
 
 { #category : #serializing }

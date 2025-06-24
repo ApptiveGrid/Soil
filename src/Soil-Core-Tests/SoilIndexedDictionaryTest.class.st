@@ -773,7 +773,6 @@ SoilIndexedDictionaryTest >> testRemovePagesSequential [
 	tx := soil newTransaction.
 	tx root: dict.
 	1 to: 1000 do: [ :n | dict at: n put: n asString ].
-	
 	tx commit.
 	
 	"open a second transaction ..."
@@ -782,7 +781,6 @@ SoilIndexedDictionaryTest >> testRemovePagesSequential [
 	(classToTest = SoilBTreeDictionary) 
 		ifTrue: [339 to: 451 do: [ :n | tx2 root removeKey: n ]]
 		ifFalse: [ 300 to: 700 do: [ :n | tx2 root removeKey: n ]].
-	
 	tx2 commit.
 	indexManager := soil objectRepository firstSegment indexManager.
 	index := indexManager indexes anyOne.

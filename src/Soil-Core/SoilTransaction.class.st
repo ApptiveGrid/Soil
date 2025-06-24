@@ -12,7 +12,6 @@ Class {
 		'locks',
 		'lastObjectIndexes',
 		'journal',
-		'indexes',
 		'createdAt',
 		'indexUpdatesToCommit'
 	],
@@ -51,6 +50,11 @@ SoilTransaction >> addClusterObject: anObject [
 		putObject: anObject.
 	^ objectId
 
+]
+
+{ #category : #adding }
+SoilTransaction >> addJournalEntry: anEntry [ 
+	self journal addEntry: anEntry 
 ]
 
 { #category : #adding }
@@ -110,8 +114,6 @@ SoilTransaction >> basicCommit [
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
-		indexUpdatesToCommit do: [:indexDict | 
-			self updatedIndexDictionary: indexDict] .
 		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
@@ -190,39 +192,29 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 
 { #category : #accessing }
 SoilTransaction >> buildJournal [
-	journal := soil journal newTransactionJournalForId: writeVersion.
-	journal addEntry: (SoilBeginTransactionEntry new
-		readVersion: readVersion; 
-		transactionId: writeVersion;
-		createdAt: createdAt).
+	self journal index: writeVersion.
 	"add entries for updating the last index of each modified 
 	segment"
 	lastObjectIndexes keysAndValuesDo: [ :segment :index |
 		journal addEntry: (SoilUpdateSegmentIndexEntry new 
-			transactionId: self writeVersion;
 			segment: segment;
 			index: index value) ].
 	"create entries for all new objects and new object versions"
-	recordsToCommit do: [ :record | 
+	recordsToCommit do: [ :record |
 		record version: writeVersion.
-		journal addEntries: (record asJournalEntry do: [:each | each transactionId: writeVersion ]).
+		journal addEntries: record asJournalEntry.
 		record committed  ].
-	indexUpdatesToCommit do: [ :object | 
-		journal addEntries: object journalEntries  ].
 	"for all new objects with a new behavior we create an entry to
 	add the behavior"
 	behaviorDescriptions do: [ :description |
 		journal addEntry: (SoilNewBehaviorEntry new 
-			transactionId: self writeVersion;
 			identifier: description value behaviorIdentifier;
 			objectId: description objectId) ].
 	"update the global database version"
 	journal addEntry: (SoilUpdateDatabaseVersion new 
-		transactionId: self writeVersion;
 		databaseVersion: writeVersion;
 		previousDatabaseVersion: readVersion).
 	journal addEntry: (SoilCommitTransactionEntry new 
-		transactionId: self writeVersion;
 		committedAt: DateAndTime now;
 		yourself).
 	^ journal
@@ -311,12 +303,7 @@ SoilTransaction >> findRecords: aBlock [
 
 { #category : #testing }
 SoilTransaction >> hasModifications [ 
-	^ recordsToCommit isEmptyOrNil not or: [ indexUpdatesToCommit isEmptyOrNil not ]
-]
-
-{ #category : #accessing }
-SoilTransaction >> indexes [ 
-	^ indexes
+	^ (recordsToCommit notNil and: [ recordsToCommit notEmpty ]) or: [ journal notNil and: [ journal size > 1 ] ]
 ]
 
 { #category : #initialization }
@@ -326,7 +313,6 @@ SoilTransaction >> initialize [
 	objectMap := IdentityDictionary new.
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
-	indexes := Dictionary new.
 	indexUpdatesToCommit := OrderedCollection new
 ]
 
@@ -372,8 +358,9 @@ SoilTransaction >> isRoot: anObject [
 ]
 
 { #category : #accessing }
-SoilTransaction >> journal [
-	^ journal
+SoilTransaction >> journal [ 
+	^ journal ifNil: [ 
+		journal := self newJournal ]
 ]
 
 { #category : #api }
@@ -422,6 +409,16 @@ SoilTransaction >> newClusterVersion [
 	^ SoilNewClusterVersion new
 		changed: true; 
 		transaction: self.
+]
+
+{ #category : #accessing }
+SoilTransaction >> newJournal [
+	journal := SoilTransactionJournal new.
+	journal addEntry: (SoilBeginTransactionEntry new
+		readVersion: readVersion; 
+		createdAt: createdAt).
+	^ journal
+
 ]
 
 { #category : #'instance creation' }
@@ -509,9 +506,7 @@ SoilTransaction >> prepareRecordsForCommit [
 	recordsToCommit := OrderedCollection new.
 	idMap values do: [ :record |
 		record shouldBeCommitted ifTrue: [ 
-			recordsToCommit add: record asNewClusterVersion ].
-		record hasIndexUpdates ifTrue: [ 
-			indexUpdatesToCommit add: record object ] ].
+			recordsToCommit add: record asNewClusterVersion ] ].
 	"serialize initial records. While serializing there can be new records 
 	popping up (an object not registered yet in the transaction but is a
 	cluster root"
@@ -640,24 +635,6 @@ SoilTransaction >> start [
 { #category : #accessing }
 SoilTransaction >> transactionManager [ 
 	^ soil transactionManager
-]
-
-{ #category : #indexes }
-SoilTransaction >> updatedIndexDictionary: indexedDictionary [ 
-	|  segment realIndex |
-	segment := self segmentAt: (self objectIdOf: indexedDictionary) segment.
-	"when indexed dictionaries created the first time the journal creates the 
-	real index with path. In this case we request the real index from the index
-	manager"
-	realIndex := indexedDictionary index store isOpen 
-		ifTrue: [ indexedDictionary persistentIndex ]
-		ifFalse: [ 
-			segment indexManager 
-				at: indexedDictionary id 
-				ifAbsent: [ Error signal: 'cannot find index which should have been added before' ] ].
-	segment indexManager 
-		addDirtyIndex: realIndex 
-	
 ]
 
 { #category : #accessing }

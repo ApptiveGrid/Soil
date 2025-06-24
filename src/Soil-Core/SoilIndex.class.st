@@ -176,6 +176,11 @@ SoilIndex >> flushCachedPages [
 ]
 
 { #category : #testing }
+SoilIndex >> hasDirtyPages [
+	^ dirtyPages notEmpty 
+]
+
+{ #category : #testing }
 SoilIndex >> hasHeaderPage [
 	^ self subclassResponsibility
 ]
@@ -263,6 +268,16 @@ SoilIndex >> maxLevel: anIntegeer [
 SoilIndex >> newFileStore [
 	^ SoilPagedFileIndexStore new
 		index: self
+]
+
+{ #category : #utilities }
+SoilIndex >> newIndexEntry [
+	^ self newIndexEntryClass new
+		maxLevel: self maxLevel;
+		keySize: self keySize;
+		valueSize: self valueSize;
+		yourself 
+
 ]
 
 { #category : #utilities }
