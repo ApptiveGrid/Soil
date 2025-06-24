@@ -225,7 +225,7 @@ SoilPrimitiveSerializationTest >> testSerializationDateAndTime [
 	self assert: serialized equals: #[29 5 10 0 0 5 0].
 	self assert: (serialized at: 1) equals: TypeCodeDateAndTime.
 
-	materialized := SoilMaterializer materializeFromBytes: serialized.
+	materialized := SoilBasicMaterializer materializeFromBytes: serialized.
 	self assert: materialized equals: object
 ]
 
