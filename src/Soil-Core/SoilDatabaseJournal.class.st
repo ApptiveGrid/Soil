@@ -15,7 +15,6 @@ SoilDatabaseJournal >> acceptSoil: aSoilVisitor [
 
 { #category : #adding }
 SoilDatabaseJournal >> addTransactionJournal: aTransactionJournal [ 
-	aTransactionJournal index ifNil: [ self halt ].
 	transactionJournals 
 		at: aTransactionJournal index
 		put: aTransactionJournal

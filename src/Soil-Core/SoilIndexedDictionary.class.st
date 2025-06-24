@@ -14,7 +14,8 @@ Class {
 	#instVars : [
 		'id',
 		'transaction',
-		'index'
+		'index',
+		'segment'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -27,7 +28,7 @@ SoilIndexedDictionary class >> isAbstract [
 
 { #category : #accessing }
 SoilIndexedDictionary class >> soilTransientInstVars [ 
-	^ #( index transaction newValues removedValues oldValues)
+	^ #( index transaction segment)
 ]
 
 { #category : #accessing }
@@ -51,9 +52,14 @@ SoilIndexedDictionary >> at: key put: anObject [
 	objectId := transaction makeRoot: anObject.
 	(self newIterator at: key put: objectId) ifNotNil: [ :value |
 		oldValue := value ].
-	"if there has been a prior removal of the key this new addition invalidates it"
-	"removedValues removeKey: key ifAbsent: nil."
-	self entryForAddKey: key value: objectId oldValue: oldValue. 
+
+	transaction addJournalEntry: (SoilAddKeyEntry new 
+		segment: self segment;
+		id: id;
+		key: (index indexKey: key);
+		value: objectId;
+		oldValue: oldValue).
+
 	^ objectId 
 ]
 
@@ -81,33 +87,6 @@ SoilIndexedDictionary >> createIndex [
 SoilIndexedDictionary >> do: aBlock [
  	self newIterator do: [ :objectId | 
  				aBlock value: objectId ]
-]
-
-{ #category : #journal }
-SoilIndexedDictionary >> entryForAddKey: key value: value oldValue: oldValue [
-	|  segment |
-	segment := (transaction objectIdOf: self) segment.
-"	value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
-"	transaction journal addEntry: (SoilAddKeyEntry new 
-		segment: segment;
-		id: id;
-		key: (index indexKey: key);
-		value: value;
-		oldValue: oldValue) 
-
-]
-
-{ #category : #journal }
-SoilIndexedDictionary >> entryForRemoveKey: key  oldValue: oldValue [
-		| entries segment |
-	entries := OrderedCollection new.
-	segment := (transaction objectIdOf: self) segment.
-	transaction addJournalEntry: (SoilRemoveKeyEntry new 
-			segment: segment;
-			id: id;
-			key: (index indexKey: key); 
-			oldValue: oldValue) .
-	^ entries
 ]
 
 { #category : #accessing }
@@ -210,10 +189,15 @@ SoilIndexedDictionary >> removeKey: key [
 
 { #category : #removing }
 SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
-	"might be optimized to not store invalidate add-remove or remove-add"
 	| oldValue |
 	oldValue := self newIterator removeKey: key ifAbsent: [^ aBlock value].
-	self entryForRemoveKey: key  oldValue: oldValue asSoilObjectId .
+
+	transaction addJournalEntry: (SoilRemoveKeyEntry new 
+			segment: self segment;
+			id: id;
+			key: (index indexKey: key); 
+			oldValue: oldValue) .
+
 	^ oldValue
 ]
 
@@ -231,6 +215,12 @@ SoilIndexedDictionary >> rewriteUsing: aBlock [
 { #category : #accessing }
 SoilIndexedDictionary >> second [
 	^ self newIterator first; next
+]
+
+{ #category : #journal }
+SoilIndexedDictionary >> segment [
+	^ segment ifNil: [
+		segment := (transaction objectIdOf: self) segment ]
 ]
 
 { #category : #accessing }
