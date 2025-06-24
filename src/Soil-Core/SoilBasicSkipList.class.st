@@ -52,16 +52,6 @@ SoilBasicSkipList >> maxLevel: anInteger [
 ]
 
 { #category : #utilities }
-SoilBasicSkipList >> newIndexEntry [
-	^ super newIndexEntry 
-		maxLevel: self maxLevel;
-		keySize: self keySize;
-		valueSize: self valueSize;
-		yourself 
-
-]
-
-{ #category : #utilities }
 SoilBasicSkipList >> newIndexEntryClass [
 	^ SoilNewSkipListIndexEntry
 ]

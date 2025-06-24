@@ -6,11 +6,6 @@ Object >> asSoilSignal [
 ]
 
 { #category : #'*Soil-Core' }
-Object >> hasIndexUpdates [ 
-	^ false
-]
-
-{ #category : #'*Soil-Core' }
 Object >> isObjectId [
 	^ false
 ]

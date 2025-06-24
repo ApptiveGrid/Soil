@@ -262,6 +262,11 @@ SoilIndex >> newFileStore [
 { #category : #utilities }
 SoilIndex >> newIndexEntry [
 	^ self newIndexEntryClass new
+		maxLevel: self maxLevel;
+		keySize: self keySize;
+		valueSize: self valueSize;
+		yourself 
+
 ]
 
 { #category : #utilities }

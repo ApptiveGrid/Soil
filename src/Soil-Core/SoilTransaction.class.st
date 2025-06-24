@@ -54,6 +54,11 @@ SoilTransaction >> addClusterObject: anObject [
 ]
 
 { #category : #adding }
+SoilTransaction >> addJournalEntry: anEntry [ 
+	self journal addEntry: anEntry 
+]
+
+{ #category : #adding }
 SoilTransaction >> addLock: aLock [ 
 	locks add: aLock
 ]
@@ -190,14 +195,16 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 
 { #category : #accessing }
 SoilTransaction >> buildJournal [
-	journal 
+	journal index: writeVersion.
+	journal entries do: [ :entry | entry transactionId: writeVersion ].
+	"journal 
 		ifNotNil: [ journal entries do: [ :entry | entry transactionId: writeVersion ]. ]
 		ifNil: [  
 			journal := soil journal newTransactionJournalForId: writeVersion.
 			journal addEntry: (SoilBeginTransactionEntry new
 				readVersion: readVersion; 
 				transactionId: writeVersion;
-				createdAt: createdAt) ].
+				createdAt: createdAt) ]."
 	"add entries for updating the last index of each modified 
 	segment"
 	lastObjectIndexes keysAndValuesDo: [ :segment :index |
@@ -206,7 +213,7 @@ SoilTransaction >> buildJournal [
 			segment: segment;
 			index: index value) ].
 	"create entries for all new objects and new object versions"
-	recordsToCommit do: [ :record | 
+	recordsToCommit do: [ :record |
 		record version: writeVersion.
 		journal addEntries: (record asJournalEntry do: [:each | each transactionId: writeVersion ]).
 		record committed  ].
@@ -524,8 +531,8 @@ SoilTransaction >> prepareRecordsForCommit [
 	idMap values do: [ :record |
 		record shouldBeCommitted ifTrue: [ 
 			recordsToCommit add: record asNewClusterVersion ].
-		record hasIndexUpdates ifTrue: [ 
-			indexUpdatesToCommit add: record object ] ].
+		"record hasIndexUpdates ifTrue: [ 
+			indexUpdatesToCommit add: record object ]" ].
 	"serialize initial records. While serializing there can be new records 
 	popping up (an object not registered yet in the transaction but is a
 	cluster root"

@@ -104,7 +104,7 @@ SoilTransactionJournalTest >> testNewRootSkipList [
 	self assert: (journal anyEntrySatisfy:[:each | (each isKindOf: SoilNewObjectEntry) and: [ each objectId notNil and: [ each objectId isSameObjectId: (SoilObjectId segment: 1 index: 1) ]]]).
 	self assert: (journal anyEntrySatisfy: [:each | each class = SoilAddKeyEntry ]).
 	self assert: (journal entryAt: 9) class equals: SoilNewBehaviorEntry.
-	self assert: (journal entryAt: 2) class equals: SoilUpdateSegmentIndexEntry.
+	self assert: (journal entryAt: 3) class equals: SoilUpdateSegmentIndexEntry.
 	self assert: (journal entryAt: 10) class equals: SoilUpdateDatabaseVersion.
 ]
 
