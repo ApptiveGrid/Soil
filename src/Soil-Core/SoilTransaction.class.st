@@ -279,7 +279,7 @@ SoilTransaction >> dirtyObjects [
 	^ idMap select: [ :each | each hasChanged ] thenCollect: #object
 ]
 
-{ #category : #api }
+{ #category : #'api - debugging' }
 SoilTransaction >> findObject: aBlock [ 
 	"scan all records in the database where the materialized object matches 
 	the condition in aBlock. Return the object of the record instead"
@@ -299,10 +299,10 @@ SoilTransaction >> findRecord: aBlock [
 			ifEmpty: [ nil ] 
 ]
 
-{ #category : #api }
+{ #category : #'api - debugging' }
 SoilTransaction >> findRecords: aBlock [ 
 	"scan all connected records in the database until one matches 
-	the condition in aBlock"
+	the condition in aBlock."
 	 ^ SoilFindRecordsVisitor new 
 		find: aBlock 
 		in: self;

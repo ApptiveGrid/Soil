@@ -17,17 +17,6 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
-{ #category : #'instance creation' }
-SoilBasicSkipList >> allocatePage [
-	| page |
-	page := self newPage 
-		offset: (self nextFreePageIndex
-			ifNil: [ self nextPageOffset ]).
-	self store pageAt: page offset put: page.
-	self addDirtyPage: page.
-	^ page
-]
-
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
