@@ -213,7 +213,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 	"might be optimized to not store invalidate add-remove or remove-add"
 	| oldValue |
 	oldValue := self newIterator removeKey: key ifAbsent: [^ aBlock value].
-	self entryForRemoveKey: key  oldValue: oldValue.
+	self entryForRemoveKey: key  oldValue: oldValue asSoilObjectId .
 	^ oldValue
 ]
 

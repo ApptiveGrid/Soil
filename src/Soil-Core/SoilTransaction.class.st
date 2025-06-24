@@ -310,7 +310,7 @@ SoilTransaction >> findRecords: aBlock [
 
 { #category : #testing }
 SoilTransaction >> hasModifications [ 
-	^ recordsToCommit notEmpty or: [ journal notNil and: [ journal size > 2 ] ]
+	^ (recordsToCommit notNil and: [ recordsToCommit notEmpty ]) or: [ journal notNil and: [ journal size > 1 ] ]
 ]
 
 { #category : #initialization }

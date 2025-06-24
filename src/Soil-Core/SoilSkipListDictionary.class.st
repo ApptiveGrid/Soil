@@ -18,19 +18,8 @@ SoilSkipListDictionary >> createIndex [
 		yourself
 ]
 
-{ #category : #testing }
-SoilSkipListDictionary >> isEmpty [
-	^ self newIterator isEmpty
-]
-
 { #category : #serializing }
 SoilSkipListDictionary >> soilBasicSerialize: aSerializer [ 
 	super soilBasicSerialize: aSerializer.
 	aSerializer registerIndexId: id.
-]
-
-{ #category : #serializing }
-SoilSkipListDictionary >> soilLoadedIn: aTransaction [
-	transaction := aTransaction.
-
 ]
