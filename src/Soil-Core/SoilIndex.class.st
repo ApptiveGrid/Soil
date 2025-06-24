@@ -170,6 +170,11 @@ SoilIndex >> flushCachedPages [
 ]
 
 { #category : #testing }
+SoilIndex >> hasDirtyPages [
+	^ dirtyPages notEmpty 
+]
+
+{ #category : #testing }
 SoilIndex >> hasHeaderPage [
 	^ self subclassResponsibility
 ]
