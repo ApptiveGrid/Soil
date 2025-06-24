@@ -131,7 +131,7 @@ SoilControlFile >> initialize [
 
 { #category : #initialization }
 SoilControlFile >> initializeStart [
-	self databaseFormatVersion: 1.
+	self databaseFormatVersion: Soil databaseFormatVersion.
 	self basicDatabaseVersion: 0.
 	self applicationVersion: 1
 ]
@@ -179,7 +179,9 @@ SoilControlFile >> open [
 			self legacyPath moveTo: self path ] ].
 	super open.
 	(Soil databaseFormatVersion = self databaseFormatVersion)	
-		ifFalse: [ SoilIncompatibleDatabaseFormat signal: 'database format version ', Soil databaseFormatVersion asString, ' does not match persisted database format version ', self databaseFormatVersion asString ].
+		ifFalse: [ 
+			SoilIncompatibleDatabaseFormat signal: 'this code is incompatible with your database version. Please use branch v3 unless v4 is released which will provide a conversion'
+			"SoilIncompatibleDatabaseFormat signal: 'database format version ', Soil databaseFormatVersion asString, ' does not match persisted database format version ', self databaseFormatVersion asString" ].
 	currentDatabaseVersion := self databaseVersion  
 ]
 

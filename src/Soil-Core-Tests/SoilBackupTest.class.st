@@ -247,7 +247,7 @@ SoilBackupTest >> testBackupWithIndexRemoval [
 SoilBackupTest >> testSimpleBackup [ 
 	| tx backup tx2 nested |
 	soil control
-		databaseFormatVersion: 1; 
+		databaseFormatVersion: Soil databaseFormatVersion; 
 		applicationVersion: 5.
 	tx := soil newTransaction.
 	nested := SoilTestClusterRoot new.
