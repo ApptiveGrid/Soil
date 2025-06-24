@@ -131,7 +131,7 @@ SoilControlFile >> initialize [
 
 { #category : #initialization }
 SoilControlFile >> initializeStart [
-	self databaseFormatVersion: 1.
+	self databaseFormatVersion: Soil databaseFormatVersion.
 	self basicDatabaseVersion: 0.
 	self applicationVersion: 1
 ]
