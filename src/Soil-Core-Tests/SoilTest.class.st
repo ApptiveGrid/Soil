@@ -155,7 +155,7 @@ SoilTest >> testFindRecordWithIndex [
 
 { #category : #tests }
 SoilTest >> testIncompatibleDatabaseFormatVersion [ 
-	soil control databaseFormatVersion: 2.
+	soil control databaseFormatVersion: Soil databaseFormatVersion + 1.
 	soil close.
 	
 	soil := Soil path: self path.
