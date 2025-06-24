@@ -12,7 +12,6 @@ Class {
 		'locks',
 		'lastObjectIndexes',
 		'journal',
-		'indexes',
 		'createdAt',
 		'indexUpdatesToCommit'
 	],
@@ -115,8 +114,8 @@ SoilTransaction >> basicCommit [
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
-		indexUpdatesToCommit do: [:indexDict | 
-			self updatedIndexDictionary: indexDict] .
+	"	indexUpdatesToCommit do: [:indexDict | 
+			self updatedIndexDictionary: indexDict] ."
 		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
@@ -197,14 +196,6 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 SoilTransaction >> buildJournal [
 	self journal index: writeVersion.
 	journal entries do: [ :entry | entry transactionId: writeVersion ].
-	"journal 
-		ifNotNil: [ journal entries do: [ :entry | entry transactionId: writeVersion ]. ]
-		ifNil: [  
-			journal := soil journal newTransactionJournalForId: writeVersion.
-			journal addEntry: (SoilBeginTransactionEntry new
-				readVersion: readVersion; 
-				transactionId: writeVersion;
-				createdAt: createdAt) ]."
 	"add entries for updating the last index of each modified 
 	segment"
 	lastObjectIndexes keysAndValuesDo: [ :segment :index |
@@ -319,12 +310,7 @@ SoilTransaction >> findRecords: aBlock [
 
 { #category : #testing }
 SoilTransaction >> hasModifications [ 
-	^ recordsToCommit isEmptyOrNil not or: [ indexUpdatesToCommit isEmptyOrNil not ]
-]
-
-{ #category : #accessing }
-SoilTransaction >> indexes [ 
-	^ indexes
+	^ journal notNil and: [ journal size > 2 ]
 ]
 
 { #category : #initialization }
@@ -334,7 +320,6 @@ SoilTransaction >> initialize [
 	objectMap := IdentityDictionary new.
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
-	indexes := Dictionary new.
 	indexUpdatesToCommit := OrderedCollection new
 ]
 

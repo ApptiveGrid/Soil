@@ -14,10 +14,7 @@ Class {
 	#instVars : [
 		'id',
 		'transaction',
-		'index',
-		'newValues',
-		'removedValues',
-		'oldValues'
+		'index'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -137,16 +134,13 @@ SoilIndexedDictionary >> index [
 { #category : #initialization }
 SoilIndexedDictionary >> initialize [ 
 	super initialize.
-	newValues := OrderedDictionary new.
-	oldValues := Dictionary new.
-	removedValues := OrderedDictionary new.
 	id := UUID new asString36.
 	index := self createIndex.
 ]
 
 { #category : #testing }
 SoilIndexedDictionary >> isEmpty [
-	^ newValues isEmpty and: [ self newIterator isEmpty ]
+	^ self newIterator isEmpty
 ]
 
 { #category : #testing }
@@ -201,13 +195,6 @@ SoilIndexedDictionary >> persistentIndex [
 	^ index persistentIndex 
 ]
 
-{ #category : #private }
-SoilIndexedDictionary >> prepareNewValues [
-	newValues copy keysAndValuesDo: [ :key :object |
-		object isObjectId ifFalse: [
-			newValues at: key put: (transaction makeRoot: object) ] ]
-]
-
 { #category : #printing }
 SoilIndexedDictionary >> printOn: aStream [ 
 	super printOn: aStream.
@@ -255,8 +242,7 @@ SoilIndexedDictionary >> size [
 { #category : #serializing }
 SoilIndexedDictionary >> soilBasicSerialize: aSerializer [ 
 	transaction ifNil: [ 
-		transaction := aSerializer transaction.
-		self prepareNewValues ].
+		transaction := aSerializer transaction ].
 	super soilBasicSerialize: aSerializer.
 	aSerializer registerIndexId: id.
 ]
@@ -275,10 +261,7 @@ SoilIndexedDictionary >> soilClusterRootIn: aTransaction [
 { #category : #serializing }
 SoilIndexedDictionary >> soilLoadedIn: aTransaction [
 	transaction := aTransaction.
-	"when being materialized newValues is not initialized so we do it here"
-	newValues := Dictionary new.
-	removedValues := Dictionary new.
-	oldValues := Dictionary new
+
 ]
 
 { #category : #serializing }
