@@ -196,7 +196,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 			segment: self segment;
 			id: id;
 			key: (index indexKey: key); 
-			oldValue: oldValue) .
+			oldValue: oldValue asSoilObjectId ) .
 
 	^ oldValue
 ]

@@ -114,8 +114,6 @@ SoilTransaction >> basicCommit [
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
-	"	indexUpdatesToCommit do: [:indexDict | 
-			self updatedIndexDictionary: indexDict] ."
 		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
@@ -195,33 +193,28 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 { #category : #accessing }
 SoilTransaction >> buildJournal [
 	self journal index: writeVersion.
-	journal entries do: [ :entry | entry transactionId: writeVersion ].
 	"add entries for updating the last index of each modified 
 	segment"
 	lastObjectIndexes keysAndValuesDo: [ :segment :index |
 		journal addEntry: (SoilUpdateSegmentIndexEntry new 
-			transactionId: self writeVersion;
 			segment: segment;
 			index: index value) ].
 	"create entries for all new objects and new object versions"
 	recordsToCommit do: [ :record |
 		record version: writeVersion.
-		journal addEntries: (record asJournalEntry do: [:each | each transactionId: writeVersion ]).
+		journal addEntries: record asJournalEntry.
 		record committed  ].
 	"for all new objects with a new behavior we create an entry to
 	add the behavior"
 	behaviorDescriptions do: [ :description |
 		journal addEntry: (SoilNewBehaviorEntry new 
-			transactionId: self writeVersion;
 			identifier: description value behaviorIdentifier;
 			objectId: description objectId) ].
 	"update the global database version"
 	journal addEntry: (SoilUpdateDatabaseVersion new 
-		transactionId: self writeVersion;
 		databaseVersion: writeVersion;
 		previousDatabaseVersion: readVersion).
 	journal addEntry: (SoilCommitTransactionEntry new 
-		transactionId: self writeVersion;
 		committedAt: DateAndTime now;
 		yourself).
 	^ journal
