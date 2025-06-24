@@ -95,7 +95,8 @@ SoilTransactionJournal >> index [
 { #category : #accessing }
 SoilTransactionJournal >> index: anObject [
 
-	index := anObject
+	index := anObject.
+	entries ifNotEmpty: [ entries first transactionId: anObject ]
 ]
 
 { #category : #initialization }
