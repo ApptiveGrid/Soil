@@ -35,7 +35,7 @@ Metacello new
 	load.
 ```
 
-The changelog can be found [here](https://github.com/ApptiveGrid/Soil/blob/v2/docs/changelog.md)
+The changelog can be found [here](https://github.com/ApptiveGrid/Soil/blob/v3/docs/changelog.md)
 
 *note*: Releases in Soil are branches. Loading it with a release tag will get the hot fixes of that release. If you do not want this please use the commit hash as version instead
 
