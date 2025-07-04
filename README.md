@@ -54,7 +54,7 @@ More info:
 
 
 **NEWS** 
-- Smalltalk 2025 talk "Soil: an object oriented database for fun and profit"
+- Smalltalk 2025 talk "Soil: an object oriented database for fun and profit" 2025-07-04
 	- Video on [YouTube](https://www.youtube.com/watch?v=JWY5HCUlX_4)
 - The Soil Database has now an entry in [HAL](https://hal.science/hal-04726251) and is archived by [https://www.softwareheritage.org](https://www.softwareheritage.org) 2024-11-22
 - [ANN] Release V2 of Soil, the object oriented database for Pharo implemented in Pharo [Mail](https://lists.pharo.org/empathy/thread/OE434T74GYE74GUNP3GLKYAZGGBXUSWT) 2024-08-28
