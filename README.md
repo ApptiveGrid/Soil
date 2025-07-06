@@ -49,7 +49,7 @@ We use github for organizing our development. You can see what we are doing righ
 - ESUG 2023 talk "Soil: a fresh look on object oriented databases" Slides [PDF](http://archive.esug.org/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-a-fresh-look-on-object-oriented-databases/260898335), Video on [YouTube](https://www.youtube.com/watch?v=ui4TXcv7tus)
 - ESUG 2023 talk "Soil and Pharo". Slides [PDF](http://archive.esug.org/ESUG2023/day3/02_2%20-%20Soil%20and%20Pharo.pdf), [SlideShare](https://www.slideshare.net/esug/soil-and-pharo-260898369)
 - ESUG 2022 talk "there's no magic... until you talk about databases" Slides [PDF](http://archive.esug.org/ESUG2022/02Tuesday/08-hartl-deployment.pdf), [SlideShare](https://www.slideshare.net/slideshow/theres-no-magic-until-you-talk-about-databases/253132135), Video [YouTube](https://www.youtube.com/watch?v=MLtaHeFgbNo)
-- ESUG 2022 ShowUs: "Soil: a OO Database for Pharo" Video [YouTube](https://www.youtube.com/watch?v=_5mk7yYVz)
+- ESUG 2022 ShowUs: "Soil: a OO Database for Pharo" Video [YouTube](https://www.youtube.com/watch?v=_5mk7yYVzds&t=3s)
 
 ### Soil in Action
 
