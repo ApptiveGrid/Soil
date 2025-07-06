@@ -55,7 +55,6 @@ We use github for organizing our development. You can see what we are doing righ
 
 If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is using it to persist all data. (You can create a free accout [here](https://www.apptivegrid.de)). 
 
-More info:
 - Smalltalks 2024: "ApptiveGrid: solve (business) problems without programming"  [Video Youtube](https://www.youtube.com/watch?v=aPtsGswPJAc)
 - Pharo Success Story: [ApptiveGrid - Digitize and Automatize Business Processes](https://www.pharo.org/success/ApptiveGrid.html)
 - Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
