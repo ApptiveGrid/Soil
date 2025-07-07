@@ -53,7 +53,7 @@ We use github for organizing our development. You can see what we are doing righ
 
 ### Soil in Action
 
-If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is using it to persist all data. (You can create a free accout [here](https://app.apptivegrid.de/login/?#/register)). 
+If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is using it to persist all data. (You can create a free accout [here](https://app.apptivegrid.de)). 
 
 - Smalltalks 2024: "ApptiveGrid: solve (business) problems without programming"  [Video Youtube](https://www.youtube.com/watch?v=aPtsGswPJAc)
 - Pharo Success Story: [ApptiveGrid - Digitize and Automatize Business Processes](https://www.pharo.org/success/ApptiveGrid.html)
