@@ -44,7 +44,9 @@ The changelog can be found [here](https://github.com/ApptiveGrid/Soil/blob/v3/do
 We use github for organizing our development. You can see what we are doing right now on the [project board](https://github.com/orgs/ApptiveGrid/projects/2). An up-to-date list of milestones you can find in [milestones](https://github.com/ApptiveGrid/Soil/milestones?direction=desc&sort=completeness&state=open). 
 
 ### Talks about Soil
-
+- ESUG 2023 talks
+	-  "Rhizome - Distribution in Soil" [Slides PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf)
+   	-  "Soil: Tutorial and Q&A" [Slides PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf)
 - Smalltalks 2024 talk "Soil: an object oriented database for fun and profit" Video [YouTube](https://www.youtube.com/watch?v=JWY5HCUlX_4)
 - ESUG 2023 talk "Soil: a fresh look on object oriented databases" Slides [PDF](http://archive.esug.org/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-a-fresh-look-on-object-oriented-databases/260898335), Video on [YouTube](https://www.youtube.com/watch?v=ui4TXcv7tus)
 - ESUG 2023 talk "Soil and Pharo". Slides [PDF](http://archive.esug.org/ESUG2023/day3/02_2%20-%20Soil%20and%20Pharo.pdf), [SlideShare](https://www.slideshare.net/esug/soil-and-pharo-260898369)
@@ -61,7 +63,10 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 
 
 **NEWS** 
-- Smalltalk 2025 talk "Soil: an object oriented database for fun and profit" 2025-07-04
+- ESUG 2023 talks
+	-  "Rhizome - Distribution in Soil" [Slides PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf)
+   	-  "Soil: Tutorial and Q&A" [Slides PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf)
+- Smalltalk 2024 talk "Soil: an object oriented database for fun and profit" 2025-07-04
 	- Video on [YouTube](https://www.youtube.com/watch?v=JWY5HCUlX_4)
 - The Soil Database has now an entry in [HAL](https://hal.science/hal-04726251) and is archived by [https://www.softwareheritage.org](https://www.softwareheritage.org) 2024-11-22
 - [ANN] Release V2 of Soil, the object oriented database for Pharo implemented in Pharo [Mail](https://lists.pharo.org/empathy/thread/OE434T74GYE74GUNP3GLKYAZGGBXUSWT) 2024-08-28
