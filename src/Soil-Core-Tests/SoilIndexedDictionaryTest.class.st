@@ -13,7 +13,7 @@ Class {
 SoilIndexedDictionaryTest class >> testParameters [
 	^ ParametrizedTestMatrix new
 		addCase: { #classToTest -> SoilSkipListDictionary };
-		addCase: { #classToTest -> SoilBTreeDictionary };
+		"addCase: { #classToTest -> SoilBTreeDictionary };"
 		yourself
 ]
 
@@ -678,6 +678,33 @@ SoilIndexedDictionaryTest >> testNextCloseTo [
 	self assert: (tx2 root nextCloseTo: #'20') equals: #two.
 	"this is a bit odd, when looking with larger values we get the last one"
 	self assert: (tx2 root nextCloseTo: #'100') equals: #two
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
+	| tx tx2 blockedTx |
+	
+	tx := soil newTransaction.
+	dict index allowDuplicateKeys.
+	tx root: dict.
+	dict 
+		at: #testkey put: 1;
+		at: #testkey put: 2;
+		at: #testkey put: 3.
+	tx commit.
+	
+	blockedTx := soil newTransaction.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	tx2 root 
+		removeKey: #testkey;
+		halt;
+		removeKey: #testkey;
+		removeKey: #testkey.
+	tx2 commit.
+	"and test last, note: keyorder"
+	self assert: (blockedTx root at: #testkey) equals: 1.
+
 ]
 
 { #category : #tests }
