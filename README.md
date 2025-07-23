@@ -61,8 +61,7 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 - Pharo Success Story: [ApptiveGrid - Digitize and Automatize Business Processes](https://www.pharo.org/success/ApptiveGrid.html)
 - Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
 
-
-**NEWS** (to get all Soil News by email, register [here](https://app.apptivegrid.de/api/r/623c52b04872209f7f96c908/6880cf1feeeecc1455f9cfc8/BDOmRVrRfuAzfyGa0wAGeVJBkUQzMsq0WKExnASoA79BfeX69KR) )
+### NEWS 
 - ESUG 2023 talks
 	-  "Rhizome - Distribution in Soil" [Slides PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
    	-  "Soil: Tutorial and Q&A" [Slides PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), - [Slides SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
@@ -82,5 +81,7 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 - Development of Soil announced at ESUG 2022
 	- Talk "there's no magic... until you talk about databases"  [Slides PDF](http://archive.esug.org/ESUG2022/02Tuesday/08-hartl-deployment.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/theres-no-magic-until-you-talk-about-databases/253132135), [Video YouTube](https://www.youtube.com/watch?v=MLtaHeFgbNo)
  	- ShowUs: "Soil: a OO Database for Pharo"  [Video YouTube](https://www.youtube.com/watch?v=_5mk7yYVz)
+
+(to get all Soil News by email, register [here](https://app.apptivegrid.de/api/r/623c52b04872209f7f96c908/6880cf1feeeecc1455f9cfc8/BDOmRVrRfuAzfyGa0wAGeVJBkUQzMsq0WKExnASoA79BfeX69KR))
 
 ![esug medal](https://esug.github.io/2022-Conference/esugAwards2ndSilverRoundMedal.png)
