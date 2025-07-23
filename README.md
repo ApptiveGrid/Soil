@@ -62,6 +62,7 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 - Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
 
 ### NEWS 
+- [ANN] Release V3 [Changelog](https://github.com/ApptiveGrid/Soil/blob/v3/docs/changelog.md) 2025-07-02
 - ESUG 2023 talks 2025-07-02
 	-  "Rhizome - Distribution in Soil" Slides [PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
    	-  "Soil: Tutorial and Q&A" Slides [PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
