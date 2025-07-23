@@ -45,8 +45,8 @@ We use github for organizing our development. You can see what we are doing righ
 
 ### Talks about Soil
 - ESUG 2023 talks
-	-  "Rhizome - Distribution in Soil" [Slides PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf)
-   	-  "Soil: Tutorial and Q&A" [Slides PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf)
+	-  "Rhizome - Distribution in Soil" Slides [PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
+   	-  "Soil: Tutorial and Q&A" Slides [PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
 - Smalltalks 2024 talk "Soil: an object oriented database for fun and profit" Video [YouTube](https://www.youtube.com/watch?v=JWY5HCUlX_4)
 - ESUG 2023 talk "Soil: a fresh look on object oriented databases" Slides [PDF](http://archive.esug.org/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-a-fresh-look-on-object-oriented-databases/260898335), Video on [YouTube](https://www.youtube.com/watch?v=ui4TXcv7tus)
 - ESUG 2023 talk "Soil and Pharo". Slides [PDF](http://archive.esug.org/ESUG2023/day3/02_2%20-%20Soil%20and%20Pharo.pdf), [SlideShare](https://www.slideshare.net/esug/soil-and-pharo-260898369)
@@ -63,8 +63,8 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 
 ### NEWS 
 - ESUG 2023 talks
-	-  "Rhizome - Distribution in Soil" [Slides PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
-   	-  "Soil: Tutorial and Q&A" [Slides PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
+	-  "Rhizome - Distribution in Soil" Slides [PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
+   	-  "Soil: Tutorial and Q&A" Slides [PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
 - Smalltalk 2024 talk "Soil: an object oriented database for fun and profit" 2025-07-04
 	- Video on [YouTube](https://www.youtube.com/watch?v=JWY5HCUlX_4)
 - The Soil Database has now an entry in [HAL](https://hal.science/hal-04726251) and is archived by [https://www.softwareheritage.org](https://www.softwareheritage.org) 2024-11-22
