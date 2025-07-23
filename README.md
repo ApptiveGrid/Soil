@@ -64,7 +64,7 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 ### NEWS 
 - ESUG 2023 talks
 	-  "Rhizome - Distribution in Soil" [Slides PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
-   	-  "Soil: Tutorial and Q&A" [Slides PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), - [Slides SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
+   	-  "Soil: Tutorial and Q&A" [Slides PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
 - Smalltalk 2024 talk "Soil: an object oriented database for fun and profit" 2025-07-04
 	- Video on [YouTube](https://www.youtube.com/watch?v=JWY5HCUlX_4)
 - The Soil Database has now an entry in [HAL](https://hal.science/hal-04726251) and is archived by [https://www.softwareheritage.org](https://www.softwareheritage.org) 2024-11-22
