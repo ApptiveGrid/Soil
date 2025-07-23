@@ -62,8 +62,9 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 - Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
 
 
-**NEWS** 
-- ESUG 2023 talks (to get all Soil News by email, register [here](https://app.apptivegrid.de/api/r/623c52b04872209f7f96c908/6880cf1feeeecc1455f9cfc8/BDOmRVrRfuAzfyGa0wAGeVJBkUQzMsq0WKExnASoA79BfeX69KR)
+**NEWS** (to get all Soil News by email, register [here]
+- ESUG 2023 talks
+	- (https://app.apptivegrid.de/api/r/623c52b04872209f7f96c908/6880cf1feeeecc1455f9cfc8/BDOmRVrRfuAzfyGa0wAGeVJBkUQzMsq0WKExnASoA79BfeX69KR)
 	-  "Rhizome - Distribution in Soil" [Slides PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
    	-  "Soil: Tutorial and Q&A" [Slides PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), - [Slides SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
 - Smalltalk 2024 talk "Soil: an object oriented database for fun and profit" 2025-07-04
