@@ -19,7 +19,8 @@ SoilSkipListDictionary >> createIndex [
 ]
 
 { #category : #serializing }
-SoilSkipListDictionary >> soilBasicSerialize: aSerializer [ 
-	super soilBasicSerialize: aSerializer.
-	aSerializer registerIndexId: id.
+SoilSkipListDictionary >> soilMaterialized: aMaterializer [ 
+	super soilMaterialized: aMaterializer.
+	index allowDuplicateKeys.
+	index wrapped allowDuplicateKeys
 ]
