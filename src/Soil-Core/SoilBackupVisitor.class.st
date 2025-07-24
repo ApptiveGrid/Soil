@@ -57,8 +57,8 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	
 	sourceSegment := soil objectRepository segmentAt: segmentId.
 	sourceIndex := sourceSegment indexManager 
-		loadIndexWithId: indexId 
-		ifNone: [ ^ self indexNotFound: indexId ].
+		at: indexId 
+		ifAbsent: [ ^ self indexNotFound: indexId ].
 	
 	"create an index of same kind and configuration in the target database"
 	targetSegment := target objectRepository segmentAt: segmentId.
@@ -77,6 +77,7 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	targetIndex
 		flush; 
 		close.
+	sourceSegment indexManager removeIndexWithId: indexId 
 ]
 
 { #category : #visiting }
