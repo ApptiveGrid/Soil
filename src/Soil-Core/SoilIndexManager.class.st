@@ -135,6 +135,14 @@ SoilIndexManager >> pathFor: indexId [
 ]
 
 { #category : #accessing }
+SoilIndexManager >> removeIndexWithId: indexId [ 
+	^ semaphore critical: [  
+		(indexes 
+			removeKey: indexId
+			ifAbsent: [  ]) close ]
+]
+
+{ #category : #accessing }
 SoilIndexManager >> segment [
 	^ segment
 ]
