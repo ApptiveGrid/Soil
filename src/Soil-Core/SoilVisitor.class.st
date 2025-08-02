@@ -42,7 +42,7 @@ SoilVisitor >> processLoop [
 	| objectId |
 	[ toBeProcessed isEmpty ] whileFalse: [  
 		objectId := toBeProcessed  removeFirst.
-		self visit: (soil objectRepository at: objectId version: self databaseVersion ) ]
+		self visit: (soil objectRepository basicAt: objectId version: self databaseVersion ) ]
 ]
 
 { #category : #accessing }
