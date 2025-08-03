@@ -72,14 +72,6 @@ SoilObjectRepository >> at: objectid version: version [
 ]
 
 { #category : #accessing }
-SoilObjectRepository >> basicAt: objectid version: version [ 
-	| segment |
-	segment := self segmentAt: objectid segment.
-	^ (segment basicAt: objectid index version: version)
-		ifNotNil: [ :record | record objectId: objectid ]
-]
-
-{ #category : #accessing }
 SoilObjectRepository >> cacheSegmentAt: index upTo: limit [ 
 	(index = 0) 
 		ifTrue: [ metaSegment := metaSegment asCachedSegment weight: limit ]

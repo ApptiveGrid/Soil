@@ -39,11 +39,12 @@ SoilVisitor >> initialize [
 
 { #category : #api }
 SoilVisitor >> processLoop [ 
-	| objectId |
+	| objectId record |
 	[ toBeProcessed isEmpty ] whileFalse: [  
 		objectId := toBeProcessed  removeFirst.
-		self visit: (soil objectRepository 
-			basicAt: objectId version: self databaseVersion ) ]
+		record := (soil objectRepository segmentAt: objectId segment) 
+			basicAt: objectId index version: self databaseVersion.
+		self visit: (record objectId: objectId) ]
 ]
 
 { #category : #accessing }
