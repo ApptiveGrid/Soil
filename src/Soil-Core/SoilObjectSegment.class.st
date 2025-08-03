@@ -46,11 +46,7 @@ SoilObjectSegment >> asCachedSegment [
 
 { #category : #accessing }
 SoilObjectSegment >> at: anInteger [ 
-	| position |
-	position := indexFile positionAt: anInteger.
-	position isZero ifTrue: [  SoilIndexOutOfRange signal: 'no entry for object at ', id asString, ':', anInteger asString ].
-	^ (objectFile atPosition: position) ifNotNil: [ :record | 
-		record objectId: (SoilObjectId segment: id index: anInteger).
+	^ (self basicAt: anInteger) ifNotNil: [ :record | 
 		self soil notificationHandler recordRead: record.
 		record ]
 ]
@@ -76,10 +72,30 @@ SoilObjectSegment >> at: index version: version [
 ]
 
 { #category : #accessing }
+SoilObjectSegment >> basicAt: anInteger [ 
+	| position |
+	position := indexFile positionAt: anInteger.
+	position isZero ifTrue: [  SoilIndexOutOfRange signal: 'no entry for object at ', id asString, ':', anInteger asString ].
+	^ (objectFile atPosition: position) ifNotNil: [ :record | 
+		record objectId: (SoilObjectId segment: id index: anInteger).
+		record ]
+]
+
+{ #category : #accessing }
 SoilObjectSegment >> basicAt: anInteger length:  length [
 	| position |
 	position := indexFile positionAt: anInteger.
 	^ objectFile basicAtPosition: position length: length
+]
+
+{ #category : #accessing }
+SoilObjectSegment >> basicAt: index version: version [ 
+	| record |
+	record := self basicAt: index.
+	[ record version <= version ] whileFalse: [ 
+		record hasPreviousVersion ifFalse: [ ^ nil ].
+		record := objectFile atPosition: record previousVersionPosition ].
+	^ record
 ]
 
 { #category : #'open/close' }
