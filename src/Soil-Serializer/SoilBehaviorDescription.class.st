@@ -16,7 +16,8 @@ Class {
 		'behaviorIdentifier',
 		'objectId',
 		'classLayout',
-		'version'
+		'version',
+		'objectClass'
 	],
 	#category : #'Soil-Serializer-Base'
 }
@@ -41,7 +42,7 @@ SoilBehaviorDescription class >> meta [
 
 { #category : #accessing }
 SoilBehaviorDescription class >> soilTransientInstVars [ 
-	^ #( objectId ) 
+	^ #( objectId objectClass ) 
 ]
 
 { #category : #converting }
@@ -163,7 +164,8 @@ SoilBehaviorDescription >> newObjectWith: aSerializer [
 
 { #category : #accessing }
 SoilBehaviorDescription >> objectClass [
-	^ Smalltalk at: behaviorIdentifier asSymbol
+	^ objectClass ifNil: [ 
+		objectClass := Smalltalk at: behaviorIdentifier asSymbol ]
 ]
 
 { #category : #accessing }
