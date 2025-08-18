@@ -119,18 +119,3 @@ SoilPersistentClusterVersion >> readFrom: stream [
 SoilPersistentClusterVersion >> shouldBeCommitted [ 
 	^ changed and: [ committed not ]
 ]
-
-{ #category : #comparing }
-SoilPersistentClusterVersion >> soilSizeInMemory [
-	^ self sizeInMemory 
-		+ objectId soilSizeInMemory 
-		+ (references sum: #soilSizeInMemory) 
-		+ bytes sizeInMemory 
-		+ committed sizeInMemory 
-		+ previousVersionPosition sizeInMemory 
-		+ version sizeInMemory 
-		+ (behaviorDescriptions sum: #soilSizeInMemory) 
-		+ (indexIds sum: #sizeInMemory) 
-		+ position sizeInMemory
-		+ changed sizeInMemory 
-]
