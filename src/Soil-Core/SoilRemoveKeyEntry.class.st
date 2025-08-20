@@ -19,10 +19,15 @@ SoilRemoveKeyEntry >> address [
 ]
 
 { #category : #committing }
-SoilRemoveKeyEntry >> commitIn: soil [ 
-	((soil objectRepository segmentAt: segment) indexAt: id) newIterator 
-		removeKey: key;
-		updateCurrentTransaction: transactionId 
+SoilRemoveKeyEntry >> commitIn: soil recovery: aBoolean [
+	| iterator |
+	iterator := ((soil objectRepository segmentAt: segment) indexAt: id) newIterator.
+	"on recovery we ignore a missing key because it can be removed already and the replay
+	would fail always. But we still want to fail in a regular commit"
+	aBoolean 
+		ifTrue: [ iterator removeKey: key ifAbsent: [ "ignore missing key"  ] ]
+		ifFalse: [ iterator removeKey: key ].
+	iterator updateCurrentTransaction: transactionId 
 ]
 
 { #category : #accessing }
