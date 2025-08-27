@@ -273,17 +273,17 @@ Soil >> inspectionControl [
 ]
 
 { #category : #inspector }
-Soil >> inspectionJournal [
+Soil >> inspectionJournal: aBuilder [
 	<inspectorPresentationOrder: 2200 title: 'journal'>
 	
-	^ self journal inspectionContent
+	^ self journal inspectionContent: aBuilder 
 ]
 
 { #category : #inspector }
-Soil >> inspectionMetadata [
+Soil >> inspectionMetadata: aBuilder [
 	<inspectorPresentationOrder: 2100 title: 'metadata'>
 
-	^ self metadata inspectionMetadata
+	^ self metadata inspectionMetadata: aBuilder 
 ]
 
 { #category : #testing }
