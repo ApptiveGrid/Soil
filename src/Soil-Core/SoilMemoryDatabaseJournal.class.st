@@ -11,10 +11,10 @@ SoilMemoryDatabaseJournal >> initialize [
 ]
 
 { #category : #inspector }
-SoilMemoryDatabaseJournal >> inspectionTransactionJournals [
+SoilMemoryDatabaseJournal >> inspectionTransactionJournals: aBuilder [ 
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 
-	^ SpTablePresenter new
+	^ aBuilder newTable 
 		items: transactionJournals;
 		addColumn: (SpCompositeTableColumn new
 			title: '#';

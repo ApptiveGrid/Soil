@@ -137,10 +137,10 @@ SoilControlFile >> initializeStart [
 ]
 
 { #category : #inspector }
-SoilControlFile >> inspectionControl [
+SoilControlFile >> inspectionControl: aBuilder [
 	<inspectorPresentationOrder: 1000 title: 'control'>
 
-	^ SpTablePresenter new
+	^ aBuilder newTable 
 		items: self parameterNames;
 		addColumn: (SpCompositeTableColumn new
 			title: 'key';

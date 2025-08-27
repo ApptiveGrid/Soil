@@ -266,10 +266,10 @@ Soil >> initializeFilesystem [
 ]
 
 { #category : #inspector }
-Soil >> inspectionControl [
+Soil >> inspectionControl: aBuilder [ 
 	<inspectorPresentationOrder: 2000 title: 'control'>
 
-	^ self control inspectionControl 
+	^ self control inspectionControl: aBuilder 
 ]
 
 { #category : #inspector }
