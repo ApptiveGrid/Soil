@@ -26,10 +26,10 @@ SoilMetadata >> ensurePresent [
 ]
 
 { #category : #inspector }
-SoilMetadata >> inspectionMetadata [
+SoilMetadata >> inspectionMetadata: aBuilder [
 	<inspectorPresentationOrder: 1000 title: 'metadata'>
 
-	^ SpTablePresenter new
+	^ aBuilder newTable
 		items: self fields keys;
 		addColumn: (SpCompositeTableColumn new
 			title: 'key';

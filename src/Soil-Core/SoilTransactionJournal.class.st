@@ -106,10 +106,10 @@ SoilTransactionJournal >> initialize [
 ]
 
 { #category : #inspector }
-SoilTransactionJournal >> inspectionEntries [
+SoilTransactionJournal >> inspectionEntries: aBuilder [ 
 	<inspectorPresentationOrder: 0 title: 'journal entries'>
 
-	^ SpTablePresenter new
+	^ aBuilder newTable 
 		items: entries;
 		addColumn: (SpCompositeTableColumn new
 			title: '#';
