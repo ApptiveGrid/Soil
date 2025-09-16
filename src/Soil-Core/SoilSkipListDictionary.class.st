@@ -17,9 +17,3 @@ SoilSkipListDictionary >> createIndex [
 		valueSize: 8;
 		yourself
 ]
-
-{ #category : #serializing }
-SoilSkipListDictionary >> soilBasicSerialize: aSerializer [ 
-	super soilBasicSerialize: aSerializer.
-	aSerializer registerIndexId: id.
-]

@@ -234,8 +234,7 @@ SoilIndexedDictionary >> soilBasicSerialize: aSerializer [
 	transaction ifNil: [ 
 		transaction := aSerializer transaction ].
 	super soilBasicSerialize: aSerializer.
-	aSerializer registerIndexId: id.
-
+	aSerializer registerIndexId: id
 ]
 
 { #category : #serializing }
