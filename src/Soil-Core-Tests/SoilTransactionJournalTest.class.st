@@ -19,7 +19,7 @@ SoilTransactionJournalTest >> fillDatabase [
 	tx root: SoilTestClusterRoot new.
 	tx commit.
 	tx := soil newTransaction.
-	dict := SoilSkipListDictionary new 
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList) 
 		maxLevel: 8;
 		keySize: 10.
 	tx makeRoot: dict.
@@ -93,7 +93,7 @@ SoilTransactionJournalTest >> testNewRootObject [
 SoilTransactionJournalTest >> testNewRootSkipList [
 	| tx journal |
 	tx := soil newTransaction.
-	tx root: (SoilSkipListDictionary new
+	tx root: ((SoilIndexedDictionary newWithBackend: SoilSkipList)
 		maxLevel: 8;
 		keySize: 16;
 		yourself).

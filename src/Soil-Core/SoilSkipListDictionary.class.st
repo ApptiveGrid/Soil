@@ -11,9 +11,7 @@ Class {
 }
 
 { #category : #initialization }
-SoilSkipListDictionary >> createIndex [ 
-	^ SoilSkipList new
-		initializeHeaderPage;
-		valueSize: 8;
-		yourself
+SoilSkipListDictionary >> initialize [ 
+	super initialize.
+	self createIndexWith: SoilSkipList
 ]
