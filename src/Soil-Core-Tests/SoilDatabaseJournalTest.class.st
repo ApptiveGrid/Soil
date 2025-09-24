@@ -28,7 +28,7 @@ SoilDatabaseJournalTest >> fillDatabase [
 	tx root: SoilTestClusterRoot new.
 	tx commit.
 	tx := soil newTransaction.
-	dict := SoilSkipListDictionary new 
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList) 
 		maxLevel: 8;
 		keySize: 10.
 	tx makeRoot: dict.

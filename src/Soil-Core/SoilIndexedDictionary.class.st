@@ -26,6 +26,11 @@ SoilIndexedDictionary class >> isAbstract [
 	^ self == SoilIndexedDictionary
 ]
 
+{ #category : #'instance creation' }
+SoilIndexedDictionary class >> newWithBackend: aClass [
+	^ self new createIndexWith: aClass
+]
+
 { #category : #accessing }
 SoilIndexedDictionary class >> soilTransientInstVars [ 
 	^ #( index transaction segment)
@@ -69,6 +74,12 @@ SoilIndexedDictionary >> atIndex: anInteger [
 ]
 
 { #category : #accessing }
+SoilIndexedDictionary >> backend [
+	"return the backend used, which is the class of the index that we use"
+	^index class
+]
+
+{ #category : #accessing }
 SoilIndexedDictionary >> basicAt: aString ifAbsent: aBlock [ 
 	^ self newIterator at: aString ifAbsent: aBlock
 ]
@@ -79,8 +90,11 @@ SoilIndexedDictionary >> compact [
 ]
 
 { #category : #initialization }
-SoilIndexedDictionary >> createIndex [
-	^ self subclassResponsibility
+SoilIndexedDictionary >> createIndexWith: anIndexClass [
+	index := anIndexClass new
+		initializeHeaderPage;
+		valueSize: 8;
+		yourself
 ]
 
 { #category : #enumerating }
@@ -113,8 +127,7 @@ SoilIndexedDictionary >> index [
 { #category : #initialization }
 SoilIndexedDictionary >> initialize [ 
 	super initialize.
-	id := UUID new asString36.
-	index := self createIndex.
+	id := UUID new asString36
 ]
 
 { #category : #testing }
