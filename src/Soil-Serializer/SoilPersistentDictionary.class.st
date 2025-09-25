@@ -25,11 +25,10 @@ SoilPersistentDictionary class >> soilTransientInstVars [
 
 { #category : #forwarded }
 SoilPersistentDictionary >> add: anAssociation [
-	| return |
 	transaction makeRoot: anAssociation value.
-	return := dict add: anAssociation.
+	dict add: anAssociation.
 	transaction markDirty: self.
-	^return
+	^anAssociation
 ]
 
 { #category : #forwarded }
@@ -65,11 +64,10 @@ SoilPersistentDictionary >> at: key ifPresent: aPresentBlock ifAbsent: anAbsentB
 
 { #category : #forwarded }
 SoilPersistentDictionary >> at: key put: value [
-	| return |
 	transaction ifNotNil: [:tr | tr makeRoot: value].
-	return := dict at: key put: value.
+	dict at: key put: value.
 	transaction ifNotNil: [:tr | tr markDirty: self].
-	^return
+	^value
 
 ]
 
