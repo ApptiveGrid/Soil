@@ -9,8 +9,15 @@ Class {
 }
 
 { #category : #'instance creation' }
+SoilPersistentDictionary class >> new [
+	^ self basicNew
+		initialize: 5;
+		yourself
+]
+
+{ #category : #'instance creation' }
 SoilPersistentDictionary class >> new: size [
-	^self new
+	^ self basicNew initialize: size
 ]
 
 { #category : #materializing }
@@ -89,8 +96,8 @@ SoilPersistentDictionary >> includesKey: key [
 ]
 
 { #category : #initialization }
-SoilPersistentDictionary >> initialize [
-	dict := Dictionary new
+SoilPersistentDictionary >> initialize: size [
+	dict := Dictionary new: size
 ]
 
 { #category : #testing }
