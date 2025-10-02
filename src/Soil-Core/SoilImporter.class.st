@@ -37,7 +37,6 @@ SoilImporter >> importBehaviors [
 		objectId := SoilObjectId readFrom: stream.
 		max := max max: objectId index.
 		cluster := SoilPersistentClusterVersion new readFrom: stream .
-		cluster version: 1.
 		cluster previousVersionPosition: 0.
 		cluster 
 			transaction: transaction;
@@ -54,7 +53,7 @@ SoilImporter >> importBehaviors [
 							materializeObject.
 						(presentBehavior object hasSameShape: cluster object )
 							ifTrue: [ 
-								idMap at: objectId put: (presentObjectId asObjectIdVersion: presentBehavior version).
+								idMap at: objectId put: (presentObjectId asObjectIdVersion: presentBehavior object version).
 								"if oid is the same and shape this is the wanted case" ]
 							ifFalse: [ self halt ]  ]
 						ifNil: [ self halt ] ] 
