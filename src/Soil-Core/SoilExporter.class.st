@@ -21,14 +21,19 @@ SoilExporter >> export: aSoilObjectId [
 SoilExporter >> exportBehaviorRegistry [
 	| metaSegment record |
 	metaSegment := soil objectRepository metaSegment.
+	"we have no good format for now so we just write the number of 
+	descriptions we are gonna write followed by the descriptions"
 	stream nextPutAll: ((metaSegment lastObjectIndex - 2) asByteArrayOfSize: 8).
-		3 to: metaSegment lastObjectIndex do: [ :n | 
-			record := transaction materializeRecord: (metaSegment at: n). 
-			record object isCurrent ifFalse: [ self halt ].
-			maxVersions at: record objectId put: record object version.
-			record objectId writeOn: stream.
-			record serializeOn: stream
-		].
+	3 to: metaSegment lastObjectIndex do: [ :n | 
+		record := transaction materializeRecord: (metaSegment at: n). 
+		"remember the current maximum version of each behavior so we can 
+		easily figure out which of the objects need to be migrated"
+		maxVersions 
+			at: record objectId 
+			put: record object version.
+		record objectId writeOn: stream.
+		record serializeOn: stream
+	].
 ]
 
 { #category : #initialization }
@@ -36,6 +41,15 @@ SoilExporter >> initialize [
 	super initialize.
 	migrationMap := Dictionary new.
 	maxVersions := Dictionary new.
+]
+
+{ #category : #visiting }
+SoilExporter >> isUpToDateCluster: aCluster [
+	
+	"check if all behavior descriptions of the cluster are at the newest 
+	version"
+	^ aCluster behaviorDescriptions allSatisfy: [ :objectId | 
+		objectId version = (maxVersions at: objectId asSoilObjectId) ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -78,20 +92,23 @@ SoilExporter >> transaction: aTransaction [
 { #category : #visiting }
 SoilExporter >> visitPersistentClusterVersion: aCluster [ 
 	| index cluster |
-	cluster := (aCluster behaviorDescriptions allSatisfy: [ :ref | 
-		(ref version = (maxVersions at: ref asSoilObjectId)) ])
-		ifTrue: [ 
-				aCluster 
-					detachFromSegment;
-					yourself ] 
+	"remove all information regarding the current segment as it
+	will be invalid when exported"
+	aCluster detachFromSegment.
+	cluster := (self isUpToDateCluster: aCluster)
+		ifTrue: [ aCluster ] 
 		ifFalse: [ 
-			(aCluster 
+			"if the cluster is not up-to-date we materialize the 
+			object which will upgrade it"
+			aCluster 
 				transaction: transaction;
 				materializeObject;
-				asNewClusterVersion) detachFromSegment; yourself ].
+				asNewClusterVersion ].
+	"write the cleaned and up-to-date cluster"
 	self write: (self migrateCluster: cluster).
 	cluster references do: [ :reference |
 		self processObjectId: reference ].
+	"for all indexes being used remember the index setting for it "
 	cluster indexIds do: [ :indexId |
 		index := (soil objectRepository segmentAt: 1) indexManager at: indexId ifAbsent: [ self halt ].
 		stream 
