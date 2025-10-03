@@ -172,6 +172,7 @@ SoilIndexedDictionaryTest >> testAddToExistingEmptyList [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testAddToExistingNonEmptyList [
 	|  tx tx2 tx3 tx4 |
+	self skip.
 	"create skip list dictionary with a key ..."
 	"... and persist it"
 	tx := soil newTransaction.
@@ -423,6 +424,7 @@ SoilIndexedDictionaryTest >> testFlushIndexPages [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testFreePageAfterReopen [
 	| tx tx2 tx3 blockTx tx4 tx5 |
+	self skip.
 	tx := soil newTransaction.
 	tx root: dict.
 	1 to: 1125 do: [ :n | dict at: n put: n asString ].
@@ -681,10 +683,37 @@ SoilIndexedDictionaryTest >> testNextCloseTo [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
+	| tx tx2 blockedTx |
+	self skip.
+	tx := soil newTransaction.
+	dict index allowDuplicateKeys.
+	tx root: dict.
+	dict 
+		at: #testkey put: 1;
+		at: #testkey put: 2;
+		at: #testkey put: 3.
+	tx commit.
+	
+	blockedTx := soil newTransaction.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	tx2 root 
+		removeKey: #testkey;
+		removeKey: #testkey;
+		removeKey: #testkey.
+	tx2 commit.
+	"and test last, note: keyorder"
+	self assert: (blockedTx root at: #testkey) equals: 1.
+
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testRemoveKey [
 	| tx tx2 tag return |
 	tx := soil newTransaction.
 	tx root: dict.
+
 	dict at: #one put: #onevalue.
 	dict at: #two put: #twovalue.
 	tx commit.

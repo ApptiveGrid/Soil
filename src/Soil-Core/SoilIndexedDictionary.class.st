@@ -243,9 +243,7 @@ SoilIndexedDictionary >> size [
 ]
 
 { #category : #serializing }
-SoilIndexedDictionary >> soilBasicSerialize: aSerializer [ 
-	transaction ifNil: [ 
-		transaction := aSerializer transaction ].
+SoilIndexedDictionary >> soilBasicSerialize: aSerializer [
 	super soilBasicSerialize: aSerializer.
 	aSerializer registerIndexId: id
 ]
