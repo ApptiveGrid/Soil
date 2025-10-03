@@ -116,7 +116,11 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 	last key of the page we can append a page and add the new key
 	there. If the key is in between or the page is not the last we
 	split the page with each containing half of the items"
-	newPage := (page isLastPage and: [ page lastKey < aKey ])
+	self flag: #todo.
+	"is it correct to check for lastKey smallerOREQUAL. If we reach
+	here the key was not found and for duplicate keys it should safe
+	to have the equal case."
+	newPage := (page isLastPage and: [ page lastKey <= aKey ])
 		ifTrue: [ store allocatePage ] 
 		ifFalse: [ page split: store allocatePage ].
 	newPage level to: 1 by: -1  do: [ :level |
