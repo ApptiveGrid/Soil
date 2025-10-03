@@ -133,11 +133,26 @@ SoilSkipListIterator >> removeKey: key ifAbsent: aBlock [
 	"We search for the data page for the key to update the value with a removed ID
 	and return the prior value just like #at: would do"
 	self findPageFor: indexKey.
+
+	self flag: #todo.
+	"this is a hack to be able to find the first occurrence but in a 
+	very inefficient way"
 	currentPageIndex := currentPage indexOfKey: indexKey.
-	currentKey := (currentPage items at: currentPageIndex) key. 
-	assoc := self previousAssociation.
-	[ assoc notNil and: [ assoc key = key ] ] whileTrue: [ 
-		assoc := self previousAssociation ].
+	currentKey := (currentPage items at: currentPageIndex ifAbsent: [ ^ aBlock value ]) key. 
+	(currentKey > indexKey) ifTrue: [  
+		assoc := self previousAssociation.
+		[ assoc notNil and: [ assoc key = indexKey ] ] whileTrue: [ 
+			assoc := self previousAssociation ].
+		(assoc notNil and: [assoc key = indexKey]) ifFalse: [ self nextAssociation ]. 
+		currentPageIndex := currentPage indexOfKey: indexKey.
+		currentKey := (currentPage itemAtIndex: currentPageIndex) key ]
+		ifFalse: [
+			assoc := self nextAssociation.
+			[ assoc notNil and: [ assoc key = indexKey ] ] whileTrue: [ 
+				assoc := self nextAssociation ].
+			(assoc notNil and: [assoc key = indexKey]) ifFalse: [ self previousAssociation ]. 
+				currentPageIndex := currentPage indexOfKey: indexKey.
+				currentKey := (currentPage itemAtIndex: currentPageIndex) key]. 
 	
 	item :=  self restoreItem: (currentPage itemAtIndex: currentPageIndex).
 	oldValue := item
@@ -147,7 +162,7 @@ SoilSkipListIterator >> removeKey: key ifAbsent: aBlock [
 		ifNil: [ aBlock value ].
 	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
 	(e.g no need to update index pages for the BTree"
-	currentPage items at: currentPageIndex put:  key -> SoilObjectId removed.
+	currentPage items at: currentPageIndex put:  indexKey -> SoilObjectId removed.
 	index addDirtyPage: currentPage.
 
 	index decreaseSize.
