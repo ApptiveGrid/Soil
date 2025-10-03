@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilImporter,
+	#name : #SoilGraphImporter,
 	#superclass : #SoilVisitor,
 	#instVars : [
 		'stream',
@@ -13,7 +13,7 @@ Class {
 }
 
 { #category : #importing }
-SoilImporter >> import [
+SoilGraphImporter >> import [
 	lastIndex := Array new: 2.
 	lastIndex at: 1 put: (transaction objectRepository metaSegment) lastObjectIndex.
 	lastIndex at: 2 put: (transaction objectRepository segmentAt: 1) lastObjectIndex.
@@ -25,7 +25,7 @@ SoilImporter >> import [
 ]
 
 { #category : #importing }
-SoilImporter >> importBehaviorCluster: cluster [
+SoilGraphImporter >> importBehaviorCluster: cluster [
 
 	"When importing a behavior we need to check if it is already present 
 	in this database"
@@ -57,25 +57,25 @@ SoilImporter >> importBehaviorCluster: cluster [
 ]
 
 { #category : #initialization }
-SoilImporter >> initialize [ 
+SoilGraphImporter >> initialize [ 
 	super initialize.
 	idMap := Dictionary new
 ]
 
 { #category : #importing }
-SoilImporter >> metaSegment [ 
+SoilGraphImporter >> metaSegment [ 
 	^ metaSegment ifNil: [  
 		metaSegment := soil objectRepository metaSegment ]
 
 ]
 
 { #category : #accessing }
-SoilImporter >> newId [
+SoilGraphImporter >> newId [
 	^ newId
 ]
 
 { #category : #'instance creation' }
-SoilImporter >> newObjectIdFor: aSoilObjectId [ 
+SoilGraphImporter >> newObjectIdFor: aSoilObjectId [ 
 	| current |
 	^ idMap
 		at: aSoilObjectId
@@ -87,7 +87,7 @@ SoilImporter >> newObjectIdFor: aSoilObjectId [
 ]
 
 { #category : #'instance creation' }
-SoilImporter >> newObjectIdFor: aSoilObjectId version: anInteger [ 
+SoilGraphImporter >> newObjectIdFor: aSoilObjectId version: anInteger [ 
 	| current |
 	^ idMap
 		at: aSoilObjectId
@@ -100,14 +100,14 @@ SoilImporter >> newObjectIdFor: aSoilObjectId version: anInteger [
 ]
 
 { #category : #importing }
-SoilImporter >> presentBehaviorWithName: aSymbol [
+SoilGraphImporter >> presentBehaviorWithName: aSymbol [
 	^ soil behaviorRegistry 
 		nameAt: aSymbol
 		ifAbsent: [ nil ].
 ]
 
 { #category : #importing }
-SoilImporter >> readBehaviorDescription [
+SoilGraphImporter >> readBehaviorDescription [
 	| importOid  cluster |
 	importOid := SoilObjectId readFrom: stream.
 	
@@ -122,7 +122,7 @@ SoilImporter >> readBehaviorDescription [
 ]
 
 { #category : #importing }
-SoilImporter >> readCluster [
+SoilGraphImporter >> readCluster [
 	| objectId cluster keySize valueSize index |
 	objectId := self newObjectIdFor: (SoilObjectId readFrom: stream).
 	newId ifNil: [newId := objectId ].
@@ -147,11 +147,11 @@ SoilImporter >> readCluster [
 ]
 
 { #category : #accessing }
-SoilImporter >> stream: aReadStream [ 
+SoilGraphImporter >> stream: aReadStream [ 
 	stream := aReadStream 
 ]
 
 { #category : #accessing }
-SoilImporter >> transaction: anAGBaseTransaction [ 
+SoilGraphImporter >> transaction: anAGBaseTransaction [ 
 	transaction := anAGBaseTransaction 
 ]

@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilExporter,
+	#name : #SoilGraphExporter,
 	#superclass : #SoilVisitor,
 	#instVars : [
 		'stream',
@@ -12,20 +12,20 @@ Class {
 }
 
 { #category : #'as yet unclassified' }
-SoilExporter >> export: aSoilObjectId [ 
+SoilGraphExporter >> export: aSoilObjectId [ 
 	self processObjectId: aSoilObjectId.
 	self processLoop 
 ]
 
 { #category : #initialization }
-SoilExporter >> initialize [ 
+SoilGraphExporter >> initialize [ 
 	super initialize.
 	migrationMap := Dictionary new.
 	versionMap := Dictionary new.
 ]
 
 { #category : #visiting }
-SoilExporter >> isUpToDateCluster: aCluster [
+SoilGraphExporter >> isUpToDateCluster: aCluster [
 	
 	"check if all behavior descriptions of the cluster are at the newest 
 	version"
@@ -34,14 +34,14 @@ SoilExporter >> isUpToDateCluster: aCluster [
 ]
 
 { #category : #'as yet unclassified' }
-SoilExporter >> metaSegment [ 
+SoilGraphExporter >> metaSegment [ 
 	^ metaSegment ifNil: [ 
 		metaSegment := soil objectRepository metaSegment ].
 
 ]
 
 { #category : #'as yet unclassified' }
-SoilExporter >> migrate: aClass to: aFullBlockClosure [ 
+SoilGraphExporter >> migrate: aClass to: aFullBlockClosure [ 
 	migrationMap 
 		at: (soil behaviorRegistry nameAt: aClass name ifAbsent: [self halt]) index 
 		put: aFullBlockClosure 
@@ -49,7 +49,7 @@ SoilExporter >> migrate: aClass to: aFullBlockClosure [
 ]
 
 { #category : #actions }
-SoilExporter >> migrateCluster: cluster [ 
+SoilGraphExporter >> migrateCluster: cluster [ 
 	| block |
 	cluster behaviorDescriptions ifEmpty: [ ^ cluster ].
 	block := migrationMap
@@ -62,23 +62,23 @@ SoilExporter >> migrateCluster: cluster [
 ]
 
 { #category : #accessing }
-SoilExporter >> stream [
+SoilGraphExporter >> stream [
 	^ stream
 ]
 
 { #category : #accessing }
-SoilExporter >> stream: anObject [
+SoilGraphExporter >> stream: anObject [
 
 	stream := anObject
 ]
 
 { #category : #accessing }
-SoilExporter >> transaction: aTransaction [ 
+SoilGraphExporter >> transaction: aTransaction [ 
 	transaction := aTransaction 
 ]
 
 { #category : #visiting }
-SoilExporter >> updateCluster: aCluster [
+SoilGraphExporter >> updateCluster: aCluster [
 	"Behavior objectIds and versions depend on the time and state 
 	of the software when they are being written the first time. 
 	They become meaningless through export. The current assumption
@@ -99,7 +99,7 @@ SoilExporter >> updateCluster: aCluster [
 ]
 
 { #category : #visiting }
-SoilExporter >> visitPersistentClusterVersion: aCluster [ 
+SoilGraphExporter >> visitPersistentClusterVersion: aCluster [ 
 	| index cluster |
 	"remove all information regarding the current segment as it
 	will be invalid when exported"
@@ -126,7 +126,7 @@ SoilExporter >> visitPersistentClusterVersion: aCluster [
 ]
 
 { #category : #visiting }
-SoilExporter >> writeBehaviorDescriptions: aCollection [ 
+SoilGraphExporter >> writeBehaviorDescriptions: aCollection [ 
 	| unwritten record |
 	"write only behaviors that have not been written already"
 	unwritten := aCollection reject: [ :each | versionMap includesKey: each asSoilObjectId ].
