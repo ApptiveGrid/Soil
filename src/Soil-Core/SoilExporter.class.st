@@ -5,42 +5,23 @@ Class {
 		'stream',
 		'transaction',
 		'migrationMap',
-		'maxVersions'
+		'metaSegment',
+		'versionMap'
 	],
 	#category : #'Soil-Core-Error'
 }
 
 { #category : #'as yet unclassified' }
 SoilExporter >> export: aSoilObjectId [ 
-	self exportBehaviorRegistry.
 	self processObjectId: aSoilObjectId.
 	self processLoop 
-]
-
-{ #category : #'as yet unclassified' }
-SoilExporter >> exportBehaviorRegistry [
-	| metaSegment record |
-	metaSegment := soil objectRepository metaSegment.
-	"we have no good format for now so we just write the number of 
-	descriptions we are gonna write followed by the descriptions"
-	stream nextPutAll: ((metaSegment lastObjectIndex - 2) asByteArrayOfSize: 8).
-	3 to: metaSegment lastObjectIndex do: [ :n | 
-		record := transaction materializeRecord: (metaSegment at: n). 
-		"remember the current maximum version of each behavior so we can 
-		easily figure out which of the objects need to be migrated"
-		maxVersions 
-			at: record objectId 
-			put: record object version.
-		record objectId writeOn: stream.
-		record serializeOn: stream
-	].
 ]
 
 { #category : #initialization }
 SoilExporter >> initialize [ 
 	super initialize.
 	migrationMap := Dictionary new.
-	maxVersions := Dictionary new.
+	versionMap := Dictionary new.
 ]
 
 { #category : #visiting }
@@ -49,7 +30,14 @@ SoilExporter >> isUpToDateCluster: aCluster [
 	"check if all behavior descriptions of the cluster are at the newest 
 	version"
 	^ aCluster behaviorDescriptions allSatisfy: [ :objectId | 
-		objectId version = (maxVersions at: objectId asSoilObjectId) ]
+		objectId version = (versionMap at: objectId asSoilObjectId) ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilExporter >> metaSegment [ 
+	^ metaSegment ifNil: [ 
+		metaSegment := soil objectRepository metaSegment ].
+
 ]
 
 { #category : #'as yet unclassified' }
@@ -75,7 +63,7 @@ SoilExporter >> migrateCluster: cluster [
 
 { #category : #accessing }
 SoilExporter >> stream [
-	^ stream 
+	^ stream
 ]
 
 { #category : #accessing }
@@ -90,35 +78,69 @@ SoilExporter >> transaction: aTransaction [
 ]
 
 { #category : #visiting }
+SoilExporter >> updateCluster: aCluster [
+	"Behavior objectIds and versions depend on the time and state 
+	of the software when they are being written the first time. 
+	They become meaningless through export. The current assumption
+	is that the export is a short-lived structure that is used 
+	to be re-imported somewhere else. The common denominator here
+	is the actual state of the software. We can match that if we
+	make sure that the clusters are on the newest version "
+	(self isUpToDateCluster: aCluster) ifTrue: [ ^ aCluster ].
+	"if the cluster is not up-to-date we materialize the 
+	object which will upgrade it"
+	^ (aCluster 
+		transaction: transaction;
+		materializeObject;
+		asNewClusterVersion)
+			version: 0;
+			yourself
+			
+]
+
+{ #category : #visiting }
 SoilExporter >> visitPersistentClusterVersion: aCluster [ 
 	| index cluster |
 	"remove all information regarding the current segment as it
 	will be invalid when exported"
 	aCluster detachFromSegment.
-	cluster := (self isUpToDateCluster: aCluster)
-		ifTrue: [ aCluster ] 
-		ifFalse: [ 
-			"if the cluster is not up-to-date we materialize the 
-			object which will upgrade it"
-			aCluster 
-				transaction: transaction;
-				materializeObject;
-				asNewClusterVersion ].
+
+	"write format objectId, behaviors, cluster, index settings"
+	aCluster objectId writeOn: stream.
+
+	cluster := self migrateCluster: aCluster.
+	self writeBehaviorDescriptions: cluster behaviorDescriptions.
+	cluster := self updateCluster: aCluster.
 	"write the cleaned and up-to-date cluster"
-	self write: (self migrateCluster: cluster).
-	cluster references do: [ :reference |
-		self processObjectId: reference ].
+	cluster serializeOn: stream .
 	"for all indexes being used remember the index setting for it "
 	cluster indexIds do: [ :indexId |
-		index := (soil objectRepository segmentAt: 1) indexManager at: indexId ifAbsent: [ self halt ].
+		index := soil objectRepository firstSegment indexManager at: indexId.
 		stream 
 			nextPutAll: (index keySize asByteArrayOfSize: 2);
 			nextPutAll: ( index valueSize asByteArrayOfSize: 2 );
-			nextPutAll: ( index maxLevel asByteArrayOfSize: 2 ) ]
+			nextPutAll: ( index maxLevel asByteArrayOfSize: 2 ) ].
+	cluster references do: [ :reference |
+		self processObjectId: reference ].
+
 ]
 
-{ #category : #writing }
-SoilExporter >> write: cluster [ 
-	cluster objectId writeOn: stream.
-	cluster serializeOn: self stream 
+{ #category : #visiting }
+SoilExporter >> writeBehaviorDescriptions: aCollection [ 
+	| unwritten record |
+	"write only behaviors that have not been written already"
+	unwritten := aCollection reject: [ :each | versionMap includesKey: each asSoilObjectId ].
+	
+	"write size"
+	stream nextPutAll: (unwritten size asByteArrayOfSize: 8).
+	unwritten do: [ :reference | 
+		record := transaction materializeRecord: (self metaSegment at: reference index). 
+		"remember the current maximum version of each behavior so we can 
+		easily figure out which of the objects need to be migrated"
+		versionMap 
+			at: record objectId 
+			put: record object version.
+		record objectId writeOn: stream.
+		record serializeOn: stream
+	].
 ]
