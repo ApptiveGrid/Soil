@@ -4,29 +4,29 @@ Class {
 	#instVars : [
 		'soil',
 		'dict',
-		'classToTest'
+		'backend'
 	],
 	#category : #'Soil-Core-Tests-Index'
 }
 
-{ #category : #tests }
+{ #category : #'building suites' }
 SoilIndexedDictionaryTest class >> testParameters [
 	^ ParametrizedTestMatrix new
-		addCase: { #classToTest -> SoilSkipListDictionary };
-		"addCase: { #classToTest -> SoilBTreeDictionary };"
+		addCase: { #backend -> SoilSkipList };
+		addCase: { #backend -> SoilBTree };
 		yourself
 ]
 
 { #category : #accessing }
-SoilIndexedDictionaryTest >> classToTest [
+SoilIndexedDictionaryTest >> backend [
 
-	^ classToTest
+	^ backend
 ]
 
 { #category : #accessing }
-SoilIndexedDictionaryTest >> classToTest: anObject [
+SoilIndexedDictionaryTest >> backend: anObject [
 
-	classToTest := anObject
+	backend := anObject
 ]
 
 { #category : #accessing }
@@ -41,7 +41,7 @@ SoilIndexedDictionaryTest >> setUp [
 	soil 
 		destroy;
 		initializeFilesystem.
-	dict := classToTest new
+	dict := (SoilIndexedDictionary newWithBackend: backend)
 		keySize: 10;
 		maxLevel: 8; "ignored for BTree"
 		yourself
@@ -449,7 +449,7 @@ SoilIndexedDictionaryTest >> testFreePageAfterReopen [
 	tx4 root removeKey: 223.
 	tx4 commit.
 	tx5 := soil newTransaction.
-	(classToTest = SoilSkipListDictionary ) ifTrue: [ 
+	(backend = SoilSkipList ) ifTrue: [ 
 		self deny: (tx5 root index wrapped store headerPage right includes: 2) ].
 ]
 
@@ -521,7 +521,7 @@ SoilIndexedDictionaryTest >> testFreePages [
 	tx root: dict.
 	1 to: 1300 do: [ :n | dict at: n put: n asString ].
 	tx commit.
-	(classToTest = SoilBTreeDictionary) 
+	(backend = SoilBTree) 
 		ifTrue:  [ self assert: indexManager indexes anyOne pages size equals: 12]
 		ifFalse: [ self assert: indexManager indexes anyOne pages size equals: 6].
 		
@@ -531,7 +531,7 @@ SoilIndexedDictionaryTest >> testFreePages [
 	tx2 commit.
 	index := indexManager indexes anyOne.
 	self deny: index headerPage firstFreePageIndex isZero.
-	(classToTest = SoilBTreeDictionary) 
+	(backend = SoilBTree) 
 		ifTrue:  [ self assert: index firstFreePage pageIndexes size equals: 5 ]
 		ifFalse: [ self assert: index firstFreePage pageIndexes size equals: 1 ]
 ]
@@ -777,12 +777,12 @@ SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 	tx4 := soil newTransaction.
 	300 to: 500 do: [ :n | tx2 root removeKey: n ].
 	tx2 commit.
-	(classToTest = SoilBTreeDictionary) 
+	(backend = SoilBTree) 
 		ifTrue: [self assert: (index pages select: #needsCleanup) size equals: 3]
 		ifFalse: [self assert: (index pages select: #needsCleanup) size equals: 2].
 	501 to: 700 do: [ :n | tx3 root removeKey: n ].
 	tx3 commit.
-	(classToTest = SoilBTreeDictionary) 
+	(backend = SoilBTree) 
 		ifTrue: [self assert: (index pages select: #needsCleanup) size equals: 5]
 		ifFalse: [self assert: (index pages select: #needsCleanup) size equals: 3].
 	
@@ -807,7 +807,7 @@ SoilIndexedDictionaryTest >> testRemovePagesSequential [
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	"we remove all keys from one page to make it empty"
-	(classToTest = SoilBTreeDictionary) 
+	(backend = SoilBTree) 
 		ifTrue: [339 to: 451 do: [ :n | tx2 root removeKey: n ]]
 		ifFalse: [ 300 to: 700 do: [ :n | tx2 root removeKey: n ]].
 	tx2 commit.
@@ -815,7 +815,7 @@ SoilIndexedDictionaryTest >> testRemovePagesSequential [
 	index := indexManager indexes anyOne.
 	self assert: index dirtyPages size equals: 0.
 	self assert: indexManager dirtyIndexes size equals: 0.
-	self assert: (index pages select: #needsWrite) size equals: (	(classToTest = SoilBTreeDictionary) ifTrue: [1] ifFalse: [0])
+	self assert: (index pages select: #needsWrite) size equals: ((backend = SoilBTree) ifTrue: [1] ifFalse: [0])
 	
 
 ]

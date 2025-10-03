@@ -162,7 +162,7 @@ SoilBackupTest >> testBackupOldVersion [
 { #category : #tests }
 SoilBackupTest >> testBackupTheBackup [
 	| tx visitor dict secondBackup txn |
-	dict := SoilSkipListDictionary  new
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
 		keySize: 10;
 		maxLevel: 8;
 		yourself.
@@ -197,7 +197,7 @@ SoilBackupTest >> testBackupWithIndex [
 	| tx backup tx2 dict object |
 	tx := soil newTransaction.
 	
-	dict := SoilSkipListDictionary new 
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList) 
 		keySize: 8;
 		maxLevel: 16.
 	tx root: dict.
@@ -221,7 +221,7 @@ SoilBackupTest >> testBackupWithIndexRemoval [
 	"removed keys in indexes get objectId 0:0. On backup time we only
 	need to copy the non-removed"
 	tx := soil newTransaction.
-	dict := SoilSkipListDictionary new 
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
 		keySize: 8;
 		maxLevel: 16.
 		tx root: dict.

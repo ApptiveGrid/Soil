@@ -10,9 +10,7 @@ Class {
 }
 
 { #category : #initialization }
-SoilBTreeDictionary >> createIndex [ 
-	^ SoilBTree new
-		initializeHeaderPage;
-		valueSize: 8;
-		yourself
+SoilBTreeDictionary >> initialize [ 
+	super initialize.
+	self createIndexWith: SoilBTree
 ]
