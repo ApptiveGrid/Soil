@@ -29,6 +29,20 @@ SoilPersistentDictionaryTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilPersistentDictionaryTest >> testAdd [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	
+	dict add: (#test -> 'string').
+	transaction commit.
+		
+	self assert: (dict at: #test) equals: 'string'
+]
+
+{ #category : #tests }
 SoilPersistentDictionaryTest >> testAnyOne [
 
 	| dict transaction |
@@ -142,6 +156,39 @@ SoilPersistentDictionaryTest >> testCommitAndRead [
 ]
 
 { #category : #tests }
+SoilPersistentDictionaryTest >> testDetectIfNone [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	
+	dict add: (#test -> 'string').
+	dict add: (#test2 -> 'string').
+	transaction commit.
+		
+	self assert: (dict detect: [:each | each = 'string'] ifNone: [ #error ]) equals: 'string'.
+	self assert: (dict detect: [:each | each = 'tt'] ifNone: [ #error ]) equals: #error
+
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testIncludesKey [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	
+	dict add: (#test -> 'string').
+	dict add: (#test2 -> 'string').
+	transaction commit.
+		
+	self deny: (dict includesKey: #test1).
+	self assert: (dict includesKey: #test2)
+]
+
+{ #category : #tests }
 SoilPersistentDictionaryTest >> testIsCollection [
 
 	| dict |
@@ -224,6 +271,21 @@ SoilPersistentDictionaryTest >> testRemoveKeyIfAbsent [
 	
 
 
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testSize [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	
+	dict add: (#test -> 'string').
+	dict add: (#test2 -> 'string').
+	transaction commit.
+		
+	self assert: (dict size) equals: 2
 ]
 
 { #category : #tests }

@@ -211,10 +211,10 @@ SoilJournalFragmentFile >> initializeVersion [
 ]
 
 { #category : #inspector }
-SoilJournalFragmentFile >> inspectionTransactionJournals [
+SoilJournalFragmentFile >> inspectionTransactionJournals: aBuilder [
 	<inspectorPresentationOrder: 0 title: 'transaction journals'>
 
-	^ SpTablePresenter new
+	^ aBuilder newTable
 		items: (self transactionJournals reverse);
 		addColumn: (SpCompositeTableColumn new
 			title: '#';
