@@ -29,6 +29,7 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 
 	"When importing a behavior we need to check if it is already present 
 	in this database"
+	| newOid |
 	(self presentBehaviorWithName: cluster object behaviorIdentifier)
 		ifNotNil: [ :presentOid |
 			(self metaSegment basicAt: presentOid index ifAbsent: [ Error signal: 'the behavior is present by name but not as object on the heap' ]) 
@@ -50,10 +51,11 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 		ifNil: [ 
 			"The behavior is not in the database so we import the behavior with 
 			version 1"
-			cluster version: 1.
+			cluster object version: 1.
+			newOid := self newObjectIdFor: cluster objectId version: 1.
 			self metaSegment 
-				at: (self newObjectIdFor: cluster objectId version: 1) index 
-				putBytes: cluster serialize ] 
+				at: newOid index 
+				putBytes: (cluster asNewClusterVersion version: 1; serialize) ] 
 ]
 
 { #category : #initialization }
@@ -123,8 +125,9 @@ SoilGraphImporter >> readBehaviorDescription [
 
 { #category : #importing }
 SoilGraphImporter >> readCluster [
-	| objectId cluster keySize valueSize index |
-	objectId := self newObjectIdFor: (SoilObjectId readFrom: stream).
+	| objectId cluster keySize valueSize index maxLevel originalOid |
+	originalOid := SoilObjectId readFrom: stream.
+	objectId := self newObjectIdFor: originalOid.
 	newId ifNil: [newId := objectId ].
 	(stream next: 8) asInteger timesRepeat: [ 
 		 self readBehaviorDescription ].
@@ -133,17 +136,23 @@ SoilGraphImporter >> readCluster [
 		objectId: objectId;
 		version: self databaseVersion.
 	cluster references: (cluster references collect: [:id| self newObjectIdFor: id]).
+	(cluster indexIds size > 1) ifTrue: [ self halt ].
 	cluster indexIds do: [ :indexId |
 		keySize := (stream next: 2) asInteger.
 		valueSize := (stream next: 2) asInteger.
+		maxLevel := (stream next: 2) asInteger.
 		index := soil objectRepository firstSegment indexManager createIndexWithId: indexId class: SoilSkipList.
-		index keySize: keySize; valueSize: valueSize; maxLevel: (stream next: 2) asInteger .
+		index keySize: keySize; valueSize: valueSize; maxLevel: maxLevel.
+		(stream next: 8) asInteger timesRepeat: [
+			index basicAt: (stream next: keySize) asInteger put: (self newObjectIdFor: (SoilObjectId readFrom: stream)) ].
+		
 		index writePages  ].
 	cluster behaviorDescriptions: (cluster behaviorDescriptions collect: [ :bd |
 		 idMap at: bd objectId asSoilObjectId ]).
 	soil objectRepository 
 		at: cluster objectId 
-		putBytes: cluster serialize 
+		putBytes: cluster serialize.
+	(stream next = 255) ifFalse: [ self halt ].
 ]
 
 { #category : #accessing }

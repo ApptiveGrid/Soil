@@ -6,7 +6,8 @@ Class {
 		'transaction',
 		'migrationMap',
 		'metaSegment',
-		'versionMap'
+		'versionMap',
+		'indexesToSkip'
 	],
 	#category : #'Soil-Core-Error'
 }
@@ -22,6 +23,7 @@ SoilGraphExporter >> initialize [
 	super initialize.
 	migrationMap := Dictionary new.
 	versionMap := Dictionary new.
+	indexesToSkip := OrderedCollection new
 ]
 
 { #category : #visiting }
@@ -59,6 +61,14 @@ SoilGraphExporter >> migrateCluster: cluster [
 		^ block value: cluster ].
 	^ cluster
 	
+]
+
+{ #category : #'as yet unclassified' }
+SoilGraphExporter >> skipIndexes: aCollection [ 
+	indexesToSkip := aCollection collect: [ :each |
+		(each class = SoilObjectId)
+			ifTrue: [ each ]
+			ifFalse: [ transaction objectIdOf: each  ] ]
 ]
 
 { #category : #accessing }
@@ -100,7 +110,7 @@ SoilGraphExporter >> updateCluster: aCluster [
 
 { #category : #visiting }
 SoilGraphExporter >> visitPersistentClusterVersion: aCluster [ 
-	| index cluster |
+	| cluster |
 	"remove all information regarding the current segment as it
 	will be invalid when exported"
 	aCluster detachFromSegment.
@@ -114,15 +124,39 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 	"write the cleaned and up-to-date cluster"
 	cluster serializeOn: stream .
 	"for all indexes being used remember the index setting for it "
-	cluster indexIds do: [ :indexId |
-		index := soil objectRepository firstSegment indexManager at: indexId.
-		stream 
-			nextPutAll: (index keySize asByteArrayOfSize: 2);
-			nextPutAll: ( index valueSize asByteArrayOfSize: 2 );
-			nextPutAll: ( index maxLevel asByteArrayOfSize: 2 ) ].
 	cluster references do: [ :reference |
 		self processObjectId: reference ].
+	cluster indexIds ifNotEmpty: [ 
+		transaction registerRecord: (cluster 
+			transaction: transaction;
+			materializeObject;
+			yourself).
+		self visit: cluster object ].
+	stream nextPut: 255.
 
+]
+
+{ #category : #visiting }
+SoilGraphExporter >> visitSkipListDictionary: aSkipListDictionary [ 
+	| index count |
+	index := aSkipListDictionary index wrapped.
+	stream 
+			nextPutAll: (index keySize asByteArrayOfSize: 2);
+			nextPutAll: ( index valueSize asByteArrayOfSize: 2 );
+			nextPutAll: ( index maxLevel asByteArrayOfSize: 2 ).
+	(indexesToSkip includes: (transaction objectIdOf: aSkipListDictionary))
+		ifTrue: [ 
+			stream nextPutAll: (0 asByteArrayOfSize: 8) ]
+		ifFalse: [ 
+			count := 0.
+			stream nextPutAll: (index size asByteArrayOfSize: 8).
+			index newIterator associationsDo: [ :assoc |
+				count := count + 1.
+				self processObjectId: (SoilObjectId readFrom: assoc value readStream).
+				stream 
+					nextPutAll: (assoc key asByteArrayOfSize: index keySize);
+					nextPutAll: (assoc value asByteArrayOfSize: index valueSize ) ] ].
+		"(index size = count) ifFalse: [ self halt ]."
 ]
 
 { #category : #visiting }

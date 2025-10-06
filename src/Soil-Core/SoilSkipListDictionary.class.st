@@ -16,6 +16,11 @@ SoilSkipListDictionary class >> soilMaterialize: anObject [
 	^ super soilMaterialize: anObject 
 ]
 
+{ #category : #visiting }
+SoilSkipListDictionary >> acceptSoil: aSoilVisitor [
+	aSoilVisitor visitSkipListDictionary: self 
+]
+
 { #category : #initialization }
 SoilSkipListDictionary >> createIndex [ 
 	^ SoilSkipList new
