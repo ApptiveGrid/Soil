@@ -65,13 +65,12 @@ SoilGraphExporter >> migrate: aClass to: aFullBlockClosure [
 
 { #category : #actions }
 SoilGraphExporter >> migrateCluster: cluster [ 
-	| block newCluster oid rec |
+	| block newCluster |
 	cluster behaviorDescriptions ifEmpty: [ ^ cluster ].
 	block := migrationMap
 		at: cluster behaviorDescriptions first index
 		ifAbsent: [ ^ cluster ].
 	
-	'migrating cluster' apptiveEmit.
 	newCluster := cluster asNewClusterVersion.
 	newCluster object: (block value: cluster).
 	newCluster version: 1.
