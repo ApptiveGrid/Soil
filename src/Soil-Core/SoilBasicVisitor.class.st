@@ -138,6 +138,11 @@ SoilBasicVisitor >> visitSkipList: aSkiplist [
 ]
 
 { #category : #visiting }
+SoilBasicVisitor >> visitSkipListDictionary: aSkipListDictionary [ 
+	
+]
+
+{ #category : #visiting }
 SoilBasicVisitor >> visitSoil: aSoil [ 
 	self visit: aSoil control.
 	self visit: aSoil objectRepository.

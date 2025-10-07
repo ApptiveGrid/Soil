@@ -82,6 +82,16 @@ SoilObjectSegment >> basicAt: anInteger [
 ]
 
 { #category : #accessing }
+SoilObjectSegment >> basicAt: anInteger ifAbsent: aBlock [
+	| position |
+	position := indexFile positionAt: anInteger.
+	position isZero ifTrue: [  ^ aBlock value ].
+	^ (objectFile atPosition: position) ifNotNil: [ :record | 
+		record objectId: (SoilObjectId segment: id index: anInteger).
+		record ]
+]
+
+{ #category : #accessing }
 SoilObjectSegment >> basicAt: anInteger length:  length [
 	| position |
 	position := indexFile positionAt: anInteger.

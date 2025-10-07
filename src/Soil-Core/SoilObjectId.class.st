@@ -85,6 +85,12 @@ SoilObjectId >> asByteArrayOfSize: anInteger [
 ]
 
 { #category : #converting }
+SoilObjectId >> asObjectIdVersion: anInteger [ 
+	^ (self as: SoilVersionedObjectId)
+		version: anInteger 
+]
+
+{ #category : #converting }
 SoilObjectId >> asSoilObjectId [
 	^ self 
 ]

@@ -56,6 +56,16 @@ SoilNewClusterVersion >> beChanged [
 	"nothing to be done"
 ]
 
+{ #category : #'as yet unclassified' }
+SoilNewClusterVersion >> detachFromSegment [
+	"remove all information that belongs to the segment where the cluster
+	was stored"
+	version := 0.
+	position := 0.
+	previousVersionPosition := 0.
+	previousVersionRecord := nil 
+]
+
 { #category : #testing }
 SoilNewClusterVersion >> hasChanged [
 	^ true

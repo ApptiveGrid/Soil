@@ -17,6 +17,12 @@ SoilVersionedObjectId >> objectId [
 	^ self
 ]
 
+{ #category : #printing }
+SoilVersionedObjectId >> printOn: aStream [ 
+	super printOn: aStream.
+	aStream << ':' << version asString 
+]
+
 { #category : #accessing }
 SoilVersionedObjectId >> version [
 

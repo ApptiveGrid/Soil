@@ -32,6 +32,15 @@ SoilPersistentClusterVersion >> changed: aBoolean [
 	changed := aBoolean 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilPersistentClusterVersion >> detachFromSegment [
+	"remove all information that belongs to the segment where the cluster
+	was stored"
+	version := 0.
+	position := 0.
+	previousVersionPosition := 0
+]
+
 { #category : #testing }
 SoilPersistentClusterVersion >> hasChanged [
 	^ changed 
@@ -113,6 +122,11 @@ SoilPersistentClusterVersion >> readFrom: stream [
 	objectSize := stream nextLengthEncodedInteger.
 	bytes := stream next: objectSize.
 		
+]
+
+{ #category : #initialization }
+SoilPersistentClusterVersion >> resetBytes [
+	bytes := nil 
 ]
 
 { #category : #asserting }
