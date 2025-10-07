@@ -7,10 +7,20 @@ Class {
 		'migrationMap',
 		'metaSegment',
 		'versionMap',
-		'indexesToSkip'
+		'indexesToSkip',
+		'behaviors'
 	],
 	#category : #'Soil-Core-Error'
 }
+
+{ #category : #visiting }
+SoilGraphExporter >> behaviorAt: index [ 
+	^ behaviors 
+		at: index 
+		ifAbsentPut: [ 
+			 transaction materializeRecord: (self metaSegment at: index) ]
+
+]
 
 { #category : #'as yet unclassified' }
 SoilGraphExporter >> export: aSoilObjectId [ 
@@ -23,7 +33,8 @@ SoilGraphExporter >> initialize [
 	super initialize.
 	migrationMap := Dictionary new.
 	versionMap := Dictionary new.
-	indexesToSkip := OrderedCollection new
+	indexesToSkip := OrderedCollection new.
+	behaviors := Dictionary new.
 ]
 
 { #category : #visiting }
@@ -32,7 +43,7 @@ SoilGraphExporter >> isUpToDateCluster: aCluster [
 	"check if all behavior descriptions of the cluster are at the newest 
 	version"
 	^ aCluster behaviorDescriptions allSatisfy: [ :objectId | 
-		objectId version = (versionMap at: objectId asSoilObjectId) ]
+		objectId version = (versionMap at: objectId asSoilObjectId ifAbsent: false ) ]
 ]
 
 { #category : #'as yet unclassified' }
@@ -45,22 +56,29 @@ SoilGraphExporter >> metaSegment [
 { #category : #'as yet unclassified' }
 SoilGraphExporter >> migrate: aClass to: aFullBlockClosure [ 
 	migrationMap 
-		at: (soil behaviorRegistry nameAt: aClass name ifAbsent: [self halt]) index 
+		at: (soil behaviorRegistry 
+			nameAt: aClass name 
+			ifAbsent: [Error signal: 'no class found']) index 
 		put: aFullBlockClosure 
 
 ]
 
 { #category : #actions }
 SoilGraphExporter >> migrateCluster: cluster [ 
-	| block |
+	| block newCluster oid rec |
 	cluster behaviorDescriptions ifEmpty: [ ^ cluster ].
 	block := migrationMap
 		at: cluster behaviorDescriptions first index
-		ifAbsent: [ nil ].
-	block ifNotNil: [ 
-		^ block value: cluster ].
-	^ cluster
+		ifAbsent: [ ^ cluster ].
 	
+	'migrating cluster' apptiveEmit.
+	newCluster := cluster asNewClusterVersion.
+	newCluster object: (block value: cluster).
+	newCluster version: 1.
+	newCluster 
+		transaction: transaction;
+		serializeObject.
+	^ newCluster
 ]
 
 { #category : #'as yet unclassified' }
@@ -96,15 +114,18 @@ SoilGraphExporter >> updateCluster: aCluster [
 	to be re-imported somewhere else. The common denominator here
 	is the actual state of the software. We can match that if we
 	make sure that the clusters are on the newest version "
+	| cluster |
 	(self isUpToDateCluster: aCluster) ifTrue: [ ^ aCluster ].
 	"if the cluster is not up-to-date we materialize the 
 	object which will upgrade it"
-	^ (aCluster 
+	cluster := (aCluster 
 		transaction: transaction;
 		materializeObject;
 		asNewClusterVersion)
-			version: 0;
-			yourself
+			version: 1;
+			yourself.
+	transaction registerRecord: cluster.
+	^ cluster
 			
 ]
 
@@ -117,21 +138,27 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 
 	"write format objectId, behaviors, cluster, index settings"
 	aCluster objectId writeOn: stream.
-
+	 
+	"cluster := self updateCluster: aCluster."
 	cluster := self migrateCluster: aCluster.
-	self writeBehaviorDescriptions: cluster behaviorDescriptions.
-	cluster := self updateCluster: aCluster.
+	self writeBehaviorDescriptions: (cluster behaviorDescriptions collect: [:each | 
+		(each isKindOf: SoilVersionedObjectId)
+			ifTrue: [ self behaviorAt: each index ]
+			ifFalse: [ self behaviorAt: each objectId index ] ]).
 	"write the cleaned and up-to-date cluster"
-	cluster serializeOn: stream .
+	cluster 
+		transaction: transaction;
+		serializeOn: stream .
 	"for all indexes being used remember the index setting for it "
+	cluster indexIds ifNotEmpty: [ 
+		cluster object ifNil: [  
+			transaction registerRecord: (cluster 
+				transaction: transaction;
+				materializeObject;
+				yourself) ].
+		self visit: cluster object ].
 	cluster references do: [ :reference |
 		self processObjectId: reference ].
-	cluster indexIds ifNotEmpty: [ 
-		transaction registerRecord: (cluster 
-			transaction: transaction;
-			materializeObject;
-			yourself).
-		self visit: cluster object ].
 	stream nextPut: 255.
 
 ]
@@ -156,19 +183,19 @@ SoilGraphExporter >> visitSkipListDictionary: aSkipListDictionary [
 				stream 
 					nextPutAll: (assoc key asByteArrayOfSize: index keySize);
 					nextPutAll: (assoc value asByteArrayOfSize: index valueSize ) ] ].
-		"(index size = count) ifFalse: [ self halt ]."
+		(count isNil or: [ index size = count ]) ifFalse: [ self halt ].
 ]
 
 { #category : #visiting }
 SoilGraphExporter >> writeBehaviorDescriptions: aCollection [ 
-	| unwritten record |
+	| unwritten |
 	"write only behaviors that have not been written already"
-	unwritten := aCollection reject: [ :each | versionMap includesKey: each asSoilObjectId ].
+	unwritten := aCollection reject: [ :each | versionMap includesKey: each objectId ].
 	
 	"write size"
 	stream nextPutAll: (unwritten size asByteArrayOfSize: 8).
-	unwritten do: [ :reference | 
-		record := transaction materializeRecord: (self metaSegment at: reference index). 
+	unwritten do: [ :record | 
+		'write behavior description', record object asString.
 		"remember the current maximum version of each behavior so we can 
 		easily figure out which of the objects need to be migrated"
 		versionMap 
