@@ -10,12 +10,6 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
-{ #category : #materializing }
-SoilSkipListDictionary class >> soilMaterialize: anObject [ 
-	self halt.
-	^ super soilMaterialize: anObject 
-]
-
 { #category : #visiting }
 SoilSkipListDictionary >> acceptSoil: aSoilVisitor [
 	aSoilVisitor visitSkipListDictionary: self 
