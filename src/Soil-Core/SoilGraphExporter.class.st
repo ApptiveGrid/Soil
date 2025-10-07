@@ -74,9 +74,12 @@ SoilGraphExporter >> migrateCluster: cluster [
 	block := migrationMap
 		at: cluster behaviorDescriptions first index
 		ifAbsent: [ ^ cluster ].
+	cluster 
+		transaction: transaction;
+		materializeObject.
 	
 	newCluster := cluster asNewClusterVersion.
-	newCluster object: (block value: cluster).
+	newCluster object: (block value: cluster object).
 	newCluster version: 1.
 	newCluster 
 		transaction: transaction;
