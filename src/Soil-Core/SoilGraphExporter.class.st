@@ -8,7 +8,8 @@ Class {
 		'metaSegment',
 		'versionMap',
 		'indexesToSkip',
-		'behaviors'
+		'behaviors',
+		'clusters'
 	],
 	#category : #'Soil-Core-Error'
 }
@@ -35,6 +36,7 @@ SoilGraphExporter >> initialize [
 	versionMap := Dictionary new.
 	indexesToSkip := OrderedCollection new.
 	behaviors := Dictionary new.
+	clusters := 0.
 ]
 
 { #category : #visiting }
@@ -54,12 +56,14 @@ SoilGraphExporter >> metaSegment [
 ]
 
 { #category : #'as yet unclassified' }
-SoilGraphExporter >> migrate: aClass to: aFullBlockClosure [ 
+SoilGraphExporter >> migrate: aClass to: aBlock [ 
+	"lookup the objectID of the behavior and store it 
+	along with the block "
 	migrationMap 
 		at: (soil behaviorRegistry 
 			nameAt: aClass name 
 			ifAbsent: [Error signal: 'no class found']) index 
-		put: aFullBlockClosure 
+		put: aBlock 
 
 ]
 
@@ -131,6 +135,7 @@ SoilGraphExporter >> updateCluster: aCluster [
 { #category : #visiting }
 SoilGraphExporter >> visitPersistentClusterVersion: aCluster [ 
 	| cluster |
+	clusters := clusters + 1.
 	"remove all information regarding the current segment as it
 	will be invalid when exported"
 	aCluster detachFromSegment.
@@ -149,6 +154,8 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 		transaction: transaction;
 		serializeOn: stream .
 	"for all indexes being used remember the index setting for it "
+	cluster references do: [ :reference |
+		self processObjectId: reference ].
 	cluster indexIds ifNotEmpty: [ 
 		cluster object ifNil: [  
 			transaction registerRecord: (cluster 
@@ -156,20 +163,21 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 				materializeObject;
 				yourself) ].
 		self visit: cluster object ].
-	cluster references do: [ :reference |
-		self processObjectId: reference ].
 	stream nextPut: 255.
 
 ]
 
 { #category : #visiting }
 SoilGraphExporter >> visitSkipListDictionary: aSkipListDictionary [ 
-	| index count |
+	| index count keySize valueSize maxLevel |
 	index := aSkipListDictionary index wrapped.
+	keySize := index keySize.
+	valueSize := index valueSize.
+	maxLevel := index maxLevel.
 	stream 
-			nextPutAll: (index keySize asByteArrayOfSize: 2);
-			nextPutAll: ( index valueSize asByteArrayOfSize: 2 );
-			nextPutAll: ( index maxLevel asByteArrayOfSize: 2 ).
+			nextPutAll: ( keySize asByteArrayOfSize: 2);
+			nextPutAll: ( valueSize asByteArrayOfSize: 2 );
+			nextPutAll: ( maxLevel asByteArrayOfSize: 2 ).
 	(indexesToSkip includes: (transaction objectIdOf: aSkipListDictionary))
 		ifTrue: [ 
 			stream nextPutAll: (0 asByteArrayOfSize: 8) ]
@@ -180,9 +188,8 @@ SoilGraphExporter >> visitSkipListDictionary: aSkipListDictionary [
 				count := count + 1.
 				self processObjectId: (SoilObjectId readFrom: assoc value readStream).
 				stream 
-					nextPutAll: (assoc key asByteArrayOfSize: index keySize);
-					nextPutAll: (assoc value asByteArrayOfSize: index valueSize ) ] ].
-		(count isNil or: [ index size = count ]) ifFalse: [ self halt ].
+					nextPutAll: (assoc key asByteArrayOfSize: keySize);
+					nextPutAll: (assoc value asByteArrayOfSize: valueSize ) ] ]
 ]
 
 { #category : #visiting }
