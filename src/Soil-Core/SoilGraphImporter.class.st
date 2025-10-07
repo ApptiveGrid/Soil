@@ -136,7 +136,6 @@ SoilGraphImporter >> readCluster [
 		objectId: objectId;
 		version: self databaseVersion.
 	cluster references: (cluster references collect: [:id| self newObjectIdFor: id]).
-	(cluster indexIds size > 1) ifTrue: [ self halt ].
 	cluster indexIds do: [ :indexId |
 		keySize := (stream next: 2) asInteger.
 		valueSize := (stream next: 2) asInteger.

@@ -67,6 +67,12 @@ SoilGraphExporter >> migrate: aClass to: aBlock [
 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilGraphExporter >> migrateAll: aCollection to: aBlock [ 
+	aCollection do: [ :cls |
+		self migrate: cls to: aBlock  ]
+]
+
 { #category : #actions }
 SoilGraphExporter >> migrateCluster: cluster [ 
 	| block newCluster |
@@ -129,6 +135,8 @@ SoilGraphExporter >> updateCluster: aCluster [
 		materializeObject;
 		asNewClusterVersion)
 			version: 1;
+			transaction: transaction;
+			serializeObject;
 			yourself.
 	transaction registerRecord: cluster.
 	^ cluster
@@ -146,8 +154,10 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 	"write format objectId, behaviors, cluster, index settings"
 	aCluster objectId writeOn: stream.
 	 
-	"cluster := self updateCluster: aCluster."
 	cluster := self migrateCluster: aCluster.
+	(cluster == aCluster) ifTrue: [ 
+		 cluster := self updateCluster: aCluster ].
+	
 	self writeBehaviorDescriptions: (cluster behaviorDescriptions collect: [:each | 
 		(each isKindOf: SoilVersionedObjectId)
 			ifTrue: [ self behaviorAt: each index ]
