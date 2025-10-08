@@ -1,12 +1,16 @@
 "
 The SoilIndexedDictionary implements a Dictionary that uses an on-disk index.
 
+A SoilIndexedDictionary has to be created with a backend, for now we have SoilBTree and SoilSkipList
+
+	SoilIndexedDictionary newWithBackend: SoilSkipList
+
 Keys are created with #asIndexKeyOfSize: with the keySize being configurable when creating the dictionary. 
 Values are SoilObjectId instances (8 byte). 
 
 The indexes store data on pages (currently 4kb) on disk. 
 
-Take care: SoilIndexedDictionary needs a transaction before values can be added.
+Take care: SoilIndexedDictionary has to be a root object
 "
 Class {
 	#name : #SoilIndexedDictionary,
@@ -19,12 +23,6 @@ Class {
 	],
 	#category : #'Soil-Core-Index-Common'
 }
-
-{ #category : #testing }
-SoilIndexedDictionary class >> isAbstract [
-	<ignoreForCoverage>
-	^ self == SoilIndexedDictionary
-]
 
 { #category : #'instance creation' }
 SoilIndexedDictionary class >> newWithBackend: aClass [
