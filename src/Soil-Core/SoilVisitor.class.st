@@ -11,14 +11,14 @@ Class {
 	#category : #'Soil-Core-Visitor'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilVisitor >> beBreadthFirst [ 
 	depthFirst := false.
 	seen := Set new.
 	toBeProcessed := OrderedCollection new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilVisitor >> beDepthFirst [ 
 	depthFirst := true.
 	seen := nil.

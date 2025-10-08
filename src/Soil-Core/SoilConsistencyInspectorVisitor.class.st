@@ -19,7 +19,7 @@ SoilConsistencyInspectorVisitor >> addCluster: aSoilPersistentClusterVersion [
 				yourself ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #checking }
 SoilConsistencyInspectorVisitor >> check: anObject using: aBlock [
 	aBlock 
 		on: Error 
@@ -38,7 +38,7 @@ SoilConsistencyInspectorVisitor >> initialize [
 	nodes := Dictionary new 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #inspector }
 SoilConsistencyInspectorVisitor >> inspectionGraph [
 	<inspectorPresentationOrder: 1800 title: 'graph'>
 
@@ -56,19 +56,19 @@ SoilConsistencyInspectorVisitor >> processIndexValue: aSoilObjectId [
 	super processIndexValue: aSoilObjectId 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilConsistencyInspectorVisitor >> processOutgoing: aSoilObjectId [ 
 	currentNode addOutgoing: aSoilObjectId.
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #processing }
 SoilConsistencyInspectorVisitor >> processReference: aSoilObjectId [ 
 	self processOutgoing: aSoilObjectId.
 	super processReference: aSoilObjectId 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilConsistencyInspectorVisitor >> resolveNodes [
 	nodes valuesDo: [ :each | 
 		each resolveObjectIdsIn: self ].
@@ -77,7 +77,7 @@ SoilConsistencyInspectorVisitor >> resolveNodes [
 			outgoing addIncoming: node ] ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilConsistencyInspectorVisitor >> roassalCanvas [ 
 	| canvas shapes |
 	canvas := RSCanvas new.
@@ -119,7 +119,7 @@ SoilConsistencyInspectorVisitor >> roassalCanvas [
 	^ canvas
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilConsistencyInspectorVisitor >> useNode: aSoilVisualNode during: aBlock [
 	| oldNode |
 	oldNode := currentNode.
