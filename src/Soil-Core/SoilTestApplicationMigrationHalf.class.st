@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilTestApplicationMigrationHalf,
 	#superclass : #SoilApplicationMigration,
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Migration'
 }
 
 { #category : #accessing }
