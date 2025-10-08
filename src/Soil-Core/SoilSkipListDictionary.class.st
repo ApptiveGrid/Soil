@@ -10,11 +10,6 @@ Class {
 	#category : #'Soil-Core-Index-Deprecated'
 }
 
-{ #category : #testing }
-SoilSkipListDictionary class >> isDeprecated [ 
-	^true
-]
-
 { #category : #initialization }
 SoilSkipListDictionary >> initialize [ 
 	super initialize.

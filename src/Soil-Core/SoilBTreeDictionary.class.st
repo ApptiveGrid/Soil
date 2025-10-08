@@ -10,11 +10,6 @@ Class {
 	#category : #'Soil-Core-Index-Deprecated'
 }
 
-{ #category : #testing }
-SoilBTreeDictionary class >> isDeprecated [ 
-	^true
-]
-
 { #category : #initialization }
 SoilBTreeDictionary >> initialize [ 
 	super initialize.
