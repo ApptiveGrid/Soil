@@ -37,8 +37,7 @@ Object >> soilEmit [
 
 { #category : #'*Soil-Core' }
 Object >> soilSizeInMemory [ 
-	^ self class allSlots 
-		sum: [ :each | (each read: self) soilSizeInMemory ]
+	^ self sizeInMemory 
 ]
 
 { #category : #'*Soil-Core' }
