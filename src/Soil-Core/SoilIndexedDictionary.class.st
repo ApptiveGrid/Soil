@@ -89,8 +89,8 @@ SoilIndexedDictionary >> compact [
 { #category : #initialization }
 SoilIndexedDictionary >> createIndexWith: anIndexClass [
 	index := anIndexClass new
-		initializeHeaderPage;
 		valueSize: 8;
+		initializeHeaderPage;
 		yourself
 ]
 

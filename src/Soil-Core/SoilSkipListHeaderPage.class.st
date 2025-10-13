@@ -147,9 +147,9 @@ SoilSkipListHeaderPage >> readFrom: aStream [
 
 { #category : #reading }
 SoilSkipListHeaderPage >> readHeaderFrom: aStream [
-	keySize := (aStream next: 2) asInteger.
+	"keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
-	maxLevel := (aStream next: 2) asInteger.
+	maxLevel := (aStream next: 2) asInteger."
 	lastPageOffset :=(aStream next: 4) asInteger.
 	firstFreePageIndex :=(aStream next: 4) asInteger.
 	size := (version > 1) 
@@ -190,9 +190,9 @@ SoilSkipListHeaderPage >> validate [
 SoilSkipListHeaderPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
 	aStream 
-		nextPutAll: (keySize asByteArrayOfSize: 2);
+		"nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
-		nextPutAll: (maxLevel asByteArrayOfSize: 2);
+		nextPutAll: (maxLevel asByteArrayOfSize: 2);"
 		nextPutAll: (lastPageOffset asByteArrayOfSize: 4);
 		nextPutAll: (firstFreePageIndex asByteArrayOfSize: 4).
 		(version > 1) ifTrue: [ 

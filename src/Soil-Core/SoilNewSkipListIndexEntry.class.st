@@ -15,17 +15,17 @@ SoilNewSkipListIndexEntry class >> journalTypeCode [
 { #category : #committing }
 SoilNewSkipListIndexEntry >> commitIn: soil [
 
-	| index indexManager |
-	indexManager := (soil objectRepository segmentAt: segment) pageCacheManager.
+	| index pageCacheManager |
+	pageCacheManager := (soil objectRepository segmentAt: segment) pageCacheManager.
 	index := SoilSkipList new
-		path: (indexManager pathFor: id);
+		path: (pageCacheManager pathFor: id);
 		initializeFilesystem;
 		initializeHeaderPage;
 		maxLevel: maxLevel;
-		keySize: keySize;
-		valueSize: valueSize;
+		"keySize: keySize;
+		valueSize: valueSize;"
 		flush.
-	indexManager at: id put: index
+	pageCacheManager at: id put: index
 ]
 
 { #category : #accessing }

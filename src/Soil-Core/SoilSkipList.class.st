@@ -1,10 +1,6 @@
 Class {
 	#name : #SoilSkipList,
 	#superclass : #SoilBasicSkipList,
-	#instVars : [
-		'valueSize',
-		'keySize'
-	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
@@ -16,7 +12,7 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 { #category : #'open/close' }
 SoilSkipList >> close [ 
 	super close.
-	keySize := nil
+
 ]
 
 { #category : #deleting }
@@ -47,18 +43,6 @@ SoilSkipList >> initializeParametersFrom: aSoilSkipList [
 		valueSize: aSoilSkipList valueSize
 ]
 
-{ #category : #accessing }
-SoilSkipList >> keySize [
-	^ keySize ifNil: [
-		keySize := super keySize ]
-]
-
-{ #category : #accessing }
-SoilSkipList >> keySize: anInteger [
-	super keySize: anInteger.
-	keySize := anInteger
-]
-
 { #category : #'instance creation' }
 SoilSkipList >> newHeaderPage [
 	^ SoilSkipListHeaderPage new
@@ -83,18 +67,6 @@ SoilSkipList >> soilMaterialized: aMaterializer [
 SoilSkipList >> thePersistentInstance [
 	^ self
 	
-]
-
-{ #category : #accessing }
-SoilSkipList >> valueSize [
-	^ valueSize ifNil: [ 
-		valueSize := super valueSize ]
-]
-
-{ #category : #accessing }
-SoilSkipList >> valueSize: anInteger [ 
-	super valueSize: anInteger.
-	valueSize := anInteger
 ]
 
 { #category : #writing }
