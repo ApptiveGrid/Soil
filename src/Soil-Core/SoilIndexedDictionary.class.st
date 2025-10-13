@@ -244,10 +244,9 @@ SoilIndexedDictionary >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
 	transaction markDirty: self.
-	self isRegistered ifFalse: [ 
-		aTransaction addJournalEntry: (index newIndexEntry 
-			id: index id;
-			segment: (aTransaction objectIdOf: self) segment) ]
+	index transaction: aTransaction.
+	index isRegistered ifFalse: [ 
+		index initializeStore: (transaction objectIdOf: self) segment   ] 
 ]
 
 { #category : #serializing }

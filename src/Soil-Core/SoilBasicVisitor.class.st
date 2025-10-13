@@ -105,7 +105,7 @@ SoilBasicVisitor >> visitObjectRepository: aSoilObjectRepository [
 
 { #category : #visiting }
 SoilBasicVisitor >> visitObjectSegment: aSoilObjectSegment [ 
-	self visit: aSoilObjectSegment indexManager.
+	self visit: aSoilObjectSegment pageCacheManager.
 
 	^ aSoilObjectSegment 
 ]

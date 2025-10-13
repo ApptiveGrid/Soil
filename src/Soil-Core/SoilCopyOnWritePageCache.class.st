@@ -1,6 +1,6 @@
 Class {
-	#name : #SoilCopyOnWriteIndexStore,
-	#superclass : #SoilPagedIndexStore,
+	#name : #SoilCopyOnWritePageCache,
+	#superclass : #SoilPageCache,
 	#instVars : [
 		'wrappedStore'
 	],
@@ -8,28 +8,28 @@ Class {
 }
 
 { #category : #flushing }
-SoilCopyOnWriteIndexStore >> flush [ 
+SoilCopyOnWritePageCache >> flush [ 
 	^ wrappedStore flush
 ]
 
 { #category : #accessing }
-SoilCopyOnWriteIndexStore >> flushCachedPages [ 
+SoilCopyOnWritePageCache >> flushCachedPages [ 
 	super flushCachedPages.
 	wrappedStore flushCachedPages 
 ]
 
 { #category : #testing }
-SoilCopyOnWriteIndexStore >> isCopyOnWrite [ 
+SoilCopyOnWritePageCache >> isCopyOnWrite [ 
 	^ true
 ]
 
 { #category : #testing }
-SoilCopyOnWriteIndexStore >> isOpen [ 
+SoilCopyOnWritePageCache >> isOpen [ 
 	^ wrappedStore isOpen
 ]
 
 { #category : #accessing }
-SoilCopyOnWriteIndexStore >> pageFaultAt: anInteger [ 
+SoilCopyOnWritePageCache >> pageFaultAt: anInteger [ 
 	| page |
 	page := (wrappedStore pageAt: anInteger) copy.
 	pages at: anInteger put: page.
@@ -37,13 +37,13 @@ SoilCopyOnWriteIndexStore >> pageFaultAt: anInteger [
 ]
 
 { #category : #accessing }
-SoilCopyOnWriteIndexStore >> wrappedStore [
+SoilCopyOnWritePageCache >> wrappedStore [
 
 	^ wrappedStore
 ]
 
 { #category : #accessing }
-SoilCopyOnWriteIndexStore >> wrappedStore: anObject [
+SoilCopyOnWritePageCache >> wrappedStore: anObject [
 
 	wrappedStore := anObject
 ]

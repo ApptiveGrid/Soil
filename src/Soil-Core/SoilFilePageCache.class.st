@@ -1,51 +1,57 @@
 Class {
-	#name : #SoilPagedFileIndexStore,
-	#superclass : #SoilPagedIndexStore,
+	#name : #SoilFilePageCache,
+	#superclass : #SoilPageCache,
 	#instVars : [
 		'stream',
-		'streamSemaphore'
+		'streamSemaphore',
+		'path'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
 
 { #category : #visiting }
-SoilPagedFileIndexStore >> acceptSoil: aSoilVisitor [ 
+SoilFilePageCache >> acceptSoil: aSoilVisitor [ 
 	^ aSoilVisitor visitPagedFileIndexStore: self
 ]
 
 { #category : #converting }
-SoilPagedFileIndexStore >> asCopyOnWriteStore [
-	^ SoilCopyOnWriteIndexStore new 
+SoilFilePageCache >> asCopyOnWriteStore [
+	^ SoilCopyOnWritePageCache new 
 		wrappedStore: self
 ]
 
 { #category : #'open/close' }
-SoilPagedFileIndexStore >> close [ 
+SoilFilePageCache >> close [ 
 	stream ifNotNil: [  
 		stream close.
 		stream := nil ]
 ]
 
+{ #category : #deleting }
+SoilFilePageCache >> destroy [
+	path ensureDelete 
+]
+
 { #category : #accessing }
-SoilPagedFileIndexStore >> ensureStreamIsOpen [
+SoilFilePageCache >> ensureStreamIsOpen [
 	stream ifNotNil: [ ^ self ].
 	self open
 		
 ]
 
 { #category : #'instance creation' }
-SoilPagedFileIndexStore >> filePageSize [
+SoilFilePageCache >> filePageSize [
 	"most OSses use a file page size of 4k today"
 	^ 4096
 ]
 
 { #category : #flushing }
-SoilPagedFileIndexStore >> flush [
+SoilFilePageCache >> flush [
 	self flushPages 
 ]
 
 { #category : #flushing }
-SoilPagedFileIndexStore >> flushPages [
+SoilFilePageCache >> flushPages [
 	pagesMutex critical: [  
 		pages valuesDo: [ :page |
 			page needsWrite ifTrue: [ 
@@ -53,7 +59,7 @@ SoilPagedFileIndexStore >> flushPages [
 ]
 
 { #category : #accessing }
-SoilPagedFileIndexStore >> headerPage [ 
+SoilFilePageCache >> headerPage [ 
 	pages ifEmpty: [ 
 		self ensureStreamIsOpen.
 		self readHeaderPage ].
@@ -61,18 +67,18 @@ SoilPagedFileIndexStore >> headerPage [
 ]
 
 { #category : #initialization }
-SoilPagedFileIndexStore >> initialize [ 
+SoilFilePageCache >> initialize [ 
 	super initialize.
 	streamSemaphore := Semaphore forMutualExclusion 
 ]
 
 { #category : #initialization }
-SoilPagedFileIndexStore >> initializeFilesystem [
+SoilFilePageCache >> initializeFilesystem [
 	self openStream
 ]
 
 { #category : #initialization }
-SoilPagedFileIndexStore >> initializeHeaderPage [
+SoilFilePageCache >> initializeHeaderPage [
 	| page |
 	page := index newHeaderPage.
 	pagesMutex critical: [  
@@ -80,25 +86,30 @@ SoilPagedFileIndexStore >> initializeHeaderPage [
 ]
 
 { #category : #testing }
-SoilPagedFileIndexStore >> isOpen [
+SoilFilePageCache >> isOpen [
 	^stream isNotNil and: [ stream isOpen ]
 ]
 
+{ #category : #testing }
+SoilFilePageCache >> isRegistered [
+	^ path notNil
+]
+
 { #category : #'open/close' }
-SoilPagedFileIndexStore >> open [
+SoilFilePageCache >> open [
 	self isOpen ifTrue: [ self error: 'Index store already open' ].
 	self openStream
 ]
 
 { #category : #'open/close' }
-SoilPagedFileIndexStore >> openStream [
+SoilFilePageCache >> openStream [
 	streamSemaphore critical: [  
-		stream := SoilLockableStream path: index path
+		stream := SoilLockableStream path: path
 	]
 ]
 
 { #category : #accessing }
-SoilPagedFileIndexStore >> pageFaultAt: anInteger [
+SoilFilePageCache >> pageFaultAt: anInteger [
 	| page |
 	self ensureStreamIsOpen.
 	page := self readPageAt: anInteger.
@@ -112,13 +123,18 @@ SoilPagedFileIndexStore >> pageFaultAt: anInteger [
 	^ page
 ]
 
+{ #category : #accessing }
+SoilFilePageCache >> path: aFileReference [ 
+	path := aFileReference
+]
+
 { #category : #'instance creation' }
-SoilPagedFileIndexStore >> positionOfPageIndex: anInteger [
+SoilFilePageCache >> positionOfPageIndex: anInteger [
 	^ ((anInteger - 1) * self filePageSize)
 ]
 
 { #category : #writing }
-SoilPagedFileIndexStore >> readHeaderPage [
+SoilFilePageCache >> readHeaderPage [
 	| headerPage |
 	stream position: 0.
 	stream next. "pageCode"
@@ -128,7 +144,7 @@ SoilPagedFileIndexStore >> readHeaderPage [
 ]
 
 { #category : #accessing }
-SoilPagedFileIndexStore >> readPageAt: anInteger [
+SoilFilePageCache >> readPageAt: anInteger [
 
 	^ streamSemaphore critical: [  
 		stream position: (self positionOfPageIndex: anInteger).
@@ -139,13 +155,13 @@ SoilPagedFileIndexStore >> readPageAt: anInteger [
 ]
 
 { #category : #accessing }
-SoilPagedFileIndexStore >> removePageAt: anIndex [ 
+SoilFilePageCache >> removePageAt: anIndex [ 
 	^ pagesMutex critical: [  
 		pages removeKey: anIndex ]
 ]
 
 { #category : #accessing }
-SoilPagedFileIndexStore >> replace: oldPage with: newPage [ 
+SoilFilePageCache >> replace: oldPage with: newPage [ 
 	pagesMutex critical: [  
 		pages
 			at: oldPage offset 
@@ -153,18 +169,18 @@ SoilPagedFileIndexStore >> replace: oldPage with: newPage [
 ]
 
 { #category : #accessing }
-SoilPagedFileIndexStore >> stream [
+SoilFilePageCache >> stream [
 	^ stream 
 ]
 
 { #category : #writing }
-SoilPagedFileIndexStore >> writeContentsToDisk [
+SoilFilePageCache >> writeContentsToDisk [
 	stream ifNotNil: [  
 		stream fileStream fsync ]
 ]
 
 { #category : #writing }
-SoilPagedFileIndexStore >> writePage: aPage [ 
+SoilFilePageCache >> writePage: aPage [ 
 	| pagePosition |
 	self ensureStreamIsOpen.
 	streamSemaphore critical: [  

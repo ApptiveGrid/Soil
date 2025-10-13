@@ -2,7 +2,6 @@ Class {
 	#name : #SoilSkipList,
 	#superclass : #SoilBasicSkipList,
 	#instVars : [
-		'path',
 		'valueSize',
 		'keySize'
 	],
@@ -25,11 +24,6 @@ SoilSkipList >> asCopyOnWrite [
 SoilSkipList >> close [ 
 	super close.
 	keySize := nil
-]
-
-{ #category : #deleting }
-SoilSkipList >> destroy [
-	path ensureDelete 
 ]
 
 { #category : #deleting }
@@ -60,11 +54,6 @@ SoilSkipList >> initializeParametersFrom: aSoilSkipList [
 		valueSize: aSoilSkipList valueSize
 ]
 
-{ #category : #testing }
-SoilSkipList >> isRegistered [
-	^ path notNil
-]
-
 { #category : #accessing }
 SoilSkipList >> keySize [
 	^ keySize ifNil: [
@@ -92,16 +81,9 @@ SoilSkipList >> open [
 	self store open
 ]
 
-{ #category : #accessing }
-SoilSkipList >> path [
-
-	^ path
-]
-
-{ #category : #accessing }
-SoilSkipList >> path: aStringOrFileReference [
-
-	path := aStringOrFileReference asFileReference 
+{ #category : #serializing }
+SoilSkipList >> soilMaterialized: aMaterializer [ 
+	store := (aMaterializer indexAt: id) store asCopyOnWriteStore
 ]
 
 { #category : #converting }

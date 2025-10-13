@@ -2,7 +2,6 @@ Class {
 	#name : #SoilBTree,
 	#superclass : #SoilBasicBTree,
 	#instVars : [
-		'path',
 		'keySize',
 		'valueSize'
 	],
@@ -15,16 +14,6 @@ SoilBTree >> close [
 	keySize := nil
 ]
 
-{ #category : #deleting }
-SoilBTree >> destroy [
-	path ensureDelete 
-]
-
-{ #category : #testing }
-SoilBTree >> isRegistered [
-	^ path notNil
-]
-
 { #category : #accessing }
 SoilBTree >> keySize [
 	^ keySize ifNil: [
@@ -35,18 +24,6 @@ SoilBTree >> keySize [
 SoilBTree >> keySize: anInteger [
 	super keySize: anInteger.
 	keySize := anInteger
-]
-
-{ #category : #accessing }
-SoilBTree >> path [
-
-	^ path
-]
-
-{ #category : #accessing }
-SoilBTree >> path: aStringOrFileReference [
-
-	path := aStringOrFileReference asFileReference 
 ]
 
 { #category : #converting }
