@@ -129,7 +129,7 @@ SoilBehaviorRegistry >> open [
 
 { #category : #accessing }
 SoilBehaviorRegistry >> path [
-	^ soil objectRepository metaSegment indexManager path / #identifier , #index
+	^ soil objectRepository metaSegment pageCacheManager path / #identifier , #index
 ]
 
 { #category : #initialization }

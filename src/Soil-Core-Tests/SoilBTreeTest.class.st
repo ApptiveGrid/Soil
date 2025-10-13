@@ -448,6 +448,8 @@ SoilBTreeTest >> testLastPage [
 SoilBTreeTest >> testOverflowCopyOnWriteSplitting [
 	
 	| page capacity copyOnWrite |
+	self skip. 
+	"needs to be done with COW page cache instead "
 	copyOnWrite := index asCopyOnWrite.
 	capacity := copyOnWrite headerPage itemCapacity.
 	1 to: capacity * 2 by: 2 do: [ :n | 

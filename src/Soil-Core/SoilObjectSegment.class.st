@@ -6,8 +6,8 @@ Class {
 		'objectRepository',
 		'indexFile',
 		'objectFile',
-		'indexManager',
-		'path'
+		'path',
+		'pageCacheManager'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -104,13 +104,13 @@ SoilObjectSegment >> close [
 		indexFile close ].
 	objectFile ifNotNil: [ 
 		objectFile close ].
-	indexManager ifNotNil: [ 
-		indexManager close ]
+	pageCacheManager ifNotNil: [ 
+		pageCacheManager close ]
 ]
 
 { #category : #accessing }
 SoilObjectSegment >> flush [
-	self indexManager flush
+	self pageCacheManager flush
 ]
 
 { #category : #accessing }
@@ -120,7 +120,7 @@ SoilObjectSegment >> flushCachedObjectRecords [
 
 { #category : #flushing }
 SoilObjectSegment >> flushIndexes [
-	indexManager flushIndexes
+	pageCacheManager flushIndexes
 ]
 
 { #category : #accessing }
@@ -150,7 +150,7 @@ SoilObjectSegment >> indexAt: indexId [
 
 { #category : #accessing }
 SoilObjectSegment >> indexAt: indexId ifAbsent: aBlock [
-	^ self indexManager 
+	^ self pageCacheManager 
 		at: indexId 
 		ifAbsent: aBlock
 ]
@@ -158,11 +158,6 @@ SoilObjectSegment >> indexAt: indexId ifAbsent: aBlock [
 { #category : #accessing }
 SoilObjectSegment >> indexFile: aSOObjectIndexFile [ 
 	indexFile := aSOObjectIndexFile
-]
-
-{ #category : #accessing }
-SoilObjectSegment >> indexManager [ 
-	^ indexManager
 ]
 
 { #category : #initialization }
@@ -174,7 +169,7 @@ SoilObjectSegment >> initializeFilesystem [
 	indexFile := SoilObjectIndexFile new
 		segment: self;
 		initializeFilesystem.
-	indexManager := SoilIndexManager new 
+	pageCacheManager := SoilPageCacheManager new 
 		segment: self;
 		initializeFilesystem;
 		close
@@ -252,9 +247,14 @@ SoilObjectSegment >> open [
 	objectFile := SoilObjectFile new
 			segment: self;
 			open.
-	indexManager := SoilIndexManager new 
+	pageCacheManager := SoilPageCacheManager new 
 			segment: self;
 			open
+]
+
+{ #category : #accessing }
+SoilObjectSegment >> pageCacheManager [ 
+	^ pageCacheManager
 ]
 
 { #category : #accessing }
@@ -294,5 +294,5 @@ SoilObjectSegment >> writeContentsToDisk [
 	self soil setup isFsyncEnabled ifTrue: [  
 		indexFile writeContentsToDisk.
 		objectFile writeContentsToDisk.
-		self indexManager writeContentsToDisk ]
+		self pageCacheManager writeContentsToDisk ]
 ]

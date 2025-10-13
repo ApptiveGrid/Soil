@@ -70,7 +70,7 @@ SoilGarbageCollectVisitor >> visitPersistentClusterVersion: aSoilPersistentClust
 		self processObjectId: reference ].
 	behaviorDescriptions addAll: aSoilPersistentClusterVersion behaviorDescriptions.
 	[aSoilPersistentClusterVersion indexIds do: [ :indexId |
-		 self visit: (currentSegment indexManager at: indexId ifAbsent: [ Error signal ]) ] ]
+		 self visit: (currentSegment pageCacheManager at: indexId ifAbsent: [ Error signal ]) ] ]
 	on: Error do: [:x | ].
 
 	^ aSoilPersistentClusterVersion 
@@ -80,8 +80,8 @@ SoilGarbageCollectVisitor >> visitPersistentClusterVersion: aSoilPersistentClust
 SoilGarbageCollectVisitor >> visitSkipList: aSoilSkipList [ 
 	| newSkipList |
 	indexIds add: aSoilSkipList indexId.
-	newSkipList := newSegment indexManager  
-		createIndexWithId: aSoilSkipList indexId 
+	newSkipList := newSegment pageCacheManager  
+		createPageCacheWithId: aSoilSkipList indexId 
 		class: aSoilSkipList class. 
 	newSkipList initializeParametersFrom: aSoilSkipList. 
 	

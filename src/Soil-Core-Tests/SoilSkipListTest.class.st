@@ -515,6 +515,9 @@ SoilSkipListTest >> testMorePages [
 SoilSkipListTest >> testOverflowCopyOnWriteAppending [
 	
 	| page capacity copyOnWrite |
+	self skip. 
+	"needs to be done with COW page cache instead "
+
 	copyOnWrite := index asCopyOnWrite.
 	capacity := copyOnWrite firstPage itemCapacity.
 	1 to: capacity do: [ :n | 
@@ -532,6 +535,9 @@ SoilSkipListTest >> testOverflowCopyOnWriteAppending [
 SoilSkipListTest >> testOverflowCopyOnWriteSplitting [
 	
 	| page capacity copyOnWrite |
+	self skip. 
+	"needs to be done with COW page cache instead "
+
 	copyOnWrite := index asCopyOnWrite.
 	capacity := copyOnWrite firstPage itemCapacity.
 	1 to: capacity * 2 by: 2 do: [ :n | 

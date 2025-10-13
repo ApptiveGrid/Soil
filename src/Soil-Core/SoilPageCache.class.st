@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilPagedIndexStore,
+	#name : #SoilPageCache,
 	#superclass : #Object,
 	#instVars : [
 		'pages',
@@ -10,53 +10,53 @@ Class {
 }
 
 { #category : #testing }
-SoilPagedIndexStore class >> isAbstract [
+SoilPageCache class >> isAbstract [
 	<ignoreForCoverage>
-	^ self == SoilPagedIndexStore
+	^ self == SoilPageCache
 ]
 
 { #category : #initialization }
-SoilPagedIndexStore >> allocatePage [
+SoilPageCache >> allocatePage [
 	^ index allocatePage 
 ]
 
 { #category : #flushing }
-SoilPagedIndexStore >> flush [
+SoilPageCache >> flush [
 	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> flushCachedPages [
+SoilPageCache >> flushCachedPages [
 	pages removeAll
 ]
 
 { #category : #testing }
-SoilPagedIndexStore >> hasHeaderPage [
+SoilPageCache >> hasHeaderPage [
 	^ pages includesKey: 1
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> headerPage [
+SoilPageCache >> headerPage [
 	^ self pageAt: 1
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> includesPageAt: anInteger [ 
+SoilPageCache >> includesPageAt: anInteger [ 
 	^ pages includesKey: anInteger 
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> index [
+SoilPageCache >> index [
 	^ index
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> index: aCollection [ 
+SoilPageCache >> index: aCollection [ 
 	index := aCollection
 ]
 
 { #category : #initialization }
-SoilPagedIndexStore >> initialize [ 
+SoilPageCache >> initialize [ 
 	super initialize.
 	pages := Dictionary new.
 	pagesMutex := Mutex new
@@ -64,32 +64,32 @@ SoilPagedIndexStore >> initialize [
 ]
 
 { #category : #testing }
-SoilPagedIndexStore >> isCopyOnWrite [
+SoilPageCache >> isCopyOnWrite [
 	^ false
 ]
 
 { #category : #testing }
-SoilPagedIndexStore >> isOpen [
+SoilPageCache >> isOpen [
 	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> lastPageOffset [
+SoilPageCache >> lastPageOffset [
 	^ self headerPage lastPageOffset
 ]
 
 { #category : #'instance creation' }
-SoilPagedIndexStore >> newPage [
+SoilPageCache >> newPage [
 	^ index allocatePage
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> nextPageOffset [
+SoilPageCache >> nextPageOffset [
 	^ self headerPage nextPageOffset
 ]
 
 { #category : #private }
-SoilPagedIndexStore >> orderedPages [
+SoilPageCache >> orderedPages [
 	| page orderedPages |
 	page := self pageAt: 1.
 	orderedPages := OrderedCollection new.
@@ -103,7 +103,7 @@ SoilPagedIndexStore >> orderedPages [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> pageAt: anInteger [ 
+SoilPageCache >> pageAt: anInteger [ 
 	^ pagesMutex critical: [  
 		pages 
 			at: anInteger 
@@ -111,7 +111,7 @@ SoilPagedIndexStore >> pageAt: anInteger [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> pageAt: anInteger put: aPage [ 
+SoilPageCache >> pageAt: anInteger put: aPage [ 
 	^ pagesMutex critical: [  
 		(pages includesKey: anInteger) 
 			ifTrue: [ ^ Error signal: 'store already has page with key ', anInteger asString ].
@@ -121,16 +121,16 @@ SoilPagedIndexStore >> pageAt: anInteger put: aPage [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> pageFaultAt: anInteger [ 
+SoilPageCache >> pageFaultAt: anInteger [ 
 	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> pages [
+SoilPageCache >> pages [
 	^ pages
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> removePageAt: anInteger [ 
+SoilPageCache >> removePageAt: anInteger [ 
 	pages removeKey: anInteger 
 ]
