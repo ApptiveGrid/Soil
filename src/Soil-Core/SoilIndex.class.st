@@ -23,6 +23,11 @@ Class {
 	#category : #'Soil-Core-Index-Common'
 }
 
+{ #category : #accessing }
+SoilIndex class >> soilTransientInstVars [ 
+	^ #(store dirtypages)
+]
+
 { #category : #adding }
 SoilIndex >> addDirtyPage: aPage [ 
 	dirtyPages 
@@ -207,12 +212,6 @@ SoilIndex >> id [
 	^ id
 ]
 
-{ #category : #accessing }
-SoilIndex >> id: anObject [
-
-	id := anObject
-]
-
 { #category : #utilities }
 SoilIndex >> increaseSize [
 	self headerPage increaseSize.
@@ -227,6 +226,7 @@ SoilIndex >> indexKey: aString [
 { #category : #initialization }
 SoilIndex >> initialize [ 
 	super initialize.
+	id := UUID new asString36.
 	keysAreUnique := true
 ]
 
