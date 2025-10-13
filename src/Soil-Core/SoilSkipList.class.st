@@ -13,13 +13,6 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSkipList: self
 ]
 
-{ #category : #converting }
-SoilSkipList >> asCopyOnWrite [
-	^ SoilCopyOnWriteSkipList new
-		wrapped: self;
-		yourself 
-]
-
 { #category : #'open/close' }
 SoilSkipList >> close [ 
 	super close.
