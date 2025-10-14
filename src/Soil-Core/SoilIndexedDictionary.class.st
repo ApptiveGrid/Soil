@@ -178,6 +178,14 @@ SoilIndexedDictionary >> persistentIndex [
 	^ index persistentIndex 
 ]
 
+{ #category : #private }
+SoilIndexedDictionary >> prepareNewValues [
+	newValues ifNil: [ newValues := OrderedDictionary new ].
+	newValues copy keysAndValuesDo: [ :key :object |
+		object isObjectId ifFalse: [
+			newValues at: key put: (transaction makeRoot: object) ] ]
+]
+
 { #category : #printing }
 SoilIndexedDictionary >> printOn: aStream [ 
 	super printOn: aStream.

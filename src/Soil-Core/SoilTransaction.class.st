@@ -20,6 +20,7 @@ Class {
 
 { #category : #aborting }
 SoilTransaction >> abort [
+	soil ifNil: [ ^ self  ].
 	self transactionManager abortTransaction: self
 ]
 

@@ -123,7 +123,7 @@ SoilBasicMaterializer >> nextSoilObject [
 		at: byte
 		ifAbsent: [ Error signal: 'cannot find type code for ', byte asString]) 
 			soilMaterialize: self.
-	^ object soilMaterializationReplacement 
+	^ object soilMaterializationReplacement
 ]
 
 { #category : #reading }
