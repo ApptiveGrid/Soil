@@ -8,6 +8,9 @@ See SoilSkipList for more information
 Class {
 	#name : #SoilBasicSkipList,
 	#superclass : #SoilIndex,
+	#instVars : [
+		'maxLevel'
+	],
 	#category : #'Soil-Core-Index-SkipList'
 }
 
@@ -31,13 +34,13 @@ SoilBasicSkipList >> initialize [
 { #category : #accessing }
 SoilBasicSkipList >> maxLevel [
 
-	^ self headerPage maxLevel
+	^ maxLevel
 ]
 
 { #category : #accessing }
 SoilBasicSkipList >> maxLevel: anInteger [ 
 
-	self headerPage maxLevel: anInteger 
+	maxLevel := anInteger
 ]
 
 { #category : #utilities }

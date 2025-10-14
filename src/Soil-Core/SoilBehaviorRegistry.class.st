@@ -71,11 +71,11 @@ SoilBehaviorRegistry >> initialize [
 SoilBehaviorRegistry >> initializeFilesystem [
 	index := SoilSkipList new 
 		path: self path;
-		initializeFilesystem;
-		initializeHeaderPage;
 		maxLevel: 10;
 		keySize: 64;
-		valueSize: 8.
+		valueSize: 8;
+		initializeFilesystem;
+		initializeHeaderPage.
 	self addSpecialObjects.
 	index writePages
 ]

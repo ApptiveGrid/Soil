@@ -19,7 +19,9 @@ Class {
 		'store',
 		'dirtyPages',
 		'keysAreUnique',
-		'transaction'
+		'transaction',
+		'keySize',
+		'valueSize'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -127,7 +129,9 @@ SoilIndex >> cleanUpToVersion: aNumberOrNil [
 { #category : #'open/close' }
 SoilIndex >> close [
 	self store close.
-	store := nil
+	store := nil.
+	keySize := nil.
+	valueSize := nil 
 ]
 
 { #category : #private }
@@ -262,13 +266,12 @@ SoilIndex >> isRegistered [
 
 { #category : #accessing }
 SoilIndex >> keySize [
-	^ self headerPage keySize
+	^ keySize
 ]
 
 { #category : #accessing }
 SoilIndex >> keySize: anInteger [
-	anInteger isZero ifTrue: [ Error signal: 'keySize cannot be zero yet' ].
-	self headerPage keySize: anInteger
+	keySize := anInteger 
 ]
 
 { #category : #accessing }
@@ -457,7 +460,7 @@ SoilIndex >> removePageWithIndexIfPresent: anInteger [
 
 { #category : #public }
 SoilIndex >> reopen [
-	self 
+	self store 
 		close;
 		open
 ]
@@ -520,12 +523,12 @@ SoilIndex >> transaction: aSoilTransaction [
 
 { #category : #accessing }
 SoilIndex >> valueSize [
-	^ self headerPage valueSize
+	^ valueSize
 ]
 
 { #category : #accessing }
 SoilIndex >> valueSize: anInteger [
-	self headerPage valueSize: anInteger
+	valueSize := anInteger
 ]
 
 { #category : #enumerating }
