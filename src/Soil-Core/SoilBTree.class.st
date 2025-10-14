@@ -3,8 +3,3 @@ Class {
 	#superclass : #SoilBasicBTree,
 	#category : #'Soil-Core-Index-BTree'
 }
-
-{ #category : #converting }
-SoilBTree >> thePersistentInstance [
-	^ self
-]

@@ -54,7 +54,7 @@ SoilIndexJournalEntry >> segment: anInteger [
 SoilIndexJournalEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
 	aStream 
-		nextPutLengthEncodedInteger: segment;
+		nextPutLengthEncodedInteger: self segment;
 		nextPut: id size; 
 		nextPutAll: id asByteArray
 	

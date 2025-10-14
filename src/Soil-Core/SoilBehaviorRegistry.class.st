@@ -76,6 +76,11 @@ SoilBehaviorRegistry >> initializeFilesystem [
 		valueSize: 8;
 		initializeFilesystem;
 		initializeHeaderPage.
+	index headerPage 
+		keySize: 64;
+		valueSize: 8;
+		maxLevel: 10;
+		initializeLevel: 10.
 	self addSpecialObjects.
 	index writePages
 ]

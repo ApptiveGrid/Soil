@@ -20,6 +20,14 @@ SoilFilePageCache >> asCopyOnWriteStore [
 		wrappedStore: self
 ]
 
+{ #category : #'as yet unclassified' }
+SoilFilePageCache >> cleanUpToVersion: aNumberOrNil [
+	SoilIndexCleaner new 
+		index: self;
+		readVersion: aNumberOrNil;
+		clean.
+]
+
 { #category : #'open/close' }
 SoilFilePageCache >> close [ 
 	stream ifNotNil: [  
@@ -30,6 +38,11 @@ SoilFilePageCache >> close [
 { #category : #deleting }
 SoilFilePageCache >> destroy [
 	path ensureDelete 
+]
+
+{ #category : #accessing }
+SoilFilePageCache >> dirtyPages [
+	^ pages values select: #needsWrite
 ]
 
 { #category : #accessing }
@@ -56,6 +69,11 @@ SoilFilePageCache >> flushPages [
 		pages valuesDo: [ :page |
 			page needsWrite ifTrue: [ 
 				self writePage: page ] ] ]
+]
+
+{ #category : #testing }
+SoilFilePageCache >> hasDirtyPages [
+	^ pages anySatisfy: #needsWrite
 ]
 
 { #category : #accessing }

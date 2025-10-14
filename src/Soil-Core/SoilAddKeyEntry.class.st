@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'key',
 		'value',
-		'oldValue'
+		'oldValue',
+		'objectId'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -21,9 +22,11 @@ SoilAddKeyEntry >> address [
 
 { #category : #committing }
 SoilAddKeyEntry >> commitIn: soil [ 
-	| index |
-	index := (soil objectRepository segmentAt: segment) indexAt: id.
-	index newIterator 
+	| record |
+	record := (soil objectRepository at: objectId).
+	record transaction: (SoilPseudoTransaction new soil: soil).
+	record materializeObjectUsing: soil newMaterializer.
+	record object unwrapped newIterator 
 		at: key put: value;
 		updateCurrentTransaction: transactionId
 		
@@ -42,6 +45,11 @@ SoilAddKeyEntry >> key [
 { #category : #accessing }
 SoilAddKeyEntry >> key: aString [ 
 	key := aString 
+]
+
+{ #category : #accessing }
+SoilAddKeyEntry >> objectId: aSoilObjectId [ 
+	objectId := aSoilObjectId 
 ]
 
 { #category : #accessing }
@@ -77,6 +85,11 @@ SoilAddKeyEntry >> readFrom: aStream [
 	id := (aStream next: idSize) asString.
 	key := (aStream next: aStream nextLengthEncodedInteger) asInteger.
 	value := (aStream next: (aStream nextLengthEncodedInteger) asInteger) asSoilObjectId .
+]
+
+{ #category : #accessing }
+SoilAddKeyEntry >> segment [ 
+	^ objectId segment 
 ]
 
 { #category : #accessing }

@@ -2,7 +2,8 @@ Class {
 	#name : #SoilNewSkipListIndexEntry,
 	#superclass : #SoilNewIndexEntry,
 	#instVars : [
-		'maxLevel'
+		'maxLevel',
+		'objectId'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -15,17 +16,29 @@ SoilNewSkipListIndexEntry class >> journalTypeCode [
 { #category : #committing }
 SoilNewSkipListIndexEntry >> commitIn: soil [
 
-	| index pageCacheManager |
-	pageCacheManager := (soil objectRepository segmentAt: segment) pageCacheManager.
-	index := SoilSkipList new
+	| pageCache pageCacheManager headerPage |
+	pageCacheManager := (soil objectRepository segmentAt: self segment) pageCacheManager.
+	pageCache := pageCacheManager createPageCacheWithId: id class: SoilSkipList.
+	headerPage := SoilSkipListHeaderPage new
+		offset: 1;
+		lastPageOffset: 1;
+		firstFreePageIndex: 0;
+		pageSize: 4096;
+		maxLevel: maxLevel;
+		initializeLevel: maxLevel;
+		keySize: keySize;
+		valueSize: valueSize.
+	pageCache pageAt: 1 put: headerPage. 
+	pageCache flush  .
+	"index := SoilSkipList new
 		path: (pageCacheManager pathFor: id);
 		initializeFilesystem;
-		initializeHeaderPage;
 		maxLevel: maxLevel;
-		"keySize: keySize;
-		valueSize: valueSize;"
-		flush.
-	pageCacheManager at: id put: index
+		keySize: keySize;
+		valueSize: valueSize;
+		initializeHeaderPage;
+		flush."
+	pageCacheManager at: id put: pageCache
 ]
 
 { #category : #accessing }
@@ -45,8 +58,13 @@ SoilNewSkipListIndexEntry >> maxLevel: anInteger [
 ]
 
 { #category : #accessing }
+SoilNewSkipListIndexEntry >> objectId: aSoilObjectId [ 
+	objectId := aSoilObjectId 
+]
+
+{ #category : #accessing }
 SoilNewSkipListIndexEntry >> objectIds [
-	^ {  }
+	^ { objectId }
 ]
 
 { #category : #'instance creation' }
@@ -62,6 +80,11 @@ SoilNewSkipListIndexEntry >> readFrom: aStream [
 ]
 
 { #category : #accessing }
+SoilNewSkipListIndexEntry >> segment [  
+	^ objectId segment 
+]
+
+{ #category : #accessing }
 SoilNewSkipListIndexEntry >> value [ 
 	^ 'maxLevel=', maxLevel printString, ',keySize=', keySize printString,',valueSize=', valueSize printString
 ]
@@ -72,7 +95,7 @@ SoilNewSkipListIndexEntry >> writeOn: aStream [
 	aStream 
 		nextPut: id size; 
 		nextPutAll: id asByteArray;
-		nextPutLengthEncodedInteger: segment;
+		nextPutLengthEncodedInteger: objectId segment;
 		nextPutLengthEncodedInteger: maxLevel;
 		nextPutLengthEncodedInteger: keySize;
 		nextPutLengthEncodedInteger: valueSize

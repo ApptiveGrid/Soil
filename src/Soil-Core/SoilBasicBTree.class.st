@@ -29,7 +29,7 @@ SoilBasicBTree >> flush [
 
 { #category : #testing }
 SoilBasicBTree >> hasHeaderPage [
-	^ store hasHeaderPage 
+	^ pageCache hasHeaderPage 
 ]
 
 { #category : #accessing }
@@ -155,7 +155,7 @@ SoilBasicBTree >> removePage: aPage [
 	aPage items reverseDo: [ :item | item ifNotNil: [self removeKey: item key]  ].
 	
 	"finally remove the page from the store"
-	store removePageAt: aPage offset.
+	pageCache removePageAt: aPage offset.
 	^ aPage 
 
 ]
@@ -182,7 +182,7 @@ SoilBasicBTree >> splitIndexPage: page [
 { #category : #splitting }
 SoilBasicBTree >> splitPage: page [ 
 	| newPage |
-	newPage := page split: store allocatePage.
+	newPage := page split: pageCache allocatePage.
 	newPage next: page next.
 	page next: newPage offset.
 	self addDirtyPage: page.

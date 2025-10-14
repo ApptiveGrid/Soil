@@ -55,8 +55,8 @@ SoilIndexedDictionary >> at: key put: anObject [
 	(self newIterator at: key put: objectId) ifNotNil: [ :value |
 		oldValue := value ].
 
-	transaction addJournalEntry: (SoilAddKeyEntry new 
-		segment: self segment;
+	transaction addIndexJournalEntry: (SoilAddKeyEntry new 
+		objectId: (transaction  objectIdOf: index);
 		id: index id;
 		key: (index indexKey: key);
 		value: objectId;
@@ -90,7 +90,7 @@ SoilIndexedDictionary >> compact [
 SoilIndexedDictionary >> createIndexWith: anIndexClass [
 	index := anIndexClass new
 		valueSize: 8;
-		initializeHeaderPage;
+		"initializeHeaderPage;"
 		yourself
 ]
 
@@ -119,6 +119,17 @@ SoilIndexedDictionary >> id [
 { #category : #accessing }
 SoilIndexedDictionary >> index [
 	^ index
+]
+
+{ #category : #accessing }
+SoilIndexedDictionary >> index: aSoilIndex [
+	index := aSoilIndex.
+
+]
+
+{ #category : #initialization }
+SoilIndexedDictionary >> initializeHeaderPage [
+	index initializeHeaderPage 
 ]
 
 { #category : #testing }
@@ -244,9 +255,7 @@ SoilIndexedDictionary >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
 	transaction markDirty: self.
-	index transaction: aTransaction.
-	index isRegistered ifFalse: [ 
-		index initializeStore: (transaction objectIdOf: self) segment   ] 
+	transaction makeRoot: index
 ]
 
 { #category : #serializing }

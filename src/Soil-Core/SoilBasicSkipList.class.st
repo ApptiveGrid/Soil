@@ -22,7 +22,7 @@ SoilBasicSkipList class >> isAbstract [
 
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
-	^ store hasHeaderPage 
+	^ pageCache hasHeaderPage 
 ]
 
 { #category : #initialization }
@@ -94,7 +94,7 @@ SoilBasicSkipList >> removePage: aPage [
 					previousPage rightAt: lvl put: (aPage rightAt: lvl).
 					previousPage markForWrite ] ] ] ].
 	"finally remove the page from the store"
-	store removePageAt: aPage offset.
+	pageCache removePageAt: aPage offset.
 	^ aPage 
 
 
@@ -124,8 +124,8 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 	here the key was not found and for duplicate keys it should safe
 	to have the equal case."
 	newPage := (page isLastPage and: [ page lastKey <= aKey ])
-		ifTrue: [ store allocatePage ] 
-		ifFalse: [ page split: store allocatePage ].
+		ifTrue: [ pageCache allocatePage ] 
+		ifFalse: [ page split: pageCache allocatePage ].
 	newPage level to: 1 by: -1  do: [ :level |
 		(level > page level)
 			ifTrue: [ 

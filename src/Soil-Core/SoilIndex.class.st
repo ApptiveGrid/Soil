@@ -16,12 +16,12 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'id',
-		'store',
 		'dirtyPages',
 		'keysAreUnique',
 		'transaction',
 		'keySize',
-		'valueSize'
+		'valueSize',
+		'pageCache'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -42,7 +42,7 @@ SoilIndex >> addDirtyPage: aPage [
 SoilIndex >> addToFreePages: aPage [  
 	| currentFreePage newFreePage |
 	newFreePage := aPage asSoilFreePage.
-	store pageAt: aPage offset put: newFreePage.
+	pageCache pageAt: aPage offset put: newFreePage.
 	currentFreePage := self firstFreePage
 		ifNil: [ 
 			"if there is no first free page yet make aPage the
@@ -59,7 +59,7 @@ SoilIndex >> addToFreePages: aPage [
 			ifTrue: [
 				currentFreePage next: newFreePage offset.
 				^ newFreePage  ]
-			ifFalse: [ currentFreePage := store pageAt: currentFreePage next ]].
+			ifFalse: [ currentFreePage := pageCache pageAt: currentFreePage next ]].
 	currentFreePage addPage: newFreePage.
 	^ newFreePage 
 ]
@@ -129,7 +129,7 @@ SoilIndex >> cleanUpToVersion: aNumberOrNil [
 { #category : #'open/close' }
 SoilIndex >> close [
 	self store close.
-	store := nil.
+	pageCache := nil.
 	keySize := nil.
 	valueSize := nil 
 ]
@@ -183,7 +183,7 @@ SoilIndex >> firstFreePage [
 	index := self headerPage firstFreePageIndex.
 	^ index isZero 
 		ifTrue: [ ^ nil ]
-		ifFalse: [ store pageAt: index ]
+		ifFalse: [ pageCache pageAt: index ]
 ]
 
 { #category : #accessing }
@@ -193,7 +193,7 @@ SoilIndex >> firstPage [
 
 { #category : #accessing }
 SoilIndex >> flushCachedPages [
-	store flushCachedPages
+	pageCache flushCachedPages
 ]
 
 { #category : #testing }
@@ -244,7 +244,8 @@ SoilIndex >> initialize [
 SoilIndex >> initializeStore: aSegment [
 	"use aSegment as argument as we target to refacor the index dictionaries
 	and those have knowledge about the segment because they are root objects"
-	transaction addJournalEntry: (self newIndexEntry 
+	self halt.
+	transaction addIndexJournalEntry: (self newIndexEntry 
 		id: id;
 		segment: aSegment )
 ]
@@ -256,7 +257,7 @@ SoilIndex >> isEmpty [
 
 { #category : #testing }
 SoilIndex >> isOpen [
-	^ store isNotNil and: [ store isOpen ]
+	^ pageCache isNotNil and: [ pageCache isOpen ]
 ]
 
 { #category : #testing }
@@ -286,7 +287,7 @@ SoilIndex >> lastPage [
 
 { #category : #'as yet unclassified' }
 SoilIndex >> markAllDirty [ 
-	store pages do: [ :page | self addDirtyPage: page ]
+	pageCache pages do: [ :page | self addDirtyPage: page ]
 ]
 
 { #category : #accessing }
@@ -326,6 +327,12 @@ SoilIndex >> newIterator [
 ]
 
 { #category : #'instance creation' }
+SoilIndex >> newMemoryStore [
+	^ SoilMemoryPageCache new
+		index: self
+]
+
+{ #category : #'instance creation' }
 SoilIndex >> newPage [
 	^ self subclassResponsibility
 ]
@@ -362,8 +369,8 @@ SoilIndex >> nextFreePageIndex [
 { #category : #initialization }
 SoilIndex >> nextPageOffset [
 	| offset |
-	offset := store nextPageOffset.
-	self addDirtyPage: store headerPage.
+	offset := pageCache nextPageOffset.
+	self addDirtyPage: pageCache headerPage.
 	^ offset 
 ]
 
@@ -389,7 +396,9 @@ SoilIndex >> pages [
 
 { #category : #accessing }
 SoilIndex >> path: aFileReference [ 
-	self store path: aFileReference 
+	pageCache :=  self newFileStore 
+		path: aFileReference;
+		yourself 
 ]
 
 { #category : #accessing }
@@ -454,8 +463,8 @@ SoilIndex >> removePage: aPage [
 
 { #category : #removing }
 SoilIndex >> removePageWithIndexIfPresent: anInteger [ 
-	(store includesPageAt: anInteger) ifTrue: [ 
-		store removePageAt: anInteger ]
+	(pageCache includesPageAt: anInteger) ifTrue: [ 
+		pageCache removePageAt: anInteger ]
 ]
 
 { #category : #public }
@@ -489,31 +498,25 @@ SoilIndex >> size [
 
 { #category : #private }
 SoilIndex >> soilClusterRootIn: aTransaction [
-self halt.
 	transaction ifNotNil: [ ^ self ].
 	transaction := aTransaction.
 	transaction markDirty: self.
 	self isRegistered ifFalse: [ 
-		aTransaction addJournalEntry: (self newIndexEntry 
+		aTransaction addIndexJournalEntry: (self newIndexEntry 
 			id: id;
-			segment: (aTransaction objectIdOf: self) segment) ]
+			objectId: (aTransaction objectIdOf: self)) ]
 ]
 
 { #category : #accessing }
 SoilIndex >> store [
-	^ store ifNil: [ 
-		store := self newFileStore ]
+	^ pageCache ifNil: [ 
+		pageCache := self newMemoryStore ]
 ]
 
 { #category : #accessing }
 SoilIndex >> store: anObject [
 	anObject index: self.
-	store := anObject
-]
-
-{ #category : #converting }
-SoilIndex >> thePersistentInstance [
-	^ self subclassResponsibility
+	pageCache := anObject
 ]
 
 { #category : #accessing }

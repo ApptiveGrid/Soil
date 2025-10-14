@@ -3,8 +3,8 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'segment',
-		'indexes',
-		'semaphore'
+		'semaphore',
+		'pageCaches'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -27,7 +27,7 @@ SoilPageCacheManager >> acceptSoil: aSoilVisitor [
 { #category : #accessing }
 SoilPageCacheManager >> at: indexId ifAbsent: aBlock [ 
 	^ semaphore critical: [  
-		indexes 
+		pageCaches 
 			at: indexId 
 			ifAbsentPut: [ 
 				self 
@@ -39,30 +39,30 @@ SoilPageCacheManager >> at: indexId ifAbsent: aBlock [
 { #category : #accessing }
 SoilPageCacheManager >> at: indexId put: aSoilIndex [
 	^ semaphore critical: [  
-		indexes 
+		pageCaches 
 			at: indexId
-			put: aSoilIndex thePersistentInstance ]
+			put: aSoilIndex ]
 ]
 
 { #category : #'open/close' }
 SoilPageCacheManager >> close [
 	semaphore critical: [  
-		indexes copy keysAndValuesDo: [ :id :index |
+		pageCaches copy keysAndValuesDo: [ :id :index |
 			index close.
-			indexes removeKey: id ] ]
+			pageCaches removeKey: id ] ]
 ]
 
 { #category : #api }
 SoilPageCacheManager >> createPageCacheWithId: indexId class: aClass [ 
-	^ aClass new 
+	^ SoilFilePageCache new
 		path: (self pathFor: indexId);
-		initializeFilesystem;
-		initializeHeaderPage
+		initializeFilesystem";
+		initializeHeaderPage"
 ]
 
 { #category : #accessing }
 SoilPageCacheManager >> dirtyIndexes [
-	^ indexes select: [ :each | each hasDirtyPages ]
+	^ pageCaches select: [ :each | each hasDirtyPages ]
 ]
 
 { #category : #accessing }
@@ -73,7 +73,7 @@ SoilPageCacheManager >> flush [
 
 { #category : #flushing }
 SoilPageCacheManager >> flushIndexes [
-	indexes do: #flushCachedPages
+	pageCaches do: #flushCachedPages
 ]
 
 { #category : #testing }
@@ -84,13 +84,13 @@ SoilPageCacheManager >> hasIndexId: aString [
 { #category : #accessing }
 SoilPageCacheManager >> indexes [
 
-	^ indexes
+	^ pageCaches
 ]
 
 { #category : #initialization }
 SoilPageCacheManager >> initialize [ 
 	super initialize.
-	indexes := Dictionary new.
+	pageCaches := Dictionary new.
 	semaphore := Semaphore forMutualExclusion
 ]
 
@@ -128,7 +128,7 @@ SoilPageCacheManager >> pathFor: indexId [
 { #category : #accessing }
 SoilPageCacheManager >> removePageCacheWithId: indexId [ 
 	^ semaphore critical: [  
-		(indexes 
+		(pageCaches 
 			removeKey: indexId
 			ifAbsent: [  ]) close ]
 ]

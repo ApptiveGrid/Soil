@@ -13,7 +13,8 @@ Class {
 		'lastObjectIndexes',
 		'journal',
 		'createdAt',
-		'indexUpdatesToCommit'
+		'indexUpdatesToCommit',
+		'indexJournalEntries'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -50,6 +51,11 @@ SoilTransaction >> addClusterObject: anObject [
 		putObject: anObject.
 	^ objectId
 
+]
+
+{ #category : #adding }
+SoilTransaction >> addIndexJournalEntry: aSoilJournalEntry [ 
+	indexJournalEntries add: aSoilJournalEntry 
 ]
 
 { #category : #adding }
@@ -210,6 +216,7 @@ SoilTransaction >> buildJournal [
 		journal addEntry: (SoilNewBehaviorEntry new 
 			identifier: description value behaviorIdentifier;
 			objectId: description objectId) ].
+	journal addEntries: indexJournalEntries.
 	"update the global database version"
 	journal addEntry: (SoilUpdateDatabaseVersion new 
 		databaseVersion: writeVersion;
@@ -313,7 +320,8 @@ SoilTransaction >> initialize [
 	objectMap := IdentityDictionary new.
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
-	indexUpdatesToCommit := OrderedCollection new
+	indexUpdatesToCommit := OrderedCollection new.
+	indexJournalEntries := OrderedCollection new
 ]
 
 { #category : #api }

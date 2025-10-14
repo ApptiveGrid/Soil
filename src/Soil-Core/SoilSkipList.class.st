@@ -49,7 +49,10 @@ SoilSkipList >> newHeaderPage [
 		offset: 1;
 		lastPageOffset: 1;
 		firstFreePageIndex: 0;
-		pageSize: self pageSize
+		pageSize: self pageSize;
+		keySize: keySize;
+		valueSize: valueSize;
+		maxLevel: maxLevel 
 ]
 
 { #category : #'opening/closing' }
@@ -60,13 +63,12 @@ SoilSkipList >> open [
 
 { #category : #serializing }
 SoilSkipList >> soilMaterialized: aMaterializer [ 
-	store := (aMaterializer indexAt: id) store asCopyOnWriteStore
+	pageCache := (aMaterializer indexAt: id) asCopyOnWriteStore
 ]
 
-{ #category : #converting }
-SoilSkipList >> thePersistentInstance [
-	^ self
-	
+{ #category : #'as yet unclassified' }
+SoilSkipList >> unwrapped [
+	pageCache := pageCache wrappedStore 
 ]
 
 { #category : #writing }

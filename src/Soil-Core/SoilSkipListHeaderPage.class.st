@@ -123,7 +123,7 @@ SoilSkipListHeaderPage >> maxLevel [
 
 { #category : #accessing }
 SoilSkipListHeaderPage >> maxLevel: anInteger [
-
+	anInteger ifNil: [^ self ].
 	maxLevel := anInteger.
 	right := Array new: anInteger withAll: 0.
 	needWrite := true

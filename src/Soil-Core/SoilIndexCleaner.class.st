@@ -26,10 +26,10 @@ SoilIndexCleaner >> clean [
 	"Now we have a final set if dirty pages"
 	index dirtyPages copy do: [ :page | 
 		page needsWrite ifTrue: [ 
-			index store writePage: page ].
+			index writePage: page ].
 		"pages at this point could still need cleanup"
 		page isDirty ifFalse: [ 
-			index removeDirtyPage: page ] ].
+			"index removeDirtyPage: page" ] ].
 ]
 
 { #category : #cleaning }
