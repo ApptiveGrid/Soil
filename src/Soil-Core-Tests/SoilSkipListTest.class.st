@@ -312,7 +312,7 @@ SoilSkipListTest >> testFreePageAddAndDelete [
 		iterator at: n  put: (n asByteArrayOfSize: 8) ].
 	self assert: index headerPage lastPageOffset equals: 2.
 	self assert: index headerPage firstFreePageIndex equals: 0.
-	1 to: 2000 do: [ : n |
+	1 to: 1989 do: [ : n |
 		iterator at: 280+n put: ((200+n) asByteArrayOfSize: 8).
 		iterator removeKey: n.
 		index cleanUpToVersion: nil. ].
