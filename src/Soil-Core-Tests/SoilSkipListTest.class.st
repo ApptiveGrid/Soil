@@ -713,6 +713,6 @@ SoilSkipListTest >> testVersionOneRoundtripAndCompact [
 	index 
 		reopen;
 		compact.
-	self assert: index headerPage version equals: 2.
+	self assert: index headerPage version equals: 3.
 	self assert: (index headerPage instVarNamed: #size) equals: 9
 ]
