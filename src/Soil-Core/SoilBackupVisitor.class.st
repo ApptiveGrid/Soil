@@ -56,14 +56,14 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	| sourceSegment sourceIndex targetSegment targetIndex iterator assoc |
 	
 	sourceSegment := soil objectRepository segmentAt: segmentId.
-	sourceIndex := sourceSegment indexManager 
+	sourceIndex := sourceSegment pageCacheManager 
 		at: indexId 
 		ifAbsent: [ ^ self indexNotFound: indexId ].
 	
 	"create an index of same kind and configuration in the target database"
 	targetSegment := target objectRepository segmentAt: segmentId.
-	targetIndex := targetSegment indexManager 
-		createIndexWithId: indexId 
+	targetIndex := targetSegment pageCacheManager 
+		createPageCacheWithId: indexId 
 		class: sourceIndex class.
 	targetIndex initializeParametersFrom: sourceIndex. 
 	
@@ -77,7 +77,7 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	targetIndex
 		flush; 
 		close.
-	sourceSegment indexManager removeIndexWithId: indexId 
+	sourceSegment pageCacheManager removePageCacheWithId: indexId 
 ]
 
 { #category : #visiting }

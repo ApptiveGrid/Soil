@@ -15,10 +15,3 @@ SoilSkipListDictionary >> initialize [
 	super initialize.
 	self createIndexWith: SoilSkipList
 ]
-
-{ #category : #serializing }
-SoilSkipListDictionary >> soilMaterialized: aMaterializer [ 
-	super soilMaterialized: aMaterializer.
-	index allowDuplicateKeys.
-	index wrapped allowDuplicateKeys
-]

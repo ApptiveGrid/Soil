@@ -13,7 +13,7 @@ SoilNewBTreeListIndexEntry class >> journalTypeCode [
 SoilNewBTreeListIndexEntry >> commitIn: soil [
 
 	| index indexManager |
-	indexManager := (soil objectRepository segmentAt: segment) indexManager.
+	indexManager := (soil objectRepository segmentAt: segment) pageCacheManager.
 	index := SoilBTree new
 		path: (indexManager pathFor: id);
 		initializeFilesystem;

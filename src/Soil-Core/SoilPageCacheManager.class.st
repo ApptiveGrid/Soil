@@ -1,5 +1,5 @@
 Class {
-	#name : #SoilIndexManager,
+	#name : #SoilPageCacheManager,
 	#superclass : #Object,
 	#instVars : [
 		'segment',
@@ -10,7 +10,7 @@ Class {
 }
 
 { #category : #accessing }
-SoilIndexManager class >> indexClassFromFile: aFileReference [ 
+SoilPageCacheManager class >> indexClassFromFile: aFileReference [ 
 	| stream pageCode headerPage |
 	stream := aFileReference binaryReadStream.
 	pageCode := stream next.
@@ -20,24 +20,24 @@ SoilIndexManager class >> indexClassFromFile: aFileReference [
 ]
 
 { #category : #visiting }
-SoilIndexManager >> acceptSoil: aSoilVisitor [ 
+SoilPageCacheManager >> acceptSoil: aSoilVisitor [ 
 	^ aSoilVisitor visitIndexManager: self 
 ]
 
 { #category : #accessing }
-SoilIndexManager >> at: indexId ifAbsent: aBlock [ 
+SoilPageCacheManager >> at: indexId ifAbsent: aBlock [ 
 	^ semaphore critical: [  
 		indexes 
 			at: indexId 
 			ifAbsentPut: [ 
 				self 
-					loadIndexWithId: indexId 
+					loadPageCacheWithId: indexId 
 					ifNone: aBlock  ] ]
 		
 ]
 
 { #category : #accessing }
-SoilIndexManager >> at: indexId put: aSoilIndex [
+SoilPageCacheManager >> at: indexId put: aSoilIndex [
 	^ semaphore critical: [  
 		indexes 
 			at: indexId
@@ -45,7 +45,7 @@ SoilIndexManager >> at: indexId put: aSoilIndex [
 ]
 
 { #category : #'open/close' }
-SoilIndexManager >> close [
+SoilPageCacheManager >> close [
 	semaphore critical: [  
 		indexes copy keysAndValuesDo: [ :id :index |
 			index close.
@@ -53,7 +53,7 @@ SoilIndexManager >> close [
 ]
 
 { #category : #api }
-SoilIndexManager >> createIndexWithId: indexId class: aClass [ 
+SoilPageCacheManager >> createPageCacheWithId: indexId class: aClass [ 
 	^ aClass new 
 		path: (self pathFor: indexId);
 		initializeFilesystem;
@@ -61,46 +61,46 @@ SoilIndexManager >> createIndexWithId: indexId class: aClass [
 ]
 
 { #category : #accessing }
-SoilIndexManager >> dirtyIndexes [
+SoilPageCacheManager >> dirtyIndexes [
 	^ indexes select: [ :each | each hasDirtyPages ]
 ]
 
 { #category : #accessing }
-SoilIndexManager >> flush [
+SoilPageCacheManager >> flush [
 	self dirtyIndexes copy do: [ :index | 
 		index cleanUpToVersion: (self soil transactionManager smallestReadVersion) ]
 ]
 
 { #category : #flushing }
-SoilIndexManager >> flushIndexes [
+SoilPageCacheManager >> flushIndexes [
 	indexes do: #flushCachedPages
 ]
 
 { #category : #testing }
-SoilIndexManager >> hasIndexId: aString [ 
+SoilPageCacheManager >> hasIndexId: aString [ 
 	^ (self pathFor: aString) exists
 ]
 
 { #category : #accessing }
-SoilIndexManager >> indexes [
+SoilPageCacheManager >> indexes [
 
 	^ indexes
 ]
 
 { #category : #initialization }
-SoilIndexManager >> initialize [ 
+SoilPageCacheManager >> initialize [ 
 	super initialize.
 	indexes := Dictionary new.
 	semaphore := Semaphore forMutualExclusion
 ]
 
 { #category : #initialization }
-SoilIndexManager >> initializeFilesystem [
+SoilPageCacheManager >> initializeFilesystem [
 	self path ensureCreateDirectory 
 ]
 
 { #category : #api }
-SoilIndexManager >> loadIndexWithId: indexId ifNone: aBlock [
+SoilPageCacheManager >> loadPageCacheWithId: indexId ifNone: aBlock [
 	| path |
 	path := self path / indexId , #index.
 	^ path exists
@@ -111,22 +111,22 @@ SoilIndexManager >> loadIndexWithId: indexId ifNone: aBlock [
 ]
 
 { #category : #'open/close' }
-SoilIndexManager >> open [
+SoilPageCacheManager >> open [
 	
 ]
 
 { #category : #accessing }
-SoilIndexManager >> path [ 
+SoilPageCacheManager >> path [ 
 	^ segment path / #indexes
 ]
 
 { #category : #accessing }
-SoilIndexManager >> pathFor: indexId [ 
+SoilPageCacheManager >> pathFor: indexId [ 
 	^ self path / indexId , #index
 ]
 
 { #category : #accessing }
-SoilIndexManager >> removeIndexWithId: indexId [ 
+SoilPageCacheManager >> removePageCacheWithId: indexId [ 
 	^ semaphore critical: [  
 		(indexes 
 			removeKey: indexId
@@ -134,22 +134,22 @@ SoilIndexManager >> removeIndexWithId: indexId [
 ]
 
 { #category : #accessing }
-SoilIndexManager >> segment [
+SoilPageCacheManager >> segment [
 	^ segment
 ]
 
 { #category : #accessing }
-SoilIndexManager >> segment: aSOObjectSegment [ 
+SoilPageCacheManager >> segment: aSOObjectSegment [ 
 	segment := aSOObjectSegment 
 ]
 
 { #category : #accessing }
-SoilIndexManager >> soil [ 
+SoilPageCacheManager >> soil [ 
 	^ segment soil 
 ]
 
 { #category : #writing }
-SoilIndexManager >> writeContentsToDisk [
+SoilPageCacheManager >> writeContentsToDisk [
 	segment soil setup isFsyncEnabled ifTrue: [  
 		self indexes do: [ :each | each writeContentsToDisk ] ]
 ]

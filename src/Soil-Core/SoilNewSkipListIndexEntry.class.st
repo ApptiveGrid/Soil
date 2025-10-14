@@ -16,7 +16,7 @@ SoilNewSkipListIndexEntry class >> journalTypeCode [
 SoilNewSkipListIndexEntry >> commitIn: soil [
 
 	| index indexManager |
-	indexManager := (soil objectRepository segmentAt: segment) indexManager.
+	indexManager := (soil objectRepository segmentAt: segment) pageCacheManager.
 	index := SoilSkipList new
 		path: (indexManager pathFor: id);
 		initializeFilesystem;
@@ -24,7 +24,6 @@ SoilNewSkipListIndexEntry >> commitIn: soil [
 		maxLevel: maxLevel;
 		keySize: keySize;
 		valueSize: valueSize;
-		allowDuplicateKeys;
 		flush.
 	indexManager at: id put: index
 ]

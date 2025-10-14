@@ -506,7 +506,7 @@ SoilIndexedDictionaryTest >> testFreePageReuse [
 	tx3 := soil newTransaction.
 	300 to: 1200 do: [ :n | tx3 root at: n put: n asString ].
 	tx3 commit.
-	indexManager := soil objectRepository firstSegment indexManager.
+	indexManager := soil objectRepository firstSegment pageCacheManager.
 	index := indexManager indexes anyOne.
 	self assert: index headerPage firstFreePageIndex isZero.
 	self assert: index firstFreePage isNil
@@ -516,7 +516,7 @@ SoilIndexedDictionaryTest >> testFreePageReuse [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testFreePages [ 
 	| tx tx2 index indexManager |
-	indexManager := soil objectRepository firstSegment indexManager.
+	indexManager := soil objectRepository firstSegment pageCacheManager.
 	tx := soil newTransaction.
 	tx root: dict.
 	1 to: 1300 do: [ :n | dict at: n put: n asString ].
@@ -764,7 +764,7 @@ SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRemovePagesConcurrent [
 	| tx tx2 index indexManager tx3 tx4 |
-	indexManager := soil objectRepository firstSegment indexManager.
+	indexManager := soil objectRepository firstSegment pageCacheManager.
 	tx := soil newTransaction.
 	tx root: dict.
 	1 to: 1000 do: [ :n | dict at: n put: n asString ].
@@ -811,7 +811,7 @@ SoilIndexedDictionaryTest >> testRemovePagesSequential [
 		ifTrue: [339 to: 451 do: [ :n | tx2 root removeKey: n ]]
 		ifFalse: [ 300 to: 700 do: [ :n | tx2 root removeKey: n ]].
 	tx2 commit.
-	indexManager := soil objectRepository firstSegment indexManager.
+	indexManager := soil objectRepository firstSegment pageCacheManager.
 	index := indexManager indexes anyOne.
 	self assert: index dirtyPages size equals: 0.
 	self assert: indexManager dirtyIndexes size equals: 0.

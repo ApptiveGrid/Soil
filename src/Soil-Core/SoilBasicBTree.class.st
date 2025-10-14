@@ -17,13 +17,6 @@ SoilBasicBTree class >> isAbstract [
 	^ self == SoilBasicBTree
 ]
 
-{ #category : #converting }
-SoilBasicBTree >> asCopyOnWrite [
-	^ SoilCopyOnWriteBTree new
-		wrapped: self;
-		yourself 
-]
-
 { #category : #accessing }
 SoilBasicBTree >> dataPages [
 	^ (self pages reject: [ :page | page isIndexPage ]) asArray

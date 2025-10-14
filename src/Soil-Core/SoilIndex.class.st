@@ -18,10 +18,16 @@ Class {
 		'id',
 		'store',
 		'dirtyPages',
-		'keysAreUnique'
+		'keysAreUnique',
+		'transaction'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
+
+{ #category : #accessing }
+SoilIndex class >> soilTransientInstVars [ 
+	^ #(store dirtypages transaction )
+]
 
 { #category : #adding }
 SoilIndex >> addDirtyPage: aPage [ 
@@ -136,6 +142,11 @@ SoilIndex >> decreaseSize [
 	self addDirtyPage: self headerPage.
 ]
 
+{ #category : #deleting }
+SoilIndex >> destroy [
+	self store destroy 
+]
+
 { #category : #accessing }
 SoilIndex >> dirtyPages [
 	^ dirtyPages
@@ -207,12 +218,6 @@ SoilIndex >> id [
 	^ id
 ]
 
-{ #category : #accessing }
-SoilIndex >> id: anObject [
-
-	id := anObject
-]
-
 { #category : #utilities }
 SoilIndex >> increaseSize [
 	self headerPage increaseSize.
@@ -227,7 +232,17 @@ SoilIndex >> indexKey: aString [
 { #category : #initialization }
 SoilIndex >> initialize [ 
 	super initialize.
+	id := UUID new asString36.
 	keysAreUnique := true
+]
+
+{ #category : #initialization }
+SoilIndex >> initializeStore: aSegment [
+	"use aSegment as argument as we target to refacor the index dictionaries
+	and those have knowledge about the segment because they are root objects"
+	transaction addJournalEntry: (self newIndexEntry 
+		id: id;
+		segment: aSegment )
 ]
 
 { #category : #testing }
@@ -242,7 +257,7 @@ SoilIndex >> isOpen [
 
 { #category : #testing }
 SoilIndex >> isRegistered [
-	^ self subclassResponsibility
+	^ self store isRegistered 
 ]
 
 { #category : #accessing }
@@ -283,7 +298,7 @@ SoilIndex >> maxLevel: anIntegeer [
 
 { #category : #'instance creation' }
 SoilIndex >> newFileStore [
-	^ SoilPagedFileIndexStore new
+	^ SoilFilePageCache new
 		index: self
 ]
 
@@ -367,6 +382,11 @@ SoilIndex >> pageSize [
 { #category : #accessing }
 SoilIndex >> pages [
 	^ self store pages
+]
+
+{ #category : #accessing }
+SoilIndex >> path: aFileReference [ 
+	self store path: aFileReference 
 ]
 
 { #category : #accessing }
@@ -464,6 +484,18 @@ SoilIndex >> size [
 	^ self newIterator size 
 ]
 
+{ #category : #private }
+SoilIndex >> soilClusterRootIn: aTransaction [
+self halt.
+	transaction ifNotNil: [ ^ self ].
+	transaction := aTransaction.
+	transaction markDirty: self.
+	self isRegistered ifFalse: [ 
+		aTransaction addJournalEntry: (self newIndexEntry 
+			id: id;
+			segment: (aTransaction objectIdOf: self) segment) ]
+]
+
 { #category : #accessing }
 SoilIndex >> store [
 	^ store ifNil: [ 
@@ -479,6 +511,11 @@ SoilIndex >> store: anObject [
 { #category : #converting }
 SoilIndex >> thePersistentInstance [
 	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+SoilIndex >> transaction: aSoilTransaction [ 
+	transaction := aSoilTransaction
 ]
 
 { #category : #accessing }
