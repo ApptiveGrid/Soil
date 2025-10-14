@@ -59,7 +59,7 @@ SoilSkipListHeaderPage >> headerSize [
 	^ super headerSize 
 		+ 21 "keySize(2), valueSize(2), maxLevel(2), lastPageIndex(4), lastFreePageIndex(4) size(6) uniqueKeys(1)" 
 		+ 1 "level" 
-		+ (self level * self rightSize)
+		+ (self level * self rightSize) * 2 "left and right"
 
 ]
 
@@ -128,6 +128,7 @@ SoilSkipListHeaderPage >> maxLevel: anInteger [
 
 	maxLevel := anInteger.
 	right := Array new: anInteger withAll: 0.
+	left := Array new: anInteger withAll: 0.
 	needWrite := true
 ]
 
@@ -183,7 +184,8 @@ SoilSkipListHeaderPage >> uniqueKeys [
 
 { #category : #accessing }
 SoilSkipListHeaderPage >> uniqueKeys: aBoolean [ 
-	uniqueKeys := aBoolean 
+	uniqueKeys := aBoolean.
+	needWrite := true
 ]
 
 { #category : #accessing }

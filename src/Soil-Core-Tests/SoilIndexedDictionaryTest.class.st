@@ -685,6 +685,8 @@ SoilIndexedDictionaryTest >> testNextCloseTo [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 	| tx tx2 blockedTx |
+	"(backend = SoilBTree) ifTrue: [ 
+		self skip ]. "
 	self skip.
 	tx := soil newTransaction.
 	dict index allowDuplicateKeys.

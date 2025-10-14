@@ -39,8 +39,8 @@ SoilSkipListTest >> testAddFirstOverflowAppending [
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
 	self assert: page numberOfItems equals: 1.
-	self assert: page items first key equals: 253.
-	self assert: page items last key asByteArray equals: #[ 253 ]
+	self assert: page items first key equals: 250.
+	self assert: page items last key asByteArray equals: #[ 250 ]
 ]
 
 { #category : #tests }
@@ -55,8 +55,8 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
 	self assert: page numberOfItems equals: 1.
-	self assert: page items first key equals: 253.
-	self assert: page items last key asByteArray equals: #[ 253 ].
+	self assert: page items first key equals: 250.
+	self assert: page items last key asByteArray equals: #[ 250 ].
 	
 	"write it and then read it back with a new SoilSkipList"
 	index writePages.
@@ -76,12 +76,12 @@ SoilSkipListTest >> testAddFirstOverflowSplitting [
 	1 to: capacity * 2 by: 2 do: [ :n | 
 		index at: n  put: (n asByteArrayOfSize: 8)].
 	self assert: index pages size equals: 1.
-	index at: capacity - 2 put: (capacity - 2 asByteArrayOfSize: 8).
+	index at: capacity - 3 put: (capacity - 3 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
-	self assert: page numberOfItems equals: 126.
-	self assert: page items first key equals: 253.
-	self assert: page items last key asByteArray equals: #[ 1 247 ]
+	self assert: page numberOfItems equals: 124.
+	self assert: page items first key equals: 251.
+	self assert: page items last key asByteArray equals: #[ 1 241 ]
 ]
 
 { #category : #tests }
@@ -95,8 +95,8 @@ SoilSkipListTest >> testAddInBetween [
 	index at: (capacity / 2) floor put: ((capacity / 2) floor asByteArrayOfSize: 8).
 	self assert: index pages size equals: 1.
 	page := index pageAt: 1.
-	self assert: page numberOfItems equals: 252.
-	self assert: (page items at: (capacity / 2) floor) key equals: 126
+	self assert: page numberOfItems equals: 249.
+	self assert: (page items at: (capacity / 2) floor) key equals: 124
 ]
 
 { #category : #tests }
@@ -110,9 +110,9 @@ SoilSkipListTest >> testAddInBetweenOverflowing [
 	index at: 32 put: (32 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 2.
 	page := index pageAt: 2.
-	self assert: page numberOfItems equals: 126.
-	self assert: (page items first) key equals: 253.
-	self assert: (page items last) key asByteArray equals: #[ 1 247 ].
+	self assert: page numberOfItems equals: 124.
+	self assert: (page items first) key equals: 251.
+	self assert: (page items last) key asByteArray equals: #[ 1 241 ].
 	index writePages 
 ]
 
@@ -127,7 +127,7 @@ SoilSkipListTest >> testAddInBetweenOverwriting [
 	index at: 31 put: #[ 8 7 6 5 4 3 2 1 ].
 	self assert: index pages size equals: 1.
 	page := index pageAt: 1.
-	self assert: page numberOfItems equals: 252.
+	self assert: page numberOfItems equals: 249.
 	self assert: (page items at: 16) value equals: #[ 8 7 6 5 4 3 2 1 ] 
 ]
 
@@ -477,8 +477,8 @@ SoilSkipListTest >> testLastPage [
 	1 to: capacity - 1 do: [ :n |
 		index at: n put: (n asByteArrayOfSize: 8)].
 	index at: capacity put: (capacity asByteArrayOfSize: 8).
-	self assert: index pages size equals: 99.
-	self assert: index lastPage offset equals: 99.
+	self assert: index pages size equals: 98.
+	self assert: index lastPage offset equals: 98.
 	self assert: index lastPage isLastPage.
 	lastItem := index lastPage itemAt: capacity ifAbsent: [nil].
 	self assert: lastItem value equals: (capacity asByteArrayOfSize: 8)
@@ -524,8 +524,8 @@ SoilSkipListTest >> testOverflowCopyOnWriteAppending [
 	self assert: copyOnWrite pages size equals: 2.
 	page := copyOnWrite pageAt: 2.
 	self assert: page numberOfItems equals: 1.
-	self assert: page items first key equals: 253.
-	self assert: page items last key asByteArray equals: #[ 253 ]
+	self assert: page items first key equals: 250.
+	self assert: page items last key asByteArray equals: #[ 250 ]
 ]
 
 { #category : #tests }
@@ -540,9 +540,9 @@ SoilSkipListTest >> testOverflowCopyOnWriteSplitting [
 	copyOnWrite at: 2 put: (2 asByteArrayOfSize: 8).
 	self assert: copyOnWrite pages size equals: 2.
 	page := copyOnWrite pageAt: 2.
-	self assert: page numberOfItems equals: 126.
-	self assert: page items first key equals: 253.
-	self assert: page items last key asByteArray equals: #[ 1 247 ]
+	self assert: page numberOfItems equals: 124.
+	self assert: page items first key equals: 251.
+	self assert: page items last key asByteArray equals: #[ 1 241 ]
 ]
 
 { #category : #tests }
