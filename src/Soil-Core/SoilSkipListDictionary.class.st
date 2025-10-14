@@ -10,6 +10,11 @@ Class {
 	#category : #'Soil-Core-Index-SkipList'
 }
 
+{ #category : #visiting }
+SoilSkipListDictionary >> acceptSoil: aSoilVisitor [
+	aSoilVisitor visitSkipListDictionary: self 
+]
+
 { #category : #initialization }
 SoilSkipListDictionary >> createIndex [ 
 	^ SoilSkipList new

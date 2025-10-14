@@ -94,6 +94,13 @@ SoilBehaviorDescription >> compatibilityCheckObject: anObject [
 	^anObject
 ]
 
+{ #category : #testing }
+SoilBehaviorDescription >> hasSameShape: aBehaviorDescription [
+	(behaviorIdentifier = aBehaviorDescription behaviorIdentifier) ifFalse: [ ^ false ].
+	(instVarNames = aBehaviorDescription instVarNames) ifFalse: [ ^ false ].
+	^ true 
+]
+
 { #category : #api }
 SoilBehaviorDescription >> incrementVersion [ 
 	version := version + 1
