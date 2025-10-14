@@ -4,8 +4,7 @@ Class {
 	#instVars : [
 		'key',
 		'value',
-		'oldValue',
-		'objectId'
+		'oldValue'
 	],
 	#category : #'Soil-Core-Journal'
 }

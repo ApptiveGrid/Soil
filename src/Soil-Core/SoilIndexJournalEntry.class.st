@@ -2,8 +2,8 @@ Class {
 	#name : #SoilIndexJournalEntry,
 	#superclass : #SoilTransactionJournalEntry,
 	#instVars : [
-		'segment',
-		'id'
+		'id',
+		'objectId'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -37,17 +37,6 @@ SoilIndexJournalEntry >> readFrom: aStream [
 	segment := aStream nextLengthEncodedInteger.
 	idSize := aStream next.
 	id := (aStream next: idSize) asString
-]
-
-{ #category : #accessing }
-SoilIndexJournalEntry >> segment [
-
-	^ segment
-]
-
-{ #category : #accessing }
-SoilIndexJournalEntry >> segment: anInteger [ 
-	segment := anInteger
 ]
 
 { #category : #writing }

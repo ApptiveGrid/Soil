@@ -37,10 +37,10 @@ SoilIndexIteratorTest >> setUp [
 		path: 'sunit-indexIteratorTest';
 		destroy;
 		initializeFilesystem;
-		initializeHeaderPage;
 		keySize: 8;
 		valueSize: 8;
 		maxLevel: 4; "ignored for BTree"
+		initializeHeaderPage;
 	   yourself
 		
 ]

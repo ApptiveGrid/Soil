@@ -2,8 +2,7 @@ Class {
 	#name : #SoilNewSkipListIndexEntry,
 	#superclass : #SoilNewIndexEntry,
 	#instVars : [
-		'maxLevel',
-		'objectId'
+		'maxLevel'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -58,11 +57,6 @@ SoilNewSkipListIndexEntry >> maxLevel: anInteger [
 ]
 
 { #category : #accessing }
-SoilNewSkipListIndexEntry >> objectId: aSoilObjectId [ 
-	objectId := aSoilObjectId 
-]
-
-{ #category : #accessing }
 SoilNewSkipListIndexEntry >> objectIds [
 	^ { objectId }
 ]
@@ -77,11 +71,6 @@ SoilNewSkipListIndexEntry >> readFrom: aStream [
 	maxLevel := aStream nextLengthEncodedInteger.
 	keySize := aStream nextLengthEncodedInteger.
 	valueSize := aStream nextLengthEncodedInteger
-]
-
-{ #category : #accessing }
-SoilNewSkipListIndexEntry >> segment [  
-	^ objectId segment 
 ]
 
 { #category : #accessing }

@@ -46,9 +46,6 @@ SoilSkipList >> initializeParametersFrom: aSoilSkipList [
 { #category : #'instance creation' }
 SoilSkipList >> newHeaderPage [
 	^ SoilSkipListHeaderPage new
-		offset: 1;
-		lastPageOffset: 1;
-		firstFreePageIndex: 0;
 		pageSize: self pageSize;
 		keySize: keySize;
 		valueSize: valueSize;

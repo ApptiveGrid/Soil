@@ -72,6 +72,7 @@ SoilSkipListHeaderPage >> increaseSize [
 { #category : #initialization }
 SoilSkipListHeaderPage >> initialize [ 
 	super initialize.
+	offset := 1.
 	lastPageOffset := 1.
 	firstFreePageIndex := 0.
 	size := 0

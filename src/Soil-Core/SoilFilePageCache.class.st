@@ -142,8 +142,8 @@ SoilFilePageCache >> pageFaultAt: anInteger [
 ]
 
 { #category : #accessing }
-SoilFilePageCache >> path: aFileReference [ 
-	path := aFileReference
+SoilFilePageCache >> path: aStringOrFileReference [ 
+	path := aStringOrFileReference asFileReference 
 ]
 
 { #category : #'instance creation' }

@@ -71,7 +71,9 @@ SoilBasicBTree >> newHeaderPage [
 		offset: 1;
 		lastPageOffset: 2;
 		firstFreePageIndex: 0;
-		pageSize: self pageSize
+		pageSize: self pageSize;
+		keySize: keySize;
+		valueSize: valueSize 
 ]
 
 { #category : #utilities }

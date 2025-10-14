@@ -31,6 +31,16 @@ SoilNewIndexEntry >> keySize: anInteger [
 ]
 
 { #category : #accessing }
+SoilNewIndexEntry >> objectId: aSoilObjectId [ 
+	objectId := aSoilObjectId 
+]
+
+{ #category : #accessing }
+SoilNewIndexEntry >> segment [  
+	^ objectId segment 
+]
+
+{ #category : #accessing }
 SoilNewIndexEntry >> valueSize [
 
 	^ valueSize
