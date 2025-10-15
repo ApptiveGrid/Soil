@@ -121,6 +121,11 @@ SoilBTreeHeaderPage >> size: anInteger [
  	size := anInteger
 ]
 
+{ #category : #accessing }
+SoilBTreeHeaderPage >> uniqueKeys [
+	^ true 
+]
+
 { #category : #writing }
 SoilBTreeHeaderPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.

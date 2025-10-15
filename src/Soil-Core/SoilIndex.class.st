@@ -17,8 +17,7 @@ Class {
 	#instVars : [
 		'id',
 		'store',
-		'dirtyPages',
-		'keysAreUnique'
+		'dirtyPages'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -239,12 +238,6 @@ SoilIndex >> indexKey: aString [
 	^ aString asIndexKeyOfSize: self keySize
 ]
 
-{ #category : #initialization }
-SoilIndex >> initialize [ 
-	super initialize.
-	keysAreUnique := true
-]
-
 { #category : #testing }
 SoilIndex >> isEmpty [
 	^ self store headerPage isEmpty
@@ -308,6 +301,7 @@ SoilIndex >> newIndexEntry [
 		maxLevel: self maxLevel;
 		keySize: self keySize;
 		valueSize: self valueSize;
+		uniqueKeys: self uniqueKeys;
 		yourself 
 
 ]
@@ -494,6 +488,16 @@ SoilIndex >> store: anObject [
 { #category : #converting }
 SoilIndex >> thePersistentInstance [
 	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+SoilIndex >> uniqueKeys [
+	^ self headerPage uniqueKeys
+]
+
+{ #category : #accessing }
+SoilIndex >> uniqueKeys: aBoolean [ 
+	self headerPage uniqueKeys: aBoolean 
 ]
 
 { #category : #accessing }

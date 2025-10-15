@@ -24,7 +24,7 @@ SoilNewSkipListIndexEntry >> commitIn: soil [
 		maxLevel: maxLevel;
 		keySize: keySize;
 		valueSize: valueSize;
-		allowDuplicateKeys;
+		uniqueKeys: uniqueKeys;
 		flush.
 	indexManager at: id put: index
 ]
@@ -59,7 +59,8 @@ SoilNewSkipListIndexEntry >> readFrom: aStream [
 	segment := aStream nextLengthEncodedInteger.
 	maxLevel := aStream nextLengthEncodedInteger.
 	keySize := aStream nextLengthEncodedInteger.
-	valueSize := aStream nextLengthEncodedInteger
+	valueSize := aStream nextLengthEncodedInteger.
+	uniqueKeys := aStream next = 1
 ]
 
 { #category : #accessing }
@@ -76,5 +77,6 @@ SoilNewSkipListIndexEntry >> writeOn: aStream [
 		nextPutLengthEncodedInteger: segment;
 		nextPutLengthEncodedInteger: maxLevel;
 		nextPutLengthEncodedInteger: keySize;
-		nextPutLengthEncodedInteger: valueSize
+		nextPutLengthEncodedInteger: valueSize;
+		nextPut: (uniqueKeys ifTrue: [ 1 ] ifFalse: [ 0 ])
 ]
