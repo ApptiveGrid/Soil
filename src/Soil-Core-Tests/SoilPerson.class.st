@@ -3,10 +3,16 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'id',
-		'lastName'
+		'lastName',
+		'firstName'
 	],
 	#category : #'Soil-Core-Tests'
 }
+
+{ #category : #accessing }
+SoilPerson >> firstName: aString [ 
+	firstName := aString 
+]
 
 { #category : #accessing }
 SoilPerson >> id [
@@ -16,6 +22,11 @@ SoilPerson >> id [
 { #category : #accessing }
 SoilPerson >> id: aString [ 
 	id := aString 
+]
+
+{ #category : #accessing }
+SoilPerson >> lastName [
+	^ lastName
 ]
 
 { #category : #accessing }

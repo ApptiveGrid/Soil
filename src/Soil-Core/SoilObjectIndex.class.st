@@ -39,6 +39,16 @@ SoilObjectIndex >> add: anObject objectId: objectId [
 ]
 
 { #category : #accessing }
+SoilObjectIndex >> index [
+	^ index
+]
+
+{ #category : #accessing }
+SoilObjectIndex >> index: anIndex [
+	index := anIndex 
+]
+
+{ #category : #accessing }
 SoilObjectIndex >> indexClass: aClass [ 
 	index := aClass new 
 		keySize: 16;

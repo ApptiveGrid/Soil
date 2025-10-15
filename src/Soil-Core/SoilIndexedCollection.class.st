@@ -20,12 +20,14 @@ SoilIndexedCollection >> add: anObject [
 		index add: anObject objectId: objectId ]
 ]
 
-{ #category : #adding }
-SoilIndexedCollection >> addIndexWithSelector: aString class: aClass [ 
-	indexes add: (SoilObjectIndex new 
-		selector: aString;
-		indexClass: aClass
-		 )
+{ #category : #'as yet unclassified' }
+SoilIndexedCollection >> addIndex: anIndex [ 
+	indexes add: anIndex 
+]
+
+{ #category : #accessing }
+SoilIndexedCollection >> indexes [
+	^ indexes
 ]
 
 { #category : #initialization }
