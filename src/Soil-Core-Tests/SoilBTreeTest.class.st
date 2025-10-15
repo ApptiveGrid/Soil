@@ -73,7 +73,7 @@ SoilBTreeTest >> testAdd2 [
 	self assert: (index rootPage items collect: #key) second equals: 16.
 
 	"adding 36 causes overlow in data node, have to add the new page to index"
-	index at: 36 put: (36 asByteArrayOfSize: 8).
+	index at: 36 add: (36 asByteArrayOfSize: 8).
 
 	self assert: index pages size equals: 4.
 	self assert: index indexPages size equals: 1.
@@ -91,7 +91,7 @@ SoilBTreeTest >> testAdd2 [
 	self assert: (index rootPage items collect: #key) third equals: 26.
 
 	"adding 46 causes overlow in data node and the index node"
-	index at: 46 put: (46 asByteArrayOfSize: 8).
+	index at: 46 add: (46 asByteArrayOfSize: 8).
 
 	self assert: index pages size equals: 7.
 	self assert: index indexPages size equals: 3.
