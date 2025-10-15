@@ -19,6 +19,7 @@ SoilNewSkipListIndexEntry >> commitIn: soil [
 	indexManager := (soil objectRepository segmentAt: segment) indexManager.
 	index := SoilSkipList new
 		path: (indexManager pathFor: id);
+		beFileStore;
 		initializeFilesystem;
 		initializeHeaderPage;
 		maxLevel: maxLevel;

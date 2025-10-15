@@ -21,6 +21,11 @@ SoilSkipList >> asCopyOnWrite [
 		yourself 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilSkipList >> beFileStore [
+	store := self newFileStore 
+]
+
 { #category : #'open/close' }
 SoilSkipList >> close [ 
 	super close.
