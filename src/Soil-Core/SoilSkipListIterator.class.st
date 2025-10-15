@@ -21,7 +21,7 @@ SoilSkipListIterator >> atLevel: key put: anObject [
 ]
 
 { #category : #accessing }
-SoilSkipListIterator >> basicAt: indexKey put: anObject [
+SoilSkipListIterator >> basicAt: indexKey add: anObject [
 
 	| keyIndex |
 	self findPageFor: indexKey.
@@ -49,6 +49,16 @@ SoilSkipListIterator >> basicAt: indexKey put: anObject [
 			  currentPage addItem: indexKey -> anObject.
 			  index increaseSize.
 			  nil ]
+]
+
+{ #category : #accessing }
+SoilSkipListIterator >> basicAt: indexKey put: anObject [
+
+	self
+		deprecated: 'Please use #basicAt:add:'
+		transformWith: '`@receiver basicAt: `@arg1 put: `@arg2' -> '`@receiver basicAt: `@arg1 add: `@arg2'.
+
+	^ self basicAt: indexKey add: anObject 
 ]
 
 { #category : #private }

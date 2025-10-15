@@ -12,7 +12,7 @@ Class {
 }
 
 { #category : #accessing }
-SoilBTreeIterator >> basicAt: indexKey put: anObject [
+SoilBTreeIterator >> basicAt: indexKey add: anObject [
 	| possiblePriorValue |
 	possiblePriorValue := index rootPage insertItem: (indexKey -> anObject) for: self.
 	"as an optimization we return the prior value stored in the list. If there was none we return nil"
@@ -21,6 +21,15 @@ SoilBTreeIterator >> basicAt: indexKey put: anObject [
 		index increaseSize].
 	index addDirtyPage: currentPage.
 	^ possiblePriorValue returnValue
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> basicAt: indexKey put: anObject [
+	self
+		deprecated: 'Please use #basicAt:add:'
+		transformWith: '`@receiver basicAt: `@arg1 put: `@arg2' -> '`@receiver basicAt: `@arg1 add: `@arg2'.
+
+	^ self basicAt: indexKey add: anObject 
 ]
 
 { #category : #private }
