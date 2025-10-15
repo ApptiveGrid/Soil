@@ -14,12 +14,10 @@ Take care: SoilIndexedDictionary has to be a root object
 "
 Class {
 	#name : #SoilIndexedDictionary,
-	#superclass : #Object,
+	#superclass : #SoilBasicIndexedCollection,
 	#instVars : [
 		'id',
-		'transaction',
-		'index',
-		'segment'
+		'index'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -252,12 +250,6 @@ SoilIndexedDictionary >> rewriteUsing: aBlock [
 { #category : #accessing }
 SoilIndexedDictionary >> second [
 	^ self newIterator first; next
-]
-
-{ #category : #journal }
-SoilIndexedDictionary >> segment [
-	^ segment ifNil: [
-		segment := (transaction objectIdOf: self) segment ]
 ]
 
 { #category : #accessing }
