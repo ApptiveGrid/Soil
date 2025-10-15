@@ -35,14 +35,8 @@ SoilIndexIterator >> at: aKeyObject add: anObject [
 
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
-	| foundValue item |
-	foundValue := self find: aKeyObject ifAbsent: [^ aBlock value].
- 	item := self restoreItem: currentKey -> foundValue.
-	^ item
-		ifNotNil: [ 
-			(self convertValue: item value) 
-				ifNil: [ aBlock value ] ]
-		ifNil: [ aBlock value ]
+	^ self find: aKeyObject ifAbsent: [^ aBlock value].
+
 ]
 
 { #category : #accessing }
@@ -135,7 +129,10 @@ SoilIndexIterator >> basicPreviousAssociation [
 						^ i ]
 					ifNil: [ 
 						"are we the first page? if yes, there is no item before"
-						currentPage isHeaderPage ifTrue: [ ^nil ].
+						currentPage isHeaderPage ifTrue: [ 
+							currentKey := nil.
+							currentPageIndex := 0.
+							^ nil ].
 						currentPage := self previousPage.
 						currentKey := nil.
 						currentPageIndex := 0 ] ]
@@ -187,11 +184,59 @@ SoilIndexIterator >> find: key [
 
 { #category : #private }
 SoilIndexIterator >> find: key ifAbsent: aBlock [
+	| keyIndex |
+	
+	^ index hasUniqueKeys 
+		ifTrue: [ self findOne: key ifAbsent: aBlock  ]
+		ifFalse: [ self findAll: key ifAbsent: aBlock ]
+	
+]
+
+{ #category : #'as yet unclassified' }
+SoilIndexIterator >> findAll: key ifAbsent: aBlock [ 
+		| indexKey assoc item values |
+	indexKey := index indexKey: key.
+	self findPageFor: indexKey.
+	currentPageIndex := currentPage indexOfKey: indexKey.
+	currentKey := (currentPage items at: currentPageIndex ifAbsent: [ ^ aBlock value ]) key. 
+	(currentKey = indexKey ) ifFalse: [ ^ aBlock value ].
+	"find first occurrence"
+	assoc := self basicPreviousAssociation.
+	[ assoc notNil and: [ assoc key = indexKey ] ] whileTrue: [ 
+		assoc := self basicPreviousAssociation ].
+	(assoc notNil and: [assoc key = indexKey]) ifFalse: [ assoc := self basicNextAssociation ] . 
+	"now we are on the first item with the key"
+	values := OrderedCollection with: assoc value.
+	assoc := self basicNextAssociation.
+	[ assoc notNil and: [ assoc key = indexKey ] ] whileTrue: [ 
+		values add: assoc value.
+		assoc := self basicNextAssociation ].
+	^ values collect: [ :value |
+		item := self restoreItem: currentKey -> value.
+		item
+			ifNotNil: [ 
+				(self convertValue: item value) 
+					ifNil: [ aBlock value ] ]
+			ifNil: [ aBlock value ] ] 
+]
+
+{ #category : #private }
+SoilIndexIterator >> findOne: key ifAbsent: aBlock [
+	| value item |
 	currentKey := index indexKey: key.
 	self findPageFor: currentKey.
+
 	currentPageIndex := currentPage indexOfKey: currentKey.
 	currentPageIndex isZero ifTrue: [ ^ aBlock value ].
-	^ (currentPage itemAtIndex: currentPageIndex) value.
+	value := (currentPage itemAtIndex: currentPageIndex) value.
+	item := self restoreItem: currentKey -> value.
+	^ item
+		ifNotNil: [ 
+			(self convertValue: item value) 
+				ifNil: [ aBlock value ] ]
+		ifNil: [ aBlock value ]
+	
+
 ]
 
 { #category : #private }
@@ -468,6 +513,14 @@ SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 
 	index decreaseSize.
 	^ oldValue
+]
+
+{ #category : #removing }
+SoilIndexIterator >> removeKey: key value: value [
+	^ self 
+		removeKey: key 
+		value: value
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #initialization }

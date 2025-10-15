@@ -213,6 +213,31 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 	^ oldValue
 ]
 
+{ #category : #removing }
+SoilIndexedDictionary >> removeKey: key value: value [
+	^ self 
+		removeKey: key 
+		value: value 
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
+]
+
+{ #category : #removing }
+SoilIndexedDictionary >> removeKey: key value: value ifAbsent: aBlock [
+	| oldValue |
+	oldValue := self newIterator 
+		removeKey: key 
+		value: (transaction objectIdOf: value)  
+		ifAbsent: [^ aBlock value].
+
+	transaction addJournalEntry: (SoilRemoveKeyEntry new 
+			segment: self segment;
+			id: id;
+			key: (index indexKey: key); 
+			oldValue: oldValue asSoilObjectId ) .
+
+	^ oldValue
+]
+
 { #category : #enumerating }
 SoilIndexedDictionary >> reverseDo: aBlock [
  	self newIterator reverseDo: [ :objectId | 
