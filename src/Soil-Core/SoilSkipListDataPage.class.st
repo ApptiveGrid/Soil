@@ -16,7 +16,7 @@ SoilSkipListDataPage class >> pageCode [
 SoilSkipListDataPage >> headerSize [
 	^ super headerSize  
 		+ 1 "level"
-		+ (self level * self rightSize) * 2 "left and right"
+		+ ((self level * self rightSize) * 2) "left and right"
 
 ]
 
@@ -28,7 +28,7 @@ SoilSkipListDataPage >> initializeInIndex: aSoilSkipList [
 
 { #category : #initialization }
 SoilSkipListDataPage >> latestVersion [
-	^ 1 
+	^ 3
 ]
 
 { #category : #'instance creation' }
