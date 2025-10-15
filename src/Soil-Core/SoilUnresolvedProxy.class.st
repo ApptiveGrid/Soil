@@ -8,6 +8,12 @@ Class {
 }
 
 { #category : #accessing }
+SoilUnresolvedProxy class >> objectId: aSoilObjectId [ 
+	^ self new 
+		objectId: aSoilObjectId 
+]
+
+{ #category : #accessing }
 SoilUnresolvedProxy >> objectId [
 
 	^ objectId
