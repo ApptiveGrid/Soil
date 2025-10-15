@@ -28,6 +28,12 @@ SoilIndexIterator >> at: aKeyObject [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> at: aKeyObject add: anObject [
+
+	^ self basicAt: (index indexKey: aKeyObject) add: anObject
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 	| foundValue item |
 	foundValue := self find: aKeyObject ifAbsent: [^ aBlock value].
@@ -41,9 +47,11 @@ SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject put: anObject [
-	^ self 
-		basicAt: (index indexKey: aKeyObject) 
-		put: anObject
+	self
+		deprecated: 'Please use #at:add:'
+		transformWith: '`@receiver at: `@arg1 put: `@arg2' -> '`@receiver at: `@arg1 add: `@arg2'.
+
+	^ self at: aKeyObject add: anObject
 ]
 
 { #category : #accessing }
@@ -53,6 +61,11 @@ SoilIndexIterator >> atIndex: anInteger [
 	2 to: anInteger do: [ :idx |
 		current := self nextAssociation ].
 	^ current value
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> basicAt: key add: anObject [
+	self subclassResponsibility 
 ]
 
 { #category : #accessing }

@@ -80,6 +80,12 @@ SoilIndex >> at: key [
 ]
 
 { #category : #accessing }
+SoilIndex >> at: aKeyObject add: anObject [
+
+	self newIterator at: aKeyObject add: anObject
+]
+
+{ #category : #accessing }
 SoilIndex >> at: anObject ifAbsent: aBlock [
 	^ (self find: anObject) 
 		ifNotNil: [:node | node value ]
@@ -88,9 +94,10 @@ SoilIndex >> at: anObject ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndex >> at: aKeyObject put: anObject [
-	self newIterator 
-		at: aKeyObject 
-		put: anObject
+	self
+		deprecated: 'Please use #at:add:'
+		transformWith: '`@receiver at: `@arg1 put: `@arg2' -> '`@receiver at: `@arg1 add: `@arg2'.
+	self at: aKeyObject add: anObject 
 ]
 
 { #category : #accessing }
@@ -99,10 +106,18 @@ SoilIndex >> atIndex: anInteger [
 ]
 
 { #category : #accessing }
-SoilIndex >> basicAt: key put: anObject [
+SoilIndex >> basicAt: key add: anObject [
 	^ self newIterator 
 		basicAt: key 
-		put: anObject 
+		add: anObject 
+]
+
+{ #category : #accessing }
+SoilIndex >> basicAt: key put: anObject [
+	self
+		deprecated: 'Please use #basicAt:add:'
+		transformWith: '`@receiver basicAt: `@arg1 put: `@arg2' -> '`@receiver basicAt: `@arg1 add: `@arg2'.
+	^ self basicAt: key add: anObject 
 ]
 
 { #category : #removing }
