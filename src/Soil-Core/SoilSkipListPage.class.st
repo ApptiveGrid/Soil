@@ -160,7 +160,7 @@ SoilSkipListPage >> itemIndexForKey: key value: anObject [
 		do: [ :idx | 
 			"now that we've found the key let's check if the value does
 			match as well"
-			((items at: idx) = anObject) 
+			((items at: idx) value = anObject) 
 				ifTrue: [ ^ idx ].
 			idx] 
 		ifNone: [ ^ 0 ].
@@ -169,7 +169,7 @@ SoilSkipListPage >> itemIndexForKey: key value: anObject [
 	prevIndex := index.
 	[ prevIndex > 1 and: [ (items at: prevIndex - 1) key = key] ] whileTrue: [ 
 		prevIndex := prevIndex - 1.
-		((items at: prevIndex) = anObject) ifTrue: [ 
+		((items at: prevIndex) value = anObject) ifTrue: [ 
 			^ prevIndex ] ].
 	"backward scanning didn't help so we scan forward to find the same key in 
 	the other direction still looking for anObject"

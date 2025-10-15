@@ -126,6 +126,11 @@ SoilBTreeHeaderPage >> uniqueKeys [
 	^ true 
 ]
 
+{ #category : #accessing }
+SoilBTreeHeaderPage >> uniqueKeys: aBoolean [ 
+	"ignore for now"
+]
+
 { #category : #writing }
 SoilBTreeHeaderPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
