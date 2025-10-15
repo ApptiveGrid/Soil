@@ -155,8 +155,9 @@ SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	maxLevel := (aStream next: 2) asInteger.
 	lastPageOffset :=(aStream next: 4) asInteger.
 	firstFreePageIndex :=(aStream next: 4) asInteger.
-	uniqueKeys := (version > 2) ifTrue: [ 
-			 aStream next = 1 ].
+	uniqueKeys := (version > 2) 
+		ifTrue: [ aStream next = 1 ]
+		ifFalse: [ true ].
 	size := (version > 1) 
 		ifTrue: [ (aStream next: 6) asInteger ]
 		ifFalse: [ -1 ]
