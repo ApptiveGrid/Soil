@@ -184,7 +184,6 @@ SoilIndexIterator >> find: key [
 
 { #category : #private }
 SoilIndexIterator >> find: key ifAbsent: aBlock [
-	| keyIndex |
 	
 	^ index hasUniqueKeys 
 		ifTrue: [ self findOne: key ifAbsent: aBlock  ]
