@@ -134,9 +134,3 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 				page rightAt: level put: newPage offset ]].
 	^ newPage 
 ]
-
-{ #category : #accessing }
-SoilBasicSkipList >> uniqueKeys [ 
-
-	^ self headerPage uniqueKeys 
-]
