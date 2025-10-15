@@ -25,6 +25,13 @@ SoilIndexManager >> acceptSoil: aSoilVisitor [
 ]
 
 { #category : #accessing }
+SoilIndexManager >> at: indexId [ 
+	^ self 
+		at: indexId 
+		ifAbsent: [ SoilIndexNotFound signal: 'index with id ', indexId asString, ' not found' ]
+]
+
+{ #category : #accessing }
 SoilIndexManager >> at: indexId ifAbsent: aBlock [ 
 	^ semaphore critical: [  
 		indexes 
