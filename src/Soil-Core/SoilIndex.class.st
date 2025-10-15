@@ -69,7 +69,7 @@ SoilIndex >> allocatePage [
 
 { #category : #accessing }
 SoilIndex >> allowDuplicateKeys [
-	keysAreUnique := false
+	self headerPage uniqueKeys: false 
 ]
 
 { #category : #private }
@@ -193,7 +193,7 @@ SoilIndex >> hasHeaderPage [
 
 { #category : #accessing }
 SoilIndex >> hasUniqueKeys [
-	^ keysAreUnique 
+	^ self headerPage uniqueKeys
 ]
 
 { #category : #accessing }

@@ -9,6 +9,7 @@ Class {
 	#name : #SoilSkipListPage,
 	#superclass : #SoilIndexItemsPage,
 	#instVars : [
+		'left',
 		'right',
 		'valueSize'
 	],
@@ -107,6 +108,7 @@ SoilSkipListPage >> initializeLevel: maxLevel [
 	[ (level < maxLevel) and: [ promote ] ] whileTrue: [ 
 		level := level + 1.
 		promote := self class random next > 0.5 ].
+	left := Array new: level withAll: 0.
 	right := Array new: level withAll: 0. 
 ]
 
@@ -181,6 +183,18 @@ SoilSkipListPage >> itemIndexForKey: key value: anObject [
 ]
 
 { #category : #accessing }
+SoilSkipListPage >> left [
+	^ left
+]
+
+{ #category : #writing }
+SoilSkipListPage >> leftSize [
+	"this fixes the maximum number of pages to 32 bits which should be enough. This
+	17TB when using a page size of 4k"
+	^ 4
+]
+
+{ #category : #accessing }
 SoilSkipListPage >> level [ 
 	^ right size
 ]
@@ -193,7 +207,8 @@ SoilSkipListPage >> next [
 { #category : #copying }
 SoilSkipListPage >> postCopy [ 
 	super postCopy.
-	right := right copy
+	right := right copy.
+	left := left copy
 ]
 
 { #category : #reading }
@@ -207,6 +222,10 @@ SoilSkipListPage >> readLevelsFrom: aStream [
 	| level |
 	level := aStream next asInteger.
 	right := Array new: level withAll: 0. 
+	(version > 2) ifTrue: [ 
+		left := Array new: level withAll: 0. 
+		1 to: level do: [ :n |
+			left at: n put: (aStream next: self leftSize) asInteger ] ].
 	1 to: level do: [ :n |
 		right at: n put: (aStream next: self rightSize) asInteger ]
 ]
@@ -272,6 +291,9 @@ SoilSkipListPage >> writeHeaderOn: aStream [
 SoilSkipListPage >> writeLevelsOn: aStream [ 
 	aStream 
 		nextPut: self level.
+	(version > 2) ifTrue: [ 
+		1 to: self level do: [ :n |
+			aStream nextPutAll: ((left at: n) asByteArrayOfSize: self leftSize) ] ].
 	1 to: self level do: [ :n |
 		aStream nextPutAll: ((right at: n) asByteArrayOfSize: self rightSize) ]
 ]
