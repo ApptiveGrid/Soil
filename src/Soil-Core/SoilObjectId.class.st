@@ -54,7 +54,7 @@ SoilObjectId class >> root [
 SoilObjectId class >> segment: segmentId index: index [
 	(segmentId = 0 and: [ index = 0 ]) ifTrue: [ ^ self removed ].
 	(segmentId = 1 and: [ index = 1 ]) ifTrue: [ ^ self root ].
-	^ self new 
+	^ self basicNew
 		segment: segmentId index: index
 ]
 
@@ -97,7 +97,7 @@ SoilObjectId >> asSoilObjectId [
 
 { #category : #converting }
 SoilObjectId >> asSoilObjectProxy [
-	^ SoilObjectProxy new 
+	^ SoilObjectProxy basicNew 
 		objectId: self
 ]
 
@@ -122,12 +122,6 @@ SoilObjectId >> index [
 { #category : #accessing }
 SoilObjectId >> index: anInteger [
 	index := anInteger 
-]
-
-{ #category : #initialization }
-SoilObjectId >> initialize [ 
-	super initialize.
-	segment := 1
 ]
 
 { #category : #testing }

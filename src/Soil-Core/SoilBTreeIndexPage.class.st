@@ -106,11 +106,13 @@ SoilBTreeIndexPage >> readFrom: aStream [
 { #category : #reading }
 SoilBTreeIndexPage >> readItemsFrom: aStream [ 
 	| numberOfItems |
-	
+	"calculate the maximum number of items that can be stored in this
+	page so we spend that amount removing the need for the collection 
+	to grow"
+	items := OrderedCollection new: self itemCapacity.
 	numberOfItems := (aStream next: self itemsSizeSize) asInteger.
-	items := SortedCollection new: numberOfItems.
 	numberOfItems timesRepeat: [ 
-		items add: (aStream next: self keySize) asInteger -> (aStream next: self pointerSize) asInteger ]
+		items add: ((aStream next: self keySize) asInteger -> (aStream next: self pointerSize) asInteger ) ]
 ]
 
 { #category : #removing }

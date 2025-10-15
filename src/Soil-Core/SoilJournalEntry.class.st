@@ -2,7 +2,8 @@ Class {
 	#name : #SoilJournalEntry,
 	#superclass : #Object,
 	#instVars : [
-		'version'
+		'version',
+		'journal'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -57,6 +58,12 @@ SoilJournalEntry >> initialize [
 { #category : #testing }
 SoilJournalEntry >> isTransactionEntry [ 
 	^ false
+]
+
+{ #category : #accessing }
+SoilJournalEntry >> journal: anObject [
+
+	journal := anObject
 ]
 
 { #category : #testing }

@@ -29,6 +29,38 @@ SoilPersistentDictionaryTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilPersistentDictionaryTest >> testAdd [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	
+	dict add: (#test -> 'string').
+	transaction commit.
+		
+	self assert: (dict at: #test) equals: 'string'
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testAnyOne [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	
+	dict add: (#test -> 'string').
+	dict add: (#test2 -> 'string').
+	transaction commit.
+		
+	self assert: (dict anyOne value) equals: 'string'.
+	
+
+
+]
+
+{ #category : #tests }
 SoilPersistentDictionaryTest >> testAt [
 
 	| dict transaction |
@@ -55,6 +87,20 @@ SoilPersistentDictionaryTest >> testAtIfAbsent [
 	transaction commit.
 		
 	self assert: (dict at: #test2 ifAbsent: [#missing]) equals: #missing
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testAtIfAbsentPut [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	self assert: (dict at: #test2 ifAbsentPut: [#missing]) equals: #missing.
+	self assert: (dict at: #test2) equals: #missing.
+	transaction makeRoot: dict.
+	transaction commit.
+
+
 ]
 
 { #category : #tests }
@@ -107,6 +153,57 @@ SoilPersistentDictionaryTest >> testCommitAndRead [
 	"should this not be transparently load it?"
 	"if the Proxy inherits from ProtoObject, it works"
 	self assert: (materialized at: #test) isSoilProxy
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testDetectIfNone [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	
+	dict add: (#test -> 'string').
+	dict add: (#test2 -> 'string').
+	transaction commit.
+		
+	self assert: (dict detect: [:each | each = 'string'] ifNone: [ #error ]) equals: 'string'.
+	self assert: (dict detect: [:each | each = 'tt'] ifNone: [ #error ]) equals: #error
+
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testIncludesKey [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	
+	dict add: (#test -> 'string').
+	dict add: (#test2 -> 'string').
+	transaction commit.
+		
+	self deny: (dict includesKey: #test1).
+	self assert: (dict includesKey: #test2)
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testIsCollection [
+
+	| dict |
+	dict := SoilPersistentDictionary new.
+	soil newTransaction makeRoot: dict.
+	self assert: dict isCollection
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testIsEmpty [
+
+	| dict |
+	dict := SoilPersistentDictionary new.
+	soil newTransaction makeRoot: dict.
+	self assert: dict isEmpty
 ]
 
 { #category : #tests }
@@ -177,6 +274,21 @@ SoilPersistentDictionaryTest >> testRemoveKeyIfAbsent [
 ]
 
 { #category : #tests }
+SoilPersistentDictionaryTest >> testSize [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	
+	dict add: (#test -> 'string').
+	dict add: (#test2 -> 'string').
+	transaction commit.
+		
+	self assert: (dict size) equals: 2
+]
+
+{ #category : #tests }
 SoilPersistentDictionaryTest >> testValues [
 
 	| dict transaction |
@@ -189,4 +301,13 @@ SoilPersistentDictionaryTest >> testValues [
 		
 	self assert: (dict values includes: 'string').
 	self assert: (dict values includes: 'string2')
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testisEmpty [
+
+	| dict |
+	dict := SoilPersistentDictionary new.
+	soil newTransaction makeRoot: dict.
+	self assert: dict isEmpty
 ]

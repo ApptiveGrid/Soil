@@ -56,7 +56,8 @@ SoilTransactionJournalEntry >> readFrom: aStream [
 { #category : #accessing }
 SoilTransactionJournalEntry >> transactionId [
 
-	^ transactionId
+	^ transactionId ifNil: [ 
+		transactionId := journal writeVersion ]
 ]
 
 { #category : #accessing }
@@ -74,5 +75,5 @@ SoilTransactionJournalEntry >> validateIn: aSoilTransaction [
 SoilTransactionJournalEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
 	aStream 
-		nextPutLengthEncodedInteger:  transactionId
+		nextPutLengthEncodedInteger: self transactionId 
 ]

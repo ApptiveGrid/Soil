@@ -17,17 +17,6 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
-{ #category : #'instance creation' }
-SoilBasicSkipList >> allocatePage [
-	| page |
-	page := self newPage 
-		offset: (self nextFreePageIndex
-			ifNil: [ self nextPageOffset ]).
-	self store pageAt: page offset put: page.
-	self addDirtyPage: page.
-	^ page
-]
-
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
@@ -71,38 +60,6 @@ SoilBasicSkipList >> newPage [
 		yourself
 ]
 
-{ #category : #private }
-SoilBasicSkipList >> nextFreePageIndex [ 
-	| firstFreePage freePageIndex |
-	firstFreePage := self firstFreePage ifNil: [ 
-		^ nil ].
-	^ firstFreePage hasFreePages 
-		ifTrue: [ 
-			freePageIndex := firstFreePage removeFirstIndex.
-			self removePageWithIndexIfPresent: freePageIndex.
-			self addDirtyPage: firstFreePage.
-			freePageIndex  ] 
-		ifFalse: [ 
-			"if firstFreePage has a next pointer we set that as 
-			new first free page. Next will return 0 if there is no
-			next page"
-			freePageIndex := firstFreePage next.
-			self headerPage firstFreePageIndex: firstFreePage next.
-			self removePageWithIndexIfPresent: firstFreePage offset.
-
-			self addDirtyPage: self headerPage.
-			firstFreePage offset ]
-				
-]
-
-{ #category : #'instance creation' }
-SoilBasicSkipList >> nextPageOffset [
-	| offset |
-	offset := store nextPageOffset.
-	self addDirtyPage: store headerPage.
-	^ offset 
-]
-
 { #category : #'instance creation' }
 SoilBasicSkipList >> pageClass [
 	^ SoilSkipListDataPage
@@ -140,12 +97,6 @@ SoilBasicSkipList >> removePage: aPage [
 
 ]
 
-{ #category : #removing }
-SoilBasicSkipList >> removePageWithIndexIfPresent: anInteger [ 
-	(store includesPageAt: anInteger) ifTrue: [ 
-		store removePageAt: anInteger ]
-]
-
 { #category : #accessing }
 SoilBasicSkipList >> size [ 
 	"if size is -1 the page has been converted from version 1 format and
@@ -165,7 +116,11 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 	last key of the page we can append a page and add the new key
 	there. If the key is in between or the page is not the last we
 	split the page with each containing half of the items"
-	newPage := (page isLastPage and: [ page lastKey < aKey ])
+	self flag: #todo.
+	"is it correct to check for lastKey smallerOREQUAL. If we reach
+	here the key was not found and for duplicate keys it should safe
+	to have the equal case."
+	newPage := (page isLastPage and: [ page lastKey <= aKey ])
 		ifTrue: [ store allocatePage ] 
 		ifFalse: [ page split: store allocatePage ].
 	newPage level to: 1 by: -1  do: [ :level |

@@ -4,8 +4,7 @@ Class {
 	#instVars : [
 		'segment',
 		'indexes',
-		'semaphore',
-		'dirtyIndexes'
+		'semaphore'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -23,11 +22,6 @@ SoilIndexManager class >> indexClassFromFile: aFileReference [
 { #category : #visiting }
 SoilIndexManager >> acceptSoil: aSoilVisitor [ 
 	^ aSoilVisitor visitIndexManager: self 
-]
-
-{ #category : #adding }
-SoilIndexManager >> addDirtyIndex: anIndex [
-	dirtyIndexes add: anIndex 
 ]
 
 { #category : #accessing }
@@ -75,15 +69,13 @@ SoilIndexManager >> createIndexWithId: indexId class: aClass [
 
 { #category : #accessing }
 SoilIndexManager >> dirtyIndexes [
-	^ dirtyIndexes
+	^ indexes select: [ :each | each hasDirtyPages ]
 ]
 
 { #category : #accessing }
 SoilIndexManager >> flush [
-	
-	dirtyIndexes copy do: [ :index | 
-		index cleanUpToVersion: (self soil transactionManager smallestReadVersion).
-		index dirtyPages ifEmpty: [ dirtyIndexes remove: index ] ]
+	self dirtyIndexes copy do: [ :index | 
+		index cleanUpToVersion: (self soil transactionManager smallestReadVersion) ]
 ]
 
 { #category : #flushing }
@@ -106,8 +98,7 @@ SoilIndexManager >> indexes [
 SoilIndexManager >> initialize [ 
 	super initialize.
 	indexes := Dictionary new.
-	semaphore := Semaphore forMutualExclusion.
-	dirtyIndexes := Set new 
+	semaphore := Semaphore forMutualExclusion
 ]
 
 { #category : #initialization }

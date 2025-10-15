@@ -10,7 +10,7 @@ SoilBasicVisitor class >> isAbstract [
 	^ self == SoilBasicVisitor
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #processing }
 SoilBasicVisitor >> processBehaviorDescription: aSoilObjectId [ 
 	self processObjectId: aSoilObjectId 
 ]
@@ -30,7 +30,7 @@ SoilBasicVisitor >> processObjectId: aSoilObjectId [
 	^ aSoilObjectId 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #processing }
 SoilBasicVisitor >> processReference: aSoilObjectId [ 
 	self processObjectId: aSoilObjectId 
 ]
