@@ -341,7 +341,7 @@ SoilIndexIteratorTest >> testFirstWithRemovedItem [
 	"first when the first one was removed"
 	iterator := index newIterator.
 	iterator at: 1 add: (1 asByteArrayOfSize: 8).
-	iterator at: 2 put: (2 asByteArrayOfSize: 8).
+	iterator at: 2 add: (2 asByteArrayOfSize: 8).
 	iterator removeKey: 1.
 	iterator := index newIterator.
 	self
@@ -350,7 +350,7 @@ SoilIndexIteratorTest >> testFirstWithRemovedItem [
 
 	"lets remove the two first ones"
 	iterator := index newIterator.
-	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	iterator at: 2 put: (2 asByteArrayOfSize: 8).
 	iterator at: 3 put: (3 asByteArrayOfSize: 8).
 	iterator removeKey: 1.
@@ -441,7 +441,7 @@ SoilIndexIteratorTest >> testLastWithRemovedItem [
 	"last when the last one was removed"
 	iterator := index newIterator.
 	iterator at: 1 add: (1 asByteArrayOfSize: 8).
-	iterator at: 2 put: (2 asByteArrayOfSize: 8).
+	iterator at: 2 add: (2 asByteArrayOfSize: 8).
 	iterator removeKey: 2.
 
 	iterator := index newIterator.
@@ -451,7 +451,7 @@ SoilIndexIteratorTest >> testLastWithRemovedItem [
 
 	"lets remove the two last ones"
 	iterator := index newIterator.
-	iterator at: 2 put: (2 asByteArrayOfSize: 8).
+	iterator at: 2 add: (2 asByteArrayOfSize: 8).
 	iterator at: 3 put: (3 asByteArrayOfSize: 8).
 	iterator removeKey: 3.
 	iterator removeKey: 2.

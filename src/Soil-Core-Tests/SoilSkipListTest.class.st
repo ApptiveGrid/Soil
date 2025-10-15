@@ -196,7 +196,7 @@ SoilSkipListTest >> testAddingDuplicateKeyAcrossPages [
 	ids := OrderedCollection new.
 	1 to: 6 do: [ :n |
 		ids add: n asDummySoilObjectId.
-		iterator at: 251 put: n asDummySoilObjectId ].
+		iterator at: 251 add: n asDummySoilObjectId ].
 	self assert: index size equals: 256.
 	elements := iterator valuesAt: 251.
 	self assertCollection: elements hasSameElements: ids
@@ -318,7 +318,7 @@ SoilSkipListTest >> testFreePageAddAndDelete [
 	self assert: index headerPage lastPageOffset equals: 2.
 	self assert: index headerPage firstFreePageIndex equals: 0.
 	1 to: 1989 do: [ :n |
-		iterator at: 280 + n put: (200 + n asByteArrayOfSize: 8).
+		iterator at: 280 + n add: (200 + n asByteArrayOfSize: 8).
 		iterator removeKey: n.
 		index cleanUpToVersion: nil ].
 
@@ -351,7 +351,7 @@ SoilSkipListTest >> testFreePageAddNested [
 	"we fill the index with enough elements to use all free pages including the nested 
 	ones"
 	1 to: 15 * 1018 do: [ :n |
-	iterator at: n put: (n asByteArrayOfSize: 8) ].
+	iterator at: n add: (n asByteArrayOfSize: 8) ].
 	"there should be no more free page"
 	self assert: index headerPage firstFreePageIndex equals: 0.
 	"and all pageIndexes of the next free page should be included"
@@ -371,7 +371,7 @@ SoilSkipListTest >> testFreePageReuse [
 	index cleanUpToVersion: nil.
 	self assert: index headerPage lastPageOffset equals: 10.
 	2501 to: 2750 do: [ :n |
-	iterator at: n put: (n asByteArrayOfSize: 8) ].
+	iterator at: n add: (n asByteArrayOfSize: 8) ].
 	index cleanUpToVersion: nil.
 	"first free page is #3 with content #( 4 5 ). Adding 250 entries should remove 
 	one page #4 for reuse"
@@ -396,7 +396,7 @@ SoilSkipListTest >> testFreePageReuseAtEndAppend [
 		hasSameElements: #( 4 5 ).
 	iterator := index newIterator.
 	2501 to: 3500 do: [ :n |
-	iterator at: n put: (n asByteArrayOfSize: 8) ].
+	iterator at: n add: (n asByteArrayOfSize: 8) ].
 	index cleanUpToVersion: nil.
 	"readding the same amount of entries but at the end should reuse all 
 	free pages making first free 0."
@@ -675,7 +675,7 @@ SoilSkipListTest >> testSplitLastPage [
 	index at: n add: n ].
 	self assert: index pages size equals: 2.
 	"another page split which should be appending"
-	index at: 3000 put: 3000
+	index at: 3000 add: 3000
 ]
 
 { #category : #tests }
