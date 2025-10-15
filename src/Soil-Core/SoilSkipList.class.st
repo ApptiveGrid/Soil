@@ -21,11 +21,6 @@ SoilSkipList >> asCopyOnWrite [
 		yourself 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilSkipList >> beFileStore [
-	store := self newFileStore 
-]
-
 { #category : #'open/close' }
 SoilSkipList >> close [ 
 	super close.
@@ -105,12 +100,15 @@ SoilSkipList >> path [
 
 { #category : #accessing }
 SoilSkipList >> path: aStringOrFileReference [
-
+	(store isKindOf: SoilMemoryIndexStore) ifTrue: [ self halt ].
+	store ifNil: [  
+		store := self newFileStore ].
 	path := aStringOrFileReference asFileReference 
 ]
 
 { #category : #converting }
 SoilSkipList >> thePersistentInstance [
+(store isKindOf: SoilMemoryIndexStore) ifTrue: [ self halt ]. 
 	^ self
 	
 ]

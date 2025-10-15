@@ -106,6 +106,7 @@ SoilIndexManager >> loadIndexWithId: indexId ifNone: aBlock [
 	^ path exists
 		ifTrue: [ 
 			(self class indexClassFromFile: path) new 
+				beFileStore;
 				path: path ]
 		ifFalse: [ aBlock value ]
 ]

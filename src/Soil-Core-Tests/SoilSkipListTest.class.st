@@ -11,6 +11,7 @@ Class {
 SoilSkipListTest >> setUp [ 
 	super setUp.
 	index := SoilSkipList new 
+		beFileStore;
 		path: 'sunit-skiplist';
 		destroy;
 		initializeFilesystem;
@@ -60,6 +61,7 @@ SoilSkipListTest >> testAddFirstOverflowReload [
 	index writePages.
 	index close.
 	index := SoilSkipList new
+					beFileStore;
 		         path: 'sunit-skiplist';
 		         initializeFilesystem.
 	"we should be able to do a lookup"

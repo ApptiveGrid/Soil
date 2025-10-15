@@ -51,6 +51,7 @@ SoilBTree >> path: aStringOrFileReference [
 
 { #category : #converting }
 SoilBTree >> thePersistentInstance [
+(store isKindOf: SoilMemoryIndexStore) ifTrue: [ self halt ]. 
 	^ self
 ]
 

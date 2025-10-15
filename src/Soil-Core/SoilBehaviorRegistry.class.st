@@ -70,6 +70,7 @@ SoilBehaviorRegistry >> initialize [
 { #category : #initialization }
 SoilBehaviorRegistry >> initializeFilesystem [
 	index := SoilSkipList new 
+		beFileStore;
 		path: self path;
 		initializeFilesystem;
 		initializeHeaderPage;
@@ -124,6 +125,7 @@ SoilBehaviorRegistry >> newIterator [
 SoilBehaviorRegistry >> open [ 
 	index ifNotNil: [ index close ].
 	index :=  SoilSkipList new 
+		beFileStore;
 		path: self path;
 		open
 ]

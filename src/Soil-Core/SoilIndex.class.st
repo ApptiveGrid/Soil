@@ -119,6 +119,11 @@ SoilIndex >> basicAt: key put: anObject [
 	^ self basicAt: key add: anObject 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndex >> beFileStore [
+	store := self newFileStore 
+]
+
 { #category : #removing }
 SoilIndex >> cleanRemoved: aPage [
 	aPage cleanRemovedIn: self

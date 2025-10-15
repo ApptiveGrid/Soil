@@ -15,6 +15,7 @@ SoilNewBTreeListIndexEntry >> commitIn: soil [
 	| index indexManager |
 	indexManager := (soil objectRepository segmentAt: segment) indexManager.
 	index := SoilBTree new
+		beFileStore;
 		path: (indexManager pathFor: id);
 		initializeFilesystem;
 		initializeHeaderPage;
