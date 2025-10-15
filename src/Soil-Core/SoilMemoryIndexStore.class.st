@@ -4,6 +4,17 @@ Class {
 	#category : #'Soil-Core-Index-Common'
 }
 
+{ #category : #converting }
+SoilMemoryIndexStore >> asCopyOnWriteStore [
+	^ SoilCopyOnWriteIndexStore new 
+		wrappedStore: self
+]
+
+{ #category : #'open/close' }
+SoilMemoryIndexStore >> close [
+	
+]
+
 { #category : #flushing }
 SoilMemoryIndexStore >> flush [ 
 	
@@ -22,6 +33,11 @@ SoilMemoryIndexStore >> initializeFilesystem [
 { #category : #initialization }
 SoilMemoryIndexStore >> initializeHeaderPage [
 	pages at: 1 put: index newHeaderPage 
+]
+
+{ #category : #'instance creation' }
+SoilMemoryIndexStore >> open [
+	
 ]
 
 { #category : #accessing }
