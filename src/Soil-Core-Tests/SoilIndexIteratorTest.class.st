@@ -54,63 +54,70 @@ SoilIndexIteratorTest >> tearDown [
 
 { #category : #tests }
 SoilIndexIteratorTest >> testAddRandom [
+
 	| iterator numEntries entries |
 	"just some random adding and checking that we can find it, configured to create lots of pages"
 	iterator := index newIterator.
-	
+
 	numEntries := 1000.
 	entries := Set new: numEntries.
-	
-	numEntries timesRepeat: [ | toAdd |
-		toAdd := (numEntries*20) atRandom.
+
+	numEntries timesRepeat: [
+		| toAdd |
+		toAdd := (numEntries * 20) atRandom.
 		entries add: toAdd.
-		iterator at: toAdd  put: (toAdd asByteArrayOfSize: 8)].
-	
+		iterator at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
+
 	"check size"
 	self assert: iterator size equals: entries size.
-	
+
 	"can we find all the keys we added?"
-	entries do: [:each | self assert: (iterator at: each ) equals:(each asByteArrayOfSize: 8)].
-	
+	entries do: [ :each |
+		self assert: (iterator at: each) equals: (each asByteArrayOfSize: 8) ].
+
 	"iterate index, all should be in entries"
-	iterator do: [:each | self assert: each equals: (each asByteArrayOfSize: 8)].
-	iterator reverseDo: [:each | self assert: each equals: (each asByteArrayOfSize: 8)]
+	iterator do: [ :each |
+		self assert: each equals: (each asByteArrayOfSize: 8) ].
+	iterator reverseDo: [ :each |
+		self assert: each equals: (each asByteArrayOfSize: 8) ]
 ]
 
 { #category : #tests }
 SoilIndexIteratorTest >> testAssociationsDo [
-	
+
 	| iterator capacity result |
 	iterator := index newIterator.
-	
+
 	"empty case"
 	result := OrderedCollection new.
 	iterator associationsDo: [ :each | result add: each ].
 	self assert: result isEmpty.
-	
+
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n |
-		iterator at: n put: (n asByteArrayOfSize: 8) ].
-	
+	iterator at: n add: (n asByteArrayOfSize: 8) ].
+
 	result := OrderedCollection new.
 	iterator associationsDo: [ :each | result add: each ].
 
 	self assert: result size equals: capacity.
 	self assert: result first key equals: 1.
 	self assert: result first value equals: (1 asByteArrayOfSize: 8).
-	self assert: result last value equals: (capacity asByteArrayOfSize: 8).
+	self
+		assert: result last value
+		equals: (capacity asByteArrayOfSize: 8).
 	self assert: result last key equals: capacity
 ]
 
 { #category : #tests }
 SoilIndexIteratorTest >> testAt [
-	| iterator |
 
+	| iterator |
 	iterator := index newIterator.
-	self should: [iterator at: 1] raise: KeyNotFound.
-	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	self should: [ iterator at: 1 ] raise: KeyNotFound.
+	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	self assert: (iterator at: 1) equals: (1 asByteArrayOfSize: 8).
-	self should: [iterator at: 2] raise: KeyNotFound
+	self should: [ iterator at: 2 ] raise: KeyNotFound
 ]
 
 { #category : #tests }
@@ -124,46 +131,45 @@ SoilIndexIteratorTest >> testAtIfAbsent [
 
 { #category : #tests }
 SoilIndexIteratorTest >> testAtIndex [
-	| iterator |
 
+	| iterator |
 	iterator := index newIterator.
 	self assert: (iterator atIndex: 1) equals: nil.
-	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	self assert: (iterator atIndex: 1) equals: (1 asByteArrayOfSize: 8).
 	self assert: (iterator atIndex: 2) equals: nil
 ]
 
 { #category : #tests }
 SoilIndexIteratorTest >> testAtPut [
+
 	| iterator return |
-	
-	
 	"at:put: returns last prior value"
 	iterator := index newIterator.
-	return := iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	return := iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	self assert: return isNil.
-	self assert: (iterator at: 1) equals:  (1 asByteArrayOfSize: 8).
-	return := iterator at: 1 put: (2 asByteArrayOfSize: 8).
-	
+	self assert: (iterator at: 1) equals: (1 asByteArrayOfSize: 8).
+	return := iterator at: 1 add: (2 asByteArrayOfSize: 8).
+
 	self assert: return equals: (1 asByteArrayOfSize: 8).
 	self assert: (iterator at: 1) equals: (2 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
 SoilIndexIteratorTest >> testDo [
-	
+
 	| iterator capacity result |
 	iterator := index newIterator.
-	
+
 	"test empty case"
 	result := OrderedCollection new.
 	iterator do: [ :each | result add: each ].
 	self assert: result size equals: 0.
-	
+
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n |
-		iterator at: n put: (n asByteArrayOfSize: 8) ].
-	
+	iterator at: n add: (n asByteArrayOfSize: 8) ].
+
 	result := OrderedCollection new.
 	iterator do: [ :each | result add: each ].
 
@@ -221,25 +227,22 @@ SoilIndexIteratorTest >> testFindAndNext2 [
 
 { #category : #tests }
 SoilIndexIteratorTest >> testFindIfAbsent [
-	
+
 	| capacity iterator value |
 	capacity := index headerPage itemCapacity * 2.
 	iterator := index newIterator.
-	
+
 	"empty case"
-	value := iterator
-		find: capacity + 1 ifAbsent: [#notThere].
+	value := iterator find: capacity + 1 ifAbsent: [ #notThere ].
 	self assert: value equals: #notThere.
-	
+
 	1 to: capacity do: [ :n |
-		iterator at: n put: (n asByteArrayOfSize: 8) ].
-	
-	value := iterator
-		find: 222 ifAbsent: [#notThere].
+	iterator at: n add: (n asByteArrayOfSize: 8) ].
+
+	value := iterator find: 222 ifAbsent: [ #notThere ].
 	self assert: value equals: (222 asByteArrayOfSize: 8).
-	value := iterator
-		find: capacity + 1 ifAbsent: [#notThere].
-	self assert: value equals: #notThere.
+	value := iterator find: capacity + 1 ifAbsent: [ #notThere ].
+	self assert: value equals: #notThere
 ]
 
 { #category : #tests }
@@ -287,19 +290,23 @@ SoilIndexIteratorTest >> testFirst [
 
 { #category : #tests }
 SoilIndexIteratorTest >> testFirstAssociation [
+
 	| iterator |
-	
 	"test empty index"
 	iterator := index newIterator.
 	self assert: iterator lastAssociation isNil.
-	
+
 	"firstAssociation always returns first"
 	iterator := index newIterator.
-	iterator at: 1 put: (1 asByteArrayOfSize: 8).
-	iterator at: 2 put: (2 asByteArrayOfSize: 8).
+	iterator at: 1 add: (1 asByteArrayOfSize: 8).
+	iterator at: 2 add: (2 asByteArrayOfSize: 8).
 
-	self assert: iterator firstAssociation value equals: (1 asByteArrayOfSize: 8).
-	self assert: iterator firstAssociation value equals: (1 asByteArrayOfSize: 8).
+	self
+		assert: iterator firstAssociation value
+		equals: (1 asByteArrayOfSize: 8).
+	self
+		assert: iterator firstAssociation value
+		equals: (1 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
@@ -322,23 +329,25 @@ SoilIndexIteratorTest >> testFirstPage [
 ]
 
 { #category : #tests }
-SoilIndexIteratorTest >> testFirstWithRemovedItem [ 
+SoilIndexIteratorTest >> testFirstWithRemovedItem [
+
 	| iterator |
-	
 	iterator := index newIterator.
-	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	iterator removeKey: 1.
 	iterator := index newIterator.
 	self assert: iterator firstAssociation value equals: nil.
-	
+
 	"first when the first one was removed"
 	iterator := index newIterator.
-	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	iterator at: 2 put: (2 asByteArrayOfSize: 8).
 	iterator removeKey: 1.
 	iterator := index newIterator.
-	self assert: iterator firstAssociation value equals: (2 asByteArrayOfSize: 8).
-	
+	self
+		assert: iterator firstAssociation value
+		equals: (2 asByteArrayOfSize: 8).
+
 	"lets remove the two first ones"
 	iterator := index newIterator.
 	iterator at: 1 put: (1 asByteArrayOfSize: 8).
@@ -347,7 +356,9 @@ SoilIndexIteratorTest >> testFirstWithRemovedItem [
 	iterator removeKey: 1.
 	iterator removeKey: 2.
 	iterator := index newIterator.
-	self assert: iterator firstAssociation value equals: (3 asByteArrayOfSize: 8)
+	self
+		assert: iterator firstAssociation value
+		equals: (3 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
@@ -382,19 +393,23 @@ SoilIndexIteratorTest >> testLast [
 
 { #category : #tests }
 SoilIndexIteratorTest >> testLastAssociation [
+
 	| iterator |
-	
 	"test empty index"
 	iterator := index newIterator.
 	self assert: iterator lastAssociation isNil.
-	
+
 	"lastAssociation always returns last"
 	iterator := index newIterator.
-	iterator at: 1 put: (1 asByteArrayOfSize: 8).
-	iterator at: 2 put: (2 asByteArrayOfSize: 8).
+	iterator at: 1 add: (1 asByteArrayOfSize: 8).
+	iterator at: 2 add: (2 asByteArrayOfSize: 8).
 
-	self assert: iterator lastAssociation value equals: (2 asByteArrayOfSize: 8).
-	self assert: iterator lastAssociation value equals: (2 asByteArrayOfSize: 8).
+	self
+		assert: iterator lastAssociation value
+		equals: (2 asByteArrayOfSize: 8).
+	self
+		assert: iterator lastAssociation value
+		equals: (2 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
@@ -414,24 +429,26 @@ SoilIndexIteratorTest >> testLastPage [
 ]
 
 { #category : #tests }
-SoilIndexIteratorTest >> testLastWithRemovedItem [ 
+SoilIndexIteratorTest >> testLastWithRemovedItem [
+
 	| iterator |
-	
 	iterator := index newIterator.
-	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	iterator removeKey: 1.
 	iterator := index newIterator.
 	self assert: iterator lastAssociation equals: nil.
-	
+
 	"last when the last one was removed"
 	iterator := index newIterator.
-	iterator at: 1 put: (1 asByteArrayOfSize: 8).
+	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	iterator at: 2 put: (2 asByteArrayOfSize: 8).
 	iterator removeKey: 2.
-	
+
 	iterator := index newIterator.
-	self assert: iterator lastAssociation value equals: (1 asByteArrayOfSize: 8).
-	
+	self
+		assert: iterator lastAssociation value
+		equals: (1 asByteArrayOfSize: 8).
+
 	"lets remove the two last ones"
 	iterator := index newIterator.
 	iterator at: 2 put: (2 asByteArrayOfSize: 8).
@@ -439,7 +456,9 @@ SoilIndexIteratorTest >> testLastWithRemovedItem [
 	iterator removeKey: 3.
 	iterator removeKey: 2.
 	iterator := index newIterator.
-	self assert: iterator lastAssociation value equals: (1 asByteArrayOfSize: 8)
+	self
+		assert: iterator lastAssociation value
+		equals: (1 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
@@ -831,31 +850,33 @@ SoilIndexIteratorTest >> testReverseDo [
 
 { #category : #tests }
 SoilIndexIteratorTest >> testSize [
-	
+
 	| iterator capacity |
 	iterator := index newIterator.
 	self assert: iterator size equals: 0.
-	
+
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n |
-		iterator at: n put: (n asByteArrayOfSize: 8) ].
-	
+	iterator at: n add: (n asByteArrayOfSize: 8) ].
+
 	self assert: iterator size equals: capacity
 ]
 
 { #category : #tests }
 SoilIndexIteratorTest >> testValues [
-	
+
 	| iterator capacity |
 	iterator := index newIterator.
 	"empty case"
 	self assert: iterator values isEmpty.
-	
+
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n |
-		iterator at: n put: (n asByteArrayOfSize: 8) ].
-	
+	iterator at: n add: (n asByteArrayOfSize: 8) ].
+
 	self assert: iterator values size equals: capacity.
 	self assert: iterator values first equals: (1 asByteArrayOfSize: 8).
-	self assert: iterator values last equals: (capacity asByteArrayOfSize: 8)
+	self
+		assert: iterator values last
+		equals: (capacity asByteArrayOfSize: 8)
 ]

@@ -51,19 +51,20 @@ SoilIndexedDictionary >> at: key ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexedDictionary >> at: key put: anObject [
+
 	| objectId oldValue |
 	objectId := transaction makeRoot: anObject.
-	(self newIterator at: key put: objectId) ifNotNil: [ :value |
+	(self newIterator at: key add: objectId) ifNotNil: [ :value |
 		oldValue := value ].
 
-	transaction addJournalEntry: (SoilAddKeyEntry new 
-		segment: self segment;
-		id: id;
-		key: (index indexKey: key);
-		value: objectId;
-		oldValue: oldValue).
+	transaction addJournalEntry: (SoilAddKeyEntry new
+			 segment: self segment;
+			 id: id;
+			 key: (index indexKey: key);
+			 value: objectId;
+			 oldValue: oldValue).
 
-	^ objectId 
+	^ objectId
 ]
 
 { #category : #accessing }

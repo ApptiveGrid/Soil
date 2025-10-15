@@ -81,9 +81,8 @@ SoilIndex >> at: key [
 
 { #category : #accessing }
 SoilIndex >> at: aKeyObject add: anObject [
-	self newIterator 
-		at: aKeyObject 
-		put: anObject
+
+	self newIterator at: aKeyObject add: anObject
 ]
 
 { #category : #accessing }

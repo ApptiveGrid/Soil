@@ -74,16 +74,17 @@ SoilPluggableIndexRewriter >> restoreItem: item [
 ]
 
 { #category : #running }
-SoilPluggableIndexRewriter >> run [ 
+SoilPluggableIndexRewriter >> run [
+
 	self validatePath.
 	self prepareNewIndex.
-	[  
-		index newIterator associationsDo: [ :item |
-				item ifNotNil: [  
-				(itemBlock value: item) ifNotNil: [ :newItem | 
-					self newIndexIterator at: newItem key put: newItem value ] ] ] ]
-		ifCurtailed: [ 
-			rewritePath deleteIfAbsent: [].
+	[
+	index newIterator associationsDo: [ :item |
+		item ifNotNil: [
+			(itemBlock value: item) ifNotNil: [ :newItem |
+				self newIndexIterator at: newItem key add: newItem value ] ] ] ]
+		ifCurtailed: [
+			rewritePath deleteIfAbsent: [  ].
 			Error signal: 'reindexing failed' ].
-	self replaceIndex 
+	self replaceIndex
 ]

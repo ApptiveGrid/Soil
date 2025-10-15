@@ -187,22 +187,19 @@ SoilSkipListTest >> testAddRandom [
 ]
 
 { #category : #tests }
-SoilSkipListTest >> testAddingDuplicateKeyAcrossPages [ 
-	
+SoilSkipListTest >> testAddingDuplicateKeyAcrossPages [
+
 	| elements iterator ids |
 	index allowDuplicateKeys.
 	iterator := index newIterator.
-	1 to: 250 do: [ :n |
-		iterator at: n put: n asDummySoilObjectId ].
+	1 to: 250 do: [ :n | iterator at: n add: n asDummySoilObjectId ].
 	ids := OrderedCollection new.
 	1 to: 6 do: [ :n |
 		ids add: n asDummySoilObjectId.
-		iterator at: 251 put: n asDummySoilObjectId ]. 
+		iterator at: 251 put: n asDummySoilObjectId ].
 	self assert: index size equals: 256.
 	elements := iterator valuesAt: 251.
 	self assertCollection: elements hasSameElements: ids
-	
-
 ]
 
 { #category : #tests }
@@ -293,14 +290,13 @@ SoilSkipListTest >> testFirstArgLargerThenSize [
 
 { #category : #tests }
 SoilSkipListTest >> testFreePageAdd [
+
 	| iterator |
 	iterator := index newIterator.
-	1 to: 2500 do: [ :n | 
-		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
 	self assert: index headerPage lastPageOffset equals: 10.
 	self assert: index headerPage firstFreePageIndex equals: 0.
-	500 to: 1500 do: [ : n |
-		iterator removeKey: n ].
+	500 to: 1500 do: [ :n | iterator removeKey: n ].
 	self assert: index headerPage lastPageOffset equals: 10.
 	self assert: index headerPage firstFreePageIndex equals: 0.
 	index cleanUpToVersion: nil.
@@ -308,110 +304,110 @@ SoilSkipListTest >> testFreePageAdd [
 	"the first page that gets empty is reused as free list page"
 	self assert: index headerPage firstFreePageIndex equals: 3.
 	"subsequent removed pages are added to the first page"
-	self assertCollection: (index store pageAt: 3) pageIndexes hasSameElements: #( 4 5 ).
+	self
+		assertCollection: (index store pageAt: 3) pageIndexes
+		hasSameElements: #( 4 5 )
 ]
 
 { #category : #tests }
 SoilSkipListTest >> testFreePageAddAndDelete [
+
 	| iterator |
 	iterator := index newIterator.
-	1 to: 280 do: [ :n | 
-		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	1 to: 280 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
 	self assert: index headerPage lastPageOffset equals: 2.
 	self assert: index headerPage firstFreePageIndex equals: 0.
-	1 to: 1989 do: [ : n |
-		iterator at: 280+n put: ((200+n) asByteArrayOfSize: 8).
+	1 to: 1989 do: [ :n |
+		iterator at: 280 + n put: (200 + n asByteArrayOfSize: 8).
 		iterator removeKey: n.
-		index cleanUpToVersion: nil. ].
-	
+		index cleanUpToVersion: nil ].
+
 	self assert: index headerPage lastPageOffset equals: 4.
 	self assert: (index store pageAt: 4) pageIndexes isEmpty
 ]
 
 { #category : #tests }
 SoilSkipListTest >> testFreePageAddNested [
+
 	| iterator nestedFreeIndexes |
 	index
-		maxLevel: 8; 
+		maxLevel: 8;
 		valueSize: 512.
 	iterator := index newIterator.
 	"create enough pages to test"
-	1 to: 9000 do: [ :n | 
-		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	1 to: 9000 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
 	self assert: index headerPage lastPageOffset equals: 1286.
 	self assert: index headerPage firstFreePageIndex equals: 0.
 	"now we free more pages than a free page list has capacity"
-	10 to: 8990 do: [ : n |
-		iterator removeKey: n ].
+	10 to: 8990 do: [ :n | iterator removeKey: n ].
 	index cleanUpToVersion: nil.
 	self assert: index headerPage firstFreePageIndex equals: 3.
 	self assert: (index store pageAt: 3) pageIndexes size equals: 1018.
 	"as there were more than free list capacity there is a next free
 	list page"
 	self assert: (index store pageAt: 3) next equals: 1022.
-	nestedFreeIndexes := ((index store pageAt: 1022) pageIndexes copy) copyWith: 1022.
+	nestedFreeIndexes := (index store pageAt: 1022) pageIndexes copy
+		                     copyWith: 1022.
 	"we fill the index with enough elements to use all free pages including the nested 
 	ones"
-	1 to: 15*1018 do: [ :n | 
-		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	1 to: 15 * 1018 do: [ :n |
+	iterator at: n put: (n asByteArrayOfSize: 8) ].
 	"there should be no more free page"
 	self assert: index headerPage firstFreePageIndex equals: 0.
 	"and all pageIndexes of the next free page should be included"
-	self assert: ((index store pages collect: #offset) includesAll: nestedFreeIndexes) 
-	
-	
+	self assert:
+		((index store pages collect: #offset) includesAll: nestedFreeIndexes)
 ]
 
 { #category : #tests }
 SoilSkipListTest >> testFreePageReuse [
+
 	| iterator |
 	iterator := index newIterator.
-	1 to: 2500 do: [ :n | 
-		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
 	self assert: index headerPage lastPageOffset equals: 10.
 	self assert: index headerPage firstFreePageIndex equals: 0.
-	500 to: 1500 do: [ : n |
-		iterator removeKey: n ].
+	500 to: 1500 do: [ :n | iterator removeKey: n ].
 	index cleanUpToVersion: nil.
 	self assert: index headerPage lastPageOffset equals: 10.
-	2501 to: 2750 do: [ :n | 
-		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	2501 to: 2750 do: [ :n |
+	iterator at: n put: (n asByteArrayOfSize: 8) ].
 	index cleanUpToVersion: nil.
 	"first free page is #3 with content #( 4 5 ). Adding 250 entries should remove 
 	one page #4 for reuse"
-	self assertCollection: (index store pageAt: 3) pageIndexes hasSameElements: #( 5 ).
-
+	self
+		assertCollection: (index store pageAt: 3) pageIndexes
+		hasSameElements: #( 5 )
 ]
 
 { #category : #tests }
 SoilSkipListTest >> testFreePageReuseAtEndAppend [
+
 	| iterator |
 	iterator := index newIterator.
-	1 to: 2500 do: [ :n | 
-		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
 	self assert: index headerPage lastPageOffset equals: 10.
 	self assert: index headerPage firstFreePageIndex equals: 0.
-	500 to: 1500 do: [ : n |
-		iterator removeKey: n ].
+	500 to: 1500 do: [ :n | iterator removeKey: n ].
 	index cleanUpToVersion: nil.
 	self assert: index headerPage lastPageOffset equals: 10.
-	self assertCollection: (index store pageAt: 3) pageIndexes hasSameElements: #( 4 5 ).
+	self
+		assertCollection: (index store pageAt: 3) pageIndexes
+		hasSameElements: #( 4 5 ).
 	iterator := index newIterator.
-	2501 to: 3500 do: [ :n | 
-		iterator at: n  put: (n asByteArrayOfSize: 8) ].
+	2501 to: 3500 do: [ :n |
+	iterator at: n put: (n asByteArrayOfSize: 8) ].
 	index cleanUpToVersion: nil.
 	"readding the same amount of entries but at the end should reuse all 
 	free pages making first free 0."
-	self assert: index headerPage firstFreePageIndex  equals: 0.
+	self assert: index headerPage firstFreePageIndex equals: 0.
 	"as the new entries did not fit exactly we have one more page at the 
 	end which should have update the header page"
 	self assert: index headerPage lastPageOffset equals: 11.
 	"page #3 was the first free page so it was recycled last. Therefor the 
 	page #3 should point to page #11 which should be the last"
 	self assert: (index store pageAt: 3) right first equals: 11.
-	self assert: (index store pageAt: 11) right first equals: 0.
-
-	
+	self assert: (index store pageAt: 11) right first equals: 0
 ]
 
 { #category : #tests }
@@ -585,7 +581,7 @@ SoilSkipListTest >> testRecyclePage [
 		index at: offset + 1 add: (offset + 1 asByteArrayOfSize: 8).
 		capacity := index lastPage itemCapacity.
 		offset + 2 to: offset + capacity do: [ :n |
-		index at: n put: (n asByteArrayOfSize: 8) ].
+		index at: n add: (n asByteArrayOfSize: 8) ].
 		offset := offset + capacity ].
 	self assert: index pages size equals: 6.
 	index recyclePage: (index pages at: 3).
@@ -657,7 +653,7 @@ SoilSkipListTest >> testSize [
 	capacity := index firstPage itemCapacity.
 	index at: 1 add: (1 asByteArrayOfSize: 8).
 	2 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
-	index at: capacity + 1 put: (capacity + 1 asByteArrayOfSize: 8).
+	index at: capacity + 1 add: (capacity + 1 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 2.
 	self assert: index size equals: capacity + 1
 ]
@@ -676,7 +672,7 @@ SoilSkipListTest >> testSplitLastPage [
 	"fill second page til the end"
 	itemCapacity := (index pageAt: 2) itemCapacity.
 	headerCapacity + 2 to: headerCapacity + itemCapacity do: [ :n |
-	index at: n put: n ].
+	index at: n add: n ].
 	self assert: index pages size equals: 2.
 	"another page split which should be appending"
 	index at: 3000 put: 3000
