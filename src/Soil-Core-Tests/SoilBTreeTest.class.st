@@ -43,7 +43,7 @@ SoilBTreeTest >> testAdd2 [
 	index at: 6 add: (6 asByteArrayOfSize: 8).
 	self assert: (index at: 6) equals: (6 asByteArrayOfSize: 8).
 
-	index at: 16 put: (16 asByteArrayOfSize: 8).
+	index at: 16 add: (16 asByteArrayOfSize: 8).
 	self assert: (index at: 6) equals: (6 asByteArrayOfSize: 8).
 	self assert: (index at: 16) equals: (16 asByteArrayOfSize: 8).
 
@@ -58,7 +58,7 @@ SoilBTreeTest >> testAdd2 [
 
 
 	"with adding 26, we have to split the data page"
-	index at: 26 put: (26 asByteArrayOfSize: 8).
+	index at: 26 add: (26 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 3.
 	self assert: index indexPages size equals: 1.
 	self assert: index dataPages size equals: 2.
@@ -121,7 +121,7 @@ SoilBTreeTest >> testAddFirstOverflow [
 	self assert: index pages size equals: 3.
 	self assert: (index pageAt: 1) numberOfItems equals: 126.
 	"if we add a page, the current one is split and half is moved there"
-	index at: capacity + 1 put: (capacity + 1 asByteArrayOfSize: 8).
+	index at: capacity + 1 add: (capacity + 1 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 3.
 	page := index pageAt: 3.
 	self assert: page numberOfItems equals: 128.
@@ -180,7 +180,7 @@ SoilBTreeTest >> testAddSecondOverflow [
 	self assert: (index pageAt: 1) numberOfItems equals: 126.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n |
-		index at: capacity + n put: (capacity + n asByteArrayOfSize: 8) ].
+		index at: capacity + n add: (capacity + n asByteArrayOfSize: 8) ].
 	self assert: index pages size equals: 4.
 	page := index pageAt: 4.
 	self assert: page numberOfItems equals: 253.
@@ -202,7 +202,7 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 	self assert: (index pageAt: 1) numberOfItems equals: 126.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n |
-		index at: capacity + n put: (capacity + n asByteArrayOfSize: 8) ].
+		index at: capacity + n add: (capacity + n asByteArrayOfSize: 8) ].
 	self assert: index pages size equals: 4.
 	page := index pageAt: 4.
 	self assert: page numberOfItems equals: 253.
@@ -231,7 +231,7 @@ SoilBTreeTest >> testAt [
 	self assert: index pages size equals: 3.
 	self assert: (index pageAt: 1) numberOfItems equals: 126.
 	"if we add a page, the current one is split and half is moved there"
-	index at: capacity + 1 put: (capacity + 1 asByteArrayOfSize: 8).
+	index at: capacity + 1 add: (capacity + 1 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 3.
 
 	self assert: (index at: 1) equals: (1 asByteArrayOfSize: 8).
@@ -255,7 +255,7 @@ SoilBTreeTest >> testAtSecondOverflow [
 	self assert: (index pageAt: 1) numberOfItems equals: 126.
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n |
-		index at: capacity + n put: (capacity + n asByteArrayOfSize: 8) ].
+		index at: capacity + n add: (capacity + n asByteArrayOfSize: 8) ].
 	self assert: index pages size equals: 4.
 
 	self assert: (index at: 1) equals: (1 asByteArrayOfSize: 8).
@@ -338,7 +338,7 @@ SoilBTreeTest >> testFreePageAddNested [
 	"we fill the index with enough elements to use all free pages including the nested 
 	ones"
 	1 to: 15 * 1018 do: [ :n |
-	iterator at: n put: (n asByteArrayOfSize: 8) ].
+	iterator at: n add: (n asByteArrayOfSize: 8) ].
 	"there should be no more free page"
 	self assert: index headerPage firstFreePageIndex equals: 0.
 	"and all pageIndexes of the next free page should be included"
@@ -358,7 +358,7 @@ SoilBTreeTest >> testFreePageReuse [
 	index cleanUpToVersion: nil.
 	self assert: index headerPage lastPageOffset equals: 20.
 	2501 to: 2750 + 250 do: [ :n |
-	iterator at: n put: (n asByteArrayOfSize: 8) ].
+	iterator at: n add: (n asByteArrayOfSize: 8) ].
 	index cleanUpToVersion: nil.
 	"first free page is #6 with content #( 9 10 11 12 ). Adding 500 entries should remove 
 	two pages for reuse"
@@ -421,7 +421,7 @@ SoilBTreeTest >> testIndexRewritingWithCleaning [
 	1 to: capacity + 1 do: [ :n |
 	index at: n add: (n asByteArrayOfSize: 8) ].
 	index flush.
-	1 to: capacity do: [ :n | index at: n put: SoilObjectId removed ].
+	1 to: capacity do: [ :n | index at: n add: SoilObjectId removed ].
 
 	index newPluggableRewriter cleanRemoved run.
 	self assert: index headerPage lastPageOffset equals: 2.
@@ -542,10 +542,10 @@ SoilBTreeTest >> testRecyclePage [
 	offset := capacityFirst.
 	iterator := index newIterator.
 	2 to: 6 do: [ :p |
-		index at: offset + 1 put: (offset + 1 asByteArrayOfSize: 8).
+		index at: offset + 1 add: (offset + 1 asByteArrayOfSize: 8).
 		capacity := index lastPage itemCapacity.
 		offset + 2 to: offset + capacity do: [ :n |
-		index at: n put: (n asByteArrayOfSize: 8) ].
+		index at: n add: (n asByteArrayOfSize: 8) ].
 		offset := offset + capacity ].
 	self assert: index pages size equals: 13.
 	index recyclePage: (index pages at: 3).
@@ -598,7 +598,7 @@ SoilBTreeTest >> testRemoveFromIndex [
 	"and the index is removed, too"
 	self deny: (index pageAt: 10) items last key equals: 335.
 	"we can add it back"
-	index at: 335 put: (335 asByteArrayOfSize: 8).
+	index at: 335 add: (335 asByteArrayOfSize: 8).
 	self assert: (index pageAt: 10) items last key equals: 335.
 	self
 		assert: (index pageAt: 10) items last value
@@ -646,7 +646,7 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 
 	"and add back"
 	entries do: [ :toAdd |
-		index at: toAdd put: (toAdd asByteArrayOfSize: 8) ].
+		index at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
 	entries do: [ :each |
 		self assert: (index at: each) equals: (each asByteArrayOfSize: 8) ]
 ]
@@ -675,7 +675,7 @@ SoilBTreeTest >> testSize [
 	| capacity |
 	capacity := index headerPage itemCapacity.
 	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
-	index at: capacity + 1 put: (capacity + 1 asByteArrayOfSize: 8).
+	index at: capacity + 1 add: (capacity + 1 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 3.
 	self assert: index size equals: capacity + 1
 ]
