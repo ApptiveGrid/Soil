@@ -131,6 +131,15 @@ SoilSkipListIterator >> levelAt: anInteger [
 	^ levels at: anInteger 
 ]
 
+{ #category : #accessing }
+SoilSkipListIterator >> previousPage [ 
+	| previousPageIndex |
+	previousPageIndex := currentPage previous.
+	^ (previousPageIndex > 0)
+		ifTrue: [ self pageAt: previousPageIndex ]
+		ifFalse: [ nil ]
+]
+
 { #category : #printing }
 SoilSkipListIterator >> printOn: aStream [ 
 	aStream << 'path: ' << levels asString

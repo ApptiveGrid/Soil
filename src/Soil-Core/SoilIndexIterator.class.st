@@ -282,6 +282,17 @@ SoilIndexIterator >> firstPage [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> goToNextPage [ 
+	currentPage := self nextPage 
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> goToPreviousPage [ 
+	currentPage := self previousPage 
+
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> index [
 	^index
 ]

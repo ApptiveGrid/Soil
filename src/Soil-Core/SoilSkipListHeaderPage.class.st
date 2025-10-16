@@ -79,6 +79,11 @@ SoilSkipListHeaderPage >> initialize [
 	uniqueKeys := true
 ]
 
+{ #category : #initialization }
+SoilSkipListHeaderPage >> initializeLevel: anInteger [
+	Error signal: 'this should not be called on the header page'
+]
+
 { #category : #testing }
 SoilSkipListHeaderPage >> isHeaderPage [
 	^ true
@@ -137,6 +142,13 @@ SoilSkipListHeaderPage >> nextPageOffset [
 	lastPageOffset := lastPageOffset + 1.
 	needWrite := true.
 	^ lastPageOffset 
+]
+
+{ #category : #accessing }
+SoilSkipListHeaderPage >> previous [ 
+	"return 0 to indicate no previous page. As we misuse the left array as
+	tail sentinel we need to protect it here"
+	^ 0 
 ]
 
 { #category : #reading }
