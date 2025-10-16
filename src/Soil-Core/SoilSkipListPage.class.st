@@ -187,6 +187,17 @@ SoilSkipListPage >> left [
 	^ left
 ]
 
+{ #category : #accessing }
+SoilSkipListPage >> leftAt: anInteger [ 
+	^ left at: anInteger 
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> leftAt: anInteger put: anObject [ 
+	left at: anInteger put: anObject.
+	needWrite := true
+]
+
 { #category : #writing }
 SoilSkipListPage >> leftSize [
 	"this fixes the maximum number of pages to 32 bits which should be enough. This
@@ -209,6 +220,11 @@ SoilSkipListPage >> postCopy [
 	super postCopy.
 	right := right copy.
 	left := left copy
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> previous [
+	^ self leftAt: 1
 ]
 
 { #category : #reading }
@@ -237,13 +253,12 @@ SoilSkipListPage >> right [
 
 { #category : #accessing }
 SoilSkipListPage >> rightAt: anInteger [ 
-	(anInteger > self level) ifTrue: [ ^ 0 ]. 
-	^ self right at: anInteger 
+	^ right at: anInteger 
 ]
 
 { #category : #accessing }
 SoilSkipListPage >> rightAt: anInteger put: anObject [ 
-	self right at: anInteger put: anObject.
+	right at: anInteger put: anObject.
 	needWrite := true
 ]
 
