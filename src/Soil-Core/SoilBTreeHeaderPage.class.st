@@ -85,7 +85,7 @@ SoilBTreeHeaderPage >> lastPageOffset: anObject [
 
 { #category : #initialization }
 SoilBTreeHeaderPage >> latestVersion [
-	^ 1
+	^ 3
 ]
 
 { #category : #accessing }

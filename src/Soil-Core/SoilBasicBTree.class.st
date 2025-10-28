@@ -156,6 +156,7 @@ SoilBasicBTree >> removePage: aPage [
 	iterator := self newIterator. 
 	previousPage := iterator findPreviousPageOf: aPage. 
 	previousPage next: aPage next.
+	iterator nextPage previous: aPage previous.
 	self addDirtyPage: previousPage.
 	"now remove all keys, this will update the index pages"
 	
@@ -190,8 +191,11 @@ SoilBasicBTree >> splitIndexPage: page [
 SoilBasicBTree >> splitPage: page [ 
 	| newPage |
 	newPage := page split: store allocatePage.
+	"someone else has me as previous"
+	page next ~= 0 ifTrue: [(store pageAt: page next) previous: newPage offset].
 	newPage next: page next.
 	page next: newPage offset.
+	newPage previous: page offset.
 	self addDirtyPage: page.
 	self addDirtyPage: newPage.
 	^ newPage 

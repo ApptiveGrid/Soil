@@ -20,7 +20,7 @@ SoilBTreeDataPage >> initializeInIndex: aSoilSkipList [
 
 { #category : #initialization }
 SoilBTreeDataPage >> latestVersion [
-	^ 1
+	^ 3
 ]
 
 { #category : #reading }
