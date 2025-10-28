@@ -149,14 +149,13 @@ SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
 
 { #category : #removing }
 SoilBasicBTree >> removePage: aPage [
-	| iterator previousPage |
+	| previousPage |
 	(aPage offset > 1) ifFalse: [ ^ aPage ].
 
 	"We use the iterator to find the previousPage, to change it's next pointer to my next"
-	iterator := self newIterator. 
-	previousPage := iterator findPreviousPageOf: aPage. 
+	previousPage := self pageAt: aPage previous.
 	previousPage next: aPage next.
-	iterator nextPage previous: aPage previous.
+	(self pageAt: aPage next) previous: aPage previous.
 	self addDirtyPage: previousPage.
 	"now remove all keys, this will update the index pages"
 	
