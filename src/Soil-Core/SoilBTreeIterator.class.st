@@ -39,12 +39,21 @@ SoilBTreeIterator >> findPageFor: indexKey [
 
 { #category : #private }
 SoilBTreeIterator >> findPreviousPageOf: aPage [
-	
+	| page |
 	aPage isHeaderPage ifTrue: [ ^nil ].
-	currentPage := index rootPage findPreviousPage: aPage firstItem key with: index path: OrderedCollection new.
+	page := (aPage version > 2) 
+		ifTrue: [
+			| previousPageIndex |
+			previousPageIndex := aPage previous.
+			(previousPageIndex > 0)
+				ifTrue: [ self pageAt: previousPageIndex ]
+				ifFalse: [ nil ]
+			 ]
+		ifFalse: [index rootPage findPreviousPage: aPage firstItem key with: index path: OrderedCollection new].
 	"for now use assert to make sure this is correct"
-	self assert: (self nextPage == aPage).
-	^currentPage
+	self assert: (self pageAt: page next) == aPage.
+	currentPage := page.
+	^ currentPage
 ]
 
 { #category : #accessing }

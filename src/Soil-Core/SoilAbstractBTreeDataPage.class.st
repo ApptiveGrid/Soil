@@ -9,6 +9,7 @@ Class {
 	#name : #SoilAbstractBTreeDataPage,
 	#superclass : #SoilBTreePage,
 	#instVars : [
+		'previous',
 		'next',
 		'valueSize'
 	],
@@ -40,15 +41,15 @@ SoilAbstractBTreeDataPage >> findPreviousPage: aKey with: aBTree path: aPath [
 { #category : #utilities }
 SoilAbstractBTreeDataPage >> headerSize [
 	^ super headerSize  
-		+ self pointerSize "next"
+		+ (self pointerSize * 2) "prev and next"
 
 ]
 
 { #category : #initialization }
 SoilAbstractBTreeDataPage >> initialize [ 
 	super initialize.
-	"0 means this is the last page"
-	next := 0
+	next := 0. "0 means this is the last page"
+	previous := 0  "0 means this is the first page"
 ]
 
 { #category : #adding }
@@ -101,9 +102,21 @@ SoilAbstractBTreeDataPage >> nextPageIn: btree [
 	^btree pageAt: next
 ]
 
+{ #category : #accessing }
+SoilAbstractBTreeDataPage >> previous [
+	^ previous
+]
+
+{ #category : #accessing }
+SoilAbstractBTreeDataPage >> previous: anObject [
+	previous := anObject
+]
+
 { #category : #reading }
 SoilAbstractBTreeDataPage >> readFrom: aStream [
 	super readFrom: aStream.
+	(version > 2) ifTrue: [ 
+		previous := (aStream next: self pointerSize) asInteger].
 	next := (aStream next: self pointerSize) asInteger
 ]
 
@@ -126,6 +139,9 @@ SoilAbstractBTreeDataPage >> valueSize: anInteger [
 { #category : #writing }
 SoilAbstractBTreeDataPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
+	(version > 2) ifTrue: [ 
+	aStream
+		nextPutAll: (previous asByteArrayOfSize: self pointerSize)].
 	aStream
 		nextPutAll: (next asByteArrayOfSize: self pointerSize)
 ]
