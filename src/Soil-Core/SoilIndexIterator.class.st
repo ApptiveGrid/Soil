@@ -226,7 +226,7 @@ SoilIndexIterator >> findOne: key ifAbsent: aBlock [
 	self findPageFor: currentKey.
 
 	currentPageIndex := currentPage indexOfKey: currentKey.
-	currentPageIndex isZero ifTrue: [ ^ aBlock value ].
+	currentPageIndex == 0 ifTrue: [ ^ aBlock value ].
 	value := (currentPage itemAtIndex: currentPageIndex) value.
 	item := self restoreItem: currentKey -> value.
 	^ item

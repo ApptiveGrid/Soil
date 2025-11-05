@@ -45,12 +45,6 @@ SoilBasicBTree >> indexPages [
 ]
 
 { #category : #initialization }
-SoilBasicBTree >> initialize [ 
-	super initialize.
-	dirtyPages := OrderedDictionary new
-]
-
-{ #category : #initialization }
 SoilBasicBTree >> initializeFilesystem [ 
 	self store initializeFilesystem
 ]

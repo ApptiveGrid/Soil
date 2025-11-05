@@ -31,7 +31,7 @@ SoilObjectSegment >> allVersionsAt: index [
 	versions := OrderedCollection new.
 	versions add: obj.
 	objectId := obj objectId.
-	[ obj previousVersionPosition isZero ] whileFalse: [ 
+	[ obj previousVersionPosition == 0 ] whileFalse: [ 
 		obj := objectFile atPosition: obj previousVersionPosition.
 		obj objectId: objectId.
 		versions add: obj ].
@@ -75,7 +75,7 @@ SoilObjectSegment >> at: index version: version [
 SoilObjectSegment >> basicAt: anInteger [ 
 	| position |
 	position := indexFile positionAt: anInteger.
-	position isZero ifTrue: [  SoilIndexOutOfRange signal: 'no entry for object at ', id asString, ':', anInteger asString ].
+	position == 0 ifTrue: [  SoilIndexOutOfRange signal: 'no entry for object at ', id asString, ':', anInteger asString ].
 	^ (objectFile atPosition: position) ifNotNil: [ :record | 
 		record objectId: (SoilObjectId segment: id index: anInteger).
 		record ]
@@ -85,7 +85,7 @@ SoilObjectSegment >> basicAt: anInteger [
 SoilObjectSegment >> basicAt: anInteger ifAbsent: aBlock [
 	| position |
 	position := indexFile positionAt: anInteger.
-	position isZero ifTrue: [  ^ aBlock value ].
+	position == 0 ifTrue: [  ^ aBlock value ].
 	^ (objectFile atPosition: position) ifNotNil: [ :record | 
 		record objectId: (SoilObjectId segment: id index: anInteger).
 		record ]

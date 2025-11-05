@@ -508,7 +508,7 @@ SoilIndexedDictionaryTest >> testFreePageReuse [
 	tx3 commit.
 	indexManager := soil objectRepository firstSegment indexManager.
 	index := indexManager indexes anyOne.
-	self assert: index headerPage firstFreePageIndex isZero.
+	self assert: index headerPage firstFreePageIndex identicalTo: 0.
 	self assert: index firstFreePage isNil
 
 ]
@@ -530,7 +530,7 @@ SoilIndexedDictionaryTest >> testFreePages [
 	300 to: 1100 do: [ :n | tx2 root removeKey: n ].
 	tx2 commit.
 	index := indexManager indexes anyOne.
-	self deny: index headerPage firstFreePageIndex isZero.
+	self deny: index headerPage firstFreePageIndex identicalTo: 0.
 	(backend = SoilBTree) 
 		ifTrue:  [ self assert: index firstFreePage pageIndexes size equals: 5 ]
 		ifFalse: [ self assert: index firstFreePage pageIndexes size equals: 1 ]

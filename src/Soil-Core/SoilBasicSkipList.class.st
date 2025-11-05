@@ -22,12 +22,6 @@ SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
 ]
 
-{ #category : #initialization }
-SoilBasicSkipList >> initialize [ 
-	super initialize.
-	dirtyPages := OrderedDictionary new
-]
-
 { #category : #accessing }
 SoilBasicSkipList >> maxLevel [
 

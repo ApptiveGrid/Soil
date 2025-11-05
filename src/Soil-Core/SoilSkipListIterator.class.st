@@ -114,7 +114,7 @@ SoilSkipListIterator >> lastPage [
 	[ level >= 1 ] whileTrue: [  
 		"we scan right as long as we get right page indexes which are larger
 		than zero"
-		[ (pageNumber := currentPage rightAt: level) isZero ] whileFalse: [ 
+		[ (pageNumber := currentPage rightAt: level) == 0 ] whileFalse: [ 
 			currentPage := self pageAt: pageNumber.
 			"if we encounter the last page before reaching level 1 we can 
 			short cut the scan"

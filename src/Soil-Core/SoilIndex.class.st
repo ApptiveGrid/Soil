@@ -46,7 +46,7 @@ SoilIndex >> addToFreePages: aPage [
 		"if there is no room for the page to store and the current
 		free page does not have a next pointer we make aPage the 
 		next"
-		currentFreePage next isZero 
+		currentFreePage next == 0 
 			ifTrue: [
 				currentFreePage next: newFreePage offset.
 				^ newFreePage  ]
@@ -124,7 +124,7 @@ SoilIndex >> cleanRemoved: aPage [
 	aPage cleanRemovedIn: self
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #cleaning }
 SoilIndex >> cleanUpToVersion: aNumberOrNil [ 
 		SoilIndexCleaner new 
 			index: self;
@@ -180,8 +180,8 @@ SoilIndex >> first: anInteger [
 SoilIndex >> firstFreePage [
 	| index | 
 	index := self headerPage firstFreePageIndex.
-	^ index isZero 
-		ifTrue: [ ^ nil ]
+	^ index == 0 
+		ifTrue: [ nil ]
 		ifFalse: [ store pageAt: index ]
 ]
 
@@ -238,6 +238,12 @@ SoilIndex >> indexKey: aString [
 	^ aString asIndexKeyOfSize: self keySize
 ]
 
+{ #category : #initialization }
+SoilIndex >> initialize [ 
+	super initialize.
+	dirtyPages := OrderedDictionary new
+]
+
 { #category : #testing }
 SoilIndex >> isEmpty [
 	^ self store headerPage isEmpty
@@ -260,7 +266,7 @@ SoilIndex >> keySize [
 
 { #category : #accessing }
 SoilIndex >> keySize: anInteger [
-	anInteger isZero ifTrue: [ Error signal: 'keySize cannot be zero yet' ].
+	anInteger == 0 ifTrue: [ Error signal: 'keySize cannot be zero yet' ].
 	self headerPage keySize: anInteger
 ]
 
@@ -274,7 +280,7 @@ SoilIndex >> lastPage [
 	^ self newIterator lastPage
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #public }
 SoilIndex >> markAllDirty [ 
 	store pages do: [ :page | self addDirtyPage: page ]
 ]

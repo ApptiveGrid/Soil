@@ -151,7 +151,7 @@ SoilObjectRepository >> loadSegments [
 		segment := SoilObjectSegment new 
 			id: segmentId;
 			objectRepository: self.
-		segmentId isZero 
+		segmentId == 0 
 			ifTrue: [ 
 				metaSegment := self newMetaSegment
 					open;
@@ -226,7 +226,7 @@ SoilObjectRepository >> path: anObject [
 
 { #category : #accessing }
 SoilObjectRepository >> segmentAt: anInteger [ 
-	^ anInteger isZero 
+	^ anInteger == 0 
 		ifTrue: [ metaSegment ]
 		ifFalse: [ self segments at: anInteger ]
 ]

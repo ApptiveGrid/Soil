@@ -28,13 +28,11 @@ SoilStandaloneObjectRegistry >> behaviorDescriptionWithObjectId: aSoilObjectId a
 
 { #category : #query }
 SoilStandaloneObjectRegistry >> indexOfBehaviorDescription: aClass [ 
-	| index |
-	(classes includes: aClass) 
-		ifTrue: [ index := classes indexOf: aClass ]
+	^(classes includes: aClass) 
+		ifTrue: [ classes indexOf: aClass ]
 		ifFalse: [ 
 			classes add: aClass.
-			index := classes size ].
-	^ index
+			classes size ]
 ]
 
 { #category : #query }
@@ -52,7 +50,7 @@ SoilStandaloneObjectRegistry >> initialize [
 SoilStandaloneObjectRegistry >> readFrom: aStream [ 
 	| size |
 	size := aStream nextLengthEncodedInteger.
-	classes := OrderedCollection new.
+	classes := OrderedCollection new: size.
 	size timesRepeat: [ 
 		 classes add: (Smalltalk globals at: (aStream next: (aStream nextLengthEncodedInteger)) asString  asSymbol) ]
 ]
