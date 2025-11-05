@@ -77,7 +77,7 @@ SoilIndexItemsPage >> associationAt: anInteger ifAbsent: aBlock [
 
 { #category : #testing }
 SoilIndexItemsPage >> canBeRemoved [
-	^ self presentItemCount isZero
+	^ self presentItemCount == 0
 ]
 
 { #category : #removing }

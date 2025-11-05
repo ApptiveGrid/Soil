@@ -563,7 +563,7 @@ SoilSkipListTest >> testPageAddFirst [
 { #category : #tests }
 SoilSkipListTest >> testPageCodeNoDuplicates [ 
 	| pageCodes |
-	pageCodes := (SoilIndexPage allSubclasses collect: #pageCode) reject: [:each | each isZero ].
+	pageCodes := (SoilIndexPage allSubclasses collect: #pageCode) reject: [:each | each == 0 ].
 	self assert: pageCodes size equals: pageCodes asSet size 
 ]
 
