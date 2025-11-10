@@ -90,12 +90,17 @@ SoilAbstractBTreeDataPage >> initialize [
 { #category : #adding }
 SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 
-	| newPage pageWithItem return |
+	| newPage pageWithItem returnValue return |
 
 	return := SoilBTreeReturnWrapper new returnValue: (self valueAt: anItem key).
 	iterator index hasUniqueKeys
-		ifTrue: [ self addItem: anItem]
-		ifFalse: [ self addItemDuplicate: anItem].
+		ifTrue: [ 
+			returnValue := self valueAt: anItem key.
+			self addItem: anItem]
+		ifFalse: [ 
+			returnValue := nil.
+			self addItemDuplicate: anItem].
+	return := SoilBTreeReturnWrapper new returnValue: returnValue.
 
 	self hasRoom ifTrue: [  iterator currentPage: self. ^ return ].
 	"We have to split"

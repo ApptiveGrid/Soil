@@ -15,13 +15,11 @@ Class {
 SoilBTreeIterator >> basicAt: indexKey add: anObject [
 	| possiblePriorValue |
 	possiblePriorValue := index rootPage insertItem: (indexKey -> anObject) for: self.
-	"as an optimization we return the prior value stored in the list. If there was none we return nil"
-	index hasUniqueKeys 
-		"only increase size if there was no prior value"
-		ifTrue: [ possiblePriorValue returnValue ifNil: [index increaseSize]]
-		"always for duplicate keys"
-		ifFalse: [ index increaseSize ].
-	
+
+	"As an optimization we return the prior value stored in the list. 
+	If there was none we return nil. For duplicate keys, returnValue is always nil"
+	possiblePriorValue returnValue ifNil: [index increaseSize].
+
 	index addDirtyPage: currentPage.
 	^ possiblePriorValue returnValue
 ]
