@@ -79,7 +79,7 @@ SoilBasicSkipList >> removePage: aPage [
 			1 to: previousPage level do: [ :lvl |
 				"each previous page's next pointer might point to the page 
 				to be removed."
-				((previousPage rightAt: lvl) == aPage offset) ifTrue: [ 
+				((previousPage rightAt: lvl) = aPage offset) ifTrue: [ 
 					"We overwrite the next pointer of the previous page with 
 					the next pointer of the page to be removed"
 					previousPage rightAt: lvl put: (aPage rightAt: lvl).

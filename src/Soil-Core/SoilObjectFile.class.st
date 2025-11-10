@@ -33,7 +33,7 @@ SoilObjectFile >> atPosition: anInteger [
 	^ mutex critical: [ 
 		stream position: anInteger.
 		clusterVersion := SoilPersistentClusterVersion readFrom: stream.
-		(clusterVersion position == anInteger) ifFalse: [ 
+		(clusterVersion position = anInteger) ifFalse: [ 
 			Error signal: 'position do not match' ].
 		clusterVersion ]
 ]

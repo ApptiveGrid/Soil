@@ -58,7 +58,7 @@ SoilDatabaseRecovery >> readFragmentFileProtected: aSoilFragmentFile [
 			"a file that has been truncated should be the last fragment file because a database 
 			should not proceed if a truncation happens and the next open would have ended right
 			at the truncated position"
-			(journal lastFileNumber == aSoilFragmentFile fileNumber)
+			(journal lastFileNumber = aSoilFragmentFile fileNumber)
 				ifFalse: [ SoilDatabaseIsInconsistent signal: 'after a truncated file there should not be another one' ].
 			"we currently have no way of reading behind a truncated piece of a fragment. We cycle
 			the fragment file in order to write new entries to a new file. Future reads can just 

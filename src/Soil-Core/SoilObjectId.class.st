@@ -64,7 +64,7 @@ SoilObjectId >> = anObjectId [
 	"object ids are generated with zero as index because the allocation of the 
 	real index needs to be done on commit time"
 	(index == 0) ifTrue: [ ^ self == anObjectId ].
-	^ segment == anObjectId segment and: [ 
+	^ segment = anObjectId segment and: [ 
 		index = anObjectId index ]
 ]
 

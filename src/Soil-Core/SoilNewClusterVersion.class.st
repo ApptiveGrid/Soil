@@ -169,6 +169,6 @@ SoilNewClusterVersion >> validateReadVersion [
 	| currentPosition |
 	(previousVersionPosition == 0) ifTrue: [ ^ self ].
 	currentPosition := transaction objectRepository heapPositionOf: objectId.
-	(previousVersionPosition == currentPosition) ifFalse: [ 
+	(previousVersionPosition = currentPosition) ifFalse: [ 
 		SoilObjectHasConcurrentChange signal: 'object id: ', objectId asString, ' has been changed by another transaction']
 ]

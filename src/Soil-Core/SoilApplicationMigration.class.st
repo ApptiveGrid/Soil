@@ -100,7 +100,7 @@ SoilApplicationMigration >> useAll [
 { #category : #accessing }
 SoilApplicationMigration >> versionPragmaAt: anInteger [
 	^ self versionPragmas 
-		detect: [ :each | each arguments first == anInteger ]
+		detect: [ :each | each arguments first = anInteger ]
 ]
 
 { #category : #versions }
