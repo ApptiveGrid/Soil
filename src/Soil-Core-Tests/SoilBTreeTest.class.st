@@ -223,6 +223,22 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testAddingDuplicateKeyAcrossPages [
+
+	| elements iterator ids |
+	index allowDuplicateKeys.
+	iterator := index newIterator.
+	1 to: 250 do: [ :n | iterator at: n add: n asDummySoilObjectId ].
+	ids := OrderedCollection new.
+	1 to: 6 do: [ :n |
+		ids add: n asDummySoilObjectId.
+		iterator at: 251 add: n asDummySoilObjectId ].
+	self assert: index size equals: 256.
+	elements := iterator valuesAt: 251.
+	self assertCollection: elements hasSameElements: ids
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testAt [
 
 	| capacity |
