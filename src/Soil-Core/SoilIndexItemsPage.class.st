@@ -213,6 +213,53 @@ SoilIndexItemsPage >> itemCapacity [
 ]
 
 { #category : #accessing }
+SoilIndexItemsPage >> itemIndexForKey: key [ 
+	| index prevIndex |
+	index := items 
+		findBinaryIndex: [ :each | key - each key ] 
+		do: [ :idx |  ^ idx ] 
+		ifNone: [ ^ 0 ].
+	"we are at a position where the key is present but we want to
+	resolve the first key occurrence so we scan left"
+	prevIndex := index.
+	[ prevIndex > 1 ] whileTrue: [ 
+		((items at: prevIndex - 1) key = key) ifFalse: [ ^ prevIndex ].
+		prevIndex := prevIndex - 1.
+  ].
+	^ 0 
+]
+
+{ #category : #accessing }
+SoilIndexItemsPage >> itemIndexForKey: key value: anObject [  
+	| index prevIndex nextIndex |
+	index := items 
+		findBinaryIndex: [ :each | key - each key ] 
+		do: [ :idx | 
+			"now that we've found the key let's check if the value does
+			match as well"
+			((items at: idx) value = anObject) 
+				ifTrue: [ ^ idx ].
+			idx] 
+		ifNone: [ ^ 0 ].
+	"we've found the key but not anObject as value. We scan backward to find 
+	all keys that are the same to find anObject"
+	prevIndex := index.
+	[ prevIndex > 1 and: [ (items at: prevIndex - 1) key = key] ] whileTrue: [ 
+		prevIndex := prevIndex - 1.
+		((items at: prevIndex) value = anObject) ifTrue: [ 
+			^ prevIndex ] ].
+	"backward scanning didn't help so we scan forward to find the same key in 
+	the other direction still looking for anObject"
+	nextIndex := index.
+	[ nextIndex <= items size and: [ (items at: nextIndex) key = key] ] whileTrue: [ 
+		((items at: nextIndex) value = anObject) ifTrue: [ 
+			^ nextIndex ] .
+		nextIndex := nextIndex + 1 ].
+		
+	^ 0 
+]
+
+{ #category : #accessing }
 SoilIndexItemsPage >> itemRemoveAt: key [ 
 	^ self 
 		itemRemoveAt: key 

@@ -685,8 +685,6 @@ SoilIndexedDictionaryTest >> testNextCloseTo [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 	| tx tx2 blockedTx values |
-	(backend = SoilBTree) ifTrue: [ 
-		self skip ]. 
 	tx := soil newTransaction.
 	dict index allowDuplicateKeys.
 	tx root: dict.
@@ -694,12 +692,17 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 		at: #testkey put: 'one';
 		at: #testkey put: 'two';
 		at: #testkey put: 'three'.
+	values := dict at: #testkey.
+	self assert: values class equals: OrderedCollection.
+	self assert: values size equals: 3.
 	tx commit.
 	
 	blockedTx := soil newTransaction.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	values := tx2 root at: #testkey.
+		
+	self assert: values class equals: OrderedCollection.
 	self assert: values size equals: 3.
 	tx2 root 
 		removeKey: #testkey value: values first;

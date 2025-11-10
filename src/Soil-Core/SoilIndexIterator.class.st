@@ -193,7 +193,7 @@ SoilIndexIterator >> find: key ifAbsent: aBlock [
 
 { #category : #'as yet unclassified' }
 SoilIndexIterator >> findAll: key ifAbsent: aBlock [ 
-		| indexKey assoc item values |
+	| indexKey assoc item values |
 	indexKey := index indexKey: key.
 	self findPageFor: indexKey.
 	currentPageIndex := currentPage indexOfKey: indexKey.
@@ -504,11 +504,19 @@ SoilIndexIterator >> removeKey: key [
 { #category : #removing }
 SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 	| indexKey item oldValue |
+	index hasUniqueKeys ifFalse: [ Error signal: 'removeKey:ifAbsent: can only be used with indexes that have unique keys' ].
 	indexKey := index indexKey: key.
 	"We search for the data page for the key to update the value with a removed ID
 	and return the prior value just like #at: would do"
 	self findPageFor: indexKey.
-	item :=  self restoreItem: (currentPage itemAt: indexKey ifAbsent: [^ aBlock value]).
+
+	self flag: #todo.
+	"this is a hack to be able to find the first occurrence but in a 
+	very inefficient way"
+	currentPageIndex := currentPage indexOfKey: indexKey.
+	currentKey := (currentPage items at: currentPageIndex ifAbsent: [ ^ aBlock value ]) key. 
+	
+	item :=  self restoreItem: (currentPage itemAtIndex: currentPageIndex).
 	oldValue := item
 		ifNotNil: [ 
 			(self convertValue: item value) 
@@ -516,9 +524,7 @@ SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 		ifNil: [ aBlock value ].
 	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
 	(e.g no need to update index pages for the BTree"
-	currentPage 
-		itemAt: indexKey 
-		put: SoilObjectId removed.
+	currentPage items at: currentPageIndex put:  indexKey -> SoilObjectId removed.
 	index addDirtyPage: currentPage.
 
 	index decreaseSize.
@@ -531,6 +537,37 @@ SoilIndexIterator >> removeKey: key value: value [
 		removeKey: key 
 		value: value
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
+]
+
+{ #category : #removing }
+SoilIndexIterator >> removeKey: key value: value ifAbsent: aBlock [
+	| indexKey item oldValue |
+	indexKey := index indexKey: key.
+	"We search for the data page for the key to update the value with a removed ID
+	and return the prior value just like #at: would do"
+	self findPageFor: indexKey.
+
+	self flag: #todo.
+	"this is a hack to be able to find the first occurrence but in a 
+	very inefficient way"
+	currentPageIndex := index hasUniqueKeys 
+		ifTrue: [ currentPage itemIndexForKey: indexKey ] 
+		ifFalse: [ currentPage itemIndexForKey: indexKey value: value ]. 
+	currentKey := (currentPage items at: currentPageIndex ifAbsent: [ ^ aBlock value ]) key. 
+	
+	item :=  self restoreItem: (currentPage itemAtIndex: currentPageIndex).
+	oldValue := item
+		ifNotNil: [ 
+			(self convertValue: item value) 
+				ifNil: [ aBlock value ] ]
+		ifNil: [ aBlock value ].
+	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
+	(e.g no need to update index pages for the BTree"
+	currentPage items at: currentPageIndex put:  indexKey -> SoilObjectId removed.
+	index addDirtyPage: currentPage.
+
+	index decreaseSize.
+	^ oldValue
 ]
 
 { #category : #initialization }

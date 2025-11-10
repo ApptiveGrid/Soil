@@ -135,7 +135,8 @@ SoilBTreeHeaderPage >> uniqueKeys [
 
 { #category : #accessing }
 SoilBTreeHeaderPage >> uniqueKeys: aBoolean [ 
-	"ignore for now"
+	uniqueKeys := aBoolean.
+	needWrite := true
 ]
 
 { #category : #writing }
