@@ -33,7 +33,7 @@ SoilObjectFile >> atPosition: anInteger [
 	^ mutex critical: [ 
 		stream position: anInteger.
 		clusterVersion := SoilPersistentClusterVersion readFrom: stream.
-		(clusterVersion position = anInteger) ifFalse: [ 
+		(clusterVersion position == anInteger) ifFalse: [ 
 			Error signal: 'position do not match' ].
 		clusterVersion ]
 ]
@@ -70,7 +70,7 @@ SoilObjectFile >> prefix [
 
 { #category : #accessing }
 SoilObjectFile >> recordStart [
-	^ (segment id = 0)
+	^ (segment id == 0)
 		ifTrue: [ self headerSize + 16 ]
 		ifFalse: [ self headerSize + 8 ]
 ]

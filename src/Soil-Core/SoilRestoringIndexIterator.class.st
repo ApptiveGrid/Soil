@@ -63,7 +63,7 @@ SoilRestoringIndexIterator >> journalEntriesFor: key startingAt: anInteger [
 	transactionId := anInteger.
 	[ transactionId > readVersion ] whileTrue: [  
 		(journal transactionJournalAt: transactionId) entries do: [ :each | 
-			((each class = SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
+			((each class == SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
 				(each key = key) ifTrue: [ 
 					entries add: each ] ]  ].
 		transactionId := transactionId - 1.

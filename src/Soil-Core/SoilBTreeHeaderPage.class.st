@@ -114,7 +114,7 @@ SoilBTreeHeaderPage >> readHeaderFrom: aStream [
 	firstFreePageIndex :=(aStream next: 4) asInteger.
 	size := (aStream next: 6) asInteger.
 	uniqueKeys := (version > 2) 
-		ifTrue: [ aStream next = 1 ]
+		ifTrue: [ aStream next == 1 ]
 		ifFalse: [ true ].
 ]
 

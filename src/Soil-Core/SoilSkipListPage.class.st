@@ -114,7 +114,7 @@ SoilSkipListPage >> initializeLevel: maxLevel [
 
 { #category : #testing }
 SoilSkipListPage >> isLastPage [
-	^ (right at: 1) = 0
+	^ (right at: 1) == 0
 ]
 
 { #category : #accessing }

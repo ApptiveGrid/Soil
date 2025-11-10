@@ -92,7 +92,7 @@ SoilSkipListHeaderPage >> isHeaderPage [
 { #category : #accessing }
 SoilSkipListHeaderPage >> keySize: anInteger [
 	"as long as no items have been added the key size can be changed"
-	((self lastPageOffset = 1) and: [ items isEmpty ]) ifFalse: [ 
+	((self lastPageOffset == 1) and: [ items isEmpty ]) ifFalse: [ 
 		keySize ifNotNil: [ Error signal: 'key size has been set already' ] ].
 	super keySize: anInteger.
 	needWrite := true
@@ -168,7 +168,7 @@ SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	lastPageOffset :=(aStream next: 4) asInteger.
 	firstFreePageIndex :=(aStream next: 4) asInteger.
 	uniqueKeys := (version > 2) 
-		ifTrue: [ aStream next = 1 ]
+		ifTrue: [ aStream next == 1 ]
 		ifFalse: [ true ].
 	size := (version > 1) 
 		ifTrue: [ (aStream next: 6) asInteger ]

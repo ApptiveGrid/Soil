@@ -52,8 +52,8 @@ SoilObjectId class >> root [
 
 { #category : #'instance creation' }
 SoilObjectId class >> segment: segmentId index: index [
-	(segmentId = 0 and: [ index = 0 ]) ifTrue: [ ^ self removed ].
-	(segmentId = 1 and: [ index = 1 ]) ifTrue: [ ^ self root ].
+	(segmentId == 0 and: [ index == 0 ]) ifTrue: [ ^ self removed ].
+	(segmentId == 1 and: [ index == 1 ]) ifTrue: [ ^ self root ].
 	^ self basicNew
 		segment: segmentId index: index
 ]
@@ -63,8 +63,8 @@ SoilObjectId >> = anObjectId [
 	(anObjectId class == self class) ifFalse: [ ^ false ].
 	"object ids are generated with zero as index because the allocation of the 
 	real index needs to be done on commit time"
-	(index = 0) ifTrue: [ ^ self == anObjectId ].
-	^ segment = anObjectId segment and: [ 
+	(index == 0) ifTrue: [ ^ self == anObjectId ].
+	^ segment == anObjectId segment and: [ 
 		index = anObjectId index ]
 ]
 
@@ -80,7 +80,7 @@ SoilObjectId >> asByteArray [
 
 { #category : #converting }
 SoilObjectId >> asByteArrayOfSize: anInteger [ 
-	(anInteger = 8) ifFalse: [ Error signal: 'for now an objectId is of size 8' ].
+	(anInteger == 8) ifFalse: [ Error signal: 'for now an objectId is of size 8' ].
 	^ self asByteArray 
 ]
 
@@ -103,14 +103,14 @@ SoilObjectId >> asSoilObjectProxy [
 
 { #category : #testing }
 SoilObjectId >> hasSameSegment: aSegment andIndex: anIndex [ 
-	^ (segment = aSegment) and: [ index = anIndex ]
+	^ (segment == aSegment) and: [ index == anIndex ]
 ]
 
 { #category : #comparing }
 SoilObjectId >> hash [ 
 	"if an index is 0 we fall back to identityHash in order to
 	make two uninitialized objectIds distinct"
-	(index = 0) ifTrue: [ ^ self identityHash ].
+	(index == 0) ifTrue: [ ^ self identityHash ].
 	^ segment hash bitXor: index hash
 ]
 
@@ -131,7 +131,7 @@ SoilObjectId >> isInitialized [
 
 { #category : #testing }
 SoilObjectId >> isMeta [ 
-	^ segment = 0
+	^ segment == 0
 ]
 
 { #category : #testing }

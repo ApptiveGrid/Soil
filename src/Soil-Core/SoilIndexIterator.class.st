@@ -409,7 +409,7 @@ SoilIndexIterator >> nextAssociation [
 SoilIndexIterator >> nextAssociationAfter: key [
 	"Note: key will be index key"
 	self find: key.
-	(currentPageIndex = 0) ifTrue: [ ^ nil ].
+	(currentPageIndex == 0) ifTrue: [ ^ nil ].
 	^ self nextAssociation
 ]
 

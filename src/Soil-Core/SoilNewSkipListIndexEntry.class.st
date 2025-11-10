@@ -60,7 +60,7 @@ SoilNewSkipListIndexEntry >> readFrom: aStream [
 	maxLevel := aStream nextLengthEncodedInteger.
 	keySize := aStream nextLengthEncodedInteger.
 	valueSize := aStream nextLengthEncodedInteger.
-	uniqueKeys := aStream next = 1
+	uniqueKeys := aStream next == 1
 ]
 
 { #category : #accessing }

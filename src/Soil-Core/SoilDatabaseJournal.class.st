@@ -86,7 +86,7 @@ SoilDatabaseJournal >> verifyNextJournalIndex: index [
 	transactionJournals isEmpty 
 		ifTrue: [ ^ self ]
 		ifFalse: [ 
-			((self lastTransactionJournal index + 1) = index)
+			((self lastTransactionJournal index + 1) == index)
 				ifFalse: [ 
 					Transcript show: ('journal index is not valid: current last index is ', self lastTransactionJournal index printString, ', no index to be added is ', index printString); cr ] ]
 		

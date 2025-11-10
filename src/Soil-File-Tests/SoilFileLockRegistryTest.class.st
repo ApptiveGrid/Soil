@@ -23,7 +23,7 @@ SoilFileLockRegistryTest >> testAcquireAndGarbageCollect [
 	self assert: registry numberOfLocks equals: 0.
 	self assert: SoilFileLockRegistry numberOfRegistries > 0.
 	registry := nil.
-	[  SoilFileLockRegistry numberOfRegistries = 0 ] whileFalse: [ Smalltalk garbageCollect ].
+	[  SoilFileLockRegistry numberOfRegistries == 0 ] whileFalse: [ Smalltalk garbageCollect ].
 
 	"The registry should have been vanished"
 	self assert: SoilFileLockRegistry numberOfRegistries equals: 0.
