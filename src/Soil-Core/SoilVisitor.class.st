@@ -49,7 +49,7 @@ SoilVisitor >> processLoop [
 
 { #category : #accessing }
 SoilVisitor >> processObjectId: aSoilObjectId [ 
-	((aSoilObjectId segment = 0) and: [ aSoilObjectId index = 2 ]) ifTrue: [ ^ self ].
+	((aSoilObjectId segment == 0) and: [ aSoilObjectId index == 2 ]) ifTrue: [ ^ self ].
 	(seen includes: aSoilObjectId) ifTrue: [ ^ aSoilObjectId ].
 	seen add: aSoilObjectId.
 	^ depthFirst 

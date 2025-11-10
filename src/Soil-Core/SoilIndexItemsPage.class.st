@@ -152,7 +152,7 @@ SoilIndexItemsPage >> isOlderThan: aVersionNumber [
 SoilIndexItemsPage >> itemAfter: key [ 
 	| i item |
 	i := items findBinaryIndex: [ :each | key - each key] do: [ :e | e ] ifNone: [ ^ nil ] .
-	(i = items size) ifTrue: [ ^ nil].
+	(i == items size) ifTrue: [ ^ nil].
 	item := items at: i + 1.
 	^ item
 ]
@@ -203,7 +203,7 @@ SoilIndexItemsPage >> itemBefore: key [
 { #category : #accessing }
 SoilIndexItemsPage >> itemBeforeIndex: index [
 
-	(index = 1) ifTrue: [ ^ nil ].
+	(index == 1) ifTrue: [ ^ nil ].
 	^ items at: index - 1
 ]
 
@@ -312,7 +312,7 @@ SoilIndexItemsPage >> keySize [
 
 { #category : #accessing }
 SoilIndexItemsPage >> keySize: anInteger [ 
-	(anInteger = 0) ifTrue: [ Error signal: 'cannot use key size 0' ].
+	(anInteger == 0) ifTrue: [ Error signal: 'cannot use key size 0' ].
 	keySize := anInteger
 ]
 

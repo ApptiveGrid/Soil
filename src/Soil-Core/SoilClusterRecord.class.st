@@ -46,7 +46,7 @@ SoilClusterRecord >> beChanged [
 
 { #category : #accessing }
 SoilClusterRecord >> behaviorDescriptionAt: anInteger [ 
-	(anInteger = 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
+	(anInteger == 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
 	^ behaviorDescriptions at: anInteger 
 ]
 
@@ -226,7 +226,7 @@ SoilClusterRecord >> serializeOn: stream [
 	"references"
 	references do: [ :ref |
 		"do not write zero index, try to allocate a new index before"
-		(ref index = 0) ifTrue: [ 
+		(ref index == 0) ifTrue: [ 
 			Error signal: 'there should be no uninitialized reference' ].
 		ref writeOn: stream ].
 	"indexes"

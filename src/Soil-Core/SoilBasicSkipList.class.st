@@ -97,7 +97,7 @@ SoilBasicSkipList >> size [
 	size is uninitialized. We scan the size in order to write it properly"
 	| size |
 	size := self headerPage size.
-	^ (size = -1) 
+	^ (size == -1) 
 		ifTrue: [ super size  ]
 		ifFalse: [ size ]
 ]

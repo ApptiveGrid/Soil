@@ -192,17 +192,17 @@ SoilObjectSegment >> initializeFilesystem [
 
 { #category : #testing }
 SoilObjectSegment >> isFirstSegment [
-	^ id = 1
+	^ id == 1
 ]
 
 { #category : #testing }
 SoilObjectSegment >> isMeta [ 
-	^ id = 0
+	^ id == 0
 ]
 
 { #category : #testing }
 SoilObjectSegment >> isMetaSegment [
-	^ id = 0
+	^ id == 0
 ]
 
 { #category : #accessing }

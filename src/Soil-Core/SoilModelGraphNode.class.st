@@ -43,7 +43,7 @@ SoilModelGraphNode >> findRoot: path seen: seen [
 	seen add: objectId.
 	path add: objectId.
 	incoming do: [ :node | 
-		(node objectId index = 1) ifTrue: [ 
+		(node objectId index == 1) ifTrue: [ 
 			path add: node objectId.
 			^ path ].
 		(node findRoot: path copy seen: seen) ifNotNil: [ :p2 | ^ p2 ] ].

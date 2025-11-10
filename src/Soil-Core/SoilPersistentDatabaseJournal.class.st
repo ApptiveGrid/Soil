@@ -133,7 +133,7 @@ SoilPersistentDatabaseJournal >> historyOfObjectId: aSoilObjectId [
 	history := OrderedCollection new.
 	objectEntries := OrderedCollection new.
 	self entriesDo: [ :entry |
-		(entry class = SoilBeginTransactionEntry) ifTrue: [ 
+		(entry class == SoilBeginTransactionEntry) ifTrue: [ 
 			transactionStart := entry ].
 		entry providesObjectIds ifTrue: [ 
 			(entry includesObjectId: aSoilObjectId) ifTrue: [ 
@@ -197,7 +197,7 @@ SoilPersistentDatabaseJournal >> lastObjectVersionEntriesWithObjectId: anObjectI
 	entries := OrderedCollection new.
 	self fragmentFiles do: [ :file |
 		file entriesDo: [ :entry | 
-			(entry class = SoilNewObjectVersionEntry  
+			(entry class == SoilNewObjectVersionEntry  
 				and: [ entry objectIds includes: anObjectId]) ifTrue: [ 
 					entries add: entry  ] ].
 		entries ifNotEmpty: [ ^ entries  ] ].
@@ -306,7 +306,7 @@ SoilPersistentDatabaseJournal >> sortedFiles [
 		select: [ :file | 
 			"a fragment file is always 10 characters long. 
 			40 bit (address space) / 8 (bits in a byte) * 2 (hex characters)"
-			(file basename size = 10) ]) sorted reverse
+			(file basename size == 10) ]) sorted reverse
 ]
 
 { #category : #accessing }

@@ -41,7 +41,7 @@ SoilIndexPage class >> readPageClassFrom: aStream [
 	| pageCode |
 	pageCode := self readPageCodeFrom: aStream.
 	^ self allSubclasses 
-		detect: [ :class | class pageCode = pageCode ].
+		detect: [ :class | class pageCode == pageCode ].
 	
 ]
 
@@ -153,7 +153,7 @@ SoilIndexPage >> readFrom: aStream [
 SoilIndexPage >> validate [
 	(version > 2) ifTrue: [ 
 		Error signal: 'bogus page version' ].
-	(pageSize = 4096) ifFalse: [ 
+	(pageSize == 4096) ifFalse: [ 
 		Error signal: 'bogus page size' ]
 ]
 

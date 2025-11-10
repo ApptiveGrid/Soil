@@ -15,7 +15,7 @@ SoilIndexManager class >> indexClassFromFile: aFileReference [
 	stream := aFileReference binaryReadStream.
 	pageCode := stream next.
 	stream close.
-	headerPage :={ SoilSkipListHeaderPage . SoilBTreeHeaderPage } detect: [ :each | each pageCode = pageCode ].
+	headerPage :={ SoilSkipListHeaderPage . SoilBTreeHeaderPage } detect: [ :each | each pageCode == pageCode ].
 	^ headerPage indexClass
 ]
 

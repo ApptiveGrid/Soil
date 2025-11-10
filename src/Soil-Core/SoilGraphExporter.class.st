@@ -96,7 +96,7 @@ SoilGraphExporter >> migrateCluster: cluster [
 { #category : #'as yet unclassified' }
 SoilGraphExporter >> skipIndexes: aCollection [ 
 	indexesToSkip := aCollection collect: [ :each |
-		(each class = SoilObjectId)
+		(each class == SoilObjectId)
 			ifTrue: [ each ]
 			ifFalse: [ transaction objectIdOf: each  ] ]
 ]
