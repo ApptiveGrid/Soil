@@ -281,6 +281,19 @@ SoilBTreeTest >> testCreation [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testDuplicateKeysRoundtripAndCompact [
+
+	index allowDuplicateKeys.
+	self assert: index headerPage uniqueKeys equals: false.
+
+	index writePages.
+	index
+		reopen;
+		compact.
+	self assert: index headerPage uniqueKeys equals: false.
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testFirst [
 
 	| capacity |

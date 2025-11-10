@@ -64,6 +64,7 @@ SoilPluggableIndexRewriter >> prepareNewIndex [
 			maxLevel: index maxLevel;
 			keySize: index keySize;
 			valueSize: index valueSize;
+			uniqueKeys: index uniqueKeys;
 			headerPage ]
 ]
 
