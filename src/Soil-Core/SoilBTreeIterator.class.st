@@ -16,9 +16,12 @@ SoilBTreeIterator >> basicAt: indexKey add: anObject [
 	| possiblePriorValue |
 	possiblePriorValue := index rootPage insertItem: (indexKey -> anObject) for: self.
 	"as an optimization we return the prior value stored in the list. If there was none we return nil"
-	 possiblePriorValue returnValue ifNil: [
+	index hasUniqueKeys 
 		"only increase size if there was no prior value"
-		index increaseSize].
+		ifTrue: [ possiblePriorValue returnValue ifNil: [index increaseSize]]
+		"always for duplicate keys"
+		ifFalse: [ index increaseSize ].
+	
 	index addDirtyPage: currentPage.
 	^ possiblePriorValue returnValue
 ]
@@ -55,4 +58,17 @@ SoilBTreeIterator >> lastPage [
 	[ currentPage isIndexPage ] whileTrue: [
 		 currentPage := self pageAt: currentPage lastItem value ].
 	^ currentPage
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> size [ 
+	| headerPage |
+	"size in the header page is only correct if the current transaction
+	read version is bigger than the last modification of the page. If 
+	the header page is newer than the current transaction we need to scan
+	the index for the size"
+	headerPage := index headerPage.
+	^ (readVersion isNil or: [ headerPage lastTransaction > readVersion ]) 
+		ifTrue: [ super size] 
+		ifFalse: [ index size  ]
 ]
