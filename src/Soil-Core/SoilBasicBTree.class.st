@@ -143,16 +143,19 @@ SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
 
 { #category : #removing }
 SoilBasicBTree >> removePage: aPage [
-	| iterator previousPage |
+	| previousPage |
 	(aPage offset > 1) ifFalse: [ ^ aPage ].
 
 	"We use the iterator to find the previousPage, to support old format without backlink"
-	iterator := self newIterator. 
-	previousPage := iterator findPreviousPageOf: aPage. 
-	"later we can just use previous directly"
-	"previousPage := self pageAt: aPage previous."
+	previousPage := aPage latestVersion > 2
+		ifTrue: [self pageAt: aPage previous ]
+		ifFalse:  [ self newIterator findPreviousPageOf: aPage ]. 
+
 	previousPage next: aPage next.
-	(self pageAt: aPage next) previous: aPage previous.
+	
+	aPage latestVersion > 2 
+			ifTrue: [ (self pageAt: aPage next) previous: aPage previous].
+			
 	self addDirtyPage: previousPage.
 	"now remove all keys, this will update the index pages"
 	
@@ -161,7 +164,6 @@ SoilBasicBTree >> removePage: aPage [
 	"finally remove the page from the store"
 	store removePageAt: aPage offset.
 	^ aPage 
-
 ]
 
 { #category : #accessing }

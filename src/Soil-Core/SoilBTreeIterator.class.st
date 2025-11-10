@@ -40,20 +40,12 @@ SoilBTreeIterator >> findPageFor: indexKey [
 { #category : #private }
 SoilBTreeIterator >> findPreviousPageOf: aPage [
 	| page |
+	"Slow version, only used for old page format without previous pointer"
 	aPage isHeaderPage ifTrue: [ ^nil ].
-	page := (aPage version > 2) 
-		ifTrue: [
-			| previousPageIndex |
-			previousPageIndex := aPage previous.
-			(previousPageIndex > 0)
-				ifTrue: [ self pageAt: previousPageIndex ]
-				ifFalse: [ nil ]
-			 ]
-		ifFalse: [index rootPage findPreviousPage: aPage firstItem key with: index path: OrderedCollection new].
+	page := index rootPage findPreviousPage: aPage firstItem key with: index path: OrderedCollection new.
 	"for now use assert to make sure this is correct"
 	self assert: (self pageAt: page next) == aPage.
-	currentPage := page.
-	^ currentPage
+	^currentPage := page
 ]
 
 { #category : #accessing }
