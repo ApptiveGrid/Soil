@@ -151,10 +151,11 @@ SoilBasicBTree >> removePage: aPage [
 		ifTrue: [self pageAt: aPage previous ]
 		ifFalse:  [ self newIterator findPreviousPageOf: aPage ]. 
 
+	previousPage next: aPage next.
+	
 	aPage latestVersion > 2 
-		ifTrue: [ previousPage next: aPage next ].
-		
-	(self pageAt: aPage next) previous: aPage previous.
+			ifTrue: [ (self pageAt: aPage next) previous: aPage previous].
+			
 	self addDirtyPage: previousPage.
 	"now remove all keys, this will update the index pages"
 	
