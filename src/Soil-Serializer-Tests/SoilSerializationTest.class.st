@@ -140,6 +140,21 @@ SoilSerializationTest >> testSerializationConstantBlockClosure [
 	self assert: materialized outerCode isNil
 ]
 
+{ #category : #'tests-layouts' }
+SoilSerializationTest >> testSerializationEphemeronLayout [
+
+	| object serialized materialized |
+	object := WeakKeyAssociation new.
+	self assert: object class classLayout class equals: EphemeronLayout.
+	
+	serialized := self serializeToBytes: object.
+
+	materialized := self materializeFromBytes: serialized.
+	self assert: materialized equals: object.
+	
+	self assert: materialized class classLayout class equals: EphemeronLayout.
+]
+
 { #category : #tests }
 SoilSerializationTest >> testSerializationObject [
 	| object serialized materialized |
