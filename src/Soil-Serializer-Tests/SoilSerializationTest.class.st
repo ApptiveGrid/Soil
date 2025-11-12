@@ -327,13 +327,15 @@ SoilSerializationTest >> testSerializationWeakArray [
 
 	| object serialized materialized |
 	object := WeakArray new.
+	self assert: object class classLayout class equals: WeakLayout.
 	serialized := self serializeToBytes: object.
 	
 	"this is NOT serialized using TypeCodeArray"
 	self deny: (serialized at: 1) equals: TypeCodeArray.
 
 	materialized := self materializeFromBytes: serialized.
-	self assert: materialized equals: object
+	self assert: materialized equals: object.
+	self assert: materialized class classLayout class equals: WeakLayout
 ]
 
 { #category : #'tests-layouts' }
