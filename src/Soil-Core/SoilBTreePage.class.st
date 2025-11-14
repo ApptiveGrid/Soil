@@ -20,10 +20,11 @@ SoilBTreePage class >> isAbstract [
 
 { #category : #assertions }
 SoilBTreePage >> bTreeAssertion [
+	self assert: self isNotEmpty.
 	self assert: self hasRoom.
 	"each node has a maximum of M children and at least ceil(M/2) - 1 children"
 	self assert: (self numberOfItems <= self itemCapacity).
-	items isEmpty ifFalse: [ self assert:  self hasUnderflow not  ]
+	self assert: self hasUnderflow not
 ]
 
 { #category : #removing }
