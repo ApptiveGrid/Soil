@@ -135,6 +135,8 @@ SoilBasicBTree >> pageClass [
 
 { #category : #removing }
 SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
 
 	^ (self rootPage remove: key for: self)
 		  ifNil: [ aBlock value ]
