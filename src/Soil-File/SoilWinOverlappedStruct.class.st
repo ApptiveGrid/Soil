@@ -1,5 +1,5 @@
 Class {
-	#name : 'WinOverlapped',
+	#name : 'SoilWinOverlappedStruct',
 	#superclass : 'FFIStructure',
 	#classVars : [
 		'OFFSET_HEVENT',
@@ -13,7 +13,7 @@ Class {
 }
 
 { #category : 'field definition' }
-WinOverlapped class >> fieldsDesc [
+SoilWinOverlappedStruct class >> fieldsDesc [
 	"self rebuildFieldAccessors"
 
 	^ #(
@@ -26,72 +26,72 @@ WinOverlapped class >> fieldsDesc [
 ]
 
 { #category : 'accessing - structure variables' }
-WinOverlapped >> hEvent [
+SoilWinOverlappedStruct >> hEvent [
 	"This method was automatically generated"
 	^ExternalData fromHandle: (handle pointerAt: OFFSET_HEVENT) type: ExternalType void asPointerType
 ]
 
 { #category : 'accessing - structure variables' }
-WinOverlapped >> hEvent: anObject [
+SoilWinOverlappedStruct >> hEvent: anObject [
 	"This method was automatically generated"
 	handle pointerAt: OFFSET_HEVENT put: anObject getHandle.
 ]
 
 { #category : 'initialization' }
-WinOverlapped >> initialize [
+SoilWinOverlappedStruct >> initialize [
 	super initialize
 ]
 
 { #category : 'accessing - structure variables' }
-WinOverlapped >> internal [
+SoilWinOverlappedStruct >> internal [
 	"This method was automatically generated"
 	^handle unsignedLongLongAt: OFFSET_INTERNAL
 ]
 
 { #category : 'accessing - structure variables' }
-WinOverlapped >> internal: anObject [
+SoilWinOverlappedStruct >> internal: anObject [
 	"This method was automatically generated"
 	handle unsignedLongLongAt: OFFSET_INTERNAL put: anObject
 ]
 
 { #category : 'accessing - structure variables' }
-WinOverlapped >> internalHigh [
+SoilWinOverlappedStruct >> internalHigh [
 	"This method was automatically generated"
 	^handle unsignedLongLongAt: OFFSET_INTERNALHIGH
 ]
 
 { #category : 'accessing - structure variables' }
-WinOverlapped >> internalHigh: anObject [
+SoilWinOverlappedStruct >> internalHigh: anObject [
 	"This method was automatically generated"
 	handle unsignedLongLongAt: OFFSET_INTERNALHIGH put: anObject
 ]
 
 { #category : 'accessing - structure variables' }
-WinOverlapped >> offset [
+SoilWinOverlappedStruct >> offset [
 	"This method was automatically generated"
 	^handle unsignedLongAt: OFFSET_OFFSET
 ]
 
 { #category : 'accessing - structure variables' }
-WinOverlapped >> offset: anObject [
+SoilWinOverlappedStruct >> offset: anObject [
 	"This method was automatically generated"
 	handle unsignedLongAt: OFFSET_OFFSET put: anObject
 ]
 
 { #category : 'accessing - structure variables' }
-WinOverlapped >> offsetHigh [
+SoilWinOverlappedStruct >> offsetHigh [
 	"This method was automatically generated"
 	^handle unsignedLongAt: OFFSET_OFFSETHIGH
 ]
 
 { #category : 'accessing - structure variables' }
-WinOverlapped >> offsetHigh: anObject [
+SoilWinOverlappedStruct >> offsetHigh: anObject [
 	"This method was automatically generated"
 	handle unsignedLongAt: OFFSET_OFFSETHIGH put: anObject
 ]
 
 { #category : 'printing' }
-WinOverlapped >> printOn: aStream [
+SoilWinOverlappedStruct >> printOn: aStream [
 	"Append to the argument, aStream, the names and values of all the record's variables."
 
 	aStream nextPutAll: self class name; nextPutAll: ' ( '; cr.
