@@ -68,7 +68,6 @@ SoilBTreeIndexPage >> insertItem: item for: iterator [
 	newPage := iterator index splitIndexPage: self.
 	
 	"check that the current and new pages are balanced"
-	self flag: #TODO. "should be moved to a consistency checker"
 	newPage bTreeAssertion.
 	self bTreeAssertion.
 	

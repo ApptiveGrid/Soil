@@ -112,7 +112,6 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 	iterator currentPage: pageWithItem.
 	
 	"check that the current and new pages are balanced"
-	self flag: #TODO. "should be moved to a consistency checker"
 	newPage bTreeAssertion.
 	self bTreeAssertion.
 	
