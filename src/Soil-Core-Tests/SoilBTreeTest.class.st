@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilBTreeTest,
-	#superclass : #ParametrizedTestCase,
+	#superclass : #TestCase,
 	#instVars : [
 		'index'
 	],
