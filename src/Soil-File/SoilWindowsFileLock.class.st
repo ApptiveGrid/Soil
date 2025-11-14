@@ -1,5 +1,5 @@
 Class {
-	#name : 'WindowsFileLock',
+	#name : 'SoilWindowsFileLock',
 	#superclass : 'Object',
 	#classVars : [
 		'ERROR_ACCESS_DENIED',
@@ -16,7 +16,7 @@ Class {
 }
 
 { #category : 'testing' }
-WindowsFileLock class >> canLock: fileHandle from: start length: length exclusive: exclusive [
+SoilWindowsFileLock class >> canLock: fileHandle from: start length: length exclusive: exclusive [
 	"Windows doesn't have a direct 'test lock' API like F_GETLK.
 	We attempt to lock and immediately unlock if successful."
 
@@ -28,7 +28,7 @@ WindowsFileLock class >> canLock: fileHandle from: start length: length exclusiv
 ]
 
 { #category : 'private - error handling' }
-WindowsFileLock class >> errorDescription: errorCode [
+SoilWindowsFileLock class >> errorDescription: errorCode [
 	"Return a human-readable description for Windows error codes"
 
 	errorCode = ERROR_ACCESS_DENIED ifTrue: [ ^ 'Access denied' ].
@@ -41,21 +41,21 @@ WindowsFileLock class >> errorDescription: errorCode [
 ]
 
 { #category : 'private - ffi' }
-WindowsFileLock class >> flushFileBuffers: hFile [
+SoilWindowsFileLock class >> flushFileBuffers: hFile [
 	"Flush all file buffers to disk using Windows API"
 
 	^ self ffiCall: #(bool FlushFileBuffers(void* hFile)) module: #kernel32
 ]
 
 { #category : 'private - ffi' }
-WindowsFileLock class >> getCurrentProcessId [
+SoilWindowsFileLock class >> getCurrentProcessId [
 	"Get the current process ID using Windows API"
 
 	^ self ffiCall: #(uint GetCurrentProcessId()) module: #kernel32
 ]
 
 { #category : 'private - ffi' }
-WindowsFileLock class >> getFileHandle: stream [
+SoilWindowsFileLock class >> getFileHandle: stream [
 	"Extract Windows HANDLE from a BinaryFileStream.
 	For buffered streams (ZnBufferedWriteStream), get the wrapped file stream first."
 
@@ -65,14 +65,14 @@ WindowsFileLock class >> getFileHandle: stream [
 ]
 
 { #category : 'private - ffi' }
-WindowsFileLock class >> getLastError [
+SoilWindowsFileLock class >> getLastError [
 	"Get Windows error code"
 
 	^ self ffiCall: #(uint GetLastError()) module: #kernel32
 ]
 
 { #category : 'class initialization' }
-WindowsFileLock class >> initialize [
+SoilWindowsFileLock class >> initialize [
 	"Windows API constants"
 
 	LOCKFILE_EXCLUSIVE_LOCK := 16r00000002.
@@ -88,7 +88,7 @@ WindowsFileLock class >> initialize [
 ]
 
 { #category : 'accessing locking' }
-WindowsFileLock class >> lock: fileHandle from: start length: length [
+SoilWindowsFileLock class >> lock: fileHandle from: start length: length [
 
 	^ self
 		lock: fileHandle
@@ -98,7 +98,7 @@ WindowsFileLock class >> lock: fileHandle from: start length: length [
 ]
 
 { #category : 'accessing locking' }
-WindowsFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
+SoilWindowsFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
 	"Lock file region, returning true on success, false on failure.
 	For detailed error information, use lockOrError:from:length:exclusive:"
 
@@ -107,7 +107,7 @@ WindowsFileLock class >> lock: fileHandle from: start length: length exclusive: 
 	"fileHandle is already a Windows HANDLE (ExternalAddress)"
 
 	"Create and initialize OVERLAPPED structure"
-	overlapped := WinOverlapped new.
+	overlapped := SoilWinOverlappedStruct new.
 	overlapped offset: (start bitAnd: 16rFFFFFFFF).
 	overlapped offsetHigh: (start bitShift: -32).
 	overlapped hEvent: ExternalAddress null.
@@ -138,7 +138,7 @@ WindowsFileLock class >> lock: fileHandle from: start length: length exclusive: 
 ]
 
 { #category : 'private - ffi' }
-WindowsFileLock class >> lockFileEx: hFile flags: dwFlags bytesLow: nNumberOfBytesToLockLow bytesHigh: nNumberOfBytesToLockHigh overlapped: lpOverlapped [
+SoilWindowsFileLock class >> lockFileEx: hFile flags: dwFlags bytesLow: nNumberOfBytesToLockLow bytesHigh: nNumberOfBytesToLockHigh overlapped: lpOverlapped [
 
 	^ self
 		ffiCall: #(bool LockFileEx(
@@ -147,12 +147,12 @@ WindowsFileLock class >> lockFileEx: hFile flags: dwFlags bytesLow: nNumberOfByt
 			uint 0,
 			uint nNumberOfBytesToLockLow,
 			uint nNumberOfBytesToLockHigh,
-			WinOverlapped *lpOverlapped))
+			SoilWinOverlappedStruct *lpOverlapped))
 		module: #kernel32
 ]
 
 { #category : 'accessing locking' }
-WindowsFileLock class >> lockOrError: fileHandle from: start length: length exclusive: exclusive [
+SoilWindowsFileLock class >> lockOrError: fileHandle from: start length: length exclusive: exclusive [
 	"Lock file region, raising an error with detailed information on failure"
 
 	| success errorCode errorDesc lockType |
@@ -170,7 +170,7 @@ WindowsFileLock class >> lockOrError: fileHandle from: start length: length excl
 ]
 
 { #category : 'accessing locking' }
-WindowsFileLock class >> unlock: fileHandle from: start length: length [
+SoilWindowsFileLock class >> unlock: fileHandle from: start length: length [
 	"Unlock file region, returning true on success, false on failure.
 	For detailed error information, use unlockOrError:from:length:"
 
@@ -179,7 +179,7 @@ WindowsFileLock class >> unlock: fileHandle from: start length: length [
 	"fileHandle is already a Windows HANDLE (ExternalAddress)"
 
 	"Create and initialize OVERLAPPED structure"
-	overlapped := WinOverlapped new.
+	overlapped := SoilWinOverlappedStruct new.
 	overlapped offset: (start bitAnd: 16rFFFFFFFF).
 	overlapped offsetHigh: (start bitShift: -32).
 	overlapped hEvent: ExternalAddress null.
@@ -204,7 +204,7 @@ WindowsFileLock class >> unlock: fileHandle from: start length: length [
 ]
 
 { #category : 'private - ffi' }
-WindowsFileLock class >> unlockFileEx: hFile bytesLow: nNumberOfBytesToUnlockLow bytesHigh: nNumberOfBytesToUnlockHigh overlapped: lpOverlapped [
+SoilWindowsFileLock class >> unlockFileEx: hFile bytesLow: nNumberOfBytesToUnlockLow bytesHigh: nNumberOfBytesToUnlockHigh overlapped: lpOverlapped [
 
 	^ self
 		ffiCall: #(bool UnlockFileEx(
@@ -212,12 +212,12 @@ WindowsFileLock class >> unlockFileEx: hFile bytesLow: nNumberOfBytesToUnlockLow
 			uint 0,
 			uint nNumberOfBytesToUnlockLow,
 			uint nNumberOfBytesToUnlockHigh,
-			WinOverlapped *lpOverlapped))
+			SoilWinOverlappedStruct *lpOverlapped))
 		module: #kernel32
 ]
 
 { #category : 'accessing locking' }
-WindowsFileLock class >> unlockOrError: fileHandle from: start length: length [
+SoilWindowsFileLock class >> unlockOrError: fileHandle from: start length: length [
 	"Unlock file region, raising an error with detailed information on failure"
 
 	| success errorCode errorDesc |

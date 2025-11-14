@@ -1,33 +1,6 @@
 Extension { #name : 'BinaryFileStream' }
 
 { #category : '*Soil-File' }
-BinaryFileStream >> fdatasync [
-	"Flush data (but not necessarily metadata) to disk. Platform-independent implementation."
-
-	OSPlatform current isWindows
-		ifTrue: [ self fsyncWindows ]
-		ifFalse: [ self fdatasyncUnix ]
-]
-
-{ #category : '*Soil-File' }
-BinaryFileStream >> fdatasync: fd [
-	^ self 
-		ffiCall: #(int fdatasync(int fd))
-		module: LibC
-]
-
-{ #category : '*Soil-File' }
-BinaryFileStream >> fdatasyncUnix [
-	"Unix/Linux/MacOS implementation of fdatasync using POSIX API"
-
-	| fd err |
-	fd := self fileno.
-	err := self fdatasync: fd.
-	(err = 0) ifFalse: [
-		Error signal: 'fdatasync(', fd printString, ') failed with error code: ', err printString ]
-]
-
-{ #category : '*Soil-File' }
 BinaryFileStream >> fileHandle [
 
 	^ handle pointerAt: 9
@@ -91,9 +64,9 @@ BinaryFileStream >> fsyncWindows [
 	"Windows implementation of fsync using FlushFileBuffers API"
 
 	| result errorCode |
-	result := WindowsFileLock flushFileBuffers: self fileHandle.
+	result := SoilWindowsFileLock flushFileBuffers: self fileHandle.
 	result ifFalse: [
-			errorCode := WindowsFileLock getLastError.
+			errorCode := SoilWindowsFileLock getLastError.
 			Error signal:
 				'FlushFileBuffers failed with error code: '
 				, errorCode printString ]
