@@ -121,6 +121,21 @@ SoilIndexIteratorTest >> testAt [
 ]
 
 { #category : #tests }
+SoilIndexIteratorTest >> testAtAdd [
+
+	| iterator return |
+	"at:put: returns last prior value"
+	iterator := index newIterator.
+	return := iterator at: 1 add: (1 asByteArrayOfSize: 8).
+	self assert: return isNil.
+	self assert: (iterator at: 1) equals: (1 asByteArrayOfSize: 8).
+	return := iterator at: 1 add: (2 asByteArrayOfSize: 8).
+
+	self assert: return equals: (1 asByteArrayOfSize: 8).
+	self assert: (iterator at: 1) equals: (2 asByteArrayOfSize: 8)
+]
+
+{ #category : #tests }
 SoilIndexIteratorTest >> testAtIfAbsent [
 	| iterator return |
 
@@ -138,21 +153,6 @@ SoilIndexIteratorTest >> testAtIndex [
 	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	self assert: (iterator atIndex: 1) equals: (1 asByteArrayOfSize: 8).
 	self assert: (iterator atIndex: 2) equals: nil
-]
-
-{ #category : #tests }
-SoilIndexIteratorTest >> testAtPut [
-
-	| iterator return |
-	"at:put: returns last prior value"
-	iterator := index newIterator.
-	return := iterator at: 1 add: (1 asByteArrayOfSize: 8).
-	self assert: return isNil.
-	self assert: (iterator at: 1) equals: (1 asByteArrayOfSize: 8).
-	return := iterator at: 1 add: (2 asByteArrayOfSize: 8).
-
-	self assert: return equals: (1 asByteArrayOfSize: 8).
-	self assert: (iterator at: 1) equals: (2 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
@@ -359,6 +359,63 @@ SoilIndexIteratorTest >> testFirstWithRemovedItem [
 	self
 		assert: iterator firstAssociation value
 		equals: (3 asByteArrayOfSize: 8)
+]
+
+{ #category : #tests }
+SoilIndexIteratorTest >> testGoToNextPage [
+
+	| capacity iterator value nextPage expected |
+	iterator := index newIterator.
+
+	"empty case"
+	iterator findPageFor: 1.
+	value := iterator nextPage.
+	self assert: value isNil.
+
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
+
+	expected := index class == SoilBTree
+		            ifTrue: [ 4 ]
+		            ifFalse: [ 2 ].
+	value := iterator findPageFor: 222.
+	nextPage := iterator goToNextPage.
+	self assert: nextPage offset equals: expected.
+	
+	"check that the currentPage was set"
+	self assert: iterator currentPage equals: nextPage.
+
+	value := iterator findPageFor: capacity + 1.
+	self assert: iterator nextPage isNil
+]
+
+{ #category : #tests }
+SoilIndexIteratorTest >> testGoToPreviousPage [
+
+	| capacity iterator page toFind priorPage |
+	capacity := index headerPage itemCapacity * 2.
+	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
+	iterator := index newIterator.
+	"select a key where we have to cross over to another page"
+	toFind := index class == SoilSkipList
+		          ifTrue: [ 252 ]
+		          ifFalse: [ 254 ].
+	"the key is indeed the first one in the page"
+	self
+		assert: (iterator findPageFor: toFind) firstItem key
+		equals: toFind.
+
+	iterator := index newIterator.
+	priorPage := iterator
+		             find: toFind;
+		             goToPreviousPage.
+	"check that the currentPage was set"
+	self assert: iterator currentPage equals: priorPage.
+
+	iterator := index newIterator.
+	page := iterator findPageFor: toFind.
+
+	self assert: priorPage next equals: page offset
 ]
 
 { #category : #tests }
