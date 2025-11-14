@@ -88,7 +88,8 @@ SoilBTreeIndexPage >> latestVersion [
 
 { #category : #testing }
 SoilBTreeIndexPage >> needsCleanup [
-	^ false
+	"We can recycle empty index pages"
+	^ self isEmpty
 ]
 
 { #category : #printing }

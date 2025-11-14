@@ -330,11 +330,10 @@ SoilBTreeTest >> testFreePageAddNested [
 	index cleanUpToVersion: nil.
 	self assert: index headerPage firstFreePageIndex equals: 5.
 	self assert: (index store pageAt: 5) pageIndexes size equals: 1018.
-	"as there were more than free list capacity there is a next free
-	list page"
-	self assert: (index store pageAt: 5) next equals: 1030.
-	nestedFreeIndexes := (index store pageAt: 1030) pageIndexes copy
-		                     copyWith: 1030.
+	"as there were more than free list capacity there is a next free list page"
+	self assert: (index store pageAt: 5) next equals: 1025.
+	nestedFreeIndexes := (index store pageAt: 1025) pageIndexes copy
+		                     copyWith: 1025.
 	"we fill the index with enough elements to use all free pages including the nested 
 	ones"
 	1 to: 15 * 1018 do: [ :n |

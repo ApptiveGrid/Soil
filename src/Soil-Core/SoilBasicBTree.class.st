@@ -146,6 +146,12 @@ SoilBasicBTree >> removePage: aPage [
 	| previousPage |
 	(aPage offset > 1) ifFalse: [ ^ aPage ].
 
+	
+	aPage isIndexPage ifTrue: [ 
+		"index pages have no prev or next and are empty when we reach here"
+		store removePageAt: aPage offset.
+		^ aPage ].
+
 	"We use the iterator to find the previousPage, to support old format without backlink"
 	previousPage := aPage latestVersion > 2
 		ifTrue: [self pageAt: aPage previous ]
@@ -160,8 +166,7 @@ SoilBasicBTree >> removePage: aPage [
 	"now remove all keys, this will update the index pages"
 	
 	aPage items reverseDo: [ :item | item ifNotNil: [self removeKey: item key]  ].
-	
-	"finally remove the page from the store"
+	"remove the page from the store"
 	store removePageAt: aPage offset.
 	^ aPage 
 ]
