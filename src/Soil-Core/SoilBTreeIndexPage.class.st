@@ -98,12 +98,6 @@ SoilBTreeIndexPage >> printOn: aStream [
 ]
 
 { #category : #reading }
-SoilBTreeIndexPage >> readFrom: aStream [ 
-	super readFrom: aStream.
-	self readItemsFrom: aStream
-]
-
-{ #category : #reading }
 SoilBTreeIndexPage >> readItemsFrom: aStream [ 
 	| numberOfItems |
 	"calculate the maximum number of items that can be stored in this

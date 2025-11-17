@@ -155,8 +155,8 @@ SoilAbstractBTreeDataPage >> previous: anObject [
 ]
 
 { #category : #reading }
-SoilAbstractBTreeDataPage >> readFrom: aStream [
-	super readFrom: aStream.
+SoilAbstractBTreeDataPage >> readHeaderFrom: aStream [
+	super readHeaderFrom: aStream.
 	(version > 2) ifTrue: [ 
 		previous := (aStream next: self pointerSize) asInteger].
 	next := (aStream next: self pointerSize) asInteger

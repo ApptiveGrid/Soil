@@ -145,6 +145,11 @@ SoilIndexPage >> printOn: aStream [
 { #category : #reading }
 SoilIndexPage >> readFrom: aStream [ 
 	needWrite := false.
+	self readHeaderFrom: aStream
+]
+
+{ #category : #reading }
+SoilIndexPage >> readHeaderFrom: aStream [ 
 	"we do not read the pageCode here as it was read already"
 	version := aStream next
 ]
