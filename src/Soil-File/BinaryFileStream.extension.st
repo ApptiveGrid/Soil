@@ -1,12 +1,12 @@
-Extension { #name : 'BinaryFileStream' }
+Extension { #name : #BinaryFileStream }
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> fileHandle [
 
 	^ handle pointerAt: 9
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> fileno [
 
 	| fd |
@@ -17,7 +17,7 @@ BinaryFileStream >> fileno [
 	
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> fileno: stream [
 
 	^ self 
@@ -25,12 +25,12 @@ BinaryFileStream >> fileno: stream [
 		module: LibC
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> flockClass [
 	^ OSPlatform current flockClass
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> fsync [
 	"Flush all buffered data to disk. Platform-independent implementation."
 
@@ -39,14 +39,14 @@ BinaryFileStream >> fsync [
 		ifFalse: [ self fsyncUnix ]
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> fsync: fd [
 	^ self 
 		ffiCall: #(int fsync(int fd))
 		module: LibC
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> fsyncUnix [
 	"Unix/Linux/MacOS implementation of fsync using POSIX API"
 
@@ -59,7 +59,7 @@ BinaryFileStream >> fsyncUnix [
 				, err printString ]
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> fsyncWindows [
 	"Windows implementation of fsync using FlushFileBuffers API"
 
@@ -72,7 +72,7 @@ BinaryFileStream >> fsyncWindows [
 				, errorCode printString ]
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> lockAt: position length: length [
 	^ self flockClass
 		lock: self fileHandle
@@ -80,7 +80,7 @@ BinaryFileStream >> lockAt: position length: length [
 		length: length
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> lockEntireFile [
 	^ self flockClass
 		lock: self fileHandle
@@ -88,7 +88,7 @@ BinaryFileStream >> lockEntireFile [
 		length: self size
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> lockEntireFileAndBeyond [
 	"add a lock for appending to a file. We use the whole file starting
 	at 0 to have reliable semantics. Using the end of the file might be more
@@ -100,7 +100,7 @@ BinaryFileStream >> lockEntireFileAndBeyond [
 		length: 0
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> lockForAppendStartingAt: offset [
 	"add append lock by taking an offset. Having an append lock and matching
 	unlock is not possible from within this stream so the offset needs to be
@@ -111,20 +111,20 @@ BinaryFileStream >> lockForAppendStartingAt: offset [
 		length: 0
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> sync [ 
 	^ self sync: (self fileno: self fileHandle).
 	
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> sync: fd [
 	^ self 
 		ffiCall: #(int fsync(int fd))
 		module: LibC
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> unlockAt: position length: length [
 
 	^ self flockClass
@@ -133,7 +133,7 @@ BinaryFileStream >> unlockAt: position length: length [
 		length: length
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> unlockEntireFile [
 	^ self flockClass
 		unlock: self fileHandle
@@ -141,7 +141,7 @@ BinaryFileStream >> unlockEntireFile [
 		length: self size
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> unlockEntireFileAndBeyond [
 	"release a lock for appending to a file. We use the whole file starting
 	at 0 to have reliable semantics. The end of the file might have changed 
@@ -153,7 +153,7 @@ BinaryFileStream >> unlockEntireFileAndBeyond [
 		length: 0
 ]
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 BinaryFileStream >> unlockForAppendStartingAt: offset [
 	"release append lock by taking an offset. Having an append lock and matching
 	unlock is not possible from within this stream so the offset needs to be

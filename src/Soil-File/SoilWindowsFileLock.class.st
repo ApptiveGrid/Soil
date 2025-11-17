@@ -1,6 +1,6 @@
 Class {
-	#name : 'SoilWindowsFileLock',
-	#superclass : 'Object',
+	#name : #SoilWindowsFileLock,
+	#superclass : #Object,
 	#classVars : [
 		'ERROR_ACCESS_DENIED',
 		'ERROR_INVALID_HANDLE',
@@ -11,11 +11,10 @@ Class {
 		'LOCKFILE_FAIL_IMMEDIATELY',
 		'LOCKFILE_SHARED_LOCK'
 	],
-	#category : 'Soil-File',
-	#package : 'Soil-File'
+	#category : #'Soil-File'
 }
 
-{ #category : 'testing' }
+{ #category : #testing }
 SoilWindowsFileLock class >> canLock: fileHandle from: start length: length exclusive: exclusive [
 	"Windows doesn't have a direct 'test lock' API like F_GETLK.
 	We attempt to lock and immediately unlock if successful."
@@ -27,7 +26,7 @@ SoilWindowsFileLock class >> canLock: fileHandle from: start length: length excl
 	^ success
 ]
 
-{ #category : 'private - error handling' }
+{ #category : #'private - error handling' }
 SoilWindowsFileLock class >> errorDescription: errorCode [
 	"Return a human-readable description for Windows error codes"
 
@@ -40,21 +39,21 @@ SoilWindowsFileLock class >> errorDescription: errorCode [
 	^ 'Unknown error (code: ', errorCode printString, ')'
 ]
 
-{ #category : 'private - ffi' }
+{ #category : #'private - ffi' }
 SoilWindowsFileLock class >> flushFileBuffers: hFile [
 	"Flush all file buffers to disk using Windows API"
 
 	^ self ffiCall: #(bool FlushFileBuffers(void* hFile)) module: #kernel32
 ]
 
-{ #category : 'private - ffi' }
+{ #category : #'private - ffi' }
 SoilWindowsFileLock class >> getCurrentProcessId [
 	"Get the current process ID using Windows API"
 
 	^ self ffiCall: #(uint GetCurrentProcessId()) module: #kernel32
 ]
 
-{ #category : 'private - ffi' }
+{ #category : #'private - ffi' }
 SoilWindowsFileLock class >> getFileHandle: stream [
 	"Extract Windows HANDLE from a BinaryFileStream.
 	For buffered streams (ZnBufferedWriteStream), get the wrapped file stream first."
@@ -64,14 +63,14 @@ SoilWindowsFileLock class >> getFileHandle: stream [
 	^ fileStream fileHandle
 ]
 
-{ #category : 'private - ffi' }
+{ #category : #'private - ffi' }
 SoilWindowsFileLock class >> getLastError [
 	"Get Windows error code"
 
 	^ self ffiCall: #(uint GetLastError()) module: #kernel32
 ]
 
-{ #category : 'class initialization' }
+{ #category : #'class initialization' }
 SoilWindowsFileLock class >> initialize [
 	"Windows API constants"
 
@@ -87,7 +86,7 @@ SoilWindowsFileLock class >> initialize [
 	ERROR_IO_PENDING := 997
 ]
 
-{ #category : 'accessing locking' }
+{ #category : #'accessing locking' }
 SoilWindowsFileLock class >> lock: fileHandle from: start length: length [
 
 	^ self
@@ -97,7 +96,7 @@ SoilWindowsFileLock class >> lock: fileHandle from: start length: length [
 		exclusive: true
 ]
 
-{ #category : 'accessing locking' }
+{ #category : #'accessing locking' }
 SoilWindowsFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
 	"Lock file region, returning true on success, false on failure.
 	For detailed error information, use lockOrError:from:length:exclusive:"
@@ -137,7 +136,7 @@ SoilWindowsFileLock class >> lock: fileHandle from: start length: length exclusi
 	^ result ~= 0
 ]
 
-{ #category : 'private - ffi' }
+{ #category : #'private - ffi' }
 SoilWindowsFileLock class >> lockFileEx: hFile flags: dwFlags bytesLow: nNumberOfBytesToLockLow bytesHigh: nNumberOfBytesToLockHigh overlapped: lpOverlapped [
 
 	^ self
@@ -151,7 +150,7 @@ SoilWindowsFileLock class >> lockFileEx: hFile flags: dwFlags bytesLow: nNumberO
 		module: #kernel32
 ]
 
-{ #category : 'accessing locking' }
+{ #category : #'accessing locking' }
 SoilWindowsFileLock class >> lockOrError: fileHandle from: start length: length exclusive: exclusive [
 	"Lock file region, raising an error with detailed information on failure"
 
@@ -169,7 +168,7 @@ SoilWindowsFileLock class >> lockOrError: fileHandle from: start length: length 
 	^ success
 ]
 
-{ #category : 'accessing locking' }
+{ #category : #'accessing locking' }
 SoilWindowsFileLock class >> unlock: fileHandle from: start length: length [
 	"Unlock file region, returning true on success, false on failure.
 	For detailed error information, use unlockOrError:from:length:"
@@ -203,7 +202,7 @@ SoilWindowsFileLock class >> unlock: fileHandle from: start length: length [
 	^ result ~= 0
 ]
 
-{ #category : 'private - ffi' }
+{ #category : #'private - ffi' }
 SoilWindowsFileLock class >> unlockFileEx: hFile bytesLow: nNumberOfBytesToUnlockLow bytesHigh: nNumberOfBytesToUnlockHigh overlapped: lpOverlapped [
 
 	^ self
@@ -216,7 +215,7 @@ SoilWindowsFileLock class >> unlockFileEx: hFile bytesLow: nNumberOfBytesToUnloc
 		module: #kernel32
 ]
 
-{ #category : 'accessing locking' }
+{ #category : #'accessing locking' }
 SoilWindowsFileLock class >> unlockOrError: fileHandle from: start length: length [
 	"Unlock file region, raising an error with detailed information on failure"
 
