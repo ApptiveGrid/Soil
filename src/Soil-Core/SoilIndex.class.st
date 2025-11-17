@@ -420,23 +420,19 @@ SoilIndex >> removeDirtyPage: aPage [
 ]
 
 { #category : #removing }
-SoilIndex >> removeKey: key [ 
+SoilIndex >> removeKey: key [
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
 	^ self
 		removeKey: key 
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #removing }
-SoilIndex >> removeKey: key ifAbsent: aBlock [
-	| page index |
-	page := self newIterator 
-		find: key;
-		currentPage.
-	^ ((index := page indexOfKey: (self indexKey: key)) > 0)
-		ifTrue: [ 
-			self decreaseSize.
-			(page itemRemoveIndex: index) value ]
-		ifFalse: [ aBlock value ]
+SoilIndex >> removeKey: key ifAbsent: aBlock [ 
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
+	^ self subclassResponsibility
 ]
 
 { #category : #removing }
