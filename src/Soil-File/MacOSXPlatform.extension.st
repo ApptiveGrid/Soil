@@ -1,7 +1,7 @@
-Extension { #name : #UnixPlatform }
+Extension { #name : #MacOSXPlatform }
 
 { #category : #'*Soil-File' }
-UnixPlatform >> fileno: stream [
+MacOSXPlatform >> fileno: stream [
 
 	^ self 
 		ffiCall: #(int fileno("FILE *"void *stream))
@@ -9,19 +9,14 @@ UnixPlatform >> fileno: stream [
 ]
 
 { #category : #'*Soil-File' }
-UnixPlatform >> flockClass [
-	^ SoilUnixFileLock
-]
-
-{ #category : #'*Soil-File' }
-UnixPlatform >> fsync: fd [
+MacOSXPlatform >> fsync: fd [
 	^ self 
 		ffiCall: #(int fsync(int fd))
 		module: LibC
 ]
 
 { #category : #'*Soil-File' }
-UnixPlatform >> syncFile: fileHandle [
+MacOSXPlatform >> syncFile: fileHandle [
 	"Unix/Linux/MacOS implementation of fsync using POSIX API"
 
 	^ self fsync: (self fileno: fileHandle)

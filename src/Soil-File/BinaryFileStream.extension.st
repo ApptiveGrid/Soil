@@ -34,42 +34,11 @@ BinaryFileStream >> flockClass [
 BinaryFileStream >> fsync [
 	"Flush all buffered data to disk. Platform-independent implementation."
 
-	OSPlatform current isWindows
-		ifTrue: [ self fsyncWindows ]
-		ifFalse: [ self fsyncUnix ]
-]
-
-{ #category : #'*Soil-File' }
-BinaryFileStream >> fsync: fd [
-	^ self 
-		ffiCall: #(int fsync(int fd))
-		module: LibC
-]
-
-{ #category : #'*Soil-File' }
-BinaryFileStream >> fsyncUnix [
-	"Unix/Linux/MacOS implementation of fsync using POSIX API"
-
-	| fd err |
-	fd := self fileno.
-	err := self fsync: fd.
-	err = 0 ifFalse: [
-			Error signal:
-				'fsync(' , fd printString , ') failed with error code: '
-				, err printString ]
-]
-
-{ #category : #'*Soil-File' }
-BinaryFileStream >> fsyncWindows [
-	"Windows implementation of fsync using FlushFileBuffers API"
-
-	| result errorCode |
-	result := SoilWindowsFileLock flushFileBuffers: self fileHandle.
-	result ifFalse: [
-			errorCode := SoilWindowsFileLock getLastError.
-			Error signal:
-				'FlushFileBuffers failed with error code: '
-				, errorCode printString ]
+	| errorCode |
+	errorCode := OSPlatform current syncFile: self fileHandle.
+	(errorCode == 0) ifFalse: [ 
+		Error signal: 'syncing file failed with error code: ' , errorCode printString ]
+	
 ]
 
 { #category : #'*Soil-File' }
