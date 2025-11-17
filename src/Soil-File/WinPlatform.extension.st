@@ -1,6 +1,6 @@
-Extension { #name : 'WinPlatform' }
+Extension { #name : #WinPlatform }
 
-{ #category : '*Soil-File' }
+{ #category : #'*Soil-File' }
 WinPlatform >> flockClass [
 	^ SoilWindowsFileLock
 ]
