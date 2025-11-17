@@ -119,6 +119,11 @@ SoilIndex >> basicAt: key put: anObject [
 	^ self basicAt: key add: anObject 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndex >> beFileStore [
+	store := self newFileStore 
+]
+
 { #category : #removing }
 SoilIndex >> cleanRemoved: aPage [
 	aPage cleanRemovedIn: self
@@ -323,6 +328,12 @@ SoilIndex >> newIterator [
 ]
 
 { #category : #'instance creation' }
+SoilIndex >> newMemoryStore [
+	^ SoilMemoryIndexStore new
+		index: self
+]
+
+{ #category : #'instance creation' }
 SoilIndex >> newPage [
 	^ self subclassResponsibility
 ]
@@ -478,7 +489,7 @@ SoilIndex >> size [
 { #category : #accessing }
 SoilIndex >> store [
 	^ store ifNil: [ 
-		store := self newFileStore ]
+		store := self newMemoryStore ]
 ]
 
 { #category : #accessing }
