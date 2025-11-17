@@ -99,15 +99,8 @@ SoilBTreeHeaderPage >> printOn: aStream [
 ]
 
 { #category : #reading }
-SoilBTreeHeaderPage >> readFrom: aStream [ 
-	super readFrom: aStream.
-	self 
-		readHeaderFrom: aStream;
-		readItemsFrom: aStream
-]
-
-{ #category : #reading }
 SoilBTreeHeaderPage >> readHeaderFrom: aStream [ 
+	super readHeaderFrom: aStream.
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	lastPageOffset :=(aStream next: self pointerSize) asInteger.

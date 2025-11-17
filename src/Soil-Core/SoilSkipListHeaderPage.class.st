@@ -152,16 +152,8 @@ SoilSkipListHeaderPage >> previous [
 ]
 
 { #category : #reading }
-SoilSkipListHeaderPage >> readFrom: aStream [ 
-	super readFrom: aStream.
-	self 
-		readHeaderFrom: aStream;
-		readLevelsFrom: aStream;
-		readItemsFrom: aStream
-]
-
-{ #category : #reading }
 SoilSkipListHeaderPage >> readHeaderFrom: aStream [
+	super readHeaderFrom: aStream.
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	maxLevel := (aStream next: 2) asInteger.
@@ -172,7 +164,8 @@ SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 		ifFalse: [ true ].
 	size := (version > 1) 
 		ifTrue: [ (aStream next: 6) asInteger ]
-		ifFalse: [ -1 ]
+		ifFalse: [ -1 ].
+	self readLevelsFrom: aStream
 ]
 
 { #category : #accessing }

@@ -82,8 +82,8 @@ SoilBTreePage >> pointerSize [
 ]
 
 { #category : #reading }
-SoilBTreePage >> readFrom: aStream [ 
-	super readFrom: aStream.
+SoilBTreePage >> readHeaderFrom: aStream [ 
+	super readHeaderFrom: aStream.
 	self readLastTransactionFrom: aStream
 ]
 
@@ -107,10 +107,4 @@ SoilBTreePage >> split: newPage [
 SoilBTreePage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
 	aStream nextPutAll: (lastTransaction asByteArrayOfSize: 8)
-]
-
-{ #category : #writing }
-SoilBTreePage >> writeOn: aStream [ 
-	super writeOn: aStream.
-	self writeItemsOn: aStream
 ]

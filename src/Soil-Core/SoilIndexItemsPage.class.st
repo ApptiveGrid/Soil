@@ -365,6 +365,12 @@ SoilIndexItemsPage >> presentItemCount [
 ]
 
 { #category : #reading }
+SoilIndexItemsPage >> readFrom: aStream [ 
+	super readFrom: aStream.
+	self readItemsFrom: aStream
+]
+
+{ #category : #reading }
 SoilIndexItemsPage >> readItemsFrom: aStream [ 
 	| numberOfItems |
 	"calculate the maximum number of items that can be stored in this
@@ -424,4 +430,11 @@ SoilIndexItemsPage >> writeItemsOn: aStream [
 			nextPutAll: (assoc key asByteArrayOfSize: self keySize);
 			nextPutAll: (assoc value asByteArrayOfSize: self valueSize)].
 
+]
+
+{ #category : #writing }
+SoilIndexItemsPage >> writeOn: aStream [ 
+	super writeOn: aStream.
+	self writeItemsOn: aStream
+	
 ]
