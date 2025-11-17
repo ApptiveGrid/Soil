@@ -18,12 +18,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os: [ ubuntu-latest, windows-latest ]
         pharoversion: [ Pharo64-14, Pharo64-13, Pharo64-12, Pharo64-11 ]
         include:
           - pharoversion: Pharo64-14
             allow-failure: true
-    name: ${{ matrix.pharoversion }}
-    runs-on: ubuntu-latest
+    name: ${{ matrix.pharoversion }}-${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.allow-failure == true }}
     steps:
       - uses: actions/checkout@v2
