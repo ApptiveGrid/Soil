@@ -20,7 +20,7 @@ jobs:
       matrix:
         os: [ ubuntu-latest, windows-latest ]
         pharoversion: [ Pharo64-alpha, Pharo64-13, Pharo64-12, Pharo64-11 ]
-    name: ${{ matrix.pharoversion }}
+    name: ${{ matrix.pharoversion }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
