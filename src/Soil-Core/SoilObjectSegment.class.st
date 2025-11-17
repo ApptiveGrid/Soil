@@ -230,7 +230,7 @@ SoilObjectSegment >> lockObjectId: aSOObjectId for: lockContext [
 	^ indexFile lockObjectId: aSOObjectId for: lockContext 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #gc }
 SoilObjectSegment >> makeGCClone [
 	^ self class new 
 		id: id;

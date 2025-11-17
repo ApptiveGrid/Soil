@@ -173,7 +173,7 @@ SoilObjectRepository >> lockObjectId: aSOObjectId for: lockContext [
 		lockObjectId: aSOObjectId for: lockContext
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #gc }
 SoilObjectRepository >> makeGCClone [
 	^ self class new
 		soil: soil; 
