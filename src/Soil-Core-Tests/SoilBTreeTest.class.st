@@ -1,11 +1,29 @@
 Class {
 	#name : #SoilBTreeTest,
-	#superclass : #TestCase,
+	#superclass : #ParametrizedTestCase,
 	#instVars : [
-		'index'
+		'index',
+		'uniqueKeys'
 	],
 	#category : #'Soil-Core-Tests-Index'
 }
+
+{ #category : #'building suites' }
+SoilBTreeTest class >> testParameters [
+
+	^ ParametrizedTestMatrix new
+		  addCase: { (#uniqueKeys -> true) };
+		  addCase: { (#uniqueKeys -> false) };
+		  yourself
+]
+
+{ #category : #running }
+SoilBTreeTest >> assertSoilDuplicate: actual equals: expected [
+
+	uniqueKeys
+		ifTrue: [ self assert: actual equals: expected ]
+		ifFalse: [ self assertCollection: actual hasSameElements: { expected } ]
+]
 
 { #category : #running }
 SoilBTreeTest >> setUp [ 
@@ -16,7 +34,8 @@ SoilBTreeTest >> setUp [
 		initializeFilesystem;
 		initializeHeaderPage;
 		keySize: 8;
-		valueSize: 8
+		valueSize: 8;
+		uniqueKeys: uniqueKeys
 ]
 
 { #category : #running }
@@ -36,16 +55,17 @@ SoilBTreeTest >> testAdd2 [
 		         initializeFilesystem;
 		         initializeHeaderPage;
 		         keySize: 1016;
+					uniqueKeys: uniqueKeys;
 		         valueSize: 8.
 
 	entries := #( 6 16 26 36 46 ).
 
 	index at: 6 add: (6 asByteArrayOfSize: 8).
-	self assert: (index at: 6) equals: (6 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 6) equals: (6 asByteArrayOfSize: 8).
 
 	index at: 16 add: (16 asByteArrayOfSize: 8).
-	self assert: (index at: 6) equals: (6 asByteArrayOfSize: 8).
-	self assert: (index at: 16) equals: (16 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 6) equals: (6 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 16) equals: (16 asByteArrayOfSize: 8).
 
 	"We have two pages"
 	self assert: index pages size equals: 2.
@@ -63,9 +83,9 @@ SoilBTreeTest >> testAdd2 [
 	self assert: index indexPages size equals: 1.
 	self assert: index dataPages size equals: 2.
 
-	self assert: (index at: 6) equals: (6 asByteArrayOfSize: 8).
-	self assert: (index at: 16) equals: (16 asByteArrayOfSize: 8).
-	self assert: (index at: 26) equals: (26 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 6) equals: (6 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 16) equals: (16 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 26) equals: (26 asByteArrayOfSize: 8).
 
 	"index page has two entries: 0 and 16"
 	self assert: (index rootPage items collect: #key) size equals: 2.
@@ -79,10 +99,10 @@ SoilBTreeTest >> testAdd2 [
 	self assert: index indexPages size equals: 1.
 	self assert: index dataPages size equals: 3.
 
-	self assert: (index at: 6) equals: (6 asByteArrayOfSize: 8).
-	self assert: (index at: 16) equals: (16 asByteArrayOfSize: 8).
-	self assert: (index at: 26) equals: (26 asByteArrayOfSize: 8).
-	self assert: (index at: 36) equals: (36 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 6) equals: (6 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 16) equals: (16 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 26) equals: (26 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 36) equals: (36 asByteArrayOfSize: 8).
 
 	"index page has trhee entries: 0 and 16 and 26"
 	self assert: (index rootPage items collect: #key) size equals: 3.
@@ -97,11 +117,11 @@ SoilBTreeTest >> testAdd2 [
 	self assert: index indexPages size equals: 3.
 	self assert: index dataPages size equals: 4.
 
-	self assert: (index at: 6) equals: (6 asByteArrayOfSize: 8).
-	self assert: (index at: 16) equals: (16 asByteArrayOfSize: 8).
-	self assert: (index at: 26) equals: (26 asByteArrayOfSize: 8).
-	self assert: (index at: 36) equals: (36 asByteArrayOfSize: 8).
-	self assert: (index at: 46) equals: (46 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 6) equals: (6 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 16) equals: (16 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 26) equals: (26 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 36) equals: (36 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 46) equals: (46 asByteArrayOfSize: 8).
 
 	"index page has trhee entries: 0 and 16 and 26"
 
@@ -144,6 +164,7 @@ SoilBTreeTest >> testAddRandom [
 		         initializeFilesystem;
 		         initializeHeaderPage;
 		         keySize: 512;
+					uniqueKeys: uniqueKeys;
 		         valueSize: 512.
 
 	numEntries := 20.
@@ -157,11 +178,13 @@ SoilBTreeTest >> testAddRandom [
 		index at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
 
 	"check size"
-	self assert: index size equals: entries size.
+	uniqueKeys 
+		ifTrue: [ self assert: index size equals: entries size]
+		ifFalse: [ self assert: index size <= entries size].
 
 	"can we find all the keys we added?"
 	entries do: [ :each |
-		self assert: (index at: each) equals: (each asByteArrayOfSize: 8) ].
+		self assertSoilDuplicate: (index at: each) equals: (each asByteArrayOfSize: 8) ].
 
 	"iterate index, all should be in entries"
 	index do: [ :each |
@@ -218,8 +241,24 @@ SoilBTreeTest >> testAddSecondOverflowReload [
 		         path: 'sunit-btree';
 		         initializeFilesystem.
 	self
-		assert: (index at: capacity)
+		assertSoilDuplicate: (index at: capacity)
 		equals: (capacity asByteArrayOfSize: 8)
+]
+
+{ #category : #'tests - duplicate' }
+SoilBTreeTest >> testAddingDuplicateKeyAcrossPages [
+
+	| elements iterator ids |
+	index allowDuplicateKeys.
+	iterator := index newIterator.
+	1 to: 250 do: [ :n | iterator at: n add: n asDummySoilObjectId ].
+	ids := OrderedCollection new.
+	1 to: 6 do: [ :n |
+		ids add: n asDummySoilObjectId.
+		iterator at: 251 add: n asDummySoilObjectId ].
+	self assert: index size equals: 256.
+	elements := iterator valuesAt: 251.
+	self assertCollection: elements hasSameElements: ids
 ]
 
 { #category : #tests }
@@ -234,12 +273,12 @@ SoilBTreeTest >> testAt [
 	index at: capacity + 1 add: (capacity + 1 asByteArrayOfSize: 8).
 	self assert: index pages size equals: 3.
 
-	self assert: (index at: 1) equals: (1 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 1) equals: (1 asByteArrayOfSize: 8).
 	self
-		assert: (index at: capacity)
+		assertSoilDuplicate: (index at: capacity)
 		equals: (capacity asByteArrayOfSize: 8).
 	self
-		assert: (index at: capacity + 1)
+		assertSoilDuplicate: (index at: capacity + 1)
 		equals: (capacity + 1 asByteArrayOfSize: 8).
 	self should: [ index at: capacity + 2 ] raise: KeyNotFound
 ]
@@ -256,17 +295,17 @@ SoilBTreeTest >> testAtSecondOverflow [
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n |
 		index at: capacity + n add: (capacity + n asByteArrayOfSize: 8) ].
-	self assert: index pages size equals: 4.
+	self assert: index pages size equals: (uniqueKeys ifTrue: [4] ifFalse: [6]).
 
-	self assert: (index at: 1) equals: (1 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 1) equals: (1 asByteArrayOfSize: 8).
 	self
-		assert: (index at: capacity)
+		assertSoilDuplicate: (index at: capacity)
 		equals: (capacity asByteArrayOfSize: 8).
 	self
-		assert: (index at: capacity + 1)
+		assertSoilDuplicate: (index at: capacity + 1)
 		equals: (capacity + 1 asByteArrayOfSize: 8).
 	self
-		assert: (index at: capacity + capacity)
+		assertSoilDuplicate: (index at: capacity + capacity)
 		equals: (capacity + capacity asByteArrayOfSize: 8).
 	self should: [ index at: capacity * 2 + 1 ] raise: KeyNotFound
 ]
@@ -278,6 +317,19 @@ SoilBTreeTest >> testCreation [
 	"both pages start as dirty"
 	self assert: (index pages at: 1) needsWrite.
 	self assert: (index pages at: 2) needsWrite
+]
+
+{ #category : #'tests - duplicate' }
+SoilBTreeTest >> testDuplicateKeysRoundtripAndCompact [
+
+	index allowDuplicateKeys.
+	self assert: index headerPage uniqueKeys equals: false.
+
+	index writePages.
+	index
+		reopen;
+		compact.
+	self assert: index headerPage uniqueKeys equals: false.
 ]
 
 { #category : #tests }
@@ -300,7 +352,7 @@ SoilBTreeTest >> testFreePageAdd [
 	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
 	self assert: index headerPage lastPageOffset equals: 20.
 	self assert: index headerPage firstFreePageIndex equals: 0.
-	500 to: 1500 do: [ :n | iterator removeKey: n ].
+	500 to: 1500 do: [ :n | iterator removeKey: n value: (n asByteArrayOfSize: 8)].
 	self assert: index headerPage lastPageOffset equals: 20.
 	self assert: index headerPage firstFreePageIndex equals: 0.
 	index cleanUpToVersion: nil.
@@ -326,7 +378,7 @@ SoilBTreeTest >> testFreePageAddNested [
 	self assert: index headerPage lastPageOffset equals: 3017.
 	self assert: index headerPage firstFreePageIndex equals: 0.
 	"now we free more pages than a free page list has capacity"
-	10 to: 8990 do: [ :n | iterator removeKey: n ].
+	10 to: 8990 do: [ :n | iterator removeKey: n value: (n asByteArrayOfSize: 8)].
 	index cleanUpToVersion: nil.
 	self assert: index headerPage firstFreePageIndex equals: 5.
 	self assert: (index store pageAt: 5) pageIndexes size equals: 1018.
@@ -353,7 +405,7 @@ SoilBTreeTest >> testFreePageReuse [
 	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
 	self assert: index headerPage lastPageOffset equals: 20.
 	self assert: index headerPage firstFreePageIndex equals: 0.
-	500 to: 1500 do: [ :n | iterator removeKey: n ].
+	500 to: 1500 do: [ :n | iterator removeKey: n value: (n asByteArrayOfSize: 8)].
 	index cleanUpToVersion: nil.
 	self assert: index headerPage lastPageOffset equals: 20.
 	2501 to: 2750 + 250 do: [ :n |
@@ -374,7 +426,7 @@ SoilBTreeTest >> testFreePageReuseAtEndAppend [
 	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
 	self assert: index headerPage lastPageOffset equals: 20.
 	self assert: index headerPage firstFreePageIndex equals: 0.
-	500 to: 1500 do: [ :n | iterator removeKey: n ].
+	500 to: 1500 do: [ :n | iterator removeKey: n value: (n asByteArrayOfSize: 8)].
 	index cleanUpToVersion: nil.
 	self assert: index headerPage lastPageOffset equals: 20.
 	self
@@ -423,10 +475,10 @@ SoilBTreeTest >> testIndexRewritingWithCleaning [
 	1 to: capacity do: [ :n | index at: n add: SoilObjectId removed ].
 
 	index newPluggableRewriter cleanRemoved run.
-	self assert: index headerPage lastPageOffset equals: 2.
-	self assert: (index pageAt: 1) items size equals: 1.
+	self assert: index headerPage lastPageOffset equals: (uniqueKeys ifTrue: [2] ifFalse: [3]).
+	self assert: (index pageAt: 1) items size equals: (uniqueKeys ifTrue: [1] ifFalse: [126]).
 	self
-		assert: (index at: capacity + 1) asByteArray
+		assertSoilDuplicate: (index at: capacity + 1)
 		equals: (capacity + 1 asByteArrayOfSize: 8)
 ]
 
@@ -527,7 +579,7 @@ SoilBTreeTest >> testPageAddFirstAndLoad [
 
 	self assert: page items first key equals: (index indexKey: 1).
 	"load succeeds"
-	self assert: (index at: 1) equals: (1 asByteArrayOfSize: 8)
+	self assertSoilDuplicate: (index at: 1) equals: (1 asByteArrayOfSize: 8)
 ]
 
 { #category : #tests }
@@ -576,6 +628,7 @@ SoilBTreeTest >> testRemoveFromIndex [
 		         initializeFilesystem;
 		         initializeHeaderPage;
 		         keySize: 1016;
+					uniqueKeys: uniqueKeys;
 		         valueSize: 8.
 
 	entries := #( 104 247 56 281 61 286 66 337 308 1 400 272 347 335 45
@@ -587,7 +640,7 @@ SoilBTreeTest >> testRemoveFromIndex [
 
 	"can we find all the keys we added?"
 	entries do: [ :each |
-		self assert: (index at: each) equals: (each asByteArrayOfSize: 8) ].
+		self assertSoilDuplicate: (index at: each) equals: (each asByteArrayOfSize: 8) ].
 	"page 10 is the index page that has the index"
 	self assert: (index pageAt: 10) items last key equals: 335.
 	"now we remove 335"
@@ -615,6 +668,7 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 		         initializeFilesystem;
 		         initializeHeaderPage;
 		         keySize: 512;
+					uniqueKeys: uniqueKeys;
 		         valueSize: 512.
 
 	entries := #( 104 247 56 281 61 286 66 337 308 1 400 272 347 335 45
@@ -625,7 +679,7 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 		index at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
 	"can we find all the keys we added?"
 	entries do: [ :each |
-		self assert: (index at: each) equals: (each asByteArrayOfSize: 8) ].
+		self assertSoilDuplicate: (index at: each) equals: (each asByteArrayOfSize: 8) ].
 
 
 	entries do: [ :entry |
@@ -635,7 +689,7 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 		remainingEntries remove: entry.
 		"check that all remaining entries can be found"
 		remainingEntries do: [ :each |
-			self assert: (index at: each) equals: (each asByteArrayOfSize: 8) ].
+			self assertSoilDuplicate: (index at: each) equals: (each asByteArrayOfSize: 8) ].
 		"check size, this makes sure we can iterate over all remaining entries"
 		self assert: index values size equals: remainingEntries size ].
 	self assert: index isEmpty.
@@ -647,7 +701,7 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 	entries do: [ :toAdd |
 		index at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
 	entries do: [ :each |
-		self assert: (index at: each) equals: (each asByteArrayOfSize: 8) ]
+		self assertSoilDuplicate: (index at: each) equals: (each asByteArrayOfSize: 8) ]
 ]
 
 { #category : #tests }
@@ -660,9 +714,9 @@ SoilBTreeTest >> testRemoveKey [
 	removed := index removeKey: 20.
 	self assert: removed equals: (20 asByteArrayOfSize: 8).
 
-	self assert: (index at: 1) equals: (1 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (index at: 1) equals: (1 asByteArrayOfSize: 8).
 	self
-		assert: (index at: capacity)
+		assertSoilDuplicate: (index at: capacity)
 		equals: (capacity asByteArrayOfSize: 8).
 	self should: [ index at: 20 ] raise: KeyNotFound.
 	self should: [ index removeKey: 20 ] raise: KeyNotFound
@@ -690,6 +744,7 @@ SoilBTreeTest >> testSplitIndexPage [
 		         initializeFilesystem;
 		         initializeHeaderPage;
 		         keySize: 512;
+					uniqueKeys: uniqueKeys;
 		         valueSize: 512.
 
 	entries := #( 104 247 56 281 61 286 66 337 308 1 400 272 347 335 45
@@ -701,7 +756,7 @@ SoilBTreeTest >> testSplitIndexPage [
 
 	"can we find all the keys we added?"
 	entries do: [ :each |
-		self assert: (index at: each) equals: (each asByteArrayOfSize: 8) ].
+		self assertSoilDuplicate: (index at: each) equals: (each asByteArrayOfSize: 8) ].
 
 	"check size, this makes sure we can iterate over all remaining entries"
 	self assert: index values size equals: entries size
@@ -718,6 +773,7 @@ SoilBTreeTest >> testSplitIndexPageReleoad [
 		         initializeFilesystem;
 		         initializeHeaderPage;
 		         keySize: 512;
+					uniqueKeys: uniqueKeys;
 		         valueSize: 512.
 
 	entries := #( 104 247 56 281 61 286 66 337 308 1 400 272 347 335 45
@@ -729,7 +785,7 @@ SoilBTreeTest >> testSplitIndexPageReleoad [
 
 	"can we find all the keys we added?"
 	entries do: [ :each |
-		self assert: (index at: each) equals: (each asByteArrayOfSize: 512) ].
+		self assertSoilDuplicate: (index at: each) equals: (each asByteArrayOfSize: 512) ].
 
 	"write and reload"
 	index writePages.
@@ -740,8 +796,20 @@ SoilBTreeTest >> testSplitIndexPageReleoad [
 
 	"can we find all the keys we added?"
 	entries do: [ :each |
-		self assert: (index at: each) equals: (each asByteArrayOfSize: 512) ].
+		self assertSoilDuplicate: (index at: each) equals: (each asByteArrayOfSize: 512) ].
 
 	"check size, this makes sure we can iterate over all remaining entries"
 	self assert: index values size equals: entries size
+]
+
+{ #category : #accessing }
+SoilBTreeTest >> uniqueKeys [
+
+	^ uniqueKeys
+]
+
+{ #category : #accessing }
+SoilBTreeTest >> uniqueKeys: anObject [
+
+	uniqueKeys := anObject
 ]
