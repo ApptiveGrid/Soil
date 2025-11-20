@@ -134,6 +134,21 @@ SoilPersistentDictionaryTest >> testAtPut [
 ]
 
 { #category : #tests }
+SoilPersistentDictionaryTest >> testCollect [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	dict at: #test put: 'string'.
+	dict at: #test2 put: 'string2'.
+	transaction commit.
+		
+	self assert: ((dict collect: [ :each | each ] ) includes: 'string').
+	self assert: ((dict collect: [ :each | each ] ) includes: 'string2')
+]
+
+{ #category : #tests }
 SoilPersistentDictionaryTest >> testCommitAndRead [
 
 	| dict transaction materialized |
@@ -219,6 +234,21 @@ SoilPersistentDictionaryTest >> testKeys [
 		
 	self assert: (dict keys includes: 'test').
 	self assert: (dict keys includes: 'test2')
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testKeysAndValuesDo [
+
+	| dict transaction |
+	transaction := soil newTransaction.
+	dict := SoilPersistentDictionary new.
+	transaction makeRoot: dict.
+	dict at: #test put: 'string'.
+	dict at: #test2 put: 'string2'.
+	transaction commit.
+	dict keysAndValuesDo: [:key :value | 
+		self assert:(key beginsWith: #test).
+		self assert:(value beginsWith: 'string')]
 ]
 
 { #category : #tests }
