@@ -168,7 +168,7 @@ SoilBTreeTest >> testAddRandom [
 		         valueSize: 512.
 
 	numEntries := 20.
-	entries := Set new: numEntries.
+	entries := OrderedCollection new: numEntries.
 
 
 	numEntries timesRepeat: [
@@ -179,8 +179,8 @@ SoilBTreeTest >> testAddRandom [
 
 	"check size"
 	uniqueKeys 
-		ifTrue: [ self assert: index size equals: entries size]
-		ifFalse: [ self assert: index size <= entries size].
+		ifTrue: [ self assert: index size equals: entries asSet size]
+		ifFalse: [ self assert: index size equals: 20].
 
 	"can we find all the keys we added?"
 	entries do: [ :each |
