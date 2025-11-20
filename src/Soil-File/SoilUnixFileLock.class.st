@@ -1,5 +1,5 @@
 Class {
-	#name : #UnixFileLock,
+	#name : #SoilUnixFileLock,
 	#superclass : #FFIStructure,
 	#classVars : [
 		'F_GETFL',
@@ -26,7 +26,7 @@ Class {
 }
 
 { #category : #testing }
-UnixFileLock class >> canLock: fileHandle from: start length: length exclusive: exclusive [
+SoilUnixFileLock class >> canLock: fileHandle from: start length: length exclusive: exclusive [
 	| lock result |
 	
 	lock := self newLockExclusive: exclusive start: start length: length.
@@ -40,16 +40,16 @@ UnixFileLock class >> canLock: fileHandle from: start length: length exclusive: 
 ]
 
 { #category : #private }
-UnixFileLock class >> fcntl: fd command: cmd struct: struct [
+SoilUnixFileLock class >> fcntl: fd command: cmd struct: struct [
 
 	^ self 
-		ffiCall: #(int fcntl(int fd, int cmd, UnixFileLock *struct))
+		ffiCall: #(int fcntl(int fd, int cmd, #SoilUnixFileLock *struct))
 		library: LibC
 		fixedArgumentCount: 2
 ]
 
 { #category : #private }
-UnixFileLock class >> fcntl: fd command: cmd value: value [
+SoilUnixFileLock class >> fcntl: fd command: cmd value: value [
 
 	^ self 
 		ffiCall: #(int fcntl(int fd, int cmd, int value))
@@ -58,7 +58,7 @@ UnixFileLock class >> fcntl: fd command: cmd value: value [
 ]
 
 { #category : #'field definition' }
-UnixFileLock class >> fieldsDesc [
+SoilUnixFileLock class >> fieldsDesc [
 	"self rebuildFieldAccessors"
 
 	^ #(
@@ -71,7 +71,7 @@ UnixFileLock class >> fieldsDesc [
 ]
 
 { #category : #private }
-UnixFileLock class >> fileno: stream [
+SoilUnixFileLock class >> fileno: stream [
 
 	^ self 
 		ffiCall: #(int fileno("FILE *"void *stream))
@@ -79,7 +79,7 @@ UnixFileLock class >> fileno: stream [
 ]
 
 { #category : #private }
-UnixFileLock class >> flock: fd operation: operation [
+SoilUnixFileLock class >> flock: fd operation: operation [
 
 	^ self 
 		ffiCall: #(int flock(int fd, int operation))
@@ -87,13 +87,13 @@ UnixFileLock class >> flock: fd operation: operation [
 ]
 
 { #category : #private }
-UnixFileLock class >> getpid [
+SoilUnixFileLock class >> getpid [
 
 	^ self ffiCall: #(__pid_t getpid()) module: LibC
 ]
 
 { #category : #'class initialization' }
-UnixFileLock class >> initialize [
+SoilUnixFileLock class >> initialize [
 
 	__off64_t := FFIUInt64.
 	__pid_t := FFIUInt32.
@@ -117,7 +117,7 @@ UnixFileLock class >> initialize [
 ]
 
 { #category : #'accessing locking' }
-UnixFileLock class >> lock: fileHandle from: start length: length [
+SoilUnixFileLock class >> lock: fileHandle from: start length: length [
 	
 	^ self 
 		lock: fileHandle 
@@ -127,7 +127,7 @@ UnixFileLock class >> lock: fileHandle from: start length: length [
 ]
 
 { #category : #'accessing locking' }
-UnixFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
+SoilUnixFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
 	| lock result |
 	
 	lock := self newLockExclusive: exclusive start: start length: length.
@@ -140,7 +140,7 @@ UnixFileLock class >> lock: fileHandle from: start length: length exclusive: exc
 ]
 
 { #category : #'instance creation' }
-UnixFileLock class >> newLockExclusive: exclusive start: start length: length [
+SoilUnixFileLock class >> newLockExclusive: exclusive start: start length: length [
 	
 	^ self 
 		newType: (exclusive ifTrue: [ F_WRLCK ] ifFalse: [ F_RDLCK ])
@@ -149,7 +149,7 @@ UnixFileLock class >> newLockExclusive: exclusive start: start length: length [
 ]
 
 { #category : #'instance creation' }
-UnixFileLock class >> newType: type start: start length: length [
+SoilUnixFileLock class >> newType: type start: start length: length [
 	
 	^ self new 
 		l_type: type;
@@ -161,7 +161,7 @@ UnixFileLock class >> newType: type start: start length: length [
 ]
 
 { #category : #'instance creation' }
-UnixFileLock class >> newUnlockStart: start length: length [
+SoilUnixFileLock class >> newUnlockStart: start length: length [
 	
 	^ self 
 		newType: F_UNLCK
@@ -170,7 +170,7 @@ UnixFileLock class >> newUnlockStart: start length: length [
 ]
 
 { #category : #accessing }
-UnixFileLock class >> setNonBlock: fileHandle [
+SoilUnixFileLock class >> setNonBlock: fileHandle [
 	| fd flags |
 	
 	fd := self fileno: fileHandle.
@@ -180,7 +180,7 @@ UnixFileLock class >> setNonBlock: fileHandle [
 ]
 
 { #category : #'accessing locking' }
-UnixFileLock class >> unlock: fileHandle from: start length: length [
+SoilUnixFileLock class >> unlock: fileHandle from: start length: length [
 	| lock result |
 	
 	lock := self newUnlockStart: start length: length.
@@ -193,67 +193,67 @@ UnixFileLock class >> unlock: fileHandle from: start length: length [
 ]
 
 { #category : #'accessing structure variables' }
-UnixFileLock >> l_len [
+SoilUnixFileLock >> l_len [
 	"This method was automatically generated"
 	^handle unsignedLongLongAt: OFFSET_L_LEN
 ]
 
 { #category : #'accessing structure variables' }
-UnixFileLock >> l_len: anObject [
+SoilUnixFileLock >> l_len: anObject [
 	"This method was automatically generated"
 	handle unsignedLongLongAt: OFFSET_L_LEN put: anObject
 ]
 
 { #category : #'accessing structure variables' }
-UnixFileLock >> l_pid [
+SoilUnixFileLock >> l_pid [
 	"This method was automatically generated"
 	^handle unsignedLongAt: OFFSET_L_PID
 ]
 
 { #category : #'accessing structure variables' }
-UnixFileLock >> l_pid: anObject [
+SoilUnixFileLock >> l_pid: anObject [
 	"This method was automatically generated"
 	handle unsignedLongAt: OFFSET_L_PID put: anObject
 ]
 
 { #category : #'accessing structure variables' }
-UnixFileLock >> l_start [
+SoilUnixFileLock >> l_start [
 	"This method was automatically generated"
 	^handle unsignedLongLongAt: OFFSET_L_START
 ]
 
 { #category : #'accessing structure variables' }
-UnixFileLock >> l_start: anObject [
+SoilUnixFileLock >> l_start: anObject [
 	"This method was automatically generated"
 	handle unsignedLongLongAt: OFFSET_L_START put: anObject
 ]
 
 { #category : #'accessing structure variables' }
-UnixFileLock >> l_type [
+SoilUnixFileLock >> l_type [
 	"This method was automatically generated"
 	^handle signedShortAt: OFFSET_L_TYPE
 ]
 
 { #category : #'accessing structure variables' }
-UnixFileLock >> l_type: anObject [
+SoilUnixFileLock >> l_type: anObject [
 	"This method was automatically generated"
 	handle signedShortAt: OFFSET_L_TYPE put: anObject
 ]
 
 { #category : #'accessing structure variables' }
-UnixFileLock >> l_whence [
+SoilUnixFileLock >> l_whence [
 	"This method was automatically generated"
 	^handle signedShortAt: OFFSET_L_WHENCE
 ]
 
 { #category : #'accessing structure variables' }
-UnixFileLock >> l_whence: anObject [
+SoilUnixFileLock >> l_whence: anObject [
 	"This method was automatically generated"
 	handle signedShortAt: OFFSET_L_WHENCE put: anObject
 ]
 
 { #category : #printing }
-UnixFileLock >> printOn: aStream [ 
+SoilUnixFileLock >> printOn: aStream [ 
 	"Append to the argument, aStream, the names and values of all the record's variables."
 
 	aStream nextPutAll: self class name; nextPutAll: ' ( '; cr.
