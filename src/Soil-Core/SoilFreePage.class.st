@@ -58,7 +58,7 @@ SoilFreePage >> isDirty [
 
 { #category : #testing }
 SoilFreePage >> isEmpty [ 
-	"a free page is always true. This way we can make a free page 
+	"a free page is always empty. This way we can make a free page 
 	not (yet) removed traversable in a scan"
 	^ true 
 ]
