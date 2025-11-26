@@ -5,6 +5,21 @@ Class {
 }
 
 { #category : #tests }
+SoilClusterVersionTest >> testPersistentClusterVersionMemory [
+	| record |
+	record := SoilPersistentClusterVersion new
+		version: 12;
+		previousVersionPosition: 100;
+		bytes: #[ 9 8 7 6 5 4 3 2 1];
+		behaviorDescriptions: ({ 1 . 2 . 3 } collect: [ : each | SoilBehaviorDescription new 
+			objectId: each asSoilObjectId;
+			version: 10 atRandom ]);
+		references: ({ 4 . 5 . 6 } collect: #asSoilObjectId).
+		
+	self assert: record soilSizeInMemory equals: 224
+]
+
+{ #category : #tests }
 SoilClusterVersionTest >> testPersistentClusterVersionRoundtrip [
 	| record bytes read |
 	record := SoilPersistentClusterVersion new

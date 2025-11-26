@@ -138,13 +138,13 @@ SoilPersistentClusterVersion >> shouldBeCommitted [
 SoilPersistentClusterVersion >> soilSizeInMemory [
 	^ self sizeInMemory 
 		+ objectId soilSizeInMemory 
-		+ (references sum: #soilSizeInMemory) 
+		+ references soilSizeInMemory
 		+ bytes sizeInMemory 
-		+ committed sizeInMemory 
+		"+ committed sizeInMemory" "boolean: shared"
 		+ previousVersionPosition sizeInMemory 
 		+ version sizeInMemory 
-		+ (behaviorDescriptions sum: #soilSizeInMemory) 
-		+ (indexIds sum: #sizeInMemory) 
+		+ behaviorDescriptions soilSizeInMemory
+		+ indexIds soilSizeInMemory
 		+ position sizeInMemory
-		+ changed sizeInMemory 
+		"+ changed sizeInMemory" "boolean: shared"
 ]
