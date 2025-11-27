@@ -11,14 +11,14 @@ Class {
 	#category : #'Soil-Core-Visitor'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilVisitor >> beBreadthFirst [ 
 	depthFirst := false.
 	seen := Set new.
 	toBeProcessed := OrderedCollection new
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilVisitor >> beDepthFirst [ 
 	depthFirst := true.
 	seen := nil.
@@ -49,7 +49,7 @@ SoilVisitor >> processLoop [
 
 { #category : #accessing }
 SoilVisitor >> processObjectId: aSoilObjectId [ 
-	((aSoilObjectId segment = 0) and: [ aSoilObjectId index = 2 ]) ifTrue: [ ^ self ].
+	((aSoilObjectId segment == 0) and: [ aSoilObjectId index == 2 ]) ifTrue: [ ^ self ].
 	(seen includes: aSoilObjectId) ifTrue: [ ^ aSoilObjectId ].
 	seen add: aSoilObjectId.
 	^ depthFirst 

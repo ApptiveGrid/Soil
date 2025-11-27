@@ -9,6 +9,7 @@ Class {
 	#name : #SoilSkipListPage,
 	#superclass : #SoilIndexItemsPage,
 	#instVars : [
+		'left',
 		'right',
 		'valueSize'
 	],
@@ -28,9 +29,37 @@ SoilSkipListPage class >> isAbstract [
 
 { #category : #adding }
 SoilSkipListPage >> addItem: anAssociation [
-	"Note: this can only be called for new items, client has to check first and update if an entry for the key is already there, different to SoilBTreePage>>#addItem:"
-	items add: anAssociation.
-	needWrite := true
+
+	| index |
+	needWrite := true.
+
+	items 
+		findBinaryIndex: [ :each | anAssociation key - each key ] 
+		do: [:idx | | removedItem |
+			"replace the found index with the new value and return 
+			the removed value"
+			index := idx.
+			[ index < items size and: [ (items at: index + 1) key = anAssociation key ] ] whileTrue: [ 
+				index := index + 1 ].
+			items add: anAssociation afterIndex: index.
+			"removedItem := items at: index.
+			items at: index put: anAssociation."
+			^ removedItem ]
+		ifNone: [ :lower :upper |
+			"upper will be an index bigger than collection size if 
+			the element needs to be appended"
+			(upper > items size) ifTrue: [
+				items addLast: anAssociation.
+				^ nil ].
+			"if lower is greater than zero than lower and upper are 
+			valid indexes where we need to insert in between"
+			(lower > 0) ifTrue: [ 
+				items add: anAssociation afterIndex: lower.
+				^ nil ].
+			"lower will be zero if the element needs to be added to 
+			the front of the page"
+			items addFirst: anAssociation.
+			^ nil ]
 ]
 
 { #category : #accessing }
@@ -52,16 +81,23 @@ SoilSkipListPage >> cleanRemovedIn: index [
 	self cleanRemoved
 ]
 
+{ #category : #accessing }
+SoilSkipListPage >> firstItemIndexForKey: key [ 
+	| index |
+	index := items 
+		findBinaryIndex: [ :each | key - each key ] 
+		do: [ :idx | idx ] 
+		ifNone: [ :l :u | ^ 0 ].
+	[ index > 1 and: [ (items at: index - 1) key = key ] ] whileTrue: [ 
+		index := index - 1 ].
+	^ index 
+]
+
 { #category : #initialization }
 SoilSkipListPage >> initialize [ 
 	super initialize.
 	lastTransaction := 0.
-	needWrite := true.
-
-]
-
-{ #category : #initialization }
-SoilSkipListPage >> initializeInIndex: aSoilSkipList [
+	needWrite := true
 ]
 
 { #category : #initialization }
@@ -72,12 +108,54 @@ SoilSkipListPage >> initializeLevel: maxLevel [
 	[ (level < maxLevel) and: [ promote ] ] whileTrue: [ 
 		level := level + 1.
 		promote := self class random next > 0.5 ].
+	left := Array new: level withAll: 0.
 	right := Array new: level withAll: 0. 
 ]
 
 { #category : #testing }
 SoilSkipListPage >> isLastPage [
-	^ (right at: 1) = 0
+	^ (right at: 1) == 0
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> itemAt: key put: anObject [ 
+
+	self flag: #todo.
+	"this needs to be improved. For itemAt:put: we search twice for the index. This 
+	is to keep the assumption about replacing items. The way this is enforced might 
+	be a strategy object instead soonish"
+	items 
+		findBinaryIndex: [ :each |  key - each key ] 
+		do: [:ind | 	| removedItem |
+			removedItem := items at: ind.
+			items at: ind put: (key -> anObject).
+			needWrite := true.
+			^ removedItem ]
+		ifNone: [ KeyNotFound signal: 'this method is just for replacing items' ].
+
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> left [
+	^ left
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> leftAt: anInteger [ 
+	^ left at: anInteger 
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> leftAt: anInteger put: anObject [ 
+	left at: anInteger put: anObject.
+	needWrite := true
+]
+
+{ #category : #writing }
+SoilSkipListPage >> leftSize [
+	"this fixes the maximum number of pages to 32 bits which should be enough. This
+	17TB when using a page size of 4k"
+	^ 4
 ]
 
 { #category : #accessing }
@@ -93,12 +171,18 @@ SoilSkipListPage >> next [
 { #category : #copying }
 SoilSkipListPage >> postCopy [ 
 	super postCopy.
-	right := right copy
+	right := right copy.
+	left := left copy
+]
+
+{ #category : #accessing }
+SoilSkipListPage >> previous [
+	^ self leftAt: 1
 ]
 
 { #category : #reading }
-SoilSkipListPage >> readFrom: aStream [ 
-	super readFrom: aStream.
+SoilSkipListPage >> readHeaderFrom: aStream [ 
+	super readHeaderFrom: aStream.
 	self readLastTransactionFrom: aStream
 ]
 
@@ -107,6 +191,10 @@ SoilSkipListPage >> readLevelsFrom: aStream [
 	| level |
 	level := aStream next asInteger.
 	right := Array new: level withAll: 0. 
+	(version > 2) ifTrue: [ 
+		left := Array new: level withAll: 0. 
+		1 to: level do: [ :n |
+			left at: n put: (aStream next: self leftSize) asInteger ] ].
 	1 to: level do: [ :n |
 		right at: n put: (aStream next: self rightSize) asInteger ]
 ]
@@ -118,13 +206,12 @@ SoilSkipListPage >> right [
 
 { #category : #accessing }
 SoilSkipListPage >> rightAt: anInteger [ 
-	(anInteger > self level) ifTrue: [ ^ 0 ]. 
-	^ self right at: anInteger 
+	^ right at: anInteger 
 ]
 
 { #category : #accessing }
 SoilSkipListPage >> rightAt: anInteger put: anObject [ 
-	self right at: anInteger put: anObject.
+	right at: anInteger put: anObject.
 	needWrite := true
 ]
 
@@ -172,13 +259,9 @@ SoilSkipListPage >> writeHeaderOn: aStream [
 SoilSkipListPage >> writeLevelsOn: aStream [ 
 	aStream 
 		nextPut: self level.
+	(version > 2) ifTrue: [ 
+		1 to: self level do: [ :n |
+			aStream nextPutAll: ((left at: n) asByteArrayOfSize: self leftSize) ] ].
 	1 to: self level do: [ :n |
 		aStream nextPutAll: ((right at: n) asByteArrayOfSize: self rightSize) ]
-]
-
-{ #category : #writing }
-SoilSkipListPage >> writeOn: aStream [ 
-	super writeOn: aStream.
-	self writeItemsOn: aStream
-	
 ]

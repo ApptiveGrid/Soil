@@ -7,7 +7,7 @@ Class {
 		'start',
 		'initialBlock'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Metadata'
 }
 
 { #category : #'instance creation' }

@@ -1,3 +1,8 @@
+"
+When existing pages are emptied, we create a SoilFreePage (see #asSoilFreePage).
+
+The index maintains a list of all free page indexes for re-use.
+"
 Class {
 	#name : #SoilFreePage,
 	#superclass : #SoilIndexPage,

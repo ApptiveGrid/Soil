@@ -56,7 +56,7 @@ SoilObjectRepository >> at: objectid [
 { #category : #accessing }
 SoilObjectRepository >> at: objectId putBytes: bytes [ 
 	| segment position |
-	(objectId index = 0) ifTrue: [ Error signal: 'objectId is not initialized when trying to store' ].
+	(objectId index == 0) ifTrue: [ Error signal: 'objectId is not initialized when trying to store' ].
 	segment := self segmentAt: objectId segment.
 	position := segment at: objectId index putBytes: bytes.
 	soil notificationHandler recordWritten: objectId.
@@ -73,7 +73,7 @@ SoilObjectRepository >> at: objectid version: version [
 
 { #category : #accessing }
 SoilObjectRepository >> cacheSegmentAt: index upTo: limit [ 
-	(index = 0) 
+	(index == 0) 
 		ifTrue: [ metaSegment := metaSegment asCachedSegment weight: limit ]
 		ifFalse: [  
 			segments 	
@@ -86,7 +86,7 @@ SoilObjectRepository >> cacheSegmentAt: index using: aBlock [
 	| segment |
 	"exchange object segment with a LRU cached segment. The LRU cache
 	can be setup within aBlock"
-	(index = 0) 
+	(index == 0) 
 		ifTrue: [ 
 			metaSegment := metaSegment asCachedSegment.
 			aBlock value: metaSegment ]
@@ -151,7 +151,7 @@ SoilObjectRepository >> loadSegments [
 		segment := SoilObjectSegment new 
 			id: segmentId;
 			objectRepository: self.
-		segmentId isZero 
+		segmentId == 0 
 			ifTrue: [ 
 				metaSegment := self newMetaSegment
 					open;
@@ -173,7 +173,7 @@ SoilObjectRepository >> lockObjectId: aSOObjectId for: lockContext [
 		lockObjectId: aSOObjectId for: lockContext
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #gc }
 SoilObjectRepository >> makeGCClone [
 	^ self class new
 		soil: soil; 
@@ -226,7 +226,7 @@ SoilObjectRepository >> path: anObject [
 
 { #category : #accessing }
 SoilObjectRepository >> segmentAt: anInteger [ 
-	^ anInteger isZero 
+	^ anInteger == 0 
 		ifTrue: [ metaSegment ]
 		ifFalse: [ self segments at: anInteger ]
 ]

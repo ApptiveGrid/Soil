@@ -17,26 +17,9 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
-{ #category : #'instance creation' }
-SoilBasicSkipList >> allocatePage [
-	| page |
-	page := self newPage 
-		offset: (self nextFreePageIndex
-			ifNil: [ self nextPageOffset ]).
-	self store pageAt: page offset put: page.
-	self addDirtyPage: page.
-	^ page
-]
-
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
-]
-
-{ #category : #initialization }
-SoilBasicSkipList >> initialize [ 
-	super initialize.
-	dirtyPages := OrderedDictionary new
 ]
 
 { #category : #accessing }
@@ -71,41 +54,25 @@ SoilBasicSkipList >> newPage [
 		yourself
 ]
 
-{ #category : #private }
-SoilBasicSkipList >> nextFreePageIndex [ 
-	| firstFreePage freePageIndex |
-	firstFreePage := self firstFreePage ifNil: [ 
-		^ nil ].
-	^ firstFreePage hasFreePages 
-		ifTrue: [ 
-			freePageIndex := firstFreePage removeFirstIndex.
-			self removePageWithIndexIfPresent: freePageIndex.
-			self addDirtyPage: firstFreePage.
-			freePageIndex  ] 
-		ifFalse: [ 
-			"if firstFreePage has a next pointer we set that as 
-			new first free page. Next will return 0 if there is no
-			next page"
-			freePageIndex := firstFreePage next.
-			self headerPage firstFreePageIndex: firstFreePage next.
-			self removePageWithIndexIfPresent: firstFreePage offset.
-
-			self addDirtyPage: self headerPage.
-			firstFreePage offset ]
-				
-]
-
-{ #category : #'instance creation' }
-SoilBasicSkipList >> nextPageOffset [
-	| offset |
-	offset := store nextPageOffset.
-	self addDirtyPage: store headerPage.
-	^ offset 
-]
-
 { #category : #'instance creation' }
 SoilBasicSkipList >> pageClass [
 	^ SoilSkipListDataPage
+]
+
+{ #category : #removing }
+SoilBasicSkipList >> removeKey: key ifAbsent: aBlock [
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
+	
+	| page index |
+	page := self newIterator 
+		find: key;
+		currentPage.
+	^ ((index := page indexOfKey: (self indexKey: key)) > 0)
+		ifTrue: [ 
+			self decreaseSize.
+			(page itemRemoveIndex: index) value ]
+		ifFalse: [ aBlock value ]
 ]
 
 { #category : #removing }
@@ -140,42 +107,56 @@ SoilBasicSkipList >> removePage: aPage [
 
 ]
 
-{ #category : #removing }
-SoilBasicSkipList >> removePageWithIndexIfPresent: anInteger [ 
-	(store includesPageAt: anInteger) ifTrue: [ 
-		store removePageAt: anInteger ]
-]
-
 { #category : #accessing }
 SoilBasicSkipList >> size [ 
 	"if size is -1 the page has been converted from version 1 format and
 	size is uninitialized. We scan the size in order to write it properly"
 	| size |
 	size := self headerPage size.
-	^ (size = -1) 
+	^ (size == -1) 
 		ifTrue: [ super size  ]
 		ifFalse: [ size ]
 ]
 
 { #category : #private }
 SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
-	| newPage page |
-	page := aIterator currentPage.
-	"if we are on the last page and the new key is bigger then the
-	last key of the page we can append a page and add the new key
-	there. If the key is in between or the page is not the last we
-	split the page with each containing half of the items"
-	newPage := (page isLastPage and: [ page lastKey < aKey ])
+	| newPage currentPage previousPage nextPageOffset |
+	currentPage := aIterator currentPage.
+	"if we are on the last page and the new key is bigger then the last key 
+	of the page we can append a page and add the new key there. If the key 
+	is in between or the page is not the last we split the page with each 
+	containing half of the items"
+	newPage := (currentPage isLastPage and: [ currentPage lastKey < aKey ])
 		ifTrue: [ store allocatePage ] 
-		ifFalse: [ page split: store allocatePage ].
-	newPage level to: 1 by: -1  do: [ :level |
-		(level > page level)
-			ifTrue: [ 
-				newPage rightAt: level put: ((aIterator levelAt: level) rightAt: level).
-				(aIterator levelAt: level) rightAt: level put: newPage offset ]
-			ifFalse: [ 
-				(page rightAt: level) ifNotNil: [ :r | 
-					newPage rightAt: level put: r ].
-				page rightAt: level put: newPage offset ]].
+		ifFalse: [ currentPage split: store allocatePage ].
+	"rewire backlinks and forward links..."
+	newPage level to: 1 by: -1  do: [ :newLevel |
+		"if the level of the new page is equal or smaller than the 
+		current level then the current page is the previous page of 
+		the new one.
+		If the level is bigger than the page in the iterator on that
+		level is the previous one as we got here over that"
+		previousPage := (newLevel <= currentPage level)
+			ifTrue: [ currentPage ]
+			ifFalse: [ aIterator levelAt: newLevel ].
+			
+		"add forward link by inserting the new page between the previous
+		page and the next. The right pointer of the previous page becomes
+		the right pointer of the new page and the new page becomes the right
+		pointer of the previous page"
+		nextPageOffset := previousPage rightAt: newLevel.
+		newPage rightAt: newLevel put: nextPageOffset.
+		previousPage rightAt: newLevel put: newPage offset.
+		
+		"add backlink by setting left pointer to the previous page. "
+		newPage leftAt: newLevel put: previousPage offset.
+		"to set the left pointer of the next page we need to get
+		the page first. If right is 0 we would need to add the newPage
+		to the tail sentinel which we didn't model. So we use the header
+		page as holder of the tail sentinel array"
+		((nextPageOffset > 0)
+			ifTrue: [ store pageAt: nextPageOffset ]
+			ifFalse: [ store headerPage ])
+				leftAt: newLevel put: newPage offset ].
 	^ newPage 
 ]

@@ -46,7 +46,7 @@ SoilIndex >> addToFreePages: aPage [
 		"if there is no room for the page to store and the current
 		free page does not have a next pointer we make aPage the 
 		next"
-		currentFreePage next isZero 
+		currentFreePage next == 0 
 			ifTrue: [
 				currentFreePage next: newFreePage offset.
 				^ newFreePage  ]
@@ -57,7 +57,18 @@ SoilIndex >> addToFreePages: aPage [
 
 { #category : #'instance creation' }
 SoilIndex >> allocatePage [
-	^ self subclassResponsibility
+	| page |
+	page := self newPage 
+		offset: (self nextFreePageIndex
+			ifNil: [ self nextPageOffset ]).
+	self store pageAt: page offset put: page.
+	self addDirtyPage: page.
+	^ page
+]
+
+{ #category : #accessing }
+SoilIndex >> allowDuplicateKeys [
+	self headerPage uniqueKeys: false 
 ]
 
 { #category : #private }
@@ -65,6 +76,12 @@ SoilIndex >> at: key [
 	^ self 
 		at: key 
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
+]
+
+{ #category : #accessing }
+SoilIndex >> at: aKeyObject add: anObject [
+
+	self newIterator at: aKeyObject add: anObject
 ]
 
 { #category : #accessing }
@@ -76,9 +93,10 @@ SoilIndex >> at: anObject ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndex >> at: aKeyObject put: anObject [
-	self newIterator 
-		at: aKeyObject 
-		put: anObject
+	self
+		deprecated: 'Please use #at:add:'
+		transformWith: '`@receiver at: `@arg1 put: `@arg2' -> '`@receiver at: `@arg1 add: `@arg2'.
+	self at: aKeyObject add: anObject 
 ]
 
 { #category : #accessing }
@@ -87,10 +105,18 @@ SoilIndex >> atIndex: anInteger [
 ]
 
 { #category : #accessing }
-SoilIndex >> basicAt: key put: anObject [
+SoilIndex >> basicAt: key add: anObject [
 	^ self newIterator 
 		basicAt: key 
-		put: anObject 
+		add: anObject 
+]
+
+{ #category : #accessing }
+SoilIndex >> basicAt: key put: anObject [
+	self
+		deprecated: 'Please use #basicAt:add:'
+		transformWith: '`@receiver basicAt: `@arg1 put: `@arg2' -> '`@receiver basicAt: `@arg1 add: `@arg2'.
+	^ self basicAt: key add: anObject 
 ]
 
 { #category : #removing }
@@ -98,7 +124,7 @@ SoilIndex >> cleanRemoved: aPage [
 	aPage cleanRemovedIn: self
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #cleaning }
 SoilIndex >> cleanUpToVersion: aNumberOrNil [ 
 		SoilIndexCleaner new 
 			index: self;
@@ -154,8 +180,8 @@ SoilIndex >> first: anInteger [
 SoilIndex >> firstFreePage [
 	| index | 
 	index := self headerPage firstFreePageIndex.
-	^ index isZero 
-		ifTrue: [ ^ nil ]
+	^ index == 0 
+		ifTrue: [ nil ]
 		ifFalse: [ store pageAt: index ]
 ]
 
@@ -170,8 +196,18 @@ SoilIndex >> flushCachedPages [
 ]
 
 { #category : #testing }
+SoilIndex >> hasDirtyPages [
+	^ dirtyPages notEmpty 
+]
+
+{ #category : #testing }
 SoilIndex >> hasHeaderPage [
 	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+SoilIndex >> hasUniqueKeys [
+	^ self headerPage uniqueKeys
 ]
 
 { #category : #accessing }
@@ -202,6 +238,12 @@ SoilIndex >> indexKey: aString [
 	^ aString asIndexKeyOfSize: self keySize
 ]
 
+{ #category : #initialization }
+SoilIndex >> initialize [ 
+	super initialize.
+	dirtyPages := OrderedDictionary new
+]
+
 { #category : #testing }
 SoilIndex >> isEmpty [
 	^ self store headerPage isEmpty
@@ -224,7 +266,7 @@ SoilIndex >> keySize [
 
 { #category : #accessing }
 SoilIndex >> keySize: anInteger [
-	anInteger isZero ifTrue: [ Error signal: 'keySize cannot be zero yet' ].
+	anInteger == 0 ifTrue: [ Error signal: 'keySize cannot be zero yet' ].
 	self headerPage keySize: anInteger
 ]
 
@@ -238,7 +280,7 @@ SoilIndex >> lastPage [
 	^ self newIterator lastPage
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #public }
 SoilIndex >> markAllDirty [ 
 	store pages do: [ :page | self addDirtyPage: page ]
 ]
@@ -257,6 +299,17 @@ SoilIndex >> maxLevel: anIntegeer [
 SoilIndex >> newFileStore [
 	^ SoilPagedFileIndexStore new
 		index: self
+]
+
+{ #category : #utilities }
+SoilIndex >> newIndexEntry [
+	^ self newIndexEntryClass new
+		maxLevel: self maxLevel;
+		keySize: self keySize;
+		valueSize: self valueSize;
+		uniqueKeys: self uniqueKeys;
+		yourself 
+
 ]
 
 { #category : #utilities }
@@ -280,9 +333,45 @@ SoilIndex >> newPluggableRewriter [
 		index: self
 ]
 
+{ #category : #private }
+SoilIndex >> nextFreePageIndex [ 
+	| firstFreePage freePageIndex |
+	firstFreePage := self firstFreePage ifNil: [ 
+		^ nil ].
+	^ firstFreePage hasFreePages 
+		ifTrue: [ 
+			freePageIndex := firstFreePage removeFirstIndex.
+			self removePageWithIndexIfPresent: freePageIndex.
+			self addDirtyPage: firstFreePage.
+			freePageIndex  ] 
+		ifFalse: [ 
+			"if firstFreePage has a next pointer we set that as 
+			new first free page. Next will return 0 if there is no
+			next page"
+			freePageIndex := firstFreePage next.
+			self headerPage firstFreePageIndex: firstFreePage next.
+			self removePageWithIndexIfPresent: firstFreePage offset.
+
+			self addDirtyPage: self headerPage.
+			firstFreePage offset ]
+]
+
+{ #category : #initialization }
+SoilIndex >> nextPageOffset [
+	| offset |
+	offset := store nextPageOffset.
+	self addDirtyPage: store headerPage.
+	^ offset 
+]
+
 { #category : #accessing }
 SoilIndex >> pageAt: anInteger [ 
 	^ self store pageAt: anInteger 
+]
+
+{ #category : #'instance creation' }
+SoilIndex >> pageClass [
+	^ self subclassResponsibility
 ]
 
 { #category : #accessing }
@@ -309,7 +398,9 @@ SoilIndex >> readPageClassFrom: aStream [
 SoilIndex >> readPageFrom: aStream [
 	| page |
 	page := (self readPageClassFrom: aStream) basicNew.
-	page initializeInIndex: self. 
+	page 
+		pageSize: self pageSize;
+		initializeInIndex: self. 
 	^ page readFrom: aStream 
 ]
 
@@ -329,28 +420,30 @@ SoilIndex >> removeDirtyPage: aPage [
 ]
 
 { #category : #removing }
-SoilIndex >> removeKey: key [ 
+SoilIndex >> removeKey: key [
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
 	^ self
 		removeKey: key 
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #removing }
-SoilIndex >> removeKey: key ifAbsent: aBlock [
-	| page index |
-	page := self newIterator 
-		find: key;
-		currentPage.
-	^ ((index := page indexOfKey: (self indexKey: key)) > 0)
-		ifTrue: [ 
-			self decreaseSize.
-			(page itemRemoveIndex: index) value ]
-		ifFalse: [ aBlock value ]
+SoilIndex >> removeKey: key ifAbsent: aBlock [ 
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
+	^ self subclassResponsibility
 ]
 
 { #category : #removing }
 SoilIndex >> removePage: aPage [ 
 	^ self subclassResponsibility
+]
+
+{ #category : #removing }
+SoilIndex >> removePageWithIndexIfPresent: anInteger [ 
+	(store includesPageAt: anInteger) ifTrue: [ 
+		store removePageAt: anInteger ]
 ]
 
 { #category : #public }
@@ -397,6 +490,16 @@ SoilIndex >> store: anObject [
 { #category : #converting }
 SoilIndex >> thePersistentInstance [
 	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
+SoilIndex >> uniqueKeys [
+	^ self headerPage uniqueKeys
+]
+
+{ #category : #accessing }
+SoilIndex >> uniqueKeys: aBoolean [ 
+	self headerPage uniqueKeys: aBoolean 
 ]
 
 { #category : #accessing }

@@ -90,7 +90,7 @@ SoilTest >> testCheckpointEmptyRecordsToCommit [
 	tx root: root.
 	tx commitAndContinue.
 
-	skipList := SoilSkipListDictionary new keySize: 32; maxLevel: 8; yourself.
+	skipList := (SoilIndexedDictionary newWithBackend: SoilSkipList) keySize: 32; maxLevel: 8; yourself.
 	tx makeRoot: skipList.
 	tx root at: 123 put: skipList.
 
@@ -141,7 +141,7 @@ SoilTest >> testEnabledFsync [
 SoilTest >> testFindRecordWithIndex [ 
 	| tx skipList rec |
 	tx := soil newTransaction.
-	skipList := SoilSkipListDictionary new 
+	skipList := (SoilIndexedDictionary newWithBackend: SoilSkipList) 
 		maxLevel: 16;
 		keySize: 10.
 	tx root: { Dictionary new 
@@ -155,7 +155,7 @@ SoilTest >> testFindRecordWithIndex [
 
 { #category : #tests }
 SoilTest >> testIncompatibleDatabaseFormatVersion [ 
-	soil control databaseFormatVersion: 2.
+	soil control databaseFormatVersion: Soil databaseFormatVersion + 1.
 	soil close.
 	
 	soil := Soil path: self path.

@@ -1,13 +1,13 @@
 "
-This class implements the SoilIndexDictionary that uses a Lined List as an index.
+NOTE: Deprecated ! 
+Instead of using this class, create a SoilIndexedDictionary with a SoilSkipList as a backend:
 
-See the superclass for more informaion about indexed dictionaries
-
+SoilIndexedDictionary newWithBackend: SoilSkipList
 "
 Class {
 	#name : #SoilSkipListDictionary,
 	#superclass : #SoilIndexedDictionary,
-	#category : #'Soil-Core-Index-SkipList'
+	#category : #'Soil-Core-Index-Deprecated'
 }
 
 { #category : #visiting }
@@ -16,9 +16,7 @@ SoilSkipListDictionary >> acceptSoil: aSoilVisitor [
 ]
 
 { #category : #initialization }
-SoilSkipListDictionary >> createIndex [ 
-	^ SoilSkipList new
-		initializeHeaderPage;
-		valueSize: 8;
-		yourself
+SoilSkipListDictionary >> initialize [ 
+	super initialize.
+	self createIndexWith: SoilSkipList
 ]

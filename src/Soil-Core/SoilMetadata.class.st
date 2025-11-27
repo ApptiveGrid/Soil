@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'soil'
 	],
-	#category : #'Soil-Core'
+	#category : #'Soil-Core-Metadata'
 }
 
 { #category : #formatting }
