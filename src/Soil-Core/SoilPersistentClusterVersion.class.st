@@ -32,6 +32,15 @@ SoilPersistentClusterVersion >> changed: aBoolean [
 	changed := aBoolean 
 ]
 
+{ #category : #api }
+SoilPersistentClusterVersion >> detachFromSegment [
+	"remove all information that belongs to the segment where the cluster
+	was stored"
+	version := 0.
+	position := 0.
+	previousVersionPosition := 0
+]
+
 { #category : #testing }
 SoilPersistentClusterVersion >> hasChanged [
 	^ changed 
@@ -115,6 +124,11 @@ SoilPersistentClusterVersion >> readFrom: stream [
 		
 ]
 
+{ #category : #initialization }
+SoilPersistentClusterVersion >> resetBytes [
+	bytes := nil 
+]
+
 { #category : #asserting }
 SoilPersistentClusterVersion >> shouldBeCommitted [ 
 	^ changed and: [ committed not ]
@@ -124,13 +138,13 @@ SoilPersistentClusterVersion >> shouldBeCommitted [
 SoilPersistentClusterVersion >> soilSizeInMemory [
 	^ self sizeInMemory 
 		+ objectId soilSizeInMemory 
-		+ (references sum: #soilSizeInMemory) 
+		+ references soilSizeInMemory
 		+ bytes sizeInMemory 
-		+ committed sizeInMemory 
+		"+ committed sizeInMemory" "boolean: shared"
 		+ previousVersionPosition sizeInMemory 
 		+ version sizeInMemory 
-		+ (behaviorDescriptions sum: #soilSizeInMemory) 
-		+ (indexIds sum: #sizeInMemory) 
+		+ behaviorDescriptions soilSizeInMemory
+		+ indexIds soilSizeInMemory
 		+ position sizeInMemory
-		+ changed sizeInMemory 
+		"+ changed sizeInMemory" "boolean: shared"
 ]

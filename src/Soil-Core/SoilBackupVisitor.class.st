@@ -169,7 +169,7 @@ SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [
 { #category : #visiting }
 SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	super visitPersistentClusterVersion: aSoilPersistentClusterVersion.
-	(aSoilPersistentClusterVersion objectId segment = 0)
+	(aSoilPersistentClusterVersion objectId segment == 0)
 		ifTrue: [ 
 			"as there could be very old objects we need to copy all  versions of 
 			the behavior descriptions"

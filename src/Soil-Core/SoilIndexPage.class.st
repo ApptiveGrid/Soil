@@ -41,7 +41,7 @@ SoilIndexPage class >> readPageClassFrom: aStream [
 	| pageCode |
 	pageCode := self readPageCodeFrom: aStream.
 	^ self allSubclasses 
-		detect: [ :class | class pageCode = pageCode ].
+		detect: [ :class | class pageCode == pageCode ].
 	
 ]
 
@@ -145,6 +145,11 @@ SoilIndexPage >> printOn: aStream [
 { #category : #reading }
 SoilIndexPage >> readFrom: aStream [ 
 	needWrite := false.
+	self readHeaderFrom: aStream
+]
+
+{ #category : #reading }
+SoilIndexPage >> readHeaderFrom: aStream [ 
 	"we do not read the pageCode here as it was read already"
 	version := aStream next
 ]
@@ -153,7 +158,7 @@ SoilIndexPage >> readFrom: aStream [
 SoilIndexPage >> validate [
 	(version > 2) ifTrue: [ 
 		Error signal: 'bogus page version' ].
-	(pageSize = 4096) ifFalse: [ 
+	(pageSize == 4096) ifFalse: [ 
 		Error signal: 'bogus page size' ]
 ]
 

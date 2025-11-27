@@ -79,6 +79,11 @@ SoilSkipListHeaderPage >> initialize [
 	uniqueKeys := true
 ]
 
+{ #category : #initialization }
+SoilSkipListHeaderPage >> initializeLevel: anInteger [
+	Error signal: 'this should not be called on the header page'
+]
+
 { #category : #testing }
 SoilSkipListHeaderPage >> isHeaderPage [
 	^ true
@@ -87,7 +92,7 @@ SoilSkipListHeaderPage >> isHeaderPage [
 { #category : #accessing }
 SoilSkipListHeaderPage >> keySize: anInteger [
 	"as long as no items have been added the key size can be changed"
-	((self lastPageOffset = 1) and: [ items isEmpty ]) ifFalse: [ 
+	((self lastPageOffset == 1) and: [ items isEmpty ]) ifFalse: [ 
 		keySize ifNotNil: [ Error signal: 'key size has been set already' ] ].
 	super keySize: anInteger.
 	needWrite := true
@@ -139,28 +144,28 @@ SoilSkipListHeaderPage >> nextPageOffset [
 	^ lastPageOffset 
 ]
 
-{ #category : #reading }
-SoilSkipListHeaderPage >> readFrom: aStream [ 
-	super readFrom: aStream.
-	self 
-		readHeaderFrom: aStream;
-		readLevelsFrom: aStream;
-		readItemsFrom: aStream
+{ #category : #accessing }
+SoilSkipListHeaderPage >> previous [ 
+	"return 0 to indicate no previous page. As we misuse the left array as
+	tail sentinel we need to protect it here"
+	^ 0 
 ]
 
 { #category : #reading }
 SoilSkipListHeaderPage >> readHeaderFrom: aStream [
+	super readHeaderFrom: aStream.
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	maxLevel := (aStream next: 2) asInteger.
 	lastPageOffset :=(aStream next: 4) asInteger.
 	firstFreePageIndex :=(aStream next: 4) asInteger.
 	uniqueKeys := (version > 2) 
-		ifTrue: [ aStream next = 1 ]
+		ifTrue: [ aStream next == 1 ]
 		ifFalse: [ true ].
 	size := (version > 1) 
 		ifTrue: [ (aStream next: 6) asInteger ]
-		ifFalse: [ -1 ]
+		ifFalse: [ -1 ].
+	self readLevelsFrom: aStream
 ]
 
 { #category : #accessing }

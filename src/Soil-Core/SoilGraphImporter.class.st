@@ -1,0 +1,165 @@
+Class {
+	#name : #SoilGraphImporter,
+	#superclass : #SoilVisitor,
+	#instVars : [
+		'stream',
+		'transaction',
+		'lastIndex',
+		'idMap',
+		'newId',
+		'metaSegment'
+	],
+	#category : #'Soil-Core-Error'
+}
+
+{ #category : #importing }
+SoilGraphImporter >> import [
+	lastIndex := Array new: 2.
+	lastIndex at: 1 put: (transaction objectRepository metaSegment) lastObjectIndex.
+	lastIndex at: 2 put: (transaction objectRepository segmentAt: 1) lastObjectIndex.
+
+	[ stream atEnd ] whileFalse: [ 
+		self readCluster ].
+	
+	soil objectRepository firstSegment updateLastObjectIndex: (lastIndex at: 2)
+]
+
+{ #category : #importing }
+SoilGraphImporter >> importBehaviorCluster: cluster [
+
+	"When importing a behavior we need to check if it is already present 
+	in this database"
+	| newOid |
+	(self presentBehaviorWithName: cluster object behaviorIdentifier)
+		ifNotNil: [ :presentOid |
+			(self metaSegment basicAt: presentOid index ifAbsent: [ Error signal: 'the behavior is present by name but not as object on the heap' ]) 
+				ifNotNil: [ :presentBehavior | 
+					"We need to materialize the behavior in order to check our
+					assumption that the imported behavior and the present have
+					the same shape"
+					presentBehavior 
+						transaction: transaction;
+						materializeObject.
+					(presentBehavior object hasSameShape: cluster object )
+						ifTrue: [ 
+							"Behaviors have the same shape so we can adapt the objectId of the 
+							present behavior and the version"
+							idMap 
+								at: cluster objectId 
+								put: (presentOid asObjectIdVersion: presentBehavior object version) ]
+						ifFalse: [ Error signal: 'there is a shape difference in behavior. Yet not covered case' ] ] ] 
+		ifNil: [ 
+			"The behavior is not in the database so we import the behavior with 
+			version 1"
+			cluster object version: 1.
+			newOid := self newObjectIdFor: cluster objectId version: 1.
+			self metaSegment 
+				at: newOid index 
+				putBytes: (cluster asNewClusterVersion version: 1; serialize) ] 
+]
+
+{ #category : #initialization }
+SoilGraphImporter >> initialize [ 
+	super initialize.
+	idMap := Dictionary new
+]
+
+{ #category : #importing }
+SoilGraphImporter >> metaSegment [ 
+	^ metaSegment ifNil: [  
+		metaSegment := soil objectRepository metaSegment ]
+
+]
+
+{ #category : #accessing }
+SoilGraphImporter >> newId [
+	^ newId
+]
+
+{ #category : #'instance creation' }
+SoilGraphImporter >> newObjectIdFor: aSoilObjectId [ 
+	| current |
+	^ idMap
+		at: aSoilObjectId
+		ifAbsentPut: [ 
+			current := lastIndex at: (aSoilObjectId segment + 1).
+			SoilObjectId
+				segment: aSoilObjectId segment 
+				index: (lastIndex at: (aSoilObjectId segment + 1) put: current + 1)  ]
+]
+
+{ #category : #'instance creation' }
+SoilGraphImporter >> newObjectIdFor: aSoilObjectId version: anInteger [ 
+	| current |
+	^ idMap
+		at: aSoilObjectId
+		ifAbsentPut: [ 
+			current := lastIndex at: (aSoilObjectId segment + 1).
+			SoilVersionedObjectId new
+				segment: aSoilObjectId segment;
+				index: (lastIndex at: (aSoilObjectId segment + 1) put: current + 1);
+				version: anInteger  ]
+]
+
+{ #category : #importing }
+SoilGraphImporter >> presentBehaviorWithName: aSymbol [
+	^ soil behaviorRegistry 
+		nameAt: aSymbol
+		ifAbsent: [ nil ].
+]
+
+{ #category : #importing }
+SoilGraphImporter >> readBehaviorDescription [
+	| importOid  cluster |
+	importOid := SoilObjectId readFrom: stream.
+	
+	cluster := (SoilPersistentClusterVersion new readFrom: stream)
+		detachFromSegment;
+		transaction: transaction;
+		objectId: importOid;
+		materializeObject;
+		yourself .
+	
+	self importBehaviorCluster: cluster
+]
+
+{ #category : #importing }
+SoilGraphImporter >> readCluster [
+	| objectId cluster keySize valueSize index maxLevel originalOid |
+	originalOid := SoilObjectId readFrom: stream.
+	objectId := self newObjectIdFor: originalOid.
+	newId ifNil: [newId := objectId ].
+	(stream next: 8) asInteger timesRepeat: [ 
+		 self readBehaviorDescription ].
+	cluster := (SoilPersistentClusterVersion new readFrom: stream)
+		detachFromSegment;
+		objectId: objectId;
+		version: self databaseVersion.
+	cluster references: (cluster references collect: [:id| self newObjectIdFor: id]).
+	cluster indexIds do: [ :indexId |
+		keySize := (stream next: 2) asInteger.
+		valueSize := (stream next: 2) asInteger.
+		maxLevel := (stream next: 2) asInteger.
+		index := soil objectRepository firstSegment indexManager createIndexWithId: indexId class: SoilSkipList.
+		index keySize: keySize; valueSize: valueSize; maxLevel: maxLevel.
+		(stream next: 8) asInteger timesRepeat: [
+			index basicAt: (stream next: keySize) asInteger put: (self newObjectIdFor: (SoilObjectId readFrom: stream)) ].
+		
+		index writePages  ].
+	cluster behaviorDescriptions: (cluster behaviorDescriptions collect: [ :bd |
+		 idMap at: bd objectId asSoilObjectId ]).
+	soil objectRepository 
+		at: cluster objectId 
+		putBytes: cluster serialize.
+	(stream next == 255) ifFalse: [ self halt ].
+]
+
+{ #category : #accessing }
+SoilGraphImporter >> stream: aReadStream [ 
+	stream := aReadStream 
+]
+
+{ #category : #accessing }
+SoilGraphImporter >> transaction: anAGBaseTransaction [ 
+	transaction := anAGBaseTransaction 
+]

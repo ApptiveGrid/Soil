@@ -20,6 +20,7 @@ Class {
 
 { #category : #aborting }
 SoilTransaction >> abort [
+	soil ifNil: [ ^ self  ].
 	self transactionManager abortTransaction: self
 ]
 
@@ -135,7 +136,7 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 		ifAbsent: nil.
 		
 	objectId ifNotNil: [ 
-		behaviorDescription := (objectId index = 2)
+		behaviorDescription := (objectId index == 2)
 			ifTrue: [ ^ SoilBehaviorDescription meta ]
 			ifFalse: [ (self objectWithId: objectId) 
 				ifNotNil: [ :object | object objectId: objectId ]

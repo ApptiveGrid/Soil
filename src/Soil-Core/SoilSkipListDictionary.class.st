@@ -10,6 +10,11 @@ Class {
 	#category : #'Soil-Core-Index-Deprecated'
 }
 
+{ #category : #visiting }
+SoilSkipListDictionary >> acceptSoil: aSoilVisitor [
+	aSoilVisitor visitSkipListDictionary: self 
+]
+
 { #category : #initialization }
 SoilSkipListDictionary >> initialize [ 
 	super initialize.

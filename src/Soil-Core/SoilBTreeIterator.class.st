@@ -15,10 +15,11 @@ Class {
 SoilBTreeIterator >> basicAt: indexKey add: anObject [
 	| possiblePriorValue |
 	possiblePriorValue := index rootPage insertItem: (indexKey -> anObject) for: self.
-	"as an optimization we return the prior value stored in the list. If there was none we return nil"
-	 possiblePriorValue returnValue ifNil: [
-		"only increase size if there was no prior value"
-		index increaseSize].
+
+	"As an optimization we return the prior value stored in the list. 
+	If there was none we return nil. For duplicate keys, returnValue is always nil"
+	possiblePriorValue returnValue ifNil: [index increaseSize].
+
 	index addDirtyPage: currentPage.
 	^ possiblePriorValue returnValue
 ]
@@ -39,12 +40,13 @@ SoilBTreeIterator >> findPageFor: indexKey [
 
 { #category : #private }
 SoilBTreeIterator >> findPreviousPageOf: aPage [
-	
+	| page |
+	"Slow version, only used for old page format without previous pointer"
 	aPage isHeaderPage ifTrue: [ ^nil ].
-	currentPage := index rootPage findPreviousPage: aPage firstItem key with: index path: OrderedCollection new.
+	page := index rootPage findPreviousPage: aPage firstItem key with: index path: OrderedCollection new.
 	"for now use assert to make sure this is correct"
-	self assert: (self nextPage == aPage).
-	^currentPage
+	self assert: (self pageAt: page next) == aPage.
+	^currentPage := page
 ]
 
 { #category : #accessing }
@@ -54,4 +56,17 @@ SoilBTreeIterator >> lastPage [
 	[ currentPage isIndexPage ] whileTrue: [
 		 currentPage := self pageAt: currentPage lastItem value ].
 	^ currentPage
+]
+
+{ #category : #accessing }
+SoilBTreeIterator >> size [ 
+	| headerPage |
+	"size in the header page is only correct if the current transaction
+	read version is bigger than the last modification of the page. If 
+	the header page is newer than the current transaction we need to scan
+	the index for the size"
+	headerPage := index headerPage.
+	^ (readVersion isNil or: [ headerPage lastTransaction > readVersion ]) 
+		ifTrue: [ super size] 
+		ifFalse: [ index size  ]
 ]

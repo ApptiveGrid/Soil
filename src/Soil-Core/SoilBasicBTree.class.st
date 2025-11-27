@@ -45,12 +45,6 @@ SoilBasicBTree >> indexPages [
 ]
 
 { #category : #initialization }
-SoilBasicBTree >> initialize [ 
-	super initialize.
-	dirtyPages := OrderedDictionary new
-]
-
-{ #category : #initialization }
 SoilBasicBTree >> initializeFilesystem [ 
 	self store initializeFilesystem
 ]
@@ -141,6 +135,8 @@ SoilBasicBTree >> pageClass [
 
 { #category : #removing }
 SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
 
 	^ (self rootPage remove: key for: self)
 		  ifNil: [ aBlock value ]
@@ -149,22 +145,32 @@ SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
 
 { #category : #removing }
 SoilBasicBTree >> removePage: aPage [
-	| iterator previousPage |
+	| previousPage |
 	(aPage offset > 1) ifFalse: [ ^ aPage ].
 
-	"We use the iterator to find the previousPage, to change it's next pointer to my next"
-	iterator := self newIterator. 
-	previousPage := iterator findPreviousPageOf: aPage. 
+	
+	aPage isIndexPage ifTrue: [ 
+		"index pages have no prev or next and are empty when we reach here"
+		store removePageAt: aPage offset.
+		^ aPage ].
+
+	"We use the iterator to find the previousPage, to support old format without backlink"
+	previousPage := aPage latestVersion > 2
+		ifTrue: [self pageAt: aPage previous ]
+		ifFalse:  [ self newIterator findPreviousPageOf: aPage ]. 
+
 	previousPage next: aPage next.
+	
+	aPage latestVersion > 2 
+			ifTrue: [ (self pageAt: aPage next) previous: aPage previous].
+			
 	self addDirtyPage: previousPage.
 	"now remove all keys, this will update the index pages"
 	
 	aPage items reverseDo: [ :item | item ifNotNil: [self removeKey: item key]  ].
-	
-	"finally remove the page from the store"
+	"remove the page from the store"
 	store removePageAt: aPage offset.
 	^ aPage 
-
 ]
 
 { #category : #accessing }
@@ -190,8 +196,11 @@ SoilBasicBTree >> splitIndexPage: page [
 SoilBasicBTree >> splitPage: page [ 
 	| newPage |
 	newPage := page split: store allocatePage.
+	"someone else has me as previous"
+	page next ~= 0 ifTrue: [(store pageAt: page next) previous: newPage offset].
 	newPage next: page next.
 	page next: newPage offset.
+	newPage previous: page offset.
 	self addDirtyPage: page.
 	self addDirtyPage: newPage.
 	^ newPage 

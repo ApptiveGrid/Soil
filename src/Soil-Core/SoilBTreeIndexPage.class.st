@@ -68,7 +68,6 @@ SoilBTreeIndexPage >> insertItem: item for: iterator [
 	newPage := iterator index splitIndexPage: self.
 	
 	"check that the current and new pages are balanced"
-	self flag: #TODO. "should be moved to a consistency checker"
 	newPage bTreeAssertion.
 	self bTreeAssertion.
 	
@@ -89,18 +88,13 @@ SoilBTreeIndexPage >> latestVersion [
 
 { #category : #testing }
 SoilBTreeIndexPage >> needsCleanup [
-	^ false
+	"We can recycle empty index pages"
+	^ self isEmpty
 ]
 
 { #category : #printing }
 SoilBTreeIndexPage >> printOn: aStream [ 
 	aStream << 'index page : #' << offset asString
-]
-
-{ #category : #reading }
-SoilBTreeIndexPage >> readFrom: aStream [ 
-	super readFrom: aStream.
-	self readItemsFrom: aStream
 ]
 
 { #category : #reading }

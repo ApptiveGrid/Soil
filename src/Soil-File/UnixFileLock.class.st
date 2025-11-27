@@ -35,7 +35,7 @@ UnixFileLock class >> canLock: fileHandle from: start length: length exclusive: 
 		command: F_GETLK 
 		struct: lock.
 		
-	 result = -1 ifTrue: [ ^ false ].
+	 result == -1 ifTrue: [ ^ false ].
 	^ lock l_type = F_UNLCK
 ]
 

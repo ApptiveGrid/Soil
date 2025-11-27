@@ -27,7 +27,7 @@ SoilLogSequenceNumber class >> value: anInteger [
 
 { #category : #comparing }
 SoilLogSequenceNumber >> = aLogSequenceNumber [ 
-	(aLogSequenceNumber class = self class) ifFalse: [ ^ false ].
+	(aLogSequenceNumber class == self class) ifFalse: [ ^ false ].
 	^ aLogSequenceNumber value = value
 ]
 
@@ -67,7 +67,7 @@ SoilLogSequenceNumber >> hexOffset [
 
 { #category : #testing }
 SoilLogSequenceNumber >> isInitial [
-	^ self fileOffset = 0
+	^ self fileOffset == 0
 ]
 
 { #category : #printing }

@@ -508,7 +508,7 @@ SoilIndexedDictionaryTest >> testFreePageReuse [
 	tx3 commit.
 	indexManager := soil objectRepository firstSegment indexManager.
 	index := indexManager indexes anyOne.
-	self assert: index headerPage firstFreePageIndex isZero.
+	self assert: index headerPage firstFreePageIndex identicalTo: 0.
 	self assert: index firstFreePage isNil
 
 ]
@@ -530,7 +530,7 @@ SoilIndexedDictionaryTest >> testFreePages [
 	300 to: 1100 do: [ :n | tx2 root removeKey: n ].
 	tx2 commit.
 	index := indexManager indexes anyOne.
-	self deny: index headerPage firstFreePageIndex isZero.
+	self deny: index headerPage firstFreePageIndex identicalTo: 0.
 	(backend = SoilBTree) 
 		ifTrue:  [ self assert: index firstFreePage pageIndexes size equals: 5 ]
 		ifFalse: [ self assert: index firstFreePage pageIndexes size equals: 1 ]
@@ -685,8 +685,6 @@ SoilIndexedDictionaryTest >> testNextCloseTo [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 	| tx tx2 blockedTx values |
-	(backend = SoilBTree) ifTrue: [ 
-		self skip ]. 
 	tx := soil newTransaction.
 	dict index allowDuplicateKeys.
 	tx root: dict.
@@ -694,12 +692,17 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 		at: #testkey put: 'one';
 		at: #testkey put: 'two';
 		at: #testkey put: 'three'.
+	values := dict at: #testkey.
+	self assert: values class equals: OrderedCollection.
+	self assert: values size equals: 3.
 	tx commit.
 	
 	blockedTx := soil newTransaction.
 	"open a second transaction ..."
 	tx2 := soil newTransaction.
 	values := tx2 root at: #testkey.
+		
+	self assert: values class equals: OrderedCollection.
 	self assert: values size equals: 3.
 	tx2 root 
 		removeKey: #testkey value: values first;

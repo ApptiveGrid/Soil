@@ -57,17 +57,17 @@ SoilIndexIterator >> atIndex: anInteger [
 	^ current value
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 SoilIndexIterator >> basicAt: key add: anObject [
 	self subclassResponsibility 
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 SoilIndexIterator >> basicAt: indexKey put: anObject [
 	self subclassResponsibility
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 SoilIndexIterator >> basicNextAssociation [
 	| item |
 	currentPage ifNil: [ 
@@ -113,7 +113,7 @@ SoilIndexIterator >> basicNextAssociation [
 	^ nil 
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 SoilIndexIterator >> basicPreviousAssociation [
 	| item |
 	"Find the association before"
@@ -191,9 +191,9 @@ SoilIndexIterator >> find: key ifAbsent: aBlock [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilIndexIterator >> findAll: key ifAbsent: aBlock [ 
-		| indexKey assoc item values |
+	| indexKey assoc item values |
 	indexKey := index indexKey: key.
 	self findPageFor: indexKey.
 	currentPageIndex := currentPage indexOfKey: indexKey.
@@ -226,7 +226,7 @@ SoilIndexIterator >> findOne: key ifAbsent: aBlock [
 	self findPageFor: currentKey.
 
 	currentPageIndex := currentPage indexOfKey: currentKey.
-	currentPageIndex isZero ifTrue: [ ^ aBlock value ].
+	currentPageIndex == 0 ifTrue: [ ^ aBlock value ].
 	value := (currentPage itemAtIndex: currentPageIndex) value.
 	item := self restoreItem: currentKey -> value.
 	^ item
@@ -282,6 +282,17 @@ SoilIndexIterator >> firstPage [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> goToNextPage [ 
+	^ currentPage := self nextPage 
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> goToPreviousPage [ 
+	^ currentPage := self previousPage 
+
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> index [
 	^index
 ]
@@ -301,7 +312,7 @@ SoilIndexIterator >> isEmpty [
  		  	(self restoreItem: each) isNil ]]
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 SoilIndexIterator >> itemsAt: key [ 
 	"still need to restore."
 	| assoc items |
@@ -398,11 +409,11 @@ SoilIndexIterator >> nextAssociation [
 SoilIndexIterator >> nextAssociationAfter: key [
 	"Note: key will be index key"
 	self find: key.
-	(currentPageIndex = 0) ifTrue: [ ^ nil ].
+	(currentPageIndex == 0) ifTrue: [ ^ nil ].
 	^ self nextAssociation
 ]
 
-{ #category : #private }
+{ #category : #accessing }
 SoilIndexIterator >> nextCloseTo: key [
 	"return the next entry after key, even if key itself is not there"
 	| nextExisitingKey |
@@ -410,7 +421,7 @@ SoilIndexIterator >> nextCloseTo: key [
 	^ self at: nextExisitingKey
 ]
 
-{ #category : #private }
+{ #category : #accessing }
 SoilIndexIterator >> nextKeyCloseTo: key [
 	"Note: returned key will be an index key"
 	| indexKey |
@@ -474,7 +485,16 @@ SoilIndexIterator >> previousAssociation [
 
 { #category : #accessing }
 SoilIndexIterator >> previousPage [ 
-	^ self findPreviousPageOf: currentPage
+	| previousPageIndex |
+
+	"the old page format does not have a backpointer, we have to search for the previous page"
+	(currentPage version < 3) 
+		ifTrue: [ ^ self findPreviousPageOf: currentPage ].
+			
+	previousPageIndex := currentPage previous.
+	^(previousPageIndex > 0)
+				ifTrue: [ self pageAt: previousPageIndex ]
+				ifFalse: [ nil ]
 ]
 
 { #category : #removing }
@@ -493,11 +513,19 @@ SoilIndexIterator >> removeKey: key [
 { #category : #removing }
 SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 	| indexKey item oldValue |
+	index hasUniqueKeys ifFalse: [ Error signal: 'removeKey:ifAbsent: can only be used with indexes that have unique keys' ].
 	indexKey := index indexKey: key.
 	"We search for the data page for the key to update the value with a removed ID
 	and return the prior value just like #at: would do"
 	self findPageFor: indexKey.
-	item :=  self restoreItem: (currentPage itemAt: indexKey ifAbsent: [^ aBlock value]).
+
+	self flag: #todo.
+	"this is a hack to be able to find the first occurrence but in a 
+	very inefficient way"
+	currentPageIndex := currentPage indexOfKey: indexKey.
+	currentKey := (currentPage items at: currentPageIndex ifAbsent: [ ^ aBlock value ]) key. 
+	
+	item :=  self restoreItem: (currentPage itemAtIndex: currentPageIndex).
 	oldValue := item
 		ifNotNil: [ 
 			(self convertValue: item value) 
@@ -505,9 +533,7 @@ SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 		ifNil: [ aBlock value ].
 	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
 	(e.g no need to update index pages for the BTree"
-	currentPage 
-		itemAt: indexKey 
-		put: SoilObjectId removed.
+	currentPage items at: currentPageIndex put:  indexKey -> SoilObjectId removed.
 	index addDirtyPage: currentPage.
 
 	index decreaseSize.
@@ -520,6 +546,37 @@ SoilIndexIterator >> removeKey: key value: value [
 		removeKey: key 
 		value: value
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
+]
+
+{ #category : #removing }
+SoilIndexIterator >> removeKey: key value: value ifAbsent: aBlock [
+	| indexKey item oldValue |
+	indexKey := index indexKey: key.
+	"We search for the data page for the key to update the value with a removed ID
+	and return the prior value just like #at: would do"
+	self findPageFor: indexKey.
+
+	self flag: #todo.
+	"this is a hack to be able to find the first occurrence but in a 
+	very inefficient way"
+	currentPageIndex := index hasUniqueKeys 
+		ifTrue: [ currentPage itemIndexForKey: indexKey ] 
+		ifFalse: [ currentPage itemIndexForKey: indexKey value: value ]. 
+	currentKey := (currentPage items at: currentPageIndex ifAbsent: [ ^ aBlock value ]) key. 
+	
+	item :=  self restoreItem: (currentPage itemAtIndex: currentPageIndex).
+	oldValue := item
+		ifNotNil: [ 
+			(self convertValue: item value) 
+				ifNil: [ aBlock value ] ]
+		ifNil: [ aBlock value ].
+	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
+	(e.g no need to update index pages for the BTree"
+	currentPage items at: currentPageIndex put:  indexKey -> SoilObjectId removed.
+	index addDirtyPage: currentPage.
+
+	index decreaseSize.
+	^ oldValue
 ]
 
 { #category : #initialization }

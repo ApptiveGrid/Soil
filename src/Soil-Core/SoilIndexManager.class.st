@@ -15,13 +15,20 @@ SoilIndexManager class >> indexClassFromFile: aFileReference [
 	stream := aFileReference binaryReadStream.
 	pageCode := stream next.
 	stream close.
-	headerPage :={ SoilSkipListHeaderPage . SoilBTreeHeaderPage } detect: [ :each | each pageCode = pageCode ].
+	headerPage :={ SoilSkipListHeaderPage . SoilBTreeHeaderPage } detect: [ :each | each pageCode == pageCode ].
 	^ headerPage indexClass
 ]
 
 { #category : #visiting }
 SoilIndexManager >> acceptSoil: aSoilVisitor [ 
 	^ aSoilVisitor visitIndexManager: self 
+]
+
+{ #category : #accessing }
+SoilIndexManager >> at: indexId [ 
+	^ self 
+		at: indexId 
+		ifAbsent: [ SoilIndexNotFound signal: 'index with id ', indexId asString, ' not found' ]
 ]
 
 { #category : #accessing }

@@ -114,7 +114,7 @@ SoilBasicVisitor >> visitObjectSegment: aSoilObjectSegment [
 SoilBasicVisitor >> visitPagedFileIndexStore: aSoilPagedFileIndexStore [ 
 	| pageOffset page |
 	pageOffset := 1.
-	[ pageOffset = 0 ] whileFalse: [  
+	[ pageOffset == 0 ] whileFalse: [  
 		page := aSoilPagedFileIndexStore pageAt: pageOffset.
 		page items do: [ :item |
 			item value isRemoved ifFalse: [ 
@@ -135,6 +135,11 @@ SoilBasicVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion
 { #category : #visiting }
 SoilBasicVisitor >> visitSkipList: aSkiplist [ 
 	self visitIndex: aSkiplist
+]
+
+{ #category : #visiting }
+SoilBasicVisitor >> visitSkipListDictionary: aSkipListDictionary [ 
+	
 ]
 
 { #category : #visiting }

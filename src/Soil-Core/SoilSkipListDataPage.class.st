@@ -31,12 +31,10 @@ SoilSkipListDataPage >> latestVersion [
 	^ 3
 ]
 
-{ #category : #'instance creation' }
-SoilSkipListDataPage >> readFrom: aStream [ 
-	super readFrom: aStream.
-	self 
-		readLevelsFrom: aStream;
-		readItemsFrom: aStream
+{ #category : #reading }
+SoilSkipListDataPage >> readHeaderFrom: aStream [ 
+	super readHeaderFrom: aStream.
+	self readLevelsFrom: aStream
 ]
 
 { #category : #writing }

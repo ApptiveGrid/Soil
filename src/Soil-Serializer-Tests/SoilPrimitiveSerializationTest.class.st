@@ -383,12 +383,6 @@ SoilPrimitiveSerializationTest >> testSerializationDictionary [
 	self assert: materialized equals: object
 ]
 
-{ #category : #'tests-layouts' }
-SoilPrimitiveSerializationTest >> testSerializationEphemeronLayout [
-	"Emphemeron classes are not yet used (no example in Pharo11), thus we do not support them yet"
-	self flag: #TODO
-]
-
 { #category : #tests }
 SoilPrimitiveSerializationTest >> testSerializationFalse [
 	| object serialized materialized |

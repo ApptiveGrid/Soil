@@ -22,12 +22,6 @@ SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
 ]
 
-{ #category : #initialization }
-SoilBasicSkipList >> initialize [ 
-	super initialize.
-	dirtyPages := OrderedDictionary new
-]
-
 { #category : #accessing }
 SoilBasicSkipList >> maxLevel [
 
@@ -63,6 +57,22 @@ SoilBasicSkipList >> newPage [
 { #category : #'instance creation' }
 SoilBasicSkipList >> pageClass [
 	^ SoilSkipListDataPage
+]
+
+{ #category : #removing }
+SoilBasicSkipList >> removeKey: key ifAbsent: aBlock [
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
+	
+	| page index |
+	page := self newIterator 
+		find: key;
+		currentPage.
+	^ ((index := page indexOfKey: (self indexKey: key)) > 0)
+		ifTrue: [ 
+			self decreaseSize.
+			(page itemRemoveIndex: index) value ]
+		ifFalse: [ aBlock value ]
 ]
 
 { #category : #removing }
@@ -103,34 +113,50 @@ SoilBasicSkipList >> size [
 	size is uninitialized. We scan the size in order to write it properly"
 	| size |
 	size := self headerPage size.
-	^ (size = -1) 
+	^ (size == -1) 
 		ifTrue: [ super size  ]
 		ifFalse: [ size ]
 ]
 
 { #category : #private }
 SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
-	| newPage page |
-	page := aIterator currentPage.
-	"if we are on the last page and the new key is bigger then the
-	last key of the page we can append a page and add the new key
-	there. If the key is in between or the page is not the last we
-	split the page with each containing half of the items"
-	self flag: #todo.
-	"is it correct to check for lastKey smallerOREQUAL. If we reach
-	here the key was not found and for duplicate keys it should safe
-	to have the equal case."
-	newPage := (page isLastPage and: [ page lastKey <= aKey ])
+	| newPage currentPage previousPage nextPageOffset |
+	currentPage := aIterator currentPage.
+	"if we are on the last page and the new key is bigger then the last key 
+	of the page we can append a page and add the new key there. If the key 
+	is in between or the page is not the last we split the page with each 
+	containing half of the items"
+	newPage := (currentPage isLastPage and: [ currentPage lastKey < aKey ])
 		ifTrue: [ store allocatePage ] 
-		ifFalse: [ page split: store allocatePage ].
-	newPage level to: 1 by: -1  do: [ :level |
-		(level > page level)
-			ifTrue: [ 
-				newPage rightAt: level put: ((aIterator levelAt: level) rightAt: level).
-				(aIterator levelAt: level) rightAt: level put: newPage offset ]
-			ifFalse: [ 
-				(page rightAt: level) ifNotNil: [ :r | 
-					newPage rightAt: level put: r ].
-				page rightAt: level put: newPage offset ]].
+		ifFalse: [ currentPage split: store allocatePage ].
+	"rewire backlinks and forward links..."
+	newPage level to: 1 by: -1  do: [ :newLevel |
+		"if the level of the new page is equal or smaller than the 
+		current level then the current page is the previous page of 
+		the new one.
+		If the level is bigger than the page in the iterator on that
+		level is the previous one as we got here over that"
+		previousPage := (newLevel <= currentPage level)
+			ifTrue: [ currentPage ]
+			ifFalse: [ aIterator levelAt: newLevel ].
+			
+		"add forward link by inserting the new page between the previous
+		page and the next. The right pointer of the previous page becomes
+		the right pointer of the new page and the new page becomes the right
+		pointer of the previous page"
+		nextPageOffset := previousPage rightAt: newLevel.
+		newPage rightAt: newLevel put: nextPageOffset.
+		previousPage rightAt: newLevel put: newPage offset.
+		
+		"add backlink by setting left pointer to the previous page. "
+		newPage leftAt: newLevel put: previousPage offset.
+		"to set the left pointer of the next page we need to get
+		the page first. If right is 0 we would need to add the newPage
+		to the tail sentinel which we didn't model. So we use the header
+		page as holder of the tail sentinel array"
+		((nextPageOffset > 0)
+			ifTrue: [ store pageAt: nextPageOffset ]
+			ifFalse: [ store headerPage ])
+				leftAt: newLevel put: newPage offset ].
 	^ newPage 
 ]
