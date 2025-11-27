@@ -43,7 +43,7 @@ SoilBasicMaterializer >> nextByte [
 { #category : #reading }
 SoilBasicMaterializer >> nextByteArray: aClass [ 
 	| byteArray size |
-	byteArray := aClass basicNew: (size := self nextLengthEncodedInteger).
+	byteArray := aClass new: (size := self nextLengthEncodedInteger).
 	stream readInto: byteArray startingAt: 1 count: size.
 	^ byteArray
 ]
@@ -56,42 +56,51 @@ SoilBasicMaterializer >> nextCharacter [
 
 { #category : #reading }
 SoilBasicMaterializer >> nextDate: aClass [ 
-	 ^ aClass 
+	| date |
+	date := aClass 
 		julianDayNumber: 2415386 + self nextSoilObject 
-		offset: (Duration minutes: self nextSoilObject)
-
+		offset: (Duration minutes: self nextSoilObject).
+	^ date
 ]
 
 { #category : #reading }
 SoilBasicMaterializer >> nextDateAndTime [
-	^ DateAndTime basicNew 
+	| dateAndTime |
+	dateAndTime := DateAndTime basicNew 
 		setJdn: 2415386 + self nextSoilObject  
 		seconds:  self nextLengthEncodedInteger
 		nano:  self nextLengthEncodedInteger 
-		offset: (Duration minutes: self nextSoilObject)
+		offset: (Duration minutes: self nextSoilObject).
+	^ dateAndTime
 ]
 
 { #category : #reading }
 SoilBasicMaterializer >> nextFloat: aClass [ 
 	"We multiply the Boxedfloat by 1, this way we create a SmallFloat if possible"
-  ^ BoxedFloat64 basicNew
+	| float |
+	float :=  BoxedFloat64 basicNew
 		  at: 1 put: self nextLengthEncodedInteger;
 		  at: 2 put: self nextLengthEncodedInteger;
-		  * 1
+		  * 1.
+	"Boxedfloat is a normal object (needs to be registered), SmallFloat is immediate"
+	^float
 ]
 
 { #category : #reading }
 SoilBasicMaterializer >> nextFraction: aClass [
-	 ^ aClass
+	| fraction |
+	fraction := aClass
 		numerator: self nextLengthEncodedInteger
-		denominator: self nextLengthEncodedInteger
+		denominator: self nextLengthEncodedInteger.
+	^ fraction
 ]
 
 { #category : #reading }
 SoilBasicMaterializer >> nextLargeNegativeInteger [
+	| integer |
 	"Large Integers are normal objects (need to be registered), small integers are immediate"
-	^ 0 - self nextLengthEncodedInteger
-
+	integer := 0 - self nextLengthEncodedInteger.
+	^integer
 ]
 
 { #category : #reading }
@@ -108,10 +117,12 @@ SoilBasicMaterializer >> nextLengthEncodedInteger [
 { #category : #reading }
 SoilBasicMaterializer >> nextScaledDecimal: aClass [
 
-	^ aClass new
-		         setNumerator: self nextSoilObject
-		         denominator: self nextLengthEncodedInteger
-		         scale: self nextLengthEncodedInteger
+	| scaledDecimal |
+	scaledDecimal := aClass new
+		                 setNumerator: self nextSoilObject
+		                 denominator: self nextLengthEncodedInteger
+		                 scale: self nextLengthEncodedInteger.
+	^ scaledDecimal
 ]
 
 { #category : #reading }
@@ -146,7 +157,11 @@ SoilBasicMaterializer >> nextSymbol [
 
 { #category : #reading }
 SoilBasicMaterializer >> nextTime [
-	^ Time seconds: self nextLengthEncodedInteger nanoSeconds: self nextLengthEncodedInteger
+	| time |
+	time := Time 
+		seconds: self nextLengthEncodedInteger
+		nanoSeconds: self nextLengthEncodedInteger.
+	^ time
 ]
 
 { #category : #reading }
@@ -168,10 +183,11 @@ SoilBasicMaterializer >> nextUUID: aClass [
 
 { #category : #reading }
 SoilBasicMaterializer >> nextWideString [
-	| buf length |
+	| buf length wideString |
 	buf := ByteArray new: (length := self nextLengthEncodedInteger).
 	stream readInto: buf startingAt: 1 count: length.
-	^ self class decodeBytes: buf
+	wideString := self class decodeBytes: buf. 
+	^ wideString
 ]
 
 { #category : #reading }

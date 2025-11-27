@@ -151,7 +151,7 @@ SoilGraphImporter >> readCluster [
 	soil objectRepository 
 		at: cluster objectId 
 		putBytes: cluster serialize.
-	(stream next == 255) ifFalse: [ self halt ].
+	(stream next = 255) ifFalse: [ self halt ].
 ]
 
 { #category : #accessing }

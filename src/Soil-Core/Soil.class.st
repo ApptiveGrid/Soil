@@ -57,7 +57,7 @@ Soil class >> createOnPath: aStringOrFileReference [
 
 { #category : #accessing }
 Soil class >> databaseFormatVersion [ 
-	^ 2
+	^ 1
 ]
 
 { #category : #'instance creation' }
@@ -463,7 +463,7 @@ Soil >> replayTransactionJournal: aSoilTransactionJournal [
 	| databaseVersion |
 	databaseVersion := self control databaseVersion.
 	(aSoilTransactionJournal index > databaseVersion) ifTrue: [ 
-		aSoilTransactionJournal commitIn: self.
+		aSoilTransactionJournal asSortedJournal commitIn: self.
 		self journal importTransactionJournal: aSoilTransactionJournal ]
 ]
 

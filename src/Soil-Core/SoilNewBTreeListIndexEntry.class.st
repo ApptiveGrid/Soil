@@ -20,7 +20,6 @@ SoilNewBTreeListIndexEntry >> commitIn: soil [
 		initializeHeaderPage;
 		keySize: keySize;
 		valueSize: valueSize;
-		uniqueKeys: uniqueKeys;
 		flush.
 	indexManager at: id put: index
 ]

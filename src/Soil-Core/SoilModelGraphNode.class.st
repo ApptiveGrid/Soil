@@ -37,34 +37,34 @@ SoilModelGraphNode >> extent [
 		ifFalse: [ 1 ]
 ]
 
-{ #category : #private }
+{ #category : #'as yet unclassified' }
 SoilModelGraphNode >> findRoot: path seen: seen [
 	(seen includes: objectId) ifTrue: [ ^ nil ].
 	seen add: objectId.
 	path add: objectId.
 	incoming do: [ :node | 
-		(node objectId index == 1) ifTrue: [ 
+		(node objectId index = 1) ifTrue: [ 
 			path add: node objectId.
 			^ path ].
 		(node findRoot: path copy seen: seen) ifNotNil: [ :p2 | ^ p2 ] ].
 	^ nil 
 ]
 
-{ #category : #api }
+{ #category : #'as yet unclassified' }
 SoilModelGraphNode >> findRootPath [
 	^ self 
 		findRoot: OrderedCollection new
 		seen: Set new
 ]
 
-{ #category : #api }
+{ #category : #'as yet unclassified' }
 SoilModelGraphNode >> graphColor [
 	^ self hasErrors 
 		ifTrue: [  Color lightRed ] 
 		ifFalse: [ Color lightBlue ] 
 ]
 
-{ #category : #private }
+{ #category : #'as yet unclassified' }
 SoilModelGraphNode >> hasErrors [ 
 	^ errors notEmpty 
 ]
@@ -102,7 +102,7 @@ SoilModelGraphNode >> references [
 	^ outgoing
 ]
 
-{ #category : #private }
+{ #category : #'as yet unclassified' }
 SoilModelGraphNode >> resolveObjectIdsIn: anObject [ 
 	outgoing := outgoing collect: [ :each |
 		anObject nodeAt: each  ]

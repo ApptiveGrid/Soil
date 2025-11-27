@@ -6,7 +6,7 @@ Class {
 		'fields',
 		'semaphore'
 	],
-	#category : #'Soil-Core-Files'
+	#category : #'Soil-Core'
 }
 
 { #category : #formatting }

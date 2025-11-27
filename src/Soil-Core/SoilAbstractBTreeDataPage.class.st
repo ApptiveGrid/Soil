@@ -9,7 +9,6 @@ Class {
 	#name : #SoilAbstractBTreeDataPage,
 	#superclass : #SoilBTreePage,
 	#instVars : [
-		'previous',
 		'next',
 		'valueSize'
 	],
@@ -18,43 +17,8 @@ Class {
 
 { #category : #testing }
 SoilAbstractBTreeDataPage class >> isAbstract [
-	<ignoreForCoverage>
+
 	^ self == SoilAbstractBTreeDataPage
-]
-
-{ #category : #adding }
-SoilAbstractBTreeDataPage >> addItemDuplicate: anAssociation [
-	"add, but allow duplicated items"
-	| index |
-	needWrite := true.
-
-	items 
-		findBinaryIndex: [ :each | anAssociation key - each key ] 
-		do: [:idx | | removedItem |
-			"replace the found index with the new value and return 
-			the removed value"
-			index := idx.
-			[ index < items size and: [ (items at: index + 1) key = anAssociation key ] ] whileTrue: [ 
-				index := index + 1 ].
-			items add: anAssociation afterIndex: index.
-			"removedItem := items at: index.
-			items at: index put: anAssociation."
-			^ removedItem ]
-		ifNone: [ :lower :upper |
-			"upper will be an index bigger than collection size if 
-			the element needs to be appended"
-			(upper > items size) ifTrue: [
-				items addLast: anAssociation.
-				^ nil ].
-			"if lower is greater than zero than lower and upper are 
-			valid indexes where we need to insert in between"
-			(lower > 0) ifTrue: [ 
-				items add: anAssociation afterIndex: lower.
-				^ nil ].
-			"lower will be zero if the element needs to be added to 
-			the front of the page"
-			items addFirst: anAssociation.
-			^ nil ]
 ]
 
 { #category : #private }
@@ -76,32 +40,24 @@ SoilAbstractBTreeDataPage >> findPreviousPage: aKey with: aBTree path: aPath [
 { #category : #utilities }
 SoilAbstractBTreeDataPage >> headerSize [
 	^ super headerSize  
-		+ (self pointerSize * 2) "prev and next"
+		+ self pointerSize "next"
 
 ]
 
 { #category : #initialization }
 SoilAbstractBTreeDataPage >> initialize [ 
 	super initialize.
-	next := 0. "0 means this is the last page"
-	previous := 0  "0 means this is the first page"
+	"0 means this is the last page"
+	next := 0
 ]
 
 { #category : #adding }
 SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 
-	| newPage pageWithItem returnValue return |
+	| newPage pageWithItem return |
 
 	return := SoilBTreeReturnWrapper new returnValue: (self valueAt: anItem key).
-	iterator index hasUniqueKeys
-		ifTrue: [ 
-			returnValue := self valueAt: anItem key.
-			self addItem: anItem]
-		ifFalse: [ 
-			returnValue := nil.
-			self addItemDuplicate: anItem].
-	return := SoilBTreeReturnWrapper new returnValue: returnValue.
-
+	self addItem: anItem.
 	self hasRoom ifTrue: [  iterator currentPage: self. ^ return ].
 	"We have to split"
 	newPage := iterator index splitPage: self.
@@ -112,6 +68,7 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 	iterator currentPage: pageWithItem.
 	
 	"check that the current and new pages are balanced"
+	self flag: #TODO. "should be moved to a consistency checker"
 	newPage bTreeAssertion.
 	self bTreeAssertion.
 	
@@ -144,21 +101,9 @@ SoilAbstractBTreeDataPage >> nextPageIn: btree [
 	^btree pageAt: next
 ]
 
-{ #category : #accessing }
-SoilAbstractBTreeDataPage >> previous [
-	^ previous
-]
-
-{ #category : #accessing }
-SoilAbstractBTreeDataPage >> previous: anObject [
-	previous := anObject
-]
-
 { #category : #reading }
-SoilAbstractBTreeDataPage >> readHeaderFrom: aStream [
-	super readHeaderFrom: aStream.
-	(version > 2) ifTrue: [ 
-		previous := (aStream next: self pointerSize) asInteger].
+SoilAbstractBTreeDataPage >> readFrom: aStream [
+	super readFrom: aStream.
 	next := (aStream next: self pointerSize) asInteger
 ]
 
@@ -181,9 +126,6 @@ SoilAbstractBTreeDataPage >> valueSize: anInteger [
 { #category : #writing }
 SoilAbstractBTreeDataPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
-	(version > 2) ifTrue: [ 
-	aStream
-		nextPutAll: (previous asByteArrayOfSize: self pointerSize)].
 	aStream
 		nextPutAll: (next asByteArrayOfSize: self pointerSize)
 ]

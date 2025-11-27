@@ -202,7 +202,7 @@ SoilCleanCodeTest >> testNoUnusedClasses [
 	self skip.
 	found := self packageToCheck definedClasses reject: [ :class | class isUsed]. 
 	
-	knownviolations := #(SoilSkipListDictionary SoilBTreeDictionary).
+	knownviolations := #( ).
 	found := found reject: [:class | knownviolations includes: class name  ].
 	
 	self 

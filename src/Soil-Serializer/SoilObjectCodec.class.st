@@ -39,7 +39,6 @@ SoilObjectCodec class >> encodeString: aString [
 
 { #category : #'class initialization' }
 SoilObjectCodec class >> initialize [
-	<ignoreForCoverage>
 	CharacterEncoder := #utf8 asZnCharacterEncoder
 ]
 

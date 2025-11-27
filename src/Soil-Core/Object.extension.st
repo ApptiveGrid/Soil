@@ -6,6 +6,11 @@ Object >> asSoilSignal [
 ]
 
 { #category : #'*Soil-Core' }
+Object >> hasIndexUpdates [ 
+	^ false
+]
+
+{ #category : #'*Soil-Core' }
 Object >> isObjectId [
 	^ false
 ]
@@ -13,6 +18,11 @@ Object >> isObjectId [
 { #category : #'*Soil-Core' }
 Object >> isSoilProxy [ 
 	^ false
+]
+
+{ #category : #'*Soil-Core' }
+Object >> journalEntries [
+	^ #()
 ]
 
 { #category : #'*Soil-Core' }

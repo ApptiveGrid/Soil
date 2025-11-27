@@ -12,8 +12,11 @@ ByteLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 
 { #category : #'*Soil-Serializer' }
 ByteLayout >> soilBasicSerialize: anObject with: serializer [
+	| description basicSize |
+	description := serializer serializeBehaviorDescriptionFor: anObject.
+	basicSize := anObject basicSize.
+
 	serializer 
-		serializeBehaviorDescriptionFor: anObject;
-		nextPutLengthEncodedInteger: anObject basicSize;
+		nextPutLengthEncodedInteger: basicSize;
 		nextPutBytesFrom: anObject
 ]

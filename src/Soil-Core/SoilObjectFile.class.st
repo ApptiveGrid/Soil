@@ -70,7 +70,7 @@ SoilObjectFile >> prefix [
 
 { #category : #accessing }
 SoilObjectFile >> recordStart [
-	^ (segment id == 0)
+	^ (segment id = 0)
 		ifTrue: [ self headerSize + 16 ]
 		ifFalse: [ self headerSize + 8 ]
 ]

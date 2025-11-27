@@ -17,6 +17,17 @@ SoilBasicBTree class >> isAbstract [
 	^ self == SoilBasicBTree
 ]
 
+{ #category : #'instance creation' }
+SoilBasicBTree >> allocatePage [
+	| page |
+	page := self newPage 
+		offset: (self nextFreePageIndex
+			ifNil: [ self nextPageOffset ]).
+	self store pageAt: page offset put: page.
+	self addDirtyPage: page.
+	^ page
+]
+
 { #category : #converting }
 SoilBasicBTree >> asCopyOnWrite [
 	^ SoilCopyOnWriteBTree new
@@ -42,6 +53,12 @@ SoilBasicBTree >> hasHeaderPage [
 { #category : #accessing }
 SoilBasicBTree >> indexPages [
 	^ (self pages select: [ :page | page isIndexPage ]) asArray
+]
+
+{ #category : #initialization }
+SoilBasicBTree >> initialize [ 
+	super initialize.
+	dirtyPages := OrderedDictionary new
 ]
 
 { #category : #initialization }
@@ -96,7 +113,7 @@ SoilBasicBTree >> newIndexPageFromRoot: rootIndexPage [
 	self store pageAt: newPage offset put: newPage.
 	"now move over all items"
 	newPage setItems: rootIndexPage items.
-	rootIndexPage setItems: OrderedCollection new.
+	rootIndexPage setItems: SortedCollection new.
 	^newPage
 ]
 
@@ -122,21 +139,50 @@ SoilBasicBTree >> newRootPage [
 		pageSize: self pageSize
 ]
 
+{ #category : #private }
+SoilBasicBTree >> nextFreePageIndex [
+	| firstFreePage freePageIndex |
+	firstFreePage := self firstFreePage ifNil: [ 
+		^ nil ].
+	^ firstFreePage hasFreePages 
+		ifTrue: [ 
+			freePageIndex := firstFreePage removeFirstIndex.
+			self removePageWithIndexIfPresent: freePageIndex.
+			self addDirtyPage: firstFreePage.
+			freePageIndex  ] 
+		ifFalse: [ 
+			"if firstFreePage has a next pointer we set that as 
+ 			new first free page. Next will return 0 if there is no
+ 			next page"
+			freePageIndex := firstFreePage next.
+			self headerPage firstFreePageIndex: firstFreePage next.
+			self removePageWithIndexIfPresent: firstFreePage offset.
+
+			self addDirtyPage: self headerPage.
+			firstFreePage offset ]
+]
+
+{ #category : #accessing }
+SoilBasicBTree >> nextPageOffset [
+	| offset |
+	offset := store nextPageOffset.
+	self addDirtyPage: store headerPage.
+	^ offset 
+]
+
 { #category : #'open/close' }
 SoilBasicBTree >> open [
  	self isOpen ifTrue: [ self error: 'Index already open' ].
 	self store open
 ]
 
-{ #category : #'instance creation' }
+{ #category : #initialization }
 SoilBasicBTree >> pageClass [
 	^ SoilBTreeDataPage
 ]
 
 { #category : #removing }
 SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
-	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
-	Caller has to remove the empty page!"
 
 	^ (self rootPage remove: key for: self)
 		  ifNil: [ aBlock value ]
@@ -145,32 +191,28 @@ SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
 
 { #category : #removing }
 SoilBasicBTree >> removePage: aPage [
-	| previousPage |
+	| iterator previousPage |
 	(aPage offset > 1) ifFalse: [ ^ aPage ].
 
-	
-	aPage isIndexPage ifTrue: [ 
-		"index pages have no prev or next and are empty when we reach here"
-		store removePageAt: aPage offset.
-		^ aPage ].
-
-	"We use the iterator to find the previousPage, to support old format without backlink"
-	previousPage := aPage latestVersion > 2
-		ifTrue: [self pageAt: aPage previous ]
-		ifFalse:  [ self newIterator findPreviousPageOf: aPage ]. 
-
+	"We use the iterator to find the previousPage, to change it's next pointer to my next"
+	iterator := self newIterator. 
+	previousPage := iterator findPreviousPageOf: aPage. 
 	previousPage next: aPage next.
-	
-	aPage latestVersion > 2 
-			ifTrue: [ (self pageAt: aPage next) previous: aPage previous].
-			
 	self addDirtyPage: previousPage.
 	"now remove all keys, this will update the index pages"
 	
 	aPage items reverseDo: [ :item | item ifNotNil: [self removeKey: item key]  ].
-	"remove the page from the store"
+	
+	"finally remove the page from the store"
 	store removePageAt: aPage offset.
 	^ aPage 
+
+]
+
+{ #category : #removing }
+SoilBasicBTree >> removePageWithIndexIfPresent: anInteger [ 
+	(store includesPageAt: anInteger) ifTrue: [ 
+		store removePageAt: anInteger ]
 ]
 
 { #category : #accessing }
@@ -196,11 +238,8 @@ SoilBasicBTree >> splitIndexPage: page [
 SoilBasicBTree >> splitPage: page [ 
 	| newPage |
 	newPage := page split: store allocatePage.
-	"someone else has me as previous"
-	page next ~= 0 ifTrue: [(store pageAt: page next) previous: newPage offset].
 	newPage next: page next.
 	page next: newPage offset.
-	newPage previous: page offset.
 	self addDirtyPage: page.
 	self addDirtyPage: newPage.
 	^ newPage 

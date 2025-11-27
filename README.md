@@ -43,35 +43,21 @@ The changelog can be found [here](https://github.com/ApptiveGrid/Soil/blob/v3/do
 
 We use github for organizing our development. You can see what we are doing right now on the [project board](https://github.com/orgs/ApptiveGrid/projects/2). An up-to-date list of milestones you can find in [milestones](https://github.com/ApptiveGrid/Soil/milestones?direction=desc&sort=completeness&state=open). 
 
-### Talks about Soil
-- ESUG 2025 talks
-	-  "Rhizome - Distribution in Soil" Slides [PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
-   	-  "Soil: Tutorial and Q&A" Slides [PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
-- Smalltalks 2024 talk "Soil: an object oriented database for fun and profit" Video [YouTube](https://www.youtube.com/watch?v=JWY5HCUlX_4)
-- ESUG 2023 talk "Soil: a fresh look on object oriented databases" Slides [PDF](http://archive.esug.org/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-a-fresh-look-on-object-oriented-databases/260898335), Video on [YouTube](https://www.youtube.com/watch?v=ui4TXcv7tus)
-- ESUG 2023 talk "Soil and Pharo". Slides [PDF](http://archive.esug.org/ESUG2023/day3/02_2%20-%20Soil%20and%20Pharo.pdf), [SlideShare](https://www.slideshare.net/esug/soil-and-pharo-260898369)
-- ESUG 2022 talk "there's no magic... until you talk about databases" Slides [PDF](http://archive.esug.org/ESUG2022/02Tuesday/08-hartl-deployment.pdf), [SlideShare](https://www.slideshare.net/slideshow/theres-no-magic-until-you-talk-about-databases/253132135), Video [YouTube](https://www.youtube.com/watch?v=MLtaHeFgbNo)
-- ESUG 2022 ShowUs: "Soil: a OO Database for Pharo" Video [YouTube](https://www.youtube.com/watch?v=_5mk7yYVzds&t=3s)
-
 ### Soil in Action
 
-If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is using it to persist all data. (You can create a free accout [here](https://app.apptivegrid.de)). 
+If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is using it to persist all data. (You can create a free accout). 
 
-- Smalltalks 2024: "ApptiveGrid: solve (business) problems without programming"  [Video Youtube](https://www.youtube.com/watch?v=aPtsGswPJAc)
+More info:
 - Pharo Success Story: [ApptiveGrid - Digitize and Automatize Business Processes](https://www.pharo.org/success/ApptiveGrid.html)
 - Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
+- create your account [here](https://www.apptivegrid.de)
 
-### NEWS 
-- [ANN] Release V3 [Changelog](https://github.com/ApptiveGrid/Soil/blob/v3/docs/changelog.md) 2025-07-02
-- ESUG 2025 talks 2025-07-02
-	-  "Rhizome - Distribution in Soil" Slides [PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
-   	-  "Soil: Tutorial and Q&A" Slides [PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
-- Smalltalk 2024 talk "Soil: an object oriented database for fun and profit" 2025-07-04
-	- Video on [YouTube](https://www.youtube.com/watch?v=JWY5HCUlX_4)
+
+**NEWS** 
 - The Soil Database has now an entry in [HAL](https://hal.science/hal-04726251) and is archived by [https://www.softwareheritage.org](https://www.softwareheritage.org) 2024-11-22
 - [ANN] Release V2 of Soil, the object oriented database for Pharo implemented in Pharo [Mail](https://lists.pharo.org/empathy/thread/OE434T74GYE74GUNP3GLKYAZGGBXUSWT) 2024-08-28
 - [ANN] Soil release v1 [Mail](https://lists.pharo.org/empathy/thread/6VYPN7R6TQPWDKQTRXUV7S6UU5AEMPV7) 2024-04-24
-- ESUG2023 talk "Soil: a fresh look on object oriented databases"
+- ESUG2023 talk "Soil:a fresh look on object oriented databases"
 	- [Slides PDF](http://archive.esug.org/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/soil-a-fresh-look-on-object-oriented-databases/260898335)
  	- Video on [YouTube](https://www.youtube.com/watch?v=ui4TXcv7tus)
 - ESUG 2023 talk "Soil and Pharo"
@@ -82,7 +68,5 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 - Development of Soil announced at ESUG 2022
 	- Talk "there's no magic... until you talk about databases"  [Slides PDF](http://archive.esug.org/ESUG2022/02Tuesday/08-hartl-deployment.pdf), [Slides SlideShare](https://www.slideshare.net/slideshow/theres-no-magic-until-you-talk-about-databases/253132135), [Video YouTube](https://www.youtube.com/watch?v=MLtaHeFgbNo)
  	- ShowUs: "Soil: a OO Database for Pharo"  [Video YouTube](https://www.youtube.com/watch?v=_5mk7yYVz)
-
-(to get all Soil News by email, register [here](https://app.apptivegrid.de/api/r/623c52b04872209f7f96c908/6880cf1feeeecc1455f9cfc8/BDOmRVrRfuAzfyGa0wAGeVJBkUQzMsq0WKExnASoA79BfeX69KR))
 
 ![esug medal](https://esug.github.io/2022-Conference/esugAwards2ndSilverRoundMedal.png)

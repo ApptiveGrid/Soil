@@ -74,11 +74,6 @@ SoilPagedIndexStore >> isOpen [
 ]
 
 { #category : #accessing }
-SoilPagedIndexStore >> lastPage [ 
-	^ self pageAt: self lastPageOffset 
-]
-
-{ #category : #accessing }
 SoilPagedIndexStore >> lastPageOffset [
 	^ self headerPage lastPageOffset
 ]

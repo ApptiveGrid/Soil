@@ -19,7 +19,7 @@ SoilIndexRewriter class >> index: anIndex [
 
 { #category : #testing }
 SoilIndexRewriter class >> isAbstract [
-	<ignoreForCoverage>
+
 	^ self == SoilIndexRewriter
 ]
 
@@ -99,9 +99,8 @@ SoilIndexRewriter >> rewrite [
 ]
 
 { #category : #running }
-SoilIndexRewriter >> storeItem: anItem [
-
-	self newIndexIterator at: anItem key add: anItem value
+SoilIndexRewriter >> storeItem: anItem [ 
+	self newIndexIterator at: anItem key put: anItem value 
 ]
 
 { #category : #running }

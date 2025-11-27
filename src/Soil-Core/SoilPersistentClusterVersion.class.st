@@ -32,7 +32,7 @@ SoilPersistentClusterVersion >> changed: aBoolean [
 	changed := aBoolean 
 ]
 
-{ #category : #api }
+{ #category : #'as yet unclassified' }
 SoilPersistentClusterVersion >> detachFromSegment [
 	"remove all information that belongs to the segment where the cluster
 	was stored"

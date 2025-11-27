@@ -35,7 +35,7 @@ MacOSFileLock class >> canLock: fileHandle from: start to: length exclusive: exc
 		command: F_GETLK 
 		struct: lock.
 		
-	 result == -1 ifTrue: [ ^ false ].
+	 result = -1 ifTrue: [ ^ false ].
 	^ lock l_type = F_UNLCK
 ]
 

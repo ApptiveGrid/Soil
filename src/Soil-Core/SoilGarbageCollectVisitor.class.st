@@ -10,17 +10,17 @@ Class {
 	#category : #'Soil-Core-Visitor'
 }
 
-{ #category : #api }
+{ #category : #'as yet unclassified' }
 SoilGarbageCollectVisitor >> cleanIndexes [
 	self halt.
 ]
 
-{ #category : #api }
+{ #category : #'as yet unclassified' }
 SoilGarbageCollectVisitor >> compactIndexes [
 
 ]
 
-{ #category : #api }
+{ #category : #'as yet unclassified' }
 SoilGarbageCollectVisitor >> garbageCollectHeap [
 	currentSegment := soil objectRepository firstSegment.
 	newSegment := currentSegment makeGCClone.
@@ -31,7 +31,7 @@ SoilGarbageCollectVisitor >> garbageCollectHeap [
 	newSegment := nil 
 ]
 
-{ #category : #api }
+{ #category : #'as yet unclassified' }
 SoilGarbageCollectVisitor >> garbageCollectMeta [
 self halt.
 	newSegment := soil objectRepository metaSegment makeGCClone.

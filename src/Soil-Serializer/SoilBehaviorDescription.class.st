@@ -24,7 +24,7 @@ Class {
 
 { #category : #'instance creation' }
 SoilBehaviorDescription class >> for: aClass [ 
-	^ self basicNew 
+	^ self new 
 		initializeFromBehavior: aClass
 ]
 

@@ -5,7 +5,7 @@ Class {
 		'soil',
 		'all'
 	],
-	#category : #'Soil-Core-Migration'
+	#category : #'Soil-Core'
 }
 
 { #category : #versions }

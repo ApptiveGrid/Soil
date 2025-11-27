@@ -21,7 +21,7 @@ SoilStandaloneSerializationTest >> setUp [
 SoilStandaloneSerializationTest >> testSerializationByteLayout [
 	| object serialized materialized |
 	"We use SocketAddress as an exampe of a class with a ByteLayout but not specially encoded"
-	object := SocketAddress fromDottedString: '127.0.0.1'.
+	object := #[127 0 0 1] asSocketAddress.
 	
 	self assert: object class classLayout class equals: ByteLayout.
 	serialized := object soilSerialize.

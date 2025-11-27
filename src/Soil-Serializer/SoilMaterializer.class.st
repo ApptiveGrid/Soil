@@ -49,17 +49,19 @@ SoilMaterializer >> nextArray: aClass [
 
 { #category : #reading }
 SoilMaterializer >> nextAssociation: aClass [ 
-
-	^ self registerObject: (aClass
-		key: self nextSoilObject
-		value: self nextSoilObject)
+	| association |
+	association := aClass new.
+	self registerObject: association.
+	^ association
+		key: self nextSoilObject;
+		value: self nextSoilObject
 ]
 
 { #category : #reading }
 SoilMaterializer >> nextBehaviorDescription [
 	| behaviorIndex behaviorDescription |
 	behaviorIndex := self nextLengthEncodedInteger.
-	(behaviorIndex == 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
+	(behaviorIndex = 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
 	behaviorDescription := externalObjectRegistry 
 				behaviorDescriptionAt: behaviorIndex.
 	^ externalObjectRegistry 
@@ -240,7 +242,6 @@ SoilMaterializer >> nextExternalReference [
 SoilMaterializer >> nextFloat: aClass [ 
 	| float |
 	float := super nextFloat: aClass.
-	"Boxedfloat is a normal object (needs to be registered), SmallFloat is immediate"
 	float isImmediateObject ifFalse: [self registerObject: float].
 	^ float
 ]
@@ -277,8 +278,8 @@ SoilMaterializer >> nextLargePositiveInteger [
 
 { #category : #reading }
 SoilMaterializer >> nextOrderedCollection: aClass [ 
-	| size collection |
-	size := self nextLengthEncodedInteger.
+		| size collection |
+	size := self  nextLengthEncodedInteger.
 	collection := aClass new: size.
 	self registerObject: collection.
 	size timesRepeat: [ collection addLast: self nextSoilObject ].

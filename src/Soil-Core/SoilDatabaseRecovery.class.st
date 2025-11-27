@@ -30,7 +30,7 @@ SoilDatabaseRecovery >> readFragmentFile: aSoilJournalFragmentFile [
 		lsn := aSoilJournalFragmentFile currentLogSequenceNumber.
 		entry := self readEntryFrom: aSoilJournalFragmentFile stream.
 		"if we read a begin entry we can read a transaction journal"
-		(entry class == SoilBeginTransactionEntry) ifTrue: [ 
+		(entry class = SoilBeginTransactionEntry) ifTrue: [ 
 			processed := true.
 			transactionJournal :=  SoilTransactionJournal new index: entry transactionId.
 			"transaction journals are written always completely so we can read until we 
@@ -75,7 +75,7 @@ SoilDatabaseRecovery >> readTransactionJournal: transactionJournal from: stream 
 	[ stream atEnd ] whileFalse: [  
 		entry := self readEntryFrom: stream.
 		transactionJournal addEntry: entry.
-		(entry class == SoilCommitTransactionEntry) 
+		(entry class = SoilCommitTransactionEntry) 
 			ifTrue: [ ^ transactionJournal ] ].
 	SoilTruncatedRead signal: 'reading of transaction journal is incomplete'
 ]

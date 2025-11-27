@@ -18,8 +18,7 @@ Class {
 		'maxLevel',
 		'firstFreePageIndex',
 		'size',
-		'lastPageOffset',
-		'uniqueKeys'
+		'lastPageOffset'
 	],
 	#category : #'Soil-Core-Index-SkipList'
 }
@@ -57,9 +56,9 @@ SoilSkipListHeaderPage >> firstFreePageIndex: anObject [
 { #category : #utilities }
 SoilSkipListHeaderPage >> headerSize [
 	^ super headerSize 
-		+ 21 "keySize(2), valueSize(2), maxLevel(2), lastPageIndex(4), lastFreePageIndex(4) size(6) uniqueKeys(1)" 
+		+ 20 "keySize(2), valueSize(2), maxLevel(2), lastPageIndex(4), lastFreePageIndex(4) size(6)" 
 		+ 1 "level" 
-		+ ((self level * self rightSize) * 2) "left and right"
+		+ (self level * self rightSize)
 
 ]
 
@@ -75,13 +74,7 @@ SoilSkipListHeaderPage >> initialize [
 	super initialize.
 	lastPageOffset := 1.
 	firstFreePageIndex := 0.
-	size := 0.
-	uniqueKeys := true
-]
-
-{ #category : #initialization }
-SoilSkipListHeaderPage >> initializeLevel: anInteger [
-	Error signal: 'this should not be called on the header page'
+	size := 0
 ]
 
 { #category : #testing }
@@ -92,7 +85,7 @@ SoilSkipListHeaderPage >> isHeaderPage [
 { #category : #accessing }
 SoilSkipListHeaderPage >> keySize: anInteger [
 	"as long as no items have been added the key size can be changed"
-	((self lastPageOffset == 1) and: [ items isEmpty ]) ifFalse: [ 
+	((self lastPageOffset = 1) and: [ items isEmpty ]) ifFalse: [ 
 		keySize ifNotNil: [ Error signal: 'key size has been set already' ] ].
 	super keySize: anInteger.
 	needWrite := true
@@ -119,7 +112,7 @@ SoilSkipListHeaderPage >> lastPageOffset: anObject [
 
 { #category : #initialization }
 SoilSkipListHeaderPage >> latestVersion [
-	^ 3
+	^ 2
 ]
 
 { #category : #accessing }
@@ -133,7 +126,6 @@ SoilSkipListHeaderPage >> maxLevel: anInteger [
 
 	maxLevel := anInteger.
 	right := Array new: anInteger withAll: 0.
-	left := Array new: anInteger withAll: 0.
 	needWrite := true
 ]
 
@@ -144,28 +136,25 @@ SoilSkipListHeaderPage >> nextPageOffset [
 	^ lastPageOffset 
 ]
 
-{ #category : #accessing }
-SoilSkipListHeaderPage >> previous [ 
-	"return 0 to indicate no previous page. As we misuse the left array as
-	tail sentinel we need to protect it here"
-	^ 0 
+{ #category : #reading }
+SoilSkipListHeaderPage >> readFrom: aStream [ 
+	super readFrom: aStream.
+	self 
+		readHeaderFrom: aStream;
+		readLevelsFrom: aStream;
+		readItemsFrom: aStream
 ]
 
 { #category : #reading }
 SoilSkipListHeaderPage >> readHeaderFrom: aStream [
-	super readHeaderFrom: aStream.
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	maxLevel := (aStream next: 2) asInteger.
 	lastPageOffset :=(aStream next: 4) asInteger.
 	firstFreePageIndex :=(aStream next: 4) asInteger.
-	uniqueKeys := (version > 2) 
-		ifTrue: [ aStream next == 1 ]
-		ifFalse: [ true ].
 	size := (version > 1) 
 		ifTrue: [ (aStream next: 6) asInteger ]
-		ifFalse: [ -1 ].
-	self readLevelsFrom: aStream
+		ifFalse: [ -1 ]
 ]
 
 { #category : #accessing }
@@ -181,17 +170,6 @@ SoilSkipListHeaderPage >> size: anInteger [
 { #category : #accessing }
 SoilSkipListHeaderPage >> smallestKey [ 
 	^ 0
-]
-
-{ #category : #accessing }
-SoilSkipListHeaderPage >> uniqueKeys [
-	^ uniqueKeys
-]
-
-{ #category : #accessing }
-SoilSkipListHeaderPage >> uniqueKeys: aBoolean [ 
-	uniqueKeys := aBoolean.
-	needWrite := true
 ]
 
 { #category : #accessing }
@@ -217,10 +195,6 @@ SoilSkipListHeaderPage >> writeHeaderOn: aStream [
 		nextPutAll: (maxLevel asByteArrayOfSize: 2);
 		nextPutAll: (lastPageOffset asByteArrayOfSize: 4);
 		nextPutAll: (firstFreePageIndex asByteArrayOfSize: 4).
-		(version > 2) ifTrue: [ 
-			 (uniqueKeys isNil or: [ uniqueKeys ])
-				ifTrue: [ aStream nextPut:  1 ]
-				ifFalse: [ aStream nextPut: 0 ] ].
 		(version > 1) ifTrue: [ 
 			aStream nextPutAll: (self size asByteArrayOfSize: 6) ].
 	self 

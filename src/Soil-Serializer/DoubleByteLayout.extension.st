@@ -12,13 +12,11 @@ DoubleByteLayout >> soilBasicMaterialize: aBehaviorDescription with: materialize
 
 { #category : #'*Soil-Serializer' }
 DoubleByteLayout >> soilBasicSerialize: anObject with: serializer [
-	| basicSize |
+	| description basicSize |
+	description := serializer serializeBehaviorDescriptionFor: anObject.
 	basicSize := anObject basicSize.
-	
-	serializer 
-		serializeBehaviorDescriptionFor: anObject;
-		nextPutLengthEncodedInteger: basicSize.
-		
+
+	serializer nextPutLengthEncodedInteger: basicSize.
 	1 to: basicSize do: [:i |
 		serializer nextPutByte: (anObject at: i)]
 ]

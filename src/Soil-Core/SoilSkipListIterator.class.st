@@ -21,44 +21,28 @@ SoilSkipListIterator >> atLevel: key put: anObject [
 ]
 
 { #category : #accessing }
-SoilSkipListIterator >> basicAt: indexKey add: anObject [
+SoilSkipListIterator >> basicAt: indexKey put: anObject [
 
-	| keyIndex |
 	self findPageFor: indexKey.
 
 	"as an optimization we return the prior value stored in the list. If
 	there was none we return nil"
 	index addDirtyPage: currentPage.
-	keyIndex := index hasUniqueKeys 
-		ifTrue: [ currentPage itemIndexForKey: indexKey ] 
-		ifFalse: [ currentPage itemIndexForKey: indexKey value: anObject ]. 
-	
-	^ keyIndex > 0
+	^(currentPage hasKey: indexKey)
 		ifTrue: [ 
 			"overwriting a key does not change the size of an index"
+			
 			(currentPage itemAt: indexKey put: anObject) value ]
 		ifFalse: [
 			currentPage hasRoom ifFalse: [  | newPage |
 				newPage := index splitPage: self forKey: indexKey.
 				index addDirtyPage: newPage.	
-				self flag: #todo.
-				"another <= case"
-				currentPage := currentPage biggestKey <= indexKey
+				currentPage := currentPage biggestKey < indexKey
 					                 ifTrue: [ newPage ]
 					                 ifFalse: [ currentPage ] ].
 			  currentPage addItem: indexKey -> anObject.
 			  index increaseSize.
 			  nil ]
-]
-
-{ #category : #accessing }
-SoilSkipListIterator >> basicAt: indexKey put: anObject [
-
-	self
-		deprecated: 'Please use #basicAt:add:'
-		transformWith: '`@receiver basicAt: `@arg1 put: `@arg2' -> '`@receiver basicAt: `@arg1 add: `@arg2'.
-
-	^ self basicAt: indexKey add: anObject 
 ]
 
 { #category : #private }
@@ -73,7 +57,6 @@ SoilSkipListIterator >> findPageFor: indexKey [
 				candidatePage smallestKey <= indexKey ] ]
 					whileTrue: [ currentPage := candidatePage  ].
 			self atLevel: level put: currentPage. ].
-	currentPageIndex := 0.
 	^ currentPage 
 ]
 
@@ -114,7 +97,7 @@ SoilSkipListIterator >> lastPage [
 	[ level >= 1 ] whileTrue: [  
 		"we scan right as long as we get right page indexes which are larger
 		than zero"
-		[ (pageNumber := currentPage rightAt: level) == 0 ] whileFalse: [ 
+		[ (pageNumber := currentPage rightAt: level) isZero ] whileFalse: [ 
 			currentPage := self pageAt: pageNumber.
 			"if we encounter the last page before reaching level 1 we can 
 			short cut the scan"

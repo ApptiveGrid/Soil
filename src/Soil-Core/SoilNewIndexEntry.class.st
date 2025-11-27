@@ -3,8 +3,7 @@ Class {
 	#superclass : #SoilIndexJournalEntry,
 	#instVars : [
 		'keySize',
-		'valueSize',
-		'uniqueKeys'
+		'valueSize'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -29,18 +28,6 @@ SoilNewIndexEntry >> keySize [
 { #category : #accessing }
 SoilNewIndexEntry >> keySize: anInteger [ 
 	keySize := anInteger
-]
-
-{ #category : #accessing }
-SoilNewIndexEntry >> uniqueKeys [
-
-	^ uniqueKeys
-]
-
-{ #category : #accessing }
-SoilNewIndexEntry >> uniqueKeys: anObject [
-
-	uniqueKeys := anObject
 ]
 
 { #category : #accessing }

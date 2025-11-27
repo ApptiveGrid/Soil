@@ -9,15 +9,8 @@ Class {
 }
 
 { #category : #'instance creation' }
-SoilPersistentDictionary class >> new [
-	^ self basicNew
-		initialize: 5;
-		yourself
-]
-
-{ #category : #'instance creation' }
 SoilPersistentDictionary class >> new: size [
-	^ self basicNew initialize: size
+	^self new
 ]
 
 { #category : #materializing }
@@ -32,10 +25,11 @@ SoilPersistentDictionary class >> soilTransientInstVars [
 
 { #category : #forwarded }
 SoilPersistentDictionary >> add: anAssociation [
+	| return |
 	transaction makeRoot: anAssociation value.
-	dict add: anAssociation.
+	return := dict add: anAssociation.
 	transaction markDirty: self.
-	^anAssociation
+	^return
 ]
 
 { #category : #forwarded }
@@ -71,10 +65,11 @@ SoilPersistentDictionary >> at: key ifPresent: aPresentBlock ifAbsent: anAbsentB
 
 { #category : #forwarded }
 SoilPersistentDictionary >> at: key put: value [
+	| return |
 	transaction ifNotNil: [:tr | tr makeRoot: value].
-	dict at: key put: value.
+	return := dict at: key put: value.
 	transaction ifNotNil: [:tr | tr markDirty: self].
-	^value
+	^return
 
 ]
 
@@ -96,8 +91,8 @@ SoilPersistentDictionary >> includesKey: key [
 ]
 
 { #category : #initialization }
-SoilPersistentDictionary >> initialize: size [
-	dict := Dictionary new: size
+SoilPersistentDictionary >> initialize [
+	dict := Dictionary new
 ]
 
 { #category : #testing }

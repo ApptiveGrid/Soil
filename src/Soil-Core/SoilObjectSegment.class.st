@@ -31,7 +31,7 @@ SoilObjectSegment >> allVersionsAt: index [
 	versions := OrderedCollection new.
 	versions add: obj.
 	objectId := obj objectId.
-	[ obj previousVersionPosition == 0 ] whileFalse: [ 
+	[ obj previousVersionPosition isZero ] whileFalse: [ 
 		obj := objectFile atPosition: obj previousVersionPosition.
 		obj objectId: objectId.
 		versions add: obj ].
@@ -75,7 +75,7 @@ SoilObjectSegment >> at: index version: version [
 SoilObjectSegment >> basicAt: anInteger [ 
 	| position |
 	position := indexFile positionAt: anInteger.
-	position == 0 ifTrue: [  SoilIndexOutOfRange signal: 'no entry for object at ', id asString, ':', anInteger asString ].
+	position isZero ifTrue: [  SoilIndexOutOfRange signal: 'no entry for object at ', id asString, ':', anInteger asString ].
 	^ (objectFile atPosition: position) ifNotNil: [ :record | 
 		record objectId: (SoilObjectId segment: id index: anInteger).
 		record ]
@@ -85,7 +85,7 @@ SoilObjectSegment >> basicAt: anInteger [
 SoilObjectSegment >> basicAt: anInteger ifAbsent: aBlock [
 	| position |
 	position := indexFile positionAt: anInteger.
-	position == 0 ifTrue: [  ^ aBlock value ].
+	position isZero ifTrue: [  ^ aBlock value ].
 	^ (objectFile atPosition: position) ifNotNil: [ :record | 
 		record objectId: (SoilObjectId segment: id index: anInteger).
 		record ]
@@ -192,17 +192,17 @@ SoilObjectSegment >> initializeFilesystem [
 
 { #category : #testing }
 SoilObjectSegment >> isFirstSegment [
-	^ id == 1
+	^ id = 1
 ]
 
 { #category : #testing }
 SoilObjectSegment >> isMeta [ 
-	^ id == 0
+	^ id = 0
 ]
 
 { #category : #testing }
 SoilObjectSegment >> isMetaSegment [
-	^ id == 0
+	^ id = 0
 ]
 
 { #category : #accessing }
@@ -230,7 +230,7 @@ SoilObjectSegment >> lockObjectId: aSOObjectId for: lockContext [
 	^ indexFile lockObjectId: aSOObjectId for: lockContext 
 ]
 
-{ #category : #gc }
+{ #category : #'as yet unclassified' }
 SoilObjectSegment >> makeGCClone [
 	^ self class new 
 		id: id;

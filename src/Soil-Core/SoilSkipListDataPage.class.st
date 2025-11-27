@@ -16,7 +16,7 @@ SoilSkipListDataPage class >> pageCode [
 SoilSkipListDataPage >> headerSize [
 	^ super headerSize  
 		+ 1 "level"
-		+ ((self level * self rightSize) * 2) "left and right"
+		+ (self level * self rightSize)
 
 ]
 
@@ -28,13 +28,15 @@ SoilSkipListDataPage >> initializeInIndex: aSoilSkipList [
 
 { #category : #initialization }
 SoilSkipListDataPage >> latestVersion [
-	^ 3
+	^ 1 
 ]
 
-{ #category : #reading }
-SoilSkipListDataPage >> readHeaderFrom: aStream [ 
-	super readHeaderFrom: aStream.
-	self readLevelsFrom: aStream
+{ #category : #'instance creation' }
+SoilSkipListDataPage >> readFrom: aStream [ 
+	super readFrom: aStream.
+	self 
+		readLevelsFrom: aStream;
+		readItemsFrom: aStream
 ]
 
 { #category : #writing }

@@ -20,13 +20,13 @@ SoilAddKeyEntry >> address [
 ]
 
 { #category : #committing }
-SoilAddKeyEntry >> commitIn: soil [
-
+SoilAddKeyEntry >> commitIn: soil [ 
 	| index |
 	index := (soil objectRepository segmentAt: segment) indexAt: id.
-	index newIterator
-		at: key add: value;
+	index newIterator 
+		at: key put: value;
 		updateCurrentTransaction: transactionId
+		
 ]
 
 { #category : #accessing }

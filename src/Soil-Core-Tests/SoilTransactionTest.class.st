@@ -85,33 +85,6 @@ SoilTransactionTest >> testEmptyAbort [
 ]
 
 { #category : #tests }
-SoilTransactionTest >> testFindObject [
-	| tx object |
-	tx := soil newTransaction.
-	tx root: Object new.
-	tx commit.
-	
-	tx := soil newTransaction.
-	object := tx findObject: [ :each | true ].
-	"we get the object we commited above"
-	self assert: object class equals: Object.
-	tx abort
-]
-
-{ #category : #tests }
-SoilTransactionTest >> testFindRecords [
-	| tx records |
-	tx := soil newTransaction.
-	tx root: Object new.
-	tx commit.
-	
-	tx := soil newTransaction.
-	records := tx findRecords: [ :each | true ].
-	self assert: records size equals: 2.
-	tx abort
-]
-
-{ #category : #tests }
 SoilTransactionTest >> testRootObject [ 
 	| tx obj |
 	obj := Object new.

@@ -53,31 +53,31 @@ SoilBackupVisitor >> copyCluster: aSoilPersistentClusterVersion [
 
 { #category : #visiting }
 SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
-
 	| sourceSegment sourceIndex targetSegment targetIndex iterator assoc |
+	
 	sourceSegment := soil objectRepository segmentAt: segmentId.
-	sourceIndex := sourceSegment indexManager
-		               at: indexId
-		               ifAbsent: [ ^ self indexNotFound: indexId ].
-
+	sourceIndex := sourceSegment indexManager 
+		at: indexId 
+		ifAbsent: [ ^ self indexNotFound: indexId ].
+	
 	"create an index of same kind and configuration in the target database"
 	targetSegment := target objectRepository segmentAt: segmentId.
-	targetIndex := targetSegment indexManager
-		               createIndexWithId: indexId
-		               class: sourceIndex class.
-	targetIndex initializeParametersFrom: sourceIndex.
-
+	targetIndex := targetSegment indexManager 
+		createIndexWithId: indexId 
+		class: sourceIndex class.
+	targetIndex initializeParametersFrom: sourceIndex. 
+	
 	"copy all values to the new index"
 	iterator := sourceIndex newIterator.
-	[ (assoc := iterator nextAssociation) isNil ] whileFalse: [
-		assoc value isRemoved ifFalse: [
-			targetIndex basicAt: assoc key add: assoc value.
+	[ (assoc := iterator nextAssociation) isNil  ] whileFalse: [  
+		assoc value isRemoved ifFalse: [ 
+			targetIndex basicAt: assoc key put: assoc value.
 			"recurse further into the values of the index"
 			self processObjectId: assoc value asSoilObjectId ] ].
 	targetIndex
-		flush;
+		flush; 
 		close.
-	sourceSegment indexManager removeIndexWithId: indexId
+	sourceSegment indexManager removeIndexWithId: indexId 
 ]
 
 { #category : #visiting }
@@ -169,7 +169,7 @@ SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [
 { #category : #visiting }
 SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	super visitPersistentClusterVersion: aSoilPersistentClusterVersion.
-	(aSoilPersistentClusterVersion objectId segment == 0)
+	(aSoilPersistentClusterVersion objectId segment = 0)
 		ifTrue: [ 
 			"as there could be very old objects we need to copy all  versions of 
 			the behavior descriptions"

@@ -66,12 +66,6 @@ SoilBeginTransactionEntry >> readVersion: anObject [
 ]
 
 { #category : #accessing }
-SoilBeginTransactionEntry >> transactionId [
-
-	^ transactionId
-]
-
-{ #category : #accessing }
 SoilBeginTransactionEntry >> value [ 
 	^ createdAt 
 ]

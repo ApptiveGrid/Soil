@@ -1,17 +1,18 @@
 "
-NOTE: Deprecated ! 
-Instead of using this class, create a SoilIndexedDictionary with a SoilBTree as a backend:
+This class implements the SoilIndexDictionary that uses a B+Tree.
 
-SoilIndexedDictionary newWithBackend: SoilBTree
+See the superclass for more informaion about indexed dictionaries
 "
 Class {
 	#name : #SoilBTreeDictionary,
 	#superclass : #SoilIndexedDictionary,
-	#category : #'Soil-Core-Index-Deprecated'
+	#category : #'Soil-Core-Index-BTree'
 }
 
 { #category : #initialization }
-SoilBTreeDictionary >> initialize [ 
-	super initialize.
-	self createIndexWith: SoilBTree
+SoilBTreeDictionary >> createIndex [ 
+	^ SoilBTree new
+		initializeHeaderPage;
+		valueSize: 8;
+		yourself
 ]
