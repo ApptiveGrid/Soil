@@ -120,6 +120,32 @@ SoilIndex >> basicAt: key put: anObject [
 ]
 
 { #category : #removing }
+SoilIndex >> basicRemoveKey: key [
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
+	^ self
+		basicRemoveKey: key 
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
+]
+
+{ #category : #removing }
+SoilIndex >> basicRemoveKey: key ifAbsent: aBlock [ 
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
+	^ self subclassResponsibility
+]
+
+{ #category : #removing }
+SoilIndex >> cleanPage: page [
+	page canBeRemoved ifFalse: [ ^self ].
+
+	"swap the removed page with its free page counterpart in the dirty list of the index"
+	self 
+		removeDirtyPage: page;
+		addDirtyPage: (self recyclePage: page)
+]
+
+{ #category : #removing }
 SoilIndex >> cleanRemoved: aPage [
 	aPage cleanRemovedIn: self
 ]
@@ -421,18 +447,28 @@ SoilIndex >> removeDirtyPage: aPage [
 
 { #category : #removing }
 SoilIndex >> removeKey: key [
-	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
-	Caller has to remove the empty page!"
 	^ self
 		removeKey: key 
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
 ]
 
 { #category : #removing }
-SoilIndex >> removeKey: key ifAbsent: aBlock [ 
-	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
-	Caller has to remove the empty page!"
-	^ self subclassResponsibility
+SoilIndex >> removeKey: key ifAbsent: aBlock [
+	| return |
+
+	return := self basicRemoveKey: key ifAbsent: aBlock.
+	
+	self flag: #TODO. 
+	"We can not remove empty pages for the skiplist as it still searches for the previous page (issue #970) and search is broken with empty pages"
+	self isBTree ifFalse: [ ^ return ].
+	
+	
+	self dirtyPages copy do: [ :page |
+		"if no transaction needs old state and the page needs cleaning"
+	(page isFreePage not and: [page isEmpty]) ifTrue: [  
+			self cleanPage: page ] ].
+	"here we need to cleanup"
+	^return
 ]
 
 { #category : #removing }

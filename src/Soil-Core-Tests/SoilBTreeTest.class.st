@@ -694,8 +694,9 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 		self assert: index values size equals: remainingEntries size ].
 	self assert: index isEmpty.
 
-	"add data pages are empty"
-	index dataPages do: [ :dataPage | self assert: dataPage isEmpty ].
+	"just headerPage remains"	
+	self assert: index dataPages size equals: 1.
+	self assert: index dataPages first isHeaderPage.
 
 	"and add back"
 	entries do: [ :toAdd |
