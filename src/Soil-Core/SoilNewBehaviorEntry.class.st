@@ -89,6 +89,6 @@ SoilNewBehaviorEntry >> value [
 SoilNewBehaviorEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
 	objectId writeOn: aStream.
-	aStream nextPutLengthEncodedInteger:  identifier size.
+	aStream nextPutLengthEncodedInteger: identifier size.
 	aStream nextPutAll: identifier asByteArray
 ]
