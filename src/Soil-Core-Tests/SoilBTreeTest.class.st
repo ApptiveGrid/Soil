@@ -49,15 +49,8 @@ SoilBTreeTest >> tearDown [
 SoilBTreeTest >> testAdd2 [
 
 	| entries |
-	index := SoilBTree new
-		         path: 'sunit-btree';
-		         destroy;
-		         initializeFilesystem;
-		         initializeHeaderPage;
-		         keySize: 1016;
-					uniqueKeys: uniqueKeys;
-		         valueSize: 8.
-
+	index keySize: 1016.
+	
 	entries := #( 6 16 26 36 46 ).
 
 	index at: 6 add: (6 asByteArrayOfSize: 8).
@@ -158,14 +151,9 @@ SoilBTreeTest >> testAddRandom [
 
 	| numEntries entries |
 	"just some random adding and checking that we can find it. tree is configured to create lots of pages"
-	index := SoilBTree new
-		         path: 'sunit-btree-testAddRandom';
-		         destroy;
-		         initializeFilesystem;
-		         initializeHeaderPage;
-		         keySize: 512;
-					uniqueKeys: uniqueKeys;
-		         valueSize: 512.
+	index
+		keySize: 512;
+		valueSize: 512.
 
 	numEntries := 20.
 	entries := OrderedCollection new: numEntries.
@@ -622,15 +610,8 @@ SoilBTreeTest >> testRemoveFromIndex [
 
 	| entries |
 	"We test that removing an entry will update the index"
-	index := SoilBTree new
-		         path: 'sunit-btree';
-		         destroy;
-		         initializeFilesystem;
-		         initializeHeaderPage;
-		         keySize: 1016;
-					uniqueKeys: uniqueKeys;
-		         valueSize: 8.
-
+	index keySize: 1016.
+					
 	entries := #( 104 247 56 281 61 286 66 337 308 1 400 272 347 335 45
 	              62 207 7 123 140 ).
 
@@ -662,14 +643,9 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 
 	| entries remainingEntries |
 	"We test that removing an entry will update the index"
-	index := SoilBTree new
-		         path: 'sunit-btree';
-		         destroy;
-		         initializeFilesystem;
-		         initializeHeaderPage;
-		         keySize: 512;
-					uniqueKeys: uniqueKeys;
-		         valueSize: 512.
+	index 
+		keySize: 512;
+		valueSize: 512.
 
 	entries := #( 104 247 56 281 61 286 66 337 308 1 400 272 347 335 45
 	              62 207 7 123 140 ).
@@ -738,14 +714,9 @@ SoilBTreeTest >> testSplitIndexPage [
 
 	| entries |
 	"this test leads to a split of a non-root index page"
-	index := SoilBTree new
-		         path: 'sunit-btree';
-		         destroy;
-		         initializeFilesystem;
-		         initializeHeaderPage;
-		         keySize: 512;
-					uniqueKeys: uniqueKeys;
-		         valueSize: 512.
+	index
+		keySize: 512;
+		valueSize: 512.
 
 	entries := #( 104 247 56 281 61 286 66 337 308 1 400 272 347 335 45
 	              62 207 7 123 140 ).
@@ -767,14 +738,8 @@ SoilBTreeTest >> testSplitIndexPageReleoad [
 
 	| entries |
 	"this test leads to a split of a non-root index page"
-	index := SoilBTree new
-		         path: 'sunit-btree';
-		         destroy;
-		         initializeFilesystem;
-		         initializeHeaderPage;
-		         keySize: 512;
-					uniqueKeys: uniqueKeys;
-		         valueSize: 512.
+	index keySize: 512;
+		   valueSize: 512.
 
 	entries := #( 104 247 56 281 61 286 66 337 308 1 400 272 347 335 45
 	              62 207 7 123 140 ).
