@@ -165,7 +165,10 @@ SoilAbstractBTreeDataPage >> readHeaderFrom: aStream [
 { #category : #removing }
 SoilAbstractBTreeDataPage >> remove: aKey for: aBTree [
 	"remove and return the item"
-	^ self itemRemoveAt: aKey ifAbsent: nil
+	| return | 
+	return :=  self itemRemoveAt: aKey ifAbsent: nil.
+	return ifNotNil: [ aBTree addDirtyPage: self ].
+	^ return
 ]
 
 { #category : #accessing }

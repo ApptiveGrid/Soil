@@ -170,15 +170,10 @@ SoilSkipListTest >> testAddRandom [
 
 	| numEntries entries |
 	"just some random adding and checking that we can find it, configured to create lots of pages"
-	index := SoilSkipList new
-		         path: 'sunit-skiplist-testAddRandom';
-		         destroy;
-		         initializeFilesystem;
-		         initializeHeaderPage;
-		         maxLevel: 10;
-		         keySize: 512;
-		         valueSize: 512;
-					uniqueKeys: uniqueKeys.
+	index 
+		maxLevel: 10;
+		keySize: 512;
+		valueSize: 512.
 
 	numEntries := 20.
 	entries := Set new: numEntries.

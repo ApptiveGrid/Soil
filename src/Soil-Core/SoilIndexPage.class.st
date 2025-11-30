@@ -73,6 +73,11 @@ SoilIndexPage >> isDirty [
 ]
 
 { #category : #testing }
+SoilIndexPage >> isFreePage [
+	^ false
+]
+
+{ #category : #testing }
 SoilIndexPage >> isHeaderPage [
 	^ false
 ]
