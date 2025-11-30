@@ -195,6 +195,8 @@ Soil >> defaultFabricClass [
 
 { #category : #public }
 Soil >> destroy [
+	self isOpen ifTrue: [ 
+		self close ].
 	path exists ifFalse: [ ^ self ].
 	path children do: #deleteAll.
 	path delete
