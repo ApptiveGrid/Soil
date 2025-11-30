@@ -100,12 +100,15 @@ SoilSkipList >> path [
 
 { #category : #accessing }
 SoilSkipList >> path: aStringOrFileReference [
-
+	(store isKindOf: SoilMemoryIndexStore) ifTrue: [ self halt ].
+	store ifNil: [  
+		store := self newFileStore ].
 	path := aStringOrFileReference asFileReference 
 ]
 
 { #category : #converting }
 SoilSkipList >> thePersistentInstance [
+(store isKindOf: SoilMemoryIndexStore) ifTrue: [ self halt ]. 
 	^ self
 	
 ]

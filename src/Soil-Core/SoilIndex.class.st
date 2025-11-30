@@ -119,6 +119,11 @@ SoilIndex >> basicAt: key put: anObject [
 	^ self basicAt: key add: anObject 
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndex >> beFileStore [
+	store := self newFileStore 
+]
+
 { #category : #removing }
 SoilIndex >> basicRemoveKey: key [
 	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
@@ -349,6 +354,12 @@ SoilIndex >> newIterator [
 ]
 
 { #category : #'instance creation' }
+SoilIndex >> newMemoryStore [
+	^ SoilMemoryIndexStore new
+		index: self
+]
+
+{ #category : #'instance creation' }
 SoilIndex >> newPage [
 	^ self subclassResponsibility
 ]
@@ -514,7 +525,7 @@ SoilIndex >> size [
 { #category : #accessing }
 SoilIndex >> store [
 	^ store ifNil: [ 
-		store := self newFileStore ]
+		store := self newMemoryStore ]
 ]
 
 { #category : #accessing }
