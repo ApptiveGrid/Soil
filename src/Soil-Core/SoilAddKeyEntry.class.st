@@ -91,12 +91,15 @@ SoilAddKeyEntry >> value: aString [
 
 { #category : #writing }
 SoilAddKeyEntry >> writeOn: aStream [ 
+	| keyByteArray valueByteArray |
+	keyByteArray := key asByteArray.
+	valueByteArray := value asByteArray.
 	super writeOn: aStream.
 	aStream 
 		nextPut: id size; 
 		nextPutAll: id asByteArray;
-		nextPutLengthEncodedInteger: key asByteArray size;
-		nextPutAll: key asByteArray;
-		nextPutLengthEncodedInteger: value asByteArray size;
-		nextPutAll: value asByteArray
+		nextPutLengthEncodedInteger: keyByteArray size;
+		nextPutAll: keyByteArray;
+		nextPutLengthEncodedInteger: valueByteArray size;
+		nextPutAll: valueByteArray
 ]

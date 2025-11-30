@@ -56,7 +56,7 @@ SoilNewClusterVersion >> beChanged [
 	"nothing to be done"
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilNewClusterVersion >> detachFromSegment [
 	"remove all information that belongs to the segment where the cluster
 	was stored"

@@ -135,6 +135,8 @@ SoilBasicBTree >> pageClass [
 
 { #category : #removing }
 SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
 
 	^ (self rootPage remove: key for: self)
 		  ifNil: [ aBlock value ]
@@ -145,6 +147,12 @@ SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
 SoilBasicBTree >> removePage: aPage [
 	| previousPage |
 	(aPage offset > 1) ifFalse: [ ^ aPage ].
+
+	
+	aPage isIndexPage ifTrue: [ 
+		"index pages have no prev or next and are empty when we reach here"
+		store removePageAt: aPage offset.
+		^ aPage ].
 
 	"We use the iterator to find the previousPage, to support old format without backlink"
 	previousPage := aPage latestVersion > 2
@@ -160,8 +168,7 @@ SoilBasicBTree >> removePage: aPage [
 	"now remove all keys, this will update the index pages"
 	
 	aPage items reverseDo: [ :item | item ifNotNil: [self removeKey: item key]  ].
-	
-	"finally remove the page from the store"
+	"remove the page from the store"
 	store removePageAt: aPage offset.
 	^ aPage 
 ]

@@ -92,13 +92,16 @@ SoilRemoveKeyEntry >> value [
 
 { #category : #writing }
 SoilRemoveKeyEntry >> writeOn: aStream [ 
+	| keyByteArray oldValueByteArray |
+	keyByteArray := key asByteArray.
+	oldValueByteArray := oldValue asByteArray.
 	super writeOn: aStream.
 	aStream 
 		nextPut: id size; 
 		nextPutAll: id asByteArray;
-		nextPutLengthEncodedInteger: key asByteArray size;
-		nextPutAll: key asByteArray;
-		nextPutLengthEncodedInteger: oldValue asByteArray size;
-		nextPutAll: oldValue asByteArray
+		nextPutLengthEncodedInteger: keyByteArray size;
+		nextPutAll: keyByteArray;
+		nextPutLengthEncodedInteger: oldValueByteArray size;
+		nextPutAll: oldValueByteArray
 		
 ]

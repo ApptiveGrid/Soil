@@ -112,7 +112,6 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 	iterator currentPage: pageWithItem.
 	
 	"check that the current and new pages are balanced"
-	self flag: #TODO. "should be moved to a consistency checker"
 	newPage bTreeAssertion.
 	self bTreeAssertion.
 	
@@ -156,8 +155,8 @@ SoilAbstractBTreeDataPage >> previous: anObject [
 ]
 
 { #category : #reading }
-SoilAbstractBTreeDataPage >> readFrom: aStream [
-	super readFrom: aStream.
+SoilAbstractBTreeDataPage >> readHeaderFrom: aStream [
+	super readHeaderFrom: aStream.
 	(version > 2) ifTrue: [ 
 		previous := (aStream next: self pointerSize) asInteger].
 	next := (aStream next: self pointerSize) asInteger

@@ -57,17 +57,17 @@ SoilIndexIterator >> atIndex: anInteger [
 	^ current value
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 SoilIndexIterator >> basicAt: key add: anObject [
 	self subclassResponsibility 
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 SoilIndexIterator >> basicAt: indexKey put: anObject [
 	self subclassResponsibility
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 SoilIndexIterator >> basicNextAssociation [
 	| item |
 	currentPage ifNil: [ 
@@ -113,7 +113,7 @@ SoilIndexIterator >> basicNextAssociation [
 	^ nil 
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 SoilIndexIterator >> basicPreviousAssociation [
 	| item |
 	"Find the association before"
@@ -191,7 +191,7 @@ SoilIndexIterator >> find: key ifAbsent: aBlock [
 	
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilIndexIterator >> findAll: key ifAbsent: aBlock [ 
 	| indexKey assoc item values |
 	indexKey := index indexKey: key.
@@ -283,12 +283,12 @@ SoilIndexIterator >> firstPage [
 
 { #category : #accessing }
 SoilIndexIterator >> goToNextPage [ 
-	currentPage := self nextPage 
+	^ currentPage := self nextPage 
 ]
 
 { #category : #accessing }
 SoilIndexIterator >> goToPreviousPage [ 
-	currentPage := self previousPage 
+	^ currentPage := self previousPage 
 
 ]
 
@@ -312,7 +312,7 @@ SoilIndexIterator >> isEmpty [
  		  	(self restoreItem: each) isNil ]]
 ]
 
-{ #category : #accessing }
+{ #category : #private }
 SoilIndexIterator >> itemsAt: key [ 
 	"still need to restore."
 	| assoc items |
@@ -413,7 +413,7 @@ SoilIndexIterator >> nextAssociationAfter: key [
 	^ self nextAssociation
 ]
 
-{ #category : #private }
+{ #category : #accessing }
 SoilIndexIterator >> nextCloseTo: key [
 	"return the next entry after key, even if key itself is not there"
 	| nextExisitingKey |
@@ -421,7 +421,7 @@ SoilIndexIterator >> nextCloseTo: key [
 	^ self at: nextExisitingKey
 ]
 
-{ #category : #private }
+{ #category : #accessing }
 SoilIndexIterator >> nextKeyCloseTo: key [
 	"Note: returned key will be an index key"
 	| indexKey |

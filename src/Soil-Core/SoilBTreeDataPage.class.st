@@ -22,10 +22,3 @@ SoilBTreeDataPage >> initializeInIndex: aSoilSkipList [
 SoilBTreeDataPage >> latestVersion [
 	^ 3
 ]
-
-{ #category : #reading }
-SoilBTreeDataPage >> readFrom: aStream [ 
-	super readFrom: aStream.
-	self
-		readItemsFrom: aStream
-]

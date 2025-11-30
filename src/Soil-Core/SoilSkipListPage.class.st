@@ -181,8 +181,8 @@ SoilSkipListPage >> previous [
 ]
 
 { #category : #reading }
-SoilSkipListPage >> readFrom: aStream [ 
-	super readFrom: aStream.
+SoilSkipListPage >> readHeaderFrom: aStream [ 
+	super readHeaderFrom: aStream.
 	self readLastTransactionFrom: aStream
 ]
 
@@ -264,11 +264,4 @@ SoilSkipListPage >> writeLevelsOn: aStream [
 			aStream nextPutAll: ((left at: n) asByteArrayOfSize: self leftSize) ] ].
 	1 to: self level do: [ :n |
 		aStream nextPutAll: ((right at: n) asByteArrayOfSize: self rightSize) ]
-]
-
-{ #category : #writing }
-SoilSkipListPage >> writeOn: aStream [ 
-	super writeOn: aStream.
-	self writeItemsOn: aStream
-	
 ]
