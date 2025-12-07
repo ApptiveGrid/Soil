@@ -54,12 +54,16 @@ SoilBehaviorDescription >> asSoilObjectId [
 
 { #category : #'object creation' }
 SoilBehaviorDescription >> basicNew [
-	^ self compatibilityCheckObject: self objectClass basicNew
+	current == true 
+		ifFalse: [self compatibilityCheck: self objectClass classLayout].
+	^ self objectClass basicNew
 ]
 
 { #category : #'object creation' }
 SoilBehaviorDescription >> basicNew: size [
-	^ self compatibilityCheckObject: (self objectClass basicNew: size)
+	current == true 
+		ifFalse: [self compatibilityCheck: self objectClass classLayout].
+	^ self objectClass basicNew: size
 ]
 
 { #category : #accessing }
@@ -87,13 +91,6 @@ SoilBehaviorDescription >> compatibilityCheck: aClassLayout [
 	(aClassLayout isVariable and: [ aClassLayout isBits not and: [self isFixedLayout]]) ifTrue: [ ^true ].
 	"for now we raise errors for the others. We could instead create and empty object and log a warning"
 	SoilLayoutMigrationError signal: 'Incompatible layout detected: trying to read a ', classLayout , ' current code uses ', aClassLayout class name asString
-]
-
-{ #category : #testing }
-SoilBehaviorDescription >> compatibilityCheckObject: anObject [
-
-	self compatibilityCheck: anObject class classLayout.
-	^anObject
 ]
 
 { #category : #testing }
