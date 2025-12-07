@@ -114,7 +114,9 @@ SoilBehaviorDescription >> initializeFromBehavior: aClass [
 	"we record only the persistent ivar names, in order"
 	instVarNames := aClass soilPersistentInstVars.
 	"we record the Layout to be able to detect if the layout changed"
-	classLayout := aClass classLayout class name
+	classLayout := aClass classLayout class name.
+	"we are created for a class that is current in the system"
+	current := true
 ]
 
 { #category : #accessing }
