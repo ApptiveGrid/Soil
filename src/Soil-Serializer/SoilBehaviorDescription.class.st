@@ -54,19 +54,19 @@ SoilBehaviorDescription >> asSoilObjectId [
 
 { #category : #'object creation' }
 SoilBehaviorDescription >> basicNew [
-	current == true 
-		ifFalse: [self compatibilityCheck: self objectClass classLayout].
+	current 
+		ifNil: [self compatibilityCheck: self objectClass classLayout].
 	^ self objectClass basicNew
 ]
 
 { #category : #'object creation' }
 SoilBehaviorDescription >> basicNew: size [
-	current == true 
-		ifFalse: [self compatibilityCheck: self objectClass classLayout].
+	current
+		ifNil: [self compatibilityCheck: self objectClass classLayout].
 	^ self objectClass basicNew: size
 ]
 
-{ #category : #accessing }
+{ #category : #versions }
 SoilBehaviorDescription >> beFirstVersion [
 	version := 1
 ]
@@ -100,7 +100,7 @@ SoilBehaviorDescription >> hasSameShape: aBehaviorDescription [
 	^ true 
 ]
 
-{ #category : #api }
+{ #category : #versions }
 SoilBehaviorDescription >> incrementVersion [ 
 	version := version + 1
 ]
@@ -173,7 +173,7 @@ SoilBehaviorDescription >> newObjectWith: aSerializer [
 { #category : #accessing }
 SoilBehaviorDescription >> objectClass [
 	^ objectClass ifNil: [ 
-		objectClass := Smalltalk at: behaviorIdentifier asSymbol ]
+		objectClass := Smalltalk at: behaviorIdentifier ]
 ]
 
 { #category : #accessing }
