@@ -332,16 +332,17 @@ SoilSkipListTest >> testFreePageAddAndDelete [
 	| iterator |
 	uniqueKeys ifFalse: [ ^self ]. "test foruniqueKeys only"
 	iterator := index newIterator.
-	1 to: 280 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
+	1 to: 280 do: [ :n | iterator at: n add: n asDummySoilObjectId ].
 	self assert: index headerPage lastPageOffset equals: 2.
 	self assert: index headerPage firstFreePageIndex equals: 0.
 	1 to: 1989 do: [ :n |
-		iterator at: 280 + n add: (200 + n asByteArrayOfSize: 8).
+		iterator at: 280 + n add: (200 + n) asDummySoilObjectId.
 		iterator removeKey: n.
 		index cleanUpToVersion: nil ].
 
 	self assert: index headerPage lastPageOffset equals: 4.
-	self assert: (index store pageAt: 4) pageIndexes isEmpty
+	self assert: (index store pageAt: 4) pageIndexes isEmpty.
+	self assert: (index store pageAt: 4) isFreePage.
 ]
 
 { #category : #tests }

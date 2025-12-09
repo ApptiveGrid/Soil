@@ -354,6 +354,25 @@ SoilBTreeTest >> testFreePageAdd [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testFreePageAddAndDelete [
+
+	| iterator |
+	uniqueKeys ifFalse: [ ^self ]. "test foruniqueKeys only"
+	iterator := index newIterator.
+	1 to: 280 do: [ :n | iterator at: n add: n asDummySoilObjectId ].
+	self assert: index headerPage lastPageOffset equals: 3.
+	self assert: index headerPage firstFreePageIndex equals: 0.
+	1 to: 2000 do: [ :n |
+		iterator at: 280 + n add: (200 + n) asDummySoilObjectId.
+		iterator removeKey: n.
+		index cleanUpToVersion: nil ].
+
+	self assert: index headerPage lastPageOffset equals: 5.
+	self assert: (index store pageAt: 4) pageIndexes isEmpty.
+	self assert: (index store pageAt: 4) isFreePage.
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testFreePageAddNested [
 
 	| iterator nestedFreeIndexes |
