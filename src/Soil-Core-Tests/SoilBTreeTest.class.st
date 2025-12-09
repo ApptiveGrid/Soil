@@ -606,6 +606,36 @@ SoilBTreeTest >> testRecyclePage [
 ]
 
 { #category : #tests }
+SoilBTreeTest >> testRemoveAllFromPage [
+	| entries return |
+	"We test that after removing all entries from one page, #nextAssociation will continue to the next page"
+	
+	uniqueKeys ifFalse: [ ^self skip]. "To check: error with duplicate keys"
+	
+	index keySize: 1016. "huge keySize forces multiple pages"
+	entries := #( 104 247 56 281 61 286 66 337 308 1 400 272 347 335 45
+	              62 207 7 123 140 ).
+
+
+	entries do: [ :toAdd | index at: toAdd add: #[ 1 2 3 4 5 6 7 8 ] ].
+
+	"can we find all the keys we added?"
+	entries do: [ :each |
+		self assert: (index at: each) equals: #[ 1 2 3 4 5 6 7 8 ] ].
+	"#values iterates using #basicNextAssociation"
+	self assert: index values size equals: entries size.
+
+	index removeKey: 247.
+	index removeKey: 272.
+	self assert: (index pageAt: 4) isFreePage.
+	self assert: index values size equals: entries size - 2.
+
+	"We can search for a key that is in a page after the empty page"
+	return := index newIterator find: 281.
+	self assert: return equals: #[ 1 2 3 4 5 6 7 8 ]
+]
+
+{ #category : #tests }
 SoilBTreeTest >> testRemoveFromIndex [
 
 	| entries |
