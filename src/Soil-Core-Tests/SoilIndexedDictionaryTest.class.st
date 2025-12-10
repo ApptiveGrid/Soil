@@ -172,9 +172,8 @@ SoilIndexedDictionaryTest >> testAddToExistingEmptyList [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testAddToExistingNonEmptyList [
 	|  tx tx2 tx3 tx4 |
-	self skip.
-	"create skip list dictionary with a key ..."
-	"... and persist it"
+	"create indexed dictionary with a key ...
+	... and persist it"
 	tx := soil newTransaction.
 	tx root: dict.
 	dict at: #foo put: #one.
