@@ -190,6 +190,17 @@ SoilBehaviorDescription >> printOn: aStream [
 	aStream << 'behavior: ' << behaviorIdentifier asString
 ]
 
+{ #category : #comparing }
+SoilBehaviorDescription >> soilSizeInMemory [
+	^ self sizeInMemory 
+		+ instVarNames soilSizeInMemory
+		+ behaviorIdentifier soilSizeInMemory
+		+ objectId soilSizeInMemory 
+		+ classLayout soilSizeInMemory
+		+ version soilSizeInMemory
+		"objectClass is shared"
+]
+
 { #category : #accessing }
 SoilBehaviorDescription >> version [
 	^ version
