@@ -513,7 +513,7 @@ SoilIndexIterator >> removeKey: key [
 { #category : #removing }
 SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 	| indexKey item oldValue |
-	index hasUniqueKeys ifFalse: [ Error signal: 'removeKey:ifAbsent: can only be used with indexes that have unique keys' ].
+	index hasUniqueKeys ifFalse: [ ^ self removeKeyAll: key ifAbsent: aBlock ].
 	indexKey := index indexKey: key.
 	"We search for the data page for the key to update the value with a removed ID
 	and return the prior value just like #at: would do"
@@ -577,6 +577,15 @@ SoilIndexIterator >> removeKey: key value: value ifAbsent: aBlock [
 
 	index decreaseSize.
 	^ oldValue
+]
+
+{ #category : #removing }
+SoilIndexIterator >> removeKeyAll: key ifAbsent: aBlock [
+	"we remove all the entries for key"
+	| all |
+	all := self at: key.
+	all do: [ :each | self removeKey: key value: each ].
+	^all
 ]
 
 { #category : #initialization }

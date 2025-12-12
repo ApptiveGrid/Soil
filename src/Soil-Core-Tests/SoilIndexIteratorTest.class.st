@@ -884,6 +884,34 @@ SoilIndexIteratorTest >> testRemoveKey [
 	self should: [ iterator removeKey: capacity ] raise: KeyNotFound
 ]
 
+{ #category : #'tests - duplicate keys' }
+SoilIndexIteratorTest >> testRemoveKeyDuplicate [
+
+	| capacity iterator result |
+	index allowDuplicateKeys.
+	capacity := index headerPage itemCapacity * 2.
+
+	"test empty iterator"
+	iterator := index newIterator.
+	"removing non-existing keys raises KeyNotFound error"
+	self should: [ iterator removeKey: 1 ] raise: KeyNotFound.
+
+	1 to: capacity do: [ :n | index at: n add: n asDummySoilObjectId ].
+	iterator := index newIterator.
+	"removing non-existing keys raises KeyNotFound error"
+	self should: [ iterator removeKey: capacity + 1 ] raise: KeyNotFound.
+	"we add a second value for 1"
+	index at: 1 add: 1 asDummySoilObjectId.
+	result := index at: 1.
+	self assertCollection: result hasSameElements: {1 asDummySoilObjectId. 1 asDummySoilObjectId}.
+	result := iterator removeKey: 1.
+	self assertCollection: result hasSameElements: {1 asDummySoilObjectId}.
+	result := iterator removeKey: capacity.
+	self assertCollection: result hasSameElements: {capacity asDummySoilObjectId}.
+	"removing the key again raises KeyNotFound, too"
+	self should: [ iterator removeKey: capacity ] raise: KeyNotFound
+]
+
 { #category : #tests }
 SoilIndexIteratorTest >> testRemoveKeyIfAbsent [
 
