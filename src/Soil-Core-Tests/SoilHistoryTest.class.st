@@ -1,5 +1,7 @@
 "
-This test class collects related to the ""historu"" features of Soil: being append only, we can ask for old versions for an Object id or create Transactions in the past.
+This test class collects test related to the ""history"" related features of Soil
+
+Being append only, we can ask for old versions for an Object id or create Transactions in the past.
 "
 Class {
 	#name : #SoilHistoryTest,
