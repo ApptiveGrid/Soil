@@ -63,3 +63,26 @@ SoilHistoryTest >> testObjectIDVersions [
 	"take care, lastest version is first"
 	self assert: strings first equals: 'String for Testing 3'
 ]
+
+{ #category : #tests }
+SoilHistoryTest >> testTransactionPastVersion [
+	| tx |
+	"we create a transaction on a past version"
+	tx := soil newTransaction.
+	tx root: {1}.
+	tx commit.
+
+	tx := soil newTransaction.
+	tx root at: 1 put: 2.
+	tx markDirty: tx root.
+	tx commit.
+
+	tx := soil newTransaction.
+	self assert: tx root equals: {2}.
+
+	tx := soil newTransactionForVersion: soil control databaseVersion.
+	self assert: tx root equals: {2}.
+
+	tx := soil newTransactionForVersion: soil control databaseVersion - 1.
+	self assert: tx root equals: {1}
+]
