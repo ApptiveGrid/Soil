@@ -368,6 +368,13 @@ Soil >> newTransaction: aClass [
 	^ txn
 ]
 
+{ #category : #transactions }
+Soil >> newTransactionForVersion: version [
+	^ self transactionManager 
+		newTransaction: self transactionClass
+		readVersion: version
+]
+
 { #category : #accessing }
 Soil >> notificationHandler [ 
 	^ notificationHandler
