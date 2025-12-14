@@ -86,3 +86,25 @@ SoilHistoryTest >> testTransactionPastVersion [
 	tx := soil newTransactionForVersion: soil control databaseVersion - 1.
 	self assert: tx root equals: {1}
 ]
+
+{ #category : #tests }
+SoilHistoryTest >> testTransactionPastVersionIsReadOnly [
+	| tx |
+	"we create a transaction on a past version"
+	tx := soil newTransaction.
+	tx root: {1}.
+	tx commit.
+
+	tx := soil newTransaction.
+	tx root at: 1 put: 2.
+	tx markDirty: tx root.
+	tx commit.
+
+	tx := soil newTransactionForVersion: soil control databaseVersion - 1.
+	self assert: tx root equals: {1}.
+	"But we can not change it as there are newer commits, 
+	the database does not support forking the past"
+	tx root at: 1 put: 3.
+	tx markDirty: tx root.
+	self should: [tx commit] raise: SoilObjectHasConcurrentChange
+]
