@@ -119,11 +119,6 @@ SoilIndex >> basicAt: key put: anObject [
 	^ self basicAt: key add: anObject 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilIndex >> beFileStore [
-	store := self newFileStore 
-]
-
 { #category : #removing }
 SoilIndex >> basicRemoveKey: key [
 	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
@@ -138,6 +133,11 @@ SoilIndex >> basicRemoveKey: key ifAbsent: aBlock [
 	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
 	Caller has to remove the empty page!"
 	^ self subclassResponsibility
+]
+
+{ #category : #'as yet unclassified' }
+SoilIndex >> beFileStore [
+	store := self newFileStore 
 ]
 
 { #category : #removing }

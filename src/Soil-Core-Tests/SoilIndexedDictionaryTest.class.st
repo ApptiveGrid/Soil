@@ -172,9 +172,8 @@ SoilIndexedDictionaryTest >> testAddToExistingEmptyList [
 { #category : #tests }
 SoilIndexedDictionaryTest >> testAddToExistingNonEmptyList [
 	|  tx tx2 tx3 tx4 |
-	self skip.
-	"create skip list dictionary with a key ..."
-	"... and persist it"
+	"create indexed dictionary with a key ...
+	... and persist it"
 	tx := soil newTransaction.
 	tx root: dict.
 	dict at: #foo put: #one.
@@ -423,34 +422,28 @@ SoilIndexedDictionaryTest >> testFlushIndexPages [
 
 { #category : #tests }
 SoilIndexedDictionaryTest >> testFreePageAfterReopen [
-	| tx tx2 tx3 blockTx tx4 tx5 |
-	self skip.
+	| tx tx2 index indexManager tx3 |
+	indexManager := soil objectRepository firstSegment indexManager.
 	tx := soil newTransaction.
 	tx root: dict.
-	1 to: 1125 do: [ :n | dict at: n put: n asString ].
+	1 to: 1300 do: [ :n | dict at: n put: n asString ].
 	tx commit.
-	
-	"open a second transaction ..."
-	blockTx := soil newTransaction.
-	tx2 := soil newTransaction.
-	224 to: 899 do: [ :n |tx2 root removeKey: n ].
-	tx2 commit.
-	blockTx abort. 
 		
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	300 to: 1100 do: [ :n | tx2 root removeKey: n ].
+	tx2 commit.
+	index := indexManager indexes anyOne.
+	self deny: index headerPage firstFreePageIndex identicalTo: 0.
+
+	"even after close and reopen of Soil, this still works"
 	soil 
 		close; 
 		reopen.
 	tx3 := soil newTransaction.
-	900 to: 905 do: [ :n | tx3 root removeKey: n ].
-	tx3 root index wrapped markAllDirty.
-	tx3 commit.
-	tx4 := soil newTransaction.
-	tx4 root at: 906 put: 906 asString.
-	tx4 root removeKey: 223.
-	tx4 commit.
-	tx5 := soil newTransaction.
-	(backend = SoilSkipList ) ifTrue: [ 
-		self deny: (tx5 root index wrapped store headerPage right includes: 2) ].
+	"reloaded index has free page"
+	self deny: tx3 root index  headerPage firstFreePageIndex identicalTo: 0.
+	tx3 commit
 ]
 
 { #category : #tests }
