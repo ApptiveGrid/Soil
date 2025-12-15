@@ -123,15 +123,12 @@ SoilBehaviorDescription >> instVarNames [
 
 { #category : #testing }
 SoilBehaviorDescription >> isCurrent [
-	^ self isMeta
+	^self isMeta
 		ifTrue: [
-			self flag: #todo.
 			"this assumption is only valid until SOBehaviorDescription changes
 			shape itselt. But this is unlikely to be handled automatically"
 			true ]
-		ifFalse: [ | currentClass |
-			currentClass := Smalltalk globals at: behaviorIdentifier.
-			classLayout == currentClass classLayout class name and: [ self matchesBehavior: currentClass ] ]
+		ifFalse: [ self matchesBehavior: self objectClass  ]
 ]
 
 { #category : #testing }
@@ -154,11 +151,15 @@ SoilBehaviorDescription >> isVariableLayout [
 
 { #category : #testing }
 SoilBehaviorDescription >> matchesBehavior: aBehavior [
-	^ self matchesDescription: (self class for: aBehavior)
+	(classLayout = aBehavior classLayout class name) ifFalse: [ ^ false ].
+	(behaviorIdentifier = aBehavior soilBehaviorIdentifier) ifFalse: [ ^ false ].
+	(instVarNames = aBehavior soilPersistentInstVars) ifFalse: [ ^ false ].
+	^ true
 ]
 
 { #category : #testing }
 SoilBehaviorDescription >> matchesDescription: description [
+	(classLayout = description classLayout) ifFalse: [ ^ false ].
 	(behaviorIdentifier = description behaviorIdentifier) ifFalse: [ ^ false ].
 	(instVarNames = description instVarNames) ifFalse: [ ^ false ].
 	^ true
