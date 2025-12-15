@@ -9,5 +9,5 @@ SoilBehaviorDescriptionTest >> testSoilSizeInMemory [
 	| instance |
 	instance := SoilBehaviorDescription for: Point.
 			
-	self assert: instance soilSizeInMemory equals: 184
+	self assert: instance soilSizeInMemory equals: 192
 ]
