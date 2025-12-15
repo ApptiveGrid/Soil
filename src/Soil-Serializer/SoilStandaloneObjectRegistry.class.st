@@ -1,8 +1,15 @@
+"
+This class enables the serializer to be used without the database (and with no transaction).
+
+As common with serializers, we only have limited support for loading objects into a system where the class changed. We asume that all classes are the same for serialization and materialization.
+
+This class provides therefore an implementation of the API for the behavior description registration that assumes that we have only one version.
+"
 Class {
 	#name : #SoilStandaloneObjectRegistry,
 	#superclass : #Object,
 	#instVars : [
-		'classes'
+		'behaviorDescriptions'
 	],
 	#category : #'Soil-Serializer-Base'
 }
@@ -15,24 +22,29 @@ SoilStandaloneObjectRegistry class >> readFrom: aStream [
 
 { #category : #query }
 SoilStandaloneObjectRegistry >> behaviorDescriptionAt: anInteger [ 
-	^ (SoilBehaviorDescription for: (classes at: anInteger))
-		objectId: (SoilObjectId segment: 0 index: anInteger); 
-		yourself 
-
+	^ behaviorDescriptions at: anInteger
 ]
 
 { #category : #query }
 SoilStandaloneObjectRegistry >> behaviorDescriptionWithObjectId: aSoilObjectId andVersion: version [
-	^ SoilBehaviorDescription for: (classes at: aSoilObjectId index)
+	^ behaviorDescriptions at: aSoilObjectId index
 ]
 
 { #category : #query }
-SoilStandaloneObjectRegistry >> indexOfBehaviorDescription: aClass [ 
-	^(classes includes: aClass) 
-		ifTrue: [ classes indexOf: aClass ]
-		ifFalse: [ 
-			classes add: aClass.
-			classes size ]
+SoilStandaloneObjectRegistry >> indexOfBehaviorDescription: aBehavior [
+	| index |
+	index := behaviorDescriptions 
+		detectIndex: [ :each | each behaviorIdentifier = aBehavior name ]
+		ifNone: 0.
+	(index > 0) ifTrue: [ ^ index ].
+	
+	index :=  behaviorDescriptions size.
+	behaviorDescriptions add: (
+		(SoilBehaviorDescription for: (aBehavior))
+			objectId: (SoilObjectId segment: 0 index: index + 1); 
+			yourself
+	).
+	^ index + 1
 ]
 
 { #category : #query }
@@ -43,24 +55,26 @@ SoilStandaloneObjectRegistry >> indexOfExternalReference: aCollection [
 { #category : #initialization }
 SoilStandaloneObjectRegistry >> initialize [ 
 	super initialize.
-	classes := OrderedCollection new
+	behaviorDescriptions := OrderedCollection new
 ]
 
 { #category : #'instance creation' }
 SoilStandaloneObjectRegistry >> readFrom: aStream [ 
 	| size |
 	size := aStream nextLengthEncodedInteger.
-	classes := OrderedCollection new: size.
-	size timesRepeat: [ 
-		 classes add: (Smalltalk globals at: (aStream next: (aStream nextLengthEncodedInteger)) asString  asSymbol) ]
+	behaviorDescriptions := OrderedCollection new: size.
+	1 to: size do: [:index | 
+		 behaviorDescriptions 
+			add: 
+			((SoilBehaviorDescription for: (Smalltalk globals at: (aStream next: (aStream nextLengthEncodedInteger))asString asSymbol))
+				objectId: (SoilObjectId segment: 0 index: index); yourself)]
 ]
 
 { #category : #writing }
 SoilStandaloneObjectRegistry >> writeOn: aStream [ 
-	aStream nextPutLengthEncodedInteger: classes size.
-	classes do: [ :cls |
+	aStream nextPutLengthEncodedInteger: behaviorDescriptions size.
+	behaviorDescriptions do: [ :behaviorDescription |
 		aStream 
-			nextPutLengthEncodedInteger: cls name size;
-			nextPutAll: cls name asByteArray.
-		 ]
+			nextPutLengthEncodedInteger: behaviorDescription behaviorIdentifier size;
+			nextPutAll: behaviorDescription behaviorIdentifier asByteArray ]
 ]

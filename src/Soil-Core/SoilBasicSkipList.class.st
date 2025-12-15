@@ -17,9 +17,30 @@ SoilBasicSkipList class >> isAbstract [
 	^ self == SoilBasicSkipList
 ]
 
+{ #category : #removing }
+SoilBasicSkipList >> basicRemoveKey: key ifAbsent: aBlock [
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
+	
+	| page index |
+	page := self newIterator 
+		find: key;
+		currentPage.
+	^ ((index := page indexOfKey: (self indexKey: key)) > 0)
+		ifTrue: [ 
+			self decreaseSize.
+			(page itemRemoveIndex: index) value ]
+		ifFalse: [ aBlock value ]
+]
+
 { #category : #testing }
 SoilBasicSkipList >> hasHeaderPage [
 	^ store hasHeaderPage 
+]
+
+{ #category : #testing }
+SoilBasicSkipList >> isBTree [
+	^ false
 ]
 
 { #category : #accessing }
@@ -57,22 +78,6 @@ SoilBasicSkipList >> newPage [
 { #category : #'instance creation' }
 SoilBasicSkipList >> pageClass [
 	^ SoilSkipListDataPage
-]
-
-{ #category : #removing }
-SoilBasicSkipList >> removeKey: key ifAbsent: aBlock [
-	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
-	Caller has to remove the empty page!"
-	
-	| page index |
-	page := self newIterator 
-		find: key;
-		currentPage.
-	^ ((index := page indexOfKey: (self indexKey: key)) > 0)
-		ifTrue: [ 
-			self decreaseSize.
-			(page itemRemoveIndex: index) value ]
-		ifFalse: [ aBlock value ]
 ]
 
 { #category : #removing }

@@ -118,6 +118,7 @@ SoilBTreeIndexPage >> remove: aKey for: aBTree [
 	ret := page remove: aKey for: aBTree.
 	"if the key is in the index, we have to update or remove"
 	(self hasKey: aKey) ifTrue: [
+				aBTree addDirtyPage: self.
 				(ret notNil and: [page isNotEmpty])
 					ifTrue: [ item key: page items first key]
 				   ifFalse: [self itemRemoveAt: aKey]].

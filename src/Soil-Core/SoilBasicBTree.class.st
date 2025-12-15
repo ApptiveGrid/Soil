@@ -24,9 +24,19 @@ SoilBasicBTree >> asCopyOnWrite [
 		yourself 
 ]
 
+{ #category : #removing }
+SoilBasicBTree >> basicRemoveKey: key ifAbsent: aBlock [
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
+	Caller has to remove the empty page!"
+
+	^ (self rootPage remove: key for: self)
+		  ifNil: [ aBlock value ]
+		  ifNotNil: [ :removedItem | removedItem value ]
+]
+
 { #category : #accessing }
 SoilBasicBTree >> dataPages [
-	^ (self pages reject: [ :page | page isIndexPage ]) asArray
+	^ (self pages reject: [ :page | page isIndexPage or: [ page isFreePage ] ]) asArray
 ]
 
 { #category : #accessing }
@@ -57,6 +67,11 @@ SoilBasicBTree >> initializeHeaderPage [
 	"we create the first index page as the root here"	
 	rootIndexPage := self newRootPage.
 	self store pageAt: rootIndexPage offset put: rootIndexPage
+]
+
+{ #category : #testing }
+SoilBasicBTree >> isBTree [
+	^ true
 ]
 
 { #category : #accessing }
@@ -134,16 +149,6 @@ SoilBasicBTree >> pageClass [
 ]
 
 { #category : #removing }
-SoilBasicBTree >> removeKey: key ifAbsent: aBlock [
-	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work.
-	Caller has to remove the empty page!"
-
-	^ (self rootPage remove: key for: self)
-		  ifNil: [ aBlock value ]
-		  ifNotNil: [ :removedItem | removedItem value ]
-]
-
-{ #category : #removing }
 SoilBasicBTree >> removePage: aPage [
 	| previousPage |
 	(aPage offset > 1) ifFalse: [ ^ aPage ].
@@ -162,12 +167,14 @@ SoilBasicBTree >> removePage: aPage [
 	previousPage next: aPage next.
 	
 	aPage latestVersion > 2 
-			ifTrue: [ (self pageAt: aPage next) previous: aPage previous].
+			ifTrue: [ 
+				aPage next == 0 ifFalse:  [  "if we are not the last page"
+				 (self pageAt: aPage next) previous: aPage previous]].
 			
 	self addDirtyPage: previousPage.
 	"now remove all keys, this will update the index pages"
 	
-	aPage items reverseDo: [ :item | item ifNotNil: [self removeKey: item key]  ].
+	aPage items reverseDo: [ :item | item ifNotNil: [self basicRemoveKey: item key]  ].
 	"remove the page from the store"
 	store removePageAt: aPage offset.
 	^ aPage 
