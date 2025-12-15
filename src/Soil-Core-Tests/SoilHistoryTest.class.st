@@ -65,6 +65,28 @@ SoilHistoryTest >> testObjectIDVersions [
 ]
 
 { #category : #tests }
+SoilHistoryTest >> testObjectIDVersionsViaTransactionInPast [
+	| tx history |
+	"This test shows that allVersionsOf: on the objectrepository returns the complete history, even though the current transaction might be in the past"
+	tx := soil newTransaction.
+	tx root: {1}.
+	tx commit.
+
+	tx := soil newTransaction.
+	tx root at: 1 put: 2.
+	tx markDirty: tx root.
+	tx commit.
+
+	tx := soil newTransactionForVersion: soil control databaseVersion - 1.
+	self assert: tx root equals: {1}.
+	
+	
+	"even though tx is ihe past, #allVersionsOf: returns the complete history"
+	history := (tx objectRepository allVersionsOf: (tx objectIdOf: tx root)) collect: [ :each | each materializeObjectUsing: tx newMaterializer].
+	self assert: history size equals: 2
+]
+
+{ #category : #tests }
 SoilHistoryTest >> testTransactionPastVersion [
 	| tx |
 	"we create a transaction on a past version"
