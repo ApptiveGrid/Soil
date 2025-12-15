@@ -129,9 +129,7 @@ SoilBehaviorDescription >> isCurrent [
 			"this assumption is only valid until SOBehaviorDescription changes
 			shape itselt. But this is unlikely to be handled automatically"
 			true ]
-		ifFalse: [ | currentClass |
-			currentClass := Smalltalk globals at: behaviorIdentifier.
-			classLayout == currentClass classLayout class name and: [ self matchesBehavior: currentClass ] ]]
+	ifFalse: [ self matchesBehavior: self objectClass ]]
 ]
 
 { #category : #testing }
