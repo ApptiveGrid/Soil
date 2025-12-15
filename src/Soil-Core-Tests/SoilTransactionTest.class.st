@@ -12,7 +12,7 @@ SoilTransactionTest >> path [
 	^ 'soil-tests'
 ]
 
-{ #category : #initialization }
+{ #category : #running }
 SoilTransactionTest >> setUp [ 
 	super setUp.
 	soil := Soil new 

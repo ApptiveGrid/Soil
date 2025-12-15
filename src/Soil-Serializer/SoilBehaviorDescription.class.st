@@ -126,7 +126,6 @@ SoilBehaviorDescription >> instVarNames [
 SoilBehaviorDescription >> isCurrent [
 	^ current ifNil: [current := self isMeta
 		ifTrue: [
-			self flag: #todo.
 			"this assumption is only valid until SOBehaviorDescription changes
 			shape itselt. But this is unlikely to be handled automatically"
 			true ]
@@ -155,11 +154,15 @@ SoilBehaviorDescription >> isVariableLayout [
 
 { #category : #testing }
 SoilBehaviorDescription >> matchesBehavior: aBehavior [
-	^ self matchesDescription: (self class for: aBehavior)
+	(classLayout = aBehavior classLayout class name) ifFalse: [ ^ false ].
+	(behaviorIdentifier = aBehavior soilBehaviorIdentifier) ifFalse: [ ^ false ].
+	(instVarNames = aBehavior soilPersistentInstVars) ifFalse: [ ^ false ].
+	^ true
 ]
 
 { #category : #testing }
 SoilBehaviorDescription >> matchesDescription: description [
+	(classLayout = description classLayout) ifFalse: [ ^ false ].
 	(behaviorIdentifier = description behaviorIdentifier) ifFalse: [ ^ false ].
 	(instVarNames = description instVarNames) ifFalse: [ ^ false ].
 	^ true
@@ -189,6 +192,17 @@ SoilBehaviorDescription >> objectId: aSOObjectId [
 { #category : #printing }
 SoilBehaviorDescription >> printOn: aStream [ 
 	aStream << 'behavior: ' << behaviorIdentifier asString
+]
+
+{ #category : #comparing }
+SoilBehaviorDescription >> soilSizeInMemory [
+	^ self sizeInMemory 
+		+ instVarNames soilSizeInMemory
+		+ behaviorIdentifier soilSizeInMemory
+		+ objectId soilSizeInMemory 
+		+ classLayout soilSizeInMemory
+		+ version soilSizeInMemory
+		"objectClass is shared"
 ]
 
 { #category : #accessing }
