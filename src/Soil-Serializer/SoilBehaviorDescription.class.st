@@ -93,13 +93,6 @@ SoilBehaviorDescription >> compatibilityCheck: aClassLayout [
 	SoilLayoutMigrationError signal: 'Incompatible layout detected: trying to read a ', classLayout , ' current code uses ', aClassLayout class name asString
 ]
 
-{ #category : #testing }
-SoilBehaviorDescription >> hasSameShape: aBehaviorDescription [
-	(behaviorIdentifier = aBehaviorDescription behaviorIdentifier) ifFalse: [ ^ false ].
-	(instVarNames = aBehaviorDescription instVarNames) ifFalse: [ ^ false ].
-	^ true 
-]
-
 { #category : #versions }
 SoilBehaviorDescription >> incrementVersion [ 
 	version := version + 1
@@ -129,9 +122,7 @@ SoilBehaviorDescription >> isCurrent [
 			"this assumption is only valid until SOBehaviorDescription changes
 			shape itselt. But this is unlikely to be handled automatically"
 			true ]
-		ifFalse: [ | currentClass |
-			currentClass := Smalltalk globals at: behaviorIdentifier.
-			classLayout == currentClass classLayout class name and: [ self matchesBehavior: currentClass ] ]]
+	ifFalse: [ self matchesBehavior: self objectClass ]]
 ]
 
 { #category : #testing }
