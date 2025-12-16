@@ -93,13 +93,6 @@ SoilBehaviorDescription >> compatibilityCheck: aClassLayout [
 	SoilLayoutMigrationError signal: 'Incompatible layout detected: trying to read a ', classLayout , ' current code uses ', aClassLayout class name asString
 ]
 
-{ #category : #testing }
-SoilBehaviorDescription >> hasSameShape: aBehaviorDescription [
-	(behaviorIdentifier = aBehaviorDescription behaviorIdentifier) ifFalse: [ ^ false ].
-	(instVarNames = aBehaviorDescription instVarNames) ifFalse: [ ^ false ].
-	^ true 
-]
-
 { #category : #versions }
 SoilBehaviorDescription >> incrementVersion [ 
 	version := version + 1

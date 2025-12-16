@@ -40,7 +40,7 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 					presentBehavior 
 						transaction: transaction;
 						materializeObject.
-					(presentBehavior object hasSameShape: cluster object )
+					(presentBehavior object matchesDescription: cluster object )
 						ifTrue: [ 
 							"Behaviors have the same shape so we can adapt the objectId of the 
 							present behavior and the version"
