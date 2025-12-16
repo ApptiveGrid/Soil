@@ -16,8 +16,8 @@ SoilClusterVersionTest >> testPersistentClusterVersionMemory [
 			version: 10 atRandom;
 			initializeFromBehavior: Point]);
 		references: ({ 4 . 5 . 6 } collect: #asSoilObjectId).
-	
-	self assert: record soilSizeInMemory equals: 1128
+		
+	self assert: record soilSizeInMemory equals: 344
 ]
 
 { #category : #tests }
