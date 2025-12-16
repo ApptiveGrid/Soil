@@ -3,5 +3,6 @@ Extension { #name : #OrderedCollection }
 { #category : #'*Soil-Core' }
 OrderedCollection >> soilSizeInMemory [
 	^ self sizeInMemory 
-		+ array soilSizeInMemory
+		+ array sizeInMemory 
+		+ (self sum: #soilSizeInMemory)
 ]
