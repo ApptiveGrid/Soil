@@ -10,13 +10,11 @@ To read more please have a look at the [documentation](./docs/soil.md)
 
 ## Loading
 
-**note** The main branch is not usable for existing databases right now, we need to apply a non-backward compatible change. When v4 is released there will be a converter for old databases to migrate. **Please load v3 until then**
-
-Load it in 64bit Pharo 11/12/13 with Metacello:
+Load it in 64bit Pharo 11/12/13/14 with Metacello:
 
 ```smalltalk
 Metacello new 
-	repository: 'github://ApptiveGrid/Soil:v3/src';
+	repository: 'github://ApptiveGrid/Soil:main/src';
 	baseline: 'Soil';
 	load.
 ```
