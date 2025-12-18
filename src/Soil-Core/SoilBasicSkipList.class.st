@@ -114,25 +114,32 @@ SoilBasicSkipList >> pageClass [
 
 { #category : #removing }
 SoilBasicSkipList >> removePage: aPage [
-	| previousPage  |
+	| previousPage  nextPage next |
 	"only remove if not header page (> 1)"
 	(aPage offset > 1) ifFalse: [ ^ aPage ].
 	(aPage version < 3) ifTrue: [ ^ self legacyRemovePage: aPage ].
-	(aPage offset = 3) ifTrue: [ self halt ].
 
-	"we only need scan up to the level of the page to be removed. Previous
-	pages on a level higher will point to pages more to the right"
+	"we only need to scan up to the level of aPage. Previous/next pages on 
+	higher levels point to different pages"
 	1 to: aPage level do: [ :level | 
-		"remember lastPrevious in order to speed up things. We don't need
-		to mark a page dirty more than once ..."
+		"the left pointer is always filled because we dont remove the header
+		page (see guard above). Therefor at least the header page is always 
+		present on the left side"
 		previousPage := self pageAt: (aPage leftAt: level).
-		(previousPage level >= level) ifFalse: [ self halt ].
-		previousPage isFreePage ifFalse: [  
-			self addDirtyPage: previousPage.
-			previousPage markForWrite.
-			"... but we rewrite the right pointer of each previous page "
-			previousPage rightAt: level put: (aPage rightAt: level) ]. 
-			"currentPage := previousPage." ].
+		"point right of previous page to the next page (right of current)"
+		previousPage rightAt: level put: (aPage rightAt: level)  .
+		self addDirtyPage: previousPage.
+		previousPage markForWrite.
+
+		"if we are on the last page the right value will be 0 because there
+		is no next page"
+		((next := aPage rightAt: level) > 0) ifTrue: [  
+			nextPage := self pageAt: next.
+			"point left of next next page to the previous (left of current)"
+			nextPage leftAt: level put: (aPage leftAt: level).
+			self addDirtyPage: nextPage.
+			nextPage markForWrite ] ].
+
 	"finally no page should point to aPage so we can safely remove the page"
 	store removePageAt: aPage offset.
 	^ aPage
