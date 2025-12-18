@@ -133,6 +133,11 @@ SoilFreePage >> removeFirstIndex [
 	^ index 
 ]
 
+{ #category : #accessing }
+SoilFreePage >> smallestKey [
+	^ SmallInteger maxVal 
+]
+
 { #category : #writing }
 SoilFreePage >> writeOn: aStream [ 
 	super writeOn: aStream.
