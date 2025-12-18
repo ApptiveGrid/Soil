@@ -6,6 +6,7 @@ A SoilBehaviorDescription is a flat, versioned view of classes
 
 Together, this allows us to read data from disk even though the code was changed (e.g. instance variable order, variables moved in the hierachy)
 
+Instances are created per transaction, the DB reads the stored version, the standalone materializer reads the name of the class and creates behaviordescriptions for the current classes in the image.
 
 "
 Class {
@@ -17,7 +18,8 @@ Class {
 		'objectId',
 		'classLayout',
 		'version',
-		'objectClass'
+		'objectClass',
+		'current'
 	],
 	#category : #'Soil-Serializer-Base'
 }
@@ -42,7 +44,7 @@ SoilBehaviorDescription class >> meta [
 
 { #category : #accessing }
 SoilBehaviorDescription class >> soilTransientInstVars [ 
-	^ #( objectId objectClass ) 
+	^ #( objectId objectClass current) 
 ]
 
 { #category : #converting }
@@ -52,15 +54,19 @@ SoilBehaviorDescription >> asSoilObjectId [
 
 { #category : #'object creation' }
 SoilBehaviorDescription >> basicNew [
-	^ self compatibilityCheckObject: self objectClass basicNew
+	current 
+		ifNil: [self compatibilityCheck: self objectClass classLayout].
+	^ self objectClass basicNew
 ]
 
 { #category : #'object creation' }
 SoilBehaviorDescription >> basicNew: size [
-	^ self compatibilityCheckObject: (self objectClass basicNew: size)
+	current
+		ifNil: [self compatibilityCheck: self objectClass classLayout].
+	^ self objectClass basicNew: size
 ]
 
-{ #category : #accessing }
+{ #category : #versions }
 SoilBehaviorDescription >> beFirstVersion [
 	version := 1
 ]
@@ -87,21 +93,7 @@ SoilBehaviorDescription >> compatibilityCheck: aClassLayout [
 	SoilLayoutMigrationError signal: 'Incompatible layout detected: trying to read a ', classLayout , ' current code uses ', aClassLayout class name asString
 ]
 
-{ #category : #testing }
-SoilBehaviorDescription >> compatibilityCheckObject: anObject [
-
-	self compatibilityCheck: anObject class classLayout.
-	^anObject
-]
-
-{ #category : #testing }
-SoilBehaviorDescription >> hasSameShape: aBehaviorDescription [
-	(behaviorIdentifier = aBehaviorDescription behaviorIdentifier) ifFalse: [ ^ false ].
-	(instVarNames = aBehaviorDescription instVarNames) ifFalse: [ ^ false ].
-	^ true 
-]
-
-{ #category : #api }
+{ #category : #versions }
 SoilBehaviorDescription >> incrementVersion [ 
 	version := version + 1
 ]
@@ -112,7 +104,9 @@ SoilBehaviorDescription >> initializeFromBehavior: aClass [
 	"we record only the persistent ivar names, in order"
 	instVarNames := aClass soilPersistentInstVars.
 	"we record the Layout to be able to detect if the layout changed"
-	classLayout := aClass classLayout class name
+	classLayout := aClass classLayout class name.
+	"we are created for a class that is current in the system"
+	current := true
 ]
 
 { #category : #accessing }
@@ -123,12 +117,12 @@ SoilBehaviorDescription >> instVarNames [
 
 { #category : #testing }
 SoilBehaviorDescription >> isCurrent [
-	^self isMeta
+	^ current ifNil: [current := self isMeta
 		ifTrue: [
 			"this assumption is only valid until SOBehaviorDescription changes
 			shape itselt. But this is unlikely to be handled automatically"
 			true ]
-		ifFalse: [ self matchesBehavior: self objectClass  ]
+	ifFalse: [ self matchesBehavior: self objectClass ]]
 ]
 
 { #category : #testing }
@@ -173,7 +167,7 @@ SoilBehaviorDescription >> newObjectWith: aSerializer [
 { #category : #accessing }
 SoilBehaviorDescription >> objectClass [
 	^ objectClass ifNil: [ 
-		objectClass := Smalltalk at: behaviorIdentifier asSymbol ]
+		objectClass := Smalltalk at: behaviorIdentifier ]
 ]
 
 { #category : #accessing }
