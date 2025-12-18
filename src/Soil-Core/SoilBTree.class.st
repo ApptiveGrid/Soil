@@ -45,12 +45,16 @@ SoilBTree >> path [
 
 { #category : #accessing }
 SoilBTree >> path: aStringOrFileReference [
+	(store isKindOf: SoilMemoryIndexStore) ifTrue: [ self halt ].
+	store ifNil: [  
+		store := self newFileStore ].
 
 	path := aStringOrFileReference asFileReference 
 ]
 
 { #category : #converting }
 SoilBTree >> thePersistentInstance [
+(store isKindOf: SoilMemoryIndexStore) ifTrue: [ self halt ]. 
 	^ self
 ]
 

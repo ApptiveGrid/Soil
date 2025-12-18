@@ -135,6 +135,11 @@ SoilIndex >> basicRemoveKey: key ifAbsent: aBlock [
 	^ self subclassResponsibility
 ]
 
+{ #category : #'as yet unclassified' }
+SoilIndex >> beFileStore [
+	store := self newFileStore 
+]
+
 { #category : #removing }
 SoilIndex >> cleanPage: page [
 	page canBeRemoved ifFalse: [ ^self ].
@@ -349,6 +354,12 @@ SoilIndex >> newIterator [
 ]
 
 { #category : #'instance creation' }
+SoilIndex >> newMemoryStore [
+	^ SoilMemoryIndexStore new
+		index: self
+]
+
+{ #category : #'instance creation' }
 SoilIndex >> newPage [
 	^ self subclassResponsibility
 ]
@@ -514,7 +525,7 @@ SoilIndex >> size [
 { #category : #accessing }
 SoilIndex >> store [
 	^ store ifNil: [ 
-		store := self newFileStore ]
+		store := self newMemoryStore ]
 ]
 
 { #category : #accessing }
