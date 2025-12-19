@@ -652,7 +652,10 @@ SoilSkipListTest >> testRemoveAllFromPage [
 	index removeKey: 272.
 	self assert: (index pageAt: 3) isEmpty.
 	"iterating goes beyond the empty page"
-	self assert: index values size equals: entries size - 2
+	self assert: index values size equals: entries size - 2.
+	
+	"We can search for a key that is in a page after the empty page"
+	self assert: (index newIterator find: 281) notNil
 ]
 
 { #category : #tests }

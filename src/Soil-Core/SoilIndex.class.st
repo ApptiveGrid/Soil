@@ -458,11 +458,6 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 
 	return := self basicRemoveKey: key ifAbsent: aBlock.
 	
-	self flag: #TODO. 
-	"We can not remove empty pages for the skiplist as it still searches for the previous page (issue #970) and search is broken with empty pages"
-	self isBTree ifFalse: [ ^ return ].
-	
-	
 	self dirtyPages copy do: [ :page |
 		"if no transaction needs old state and the page needs cleaning"
 	(page isFreePage not and: [page isEmpty]) ifTrue: [  
