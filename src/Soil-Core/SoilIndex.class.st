@@ -459,10 +459,9 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 	return := self basicRemoveKey: key ifAbsent: aBlock.
 	
 	self dirtyPages copy do: [ :page |
-		"if no transaction needs old state and the page needs cleaning"
-	(page isFreePage not and: [page isEmpty]) ifTrue: [  
-			self cleanPage: page ] ].
-	"here we need to cleanup"
+		"we can remove all empty pages"
+		(page isFreePage not and: [page isEmpty]) ifTrue: [  
+				self cleanPage: page ] ].
 	^return
 ]
 
