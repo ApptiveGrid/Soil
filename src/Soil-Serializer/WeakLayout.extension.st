@@ -20,6 +20,6 @@ WeakLayout >> soilBasicSerialize: anObject with: serializer [
 	basicSize := anObject basicSize.
 
 	serializer nextPutLengthEncodedInteger: basicSize.
-	description instVarNames do: [:ivarName | (anObject instVarNamed: ivarName) soilSerialize: serializer ].
+	description instVarNames do: [:ivarName | ((anObject class slotNamed: ivarName) read: anObject) theNonSoilProxy soilSerialize: serializer ].
 	1 to: basicSize do: [:i | (anObject basicAt: i) soilSerialize: serializer ]
 ]
