@@ -43,6 +43,38 @@ SoilBasicSkipList >> isBTree [
 	^ false
 ]
 
+{ #category : #removing }
+SoilBasicSkipList >> legacyRemovePage: aPage [
+	| iterator seen previousPage |
+	(aPage offset > 1) ifFalse: [ ^ aPage ].
+	"we use an iterator to scan pages on all levels that are just right
+	before the page to remove"
+	iterator := self newIterator. 
+	iterator findPreviousPageOf: aPage. 
+	"on each level up to max level the iterator has a reference to a 
+	page. We remember the pages processed in order not to process the
+	same page multiple times"
+	seen := Set new.	
+	1 to: self maxLevel do: [ :level |
+		previousPage := iterator levelAt: level.
+		(seen includes: previousPage) ifFalse: [  
+			seen add: previousPage.
+			self addDirtyPage: previousPage.
+			1 to: previousPage level do: [ :lvl |
+				"each previous page's next pointer might point to the page 
+				to be removed."
+				((previousPage rightAt: lvl) = aPage offset) ifTrue: [ 
+					"We overwrite the next pointer of the previous page with 
+					the next pointer of the page to be removed"
+					previousPage rightAt: lvl put: (aPage rightAt: lvl).
+					previousPage markForWrite ] ] ] ].
+	"finally remove the page from the store"
+	store removePageAt: aPage offset.
+	^ aPage 
+
+
+]
+
 { #category : #accessing }
 SoilBasicSkipList >> maxLevel [
 
@@ -82,33 +114,35 @@ SoilBasicSkipList >> pageClass [
 
 { #category : #removing }
 SoilBasicSkipList >> removePage: aPage [
-	| iterator seen previousPage |
+	| previousPage  nextPage next |
+	"only remove if not header page (> 1)"
 	(aPage offset > 1) ifFalse: [ ^ aPage ].
-	"we use an iterator to scan pages on all levels that are just right
-	before the page to remove"
-	iterator := self newIterator. 
-	iterator findPreviousPageOf: aPage. 
-	"on each level up to max level the iterator has a reference to a 
-	page. We remember the pages processed in order not to process the
-	same page multiple times"
-	seen := Set new.	
-	1 to: self maxLevel do: [ :level |
-		previousPage := iterator levelAt: level.
-		(seen includes: previousPage) ifFalse: [  
-			seen add: previousPage.
-			self addDirtyPage: previousPage.
-			1 to: previousPage level do: [ :lvl |
-				"each previous page's next pointer might point to the page 
-				to be removed."
-				((previousPage rightAt: lvl) = aPage offset) ifTrue: [ 
-					"We overwrite the next pointer of the previous page with 
-					the next pointer of the page to be removed"
-					previousPage rightAt: lvl put: (aPage rightAt: lvl).
-					previousPage markForWrite ] ] ] ].
-	"finally remove the page from the store"
-	store removePageAt: aPage offset.
-	^ aPage 
+	(aPage version < 3) ifTrue: [ ^ self legacyRemovePage: aPage ].
 
+	"we only need to scan up to the level of aPage. Previous/next pages on 
+	higher levels point to different pages"
+	1 to: aPage level do: [ :level | 
+		"the left pointer is always filled because we dont remove the header
+		page (see guard above). Therefor at least the header page is always 
+		present on the left side"
+		previousPage := self pageAt: (aPage leftAt: level).
+		"point right of previous page to the next page (right of current)"
+		previousPage rightAt: level put: (aPage rightAt: level)  .
+		self addDirtyPage: previousPage.
+		previousPage markForWrite.
+
+		"if we are on the last page the right value will be 0 because there
+		is no next page"
+		((next := aPage rightAt: level) > 0) ifTrue: [  
+			nextPage := self pageAt: next.
+			"point left of next next page to the previous (left of current)"
+			nextPage leftAt: level put: (aPage leftAt: level).
+			self addDirtyPage: nextPage.
+			nextPage markForWrite ] ].
+
+	"finally no page should point to aPage so we can safely remove the page"
+	store removePageAt: aPage offset.
+	^ aPage
 
 ]
 
