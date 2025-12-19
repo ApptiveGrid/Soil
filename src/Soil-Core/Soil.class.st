@@ -57,7 +57,7 @@ Soil class >> createOnPath: aStringOrFileReference [
 
 { #category : #accessing }
 Soil class >> databaseFormatVersion [ 
-	^ 2
+	^ 1
 ]
 
 { #category : #'instance creation' }
