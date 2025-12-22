@@ -61,12 +61,6 @@ SoilIndexPage >> headerSize [
 	^ 2 "pageCode, version" 
 ]
 
-{ #category : #initialization }
-SoilIndexPage >> initialize [ 
-	super initialize.
-	version := self latestVersion
-]
-
 { #category : #testing }
 SoilIndexPage >> isDirty [
 	^ self subclassResponsibility
@@ -156,9 +150,8 @@ SoilIndexPage >> readFrom: aStream [
 { #category : #reading }
 SoilIndexPage >> readHeaderFrom: aStream [ 
 	"we do not read the pageCode here as it was read already"
-	(version < 3) ifTrue: [  
-		self isHeaderPage ifFalse: [  
-		 version := aStream next ] ]
+	self isHeaderPage ifTrue: [  
+		 version := aStream next ]
 ]
 
 { #category : #accessing }
@@ -182,7 +175,7 @@ SoilIndexPage >> version: anInteger [
 { #category : #writing }
 SoilIndexPage >> writeHeaderOn: aStream [ 
 	aStream nextPut: self class pageCode.
-	(version < 3) ifTrue: [
+	self isHeaderPage ifTrue: [  
 		aStream nextPut: version ]
 ]
 

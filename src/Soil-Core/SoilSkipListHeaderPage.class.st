@@ -73,6 +73,7 @@ SoilSkipListHeaderPage >> increaseSize [
 { #category : #initialization }
 SoilSkipListHeaderPage >> initialize [ 
 	super initialize.
+	version := self latestVersion.
 	lastPageOffset := 1.
 	firstFreePageIndex := 0.
 	size := 0.
@@ -154,7 +155,6 @@ SoilSkipListHeaderPage >> previous [
 { #category : #reading }
 SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	super readHeaderFrom: aStream.
-	version := aStream next.
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	maxLevel := (aStream next: 2) asInteger.
