@@ -175,7 +175,9 @@ SoilIndexPage >> version: anInteger [
 { #category : #writing }
 SoilIndexPage >> writeHeaderOn: aStream [ 
 	aStream nextPut: self class pageCode.
-	(self isHeaderPage or: [ version < 3 ]) ifTrue: [  
+	"for index version >= 3 version will be nil. For older pages version is not
+	nil but smaller than 3"
+	(self isHeaderPage or: [ version notNil and: [version < 3 ] ]) ifTrue: [  
 		aStream nextPut: version ]
 ]
 

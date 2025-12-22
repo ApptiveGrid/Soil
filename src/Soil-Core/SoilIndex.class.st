@@ -424,8 +424,13 @@ SoilIndex >> readPageClassFrom: aStream [
 SoilIndex >> readPageFrom: aStream [
 	| page |
 	page := (self readPageClassFrom: aStream) basicNew.
+	"the header page reads its version from disk. So all pages 
+	except the header page needs this to be set and they are 
+	coming after the header page so version is already there"
+	page isHeaderPage ifFalse: [
+		page version: self version ].
 	page 
-		version: self version;
+		
 		pageSize: self pageSize;
 		initializeInIndex: self. 
 	^ page readFrom: aStream 

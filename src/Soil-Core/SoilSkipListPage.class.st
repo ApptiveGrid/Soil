@@ -259,7 +259,9 @@ SoilSkipListPage >> writeHeaderOn: aStream [
 SoilSkipListPage >> writeLevelsOn: aStream [ 
 	aStream 
 		nextPut: self level.
-	(version > 2) ifTrue: [ 
+	"for data pages version is nil and for header pages it is 
+	bigger than 2"
+	(version isNil or: [ version > 2 ]) ifTrue: [ 
 		1 to: self level do: [ :n |
 			aStream nextPutAll: ((left at: n) asByteArrayOfSize: self leftSize) ] ].
 	1 to: self level do: [ :n |
