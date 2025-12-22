@@ -212,7 +212,6 @@ SoilSkipListHeaderPage >> validate [
 { #category : #writing }
 SoilSkipListHeaderPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
-	aStream nextPut: version.
 	aStream 
 		nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);
