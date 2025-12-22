@@ -191,7 +191,7 @@ SoilSkipListPage >> readLevelsFrom: aStream [
 	| level |
 	level := aStream next asInteger.
 	right := Array new: level withAll: 0. 
-	(version > 2) ifTrue: [ 
+	(version isNil or: [ version > 2 ]) ifTrue: [ 
 		left := Array new: level withAll: 0. 
 		1 to: level do: [ :n |
 			left at: n put: (aStream next: self leftSize) asInteger ] ].

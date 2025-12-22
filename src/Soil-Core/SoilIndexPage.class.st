@@ -150,7 +150,7 @@ SoilIndexPage >> readFrom: aStream [
 { #category : #reading }
 SoilIndexPage >> readHeaderFrom: aStream [ 
 	"we do not read the pageCode here as it was read already"
-	(self isHeaderPage or: [version < 3]) ifTrue: [  
+	(self isHeaderPage or: [version notNil and: [ version < 3 ]]) ifTrue: [  
 		 version := aStream next ]
 ]
 
