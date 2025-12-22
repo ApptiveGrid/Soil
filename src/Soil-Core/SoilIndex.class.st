@@ -59,6 +59,7 @@ SoilIndex >> addToFreePages: aPage [
 SoilIndex >> allocatePage [
 	| page |
 	page := self newPage 
+		version: self version;
 		offset: (self nextFreePageIndex
 			ifNil: [ self nextPageOffset ]).
 	self store pageAt: page offset put: page.
