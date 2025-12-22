@@ -156,7 +156,9 @@ SoilIndexPage >> readFrom: aStream [
 { #category : #reading }
 SoilIndexPage >> readHeaderFrom: aStream [ 
 	"we do not read the pageCode here as it was read already"
-	version := aStream next
+	(version < 3) ifTrue: [  
+		self isHeaderPage ifFalse: [  
+		 version := aStream next ] ]
 ]
 
 { #category : #accessing }
@@ -172,11 +174,16 @@ SoilIndexPage >> version [
 	^ version
 ]
 
+{ #category : #accessing }
+SoilIndexPage >> version: anInteger [ 
+	version := anInteger 
+]
+
 { #category : #writing }
 SoilIndexPage >> writeHeaderOn: aStream [ 
-	aStream
-		nextPut: self class pageCode;
-		nextPut: version
+	aStream nextPut: self class pageCode.
+	(version < 3) ifTrue: [
+		aStream nextPut: version ]
 ]
 
 { #category : #writing }

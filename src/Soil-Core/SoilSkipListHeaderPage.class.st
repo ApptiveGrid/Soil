@@ -154,6 +154,7 @@ SoilSkipListHeaderPage >> previous [
 { #category : #reading }
 SoilSkipListHeaderPage >> readHeaderFrom: aStream [
 	super readHeaderFrom: aStream.
+	version := aStream next.
 	keySize := (aStream next: 2) asInteger.
 	valueSize := (aStream next: 2) asInteger.
 	maxLevel := (aStream next: 2) asInteger.
@@ -211,6 +212,7 @@ SoilSkipListHeaderPage >> validate [
 { #category : #writing }
 SoilSkipListHeaderPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
+	aStream nextPut: version.
 	aStream 
 		nextPutAll: (keySize asByteArrayOfSize: 2);
 		nextPutAll: (valueSize asByteArrayOfSize: 2);

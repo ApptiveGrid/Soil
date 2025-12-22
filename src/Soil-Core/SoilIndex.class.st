@@ -425,6 +425,7 @@ SoilIndex >> readPageFrom: aStream [
 	| page |
 	page := (self readPageClassFrom: aStream) basicNew.
 	page 
+		version: self version;
 		pageSize: self pageSize;
 		initializeInIndex: self. 
 	^ page readFrom: aStream 
@@ -545,6 +546,11 @@ SoilIndex >> valueSize: anInteger [
 { #category : #enumerating }
 SoilIndex >> values [ 
 	^ self newIterator values
+]
+
+{ #category : #accessing }
+SoilIndex >> version [
+	^ self headerPage version
 ]
 
 { #category : #writing }
