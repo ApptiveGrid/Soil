@@ -400,7 +400,7 @@ Soil >> open [
 ]
 
 { #category : #'as yet unclassified' }
-Soil >> openForMigration [ 
+Soil >> openForDatabaseFormatMigration [ 
 	"open for migration by just resuming the incompatible version 
 	exception"
 	[ self basicOpen ]
