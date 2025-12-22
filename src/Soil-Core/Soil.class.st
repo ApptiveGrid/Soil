@@ -399,6 +399,15 @@ Soil >> open [
 	journal recover
 ]
 
+{ #category : #'as yet unclassified' }
+Soil >> openForMigration [ 
+	"open for migration by just resuming the incompatible version 
+	exception"
+	[ self basicOpen ]
+		on: SoilIncompatibleDatabaseFormat 
+		do: [:ex | ex resume ]
+]
+
 { #category : #'opening/closing' }
 Soil >> openLogged [
 	self open.
