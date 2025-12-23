@@ -58,7 +58,7 @@ SoilIndexPage >> hasRoom [
 
 { #category : #utilities }
 SoilIndexPage >> headerSize [ 
-	^ 2 "pageCode, version" 
+	^ 1 "pageCode" 
 ]
 
 { #category : #testing }

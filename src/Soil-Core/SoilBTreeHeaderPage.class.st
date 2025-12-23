@@ -47,7 +47,8 @@ SoilBTreeHeaderPage >> firstFreePageIndex: anObject [
 
 { #category : #utilities }
 SoilBTreeHeaderPage >> headerSize [
-	^ super headerSize 
+	^ super headerSize
+		+ 1 "version" 
 		+ 19 "keySize(2), valueSize(2), lastPageIndex(4), lastFreePageIndex(4) size(6) uniqueKeys(1)" 
 ]
 
