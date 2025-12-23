@@ -62,7 +62,8 @@ SoilBTreeHeaderPage >> initialize [
 	super initialize.
 	firstFreePageIndex := 0.
 	size := 0.
-	uniqueKeys := true
+	uniqueKeys := true.
+	version := self latestVersion.
 ]
 
 { #category : #testing }
