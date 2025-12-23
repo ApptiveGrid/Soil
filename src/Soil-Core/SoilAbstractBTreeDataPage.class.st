@@ -157,7 +157,7 @@ SoilAbstractBTreeDataPage >> previous: anObject [
 { #category : #reading }
 SoilAbstractBTreeDataPage >> readHeaderFrom: aStream [
 	super readHeaderFrom: aStream.
-	(version > 2) ifTrue: [ 
+	(version isNil or: [version > 2]) ifTrue: [ 
 		previous := (aStream next: self pointerSize) asInteger].
 	next := (aStream next: self pointerSize) asInteger
 ]
@@ -184,7 +184,7 @@ SoilAbstractBTreeDataPage >> valueSize: anInteger [
 { #category : #writing }
 SoilAbstractBTreeDataPage >> writeHeaderOn: aStream [ 
 	super writeHeaderOn: aStream.
-	(version > 2) ifTrue: [ 
+	(version isNil or: [ version > 2 ]) ifTrue: [ 
 	aStream
 		nextPutAll: (previous asByteArrayOfSize: self pointerSize)].
 	aStream

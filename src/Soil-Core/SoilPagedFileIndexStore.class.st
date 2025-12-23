@@ -134,6 +134,7 @@ SoilPagedFileIndexStore >> readPageAt: anInteger [
 		stream position: (self positionOfPageIndex: anInteger).
 		(index readPageFrom: stream) 
 			offset: anInteger;
+			version: index version;
 			pageSize:  self filePageSize
 			yourself ]
 ]

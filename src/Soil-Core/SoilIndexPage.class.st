@@ -58,13 +58,7 @@ SoilIndexPage >> hasRoom [
 
 { #category : #utilities }
 SoilIndexPage >> headerSize [ 
-	^ 2 "pageCode, version" 
-]
-
-{ #category : #initialization }
-SoilIndexPage >> initialize [ 
-	super initialize.
-	version := self latestVersion
+	^ 1 "pageCode" 
 ]
 
 { #category : #testing }
@@ -156,7 +150,8 @@ SoilIndexPage >> readFrom: aStream [
 { #category : #reading }
 SoilIndexPage >> readHeaderFrom: aStream [ 
 	"we do not read the pageCode here as it was read already"
-	version := aStream next
+	(self isHeaderPage or: [version notNil and: [ version < 3 ]]) ifTrue: [  
+		 version := aStream next ]
 ]
 
 { #category : #accessing }
@@ -172,11 +167,18 @@ SoilIndexPage >> version [
 	^ version
 ]
 
+{ #category : #accessing }
+SoilIndexPage >> version: anInteger [ 
+	version := anInteger 
+]
+
 { #category : #writing }
 SoilIndexPage >> writeHeaderOn: aStream [ 
-	aStream
-		nextPut: self class pageCode;
-		nextPut: version
+	aStream nextPut: self class pageCode.
+	"for index version >= 3 version will be nil. For older pages version is not
+	nil but smaller than 3"
+	(self isHeaderPage or: [ version notNil and: [version < 3 ] ]) ifTrue: [  
+		aStream nextPut: version ]
 ]
 
 { #category : #writing }

@@ -57,7 +57,7 @@ Soil class >> createOnPath: aStringOrFileReference [
 
 { #category : #accessing }
 Soil class >> databaseFormatVersion [ 
-	^ 1
+	^ 2
 ]
 
 { #category : #'instance creation' }
@@ -326,6 +326,23 @@ Soil >> materializerClass [
 { #category : #accessing }
 Soil >> metadata [
 	^ metadata
+]
+
+{ #category : #'as yet unclassified' }
+Soil >> migrateDatabaseFormat [
+	"open for migration by just resuming the incompatible version 
+	exception"
+	| needsMigration |
+	needsMigration := false.
+	[ self basicOpen ]
+		on: SoilIncompatibleDatabaseFormat 
+		do: [:ex | 
+			needsMigration := true. 
+			ex resume ].
+	needsMigration ifFalse: [ self error: 'database does not need migration' ].
+	(SoilDatabaseMigration migratesVersion: self control databaseFormatVersion) new 
+		soil: self;
+		migrate
 ]
 
 { #category : #actions }

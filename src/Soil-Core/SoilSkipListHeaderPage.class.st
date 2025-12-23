@@ -56,7 +56,8 @@ SoilSkipListHeaderPage >> firstFreePageIndex: anObject [
 
 { #category : #utilities }
 SoilSkipListHeaderPage >> headerSize [
-	^ super headerSize 
+	^ super headerSize
+		+ 1 "version" 
 		+ 21 "keySize(2), valueSize(2), maxLevel(2), lastPageIndex(4), lastFreePageIndex(4) size(6) uniqueKeys(1)" 
 		+ 1 "level" 
 		+ ((self level * self rightSize) * 2) "left and right"
@@ -73,6 +74,7 @@ SoilSkipListHeaderPage >> increaseSize [
 { #category : #initialization }
 SoilSkipListHeaderPage >> initialize [ 
 	super initialize.
+	version := self latestVersion.
 	lastPageOffset := 1.
 	firstFreePageIndex := 0.
 	size := 0.
