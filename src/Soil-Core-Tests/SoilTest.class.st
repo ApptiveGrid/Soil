@@ -10,7 +10,7 @@ Class {
 { #category : #accessing }
 SoilTest class >> classNamesNotUnderTest [
 	"we for now ignore flock as this is platform specific"
-	^ #(#MacOSFileLock #UnixFileLock)
+	^ #(#SoilMacOSFileLock #SoilUnixFileLock)
 ]
 
 { #category : #accessing }
