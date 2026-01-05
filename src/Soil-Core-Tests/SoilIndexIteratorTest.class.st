@@ -3,7 +3,8 @@ Class {
 	#superclass : #ParametrizedTestCase,
 	#instVars : [
 		'index',
-		'classToTest'
+		'classToTest',
+		'uniqueKeys'
 	],
 	#category : #'Soil-Core-Tests-Index'
 }
@@ -12,9 +13,18 @@ Class {
 SoilIndexIteratorTest class >> testParameters [
 	"even though we test the iterators, the test creates the indexes and gets the iterators from there"
 	^ ParametrizedTestMatrix new
-		addCase: { #classToTest -> SoilSkipList };
-		addCase: { #classToTest -> SoilBTree };
+		addCase: { #classToTest -> SoilSkipList . #uniqueKeys -> true};
+		addCase: { #classToTest -> SoilBTree . #uniqueKeys -> true};
+		addCase: { #classToTest -> SoilSkipList . #uniqueKeys -> false};
+		addCase: { #classToTest -> SoilBTree . #uniqueKeys -> false};
 		yourself
+]
+
+{ #category : #running }
+SoilIndexIteratorTest >> assertSoilDuplicate: actual equals: expected [
+	uniqueKeys
+		ifTrue: [self assert: actual equals: expected  ]
+		ifFalse: [ self assertCollection: actual hasSameElements: {expected} ] 
 ]
 
 { #category : #accessing }
@@ -41,6 +51,7 @@ SoilIndexIteratorTest >> setUp [
 		keySize: 8;
 		valueSize: 8;
 		maxLevel: 4; "ignored for BTree"
+		uniqueKeys: uniqueKeys;
 	   yourself
 		
 ]
@@ -57,10 +68,12 @@ SoilIndexIteratorTest >> testAddRandom [
 
 	| iterator numEntries entries |
 	"just some random adding and checking that we can find it, configured to create lots of pages"
+	(uniqueKeys not and: [ index isBTree not ]) ifTrue: [ self skip ].
+	
 	iterator := index newIterator.
 
 	numEntries := 1000.
-	entries := Set new: numEntries.
+	entries := OrderedCollection new: numEntries.
 
 	numEntries timesRepeat: [
 		| toAdd |
@@ -69,11 +82,14 @@ SoilIndexIteratorTest >> testAddRandom [
 		iterator at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
 
 	"check size"
-	self assert: iterator size equals: entries size.
+	uniqueKeys 
+		ifTrue:  [ self assert: iterator size equals: entries asSet size ]
+		ifFalse: [ self assert: iterator size equals: entries size ].
 
+	
 	"can we find all the keys we added?"
 	entries do: [ :each |
-		self assert: (iterator at: each) equals: (each asByteArrayOfSize: 8) ].
+		self assertSoilDuplicate: (iterator at: each) equals: (each asByteArrayOfSize: 8) ].
 
 	"iterate index, all should be in entries"
 	iterator do: [ :each |
@@ -142,7 +158,7 @@ SoilIndexIteratorTest >> testAt [
 	iterator := index newIterator.
 	self should: [ iterator at: 1 ] raise: KeyNotFound.
 	iterator at: 1 add: (1 asByteArrayOfSize: 8).
-	self assert: (iterator at: 1) equals: (1 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: (iterator at: 1) equals: (1 asByteArrayOfSize: 8).
 	self should: [ iterator at: 2 ] raise: KeyNotFound
 ]
 
@@ -150,15 +166,18 @@ SoilIndexIteratorTest >> testAt [
 SoilIndexIteratorTest >> testAtAdd [
 
 	| iterator return |
+	index uniqueKeys ifFalse: [ self skip ].
+	
 	"at:put: returns last prior value"
 	iterator := index newIterator.
 	return := iterator at: 1 add: 1 asDummySoilObjectId.
 	self assert: return isNil.
-	self assert: (iterator at: 1) equals: 1 asDummySoilObjectId.
+	self assertSoilDuplicate: (iterator at: 1) equals: 1 asDummySoilObjectId.
 	return := iterator at: 1 add: 2 asDummySoilObjectId.
-
-	self assert: return equals: 1 asDummySoilObjectId.
-	self assert: (iterator at: 1) equals: 2 asDummySoilObjectId
+	uniqueKeys ifTrue: [
+		"with duplicate keys, we do not return the old value"
+		self assert: return equals: 1 asDummySoilObjectId].
+	self assertSoilDuplicate: (iterator at: 1) equals: 2 asDummySoilObjectId
 ]
 
 { #category : #tests }
@@ -218,7 +237,7 @@ SoilIndexIteratorTest >> testFind [
 	1 to: capacity do: [ :n | index at: n add: n asDummySoilObjectId ].
 
 	value := iterator find: 222.
-	self assert: value equals: 222 asDummySoilObjectId.
+	self assertSoilDuplicate: value equals: 222 asDummySoilObjectId.
 
 	value := iterator find: capacity + 1.
 	self assert: value isNil
@@ -228,6 +247,7 @@ SoilIndexIteratorTest >> testFind [
 SoilIndexIteratorTest >> testFindAndNext2 [
 
 	| capacity iterator values |
+	index uniqueKeys ifFalse: [ self skip ].
 	capacity := index firstPage itemCapacity * 2.
 	1 to: capacity do: [ :n | index at: n add: n asDummySoilObjectId ].
 	iterator := index newIterator.
@@ -266,7 +286,7 @@ SoilIndexIteratorTest >> testFindIfAbsent [
 	iterator at: n add: (n asByteArrayOfSize: 8) ].
 
 	value := iterator find: 222 ifAbsent: [ #notThere ].
-	self assert: value equals: (222 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: value equals: (222 asByteArrayOfSize: 8).
 	value := iterator find: capacity + 1 ifAbsent: [ #notThere ].
 	self assert: value equals: #notThere
 ]
@@ -358,6 +378,7 @@ SoilIndexIteratorTest >> testFirstPage [
 SoilIndexIteratorTest >> testFirstWithRemovedItem [
 
 	| iterator |
+	index uniqueKeys ifFalse: [ self skip ].
 	iterator := index newIterator.
 	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	iterator removeKey: 1.
@@ -515,6 +536,7 @@ SoilIndexIteratorTest >> testLastPage [
 SoilIndexIteratorTest >> testLastWithRemovedItem [
 
 	| iterator |
+	index uniqueKeys ifFalse: [ self skip ].
 	iterator := index newIterator.
 	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	iterator removeKey: 1.
@@ -548,6 +570,8 @@ SoilIndexIteratorTest >> testLastWithRemovedItem [
 SoilIndexIteratorTest >> testNext [
 
 	| capacity iterator value |
+	index uniqueKeys ifFalse: [ self skip ].
+
 	"test empty index"
 	iterator := index newIterator.
 	self assert: iterator next isNil.
@@ -572,6 +596,7 @@ SoilIndexIteratorTest >> testNext [
 SoilIndexIteratorTest >> testNextAfter [
 
 	| iterator |
+	index uniqueKeys ifFalse: [ self skip ].
 	"first empty dict"
 	iterator := index newIterator.
 	self assert: (iterator nextAfter: 10) equals: nil.
@@ -590,6 +615,7 @@ SoilIndexIteratorTest >> testNextAfter [
 SoilIndexIteratorTest >> testNextAssociation [
 
 	| capacity iterator value |
+	index uniqueKeys ifFalse: [ self skip ].
 	"test empty index"
 	iterator := index newIterator.
 	self assert: iterator nextAssociation isNil.
@@ -616,6 +642,8 @@ SoilIndexIteratorTest >> testNextAssociation [
 SoilIndexIteratorTest >> testNextAssociationAfter [
 
 	| iterator |
+	index uniqueKeys ifFalse: [ self skip ].
+		
 	"first empty dict"
 	iterator := index newIterator.
 	self assert: (iterator nextAssociationAfter: 10) equals: nil.
@@ -645,23 +673,23 @@ SoilIndexIteratorTest >> testNextCloseTo [
 
 
 	self
-		assert: (iterator nextCloseTo: 5)
+		assertSoilDuplicate: (iterator nextCloseTo: 5)
 		equals: (10 asByteArrayOfSize: 8).
 	self
-		assert: (iterator nextCloseTo: 10)
+		assertSoilDuplicate: (iterator nextCloseTo: 10)
 		equals: (10 asByteArrayOfSize: 8).
 	self
-		assert: (iterator nextCloseTo: 11)
+		assertSoilDuplicate: (iterator nextCloseTo: 11)
 		equals: (20 asByteArrayOfSize: 8).
 	self
-		assert: (iterator nextCloseTo: 15)
+		assertSoilDuplicate: (iterator nextCloseTo: 15)
 		equals: (20 asByteArrayOfSize: 8).
 	self
-		assert: (iterator nextCloseTo: 20)
+		assertSoilDuplicate: (iterator nextCloseTo: 20)
 		equals: (20 asByteArrayOfSize: 8).
 	"this is a bit odd, when looking with larger values we get the last one"
 	self
-		assert: (iterator nextCloseTo: 100)
+		assertSoilDuplicate: (iterator nextCloseTo: 100)
 		equals: (20 asByteArrayOfSize: 8)
 ]
 
@@ -715,6 +743,8 @@ SoilIndexIteratorTest >> testNextPage [
 SoilIndexIteratorTest >> testPrevious [
 
 	| capacity iterator value toFind |
+	index uniqueKeys ifFalse: [ self skip ].
+
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n | index at: n add: n  asDummySoilObjectId ].
 	iterator := index newIterator.
@@ -751,6 +781,7 @@ SoilIndexIteratorTest >> testPrevious5 [
 SoilIndexIteratorTest >> testPreviousAssociation [
 
 	| capacity iterator value toFind |
+	index uniqueKeys ifFalse: [ self skip ].
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
 	iterator := index newIterator.
@@ -775,6 +806,7 @@ SoilIndexIteratorTest >> testPreviousAssociation [
 SoilIndexIteratorTest >> testPreviousAssociationFirstPage [
 
 	| capacity iterator value |
+	index uniqueKeys ifFalse: [ self skip ].
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
 
@@ -798,6 +830,7 @@ SoilIndexIteratorTest >> testPreviousAssociationNonBoundary [
 	"check previousAssociation where we have to *not* cross a page boundary"
 
 	| capacity iterator value toFind |
+	index uniqueKeys ifFalse: [ self skip ].
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
 	iterator := index newIterator.
@@ -877,9 +910,9 @@ SoilIndexIteratorTest >> testRemoveKey [
 	"removing non-existing keys raises KeyNotFound error"
 	self should: [ iterator removeKey: capacity + 1 ] raise: KeyNotFound.
 	result := iterator removeKey: 1.
-	self assert: result equals: (1 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: result equals: (1 asByteArrayOfSize: 8).
 	result := iterator removeKey: capacity.
-	self assert: result equals: (capacity asByteArrayOfSize: 8).
+	self assertSoilDuplicate: result equals: (capacity asByteArrayOfSize: 8).
 	"removing the key again raises KeyNotFound, too"
 	self should: [ iterator removeKey: capacity ] raise: KeyNotFound
 ]
@@ -914,6 +947,7 @@ SoilIndexIteratorTest >> testRemoveKeyDuplicate [
 SoilIndexIteratorTest >> testRemoveKeyIfAbsent [
 
 	| capacity iterator result |
+	index uniqueKeys ifFalse: [ self skip ].
 	capacity := index headerPage itemCapacity * 2.
 
 	"test empty iterator"
@@ -986,4 +1020,16 @@ SoilIndexIteratorTest >> testValues [
 	self assert: iterator values size equals: capacity.
 	self assert: iterator values first equals: 1 asDummySoilObjectId.
 	self assert: iterator values last equals: capacity asDummySoilObjectId
+]
+
+{ #category : #accessing }
+SoilIndexIteratorTest >> uniqueKeys [
+
+	^ uniqueKeys
+]
+
+{ #category : #accessing }
+SoilIndexIteratorTest >> uniqueKeys: anObject [
+
+	uniqueKeys := anObject
 ]
