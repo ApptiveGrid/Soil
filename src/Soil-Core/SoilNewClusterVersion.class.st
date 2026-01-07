@@ -60,9 +60,7 @@ SoilNewClusterVersion >> beChanged [
 SoilNewClusterVersion >> detachFromSegment [
 	"remove all information that belongs to the segment where the cluster
 	was stored"
-	version := 0.
-	position := 0.
-	previousVersionPosition := 0.
+	super detachFromSegment.
 	previousVersionRecord := nil 
 ]
 
