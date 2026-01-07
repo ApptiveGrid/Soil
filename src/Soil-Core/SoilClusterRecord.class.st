@@ -1,8 +1,8 @@
 "
-Note: behaviorDescriptions will store instances for a SoilNewClusterVersion, but objectIDs when for
+Note: behaviorDescriptions will store instances for a SoilNewClusterVersion, but objectIDs for
 SoilPersistentClusterVerson.
 
-The reasom is that we can only create the IDs when committing. The SoilNewClusterVersion will then write the IDs to disk (not the instances) and SoilPersistentClusterVerson on read will created with behaviorDescriptions as IDs.
+The reaso is that we can only create the IDs when committing. The SoilNewClusterVersion will then write the IDs to disk (not the instances) and SoilPersistentClusterVerson on read will created with behaviorDescriptions as IDs.
 "
 Class {
 	#name : #SoilClusterRecord,
