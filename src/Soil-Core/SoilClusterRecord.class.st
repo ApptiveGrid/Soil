@@ -1,3 +1,9 @@
+"
+Note: behaviorDescriptions will store instances for a SoilNewClusterVersion, but objectIDs for
+SoilPersistentClusterVerson.
+
+The reaso is that we can only create the IDs when committing. The SoilNewClusterVersion will then write the IDs to disk (not the instances) and SoilPersistentClusterVerson on read will created with behaviorDescriptions as IDs.
+"
 Class {
 	#name : #SoilClusterRecord,
 	#superclass : #Object,
@@ -79,6 +85,15 @@ SoilClusterRecord >> bytes: anObject [
 { #category : #accessing }
 SoilClusterRecord >> committed [ 
 	committed := true
+]
+
+{ #category : #api }
+SoilClusterRecord >> detachFromSegment [
+	"remove all information that belongs to the segment where the cluster
+	was stored"
+	version := 0.
+	position := 0.
+	previousVersionPosition := 0
 ]
 
 { #category : #api }
