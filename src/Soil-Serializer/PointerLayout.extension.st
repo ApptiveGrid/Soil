@@ -6,9 +6,9 @@ PointerLayout >> soilBasicSerialize: anObject with: serializer [
 	description := serializer serializeBehaviorDescriptionFor: anObject.
 	class := anObject class.
 
-	(class soilTransientInstVars size == 0) 
-		ifTrue: [1 to: class instSize do: [:index | (anObject instVarAt: index)  theNonSoilProxy soilSerialize: serializer] ]
-		ifFalse: [description instVarNames do: [:ivarName | ((class slotNamed: ivarName) read: anObject) theNonSoilProxy soilSerialize: serializer ] ]
+	class hasSoilTransientInstVars 
+		ifFalse: [1 to: class instSize do: [:index | (anObject instVarAt: index)  theNonSoilProxy soilSerialize: serializer] ]
+		ifTrue: [description instVarNames do: [:ivarName | ((class slotNamed: ivarName) read: anObject) theNonSoilProxy soilSerialize: serializer ] ]
 ]
 
 { #category : #'*Soil-Serializer' }
