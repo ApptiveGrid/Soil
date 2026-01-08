@@ -36,6 +36,7 @@ Object >> soilMaterialized: materializer [
 
 { #category : #'*Soil-Serializer' }
 Object class >> soilPersistentInstVars [
+	"return the persistent var names of the hierachy"
 	^ self allInstVarNames difference: self soilTransientInstVars 
 ]
 

@@ -2,10 +2,13 @@ Extension { #name : #PointerLayout }
 
 { #category : #'*Soil-Serializer' }
 PointerLayout >> soilBasicSerialize: anObject with: serializer [
-	| description |
+	| description class |
 	description := serializer serializeBehaviorDescriptionFor: anObject.
+	class := anObject class.
 
-	description instVarNames do: [:ivarName | ((anObject class slotNamed: ivarName) read: anObject) theNonSoilProxy soilSerialize: serializer ]
+	class hasSoilTransientInstVars 
+		ifFalse: [1 to: class instSize do: [:index | (anObject instVarAt: index)  theNonSoilProxy soilSerialize: serializer] ]
+		ifTrue: [description instVarNames do: [:ivarName | ((class slotNamed: ivarName) read: anObject) theNonSoilProxy soilSerialize: serializer ] ]
 ]
 
 { #category : #'*Soil-Serializer' }

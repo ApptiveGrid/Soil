@@ -1,6 +1,14 @@
 Extension { #name : #Class }
 
 { #category : #'*Soil-Serializer' }
+Class >> hasSoilTransientInstVars [
+	"does the hierarchy have any transient vars?"
+	self soilTransientInstVars notEmpty ifTrue: [ ^true ].
+	self allSuperclassesDo: [ :class | class soilTransientInstVars notEmpty ifTrue: [ ^true ] ].
+	^ false
+]
+
+{ #category : #'*Soil-Serializer' }
 Class >> soilBasicSerialize: serializer [
 
 	serializer nextPutClass: self
