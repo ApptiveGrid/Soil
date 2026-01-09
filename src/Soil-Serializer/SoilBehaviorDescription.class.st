@@ -81,6 +81,11 @@ SoilBehaviorDescription >> classLayout [
 	^ classLayout
 ]
 
+{ #category : #versions }
+SoilBehaviorDescription >> clearCurrent [
+	current := nil
+]
+
 { #category : #testing }
 SoilBehaviorDescription >> compatibilityCheck: aClassLayout [
 
@@ -183,11 +188,6 @@ SoilBehaviorDescription >> objectId: aSOObjectId [
 { #category : #printing }
 SoilBehaviorDescription >> printOn: aStream [ 
 	aStream << 'behavior: ' << behaviorIdentifier asString
-]
-
-{ #category : #versions }
-SoilBehaviorDescription >> resetCurrent [
-	current := nil
 ]
 
 { #category : #comparing }
