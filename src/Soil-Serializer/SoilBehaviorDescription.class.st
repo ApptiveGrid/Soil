@@ -185,6 +185,11 @@ SoilBehaviorDescription >> printOn: aStream [
 	aStream << 'behavior: ' << behaviorIdentifier asString
 ]
 
+{ #category : #versions }
+SoilBehaviorDescription >> resetCurrent [
+	current := nil
+]
+
 { #category : #comparing }
 SoilBehaviorDescription >> soilSizeInMemory [
 	^ self sizeInMemory 

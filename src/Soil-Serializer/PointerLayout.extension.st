@@ -13,16 +13,19 @@ PointerLayout >> soilBasicSerialize: anObject with: serializer [
 
 { #category : #'*Soil-Serializer' }
 PointerLayout >> updateIvars: aBehaviorDescription with: materializer for: object [
-	
+	| class |
+	class := object class.
 	aBehaviorDescription isCurrent
 		ifTrue: [
-				aBehaviorDescription instVarNames do: [:instVar | 
-					(object class slotNamed: instVar) write: materializer nextSoilObject to: object ]]
+					class hasSoilTransientInstVars 
+						ifFalse: [1 to: class instSize do: [:index | object instVarAt: index put: materializer nextSoilObject ] ] 
+						ifTrue:[ aBehaviorDescription instVarNames do: [:instVar | 
+					(class slotNamed: instVar) write: materializer nextSoilObject to: object ]]]
 		ifFalse: [
 			| versions |
 			versions := materializer behaviorVersionsUpTo: aBehaviorDescription.
 			versions last instVarNames do: [ :instVar | 
 				(versions allSatisfy: [ :version | version instVarNames includes: instVar ]) 
-					ifTrue: [ (object class slotNamed: instVar) write: materializer nextSoilObject to: object ]
+					ifTrue: [ (class slotNamed: instVar) write: materializer nextSoilObject to: object ]
 					ifFalse: [ materializer nextSoilObject "read but ignore"  ] ] ]
 ]
