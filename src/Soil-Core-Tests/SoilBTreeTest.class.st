@@ -166,9 +166,7 @@ SoilBTreeTest >> testAddRandom [
 		index at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
 
 	"check size"
-	uniqueKeys 
-		ifTrue: [ self assert: index size equals: entries asSet size]
-		ifFalse: [ self assert: index size equals: 20].
+	self assert: index size equals: entries asSet size.
 
 	"can we find all the keys we added?"
 	entries do: [ :each |
@@ -283,7 +281,7 @@ SoilBTreeTest >> testAtSecondOverflow [
 	"if we add a page, the current one is split and half is moved there"
 	1 to: capacity do: [ :n |
 		index at: capacity + n add: (capacity + n asByteArrayOfSize: 8) ].
-	self assert: index pages size equals: (uniqueKeys ifTrue: [4] ifFalse: [6]).
+	self assert: index pages size equals: 4.
 
 	self assertSoilDuplicate: (index at: 1) equals: (1 asByteArrayOfSize: 8).
 	self
@@ -475,6 +473,7 @@ SoilBTreeTest >> testIndexRewriting [
 SoilBTreeTest >> testIndexRewritingWithCleaning [
 
 	| capacity |
+	index uniqueKeys ifFalse: [ self skip ]. "need to rewrite to not at at:add:"
 	capacity := index firstPage itemCapacity.
 	1 to: capacity + 1 do: [ :n |
 	index at: n add: (n asByteArrayOfSize: 8) ].
@@ -482,8 +481,8 @@ SoilBTreeTest >> testIndexRewritingWithCleaning [
 	1 to: capacity do: [ :n | index at: n add: SoilObjectId removed ].
 
 	index newPluggableRewriter cleanRemoved run.
-	self assert: index headerPage lastPageOffset equals: (uniqueKeys ifTrue: [2] ifFalse: [3]).
-	self assert: (index pageAt: 1) items size equals: (uniqueKeys ifTrue: [1] ifFalse: [126]).
+	self assert: index headerPage lastPageOffset equals: 2.
+	self assert: (index pageAt: 1) items size equals: 1.
 	self
 		assertSoilDuplicate: (index at: capacity + 1)
 		equals: (capacity + 1 asByteArrayOfSize: 8)

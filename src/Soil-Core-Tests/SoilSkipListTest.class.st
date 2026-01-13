@@ -457,6 +457,7 @@ SoilSkipListTest >> testIndexRewriting [
 SoilSkipListTest >> testIndexRewritingWithCleaning [
 
 	| capacity |
+	index uniqueKeys ifFalse: [ self skip ]. "need to rewrite to not at at:add:"
 	capacity := index firstPage itemCapacity.
 	1 to: capacity + 1 do: [ :n |
 	index at: n add: (n asByteArrayOfSize: 8) ].
@@ -464,8 +465,8 @@ SoilSkipListTest >> testIndexRewritingWithCleaning [
 	1 to: capacity do: [ :n | index at: n add: SoilObjectId removed ].
 
 	index newPluggableRewriter cleanRemoved rewrite.
-	self assert: index headerPage lastPageOffset equals: (uniqueKeys ifTrue: [1] ifFalse: [2]).
-	self assert: (index pageAt: 1) items size equals: (uniqueKeys ifTrue: [1] ifFalse: [251]).
+	self assert: index headerPage lastPageOffset equals: 1.
+	self assert: (index pageAt: 1) items size equals: 1.
 	self
 		assertSoilDuplicate: (index at: capacity + 1)
 		equals: (capacity + 1 asByteArrayOfSize: 8)

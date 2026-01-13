@@ -68,7 +68,6 @@ SoilIndexIteratorTest >> testAddRandom [
 
 	| iterator numEntries entries |
 	"just some random adding and checking that we can find it, configured to create lots of pages"
-	(uniqueKeys not and: [ index isBTree not ]) ifTrue: [ self skip ].
 	
 	iterator := index newIterator.
 
@@ -82,11 +81,9 @@ SoilIndexIteratorTest >> testAddRandom [
 		iterator at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
 
 	"check size"
-	uniqueKeys 
-		ifTrue:  [ self assert: iterator size equals: entries asSet size ]
-		ifFalse: [ self assert: iterator size equals: entries size ].
+	self assert: iterator size equals: entries asSet size.
+	self assert: index size equals: entries asSet size.
 
-	
 	"can we find all the keys we added?"
 	entries do: [ :each |
 		self assertSoilDuplicate: (iterator at: each) equals: (each asByteArrayOfSize: 8) ].
@@ -117,8 +114,9 @@ SoilIndexIteratorTest >> testAddingDuplicateKeyAcrossPages [
 		iterator at: 1 add: (capacity + n) asDummySoilObjectId ].
 	
 	self deny: page identicalTo: iterator currentPage.
-	
+	self assert: iterator size equals: capacity*2.
 	self assert: index size equals: capacity*2.
+	
 	elements := iterator at: 1.
 	"we can ask for all values"
 	self assertCollection: elements hasSameElements: ids
