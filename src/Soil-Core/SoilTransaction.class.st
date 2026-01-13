@@ -216,7 +216,7 @@ SoilTransaction >> buildJournal [
 	indexUpdatesToCommit keysAndValuesDo: [ :index :segment | 
 		index journalEntries do: [ :entry |
 			entry 
-				segment segment;
+				segment: segment;
 				transactionId: self writeVersion.
 			journal addEntry: entry ] ].
 	"for all new objects with a new behavior we create an entry to
