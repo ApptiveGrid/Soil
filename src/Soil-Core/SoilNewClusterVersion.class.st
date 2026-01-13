@@ -9,6 +9,15 @@ Class {
 }
 
 { #category : #adding }
+SoilNewClusterVersion >> addIndexUpdate: anIndex [
+	| segment |
+	segment := (transaction objectIdOf: anIndex)
+		ifNotNil: [ :oid | oid segment ]
+		ifNil: [ self segment ]. 
+	transaction addIndexUpdate: anIndex  segment: segment
+]
+
+{ #category : #adding }
 SoilNewClusterVersion >> addObject: anObject reference: anObjectId [
 	externalObjects add: anObject.
 	self addReference: anObjectId

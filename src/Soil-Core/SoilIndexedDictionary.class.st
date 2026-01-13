@@ -139,11 +139,8 @@ SoilIndexedDictionary >> isRegistered [
 SoilIndexedDictionary >> journalEntries [
 	| entries segment |
 	entries := OrderedCollection new.
-	segment := (transaction objectIdOf: self) segment.
 	self isRegistered ifFalse: [
 		entries add: (index newIndexEntryClass new 
-			transactionId: transaction writeVersion;
-			segment: segment;
 			id: id;
 			maxLevel: index maxLevel;
 			keySize: index keySize;
@@ -151,8 +148,6 @@ SoilIndexedDictionary >> journalEntries [
 	newValues keysAndValuesDo: [ :key :value |
 		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
 		entries add: (SoilAddKeyEntry new 
-			transactionId: transaction writeVersion;
-			segment: segment;
 			id: id;
 			key: (index indexKey: key);
 			value: value;
@@ -160,8 +155,6 @@ SoilIndexedDictionary >> journalEntries [
 	removedValues keysAndValuesDo: [ :key :value |
 		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
 		entries add: (SoilRemoveKeyEntry new 
-			transactionId: transaction writeVersion;
-			segment: segment;
 			id: id;
 			key: (index indexKey: key); 
 			oldValue: value) ].
@@ -280,7 +273,7 @@ SoilIndexedDictionary >> soilBasicSerialize: aSerializer [
 		transaction := aSerializer transaction.
 		self prepareNewValues ].
 	super soilBasicSerialize: aSerializer.
-	aSerializer registerIndexId: id.
+	aSerializer registerIndex: self.
 ]
 
 { #category : #serializing }

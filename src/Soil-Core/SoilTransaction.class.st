@@ -55,6 +55,11 @@ SoilTransaction >> addClusterObject: anObject [
 ]
 
 { #category : #adding }
+SoilTransaction >> addIndexUpdate: anIndex segment: segment [ 
+	indexUpdatesToCommit at: anIndex put: segment 
+]
+
+{ #category : #adding }
 SoilTransaction >> addLock: aLock [ 
 	locks add: aLock
 ]
@@ -111,8 +116,8 @@ SoilTransaction >> basicCommit [
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
-		indexUpdatesToCommit do: [:indexDict | 
-			self updatedIndexDictionary: indexDict] .
+		indexUpdatesToCommit keysAndValuesDo: [:indexDict :segment | 
+			self updatedIndexDictionary: indexDict segment: segment ] .
 		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
@@ -208,8 +213,12 @@ SoilTransaction >> buildJournal [
 		record version: writeVersion.
 		journal addEntries: (record asJournalEntry do: [:each | each transactionId: writeVersion ]).
 		record committed  ].
-	indexUpdatesToCommit do: [ :object | 
-		journal addEntries: object journalEntries  ].
+	indexUpdatesToCommit keysAndValuesDo: [ :index :segment | 
+		index journalEntries do: [ :entry |
+			entry 
+				segment segment;
+				transactionId: self writeVersion.
+			journal addEntry: entry ] ].
 	"for all new objects with a new behavior we create an entry to
 	add the behavior"
 	behaviorDescriptions do: [ :description |
@@ -328,7 +337,7 @@ SoilTransaction >> initialize [
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
 	indexes := Dictionary new.
-	indexUpdatesToCommit := OrderedCollection new
+	indexUpdatesToCommit := Dictionary new
 ]
 
 { #category : #api }
@@ -471,7 +480,7 @@ SoilTransaction >> objectAt: anObjectId ifAbsent: aBlock [
 SoilTransaction >> objectIdOf: anObject [ 
 	^ anObject isSoilProxy
 		ifTrue: [ anObject objectId ]
-		ifFalse: [ (objectMap at: anObject) objectId ].
+		ifFalse: [ (objectMap at: anObject ifAbsent: [ ^  nil]) objectId ].
 	
 ]
 
@@ -644,9 +653,9 @@ SoilTransaction >> transactionManager [
 ]
 
 { #category : #indexes }
-SoilTransaction >> updatedIndexDictionary: indexedDictionary [ 
-	|  segment realIndex |
-	segment := self segmentAt: (self objectIdOf: indexedDictionary) segment.
+SoilTransaction >> updatedIndexDictionary: indexedDictionary segment: segmentNo [
+	| segment realIndex |
+	segment := self segmentAt: segmentNo.
 	"when indexed dictionaries created the first time the journal creates the 
 	real index with path. In this case we request the real index from the index
 	manager"
