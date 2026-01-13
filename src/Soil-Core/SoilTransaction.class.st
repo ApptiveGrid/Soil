@@ -519,9 +519,7 @@ SoilTransaction >> prepareRecordsForCommit [
 	recordsToCommit := OrderedCollection new.
 	idMap values do: [ :record |
 		record shouldBeCommitted ifTrue: [ 
-			recordsToCommit add: record asNewClusterVersion ].
-		record hasIndexUpdates ifTrue: [ 
-			indexUpdatesToCommit add: record object ] ].
+			recordsToCommit add: record asNewClusterVersion ] ].
 	"serialize initial records. While serializing there can be new records 
 	popping up (an object not registered yet in the transaction but is a
 	cluster root"
