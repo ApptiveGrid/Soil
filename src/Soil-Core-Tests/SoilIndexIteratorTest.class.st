@@ -961,9 +961,9 @@ SoilIndexIteratorTest >> testRemoveKeyIfAbsent [
 	result := iterator removeKey: capacity + 1 ifAbsent: #hello.
 	self assert: result equals: #hello.
 	result := iterator removeKey: 1 ifAbsent: [ #hello ].
-	self assert: result equals: (1 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: result equals: (1 asByteArrayOfSize: 8).
 	result := iterator removeKey: capacity ifAbsent: [ #hello ].
-	self assert: result equals: (capacity asByteArrayOfSize: 8).
+	self assertSoilDuplicate: result equals: (capacity asByteArrayOfSize: 8).
 	"removing the key again executes absent block"
 	result := iterator removeKey: capacity ifAbsent: [ #hello ].
 	self assert: result equals: #hello
