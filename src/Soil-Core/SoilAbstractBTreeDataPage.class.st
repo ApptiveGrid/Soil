@@ -92,6 +92,8 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 
 	| newPage pageWithItem returnValue return keyIndex |
 
+	iterator index addDirtyPage: self.
+
 	return := SoilBTreeReturnWrapper new returnValue: (self valueAt: anItem key).
 	
 	keyIndex := iterator index hasUniqueKeys 

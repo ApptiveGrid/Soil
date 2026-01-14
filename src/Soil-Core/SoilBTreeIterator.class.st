@@ -13,10 +13,8 @@ Class {
 
 { #category : #accessing }
 SoilBTreeIterator >> basicAt: indexKey add: anObject [
-	| possiblePriorValue |
+	| possiblePriorValue |	
 	possiblePriorValue := index rootPage insertItem: (indexKey -> anObject) for: self.
-
-	index addDirtyPage: currentPage. "for size" 
 	^ possiblePriorValue returnValue
 ]
 
