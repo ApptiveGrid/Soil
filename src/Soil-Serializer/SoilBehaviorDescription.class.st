@@ -81,6 +81,11 @@ SoilBehaviorDescription >> classLayout [
 	^ classLayout
 ]
 
+{ #category : #versions }
+SoilBehaviorDescription >> clearCurrent [
+	current := nil
+]
+
 { #category : #testing }
 SoilBehaviorDescription >> compatibilityCheck: aClassLayout [
 
