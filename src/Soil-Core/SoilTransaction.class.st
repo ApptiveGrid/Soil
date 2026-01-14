@@ -337,7 +337,7 @@ SoilTransaction >> initialize [
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
 	indexes := Dictionary new.
-	indexUpdatesToCommit := OrderedCollection new
+	indexUpdatesToCommit := Set new
 ]
 
 { #category : #api }
