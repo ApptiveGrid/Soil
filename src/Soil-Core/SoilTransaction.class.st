@@ -54,6 +54,11 @@ SoilTransaction >> addClusterObject: anObject [
 ]
 
 { #category : #adding }
+SoilTransaction >> addIndexUpdate: anIndex [
+	indexUpdatesToCommit add: anIndex
+]
+
+{ #category : #adding }
 SoilTransaction >> addJournalEntry: anEntry [ 
 	self journal addEntry: anEntry 
 ]

@@ -338,6 +338,11 @@ SoilMaterializer >> registerObject: anObject [
 ]
 
 { #category : #accessing }
+SoilMaterializer >> segment [ 
+	^ externalObjectRegistry objectId segment 
+]
+
+{ #category : #accessing }
 SoilMaterializer >> soil [
 
 	^ soil
@@ -352,6 +357,11 @@ SoilMaterializer >> soil: anObject [
 { #category : #accessing }
 SoilMaterializer >> stream [
 	^stream
+]
+
+{ #category : #accessing }
+SoilMaterializer >> transaction [ 
+	^ transaction
 ]
 
 { #category : #accessing }

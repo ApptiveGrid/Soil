@@ -178,8 +178,8 @@ SoilSerializer >> notSupportedError: anObject [
 ]
 
 { #category : #registry }
-SoilSerializer >> registerIndexId: aString [ 
-	externalObjectRegistry registerIndexId: aString
+SoilSerializer >> registerIndex: anIndex [ 
+	externalObjectRegistry registerIndex: anIndex
 ]
 
 { #category : #registry }
