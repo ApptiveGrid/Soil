@@ -162,9 +162,7 @@ SoilIndexIteratorTest >> testAt [
 
 { #category : #tests }
 SoilIndexIteratorTest >> testAtAdd [
-
 	| iterator return |
-	index uniqueKeys ifFalse: [ self skip ].
 	
 	"at:put: returns last prior value"
 	iterator := index newIterator.
@@ -172,10 +170,13 @@ SoilIndexIteratorTest >> testAtAdd [
 	self assert: return isNil.
 	self assertSoilDuplicate: (iterator at: 1) equals: 1 asDummySoilObjectId.
 	return := iterator at: 1 add: 2 asDummySoilObjectId.
-	uniqueKeys ifTrue: [
-		"with duplicate keys, we do not return the old value"
-		self assert: return equals: 1 asDummySoilObjectId].
-	self assertSoilDuplicate: (iterator at: 1) equals: 2 asDummySoilObjectId
+	uniqueKeys 
+		ifTrue: [
+			self assert: return equals: 1 asDummySoilObjectId.
+			self assert: (iterator at: 1) equals: 2 asDummySoilObjectId]
+		ifFalse: [ 
+			"with duplicate keys, we do not return the old value"
+			self assertCollection: (iterator at: 1) hasSameElements: {1 asDummySoilObjectId. 2 asDummySoilObjectId}]
 ]
 
 { #category : #tests }
