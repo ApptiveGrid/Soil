@@ -19,7 +19,8 @@ Class {
 		'id',
 		'transaction',
 		'index',
-		'segment'
+		'segment',
+		'dirty'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -31,7 +32,7 @@ SoilIndexedDictionary class >> newWithBackend: aClass [
 
 { #category : #accessing }
 SoilIndexedDictionary class >> soilTransientInstVars [ 
-	^ #( index transaction segment)
+	^ #( index segment dirty transaction )
 ]
 
 { #category : #accessing }
@@ -58,12 +59,13 @@ SoilIndexedDictionary >> at: key put: anObject [
 		oldValue := value ].
 
 	transaction addJournalEntry: (SoilAddKeyEntry new
-			 segment: self segment;
+			 segment: segment;
 			 id: id;
 			 key: (index indexKey: key);
 			 value: objectId;
 			 oldValue: oldValue).
 
+	self indexUpdated.
 	^ objectId
 ]
 
@@ -123,10 +125,18 @@ SoilIndexedDictionary >> index [
 	^ index
 ]
 
+{ #category : #accessing }
+SoilIndexedDictionary >> indexUpdated [ 
+	dirty ifFalse: [  
+		dirty := true.
+		transaction addIndexUpdate: self ].
+]
+
 { #category : #initialization }
 SoilIndexedDictionary >> initialize [ 
 	super initialize.
-	id := UUID new asString36
+	id := UUID new asString36.
+	dirty := false
 ]
 
 { #category : #testing }
@@ -205,7 +215,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 	oldValue := self newIterator removeKey: key ifAbsent: [^ aBlock value].
 
 	transaction addJournalEntry: (SoilRemoveKeyEntry new 
-			segment: self segment;
+			segment: segment;
 			id: id;
 			key: (index indexKey: key); 
 			oldValue: oldValue asSoilObjectId ) .
@@ -256,8 +266,13 @@ SoilIndexedDictionary >> second [
 
 { #category : #journal }
 SoilIndexedDictionary >> segment [
-	^ segment ifNil: [
-		segment := (transaction objectIdOf: self) segment ]
+	^ segment 
+]
+
+{ #category : #accessing }
+SoilIndexedDictionary >> segment: anObject [
+
+	segment := anObject
 ]
 
 { #category : #accessing }
@@ -269,7 +284,7 @@ SoilIndexedDictionary >> size [
 { #category : #serializing }
 SoilIndexedDictionary >> soilBasicSerialize: aSerializer [
 	super soilBasicSerialize: aSerializer.
-	aSerializer registerIndexId: id
+	aSerializer registerIndex: self
 ]
 
 { #category : #serializing }
@@ -294,7 +309,10 @@ SoilIndexedDictionary >> soilMaterialized: aMaterializer [
 	"connect the global index at materialization time when we
 	know the cluster root which defines the location of the index.
 	Store a copy-on-write version so all changes are per transaction"
-	index := (aMaterializer indexAt: id) asCopyOnWrite
+	transaction := aMaterializer transaction.
+	segment := aMaterializer segment.
+	index := (aMaterializer indexAt: id) asCopyOnWrite.
+	dirty := false
 ]
 
 { #category : #accessing }
