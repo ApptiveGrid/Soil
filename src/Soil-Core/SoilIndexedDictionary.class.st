@@ -17,7 +17,9 @@ Class {
 		'index',
 		'newValues',
 		'removedValues',
-		'oldValues'
+		'oldValues',
+		'dirty',
+		'segment'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -30,7 +32,7 @@ SoilIndexedDictionary class >> isAbstract [
 
 { #category : #accessing }
 SoilIndexedDictionary class >> soilTransientInstVars [ 
-	^ #( index transaction newValues removedValues oldValues)
+	^ #( index dirty segment transaction newValues removedValues oldValues  )
 ]
 
 { #category : #accessing }
@@ -58,6 +60,7 @@ SoilIndexedDictionary >> at: key put: anObject [
 			ifAbsentPut: objectId ].
 	"if there has been a prior removal of the key this new addition invalidates it"
 	removedValues removeKey: key ifAbsent: nil.
+	self indexUpdated.
 	^ newValues at: key put: objectId
 
 ]
@@ -115,6 +118,13 @@ SoilIndexedDictionary >> index [
 	^ index
 ]
 
+{ #category : #accessing }
+SoilIndexedDictionary >> indexUpdated [
+	dirty ifFalse: [ 
+		dirty := true.
+		transaction addIndexUpdate: self ].
+]
+
 { #category : #initialization }
 SoilIndexedDictionary >> initialize [ 
 	super initialize.
@@ -123,6 +133,7 @@ SoilIndexedDictionary >> initialize [
 	removedValues := OrderedDictionary new.
 	id := UUID new asString36.
 	index := self createIndex.
+	dirty := false
 ]
 
 { #category : #testing }
@@ -137,13 +148,10 @@ SoilIndexedDictionary >> isRegistered [
 
 { #category : #journal }
 SoilIndexedDictionary >> journalEntries [
-	| entries segment |
+	| entries |
 	entries := OrderedCollection new.
-	segment := (transaction objectIdOf: self) segment.
 	self isRegistered ifFalse: [
 		entries add: (index newIndexEntryClass new 
-			transactionId: transaction writeVersion;
-			segment: segment;
 			id: id;
 			maxLevel: index maxLevel;
 			keySize: index keySize;
@@ -151,8 +159,6 @@ SoilIndexedDictionary >> journalEntries [
 	newValues keysAndValuesDo: [ :key :value |
 		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
 		entries add: (SoilAddKeyEntry new 
-			transactionId: transaction writeVersion;
-			segment: segment;
 			id: id;
 			key: (index indexKey: key);
 			value: value;
@@ -160,8 +166,6 @@ SoilIndexedDictionary >> journalEntries [
 	removedValues keysAndValuesDo: [ :key :value |
 		value isInitialized ifFalse: [ SoilIndexOutOfRange signal: 'objectId needs to be initialized before written to journal' ].
 		entries add: (SoilRemoveKeyEntry new 
-			transactionId: transaction writeVersion;
-			segment: segment;
 			id: id;
 			key: (index indexKey: key); 
 			oldValue: value) ].
@@ -249,6 +253,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 		removedValues 
 			at: key 
 			put: v asSoilObjectId ].
+	self indexUpdated.
 	^v
 ]
 
@@ -269,6 +274,16 @@ SoilIndexedDictionary >> second [
 ]
 
 { #category : #accessing }
+SoilIndexedDictionary >> segment [
+	^ segment 
+]
+
+{ #category : #accessing }
+SoilIndexedDictionary >> segment: anInteger [ 
+	segment := anInteger
+]
+
+{ #category : #accessing }
 SoilIndexedDictionary >> size [ 
 	^ self newIterator size
 
@@ -280,7 +295,7 @@ SoilIndexedDictionary >> soilBasicSerialize: aSerializer [
 		transaction := aSerializer transaction.
 		self prepareNewValues ].
 	super soilBasicSerialize: aSerializer.
-	aSerializer registerIndexId: id.
+	aSerializer registerIndex: self.
 ]
 
 { #category : #serializing }
@@ -299,20 +314,18 @@ SoilIndexedDictionary >> soilClusterRootIn: aTransaction [
 ]
 
 { #category : #serializing }
-SoilIndexedDictionary >> soilLoadedIn: aTransaction [
-	transaction := aTransaction.
-	"when being materialized newValues is not initialized so we do it here"
-	newValues := Dictionary new.
-	removedValues := Dictionary new.
-	oldValues := Dictionary new
-]
-
-{ #category : #serializing }
 SoilIndexedDictionary >> soilMaterialized: aMaterializer [
 	"connect the global index at materialization time when we
 	know the cluster root which defines the location of the index.
 	Store a copy-on-write version so all changes are per transaction"
-	index := (aMaterializer indexAt: id) asCopyOnWrite
+	transaction := aMaterializer transaction.
+	segment := aMaterializer segment.
+	"when being materialized newValues is not initialized so we do it here"
+	newValues := Dictionary new.
+	removedValues := Dictionary new.
+	oldValues := Dictionary new.
+	index := (aMaterializer indexAt: id) asCopyOnWrite.
+	dirty := false
 ]
 
 { #category : #accessing }

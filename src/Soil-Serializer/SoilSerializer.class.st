@@ -6,7 +6,8 @@ Class {
 		'transaction',
 		'objectIdTable',
 		'externalObjectRegistry',
-		'soil'
+		'soil',
+		'indexes'
 	],
 	#category : #'Soil-Serializer-Serializer/Materializer'
 }
@@ -178,8 +179,10 @@ SoilSerializer >> notSupportedError: anObject [
 ]
 
 { #category : #registry }
-SoilSerializer >> registerIndexId: aString [ 
-	externalObjectRegistry registerIndexId: aString
+SoilSerializer >> registerIndex: anIndex [ 
+	indexes ifNil: [ indexes := OrderedCollection new ].
+	indexes add: anIndex.
+	externalObjectRegistry registerIndex: anIndex 
 ]
 
 { #category : #registry }
@@ -219,6 +222,10 @@ SoilSerializer >> serialize: anObject [
 	objectToSerialize := anObject soilSerializationReplacement.
 	clusterRoot := objectToSerialize.
 	clusterRoot soilSerialize: self.
+	indexes ifNotNil: [  
+		indexes do: [ :index |
+			index hasIndexUpdates ifTrue: [ 
+				externalObjectRegistry addIndexUpdate: index ] ] ].
 	stream flush.
 	^ stream contents
 ]

@@ -330,12 +330,22 @@ SoilMaterializer >> nextWideString [
 	^ self registerObject: super nextWideString 
 ]
 
+{ #category : #accessing }
+SoilMaterializer >> objectId [
+	^ externalObjectRegistry objectId 
+]
+
 { #category : #registry }
 SoilMaterializer >> registerObject: anObject [
 	soil ifNotNil: [  
 		soil notificationHandler objectMaterialized: anObject ].
 	objects add: anObject.
 	^ anObject 
+]
+
+{ #category : #accessing }
+SoilMaterializer >> segment [
+	^ externalObjectRegistry objectId segment 
 ]
 
 { #category : #accessing }
@@ -353,6 +363,11 @@ SoilMaterializer >> soil: anObject [
 { #category : #accessing }
 SoilMaterializer >> stream [
 	^stream
+]
+
+{ #category : #accessing }
+SoilMaterializer >> transaction [
+	^ transaction
 ]
 
 { #category : #accessing }

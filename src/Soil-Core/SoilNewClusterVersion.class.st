@@ -9,6 +9,11 @@ Class {
 }
 
 { #category : #adding }
+SoilNewClusterVersion >> addIndexUpdate: anIndex [
+	transaction addIndexUpdate: anIndex 
+]
+
+{ #category : #adding }
 SoilNewClusterVersion >> addObject: anObject reference: anObjectId [
 	externalObjects add: anObject.
 	self addReference: anObjectId
