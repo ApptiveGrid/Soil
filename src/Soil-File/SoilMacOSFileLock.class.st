@@ -1,5 +1,5 @@
 Class {
-	#name : #MacOSFileLock,
+	#name : #SoilMacOSFileLock,
 	#superclass : #FFIStructure,
 	#classVars : [
 		'F_GETFL',
@@ -26,7 +26,7 @@ Class {
 }
 
 { #category : #testing }
-MacOSFileLock class >> canLock: fileHandle from: start to: length exclusive: exclusive [
+SoilMacOSFileLock class >> canLock: fileHandle from: start to: length exclusive: exclusive [
 	| lock result |
 	
 	lock := self newLockExclusive: exclusive start: start length: length.
@@ -40,15 +40,15 @@ MacOSFileLock class >> canLock: fileHandle from: start to: length exclusive: exc
 ]
 
 { #category : #private }
-MacOSFileLock class >> fcntl: fd command: cmd struct: struct [
+SoilMacOSFileLock class >> fcntl: fd command: cmd struct: struct [
 	^ self 
-		ffiCall: #(int fcntl(int fd, int cmd, MacOSFileLock *struct)) 
+		ffiCall: #(int fcntl(int fd, int cmd, #SoilMacOSFileLock *struct)) 
 		library: LibC
 		fixedArgumentCount: 2
 ]
 
 { #category : #private }
-MacOSFileLock class >> fcntl: fd command: cmd value: value [
+SoilMacOSFileLock class >> fcntl: fd command: cmd value: value [
 
 	^ self 
 		ffiCall: #(int fcntl(int fd, int cmd, ulong value))
@@ -57,7 +57,7 @@ MacOSFileLock class >> fcntl: fd command: cmd value: value [
 ]
 
 { #category : #'field definition' }
-MacOSFileLock class >> fieldsDesc [
+SoilMacOSFileLock class >> fieldsDesc [
 	"self rebuildFieldAccessors"
 
 	^ #(
@@ -70,7 +70,7 @@ MacOSFileLock class >> fieldsDesc [
 ]
 
 { #category : #private }
-MacOSFileLock class >> fileno: stream [
+SoilMacOSFileLock class >> fileno: stream [
 
 	^ self 
 		ffiCall: #(int fileno("FILE *"void *stream))
@@ -78,7 +78,7 @@ MacOSFileLock class >> fileno: stream [
 ]
 
 { #category : #private }
-MacOSFileLock class >> flock: fd operation: operation [
+SoilMacOSFileLock class >> flock: fd operation: operation [
 
 	^ self 
 		ffiCall: #(int flock(int fd, int operation))
@@ -86,13 +86,13 @@ MacOSFileLock class >> flock: fd operation: operation [
 ]
 
 { #category : #private }
-MacOSFileLock class >> getpid [
+SoilMacOSFileLock class >> getpid [
 
 	^ self ffiCall: #(__pid_t getpid()) module: LibC
 ]
 
 { #category : #'class initialization' }
-MacOSFileLock class >> initialize [
+SoilMacOSFileLock class >> initialize [
 
 	__off64_t := FFIUInt64.
 	__pid_t := FFIUInt32.
@@ -116,7 +116,7 @@ MacOSFileLock class >> initialize [
 ]
 
 { #category : #'accessing locking' }
-MacOSFileLock class >> lock: fileHandle from: start length: length [
+SoilMacOSFileLock class >> lock: fileHandle from: start length: length [
 	
 	^ self 
 		lock: fileHandle 
@@ -126,7 +126,7 @@ MacOSFileLock class >> lock: fileHandle from: start length: length [
 ]
 
 { #category : #'accessing locking' }
-MacOSFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
+SoilMacOSFileLock class >> lock: fileHandle from: start length: length exclusive: exclusive [
 	| lock result |
 	
 	lock := self newLockExclusive: exclusive start: start length: length.
@@ -139,7 +139,7 @@ MacOSFileLock class >> lock: fileHandle from: start length: length exclusive: ex
 ]
 
 { #category : #'accessing locking' }
-MacOSFileLock class >> lock: fileHandle from: start to: length exclusive: exclusive [
+SoilMacOSFileLock class >> lock: fileHandle from: start to: length exclusive: exclusive [
 	| lock result |
 	
 	lock := self newLockExclusive: exclusive start: start length: length.
@@ -152,7 +152,7 @@ MacOSFileLock class >> lock: fileHandle from: start to: length exclusive: exclus
 ]
 
 { #category : #'instance creation' }
-MacOSFileLock class >> newLockExclusive: exclusive start: start length: length [
+SoilMacOSFileLock class >> newLockExclusive: exclusive start: start length: length [
 	
 	^ self 
 		newType: (exclusive ifTrue: [ F_WRLCK ] ifFalse: [ F_RDLCK ])
@@ -161,7 +161,7 @@ MacOSFileLock class >> newLockExclusive: exclusive start: start length: length [
 ]
 
 { #category : #'instance creation' }
-MacOSFileLock class >> newType: type start: start length: length [
+SoilMacOSFileLock class >> newType: type start: start length: length [
 	
 	^ self new 
 		l_type: type;
@@ -173,7 +173,7 @@ MacOSFileLock class >> newType: type start: start length: length [
 ]
 
 { #category : #'instance creation' }
-MacOSFileLock class >> newUnlockStart: start length: length [
+SoilMacOSFileLock class >> newUnlockStart: start length: length [
 	
 	^ self 
 		newType: F_UNLCK
@@ -182,7 +182,7 @@ MacOSFileLock class >> newUnlockStart: start length: length [
 ]
 
 { #category : #accessing }
-MacOSFileLock class >> setNonBlock: fileHandle [
+SoilMacOSFileLock class >> setNonBlock: fileHandle [
 	| fd flags |
 	
 	fd := self fileno: fileHandle.
@@ -192,7 +192,7 @@ MacOSFileLock class >> setNonBlock: fileHandle [
 ]
 
 { #category : #'accessing locking' }
-MacOSFileLock class >> unlock: fileHandle from: start length: length [
+SoilMacOSFileLock class >> unlock: fileHandle from: start length: length [
 	| lock result |
 	
 	lock := self newUnlockStart: start length: length.
@@ -205,67 +205,67 @@ MacOSFileLock class >> unlock: fileHandle from: start length: length [
 ]
 
 { #category : #'accessing - structure variables' }
-MacOSFileLock >> l_len [
+SoilMacOSFileLock >> l_len [
 	"This method was automatically generated"
 	^handle unsignedLongLongAt: OFFSET_L_LEN
 ]
 
 { #category : #'accessing - structure variables' }
-MacOSFileLock >> l_len: anObject [
+SoilMacOSFileLock >> l_len: anObject [
 	"This method was automatically generated"
 	handle unsignedLongLongAt: OFFSET_L_LEN put: anObject
 ]
 
 { #category : #'accessing - structure variables' }
-MacOSFileLock >> l_pid [
+SoilMacOSFileLock >> l_pid [
 	"This method was automatically generated"
 	^handle unsignedLongAt: OFFSET_L_PID
 ]
 
 { #category : #'accessing - structure variables' }
-MacOSFileLock >> l_pid: anObject [
+SoilMacOSFileLock >> l_pid: anObject [
 	"This method was automatically generated"
 	handle unsignedLongAt: OFFSET_L_PID put: anObject
 ]
 
 { #category : #'accessing - structure variables' }
-MacOSFileLock >> l_start [
+SoilMacOSFileLock >> l_start [
 	"This method was automatically generated"
 	^handle unsignedLongLongAt: OFFSET_L_START
 ]
 
 { #category : #'accessing - structure variables' }
-MacOSFileLock >> l_start: anObject [
+SoilMacOSFileLock >> l_start: anObject [
 	"This method was automatically generated"
 	handle unsignedLongLongAt: OFFSET_L_START put: anObject
 ]
 
 { #category : #'accessing - structure variables' }
-MacOSFileLock >> l_type [
+SoilMacOSFileLock >> l_type [
 	"This method was automatically generated"
 	^handle signedLongAt: OFFSET_L_TYPE
 ]
 
 { #category : #'accessing - structure variables' }
-MacOSFileLock >> l_type: anObject [
+SoilMacOSFileLock >> l_type: anObject [
 	"This method was automatically generated"
 	handle signedLongAt: OFFSET_L_TYPE put: anObject
 ]
 
 { #category : #'accessing - structure variables' }
-MacOSFileLock >> l_whence [
+SoilMacOSFileLock >> l_whence [
 	"This method was automatically generated"
 	^handle signedLongAt: OFFSET_L_WHENCE
 ]
 
 { #category : #'accessing - structure variables' }
-MacOSFileLock >> l_whence: anObject [
+SoilMacOSFileLock >> l_whence: anObject [
 	"This method was automatically generated"
 	handle signedLongAt: OFFSET_L_WHENCE put: anObject
 ]
 
 { #category : #printing }
-MacOSFileLock >> printOn: aStream [ 
+SoilMacOSFileLock >> printOn: aStream [ 
 	"Append to the argument, aStream, the names and values of all the record's variables."
 
 	aStream nextPutAll: self class name; nextPutAll: ' ( '; cr.
