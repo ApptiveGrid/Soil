@@ -59,7 +59,7 @@ SoilIndexedDictionary >> at: key put: anObject [
 		oldValue := value ].
 
 	transaction addJournalEntry: (SoilAddKeyEntry new
-			 segment: segment;
+			 segment: [ self segment ];
 			 id: id;
 			 key: (index indexKey: key);
 			 value: objectId;
@@ -215,7 +215,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 	oldValue := self newIterator removeKey: key ifAbsent: [^ aBlock value].
 
 	transaction addJournalEntry: (SoilRemoveKeyEntry new 
-			segment: segment;
+			segment: [ self segment ];
 			id: id;
 			key: (index indexKey: key); 
 			oldValue: oldValue asSoilObjectId ) .
@@ -240,7 +240,7 @@ SoilIndexedDictionary >> removeKey: key value: value ifAbsent: aBlock [
 		ifAbsent: [^ aBlock value].
 
 	transaction addJournalEntry: (SoilRemoveKeyEntry new 
-			segment: self segment;
+			segment: [ self segment ];
 			id: id;
 			key: (index indexKey: key); 
 			oldValue: oldValue asSoilObjectId ) .

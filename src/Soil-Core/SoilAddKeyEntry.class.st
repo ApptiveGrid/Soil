@@ -23,7 +23,7 @@ SoilAddKeyEntry >> address [
 SoilAddKeyEntry >> commitIn: soil [
 
 	| index |
-	index := (soil objectRepository segmentAt: segment) indexAt: id.
+	index := (soil objectRepository segmentAt: self segment) indexAt: id.
 	index newIterator
 		at: key add: value;
 		updateCurrentTransaction: transactionId
