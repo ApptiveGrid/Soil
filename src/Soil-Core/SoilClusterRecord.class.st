@@ -192,6 +192,7 @@ SoilClusterRecord >> references: aCollection [
 
 { #category : #accessing }
 SoilClusterRecord >> registerIndex: anIndex [ 
+	anIndex segment: objectId segment.
 	(indexIds includes: anIndex id) ifFalse: [ 
 		indexIds add: anIndex id ]
 ]

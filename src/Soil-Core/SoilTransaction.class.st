@@ -55,8 +55,8 @@ SoilTransaction >> addClusterObject: anObject [
 ]
 
 { #category : #adding }
-SoilTransaction >> addIndexUpdate: anIndex segment: segment [ 
-	indexUpdatesToCommit at: anIndex put: segment 
+SoilTransaction >> addIndexUpdate: anIndex [
+	indexUpdatesToCommit add: anIndex 
 ]
 
 { #category : #adding }
@@ -116,8 +116,8 @@ SoilTransaction >> basicCommit [
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
-		indexUpdatesToCommit keysAndValuesDo: [:indexDict :segment | 
-			self updatedIndexDictionary: indexDict segment: segment ] .
+		indexUpdatesToCommit do: [:indexDict  | 
+			self updatedIndex: indexDict  ] .
 		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
@@ -213,10 +213,10 @@ SoilTransaction >> buildJournal [
 		record version: writeVersion.
 		journal addEntries: (record asJournalEntry do: [:each | each transactionId: writeVersion ]).
 		record committed  ].
-	indexUpdatesToCommit keysAndValuesDo: [ :index :segment | 
+	indexUpdatesToCommit do: [ :index  | 
 		index journalEntries do: [ :entry |
 			entry 
-				segment: segment;
+				segment: index segment;
 				transactionId: self writeVersion.
 			journal addEntry: entry ] ].
 	"for all new objects with a new behavior we create an entry to
@@ -337,7 +337,7 @@ SoilTransaction >> initialize [
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
 	indexes := Dictionary new.
-	indexUpdatesToCommit := Dictionary new
+	indexUpdatesToCommit := OrderedCollection new
 ]
 
 { #category : #api }
@@ -651,9 +651,9 @@ SoilTransaction >> transactionManager [
 ]
 
 { #category : #indexes }
-SoilTransaction >> updatedIndexDictionary: indexedDictionary segment: segmentNo [
+SoilTransaction >> updatedIndex: indexedDictionary [ 
 	| segment realIndex |
-	segment := self segmentAt: segmentNo.
+	segment := self segmentAt: indexedDictionary segment.
 	"when indexed dictionaries created the first time the journal creates the 
 	real index with path. In this case we request the real index from the index
 	manager"

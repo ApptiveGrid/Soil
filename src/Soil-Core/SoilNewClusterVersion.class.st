@@ -10,11 +10,7 @@ Class {
 
 { #category : #adding }
 SoilNewClusterVersion >> addIndexUpdate: anIndex [
-	| segment |
-	segment := (transaction objectIdOf: anIndex)
-		ifNotNil: [ :oid | oid segment ]
-		ifNil: [ self segment ]. 
-	transaction addIndexUpdate: anIndex  segment: segment
+	transaction addIndexUpdate: anIndex 
 ]
 
 { #category : #adding }
