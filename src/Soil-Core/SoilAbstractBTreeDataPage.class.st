@@ -90,16 +90,23 @@ SoilAbstractBTreeDataPage >> initialize [
 { #category : #adding }
 SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 
-	| newPage pageWithItem returnValue return |
+	| newPage pageWithItem returnValue return keyIndex |
+
+	iterator index addDirtyPage: self.
 
 	return := SoilBTreeReturnWrapper new returnValue: (self valueAt: anItem key).
-	iterator index hasUniqueKeys
-		ifTrue: [ 
-			returnValue := self valueAt: anItem key.
-			self addItem: anItem]
-		ifFalse: [ 
-			returnValue := nil.
-			self addItemDuplicate: anItem].
+	
+	keyIndex := iterator index hasUniqueKeys 
+		ifTrue: [ self itemIndexForKey: anItem key ] 
+		ifFalse: [ self itemIndexForKey: anItem key value: anItem value ]. 
+	returnValue := self valueAt: anItem key.
+	keyIndex > 0
+		ifTrue: [
+			"overwriting a key does not change the size of an index"
+			(self itemAt: anItem key put: anItem value)  ]
+		ifFalse: [
+			iterator index increaseSize. 
+			iterator index hasUniqueKeys ifTrue: [self addItem: anItem] ifFalse:  [self addItemDuplicate: anItem]  ].
 	return := SoilBTreeReturnWrapper new returnValue: returnValue.
 
 	self hasRoom ifTrue: [  iterator currentPage: self. ^ return ].

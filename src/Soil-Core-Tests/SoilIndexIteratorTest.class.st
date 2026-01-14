@@ -68,7 +68,6 @@ SoilIndexIteratorTest >> testAddRandom [
 
 	| iterator numEntries entries |
 	"just some random adding and checking that we can find it, configured to create lots of pages"
-	(uniqueKeys not and: [ index isBTree not ]) ifTrue: [ self skip ].
 	
 	iterator := index newIterator.
 
@@ -82,11 +81,9 @@ SoilIndexIteratorTest >> testAddRandom [
 		iterator at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
 
 	"check size"
-	uniqueKeys 
-		ifTrue:  [ self assert: iterator size equals: entries asSet size ]
-		ifFalse: [ self assert: iterator size equals: entries size ].
+	self assert: iterator size equals: entries asSet size.
+	self assert: index size equals: entries asSet size.
 
-	
 	"can we find all the keys we added?"
 	entries do: [ :each |
 		self assertSoilDuplicate: (iterator at: each) equals: (each asByteArrayOfSize: 8) ].
@@ -117,8 +114,9 @@ SoilIndexIteratorTest >> testAddingDuplicateKeyAcrossPages [
 		iterator at: 1 add: (capacity + n) asDummySoilObjectId ].
 	
 	self deny: page identicalTo: iterator currentPage.
-	
+	self assert: iterator size equals: capacity*2.
 	self assert: index size equals: capacity*2.
+	
 	elements := iterator at: 1.
 	"we can ask for all values"
 	self assertCollection: elements hasSameElements: ids
@@ -164,9 +162,7 @@ SoilIndexIteratorTest >> testAt [
 
 { #category : #tests }
 SoilIndexIteratorTest >> testAtAdd [
-
 	| iterator return |
-	index uniqueKeys ifFalse: [ self skip ].
 	
 	"at:put: returns last prior value"
 	iterator := index newIterator.
@@ -174,10 +170,13 @@ SoilIndexIteratorTest >> testAtAdd [
 	self assert: return isNil.
 	self assertSoilDuplicate: (iterator at: 1) equals: 1 asDummySoilObjectId.
 	return := iterator at: 1 add: 2 asDummySoilObjectId.
-	uniqueKeys ifTrue: [
-		"with duplicate keys, we do not return the old value"
-		self assert: return equals: 1 asDummySoilObjectId].
-	self assertSoilDuplicate: (iterator at: 1) equals: 2 asDummySoilObjectId
+	uniqueKeys 
+		ifTrue: [
+			self assert: return equals: 1 asDummySoilObjectId.
+			self assert: (iterator at: 1) equals: 2 asDummySoilObjectId]
+		ifFalse: [ 
+			"with duplicate keys, we do not return the old value"
+			self assertCollection: (iterator at: 1) hasSameElements: {1 asDummySoilObjectId. 2 asDummySoilObjectId}]
 ]
 
 { #category : #tests }
