@@ -87,9 +87,7 @@ SoilIndex >> at: aKeyObject add: anObject [
 
 { #category : #accessing }
 SoilIndex >> at: anObject ifAbsent: aBlock [
-	^ (self find: anObject) 
-		ifNotNil: [:node | node value ]
-		ifNil: [ aBlock value ] 
+	^ self find: anObject ifAbsent: aBlock
 ]
 
 { #category : #accessing }
@@ -191,6 +189,13 @@ SoilIndex >> do: aBlock [
 SoilIndex >> find: key [ 
 	^ self newIterator 
 		find: key
+]
+
+{ #category : #private }
+SoilIndex >> find: key ifAbsent: aBlock [
+	^ self newIterator 
+		find: key
+		ifAbsent: aBlock
 ]
 
 { #category : #accessing }
