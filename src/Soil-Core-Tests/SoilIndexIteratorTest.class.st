@@ -176,6 +176,7 @@ SoilIndexIteratorTest >> testAtAdd [
 			self assert: (iterator at: 1) equals: 2 asDummySoilObjectId]
 		ifFalse: [ 
 			"with duplicate keys, we do not return the old value"
+			self assert: return equals: nil.
 			self assertCollection: (iterator at: 1) hasSameElements: {1 asDummySoilObjectId. 2 asDummySoilObjectId}]
 ]
 
@@ -946,7 +947,6 @@ SoilIndexIteratorTest >> testRemoveKeyDuplicate [
 SoilIndexIteratorTest >> testRemoveKeyIfAbsent [
 
 	| capacity iterator result |
-	index uniqueKeys ifFalse: [ self skip ].
 	capacity := index headerPage itemCapacity * 2.
 
 	"test empty iterator"
@@ -961,9 +961,9 @@ SoilIndexIteratorTest >> testRemoveKeyIfAbsent [
 	result := iterator removeKey: capacity + 1 ifAbsent: #hello.
 	self assert: result equals: #hello.
 	result := iterator removeKey: 1 ifAbsent: [ #hello ].
-	self assert: result equals: (1 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: result equals: (1 asByteArrayOfSize: 8).
 	result := iterator removeKey: capacity ifAbsent: [ #hello ].
-	self assert: result equals: (capacity asByteArrayOfSize: 8).
+	self assertSoilDuplicate: result equals: (capacity asByteArrayOfSize: 8).
 	"removing the key again executes absent block"
 	result := iterator removeKey: capacity ifAbsent: [ #hello ].
 	self assert: result equals: #hello

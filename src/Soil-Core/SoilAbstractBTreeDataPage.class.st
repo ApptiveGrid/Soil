@@ -106,7 +106,7 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 			(self itemAt: anItem key put: anItem value)  ]
 		ifFalse: [
 			iterator index increaseSize. 
-			iterator index hasUniqueKeys ifTrue: [self addItem: anItem] ifFalse:  [self addItemDuplicate: anItem]  ].
+			iterator index hasUniqueKeys ifTrue: [self addItem: anItem] ifFalse:  [self addItemDuplicate: anItem. returnValue := nil ]  ].
 	return := SoilBTreeReturnWrapper new returnValue: returnValue.
 
 	self hasRoom ifTrue: [  iterator currentPage: self. ^ return ].
