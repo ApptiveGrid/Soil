@@ -332,7 +332,7 @@ SoilBTreeTest >> testFirst [
 
 { #category : #tests }
 SoilBTreeTest >> testFreePageAdd [
-
+	"This tests free page reuse after iterator based remove and cleanup"
 	| iterator |
 	iterator := index newIterator.
 	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
@@ -353,7 +353,7 @@ SoilBTreeTest >> testFreePageAdd [
 
 { #category : #tests }
 SoilBTreeTest >> testFreePageAddAndDelete [
-
+	"This tests free page reuse after iterator based remove and cleanup"
 	| iterator |
 	uniqueKeys ifFalse: [ ^self ]. "test foruniqueKeys only"
 	iterator := index newIterator.
@@ -372,7 +372,8 @@ SoilBTreeTest >> testFreePageAddAndDelete [
 
 { #category : #tests }
 SoilBTreeTest >> testFreePageAddNested [
-
+	"This tests free page reuse after iterator based remove and cleanup"
+	
 	| iterator nestedFreeIndexes |
 	index
 		maxLevel: 8;
@@ -404,7 +405,8 @@ SoilBTreeTest >> testFreePageAddNested [
 
 { #category : #tests }
 SoilBTreeTest >> testFreePageReuse [
-
+	"This tests free page reuse after iterator based remove and cleanup"
+	
 	| iterator |
 	iterator := index newIterator.
 	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
@@ -416,8 +418,8 @@ SoilBTreeTest >> testFreePageReuse [
 	2501 to: 2750 + 250 do: [ :n |
 	iterator at: n add: (n asByteArrayOfSize: 8) ].
 	index cleanUpToVersion: nil.
-	"first free page is #6 with content #( 9 10 11 12 ). Adding 500 entries should remove 
-	two pages for reuse"
+	"first free page is #6 with content #( 9 10 11 12 ). 
+	Adding 500 entries should remove two pages for reuse"
 	self
 		assertCollection: (index store pageAt: 6) pageIndexes
 		hasSameElements: #( 11 12 )
@@ -425,7 +427,7 @@ SoilBTreeTest >> testFreePageReuse [
 
 { #category : #tests }
 SoilBTreeTest >> testFreePageReuseAtEndAppend [
-
+	"This tests free page reuse after iterator based remove and cleanup"
 	| iterator |
 	iterator := index newIterator.
 	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
@@ -709,7 +711,7 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 	entries do: [ :entry |
 		| removed |
 		removed := index removeKey: entry.
-		self assert: removed equals: (removed asByteArrayOfSize: 8).
+		self assertSoilDuplicate: removed equals: (entry asByteArrayOfSize: 8).
 		remainingEntries remove: entry.
 		"check that all remaining entries can be found"
 		remainingEntries do: [ :each |
@@ -737,6 +739,24 @@ SoilBTreeTest >> testRemoveKey [
 	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
 
 	removed := index removeKey: 20.
+	self assertSoilDuplicate: removed equals: (20 asByteArrayOfSize: 8).
+
+	self assertSoilDuplicate: (index at: 1) equals: (1 asByteArrayOfSize: 8).
+	self
+		assertSoilDuplicate: (index at: capacity)
+		equals: (capacity asByteArrayOfSize: 8).
+	self should: [ index at: 20 ] raise: KeyNotFound.
+	self should: [ index removeKey: 20 ] raise: KeyNotFound
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testRemoveKeyValue [
+
+	| capacity removed |
+	capacity := index headerPage itemCapacity.
+	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
+
+	removed := index removeKey: 20 value: (20 asByteArrayOfSize: 8).
 	self assert: removed equals: (20 asByteArrayOfSize: 8).
 
 	self assertSoilDuplicate: (index at: 1) equals: (1 asByteArrayOfSize: 8).
