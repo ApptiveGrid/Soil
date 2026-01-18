@@ -583,7 +583,7 @@ SoilIndexIterator >> removeKey: key value: value ifAbsent: aBlock [
 SoilIndexIterator >> removeKeyAll: key ifAbsent: aBlock [
 	"we remove all the entries for key"
 	| all |
-	all := index at: key ifAbsent: aBlock.
+	all := index at: key ifAbsent: [^ aBlock value].
 	all do: [ :each | self removeKey: key value: each ].
 	^all
 ]
