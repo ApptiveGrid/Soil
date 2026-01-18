@@ -48,7 +48,7 @@ SoilBasicBTree >> basicRemoveKey: key ifAbsent: aBlock [
 { #category : #removing }
 SoilBasicBTree >> basicRemoveKey: key value: aValue [
 		"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work. Caller has to remove the empty page!"
-	^ self removeKey: key value: aValue ifAbsent: nil
+	^ self basicRemoveKey: key value: aValue ifAbsent: nil
 ]
 
 { #category : #removing }
@@ -251,7 +251,7 @@ SoilBasicBTree >> removePage: aPage [
 	self addDirtyPage: previousPage.
 	"now remove all keys, this will update the index pages"
 	
-	aPage items reverseDo: [ :item | item ifNotNil: [self basicRemoveKey: item key]  ].
+	aPage items reverseDo: [ :item | item ifNotNil: [self basicRemoveKey: item key value: item value  ]].
 	"remove the page from the store"
 	store removePageAt: aPage offset.
 	^ aPage 
