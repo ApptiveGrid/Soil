@@ -125,6 +125,23 @@ SoilBTreeIndexPage >> remove: aKey for: aBTree [
 	^ ret
 ]
 
+{ #category : #removing }
+SoilBTreeIndexPage >> removeItem: anItem for: aBTree [
+	| item page ret aKey |
+	
+	aKey := anItem key.
+	item := self findKey: aKey.
+	page := aBTree pageAt: item value.
+	ret := page remove: aKey for: aBTree.
+	"if the key is in the index, we have to update or remove"
+	(self hasKey: aKey) ifTrue: [
+				aBTree addDirtyPage: self.
+				(ret notNil and: [page isNotEmpty])
+					ifTrue: [ item key: page items first key]
+				   ifFalse: [self itemRemoveAt: aKey]].
+	^ ret
+]
+
 { #category : #accessing }
 SoilBTreeIndexPage >> valueSize [
 	"our values are indexes of other pages"
