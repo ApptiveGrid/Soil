@@ -35,6 +35,11 @@ SoilAddKeyEntry >> context [
 ]
 
 { #category : #accessing }
+SoilAddKeyEntry >> getValue [
+	^ value
+]
+
+{ #category : #accessing }
 SoilAddKeyEntry >> key [
 	^ key
 ]
