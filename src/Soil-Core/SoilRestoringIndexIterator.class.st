@@ -51,6 +51,34 @@ SoilRestoringIndexIterator >> historicValueAt: key ifAbsent: absentBlock [
  					ifEmpty: absentBlock]
 ]
 
+{ #category : #private }
+SoilRestoringIndexIterator >> historicValueAt: key value: value ifAbsent: absentBlock [
+ 	"a removed value will return ObjectId 0:0"
+ 	readVersion ifNil: [ ^ absentBlock value ].
+ 	^ (self currentPage isOlderThan: readVersion) 
+ 		ifTrue: [ 
+ 			"all modifications to this page have been done before we
+ 			started the transaction, so the removal is visibile and 
+ 			value absent"
+ 			   absentBlock value ] 
+ 		ifFalse: [ | journalEntries |
+ 			"we determine all changes between our transaction and the
+ 			last one modifying the page. if we get back changes for the
+ 			key the value of the oldes entry has the value it had before"
+			journalEntries := index uniqueKeys 
+				ifTrue: [ self 
+ 					journalEntriesFor: key
+ 					startingAt: self currentPage lastTransaction ]
+				ifFalse: [ self 
+ 					journalEntriesFor: key value: value
+ 					startingAt: self currentPage lastTransaction ].
+			
+ 			journalEntries
+ 					ifNotEmpty: [:entries | 
+						entries last oldValue ifNotNil: [ :old | key -> old ] ]
+ 					ifEmpty: absentBlock]
+]
+
 { #category : #accessing }
 SoilRestoringIndexIterator >> journal: aSoilPersistentDatabaseJournal [ 
 	journal := aSoilPersistentDatabaseJournal 
@@ -72,6 +100,22 @@ SoilRestoringIndexIterator >> journalEntriesFor: key startingAt: anInteger [
 ]
 
 { #category : #accessing }
+SoilRestoringIndexIterator >> journalEntriesFor: key value: value startingAt: anInteger [ 
+	| transactionId entries |
+	entries := OrderedCollection new.
+	transactionId := anInteger.
+	[ transactionId > readVersion ] whileTrue: [  
+		(journal transactionJournalAt: transactionId) entries do: [ :each | 
+			((each class == SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
+			
+				((each key = key) and: [ each getValue = value ]) ifTrue: [ 
+					entries add: each ] ]  ].
+		transactionId := transactionId - 1.
+	].
+   ^ entries
+]
+
+{ #category : #accessing }
 SoilRestoringIndexIterator >> readVersion: anInteger [ 
 	readVersion := anInteger
 ]
@@ -83,13 +127,15 @@ SoilRestoringIndexIterator >> restoreItem: item [
 	item ifNil: [ ^ nil ].
 	newItem :=  item value isRemoved 
 		ifTrue: [
+			"no need to take the value into account as we know it is removed"
 			self 
-				historicValueAt: item key 
+				historicValueAt: item key
 				ifAbsent: [ nil ] ]
 		ifFalse: [
 			"restore a value that has been overwritten by a later transaction"   
 			self 
-				historicValueAt: item key 
+				historicValueAt: item key
+				value: item value
 				ifAbsent: [ item ] ].
 	^ newItem 
 		ifNotNil: [ item key -> newItem value ]

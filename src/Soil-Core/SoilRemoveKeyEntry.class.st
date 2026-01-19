@@ -44,6 +44,11 @@ SoilRemoveKeyEntry >> context [
 ]
 
 { #category : #accessing }
+SoilRemoveKeyEntry >> getValue [
+	^ oldValue
+]
+
+{ #category : #accessing }
 SoilRemoveKeyEntry >> key [
 
 	^ key
