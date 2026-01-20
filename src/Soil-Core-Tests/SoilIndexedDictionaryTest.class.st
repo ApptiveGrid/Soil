@@ -77,7 +77,7 @@ SoilIndexedDictionaryTest >> testAddAndRemoveExistingList [
 
 { #category : #tests }
 SoilIndexedDictionaryTest >> testAddRandom [
-	| tx numEntries entries|
+	| tx numEntries entries result |
 	tx := soil newTransaction.
 	tx root: dict.
 	"just some random adding and checking that we can find it, configured to create lots of pages"
@@ -88,17 +88,27 @@ SoilIndexedDictionaryTest >> testAddRandom [
 	numEntries timesRepeat: [ | toAdd |
 		toAdd := (numEntries*20) atRandom.
 		entries add: toAdd.
-		dict at: toAdd  put: (toAdd asByteArrayOfSize: 8)].
+		dict at: toAdd  put: toAdd asDummySoilObjectId].
 	
 	"check size"
 	self assert: dict size equals: entries size.
 	
 	"can we find all the keys we added?"
-	entries do: [:each | self assert: (dict at: each ) equals: (each asByteArrayOfSize: 8)].
+	entries do: [:each | self assert: (dict at: each ) equals: each asDummySoilObjectId].
 	
 	"iterate index, all should be in entries"
-	dict do: [:each | self assert: each equals: (each asByteArrayOfSize: 8)].
-	dict reverseDo: [:each | self assert: each equals: (each asByteArrayOfSize: 8)]
+	
+	result := OrderedCollection new.
+	"we use do: to iterate over the index"
+	dict do: [ :each |
+		result add: each].
+	
+	entries := (entries collect: #asDummySoilObjectId).
+	result do: [ :each | self assert: (entries includes: each) ].
+	
+	dict reverseDo: [ :each |
+		result add: each].
+	result do: [ :each | self assert: (entries includes: each) ].
 ]
 
 { #category : #tests }
@@ -673,6 +683,31 @@ SoilIndexedDictionaryTest >> testNextCloseTo [
 	self assert: (tx2 root nextCloseTo: #'20') equals: #two.
 	"this is a bit odd, when looking with larger values we get the last one"
 	self assert: (tx2 root nextCloseTo: #'100') equals: #two
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testRecoverAddedKeys [
+	| tx tx2 blockedTx |
+	"We test that added keys are not shown in a prior transaction"
+	tx := soil newTransaction.
+	tx root: dict.
+	dict 
+		at: #testkey1 put: 'one';
+		at: #testkey2 put: 'two';
+		at: #testkey3 put: 'three'.
+	tx commit.
+	
+	blockedTx := soil newTransaction.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	self assert: (tx2 root at: #testkey1) equals: 'one'.
+	tx2 root 
+		at: #testkey4 put: 'four'.
+	tx2 commit.
+	"and test last, note: keyorder"
+	self assert: (blockedTx root at: #testkey1) equals: 'one'.
+	self assert: (blockedTx root at: #testkey4 ifAbsent: #notThere) equals: #notThere
+
 ]
 
 { #category : #tests }
