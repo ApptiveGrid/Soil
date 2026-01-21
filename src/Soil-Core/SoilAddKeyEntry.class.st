@@ -34,11 +34,6 @@ SoilAddKeyEntry >> context [
 	^ id 
 ]
 
-{ #category : #accessing }
-SoilAddKeyEntry >> getValue [
-	^ value
-]
-
 { #category : #testing }
 SoilAddKeyEntry >> isForItem: anItem [
 	^ 	key = anItem key and: [value = anItem value]

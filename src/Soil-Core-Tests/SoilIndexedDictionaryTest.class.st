@@ -730,7 +730,7 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeysAdd [
 		
 	self assert: values class equals: OrderedCollection.
 	self assert: values size equals: 3.
-	tx2 root 	at: #testkey put: 'four'.
+	tx2 root at: #testkey put: 'four'.
 	tx2 commit.
 	"and test last, note: keyorder"
 	self assert: (blockedTx root at: #testkey) size equals: 3.
