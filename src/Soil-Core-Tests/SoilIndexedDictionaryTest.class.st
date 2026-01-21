@@ -705,6 +705,7 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 	tx2 commit.
 	"and test last, note: keyorder"
 	self assert: (blockedTx root at: #testkey) size equals: 3.
+	self assertCollection: (blockedTx root at: #testkey) hasSameElements: #('first' 'second' 'third').
 	
 	"we can now start new transaction and see the state as commited in tx2"
 	tx3 := soil newTransaction.
@@ -712,8 +713,6 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 	self assert: values class equals: OrderedCollection.
 	self assert: values size equals: 1.
 	self assert: values first equals: 'four'
-	
-
 ]
 
 { #category : #tests }
