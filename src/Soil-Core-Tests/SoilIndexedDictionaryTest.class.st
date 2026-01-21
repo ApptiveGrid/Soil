@@ -708,6 +708,34 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeysAdd [
+	| tx tx2 blockedTx values |
+	tx := soil newTransaction.
+	dict index allowDuplicateKeys.
+	tx root: dict.
+	dict 
+		at: #testkey put: 'one';
+		at: #testkey put: 'two';
+		at: #testkey put: 'three'.
+	values := dict at: #testkey.
+	self assert: values class equals: OrderedCollection.
+	self assert: values size equals: 3.
+	tx commit.
+	
+	blockedTx := soil newTransaction.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	values := tx2 root at: #testkey.
+		
+	self assert: values class equals: OrderedCollection.
+	self assert: values size equals: 3.
+	tx2 root 	at: #testkey put: 'four'.
+	tx2 commit.
+	"and test last, note: keyorder"
+	self assert: (blockedTx root at: #testkey) size equals: 3.
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testRemoveKey [
 	| tx tx2 tag return |
 	tx := soil newTransaction.
