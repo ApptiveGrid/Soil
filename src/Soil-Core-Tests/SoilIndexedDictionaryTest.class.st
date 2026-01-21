@@ -677,7 +677,7 @@ SoilIndexedDictionaryTest >> testNextCloseTo [
 
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
-	| tx tx2 blockedTx values |
+	| tx tx2 blockedTx values tx3 |
 	tx := soil newTransaction.
 	dict index allowDuplicateKeys.
 	tx root: dict.
@@ -704,13 +704,21 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 	tx2 root at: #testkey put: 'four'.
 	tx2 commit.
 	"and test last, note: keyorder"
-	self assert: (blockedTx root at: #testkey) size  equals: 3.
+	self assert: (blockedTx root at: #testkey) size equals: 3.
+	
+	"we can now start new transaction and see the state as commited in tx2"
+	tx3 := soil newTransaction.
+	values := tx3 root at: #testkey.
+	self assert: values class equals: OrderedCollection.
+	self assert: values size equals: 1.
+	self assert: values first equals: 'four'
+	
 
 ]
 
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeysAdd [
-	| tx tx2 blockedTx values |
+	| tx tx2 tx3 blockedTx values |
 	tx := soil newTransaction.
 	dict index allowDuplicateKeys.
 	tx root: dict.
@@ -734,6 +742,12 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeysAdd [
 	tx2 commit.
 	"and test last, note: keyorder"
 	self assert: (blockedTx root at: #testkey) size equals: 3.
+	
+	"we can now start new transaction and see the state as commited in tx2"
+	tx3 := soil newTransaction.
+	values := tx3 root at: #testkey.
+	self assert: values class equals: OrderedCollection.
+	self assert: values size equals: 4
 ]
 
 { #category : #tests }
