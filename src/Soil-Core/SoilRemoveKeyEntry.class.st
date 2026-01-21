@@ -3,7 +3,8 @@ Class {
 	#superclass : #SoilIndexJournalEntry,
 	#instVars : [
 		'key',
-		'oldValue'
+		'oldValue',
+		'value'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -43,9 +44,16 @@ SoilRemoveKeyEntry >> context [
 	^ id 
 ]
 
-{ #category : #accessing }
-SoilRemoveKeyEntry >> getValue [
-	^ oldValue
+{ #category : #testing }
+SoilRemoveKeyEntry >> isForItem: anItem [
+	| itemValue |
+	key = anItem key ifFalse: [ ^false ].
+	itemValue := anItem value.
+	^ itemValue isRemoved 
+		ifTrue: [ 
+			"we can not use #= to compare removed IDs"
+			itemValue segment == value segment and: [ itemValue index = value index ]]
+		ifFalse: [ itemValue = value ]
 ]
 
 { #category : #accessing }
@@ -91,8 +99,8 @@ SoilRemoveKeyEntry >> readFrom: aStream [
 ]
 
 { #category : #accessing }
-SoilRemoveKeyEntry >> value [ 
-	^ #removed
+SoilRemoveKeyEntry >> value: anObject [
+	^ value := anObject
 ]
 
 { #category : #writing }

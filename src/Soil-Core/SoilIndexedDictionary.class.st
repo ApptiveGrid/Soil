@@ -218,6 +218,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 			segment: [ self segment ];
 			id: id;
 			key: (index indexKey: key); 
+			value: SoilObjectId removed;
 			oldValue: oldValue asSoilObjectId ) .
 
 	^ oldValue
@@ -242,6 +243,7 @@ SoilIndexedDictionary >> removeKey: key value: value ifAbsent: aBlock [
 	transaction addJournalEntry: (SoilRemoveKeyEntry new 
 			segment: [ self segment ];
 			id: id;
+			value: SoilObjectId removed;
 			key: (index indexKey: key); 
 			oldValue: oldValue asSoilObjectId ) .
 

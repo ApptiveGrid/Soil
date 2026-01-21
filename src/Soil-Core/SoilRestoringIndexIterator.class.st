@@ -106,8 +106,7 @@ SoilRestoringIndexIterator >> journalEntriesFor: key value: value startingAt: an
 	[ transactionId > readVersion ] whileTrue: [  
 		(journal transactionJournalAt: transactionId) entries do: [ :each | 
 			((each class == SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
-			
-				((each key = key) and: [ each getValue = value ]) ifTrue: [ 
+			(each isForItem: key -> value) ifTrue: [ 
 					entries add: each ] ]  ].
 		transactionId := transactionId - 1.
 	].
@@ -124,21 +123,15 @@ SoilRestoringIndexIterator >> restoreItem: item [
 	"restore a value that has been removed by a later transaction"
 	| newItem |
 	item ifNil: [ ^ nil ].
-	newItem :=  item value isRemoved 
-		ifTrue: [
-			"no need to take the value into account as we know it is removed"
-			self 
-				historicValueAt: item key
-				ifAbsent: [ nil ] ]
-		ifFalse: [
-			"restore a value that has been overwritten by a later transaction"   
-			self 
+	"restore a value that has been overwritten by a later transaction" 
+	newItem :=  self 
 				historicValueAt: item key
 				value: item value
-				ifAbsent: [ item ] ].
+				ifAbsent: [ item ].
 	^ newItem 
-		ifNotNil: [ item key -> newItem value ]
-		ifNil: [ newItem ]
+		ifNotNil: [
+			newItem value ifNotNil: [:it| it isRemoved ifTrue: [ ^nil ]].
+			item key -> newItem value ]
 ]
 
 { #category : #strategy }

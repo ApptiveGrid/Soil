@@ -701,6 +701,7 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 		removeKey: #testkey value: values first;
 		removeKey: #testkey value: values second;
 		removeKey: #testkey value: values third. 
+	tx2 root at: #testkey put: 'four'.
 	tx2 commit.
 	"and test last, note: keyorder"
 	self assert: (blockedTx root at: #testkey) size  equals: 3.
