@@ -178,6 +178,8 @@ SoilObjectId >> setIndex: anInteger [
 
 { #category : #comparing }
 SoilObjectId >> soilSizeInMemory [
+	"recursive #sizeInMemory for Soil. 
+	Note: only works for some objects, e.g. SoilPersistentClusterVersion"
 	^ self sizeInMemory 
 		+ segment sizeInMemory 
 		+ index sizeInMemory 

@@ -8,9 +8,7 @@ A SoilIndexedDictionary has to be created with a backend, for now we have SoilBT
 Keys are created with #asIndexKeyOfSize: with the keySize being configurable when creating the dictionary. 
 Values are SoilObjectId instances (8 byte). 
 
-The indexes store data on pages (currently 4kb) on disk. 
-
-Take care: SoilIndexedDictionary has to be a root object
+The indexes store data on pages (currently 4kb) on disk.
 "
 Class {
 	#name : #SoilIndexedDictionary,

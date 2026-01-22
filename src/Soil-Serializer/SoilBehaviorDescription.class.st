@@ -192,6 +192,8 @@ SoilBehaviorDescription >> printOn: aStream [
 
 { #category : #comparing }
 SoilBehaviorDescription >> soilSizeInMemory [
+	"recursive #sizeInMemory for Soil. 
+	Note: only works for some objects, e.g. SoilPersistentClusterVersion"
 	^ self sizeInMemory 
 		+ instVarNames soilSizeInMemory
 		+ behaviorIdentifier soilSizeInMemory

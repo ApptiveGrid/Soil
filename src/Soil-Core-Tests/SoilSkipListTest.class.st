@@ -168,7 +168,7 @@ SoilSkipListTest >> testAddLastFitting [
 { #category : #tests }
 SoilSkipListTest >> testAddRandom [
 
-	| numEntries entries |
+	| numEntries entries result |
 	"just some random adding and checking that we can find it, configured to create lots of pages"
 	index 
 		maxLevel: 10;
@@ -183,20 +183,27 @@ SoilSkipListTest >> testAddRandom [
 		| toAdd |
 		toAdd := (numEntries * 20) atRandom.
 		entries add: toAdd.
-		index at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
+		index at: toAdd add: toAdd asDummySoilObjectId ].
 
 	"check size"
 	self assert: index size equals: entries size.
 
 	"can we find all the keys we added?"
 	entries do: [ :each |
-		self assertSoilDuplicate: (index at: each) equals: (each asByteArrayOfSize: 8) ].
+		self assertSoilDuplicate: (index at: each) equals: each asDummySoilObjectId ].
 
 	"iterate index, all should be in entries"
+	result := OrderedCollection new.
+	"we use do: to iterate over the index"
 	index do: [ :each |
-		self assert: each equals: (each asByteArrayOfSize: 8) ].
+		result add: each].
+	
+	entries := (entries collect: #asDummySoilObjectId).
+	result do: [ :each | self assert: (entries includes: each) ].
+	
 	index reverseDo: [ :each |
-		self assert: each equals: (each asByteArrayOfSize: 8) ]
+		result add: each].
+	result do: [ :each | self assert: (entries includes: each) ].
 ]
 
 { #category : #tests }
@@ -457,7 +464,9 @@ SoilSkipListTest >> testIndexRewriting [
 SoilSkipListTest >> testIndexRewritingWithCleaning [
 
 	| capacity |
-	index uniqueKeys ifFalse: [ self skip ]. "need to rewrite to not at at:add:"
+	index uniqueKeys ifFalse: [ ^ self ]. 
+	"we are testing cleanup for iterator level remove
+	This test makes only sense for uniqueKeys as only here we can override a value with a removed ID using at:add:"
 	capacity := index firstPage itemCapacity.
 	1 to: capacity + 1 do: [ :n |
 	index at: n add: (n asByteArrayOfSize: 8) ].
