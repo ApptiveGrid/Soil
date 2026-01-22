@@ -133,12 +133,13 @@ SoilBasicSkipList >> removePage: aPage [
 
 		"if we are on the last page the right value will be 0 because there
 		is no next page"
-		((next := aPage rightAt: level) > 0) ifTrue: [  
-			nextPage := self pageAt: next.
+		nextPage := ((next := aPage rightAt: level) > 0)
+			ifTrue: [  self pageAt: next ]
+			ifFalse: [ self headerPage ].
 			"point left of next next page to the previous (left of current)"
-			nextPage leftAt: level put: (aPage leftAt: level).
-			self addDirtyPage: nextPage.
-			nextPage markForWrite ] ].
+		nextPage leftAt: level put: (aPage leftAt: level).
+		self addDirtyPage: nextPage.
+		nextPage markForWrite ].
 
 	"finally no page should point to aPage so we can safely remove the page"
 	store removePageAt: aPage offset.
