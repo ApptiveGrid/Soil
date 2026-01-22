@@ -149,7 +149,7 @@ SoilBTreeTest >> testAddFirstOverflow [
 { #category : #tests }
 SoilBTreeTest >> testAddRandom [
 
-	| numEntries entries |
+	| numEntries entries result |
 	"just some random adding and checking that we can find it. tree is configured to create lots of pages"
 	index
 		keySize: 512;
@@ -163,20 +163,28 @@ SoilBTreeTest >> testAddRandom [
 		| toAdd |
 		toAdd := (numEntries * 20) atRandom.
 		entries add: toAdd.
-		index at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
+		index at: toAdd add: toAdd asDummySoilObjectId ].
 
 	"check size"
 	self assert: index size equals: entries asSet size.
 
 	"can we find all the keys we added?"
 	entries do: [ :each |
-		self assertSoilDuplicate: (index at: each) equals: (each asByteArrayOfSize: 8) ].
+		self assertSoilDuplicate: (index at: each) equals: each asDummySoilObjectId ].
 
 	"iterate index, all should be in entries"
+	
+	result := OrderedCollection new.
+	"we use do: to iterate over the index"
 	index do: [ :each |
-		self assert: each equals: (each asByteArrayOfSize: 8) ].
+		result add: each].
+	
+	entries := (entries collect: #asDummySoilObjectId).
+	result do: [ :each | self assert: (entries includes: each) ].
+	
 	index reverseDo: [ :each |
-		self assert: each equals: (each asByteArrayOfSize: 8) ]
+		result add: each].
+	result do: [ :each | self assert: (entries includes: each) ].
 ]
 
 { #category : #tests }
@@ -332,7 +340,7 @@ SoilBTreeTest >> testFirst [
 
 { #category : #tests }
 SoilBTreeTest >> testFreePageAdd [
-
+	"This tests free page reuse after iterator based remove and cleanup"
 	| iterator |
 	iterator := index newIterator.
 	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
@@ -353,7 +361,7 @@ SoilBTreeTest >> testFreePageAdd [
 
 { #category : #tests }
 SoilBTreeTest >> testFreePageAddAndDelete [
-
+	"This tests free page reuse after iterator based remove and cleanup"
 	| iterator |
 	uniqueKeys ifFalse: [ ^self ]. "test foruniqueKeys only"
 	iterator := index newIterator.
@@ -372,7 +380,8 @@ SoilBTreeTest >> testFreePageAddAndDelete [
 
 { #category : #tests }
 SoilBTreeTest >> testFreePageAddNested [
-
+	"This tests free page reuse after iterator based remove and cleanup"
+	
 	| iterator nestedFreeIndexes |
 	index
 		maxLevel: 8;
@@ -404,7 +413,8 @@ SoilBTreeTest >> testFreePageAddNested [
 
 { #category : #tests }
 SoilBTreeTest >> testFreePageReuse [
-
+	"This tests free page reuse after iterator based remove and cleanup"
+	
 	| iterator |
 	iterator := index newIterator.
 	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
@@ -416,8 +426,8 @@ SoilBTreeTest >> testFreePageReuse [
 	2501 to: 2750 + 250 do: [ :n |
 	iterator at: n add: (n asByteArrayOfSize: 8) ].
 	index cleanUpToVersion: nil.
-	"first free page is #6 with content #( 9 10 11 12 ). Adding 500 entries should remove 
-	two pages for reuse"
+	"first free page is #6 with content #( 9 10 11 12 ). 
+	Adding 500 entries should remove two pages for reuse"
 	self
 		assertCollection: (index store pageAt: 6) pageIndexes
 		hasSameElements: #( 11 12 )
@@ -425,7 +435,7 @@ SoilBTreeTest >> testFreePageReuse [
 
 { #category : #tests }
 SoilBTreeTest >> testFreePageReuseAtEndAppend [
-
+	"This tests free page reuse after iterator based remove and cleanup"
 	| iterator |
 	iterator := index newIterator.
 	1 to: 2500 do: [ :n | iterator at: n add: (n asByteArrayOfSize: 8) ].
@@ -473,7 +483,9 @@ SoilBTreeTest >> testIndexRewriting [
 SoilBTreeTest >> testIndexRewritingWithCleaning [
 
 	| capacity |
-	index uniqueKeys ifFalse: [ self skip ]. "need to rewrite to not at at:add:"
+	"we are testing cleanup for iterator level remove
+	This test makes only sense for uniqueKeys as only here we can override a value with a removed ID using at:add:"
+	index uniqueKeys ifFalse: [ ^self ]. 
 	capacity := index firstPage itemCapacity.
 	1 to: capacity + 1 do: [ :n |
 	index at: n add: (n asByteArrayOfSize: 8) ].
@@ -707,7 +719,7 @@ SoilBTreeTest >> testRemoveFromIndexAll [
 	entries do: [ :entry |
 		| removed |
 		removed := index removeKey: entry.
-		self assert: removed equals: (removed asByteArrayOfSize: 8).
+		self assertSoilDuplicate: removed equals: (entry asByteArrayOfSize: 8).
 		remainingEntries remove: entry.
 		"check that all remaining entries can be found"
 		remainingEntries do: [ :each |
@@ -735,6 +747,24 @@ SoilBTreeTest >> testRemoveKey [
 	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
 
 	removed := index removeKey: 20.
+	self assertSoilDuplicate: removed equals: (20 asByteArrayOfSize: 8).
+
+	self assertSoilDuplicate: (index at: 1) equals: (1 asByteArrayOfSize: 8).
+	self
+		assertSoilDuplicate: (index at: capacity)
+		equals: (capacity asByteArrayOfSize: 8).
+	self should: [ index at: 20 ] raise: KeyNotFound.
+	self should: [ index removeKey: 20 ] raise: KeyNotFound
+]
+
+{ #category : #tests }
+SoilBTreeTest >> testRemoveKeyValue [
+
+	| capacity removed |
+	capacity := index headerPage itemCapacity.
+	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
+
+	removed := index removeKey: 20 value: (20 asByteArrayOfSize: 8).
 	self assert: removed equals: (20 asByteArrayOfSize: 8).
 
 	self assertSoilDuplicate: (index at: 1) equals: (1 asByteArrayOfSize: 8).

@@ -178,6 +178,22 @@ SoilAbstractBTreeDataPage >> remove: aKey for: aBTree [
 	^ return
 ]
 
+{ #category : #removing }
+SoilAbstractBTreeDataPage >> removeItem: anItem for: aBTree [
+	"remove and return the item"
+	| return keyIndex | 
+	keyIndex := aBTree hasUniqueKeys 
+		ifTrue: [ self itemIndexForKey: anItem key ] 
+		ifFalse: [ self itemIndexForKey: anItem key value: anItem value ]. 
+	
+	keyIndex = 0 ifTrue: [ ^nil ]. "nothing found"
+	
+	return := items at: keyIndex.
+	items removeAt: keyIndex.
+	aBTree addDirtyPage: self.
+	^ return
+]
+
 { #category : #accessing }
 SoilAbstractBTreeDataPage >> valueSize [ 
 	^ valueSize

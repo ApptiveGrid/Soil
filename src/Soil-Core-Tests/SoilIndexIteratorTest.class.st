@@ -66,7 +66,7 @@ SoilIndexIteratorTest >> tearDown [
 { #category : #tests }
 SoilIndexIteratorTest >> testAddRandom [
 
-	| iterator numEntries entries |
+	| iterator numEntries entries result |
 	"just some random adding and checking that we can find it, configured to create lots of pages"
 	
 	iterator := index newIterator.
@@ -78,7 +78,7 @@ SoilIndexIteratorTest >> testAddRandom [
 		| toAdd |
 		toAdd := (numEntries * 20) atRandom.
 		entries add: toAdd.
-		iterator at: toAdd add: (toAdd asByteArrayOfSize: 8) ].
+		iterator at: toAdd add: toAdd asDummySoilObjectId].
 
 	"check size"
 	self assert: iterator size equals: entries asSet size.
@@ -86,13 +86,19 @@ SoilIndexIteratorTest >> testAddRandom [
 
 	"can we find all the keys we added?"
 	entries do: [ :each |
-		self assertSoilDuplicate: (iterator at: each) equals: (each asByteArrayOfSize: 8) ].
+		self assertSoilDuplicate: (iterator at: each) equals: each asDummySoilObjectId ].
 
-	"iterate index, all should be in entries"
+	result := OrderedCollection new.
+	"we use do: to iterate over the index"
 	iterator do: [ :each |
-		self assert: each equals: (each asByteArrayOfSize: 8) ].
+		result add: each].
+	
+	entries := (entries collect: #asDummySoilObjectId).
+	result do: [ :each | self assert: (entries includes: each) ].
+
 	iterator reverseDo: [ :each |
-		self assert: each equals: (each asByteArrayOfSize: 8) ]
+		result add: each].
+	result do: [ :each | self assert: (entries includes: each) ].
 ]
 
 { #category : #'tests - duplicate keys' }
@@ -177,7 +183,17 @@ SoilIndexIteratorTest >> testAtAdd [
 		ifFalse: [ 
 			"with duplicate keys, we do not return the old value"
 			self assert: return equals: nil.
-			self assertCollection: (iterator at: 1) hasSameElements: {1 asDummySoilObjectId. 2 asDummySoilObjectId}]
+			self assertCollection: (iterator at: 1) hasSameElements: {1 asDummySoilObjectId. 2 asDummySoilObjectId}].
+		
+	return := iterator at: 1 add: 2 asDummySoilObjectId.
+	uniqueKeys 
+		ifTrue: [
+			self assert: return equals: 2 asDummySoilObjectId.
+			self assert: (iterator at: 1) equals: 2 asDummySoilObjectId]
+		ifFalse: [ 
+			"we replace, thus return is not nil"
+			self assert: return equals: 1 asDummySoilObjectId.
+			self assertCollection: (iterator at: 1) hasSameElements: {2 asDummySoilObjectId. 2 asDummySoilObjectId}].
 ]
 
 { #category : #tests }
