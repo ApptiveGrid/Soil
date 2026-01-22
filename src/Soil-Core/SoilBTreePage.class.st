@@ -93,6 +93,11 @@ SoilBTreePage >> remove: aKey for: aBTree [
 	^ self subclassResponsibility
 ]
 
+{ #category : #removing }
+SoilBTreePage >> removeItem: aKey for: aBTree [ 
+	^ self subclassResponsibility
+]
+
 { #category : #private }
 SoilBTreePage >> split: newPage [
 	| middle |
