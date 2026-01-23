@@ -10,9 +10,16 @@ Class {
 { #category : #'instance creation' }
 SoilRemovedObjectId class >> for: aSoilObjectId [
 
+	^self new
+		removedId: aSoilObjectId;
+		yourself 
+]
+
+{ #category : #'instance creation' }
+SoilRemovedObjectId class >> new [
+
 	^self basicNew 
 		segment: 0; index: 0;
-		removedId: aSoilObjectId;
 		yourself 
 ]
 
