@@ -50,9 +50,7 @@ SoilRemoveKeyEntry >> isForItem: anItem [
 	key = anItem key ifFalse: [ ^false ].
 	itemValue := anItem value.
 	^ itemValue isRemoved 
-		ifTrue: [ 
-			"we can not use #= to compare removed IDs"
-			itemValue segment == value segment and: [ itemValue index = value index ]]
+		ifTrue: [ itemValue removedId = oldValue]
 		ifFalse: [ itemValue = value ]
 ]
 

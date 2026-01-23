@@ -534,7 +534,7 @@ SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 		ifNil: [ aBlock value ].
 	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
 	(e.g no need to update index pages for the BTree"
-	currentPage items at: currentPageIndex put:  indexKey -> SoilObjectId removed.
+	currentPage items at: currentPageIndex put: indexKey -> (SoilRemovedObjectId for: oldValue).
 	index addDirtyPage: currentPage.
 
 	index decreaseSize.
@@ -573,7 +573,7 @@ SoilIndexIterator >> removeKey: key value: value ifAbsent: aBlock [
 		ifNil: [ aBlock value ].
 	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
 	(e.g no need to update index pages for the BTree"
-	currentPage items at: currentPageIndex put:  indexKey -> SoilObjectId removed.
+	currentPage items at: currentPageIndex put: indexKey -> (SoilRemovedObjectId for: oldValue).
 	index addDirtyPage: currentPage.
 
 	index decreaseSize.
