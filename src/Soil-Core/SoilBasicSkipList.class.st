@@ -23,6 +23,8 @@ SoilBasicSkipList >> basicRemoveKey: key ifAbsent: aBlock [
 	Caller has to remove the empty page!"
 	
 	| page index |
+	self hasUniqueKeys ifFalse: [ ^ self removeKeyAll: key ifAbsent: aBlock ].
+	
 	page := self newIterator 
 		find: key;
 		currentPage.
@@ -30,6 +32,27 @@ SoilBasicSkipList >> basicRemoveKey: key ifAbsent: aBlock [
 		ifTrue: [ 
 			self decreaseSize.
 			(page itemRemoveIndex: index) value ]
+		ifFalse: [ aBlock value ]
+]
+
+{ #category : #removing }
+SoilBasicSkipList >> basicRemoveKey: key value: aValue ifAbsent: aBlock [
+	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work. Caller has to remove the empty page!"
+	| page keyIndex |
+	
+	page := self newIterator 
+		find: key;
+		currentPage.
+	
+	keyIndex := self hasUniqueKeys 
+		ifTrue: [ page itemIndexForKey: key ] 
+		ifFalse: [ page itemIndexForKey: key value: aValue ]. 
+
+	
+	^ keyIndex > 0
+		ifTrue: [ 
+			self decreaseSize.
+			(page itemRemoveIndex: keyIndex) value ]
 		ifFalse: [ aBlock value ]
 ]
 
