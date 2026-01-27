@@ -118,24 +118,6 @@ SoilSkipListPage >> isLastPage [
 ]
 
 { #category : #accessing }
-SoilSkipListPage >> itemAt: key put: anObject [ 
-
-	self flag: #todo.
-	"this needs to be improved. For itemAt:put: we search twice for the index. This 
-	is to keep the assumption about replacing items. The way this is enforced might 
-	be a strategy object instead soonish"
-	items 
-		findBinaryIndex: [ :each |  key - each key ] 
-		do: [:ind | 	| removedItem |
-			removedItem := items at: ind.
-			items at: ind put: (key -> anObject).
-			needWrite := true.
-			^ removedItem ]
-		ifNone: [ KeyNotFound signal: 'this method is just for replacing items' ].
-
-]
-
-{ #category : #accessing }
 SoilSkipListPage >> left [
 	^ left
 ]
