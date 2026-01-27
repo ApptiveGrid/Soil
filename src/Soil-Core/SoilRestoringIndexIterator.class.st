@@ -30,28 +30,6 @@ SoilRestoringIndexIterator class >> on: aSoilIndex [
 ]
 
 { #category : #private }
-SoilRestoringIndexIterator >> historicValueAt: key ifAbsent: absentBlock [
- 	"a removed value will return ObjectId 0:0"
- 	readVersion ifNil: [ ^ absentBlock value ].
- 	^ (self currentPage isOlderThan: readVersion) 
- 		ifTrue: [ 
- 			"all modifications to this page have been done before we
- 			started the transaction, so the removal is visibile and 
- 			value absent"
- 			   absentBlock value ] 
- 		ifFalse: [
- 			"we determine all changes between our transaction and the
- 			last one modifying the page. if we get back changes for the
- 			key the value of the oldes entry has the value it had before"
- 			(self 
- 				journalEntriesFor: key 
- 				startingAt: self currentPage lastTransaction)
- 					ifNotEmpty: [:entries | 
-						entries last oldValue ifNotNil: [ :old | key -> old ] ]
- 					ifEmpty: absentBlock]
-]
-
-{ #category : #private }
 SoilRestoringIndexIterator >> historicValueAt: key value: value ifAbsent: absentBlock [
  	"a removed value will return ObjectId 0:0"
  	readVersion ifNil: [ ^ absentBlock value ].
@@ -65,13 +43,10 @@ SoilRestoringIndexIterator >> historicValueAt: key value: value ifAbsent: absent
  			"we determine all changes between our transaction and the
  			last one modifying the page. if we get back changes for the
  			key the value of the oldes entry has the value it had before"
-			journalEntries := index uniqueKeys 
-				ifTrue: [ self 
- 					journalEntriesFor: key
- 					startingAt: self currentPage lastTransaction ]
-				ifFalse: [ self 
- 					journalEntriesFor: key value: value
- 					startingAt: self currentPage lastTransaction ].
+			journalEntries := self 
+ 					journalEntriesFor: key 
+					value: value
+ 					startingAt: self currentPage lastTransaction.
 			
  			journalEntries
  					ifNotEmpty: [:entries | key -> entries last oldValue]
@@ -81,21 +56,6 @@ SoilRestoringIndexIterator >> historicValueAt: key value: value ifAbsent: absent
 { #category : #accessing }
 SoilRestoringIndexIterator >> journal: aSoilPersistentDatabaseJournal [ 
 	journal := aSoilPersistentDatabaseJournal 
-]
-
-{ #category : #accessing }
-SoilRestoringIndexIterator >> journalEntriesFor: key startingAt: anInteger [ 
-	| transactionId entries |
-	entries := OrderedCollection new.
-	transactionId := anInteger.
-	[ transactionId > readVersion ] whileTrue: [  
-		(journal transactionJournalAt: transactionId) entries do: [ :each | 
-			((each class == SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
-				(each key = key) ifTrue: [ 
-					entries add: each ] ]  ].
-		transactionId := transactionId - 1.
-	].
-   ^ entries
 ]
 
 { #category : #accessing }

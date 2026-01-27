@@ -3,8 +3,7 @@ Class {
 	#superclass : #SoilIndexJournalEntry,
 	#instVars : [
 		'key',
-		'oldValue',
-		'value'
+		'oldValue'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -46,12 +45,9 @@ SoilRemoveKeyEntry >> context [
 
 { #category : #testing }
 SoilRemoveKeyEntry >> isForItem: anItem [
-	| itemValue |
-	key = anItem key ifFalse: [ ^false ].
-	itemValue := anItem value.
-	^ itemValue isRemoved 
-		ifTrue: [ itemValue removedId = oldValue]
-		ifFalse: [ itemValue = value ]
+	"for multiple keys, we store the oldValue in the removedID"
+	^ key = anItem key and: [anItem value isRemoved and: [anItem value removedId = oldValue]]
+
 ]
 
 { #category : #accessing }
@@ -94,11 +90,6 @@ SoilRemoveKeyEntry >> readFrom: aStream [
 	id := (aStream next: idSize) asString.
 	key := (aStream next: aStream nextLengthEncodedInteger) asInteger.
 	oldValue := (aStream next: aStream nextLengthEncodedInteger) asSoilObjectId .
-]
-
-{ #category : #accessing }
-SoilRemoveKeyEntry >> value: anObject [
-	^ value := anObject
 ]
 
 { #category : #writing }
