@@ -138,6 +138,11 @@ SoilObjectId >> isRemoved [
 ]
 
 { #category : #testing }
+SoilObjectId >> isRestorable [
+	^ false
+]
+
+{ #category : #testing }
 SoilObjectId >> isSameObjectId: aSOObjectId [ 
 	^ aSOObjectId hasSameSegment: segment andIndex: index
 ]

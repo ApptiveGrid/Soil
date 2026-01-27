@@ -23,6 +23,11 @@ SoilRemovedObjectId class >> new [
 		yourself 
 ]
 
+{ #category : #testing }
+SoilRemovedObjectId >> isRestorable [
+	^ true
+]
+
 { #category : #accessing }
 SoilRemovedObjectId >> removedId [
 
