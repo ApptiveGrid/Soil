@@ -64,15 +64,16 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 	keyIndex := iterator index hasUniqueKeys 
 		ifTrue: [ self itemIndexForKey: anItem key ] 
 		ifFalse: [ self itemIndexForKey: anItem key value: anItem value ]. 
-	returnValue := self valueAt: anItem key.
 	keyIndex > 0
 		ifTrue: [
 			"overwriting a key does not change the size of an index"
-			(self itemAt: anItem key put: anItem value)  ]
+			returnValue := (self itemAt: anItem key put: anItem value) value ]
 		ifFalse: [
-			iterator index increaseSize. 
-			self addItem: anItem.
-			iterator index hasUniqueKeys ifFalse: [ returnValue := nil ]].
+			returnValue := iterator index hasUniqueKeys 
+				ifTrue: [self addItem: anItem ]
+				ifFalse: [ self addItemDuplicate: anItem ]. 
+			iterator index increaseSize].
+			
 	return := SoilBTreeReturnWrapper new returnValue: returnValue.
 
 	self hasRoom ifTrue: [  iterator currentPage: self. ^ return ].
