@@ -31,25 +31,24 @@ SoilRestoringIndexIterator class >> on: aSoilIndex [
 
 { #category : #private }
 SoilRestoringIndexIterator >> historicValueFor: item [
- 	"a removed value will return ObjectId 0:0"
+ 	"a removed value will return item with value ObjectId 0:0"
+	 | journalEntries |
  	readVersion ifNil: [ ^ item ].
- 	^ (self currentPage isOlderThan: readVersion) 
- 		ifTrue: [ 
+ 	(self currentPage isOlderThan: readVersion) ifTrue: [ 
  			"all modifications to this page have been done before we
  			started the transaction, so the removal is visibile and 
  			value absent"
- 			   item ] 
- 		ifFalse: [ | journalEntries |
- 			"we determine all changes between our transaction and the
- 			last one modifying the page. if we get back changes for the
- 			key the value of the oldes entry has the value it had before"
-			journalEntries := self 
- 					journalEntriesFor: item
- 					startingAt: self currentPage lastTransaction.
+ 			  ^  item ].
+
+ 	"we determine all changes between our transaction and the
+ 	last one modifying the page. if we get back changes for the
+ 	key the value of the oldes entry has the value it had before"
+	journalEntries := self 
+ 			journalEntriesFor: item
+ 			startingAt: self currentPage lastTransaction.
 			
- 			journalEntries
- 					ifNotEmpty: [:entries | item key -> entries last oldValue]
- 					ifEmpty: [item]]
+ 	journalEntries ifEmpty: [^ item].
+	^ item key -> journalEntries last oldValue
 ]
 
 { #category : #accessing }
@@ -79,10 +78,10 @@ SoilRestoringIndexIterator >> readVersion: anInteger [
 
 { #category : #private }
 SoilRestoringIndexIterator >> restoreItem: item [ 
-	"restore a value that has been removed by a later transaction"
+	"restore a value that has been removed by a later transaction
+	this method just wraps historicValueFor: and turns removed items into nil"
 	| newItem |
-	item ifNil: [ ^ nil ].
-	"restore a value that has been overwritten by a later transaction" 
+	
 	newItem := self historicValueFor: item.
 	newItem ifNotNil: [
 			newItem value ifNotNil: [:it| it isRemoved ifTrue: [ ^ nil ]]].
