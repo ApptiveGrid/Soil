@@ -205,11 +205,12 @@ SoilIndexIterator >> findAll: key ifAbsent: aBlock [
 		assoc := self basicPreviousAssociation ].
 	(assoc notNil and: [assoc key = indexKey]) ifFalse: [ assoc := self basicNextAssociation ] . 
 	"now we are on the first item with the key"
-	values := OrderedCollection with: assoc value.
-	assoc := self basicNextAssociation.
+	values := OrderedCollection new.
 	[ assoc notNil and: [ assoc key = indexKey ] ] whileTrue: [ 
 		values add: assoc value.
-		assoc := self basicNextAssociation ].
+		assoc := self basicNextAssociation
+	 ].
+	assoc ifNotNil: [self basicPreviousAssociation].
 	
 	return := OrderedCollection new.
 	values do: [ :value | |item todAdd |
