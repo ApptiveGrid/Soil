@@ -43,6 +43,16 @@ SoilRemoveKeyEntry >> context [
 	^ id 
 ]
 
+{ #category : #testing }
+SoilRemoveKeyEntry >> isForItem: anItem [
+	"for multiple keys, we store the oldValue in the removedID"
+	^ key = anItem key and: [
+		anItem value isRemoved and: [
+			anItem value isRestorable and: [
+				anItem value removedId = oldValue]]]
+
+]
+
 { #category : #accessing }
 SoilRemoveKeyEntry >> key [
 
@@ -83,11 +93,6 @@ SoilRemoveKeyEntry >> readFrom: aStream [
 	id := (aStream next: idSize) asString.
 	key := (aStream next: aStream nextLengthEncodedInteger) asInteger.
 	oldValue := (aStream next: aStream nextLengthEncodedInteger) asSoilObjectId .
-]
-
-{ #category : #accessing }
-SoilRemoveKeyEntry >> value [ 
-	^ #removed
 ]
 
 { #category : #writing }

@@ -394,7 +394,6 @@ SoilIndexIteratorTest >> testFirstPage [
 SoilIndexIteratorTest >> testFirstWithRemovedItem [
 
 	| iterator |
-	index uniqueKeys ifFalse: [ self skip ].
 	iterator := index newIterator.
 	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	iterator removeKey: 1.
@@ -552,7 +551,6 @@ SoilIndexIteratorTest >> testLastPage [
 SoilIndexIteratorTest >> testLastWithRemovedItem [
 
 	| iterator |
-	index uniqueKeys ifFalse: [ self skip ].
 	iterator := index newIterator.
 	iterator at: 1 add: (1 asByteArrayOfSize: 8).
 	iterator removeKey: 1.

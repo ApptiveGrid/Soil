@@ -193,7 +193,7 @@ SoilIndexIterator >> find: key ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexIterator >> findAll: key ifAbsent: aBlock [ 
-	| indexKey assoc item values |
+	| indexKey assoc values return |
 	indexKey := index indexKey: key.
 	self findPageFor: indexKey.
 	currentPageIndex := currentPage indexOfKey: indexKey.
@@ -210,13 +210,14 @@ SoilIndexIterator >> findAll: key ifAbsent: aBlock [
 	[ assoc notNil and: [ assoc key = indexKey ] ] whileTrue: [ 
 		values add: assoc value.
 		assoc := self basicNextAssociation ].
-	^ values collect: [ :value |
+	
+	return := OrderedCollection new.
+	values do: [ :value | |item todAdd |
 		item := self restoreItem: currentKey -> value.
-		item
-			ifNotNil: [ 
-				(self convertValue: item value) 
-					ifNil: [ aBlock value ] ]
-			ifNil: [ aBlock value ] ] 
+		todAdd := self convertValue: item value.
+		todAdd ifNotNil: [ return add: todAdd ] ].
+		
+	^ return ifEmpty: aBlock 
 ]
 
 { #category : #private }
@@ -533,7 +534,7 @@ SoilIndexIterator >> removeKey: key ifAbsent: aBlock [
 		ifNil: [ aBlock value ].
 	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
 	(e.g no need to update index pages for the BTree"
-	currentPage items at: currentPageIndex put:  indexKey -> SoilObjectId removed.
+	currentPage items at: currentPageIndex put: indexKey -> (SoilRemovedObjectId for: oldValue).
 	index addDirtyPage: currentPage.
 
 	index decreaseSize.
@@ -572,7 +573,7 @@ SoilIndexIterator >> removeKey: key value: value ifAbsent: aBlock [
 		ifNil: [ aBlock value ].
 	"We replace the value with the removed ID. As the key stays, we do not need to do a full insert 
 	(e.g no need to update index pages for the BTree"
-	currentPage items at: currentPageIndex put:  indexKey -> SoilObjectId removed.
+	currentPage items at: currentPageIndex put: indexKey -> (SoilRemovedObjectId for: oldValue).
 	index addDirtyPage: currentPage.
 
 	index decreaseSize.

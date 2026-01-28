@@ -490,7 +490,7 @@ SoilBTreeTest >> testIndexRewritingWithCleaning [
 	1 to: capacity + 1 do: [ :n |
 	index at: n add: (n asByteArrayOfSize: 8) ].
 	index flush.
-	1 to: capacity do: [ :n | index at: n add: SoilObjectId removed ].
+	1 to: capacity do: [ :n | index at: n add: (SoilRemovedObjectId for:  (n asByteArrayOfSize: 8))  ].
 
 	index newPluggableRewriter cleanRemoved run.
 	self assert: index headerPage lastPageOffset equals: 2.

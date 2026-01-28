@@ -712,7 +712,7 @@ SoilIndexedDictionaryTest >> testRecoverAddedKeys [
 
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
-	| tx tx2 blockedTx values |
+	| tx tx2 blockedTx values tx3 |
 	tx := soil newTransaction.
 	dict index allowDuplicateKeys.
 	tx root: dict.
@@ -736,10 +736,52 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 		removeKey: #testkey value: values first;
 		removeKey: #testkey value: values second;
 		removeKey: #testkey value: values third. 
+	tx2 root at: #testkey put: 'four'.
 	tx2 commit.
 	"and test last, note: keyorder"
-	self assert: (blockedTx root at: #testkey) size  equals: 3.
+	self assert: (blockedTx root at: #testkey) size equals: 3.
+	self assertCollection: ((blockedTx root at: #testkey) collect: #yourself) hasSameElements: #('one' 'two' 'three').
+	
+	"we can now start new transaction and see the state as commited in tx2"
+	tx3 := soil newTransaction.
+	values := tx3 root at: #testkey.
+	self assert: values class equals: OrderedCollection.
+	self assert: values size equals: 1.
+	self assert: values first equals: 'four'
+]
 
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeysAdd [
+	| tx tx2 tx3 blockedTx values |
+	tx := soil newTransaction.
+	dict index allowDuplicateKeys.
+	tx root: dict.
+	dict 
+		at: #testkey put: 'one';
+		at: #testkey put: 'two';
+		at: #testkey put: 'three'.
+	values := dict at: #testkey.
+	self assert: values class equals: OrderedCollection.
+	self assert: values size equals: 3.
+	tx commit.
+	
+	blockedTx := soil newTransaction.
+	"open a second transaction ..."
+	tx2 := soil newTransaction.
+	values := tx2 root at: #testkey.
+		
+	self assert: values class equals: OrderedCollection.
+	self assert: values size equals: 3.
+	tx2 root at: #testkey put: 'four'.
+	tx2 commit.
+	"and test last, note: keyorder"
+	self assert: (blockedTx root at: #testkey) size equals: 3.
+	
+	"we can now start new transaction and see the state as commited in tx2"
+	tx3 := soil newTransaction.
+	values := tx3 root at: #testkey.
+	self assert: values class equals: OrderedCollection.
+	self assert: values size equals: 4
 ]
 
 { #category : #tests }

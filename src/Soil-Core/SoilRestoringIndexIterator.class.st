@@ -30,7 +30,7 @@ SoilRestoringIndexIterator class >> on: aSoilIndex [
 ]
 
 { #category : #private }
-SoilRestoringIndexIterator >> historicValueAt: key ifAbsent: absentBlock [
+SoilRestoringIndexIterator >> historicValueAt: key value: value ifAbsent: absentBlock [
  	"a removed value will return ObjectId 0:0"
  	readVersion ifNil: [ ^ absentBlock value ].
  	^ (self currentPage isOlderThan: readVersion) 
@@ -39,15 +39,17 @@ SoilRestoringIndexIterator >> historicValueAt: key ifAbsent: absentBlock [
  			started the transaction, so the removal is visibile and 
  			value absent"
  			   absentBlock value ] 
- 		ifFalse: [
+ 		ifFalse: [ | journalEntries |
  			"we determine all changes between our transaction and the
  			last one modifying the page. if we get back changes for the
  			key the value of the oldes entry has the value it had before"
- 			(self 
- 				journalEntriesFor: key 
- 				startingAt: self currentPage lastTransaction)
- 					ifNotEmpty: [:entries | 
-						entries last oldValue ifNotNil: [ :old | key -> old ] ]
+			journalEntries := self 
+ 					journalEntriesFor: key 
+					value: value
+ 					startingAt: self currentPage lastTransaction.
+			
+ 			journalEntries
+ 					ifNotEmpty: [:entries | key -> entries last oldValue]
  					ifEmpty: absentBlock]
 ]
 
@@ -57,14 +59,14 @@ SoilRestoringIndexIterator >> journal: aSoilPersistentDatabaseJournal [
 ]
 
 { #category : #accessing }
-SoilRestoringIndexIterator >> journalEntriesFor: key startingAt: anInteger [ 
+SoilRestoringIndexIterator >> journalEntriesFor: key value: value startingAt: anInteger [ 
 	| transactionId entries |
 	entries := OrderedCollection new.
 	transactionId := anInteger.
 	[ transactionId > readVersion ] whileTrue: [  
 		(journal transactionJournalAt: transactionId) entries do: [ :each | 
 			((each class == SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
-				(each key = key) ifTrue: [ 
+			(each isForItem: key -> value) ifTrue: [ 
 					entries add: each ] ]  ].
 		transactionId := transactionId - 1.
 	].
@@ -81,19 +83,15 @@ SoilRestoringIndexIterator >> restoreItem: item [
 	"restore a value that has been removed by a later transaction"
 	| newItem |
 	item ifNil: [ ^ nil ].
-	newItem :=  item value isRemoved 
-		ifTrue: [
-			self 
-				historicValueAt: item key 
-				ifAbsent: [ nil ] ]
-		ifFalse: [
-			"restore a value that has been overwritten by a later transaction"   
-			self 
-				historicValueAt: item key 
-				ifAbsent: [ item ] ].
+	"restore a value that has been overwritten by a later transaction" 
+	newItem :=  self 
+				historicValueAt: item key
+				value: item value
+				ifAbsent: [ item ].
 	^ newItem 
-		ifNotNil: [ item key -> newItem value ]
-		ifNil: [ newItem ]
+		ifNotNil: [
+			newItem value ifNotNil: [:it| it isRemoved ifTrue: [ ^nil ]].
+			item key -> newItem value ]
 ]
 
 { #category : #strategy }

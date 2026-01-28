@@ -40,19 +40,12 @@ SoilObjectId class >> readFrom: stream [
 ]
 
 { #category : #'instance creation' }
-SoilObjectId class >> removed [
-	"This special ID models a removed value in a SoilIndexedDictionary"
-	^ self new segment: 0; index: 0
-]
-
-{ #category : #'instance creation' }
 SoilObjectId class >> root [
 	^ RootObjectId ifNil: [ RootObjectId := self new segment: 1; index: 1 ]
 ]
 
 { #category : #'instance creation' }
 SoilObjectId class >> segment: segmentId index: index [
-	(segmentId == 0 and: [ index == 0 ]) ifTrue: [ ^ self removed ].
 	(segmentId == 1 and: [ index == 1 ]) ifTrue: [ ^ self root ].
 	^ self basicNew
 		segment: segmentId index: index
@@ -142,6 +135,11 @@ SoilObjectId >> isObjectId [
 { #category : #testing }
 SoilObjectId >> isRemoved [ 
 	^ (segment == 0) and: [index == 0]
+]
+
+{ #category : #testing }
+SoilObjectId >> isRestorable [
+	^ false
 ]
 
 { #category : #testing }
