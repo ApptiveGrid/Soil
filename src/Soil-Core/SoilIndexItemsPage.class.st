@@ -26,16 +26,18 @@ SoilIndexItemsPage class >> isAbstract [
 { #category : #adding }
 SoilIndexItemsPage >> addItem: anAssociation [
 
+	| index |
 	needWrite := true.
-
+ 	"add new item, supports multiple keys. To override, use itemAt:put:"
 	items 
-		findBinaryIndex: [ :each |  anAssociation key - each key ] 
-		do: [:index | | removedItem |
-			"replace the found index with the new value and return 
-			the removed value"
-			removedItem := items at: index.
-			items at: index put: anAssociation.
-			^ removedItem ]
+		findBinaryIndex: [ :each | anAssociation key - each key ] 
+		do: [:idx |
+			"if we have the key already, skip to the last and insert after"
+			index := idx.
+			[ index < items size and: [ (items at: index + 1) key = anAssociation key ] ] whileTrue: [ 
+				index := index + 1 ].
+			items add: anAssociation afterIndex: index.
+			^ nil]
 		ifNone: [ :lower :upper |
 			"upper will be an index bigger than collection size if 
 			the element needs to be appended"

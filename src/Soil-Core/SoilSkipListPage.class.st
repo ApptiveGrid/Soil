@@ -27,41 +27,6 @@ SoilSkipListPage class >> isAbstract [
 	^ self == SoilSkipListPage 
 ]
 
-{ #category : #adding }
-SoilSkipListPage >> addItem: anAssociation [
-
-	| index |
-	needWrite := true.
-
-	items 
-		findBinaryIndex: [ :each | anAssociation key - each key ] 
-		do: [:idx | | removedItem |
-			"replace the found index with the new value and return 
-			the removed value"
-			index := idx.
-			[ index < items size and: [ (items at: index + 1) key = anAssociation key ] ] whileTrue: [ 
-				index := index + 1 ].
-			items add: anAssociation afterIndex: index.
-			"removedItem := items at: index.
-			items at: index put: anAssociation."
-			^ removedItem ]
-		ifNone: [ :lower :upper |
-			"upper will be an index bigger than collection size if 
-			the element needs to be appended"
-			(upper > items size) ifTrue: [
-				items addLast: anAssociation.
-				^ nil ].
-			"if lower is greater than zero than lower and upper are 
-			valid indexes where we need to insert in between"
-			(lower > 0) ifTrue: [ 
-				items add: anAssociation afterIndex: lower.
-				^ nil ].
-			"lower will be zero if the element needs to be added to 
-			the front of the page"
-			items addFirst: anAssociation.
-			^ nil ]
-]
-
 { #category : #accessing }
 SoilSkipListPage >> biggestKey [
 	^ self isLastPage 
