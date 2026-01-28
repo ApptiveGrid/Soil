@@ -25,7 +25,7 @@ SoilIndexItemsPage class >> isAbstract [
 
 { #category : #adding }
 SoilIndexItemsPage >> addItem: anAssociation [
-
+	"If the key is already there, it will be replaced"
 	needWrite := true.
 
 	items 
@@ -36,6 +36,38 @@ SoilIndexItemsPage >> addItem: anAssociation [
 			removedItem := items at: index.
 			items at: index put: anAssociation.
 			^ removedItem ]
+		ifNone: [ :lower :upper |
+			"upper will be an index bigger than collection size if 
+			the element needs to be appended"
+			(upper > items size) ifTrue: [
+				items addLast: anAssociation.
+				^ nil ].
+			"if lower is greater than zero than lower and upper are 
+			valid indexes where we need to insert in between"
+			(lower > 0) ifTrue: [ 
+				items add: anAssociation afterIndex: lower.
+				^ nil ].
+			"lower will be zero if the element needs to be added to 
+			the front of the page"
+			items addFirst: anAssociation.
+			^ nil ]
+]
+
+{ #category : #adding }
+SoilIndexItemsPage >> addItemDuplicate: anAssociation [
+
+	| index |
+	needWrite := true.
+ 	"add new item, supports multiple keys. To override, use itemAt:put:"
+	items 
+		findBinaryIndex: [ :each | anAssociation key - each key ] 
+		do: [:idx |
+			"if we have the key already, skip to the last and insert after"
+			index := idx.
+			[ index < items size and: [ (items at: index + 1) key = anAssociation key ] ] whileTrue: [ 
+				index := index + 1 ].
+			items add: anAssociation afterIndex: index.
+			^ nil]
 		ifNone: [ :lower :upper |
 			"upper will be an index bigger than collection size if 
 			the element needs to be appended"

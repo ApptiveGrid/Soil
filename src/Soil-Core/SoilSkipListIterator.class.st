@@ -46,7 +46,7 @@ SoilSkipListIterator >> basicAt: indexKey add: anObject [
 				currentPage := currentPage biggestKey <= indexKey
 					                 ifTrue: [ newPage ]
 					                 ifFalse: [ currentPage ] ].
-			  currentPage addItem: indexKey -> anObject.
+			  currentPage addItemDuplicate: indexKey -> anObject.
 			  index increaseSize.
 			  nil ]
 ]
