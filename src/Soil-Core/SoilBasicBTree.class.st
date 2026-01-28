@@ -46,12 +46,6 @@ SoilBasicBTree >> basicRemoveKey: key ifAbsent: aBlock [
 ]
 
 { #category : #removing }
-SoilBasicBTree >> basicRemoveKey: key value: aValue [
-		"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work. Caller has to remove the empty page!"
-	^ self basicRemoveKey: key value: aValue ifAbsent: nil
-]
-
-{ #category : #removing }
 SoilBasicBTree >> basicRemoveKey: key value: aValue ifAbsent: aBlock [
 	"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work. Caller has to remove the empty page!"
 
@@ -196,36 +190,6 @@ SoilBasicBTree >> open [
 { #category : #'instance creation' }
 SoilBasicBTree >> pageClass [
 	^ SoilBTreeDataPage
-]
-
-{ #category : #removing }
-SoilBasicBTree >> removeKey: key value: aValue [
-	^ self
-		removeKey: key 
-		value: aValue
-		ifAbsent: [ KeyNotFound signalFor: key in: self ]
-]
-
-{ #category : #removing }
-SoilBasicBTree >> removeKey: key value: value ifAbsent: aBlock [
-	| return |
-
-	return := self basicRemoveKey: key value: value ifAbsent: aBlock.
-	
-	self dirtyPages copy do: [ :page |
-		"we can remove all empty pages"
-		(page isFreePage not and: [page isEmpty]) ifTrue: [  
-				self cleanPage: page ] ].
-	^return
-]
-
-{ #category : #removing }
-SoilBasicBTree >> removeKeyAll: key ifAbsent: aBlock [
-	"we remove all the entries for key"
-	| all |
-	all := self at: key ifAbsent: [^ aBlock value].
-	all do: [ :each | self basicRemoveKey: key value: each ifAbsent: aBlock ].
-	^all
 ]
 
 { #category : #removing }

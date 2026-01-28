@@ -135,6 +135,17 @@ SoilIndex >> basicRemoveKey: key ifAbsent: aBlock [
 ]
 
 { #category : #removing }
+SoilIndex >> basicRemoveKey: key value: aValue [
+		"Warning: Low level remove. If the page is empty after, the index will not work anymore, as we need minimal one key for search to work. Caller has to remove the empty page!"
+	^ self basicRemoveKey: key value: aValue ifAbsent: nil
+]
+
+{ #category : #removing }
+SoilIndex >> basicRemoveKey: key value: aValue ifAbsent: aBlock [ 
+	^ self subclassResponsibility
+]
+
+{ #category : #removing }
 SoilIndex >> cleanPage: page [
 	page canBeRemoved ifFalse: [ ^self ].
 
@@ -277,6 +288,11 @@ SoilIndex >> initialize [
 ]
 
 { #category : #testing }
+SoilIndex >> isBTree [
+	^ self subclassResponsibility
+]
+
+{ #category : #testing }
 SoilIndex >> isEmpty [
 	^ self store headerPage isEmpty
 ]
@@ -310,6 +326,11 @@ SoilIndex >> last [
 { #category : #accessing }
 SoilIndex >> lastPage [
 	^ self newIterator lastPage
+]
+
+{ #category : #removing }
+SoilIndex >> legacyRemovePage: aPage [ 
+	^ self subclassResponsibility
 ]
 
 { #category : #public }
@@ -475,6 +496,36 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 		(page isFreePage not and: [page isEmpty]) ifTrue: [  
 				self cleanPage: page ] ].
 	^return
+]
+
+{ #category : #removing }
+SoilIndex >> removeKey: key value: aValue [
+	^ self
+		removeKey: key 
+		value: aValue
+		ifAbsent: [ KeyNotFound signalFor: key in: self ]
+]
+
+{ #category : #removing }
+SoilIndex >> removeKey: key value: value ifAbsent: aBlock [
+	| return |
+
+	return := self basicRemoveKey: key value: value ifAbsent: aBlock.
+	
+	self dirtyPages copy do: [ :page |
+		"we can remove all empty pages"
+		(page isFreePage not and: [page isEmpty]) ifTrue: [  
+				self cleanPage: page ] ].
+	^return
+]
+
+{ #category : #removing }
+SoilIndex >> removeKeyAll: key ifAbsent: aBlock [
+	"we remove all the entries for key"
+	| all |
+	all := self at: key ifAbsent: [^ aBlock value].
+	all do: [ :each | self basicRemoveKey: key value: each ifAbsent: aBlock ].
+	^all
 ]
 
 { #category : #removing }

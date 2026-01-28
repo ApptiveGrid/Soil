@@ -676,7 +676,7 @@ SoilSkipListTest >> testRemoveKey [
 	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
 
 	removed := index removeKey: 20.
-	self assert: removed equals: (20 asByteArrayOfSize: 8).
+	self assertSoilDuplicate: removed equals: (20 asByteArrayOfSize: 8).
 
 	self assertSoilDuplicate: (index at: 1) equals: (1 asByteArrayOfSize: 8).
 	self assertSoilDuplicate: (index at: capacity) equals: (capacity asByteArrayOfSize: 8).
