@@ -641,8 +641,6 @@ SoilSkipListTest >> testRecyclePage [
 SoilSkipListTest >> testRemoveAllFromPage [
 
 	| entries |
-	uniqueKeys ifFalse: [ ^self skip]. "To check: error with duplicate keys"
-	
 	"We test that after removing all entries from one page, #nextAssociation will continue to the next page"
 	index keySize: 1016. "huge keySize forces multiple pages"
 	entries := #( 104 247 56 281 61 286 66 337 308 1 400 272 347 335 45

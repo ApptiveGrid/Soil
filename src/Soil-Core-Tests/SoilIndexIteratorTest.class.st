@@ -263,7 +263,7 @@ SoilIndexIteratorTest >> testFind [
 SoilIndexIteratorTest >> testFindAndNext2 [
 
 	| capacity iterator values |
-	index uniqueKeys ifFalse: [ self skip ].
+
 	capacity := index firstPage itemCapacity * 2.
 	1 to: capacity do: [ :n | index at: n add: n asDummySoilObjectId ].
 	iterator := index newIterator.
@@ -584,7 +584,6 @@ SoilIndexIteratorTest >> testLastWithRemovedItem [
 SoilIndexIteratorTest >> testNext [
 
 	| capacity iterator value |
-	index uniqueKeys ifFalse: [ self skip ].
 
 	"test empty index"
 	iterator := index newIterator.
@@ -610,7 +609,6 @@ SoilIndexIteratorTest >> testNext [
 SoilIndexIteratorTest >> testNextAfter [
 
 	| iterator |
-	index uniqueKeys ifFalse: [ self skip ].
 	"first empty dict"
 	iterator := index newIterator.
 	self assert: (iterator nextAfter: 10) equals: nil.
@@ -629,7 +627,6 @@ SoilIndexIteratorTest >> testNextAfter [
 SoilIndexIteratorTest >> testNextAssociation [
 
 	| capacity iterator value |
-	index uniqueKeys ifFalse: [ self skip ].
 	"test empty index"
 	iterator := index newIterator.
 	self assert: iterator nextAssociation isNil.
@@ -656,7 +653,6 @@ SoilIndexIteratorTest >> testNextAssociation [
 SoilIndexIteratorTest >> testNextAssociationAfter [
 
 	| iterator |
-	index uniqueKeys ifFalse: [ self skip ].
 		
 	"first empty dict"
 	iterator := index newIterator.
@@ -757,7 +753,6 @@ SoilIndexIteratorTest >> testNextPage [
 SoilIndexIteratorTest >> testPrevious [
 
 	| capacity iterator value toFind |
-	index uniqueKeys ifFalse: [ self skip ].
 
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n | index at: n add: n  asDummySoilObjectId ].
@@ -795,7 +790,6 @@ SoilIndexIteratorTest >> testPrevious5 [
 SoilIndexIteratorTest >> testPreviousAssociation [
 
 	| capacity iterator value toFind |
-	index uniqueKeys ifFalse: [ self skip ].
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
 	iterator := index newIterator.
@@ -820,7 +814,6 @@ SoilIndexIteratorTest >> testPreviousAssociation [
 SoilIndexIteratorTest >> testPreviousAssociationFirstPage [
 
 	| capacity iterator value |
-	index uniqueKeys ifFalse: [ self skip ].
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
 
@@ -844,7 +837,6 @@ SoilIndexIteratorTest >> testPreviousAssociationNonBoundary [
 	"check previousAssociation where we have to *not* cross a page boundary"
 
 	| capacity iterator value toFind |
-	index uniqueKeys ifFalse: [ self skip ].
 	capacity := index headerPage itemCapacity * 2.
 	1 to: capacity do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
 	iterator := index newIterator.
