@@ -193,7 +193,7 @@ SoilIndexIterator >> find: key ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexIterator >> findAll: key ifAbsent: aBlock [ 
-	| indexKey assoc values return |
+	| indexKey assoc values |
 	indexKey := index indexKey: key.
 	self findPageFor: indexKey.
 	currentPageIndex := currentPage indexOfKey: indexKey.
@@ -207,18 +207,14 @@ SoilIndexIterator >> findAll: key ifAbsent: aBlock [
 	"now we are on the first item with the key"
 	values := OrderedCollection new.
 	[ assoc notNil and: [ assoc key = indexKey ] ] whileTrue: [ 
-		values add: assoc value.
+		| toAdd |
+		toAdd := self convertValue: (self restoreItem: assoc) value.
+		toAdd ifNotNil: [values add: toAdd].
 		assoc := self basicNextAssociation
 	 ].
 	assoc ifNotNil: [self basicPreviousAssociation].
-	
-	return := OrderedCollection new.
-	values do: [ :value | |item todAdd |
-		item := self restoreItem: currentKey -> value.
-		todAdd := self convertValue: item value.
-		todAdd ifNotNil: [ return add: todAdd ] ].
 		
-	^ return ifEmpty: aBlock 
+	^ values ifEmpty: aBlock 
 ]
 
 { #category : #private }
