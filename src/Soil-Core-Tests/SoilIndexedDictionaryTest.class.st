@@ -371,7 +371,17 @@ SoilIndexedDictionaryTest >> testDoWithTransAction [
 	tx1 root  do: [ :each |
 		self assert: (each beginsWith: 'bar').
 		counter := counter + 1].
-	self assert: counter equals: 2
+	self assert: counter equals: 2.
+	
+	"we can remove the key in tx1, were it still exists"
+	tx1 root removeKey: #one.
+	counter := 0.
+	tx1 root do: [ :each |
+		self assert: (each beginsWith: 'bar').
+		counter := counter + 1].
+	self assert: counter equals: 1.
+	
+	
 ]
 
 { #category : #tests }
