@@ -105,7 +105,6 @@ SoilBasicBTree >> keySize: anInteger [
 SoilBasicBTree >> legacyRemovePage: aPage [
 	| previousPage |
 	(aPage offset > 1) ifFalse: [ ^ aPage ].
-	(aPage version < 3) ifTrue: [ ^ self legacyRemovePage: aPage ].
 	
 	aPage isIndexPage ifTrue: [ 
 		"index pages have no prev or next and are empty when we reach here"
@@ -119,7 +118,7 @@ SoilBasicBTree >> legacyRemovePage: aPage [
 	self addDirtyPage: previousPage.
 	"now remove all keys, this will update the index pages"
 	
-	aPage items reverseDo: [ :item | item ifNotNil: [self basicRemoveKey: item key]  ].
+	aPage items reverseDo: [ :item | item ifNotNil: [self basicRemoveKey: item key value: item value  ]].
 	"remove the page from the store"
 	store removePageAt: aPage offset.
 	^ aPage 

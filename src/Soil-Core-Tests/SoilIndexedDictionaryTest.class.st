@@ -249,9 +249,9 @@ SoilIndexedDictionaryTest >> testAtIndexWithTransaction [
 
 ]
 
-{ #category : #tests }
-SoilIndexedDictionaryTest >> testConcurrentAddKey [ 
-	| tx1 tx2 tx3 |
+{ #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testConcurrentAddKey [
+	| tx1 tx2 tx3 tx4 |
 	tx1 := soil newTransaction.
 	tx1 root: dict.
 	dict
@@ -265,10 +265,16 @@ SoilIndexedDictionaryTest >> testConcurrentAddKey [
 		at: #two put: #twovalue.
 	tx3 commit.
 	self assert: (tx2 root at: #one) equals: #onevalue.
-	self assert: (tx2 root at: #two ifAbsent: [ #notfound ]) equals: #notfound
+	self assert: (tx2 root at: #two ifAbsent: [ #notfound ]) equals: #notfound.
+	
+	"new transactions sees both"
+	tx4 := soil newTransaction.
+	self assert: (tx4 root at: #one) equals: #onevalue.
+	self assert: (tx4 root at: #two) equals: #twovalue.
+	
 ]
 
-{ #category : #tests }
+{ #category : #'tests - concurrent' }
 SoilIndexedDictionaryTest >> testConcurrentDo [
 	| tx1 tx2 tx3 col |
 	tx1 := soil newTransaction.
@@ -293,7 +299,7 @@ SoilIndexedDictionaryTest >> testConcurrentDo [
 	self assert: (col noneSatisfy: [:each | each = #fiveValue ])
 ]
 
-{ #category : #tests }
+{ #category : #'tests - concurrent' }
 SoilIndexedDictionaryTest >> testConcurrentIsEmpty [ 
 	| tx1 tx2 tx3 |
 	tx1 := soil newTransaction.
@@ -312,7 +318,7 @@ SoilIndexedDictionaryTest >> testConcurrentIsEmpty [
 	self assert: tx2 root size equals: 1
 ]
 
-{ #category : #tests }
+{ #category : #'tests - concurrent' }
 SoilIndexedDictionaryTest >> testConcurrentRemoveKey [
 	| tx1 tx2 tx3 |
 	tx1 := soil newTransaction.
@@ -332,7 +338,7 @@ SoilIndexedDictionaryTest >> testConcurrentRemoveKey [
 
 ]
 
-{ #category : #tests }
+{ #category : #'tests - concurrent' }
 SoilIndexedDictionaryTest >> testDoWithTransAction [
 	| tx tx1 tx2 counter |
 	
@@ -776,11 +782,13 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeysAdd [
 	tx2 commit.
 	"and test last, note: keyorder"
 	self assert: (blockedTx root at: #testkey) size equals: 3.
+	self assertCollection: ((blockedTx root at: #testkey) collect: #yourself) hasSameElements: #('one' 'two' 'three').
 	
 	"we can now start new transaction and see the state as commited in tx2"
 	tx3 := soil newTransaction.
 	values := tx3 root at: #testkey.
 	self assert: values class equals: OrderedCollection.
+	self assertCollection: (values collect: #yourself) hasSameElements: #('one' 'two' 'three' 'four').
 	self assert: values size equals: 4
 ]
 
@@ -810,7 +818,7 @@ SoilIndexedDictionaryTest >> testRemoveKey [
 
 ]
 
-{ #category : #tests }
+{ #category : #'tests - concurrent' }
 SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 
 	| tx tx2 |

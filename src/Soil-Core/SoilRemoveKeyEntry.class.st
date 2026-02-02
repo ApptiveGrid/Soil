@@ -1,3 +1,8 @@
+"
+Logs removal of a key (or key-value in multikey mode).
+
+Removal is Logged by the indexed dictionary when overriding an entry with a SoilRemovedID.
+"
 Class {
 	#name : #SoilRemoveKeyEntry,
 	#superclass : #SoilIndexJournalEntry,

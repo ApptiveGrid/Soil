@@ -67,8 +67,8 @@ SoilGraphExporter >> migrate: aClass to: aBlock [
 
 ]
 
-{ #category : #'as yet unclassified' }
-SoilGraphExporter >> migrateAll: aCollection to: aBlock [ 
+{ #category : #api }
+SoilGraphExporter >> migrateAll: aCollection to: aBlock [
 	aCollection do: [ :cls |
 		self migrate: cls to: aBlock  ]
 ]
@@ -93,7 +93,7 @@ SoilGraphExporter >> migrateCluster: cluster [
 	^ newCluster
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #api }
 SoilGraphExporter >> skipIndexes: aCollection [ 
 	indexesToSkip := aCollection collect: [ :each |
 		(each class == SoilObjectId)
