@@ -9,7 +9,7 @@ SoilDatabaseMigration class >> migratesFormatVersion [
 	self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilDatabaseMigration class >> migratesVersion: anInteger [ 
 	^ self allSubclasses 
 		detect: [ :each | each migratesFormatVersion = anInteger ]

@@ -480,6 +480,9 @@ SoilIndex >> removeDirtyPage: aPage [
 
 { #category : #removing }
 SoilIndex >> removeKey: key [
+
+	"Pages can not be empty, we have to check for empty page up after every remove. This is very slow!
+	NOTE: this is just used for tests, the Soil DB implements remove on the level of the Iterator which tags  entries as removed and cleans up empty pages on commit"
 	^ self
 		removeKey: key 
 		ifAbsent: [ KeyNotFound signalFor: key in: self ]
@@ -487,8 +490,10 @@ SoilIndex >> removeKey: key [
 
 { #category : #removing }
 SoilIndex >> removeKey: key ifAbsent: aBlock [
-	| return |
 
+	"Pages can not be empty, we have to check for empty page up after every remove. This is very slow!
+	NOTE: this is just used for tests, the Soil DB implements remove on the level of the Iterator which tags entries as removed and cleans up empty pages on commit"
+	| return |
 	return := self basicRemoveKey: key ifAbsent: aBlock.
 	
 	self dirtyPages copy do: [ :page |
@@ -500,6 +505,9 @@ SoilIndex >> removeKey: key ifAbsent: aBlock [
 
 { #category : #removing }
 SoilIndex >> removeKey: key value: aValue [
+
+	"Pages can not be empty, we have to check for empty page up after every remove. This is very slow!
+	NOTE: this is just used for tests, the Soil DB implements remove on the level of the Iterator which tags entries as removed and cleans up empty pages on commit"
 	^ self
 		removeKey: key 
 		value: aValue
@@ -508,8 +516,10 @@ SoilIndex >> removeKey: key value: aValue [
 
 { #category : #removing }
 SoilIndex >> removeKey: key value: value ifAbsent: aBlock [
+	
+	"Pages can not be empty, we have to check for empty page up after every remove. This is very slow!
+	NOTE: this is just used for tests, the Soil DB implements remove on the level of the Iterator which tags entries as removed and cleans up empty pages on commit"
 	| return |
-
 	return := self basicRemoveKey: key value: value ifAbsent: aBlock.
 	
 	self dirtyPages copy do: [ :page |

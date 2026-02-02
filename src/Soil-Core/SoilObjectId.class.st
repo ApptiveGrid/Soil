@@ -7,6 +7,11 @@ for now, we fix the segment id to be the 16 upper bits and the index be 48 lower
 
 Segment 0 is use for meta data (e.g SoilBehaviorDescription), while domain objects are in Segment 1.
 
+There are two special IDs: removed and root
+
+- removedID is 0:0, they are created as instances of SoilRemovedObjectId with the id of the removed value as additional state, but if loaded from disk as normal SoilObjectID instances 0:0.
+- the object ID of the root object is 1:1, creating of this ID always returns the same instance
+
 "
 Class {
 	#name : #SoilObjectId,
