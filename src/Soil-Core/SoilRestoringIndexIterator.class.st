@@ -32,7 +32,7 @@ SoilRestoringIndexIterator class >> on: aSoilIndex [
 { #category : #private }
 SoilRestoringIndexIterator >> historicValueFor: item [
  	"a removed value will return item with value ObjectId 0:0"
-	 | journalEntries |
+	 | journalEntry |
  	readVersion ifNil: [ ^ item ].
  	(self currentPage isOlderThan: readVersion) ifTrue: [ 
  			"all modifications to this page have been done before we
@@ -43,12 +43,12 @@ SoilRestoringIndexIterator >> historicValueFor: item [
  	"we determine all changes between our transaction and the
  	last one modifying the page. if we get back changes for the
  	key the value of the oldes entry has the value it had before"
-	journalEntries := self 
- 			journalEntriesFor: item
+	journalEntry := self 
+ 			lastJournalEntriesFor: item
  			startingAt: self currentPage lastTransaction.
 			
- 	journalEntries ifEmpty: [^ item].
-	^ item key -> journalEntries last oldValue
+ 	journalEntry ifNil: [^ item].
+	^ item key -> journalEntry oldValue 
 ]
 
 { #category : #accessing }
@@ -57,18 +57,21 @@ SoilRestoringIndexIterator >> journal: aSoilPersistentDatabaseJournal [
 ]
 
 { #category : #accessing }
-SoilRestoringIndexIterator >> journalEntriesFor: item startingAt: anInteger [ 
-	| transactionId entries |
-	entries := OrderedCollection new.
+SoilRestoringIndexIterator >> lastJournalEntriesFor: item startingAt: anInteger [
+
+	"return the journal entry that logged the add or removed that changed the entry from the state of the last commited transaction, the oldValue of this entry is what we need to restore the state of the entry"
+
+	| transactionId lastEntry |
+	
 	transactionId := anInteger.
 	[ transactionId > readVersion ] whileTrue: [  
 		(journal transactionJournalAt: transactionId) entries do: [ :each | 
 			((each class == SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
 			(each isForItem: item) ifTrue: [ 
-					entries add: each ] ]  ].
+					lastEntry := each] ]  ].
 		transactionId := transactionId - 1.
 	].
-   ^ entries
+   ^ lastEntry
 ]
 
 { #category : #accessing }
