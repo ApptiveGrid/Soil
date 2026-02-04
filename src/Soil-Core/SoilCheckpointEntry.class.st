@@ -24,7 +24,7 @@ SoilCheckpointEntry >> checkpointedAt [
 ]
 
 { #category : #committing }
-SoilCheckpointEntry >> commitIn: soil [
+SoilCheckpointEntry >> commitIn: soil recovery: aBoolean [
 	"write all values in the heap to disk"
 	soil writeEverythingToDisk 
 ]

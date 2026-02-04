@@ -15,6 +15,11 @@ SoilIndexJournalEntry class >> isAbstract [
 ]
 
 { #category : #accessing }
+SoilIndexJournalEntry >> address [
+	^ self subclassResponsibility
+]
+
+{ #category : #accessing }
 SoilIndexJournalEntry >> container [
 	^ 'index: ', id asString
 ]

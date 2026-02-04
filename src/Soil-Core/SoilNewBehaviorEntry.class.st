@@ -18,8 +18,8 @@ SoilNewBehaviorEntry >> address [
 	^ identifier 
 ]
 
-{ #category : #commiting }
-SoilNewBehaviorEntry >> commitIn: soil [ 
+{ #category : #committing }
+SoilNewBehaviorEntry >> commitIn: soil recovery: aBoolean [
 	soil behaviorRegistry 
 		nameAt: identifier  
 		put: objectId 

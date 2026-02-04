@@ -10,7 +10,7 @@ SoilNewBTreeListIndexEntry class >> journalTypeCode [
 ]
 
 { #category : #committing }
-SoilNewBTreeListIndexEntry >> commitIn: soil [
+SoilNewBTreeListIndexEntry >> commitIn: soil recovery: aBoolean [
 
 	| index indexManager |
 	indexManager := (soil objectRepository segmentAt: segment) indexManager.
