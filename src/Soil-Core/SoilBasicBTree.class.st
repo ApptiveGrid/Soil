@@ -21,6 +21,7 @@ SoilBasicBTree class >> isAbstract [
 SoilBasicBTree >> asCopyOnWrite [
 	^ SoilCopyOnWriteBTree new
 		wrapped: self;
+		id: id;
 		yourself 
 ]
 
