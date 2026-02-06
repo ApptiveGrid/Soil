@@ -67,7 +67,7 @@ SoilRestoringIndexIterator >> lastJournalEntriesFor: item startingAt: anInteger 
 	[ transactionId > readVersion ] whileTrue: [  
 		(journal transactionJournalAt: transactionId) entries do: [ :each | 
 			((each class == SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
-			(each isForItem: item) ifTrue: [ 
+			(each isForItem: item index: index id) ifTrue: [  
 					lastEntry := each] ]  ].
 		transactionId := transactionId - 1.
 	].

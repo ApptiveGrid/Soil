@@ -726,6 +726,45 @@ SoilIndexedDictionaryTest >> testRecoverAddedKeys [
 
 ]
 
+{ #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testRecoverAddedKeysTwoLists [
+	| dict2 tx tx2 blockedTx |
+	"We test that restore does not confuse indexes"
+	
+	dict2 := (SoilIndexedDictionary newWithBackend: backend)
+		keySize: 10;
+		maxLevel: 8; "ignored for BTree"
+		yourself.
+	
+	tx := soil newTransaction.
+	tx root: dict.
+	dict 
+		at: #secondDict put: dict2.
+	
+	dict2
+		at: #testkey1 put: 'one'.
+	
+	dict 
+		at: #testkey1 put: 1.
+		
+	tx commit.
+	
+	"we opem a blocked transaction that will be used to trigger restore"
+	blockedTx := soil newTransaction.
+
+	"open a second transaction, here we set the same key to the same values in both lists
+	this will add two entries to the transaction log with the same key->value but different oldValue"
+	tx2 := soil newTransaction.
+	(tx2 root at: #secondDict) at: #testkey1 put: 'changed'.
+	tx2 root 
+		at: #testkey1 put: 'changed'.
+	tx2 commit.
+	"Now we read #testKey1 in the blockedtransaction, triggereing the restore, 
+	if restore would not take the index id into account we would get the wrong value"
+	self assert: ((blockedTx root at: #secondDict) at: #testkey1) equals: 'one'.
+	self assert: (blockedTx root at: #testkey1) yourself equals: 1.
+]
+
 { #category : #tests }
 SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeys [
 	| tx tx2 blockedTx values tx3 |
