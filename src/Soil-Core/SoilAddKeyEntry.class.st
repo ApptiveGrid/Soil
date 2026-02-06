@@ -36,7 +36,7 @@ SoilAddKeyEntry >> context [
 
 { #category : #testing }
 SoilAddKeyEntry >> isForItem: anItem index: indexId [
-	(id ~= indexId) ifTrue: [ ^false ].
+	id = indexId ifFalse: [ ^false ].
 	^ 	key = anItem key and: [value = anItem value]
 ]
 
