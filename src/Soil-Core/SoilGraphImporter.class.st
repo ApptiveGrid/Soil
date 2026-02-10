@@ -7,7 +7,8 @@ Class {
 		'lastIndex',
 		'idMap',
 		'newId',
-		'metaSegment'
+		'metaSegment',
+		'oids'
 	],
 	#category : #'Soil-Core-Error'
 }
@@ -17,6 +18,10 @@ SoilGraphImporter >> import [
 	lastIndex := Array new: 2.
 	lastIndex at: 1 put: (transaction objectRepository metaSegment) lastObjectIndex.
 	lastIndex at: 2 put: (transaction objectRepository segmentAt: 1) lastObjectIndex.
+	
+	oids := Array new: stream next.
+	1 to: oids size do: [ :n |
+		oids at: n put: (SoilObjectId readFrom: stream) ].
 
 	[ stream atEnd ] whileFalse: [ 
 		self readCluster ].
@@ -40,7 +45,7 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 					presentBehavior 
 						transaction: transaction;
 						materializeObject.
-					(presentBehavior object hasSameShape: cluster object )
+					(presentBehavior object matchesDescription: cluster object )
 						ifTrue: [ 
 							"Behaviors have the same shape so we can adapt the objectId of the 
 							present behavior and the version"
@@ -101,6 +106,11 @@ SoilGraphImporter >> newObjectIdFor: aSoilObjectId version: anInteger [
 				version: anInteger  ]
 ]
 
+{ #category : #accessing }
+SoilGraphImporter >> oids [
+	^ oids
+]
+
 { #category : #importing }
 SoilGraphImporter >> presentBehaviorWithName: aSymbol [
 	^ soil behaviorRegistry 
@@ -151,7 +161,7 @@ SoilGraphImporter >> readCluster [
 	soil objectRepository 
 		at: cluster objectId 
 		putBytes: cluster serialize.
-	(stream next = 255) ifFalse: [ self halt ].
+	(stream next == 255) ifFalse: [ self halt ].
 ]
 
 { #category : #accessing }

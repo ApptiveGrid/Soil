@@ -102,7 +102,7 @@ SoilIndexedDictionary >> first: anInteger [
 { #category : #testing }
 SoilIndexedDictionary >> hasIndexUpdates [
 	self isRegistered ifFalse: [ ^ true ].
-	^ newValues notEmpty or: [ removedValues notEmpty ]
+	^ (newValues notNil and: [newValues notEmpty]) or: [ removedValues notEmpty ]
 ]
 
 { #category : #accessing }

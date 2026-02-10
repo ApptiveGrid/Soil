@@ -9,10 +9,17 @@ Class {
 		'versionMap',
 		'indexesToSkip',
 		'behaviors',
-		'clusters'
+		'clusters',
+		'oids'
 	],
 	#category : #'Soil-Core-Error'
 }
+
+{ #category : #adding }
+SoilGraphExporter >> addObjectId: aSoilObjectId [ 
+	oids ifNil: [ oids := OrderedCollection new ].
+	oids add: aSoilObjectId 
+]
 
 { #category : #visiting }
 SoilGraphExporter >> behaviorAt: index [ 
@@ -23,7 +30,16 @@ SoilGraphExporter >> behaviorAt: index [
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #actions }
+SoilGraphExporter >> export [
+	stream nextPut: oids size.
+	oids do: [ :oid |
+		oid writeOn: stream ].
+	self processObjectId: oids first.
+	self processLoop 
+]
+
+{ #category : #actions }
 SoilGraphExporter >> export: aSoilObjectId [ 
 	self processObjectId: aSoilObjectId.
 	self processLoop 
@@ -48,14 +64,14 @@ SoilGraphExporter >> isUpToDateCluster: aCluster [
 		objectId version = (versionMap at: objectId asSoilObjectId ifAbsent: false ) ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilGraphExporter >> metaSegment [ 
 	^ metaSegment ifNil: [ 
 		metaSegment := soil objectRepository metaSegment ].
 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #private }
 SoilGraphExporter >> migrate: aClass to: aBlock [ 
 	"lookup the objectID of the behavior and store it 
 	along with the block "
@@ -96,7 +112,7 @@ SoilGraphExporter >> migrateCluster: cluster [
 { #category : #'as yet unclassified' }
 SoilGraphExporter >> skipIndexes: aCollection [ 
 	indexesToSkip := aCollection collect: [ :each |
-		(each class = SoilObjectId)
+		(each class == SoilObjectId)
 			ifTrue: [ each ]
 			ifFalse: [ transaction objectIdOf: each  ] ]
 ]

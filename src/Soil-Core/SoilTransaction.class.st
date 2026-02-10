@@ -331,6 +331,11 @@ SoilTransaction >> initialize [
 	indexUpdatesToCommit := OrderedCollection new
 ]
 
+{ #category : #initialization }
+SoilTransaction >> initializeBasic [ 
+	recordsToCommit := OrderedCollection new
+]
+
 { #category : #api }
 SoilTransaction >> initializeObjectId: anObjectId [
 	| segment assoc |
