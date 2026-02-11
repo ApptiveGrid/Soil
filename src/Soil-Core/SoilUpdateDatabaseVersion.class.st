@@ -19,11 +19,6 @@ SoilUpdateDatabaseVersion >> address [
 ]
 
 { #category : #committing }
-SoilUpdateDatabaseVersion >> commitIn: soil [ 
-	Error signal: 'this sould not be called'
-]
-
-{ #category : #committing }
 SoilUpdateDatabaseVersion >> commitIn: soil recovery: aBoolean [
 	aBoolean 
 		ifTrue: [ soil control updateDatabaseVersion: databaseVersion ]

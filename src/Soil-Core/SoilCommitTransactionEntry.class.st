@@ -18,7 +18,8 @@ SoilCommitTransactionEntry >> address [
 ]
 
 { #category : #committing }
-SoilCommitTransactionEntry >> commitIn: soil [
+SoilCommitTransactionEntry >> commitIn: soil recovery: aBoolean [
+	"nothinng to do"
 ]
 
 { #category : #accessing }

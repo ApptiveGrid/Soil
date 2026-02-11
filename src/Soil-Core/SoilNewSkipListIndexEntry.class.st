@@ -13,7 +13,7 @@ SoilNewSkipListIndexEntry class >> journalTypeCode [
 ]
 
 { #category : #committing }
-SoilNewSkipListIndexEntry >> commitIn: soil [
+SoilNewSkipListIndexEntry >> commitIn: soil recovery: aBoolean [
 
 	| index indexManager |
 	indexManager := (soil objectRepository segmentAt: segment) indexManager.

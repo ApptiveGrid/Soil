@@ -19,7 +19,7 @@ SoilBeginTransactionEntry >> address [
 ]
 
 { #category : #committing }
-SoilBeginTransactionEntry >> commitIn: soil [ 
+SoilBeginTransactionEntry >> commitIn: soil recovery: aBoolean [
 ]
 
 { #category : #accessing }

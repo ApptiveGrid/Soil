@@ -20,7 +20,7 @@ SoilAddKeyEntry >> address [
 ]
 
 { #category : #committing }
-SoilAddKeyEntry >> commitIn: soil [
+SoilAddKeyEntry >> commitIn: soil recovery: aBoolean [
 
 	| index |
 	index := (soil objectRepository segmentAt: self segment) indexAt: id.
