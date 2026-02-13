@@ -7,7 +7,9 @@ Class {
 		'lastIndex',
 		'idMap',
 		'newId',
-		'metaSegment'
+		'metaSegment',
+		'oids',
+		'clusters'
 	],
 	#category : #'Soil-Core-Error'
 }
@@ -17,9 +19,14 @@ SoilGraphImporter >> import [
 	lastIndex := Array new: 2.
 	lastIndex at: 1 put: (transaction objectRepository metaSegment) lastObjectIndex.
 	lastIndex at: 2 put: (transaction objectRepository segmentAt: 1) lastObjectIndex.
+	clusters := OrderedCollection new.
+	oids := Array new: stream next.
+	1 to: oids size do: [ :n |
+		oids at: n put: (SoilObjectId readFrom: stream) ].
+self halt.
 
 	[ stream atEnd ] whileFalse: [ 
-		self readCluster ].
+		clusters add: self readCluster ].
 	
 	soil objectRepository firstSegment updateLastObjectIndex: (lastIndex at: 2)
 ]
@@ -125,7 +132,7 @@ SoilGraphImporter >> readBehaviorDescription [
 
 { #category : #importing }
 SoilGraphImporter >> readCluster [
-	| objectId cluster keySize valueSize index maxLevel originalOid |
+	| objectId cluster keySize valueSize index maxLevel originalOid serialized |
 	originalOid := SoilObjectId readFrom: stream.
 	objectId := self newObjectIdFor: originalOid.
 	newId ifNil: [newId := objectId ].
@@ -148,10 +155,11 @@ SoilGraphImporter >> readCluster [
 		index writePages  ].
 	cluster behaviorDescriptions: (cluster behaviorDescriptions collect: [ :bd |
 		 idMap at: bd objectId asSoilObjectId ]).
+	serialized := cluster serialize.
 	soil objectRepository 
 		at: cluster objectId 
-		putBytes: cluster serialize.
-	(stream next = 255) ifFalse: [ self halt ].
+		putBytes: serialized.
+	^ cluster 
 ]
 
 { #category : #accessing }

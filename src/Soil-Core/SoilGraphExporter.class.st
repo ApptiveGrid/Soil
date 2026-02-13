@@ -9,7 +9,9 @@ Class {
 		'versionMap',
 		'indexesToSkip',
 		'behaviors',
-		'clusters'
+		'clusters',
+		'oids',
+		'oidsToIgnore'
 	],
 	#category : #'Soil-Core-Error'
 }
@@ -21,6 +23,17 @@ SoilGraphExporter >> behaviorAt: index [
 		ifAbsentPut: [ 
 			 transaction materializeRecord: (self metaSegment at: index) ]
 
+]
+
+{ #category : #actions }
+SoilGraphExporter >> export [
+	stream nextPut: oids size. 
+	oids do: [ :oid |
+		oid writeOn: stream .
+		self processObjectId: oid.
+		self processLoop ]
+	"self processObjectId: oids first."
+"	self processLoop "
 ]
 
 { #category : #'as yet unclassified' }
@@ -37,6 +50,7 @@ SoilGraphExporter >> initialize [
 	indexesToSkip := OrderedCollection new.
 	behaviors := Dictionary new.
 	clusters := 0.
+	oidsToIgnore := OrderedCollection new.
 ]
 
 { #category : #visiting }
@@ -99,6 +113,11 @@ SoilGraphExporter >> skipIndexes: aCollection [
 		(each class = SoilObjectId)
 			ifTrue: [ each ]
 			ifFalse: [ transaction objectIdOf: each  ] ]
+]
+
+{ #category : #'as yet unclassified' }
+SoilGraphExporter >> skipObjectIds: oid [
+	oidsToIgnore add: oid 
 ]
 
 { #category : #accessing }
@@ -168,6 +187,7 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 		serializeOn: stream .
 	"for all indexes being used remember the index setting for it "
 	cluster references do: [ :reference |
+		(oidsToIgnore includes: reference) ifTrue: [ self halt ].
 		self processObjectId: reference ].
 	cluster indexIds ifNotEmpty: [ 
 		cluster object ifNil: [  
