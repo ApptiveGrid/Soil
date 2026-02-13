@@ -53,8 +53,7 @@ SoilIndexedDictionary >> at: key put: anObject [
 
 	| objectId oldValue |
 	objectId := transaction makeRoot: anObject.
-	(self newIterator at: key add: objectId) ifNotNil: [ :value |
-		oldValue := value ].
+	oldValue := self newIterator at: key add: objectId.
 
 	transaction addJournalEntry: (SoilAddKeyEntry new
 			 segment: [ self segment ];
