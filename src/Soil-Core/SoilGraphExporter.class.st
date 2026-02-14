@@ -10,20 +10,20 @@ Class {
 		'indexesToSkip',
 		'behaviors',
 		'clusters',
-		'oids',
-		'replacements'
+		'replacements',
+		'toBeExported'
 	],
 	#category : #'Soil-Core-Error'
 }
 
 { #category : #adding }
 SoilGraphExporter >> addObject: anObject [ 
-	oids add: (transaction objectIdOf: anObject)
+	self addObjectId: (transaction objectIdOf: anObject)
 ]
 
 { #category : #adding }
 SoilGraphExporter >> addObjectId: aSoilObjectId [ 
-	oids add: aSoilObjectId 
+	toBeExported add: aSoilObjectId 
 ]
 
 { #category : #adding }
@@ -44,16 +44,23 @@ SoilGraphExporter >> behaviorAt: index [
 
 { #category : #actions }
 SoilGraphExporter >> export [
-	stream nextPut: oids size. 
-	oids do: [ :oid |
+	"export format: 
+	1. exported objects 
+	A list of arbitrary object clusters to be exported"
+	stream nextPut: toBeExported size. 
+	toBeExported do: [ :oid |
 		oid writeOn: stream .
 		self processObjectId: oid ].
+	"2. non-mapped objects
+	These are objects that will not be serialized but still have 
+	references in clusters to it. This is to prevent exporting all
+	of the graph. The dangeling references need to be re-mapped by
+	the importer"
 	stream nextPut: replacements size.
 	replacements do: [ :oid |
 		oid writeOn: stream ].
+	"Now write out all reachable clusters but not the non-mapped"
 	self processLoop
-	"self processObjectId: oids first."
-"	self processLoop "
 ]
 
 { #category : #'as yet unclassified' }
@@ -70,7 +77,7 @@ SoilGraphExporter >> initialize [
 	indexesToSkip := OrderedCollection new.
 	behaviors := Dictionary new.
 	clusters := 0.
-	oids := OrderedCollection new.
+	toBeExported := OrderedCollection new.
 	replacements := OrderedCollection new.
 ]
 

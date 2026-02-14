@@ -6,28 +6,35 @@ Class {
 		'transaction',
 		'lastIndex',
 		'idMap',
-		'newId',
 		'metaSegment',
-		'oids',
 		'clusters',
 		'toBeReplaced',
-		'replacements'
+		'replacements',
+		'legacyOids'
 	],
 	#category : #'Soil-Core-Error'
 }
 
 { #category : #importing }
 SoilGraphImporter >> import [
+	"set the last indexes of this database. Importing will not use the objectIds that
+	have been exported. This might waste huge amounts of ids. So we remap all objectIds
+	to ids that come right after the current ones."
 	lastIndex := Array new: 2.
 	lastIndex at: 1 put: (transaction objectRepository metaSegment) lastObjectIndex.
 	lastIndex at: 2 put: (transaction objectRepository segmentAt: 1) lastObjectIndex.
 	clusters := OrderedCollection new.
-	oids := Array new: stream next.
-	1 to: oids size do: [ :n |
-		oids at: n put: (SoilObjectId readFrom: stream) ].
+	"read the list of objejctIds to be imported. This gives us access to the objects that
+	will have different objectids after import"
+	legacyOids := Array new: stream next.
+	1 to: legacyOids size do: [ :n |
+		legacyOids at: n put: (SoilObjectId readFrom: stream) ].
+	"read the list of non-mapped objectIds. Before importing we need to register a local 
+	object for all of these objectids so they can be re-mapped."
 	toBeReplaced := Array new: stream next.
 	1 to: toBeReplaced size do: [ :n |
 		toBeReplaced at: n put: (SoilObjectId readFrom: stream) ].
+	"Now just read all clusters til the end and import them into the object repository"
 	[ stream atEnd ] whileFalse: [ 
 		clusters add: self readCluster ].
 	
@@ -68,6 +75,16 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 				putBytes: (cluster asNewClusterVersion version: 1; serialize) ] 
 ]
 
+{ #category : #'instance creation' }
+SoilGraphImporter >> importedObjects [
+	^ self importedOids collect: [ :each | transaction objectWithId: each ]
+]
+
+{ #category : #'instance creation' }
+SoilGraphImporter >> importedOids [
+	^ legacyOids collect: [ :each | self newObjectIdFor: each ]
+]
+
 { #category : #initialization }
 SoilGraphImporter >> initialize [ 
 	super initialize.
@@ -80,11 +97,6 @@ SoilGraphImporter >> metaSegment [
 	^ metaSegment ifNil: [  
 		metaSegment := soil objectRepository metaSegment ]
 
-]
-
-{ #category : #accessing }
-SoilGraphImporter >> newId [
-	^ newId
 ]
 
 { #category : #'instance creation' }
@@ -110,16 +122,6 @@ SoilGraphImporter >> newObjectIdFor: aSoilObjectId version: anInteger [
 				segment: aSoilObjectId segment;
 				index: (lastIndex at: (aSoilObjectId segment + 1) put: current + 1);
 				version: anInteger  ]
-]
-
-{ #category : #'instance creation' }
-SoilGraphImporter >> newObjects [
-	^ self newOids collect: [ :each | transaction objectWithId: each ]
-]
-
-{ #category : #'instance creation' }
-SoilGraphImporter >> newOids [
-	^ oids collect: [ :each | self newObjectIdFor: each ]
 ]
 
 { #category : #importing }
@@ -149,7 +151,6 @@ SoilGraphImporter >> readCluster [
 	| objectId cluster keySize valueSize index maxLevel originalOid serialized |
 	originalOid := SoilObjectId readFrom: stream.
 	objectId := self newObjectIdFor: originalOid.
-	newId ifNil: [newId := objectId ].
 	(stream next: 8) asInteger timesRepeat: [ 
 		 self readBehaviorDescription ].
 	cluster := (SoilPersistentClusterVersion new readFrom: stream)
@@ -191,5 +192,6 @@ SoilGraphImporter >> stream: aReadStream [
 
 { #category : #accessing }
 SoilGraphImporter >> transaction: anAGBaseTransaction [ 
-	transaction := anAGBaseTransaction 
+	transaction := anAGBaseTransaction.
+	soil := anAGBaseTransaction soil 
 ]
