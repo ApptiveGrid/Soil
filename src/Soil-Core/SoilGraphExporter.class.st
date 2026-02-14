@@ -11,10 +11,27 @@ Class {
 		'behaviors',
 		'clusters',
 		'oids',
-		'oidsToIgnore'
+		'replacements'
 	],
 	#category : #'Soil-Core-Error'
 }
+
+{ #category : #adding }
+SoilGraphExporter >> addObject: anObject [ 
+	oids add: (transaction objectIdOf: anObject)
+]
+
+{ #category : #adding }
+SoilGraphExporter >> addObjectId: aSoilObjectId [ 
+	oids add: aSoilObjectId 
+]
+
+{ #category : #adding }
+SoilGraphExporter >> addObjects: aCollection [ 
+	aCollection do: [ :each |
+		self addObject: each ]
+	
+]
 
 { #category : #visiting }
 SoilGraphExporter >> behaviorAt: index [ 
@@ -30,8 +47,11 @@ SoilGraphExporter >> export [
 	stream nextPut: oids size. 
 	oids do: [ :oid |
 		oid writeOn: stream .
-		self processObjectId: oid.
-		self processLoop ]
+		self processObjectId: oid ].
+	stream nextPut: replacements size.
+	replacements do: [ :oid |
+		oid writeOn: stream ].
+	self processLoop
 	"self processObjectId: oids first."
 "	self processLoop "
 ]
@@ -50,7 +70,8 @@ SoilGraphExporter >> initialize [
 	indexesToSkip := OrderedCollection new.
 	behaviors := Dictionary new.
 	clusters := 0.
-	oidsToIgnore := OrderedCollection new.
+	oids := OrderedCollection new.
+	replacements := OrderedCollection new.
 ]
 
 { #category : #visiting }
@@ -65,7 +86,7 @@ SoilGraphExporter >> isUpToDateCluster: aCluster [
 { #category : #'as yet unclassified' }
 SoilGraphExporter >> metaSegment [ 
 	^ metaSegment ifNil: [ 
-		metaSegment := soil objectRepository metaSegment ].
+		metaSegment := transaction soil objectRepository metaSegment ].
 
 ]
 
@@ -74,7 +95,7 @@ SoilGraphExporter >> migrate: aClass to: aBlock [
 	"lookup the objectID of the behavior and store it 
 	along with the block "
 	migrationMap 
-		at: (soil behaviorRegistry 
+		at: (transaction soil behaviorRegistry 
 			nameAt: aClass name 
 			ifAbsent: [Error signal: 'no class found']) index 
 		put: aBlock 
@@ -107,17 +128,23 @@ SoilGraphExporter >> migrateCluster: cluster [
 	^ newCluster
 ]
 
+{ #category : #accessing }
+SoilGraphExporter >> processObjectId: oid [ 
+	(replacements includes: oid) ifTrue: [ ^ self ].
+	super processObjectId: oid 
+]
+
+{ #category : #'as yet unclassified' }
+SoilGraphExporter >> replaceObject: anObject [
+	replacements add: (transaction objectIdOf: anObject)
+]
+
 { #category : #'as yet unclassified' }
 SoilGraphExporter >> skipIndexes: aCollection [ 
 	indexesToSkip := aCollection collect: [ :each |
 		(each class = SoilObjectId)
 			ifTrue: [ each ]
 			ifFalse: [ transaction objectIdOf: each  ] ]
-]
-
-{ #category : #'as yet unclassified' }
-SoilGraphExporter >> skipObjectIds: oid [
-	oidsToIgnore add: oid 
 ]
 
 { #category : #accessing }
@@ -133,7 +160,8 @@ SoilGraphExporter >> stream: anObject [
 
 { #category : #accessing }
 SoilGraphExporter >> transaction: aTransaction [ 
-	transaction := aTransaction 
+	transaction := aTransaction.
+	soil := aTransaction soil 
 ]
 
 { #category : #visiting }
@@ -187,7 +215,7 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 		serializeOn: stream .
 	"for all indexes being used remember the index setting for it "
 	cluster references do: [ :reference |
-		(oidsToIgnore includes: reference) ifTrue: [ self halt ].
+		"(oidsToIgnore includes: reference) ifTrue: [ self halt ]."
 		self processObjectId: reference ].
 	cluster indexIds ifNotEmpty: [ 
 		cluster object ifNil: [  
@@ -196,8 +224,6 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 				materializeObject;
 				yourself) ].
 		self visit: cluster object ].
-	stream nextPut: 255.
-
 ]
 
 { #category : #visiting }

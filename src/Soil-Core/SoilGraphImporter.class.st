@@ -9,7 +9,9 @@ Class {
 		'newId',
 		'metaSegment',
 		'oids',
-		'clusters'
+		'clusters',
+		'toBeReplaced',
+		'replacements'
 	],
 	#category : #'Soil-Core-Error'
 }
@@ -23,8 +25,9 @@ SoilGraphImporter >> import [
 	oids := Array new: stream next.
 	1 to: oids size do: [ :n |
 		oids at: n put: (SoilObjectId readFrom: stream) ].
-self halt.
-
+	toBeReplaced := Array new: stream next.
+	1 to: toBeReplaced size do: [ :n |
+		toBeReplaced at: n put: (SoilObjectId readFrom: stream) ].
 	[ stream atEnd ] whileFalse: [ 
 		clusters add: self readCluster ].
 	
@@ -68,7 +71,8 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 { #category : #initialization }
 SoilGraphImporter >> initialize [ 
 	super initialize.
-	idMap := Dictionary new
+	idMap := Dictionary new.
+	replacements := OrderedCollection new
 ]
 
 { #category : #importing }
@@ -108,6 +112,16 @@ SoilGraphImporter >> newObjectIdFor: aSoilObjectId version: anInteger [
 				version: anInteger  ]
 ]
 
+{ #category : #'instance creation' }
+SoilGraphImporter >> newObjects [
+	^ self newOids collect: [ :each | transaction objectWithId: each ]
+]
+
+{ #category : #'instance creation' }
+SoilGraphImporter >> newOids [
+	^ oids collect: [ :each | self newObjectIdFor: each ]
+]
+
 { #category : #importing }
 SoilGraphImporter >> presentBehaviorWithName: aSymbol [
 	^ soil behaviorRegistry 
@@ -142,7 +156,10 @@ SoilGraphImporter >> readCluster [
 		detachFromSegment;
 		objectId: objectId;
 		version: self databaseVersion.
-	cluster references: (cluster references collect: [:id| self newObjectIdFor: id]).
+	cluster references: (cluster references collect: [:id| 
+		(toBeReplaced includes: id) 
+			ifTrue: [ replacements at: (toBeReplaced indexOf: id) ] 
+			ifFalse: [ self newObjectIdFor: id ] ]).
 	cluster indexIds do: [ :indexId |
 		keySize := (stream next: 2) asInteger.
 		valueSize := (stream next: 2) asInteger.
@@ -160,6 +177,11 @@ SoilGraphImporter >> readCluster [
 		at: cluster objectId 
 		putBytes: serialized.
 	^ cluster 
+]
+
+{ #category : #'as yet unclassified' }
+SoilGraphImporter >> replaceObject: anAGUser [ 
+	replacements add: (transaction objectIdOf: anAGUser) 
 ]
 
 { #category : #accessing }
