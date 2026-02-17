@@ -183,7 +183,7 @@ SoilBasicSkipList >> size [
 
 { #category : #private }
 SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
-	| newPage currentPage previousPage nextPageOffset |
+	| newPage currentPage previousPage nextPageOffset nextPage |
 	currentPage := aIterator currentPage.
 	"if we are on the last page and the new key is bigger then the last key 
 	of the page we can append a page and add the new key there. If the key 
@@ -202,7 +202,7 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 		previousPage := (newLevel <= currentPage level)
 			ifTrue: [ currentPage ]
 			ifFalse: [ aIterator levelAt: newLevel ].
-			
+		
 		"add forward link by inserting the new page between the previous
 		page and the next. The right pointer of the previous page becomes
 		the right pointer of the new page and the new page becomes the right
@@ -210,6 +210,9 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 		nextPageOffset := previousPage rightAt: newLevel.
 		newPage rightAt: newLevel put: nextPageOffset.
 		previousPage rightAt: newLevel put: newPage offset.
+
+		(previousPage == currentPage) ifFalse: [ 
+            self addDirtyPage: previousPage ].
 		
 		"add backlink by setting left pointer to the previous page. "
 		newPage leftAt: newLevel put: previousPage offset.
@@ -217,9 +220,10 @@ SoilBasicSkipList >> splitPage: aIterator forKey: aKey [
 		the page first. If right is 0 we would need to add the newPage
 		to the tail sentinel which we didn't model. So we use the header
 		page as holder of the tail sentinel array"
-		((nextPageOffset > 0)
+		nextPage := (nextPageOffset > 0)
 			ifTrue: [ store pageAt: nextPageOffset ]
-			ifFalse: [ store headerPage ])
-				leftAt: newLevel put: newPage offset ].
+			ifFalse: [ store headerPage ].
+		nextPage leftAt: newLevel put: newPage offset.
+		self addDirtyPage: nextPage ].
 	^ newPage 
 ]
