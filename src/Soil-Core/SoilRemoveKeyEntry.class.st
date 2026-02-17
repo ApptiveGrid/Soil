@@ -49,8 +49,9 @@ SoilRemoveKeyEntry >> context [
 ]
 
 { #category : #testing }
-SoilRemoveKeyEntry >> isForItem: anItem [
-	"for multiple keys, we store the oldValue in the removedID"
+SoilRemoveKeyEntry >> isForItem: anItem index: indexId [
+	id = indexId ifFalse: [ ^false ].
+	
 	^ key = anItem key and: [
 		anItem value isRemoved and: [
 			anItem value isRestorable and: [

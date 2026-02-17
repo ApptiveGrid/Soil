@@ -18,6 +18,7 @@ SoilSkipList >> acceptSoil: aSoilVisitor [
 SoilSkipList >> asCopyOnWrite [
 	^ SoilCopyOnWriteSkipList new
 		wrapped: self;
+		id: id;
 		yourself 
 ]
 

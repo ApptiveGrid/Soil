@@ -93,6 +93,7 @@ SoilIndexedDictionary >> createIndexWith: anIndexClass [
 	index := anIndexClass new
 		initializeHeaderPage;
 		valueSize: 8;
+		id: id;
 		yourself
 ]
 
@@ -310,6 +311,7 @@ SoilIndexedDictionary >> soilMaterialized: aMaterializer [
 	transaction := aMaterializer transaction.
 	segment := aMaterializer segment.
 	index := (aMaterializer indexAt: id) asCopyOnWrite.
+	index id: id.
 	dirty := false
 ]
 
