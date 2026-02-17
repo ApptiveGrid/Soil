@@ -37,6 +37,59 @@ SoilBTreePageTest >> testCreationIndex [
 ]
 
 { #category : #tests }
+SoilBTreePageTest >> testDataPageSizeOfHeader [
+	| page bytes |
+	page := SoilBTreeDataPage new 
+		keySize: 8;
+		valueSize: 8;
+		offset: 1;
+		pageSize: 4096.
+	bytes := ByteArray streamContents: [ :stream |
+		page writeHeaderOn: stream ].
+	self assert: bytes size equals: page headerSize 
+]
+
+{ #category : #tests }
+SoilBTreePageTest >> testHeaderPageSizeOfHeader [
+	| page bytes |
+	page := SoilBTreeHeaderPage new 
+		keySize: 8;
+		valueSize: 8;
+		offset: 1;
+		pageSize: 4096;
+		lastPageOffset: 2.
+	bytes := ByteArray streamContents: [ :stream |
+		page writeHeaderOn: stream ].
+	self assert: bytes size equals: page headerSize 
+]
+
+{ #category : #tests }
+SoilBTreePageTest >> testIndexPageSizeOfHeader [
+	| page bytes |
+	page := SoilBTreeIndexPage new 
+		keySize: 8;
+		valueSize: 8;
+		offset: 1;
+		pageSize: 4096.
+	bytes := ByteArray streamContents: [ :stream |
+		page writeHeaderOn: stream ].
+	self assert: bytes size equals: page headerSize 
+]
+
+{ #category : #tests }
+SoilBTreePageTest >> testRootIndexPageSizeOfHeader [
+	| page bytes |
+	page := SoilBTreeRootPage new 
+		keySize: 8;
+		valueSize: 8;
+		offset: 1;
+		pageSize: 4096.
+	bytes := ByteArray streamContents: [ :stream |
+		page writeHeaderOn: stream ].
+	self assert: bytes size equals: page headerSize 
+]
+
+{ #category : #tests }
 SoilBTreePageTest >> testWriteAndRead [
 	| page bytes readPage |
 	page := SoilBTreeDataPage new 
