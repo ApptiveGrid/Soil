@@ -41,12 +41,12 @@ SoilJournalEntry class >> withTypeCode: anInteger [
 
 { #category : #committing }
 SoilJournalEntry >> commitIn: soil [ 
-	self subclassResponsibility 
+	self commitIn: soil recovery: false
 ]
 
 { #category : #committing }
 SoilJournalEntry >> commitIn: soil recovery: aBoolean [
-	self commitIn: soil
+	self subclassResponsibility
 ]
 
 { #category : #initialization }

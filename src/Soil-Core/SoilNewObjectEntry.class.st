@@ -32,7 +32,7 @@ SoilNewObjectEntry >> bytes: aCollection [
 ]
 
 { #category : #committing }
-SoilNewObjectEntry >> commitIn: soil [ 
+SoilNewObjectEntry >> commitIn: soil recovery: aBoolean [
 	position := soil objectRepository  
 		at: objectId 
 		putBytes: bytes.

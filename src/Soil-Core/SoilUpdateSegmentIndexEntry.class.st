@@ -19,11 +19,6 @@ SoilUpdateSegmentIndexEntry >> address [
 ]
 
 { #category : #committing }
-SoilUpdateSegmentIndexEntry >> commitIn: soil [ 
-	Error signal: 'this sould not be called'
-]
-
-{ #category : #committing }
 SoilUpdateSegmentIndexEntry >> commitIn: soil recovery: aBoolean [
 	| segment |
 	segment := soil objectRepository segmentAt: segmentId.
