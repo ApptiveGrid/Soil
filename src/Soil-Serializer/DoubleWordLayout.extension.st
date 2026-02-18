@@ -7,7 +7,7 @@ DoubleWordLayout >> soilBasicMaterialize: aBehaviorDescription with: materialize
 	materializer registerObject: object.
 
 	1 to: basicSize do: [:i | object basicAt: i put: materializer nextLengthEncodedInteger].
-	^object soilMaterialized: materializer
+	^ object
 ]
 
 { #category : #'*Soil-Serializer' }

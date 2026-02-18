@@ -7,7 +7,7 @@ FixedLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer [
 	materializer registerObject: object.
 
 	self updateIvars: aBehaviorDescription with: materializer for: object.
-	^ object soilMaterialized: materializer
+	^ object
 ]
 
 { #category : #'*Soil-Serializer' }
