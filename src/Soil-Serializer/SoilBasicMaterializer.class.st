@@ -35,6 +35,11 @@ SoilBasicMaterializer >> materializeFromBytes: aByteArray [
 		materialize
 ]
 
+{ #category : #reading }
+SoilBasicMaterializer >> materializedObject: object [
+	object soilMaterialized: self
+]
+
 { #category : #'reading - basic' }
 SoilBasicMaterializer >> nextByte [
 	^ stream next
@@ -123,9 +128,8 @@ SoilBasicMaterializer >> nextSoilObject [
 		at: byte
 		ifAbsent: [ Error signal: 'cannot find type code for ', byte asString]) 
 			soilMaterialize: self.
-	^ object 
-		soilMaterialized: self;
-		soilMaterializationReplacement
+	self materializedObject: object.
+	^ object soilMaterializationReplacement
 ]
 
 { #category : #reading }
