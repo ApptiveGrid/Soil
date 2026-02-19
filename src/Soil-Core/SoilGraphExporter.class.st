@@ -9,10 +9,29 @@ Class {
 		'versionMap',
 		'indexesToSkip',
 		'behaviors',
-		'clusters'
+		'clusters',
+		'replacements',
+		'toBeExported'
 	],
 	#category : #'Soil-Core-Error'
 }
+
+{ #category : #adding }
+SoilGraphExporter >> addObject: anObject [ 
+	self addObjectId: (transaction objectIdOf: anObject)
+]
+
+{ #category : #adding }
+SoilGraphExporter >> addObjectId: aSoilObjectId [ 
+	toBeExported add: aSoilObjectId 
+]
+
+{ #category : #adding }
+SoilGraphExporter >> addObjects: aCollection [ 
+	aCollection do: [ :each |
+		self addObject: each ]
+	
+]
 
 { #category : #visiting }
 SoilGraphExporter >> behaviorAt: index [ 
@@ -24,6 +43,27 @@ SoilGraphExporter >> behaviorAt: index [
 ]
 
 { #category : #actions }
+SoilGraphExporter >> export [
+	"export format: 
+	1. exported objects 
+	A list of arbitrary object clusters to be exported"
+	stream nextPut: toBeExported size. 
+	toBeExported do: [ :oid |
+		oid writeOn: stream .
+		self processObjectId: oid ].
+	"2. non-mapped objects
+	These are objects that will not be serialized but still have 
+	references in clusters to it. This is to prevent exporting all
+	of the graph. The dangeling references need to be re-mapped by
+	the importer"
+	stream nextPut: replacements size.
+	replacements do: [ :oid |
+		oid writeOn: stream ].
+	"Now write out all reachable clusters but not the non-mapped"
+	self processLoop
+]
+
+{ #category : #'as yet unclassified' }
 SoilGraphExporter >> export: aSoilObjectId [ 
 	self processObjectId: aSoilObjectId.
 	self processLoop 
@@ -37,6 +77,8 @@ SoilGraphExporter >> initialize [
 	indexesToSkip := OrderedCollection new.
 	behaviors := Dictionary new.
 	clusters := 0.
+	toBeExported := OrderedCollection new.
+	replacements := OrderedCollection new.
 ]
 
 { #category : #visiting }
@@ -48,27 +90,27 @@ SoilGraphExporter >> isUpToDateCluster: aCluster [
 		objectId version = (versionMap at: objectId asSoilObjectId ifAbsent: false ) ]
 ]
 
-{ #category : #accessing }
+{ #category : #'as yet unclassified' }
 SoilGraphExporter >> metaSegment [ 
 	^ metaSegment ifNil: [ 
-		metaSegment := soil objectRepository metaSegment ].
+		metaSegment := transaction soil objectRepository metaSegment ].
 
 ]
 
-{ #category : #private }
+{ #category : #'as yet unclassified' }
 SoilGraphExporter >> migrate: aClass to: aBlock [ 
 	"lookup the objectID of the behavior and store it 
 	along with the block "
 	migrationMap 
-		at: (soil behaviorRegistry 
+		at: (transaction soil behaviorRegistry 
 			nameAt: aClass name 
 			ifAbsent: [Error signal: 'no class found']) index 
 		put: aBlock 
 
 ]
 
-{ #category : #api }
-SoilGraphExporter >> migrateAll: aCollection to: aBlock [
+{ #category : #'as yet unclassified' }
+SoilGraphExporter >> migrateAll: aCollection to: aBlock [ 
 	aCollection do: [ :cls |
 		self migrate: cls to: aBlock  ]
 ]
@@ -93,10 +135,21 @@ SoilGraphExporter >> migrateCluster: cluster [
 	^ newCluster
 ]
 
-{ #category : #api }
+{ #category : #accessing }
+SoilGraphExporter >> processObjectId: oid [ 
+	(replacements includes: oid) ifTrue: [ ^ self ].
+	super processObjectId: oid 
+]
+
+{ #category : #'as yet unclassified' }
+SoilGraphExporter >> replaceObject: anObject [
+	replacements add: (transaction objectIdOf: anObject)
+]
+
+{ #category : #'as yet unclassified' }
 SoilGraphExporter >> skipIndexes: aCollection [ 
 	indexesToSkip := aCollection collect: [ :each |
-		(each class == SoilObjectId)
+		(each class = SoilObjectId)
 			ifTrue: [ each ]
 			ifFalse: [ transaction objectIdOf: each  ] ]
 ]
@@ -114,7 +167,8 @@ SoilGraphExporter >> stream: anObject [
 
 { #category : #accessing }
 SoilGraphExporter >> transaction: aTransaction [ 
-	transaction := aTransaction 
+	transaction := aTransaction.
+	soil := aTransaction soil 
 ]
 
 { #category : #visiting }
@@ -168,6 +222,7 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 		serializeOn: stream .
 	"for all indexes being used remember the index setting for it "
 	cluster references do: [ :reference |
+		"(oidsToIgnore includes: reference) ifTrue: [ self halt ]."
 		self processObjectId: reference ].
 	cluster indexIds ifNotEmpty: [ 
 		cluster object ifNil: [  
@@ -176,8 +231,6 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 				materializeObject;
 				yourself) ].
 		self visit: cluster object ].
-	stream nextPut: 255.
-
 ]
 
 { #category : #visiting }
