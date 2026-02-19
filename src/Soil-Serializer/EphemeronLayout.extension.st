@@ -9,7 +9,7 @@ EphemeronLayout >> soilBasicMaterialize: aBehaviorDescription with: materializer
 
 	self updateIvars: aBehaviorDescription with: materializer for: object.
 	1 to: basicSize do: [:i | object basicAt: i put: materializer nextSoilObject ].
-	^object soilMaterialized: materializer
+	^ object
 ]
 
 { #category : #'*Soil-Serializer' }

@@ -124,6 +124,10 @@ SoilObjectProxy >> soilMaterializationReplacement [
 	^ self
 ]
 
+{ #category : #soil }
+SoilObjectProxy >> soilMaterialized: materialized [ 
+]
+
 { #category : #'reflective operations' }
 SoilObjectProxy >> soilRealObject [
 	^ object ifNil: [  
