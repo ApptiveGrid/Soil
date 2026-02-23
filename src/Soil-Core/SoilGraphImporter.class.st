@@ -38,6 +38,7 @@ SoilGraphImporter >> import [
 	[ stream atEnd ] whileFalse: [ 
 		clusters add: self readCluster ].
 	
+	soil objectRepository metaSegment updateLastObjectIndex: (lastIndex at: 1).
 	soil objectRepository firstSegment updateLastObjectIndex: (lastIndex at: 2)
 ]
 
@@ -72,7 +73,8 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 			newOid := self newObjectIdFor: cluster objectId version: 1.
 			self metaSegment 
 				at: newOid index 
-				putBytes: (cluster asNewClusterVersion version: 1; serialize) ] 
+				putBytes: (cluster asNewClusterVersion version: 1; serialize).
+			soil behaviorRegistry nameAt: cluster object behaviorIdentifier put: cluster objectId ] 
 ]
 
 { #category : #'instance creation' }
