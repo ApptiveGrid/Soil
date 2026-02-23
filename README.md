@@ -46,8 +46,8 @@ We use github for organizing our development. You can see what we are doing righ
 ### Talks about Soil
 - UK Smalltalk User Group: "Soil: a database for fun and profit", 26 November 2025 [YouTube](https://www.youtube.com/watch?v=mem0laBTbjU)
 - ESUG 2025 talks
-	-  "Rhizome - Distribution in Soil" Slides [PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
-   	-  "Soil: Tutorial and Q&A" Slides [PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
+	-  "Rhizome - Distribution in Soil" Slides [Video Youtube](https://youtu.be/pTT-vy8qS4Y), [Slides PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
+   	-  "Soil: Tutorial and Q&A" Slides [Video Youtube](https://youtu.be/FarI6qqt1fk), [Slides PDF](https://archive.esug.org/ESUG2025/day2/210-denk-soil-tutorial.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-tutorial-and-q-a-esug-2025-gdansk/281735146)
 - Smalltalks 2024 talk "Soil: an object oriented database for fun and profit" Video [YouTube](https://www.youtube.com/watch?v=JWY5HCUlX_4)
 - ESUG 2023 talk "Soil: a fresh look on object oriented databases" Slides [PDF](http://archive.esug.org/ESUG2023/day3/02_1%20-%20Soil,%20a%20Fresh%20Look%20on%20Object%20Oriented%20Databases.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-a-fresh-look-on-object-oriented-databases/260898335), Video on [YouTube](https://www.youtube.com/watch?v=ui4TXcv7tus)
 - ESUG 2023 talk "Soil and Pharo". Slides [PDF](http://archive.esug.org/ESUG2023/day3/02_2%20-%20Soil%20and%20Pharo.pdf), [SlideShare](https://www.slideshare.net/esug/soil-and-pharo-260898369)
