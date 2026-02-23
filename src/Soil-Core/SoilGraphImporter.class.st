@@ -6,20 +6,37 @@ Class {
 		'transaction',
 		'lastIndex',
 		'idMap',
-		'newId',
-		'metaSegment'
+		'metaSegment',
+		'clusters',
+		'toBeReplaced',
+		'replacements',
+		'legacyOids'
 	],
 	#category : #'Soil-Core-Error'
 }
 
 { #category : #importing }
 SoilGraphImporter >> import [
+	"set the last indexes of this database. Importing will not use the objectIds that
+	have been exported. This might waste huge amounts of ids. So we remap all objectIds
+	to ids that come right after the current ones."
 	lastIndex := Array new: 2.
 	lastIndex at: 1 put: (transaction objectRepository metaSegment) lastObjectIndex.
 	lastIndex at: 2 put: (transaction objectRepository segmentAt: 1) lastObjectIndex.
-
+	clusters := OrderedCollection new.
+	"read the list of objejctIds to be imported. This gives us access to the objects that
+	will have different objectids after import"
+	legacyOids := Array new: stream next.
+	1 to: legacyOids size do: [ :n |
+		legacyOids at: n put: (SoilObjectId readFrom: stream) ].
+	"read the list of non-mapped objectIds. Before importing we need to register a local 
+	object for all of these objectids so they can be re-mapped."
+	toBeReplaced := Array new: stream next.
+	1 to: toBeReplaced size do: [ :n |
+		toBeReplaced at: n put: (SoilObjectId readFrom: stream) ].
+	"Now just read all clusters til the end and import them into the object repository"
 	[ stream atEnd ] whileFalse: [ 
-		self readCluster ].
+		clusters add: self readCluster ].
 	
 	soil objectRepository firstSegment updateLastObjectIndex: (lastIndex at: 2)
 ]
@@ -40,7 +57,7 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 					presentBehavior 
 						transaction: transaction;
 						materializeObject.
-					(presentBehavior object matchesDescription: cluster object )
+					(presentBehavior object hasSameShape: cluster object )
 						ifTrue: [ 
 							"Behaviors have the same shape so we can adapt the objectId of the 
 							present behavior and the version"
@@ -58,10 +75,21 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 				putBytes: (cluster asNewClusterVersion version: 1; serialize) ] 
 ]
 
+{ #category : #'instance creation' }
+SoilGraphImporter >> importedObjects [
+	^ self importedOids collect: [ :each | transaction objectWithId: each ]
+]
+
+{ #category : #'instance creation' }
+SoilGraphImporter >> importedOids [
+	^ legacyOids collect: [ :each | self newObjectIdFor: each ]
+]
+
 { #category : #initialization }
 SoilGraphImporter >> initialize [ 
 	super initialize.
-	idMap := Dictionary new
+	idMap := Dictionary new.
+	replacements := OrderedCollection new
 ]
 
 { #category : #importing }
@@ -125,17 +153,19 @@ SoilGraphImporter >> readBehaviorDescription [
 
 { #category : #importing }
 SoilGraphImporter >> readCluster [
-	| objectId cluster keySize valueSize index maxLevel originalOid |
+	| objectId cluster keySize valueSize index maxLevel originalOid serialized |
 	originalOid := SoilObjectId readFrom: stream.
 	objectId := self newObjectIdFor: originalOid.
-	newId ifNil: [newId := objectId ].
 	(stream next: 8) asInteger timesRepeat: [ 
 		 self readBehaviorDescription ].
 	cluster := (SoilPersistentClusterVersion new readFrom: stream)
 		detachFromSegment;
 		objectId: objectId;
 		version: self databaseVersion.
-	cluster references: (cluster references collect: [:id| self newObjectIdFor: id]).
+	cluster references: (cluster references collect: [:id| 
+		(toBeReplaced includes: id) 
+			ifTrue: [ replacements at: (toBeReplaced indexOf: id) ] 
+			ifFalse: [ self newObjectIdFor: id ] ]).
 	cluster indexIds do: [ :indexId |
 		keySize := (stream next: 2) asInteger.
 		valueSize := (stream next: 2) asInteger.
@@ -148,10 +178,16 @@ SoilGraphImporter >> readCluster [
 		index writePages  ].
 	cluster behaviorDescriptions: (cluster behaviorDescriptions collect: [ :bd |
 		 idMap at: bd objectId asSoilObjectId ]).
+	serialized := cluster serialize.
 	soil objectRepository 
 		at: cluster objectId 
-		putBytes: cluster serialize.
-	(stream next == 255) ifFalse: [ self halt ].
+		putBytes: serialized.
+	^ cluster 
+]
+
+{ #category : #'as yet unclassified' }
+SoilGraphImporter >> replaceObject: anAGUser [ 
+	replacements add: (transaction objectIdOf: anAGUser) 
 ]
 
 { #category : #accessing }
@@ -161,5 +197,6 @@ SoilGraphImporter >> stream: aReadStream [
 
 { #category : #accessing }
 SoilGraphImporter >> transaction: anAGBaseTransaction [ 
-	transaction := anAGBaseTransaction 
+	transaction := anAGBaseTransaction.
+	soil := anAGBaseTransaction soil 
 ]
