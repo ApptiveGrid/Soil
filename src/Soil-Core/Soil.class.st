@@ -359,6 +359,14 @@ Soil >> newMaterializer [
 		yourself
 ]
 
+{ #category : #transactions }
+Soil >> newReadOnlyTransaction [
+	^ self transactionManager 
+		newTransaction: self transactionClass
+		readVersion: self control databaseVersion;
+		beReadOnly
+]
+
 { #category : #'instance creation' }
 Soil >> newSerializer [
 	^ self serializerClass new
@@ -371,18 +379,6 @@ Soil >> newTransaction [
 	^ self transactionManager 
 		newTransaction: self transactionClass
 		readVersion: self control databaseVersion 
-]
-
-{ #category : #transactions }
-Soil >> newTransaction: aClass [
-	| txn |
-	txn := aClass new 
-		soil: self;
-		readVersion: self control databaseVersion;
-		start;
-		yourself.
-	notificationHandler transactionCreated: txn.
-	^ txn
 ]
 
 { #category : #transactions }

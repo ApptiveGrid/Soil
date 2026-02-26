@@ -13,7 +13,8 @@ Class {
 		'lastObjectIndexes',
 		'journal',
 		'createdAt',
-		'indexUpdatesToCommit'
+		'indexUpdatesToCommit',
+		'readOnly'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -96,7 +97,7 @@ SoilTransaction >> basicCommit [
 	self prepareRecordsForCommit.
 	"if there are no records to commit we can just return and don't allocate any
 	resources"
-	self isReadOnly ifTrue: [ 
+	self hasModifications ifFalse: [ 
 		soil notificationHandler transactionCommitted: self.
 		^ self ].
 	"only one transactions is allowed at a time. We use the critical block of the database
@@ -124,6 +125,11 @@ SoilTransaction >> basicCommit [
 				ensure: [self releaseLocks ] ].
 		soil notificationHandler transactionCommitted: self
 
+]
+
+{ #category : #'public accessing' }
+SoilTransaction >> beReadOnly [ 
+	readOnly := true
 ]
 
 { #category : #public }
@@ -319,7 +325,8 @@ SoilTransaction >> initialize [
 	objectMap := IdentityDictionary new.
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
-	indexUpdatesToCommit := OrderedCollection new
+	indexUpdatesToCommit := OrderedCollection new.
+	readOnly := false
 ]
 
 { #category : #api }
@@ -351,7 +358,7 @@ SoilTransaction >> isPersistent: anObject [
 
 { #category : #testing }
 SoilTransaction >> isReadOnly [ 
-	^ self hasModifications not
+	^ readOnly 
 ]
 
 { #category : #testing }
@@ -385,6 +392,7 @@ SoilTransaction >> makeNewVersion: classDescription [
 { #category : #api }
 SoilTransaction >> makeRoot: anObject [ 
 	| objectId |
+	readOnly ifTrue: [ SoilTransactionIsReadOnly signal: 'attempt to call makeRoot: on a read-only transaction' ].
 	objectId := self addClusterObject: anObject theNonSoilProxy.
 	anObject soilClusterRootIn: self.
 	^ objectId
@@ -394,6 +402,7 @@ SoilTransaction >> makeRoot: anObject [
 { #category : #public }
 SoilTransaction >> markDirty: anObject [
 	| record |
+	readOnly ifTrue: [ SoilTransactionIsReadOnly signal: 'attempt to call markDirty: on a read-only transaction' ].
 	"look up the non-proxy object in the local cache"
 	record := objectMap 
 		at: anObject theNonSoilProxy
