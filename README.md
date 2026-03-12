@@ -4,33 +4,29 @@
 
 Soil is an object oriented database in [pharo](http://pharo.org). It is transaction based having ACID transactions. It has binary search capabilities with SkipList and BTree+ indexes. It aims to be a simple yet powerful database making it easy to develop with, easy to debug with, easy to inspect, ... 
 
-
 To read more please have a look at the [documentation](./docs/soil.md)
-
 
 ## Loading
 
-**note** The main branch is not usable for existing databases right now, we need to apply a non-backward compatible change. When v4 is released there will be a converter for old databases to migrate. **Please load v3 until then**
-
-Load it in 64bit Pharo 11/12/13 with Metacello:
+Load it in 64bit Pharo 11/12/13/alpha with Metacello:
 
 ```smalltalk
 Metacello new 
-	repository: 'github://ApptiveGrid/Soil:v3/src';
+	repository: 'github://ApptiveGrid/Soil/src';
 	baseline: 'Soil';
 	load.
 ```
-Note: For now, Windows is not supported. Contact us if you want to help!
+Note: For now, Windows is not supported. But v5 will most likely add support for windows
 
 **caution** Soil is in an early stage meaning there are might be things missing. It is battle tested as it is the driving database behind [ApptiveGrid](http://www.apptivegrid.de) but you might have different requirements. If so, tell us!
 
 ## Latest release
 
-The latest release is [v3](https://github.com/ApptiveGrid/Soil/tree/v3) which you can load via
+The latest release is [v4](https://github.com/ApptiveGrid/Soil/tree/v4) which you can load via
 
 ```smalltalk
 Metacello new 
-	repository: 'github://ApptiveGrid/Soil:v3/src';
+	repository: 'github://ApptiveGrid/Soil:v4/src';
 	baseline: 'Soil';
 	load.
 ```
