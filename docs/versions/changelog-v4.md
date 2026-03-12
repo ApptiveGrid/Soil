@@ -1,6 +1,6 @@
 # Soil v4
 
-> ⚠️ **Breaking Change:** The new database format is not backwards compatible with v3. See [Migration to v4](migration-v4.md)
+> ⚠️ **Breaking Change:** The new database format is not backwards compatible with v3. See [Migration to v4](migration.md)
 
 ---
 
