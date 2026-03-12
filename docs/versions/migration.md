@@ -7,8 +7,8 @@ We did a non-backward compatible change to indexes which needs to migrate the da
 To migrate your database you just need to call the following 
 
 ```
-(Soil path: '/path/to/soil/database/directory')`
-	`migrateDatabaseFormat` 
+(Soil path: '/path/to/soil/database/directory')
+	migrateDatabaseFormat
 ```
 
 This will scan the whole database and converts all indexes found
