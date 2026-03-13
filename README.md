@@ -59,6 +59,7 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 - Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
 
 ### NEWS
+- [ANN] Release V4 [Announcement](https://github.com/ApptiveGrid/Soil/blob/main/docs/versions/ann-v4.md) 2026-03-13
 - Recording online: Soil: a database for fun and profit - 26 November 2025 UK Smalltalk User Group [YouTube](https://www.youtube.com/watch?v=mem0laBTbjU) 2026-01-05
 - [ANN] Release V3 [Changelog](https://github.com/ApptiveGrid/Soil/blob/v3/docs/changelog.md) 2025-07-02
 - ESUG 2025 talks 2025-07-02
