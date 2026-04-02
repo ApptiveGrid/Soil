@@ -63,10 +63,10 @@ SoilGraphExporter >> export [
 	self processLoop
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #actions }
 SoilGraphExporter >> export: aSoilObjectId [ 
 	self processObjectId: aSoilObjectId.
-	self processLoop 
+	self processLoop
 ]
 
 { #category : #initialization }
@@ -90,14 +90,13 @@ SoilGraphExporter >> isUpToDateCluster: aCluster [
 		objectId version = (versionMap at: objectId asSoilObjectId ifAbsent: false ) ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #accessing }
 SoilGraphExporter >> metaSegment [ 
 	^ metaSegment ifNil: [ 
-		metaSegment := transaction soil objectRepository metaSegment ].
-
+		metaSegment := transaction soil objectRepository metaSegment ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #migration }
 SoilGraphExporter >> migrate: aClass to: aBlock [ 
 	"lookup the objectID of the behavior and store it 
 	along with the block "
@@ -105,11 +104,10 @@ SoilGraphExporter >> migrate: aClass to: aBlock [
 		at: (transaction soil behaviorRegistry 
 			nameAt: aClass name 
 			ifAbsent: [Error signal: 'no class found']) index 
-		put: aBlock 
-
+		put: aBlock
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #migration }
 SoilGraphExporter >> migrateAll: aCollection to: aBlock [ 
 	aCollection do: [ :cls |
 		self migrate: cls to: aBlock  ]
@@ -141,12 +139,12 @@ SoilGraphExporter >> processObjectId: oid [
 	super processObjectId: oid 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #actions }
 SoilGraphExporter >> replaceObject: anObject [
 	replacements add: (transaction objectIdOf: anObject)
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #configuration }
 SoilGraphExporter >> skipIndexes: aCollection [ 
 	indexesToSkip := aCollection collect: [ :each |
 		(each class = SoilObjectId)

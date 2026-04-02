@@ -328,7 +328,7 @@ Soil >> metadata [
 	^ metadata
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #migration }
 Soil >> migrateDatabaseFormat [
 	"open for migration by just resuming the incompatible version 
 	exception"

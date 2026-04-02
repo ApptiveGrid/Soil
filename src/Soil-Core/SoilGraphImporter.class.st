@@ -187,9 +187,9 @@ SoilGraphImporter >> readCluster [
 	^ cluster 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #actions }
 SoilGraphImporter >> replaceObject: anAGUser [ 
-	replacements add: (transaction objectIdOf: anAGUser) 
+	replacements add: (transaction objectIdOf: anAGUser)
 ]
 
 { #category : #accessing }
