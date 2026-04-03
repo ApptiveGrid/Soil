@@ -74,7 +74,7 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 			self metaSegment 
 				at: newOid index 
 				putBytes: (cluster asNewClusterVersion version: 1; serialize).
-			soil behaviorRegistry nameAt: cluster object behaviorIdentifier put: cluster objectId ] 
+			soil behaviorRegistry nameAt: cluster object behaviorIdentifier put: newOid ] 
 ]
 
 { #category : #'instance creation' }
