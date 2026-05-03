@@ -22,7 +22,9 @@ SoilBehaviorRegistry >> behaviorDescriptionWithIndex: behaviorIndex andVersion: 
 
 	self loadHistoryForBehaviorWithIndex: behaviorIndex transaction: transaction.
 
-	versionsOfBehavior := versions at: behaviorIndex ifAbsent: [Error signal: 'shouldnt happen'].
+	versionsOfBehavior := versions 
+		at: behaviorIndex 
+		ifAbsent: [ Error signal: 'cannot find behavior description at index ', behaviorIndex asString ].
 
 	^ versionsOfBehavior
 		detect: [ :behav | (behav version = version) and: [
@@ -32,16 +34,16 @@ SoilBehaviorRegistry >> behaviorDescriptionWithIndex: behaviorIndex andVersion: 
 ]
 
 { #category : #queries }
-SoilBehaviorRegistry >> behaviorVersionsUpTo: aSOBehaviorDescription transaction: transaction [
+SoilBehaviorRegistry >> behaviorVersionsUpTo: aBehaviorDescription transaction: transaction [
 	| objectId chain offset |
 	objectId := self 
-		nameAt: aSOBehaviorDescription behaviorIdentifier 
-		ifAbsent: [ Error signal: 'shouldnt happen' ].
+		nameAt: aBehaviorDescription behaviorIdentifier 
+		ifAbsent: [ Error signal: 'cannot find behavior description for ', aBehaviorDescription behaviorIdentifier ].
 	self loadHistoryForBehaviorWithIndex: objectId index transaction: transaction.
 	chain := versions at: objectId index.
 	chain first isCurrent ifFalse: [ 
-		chain addFirst: ((SoilBehaviorDescription for: aSOBehaviorDescription objectClass) version: (chain first version + 1))].
-	offset := chain detectIndex: [ :each | each matchesDescription: aSOBehaviorDescription ].
+		chain addFirst: ((SoilBehaviorDescription for: aBehaviorDescription objectClass) version: (chain first version + 1))].
+	offset := chain detectIndex: [ :each | each matchesDescription: aBehaviorDescription ].
 	^ chain copyFrom: 1 to: offset
 ]
 
