@@ -142,7 +142,7 @@ SoilIndexIterator >> basicPreviousAssociation [
 					currentKey := item2 key. 
 					currentPageIndex := currentPage numberOfItems.
 					item2 ] ] ].
-	Error signal: 'shouldnt happen'
+	Error signal: 'it should not be possible to end up here while trying to find previous association'
 ]
 
 { #category : #private }
