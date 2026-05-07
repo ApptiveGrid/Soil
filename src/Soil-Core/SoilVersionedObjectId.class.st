@@ -12,6 +12,12 @@ SoilVersionedObjectId >> asSoilObjectId [
 	^ self as: SoilObjectId 
 ]
 
+{ #category : #testing }
+SoilVersionedObjectId >> matchesObjectId: aSoilObjectId [ 
+	^ (aSoilObjectId segment == segment) and: [ 
+		aSoilObjectId index == index ]
+]
+
 { #category : #accessing }
 SoilVersionedObjectId >> objectId [
 	^ self

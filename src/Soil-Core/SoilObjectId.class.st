@@ -99,6 +99,14 @@ SoilObjectId >> asSoilObjectProxy [
 		objectId: self
 ]
 
+{ #category : #'as yet unclassified' }
+SoilObjectId >> findReferencesIn: aDatabase [
+	^ SoilReferenceFinder new
+		soil: aDatabase;
+		find: self;
+		references 
+]
+
 { #category : #testing }
 SoilObjectId >> hasSameSegment: aSegment andIndex: anIndex [ 
 	^ (segment == aSegment) and: [ index == anIndex ]
