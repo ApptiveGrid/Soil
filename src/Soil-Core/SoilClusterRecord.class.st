@@ -98,10 +98,7 @@ SoilClusterRecord >> detachFromSegment [
 
 { #category : #api }
 SoilClusterRecord >> findReferencesTo [
-	^ SoilReferenceFinder new
-		soil: transaction database;
-		find: objectId;
-		records
+	^ objectId findReferencesIn: transaction database
 ]
 
 { #category : #testing }
@@ -112,6 +109,12 @@ SoilClusterRecord >> hasChanged [
 { #category : #testing }
 SoilClusterRecord >> hasPreviousVersion [
 	^ previousVersionPosition > 0 
+]
+
+{ #category : #testing }
+SoilClusterRecord >> includesBehaviorDescription: aSoilObjectId [ 
+	^ behaviorDescriptions anySatisfy: [ :versioned | 
+		versioned matchesObjectId: aSoilObjectId  ]
 ]
 
 { #category : #testing }
