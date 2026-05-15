@@ -26,5 +26,6 @@ SoilDatabaseMigrationV2 >> visitIndex: anIndex [
 
 { #category : #visiting }
 SoilDatabaseMigrationV2 >> visitSoil: aSoil [ 
+	super visitSoil: aSoil.
 	aSoil behaviorRegistry index compact
 ]
