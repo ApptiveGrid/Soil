@@ -21,7 +21,8 @@ SoilDatabaseMigrationV2 >> visitIndex: anIndex [
 	version of pages is not possible. But the mechanics for migrating is still 
 	doing a compact which reads the index in its old format and writes the new
 	one"
-	anIndex compact
+	super visitIndex: anIndex.
+	anIndex compact.
 ]
 
 { #category : #visiting }
