@@ -75,6 +75,17 @@ SoilPersistentDatabaseJournal >> cycleFragmentFileAfter: aSoilJournalFragmentFil
 	currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber)
 ]
 
+{ #category : #fragmentfile }
+SoilPersistentDatabaseJournal >> cycleFragmentFileFrom: aSoilJournalFragmentFile [
+	"cycle to a new writable fragment file based on a fragment file that was
+	opened read-only during recovery. The read-only file is only closed (it must
+	not be flushed/synced) before the next writable fragment file is created"
+	| nextFileNumber |
+	nextFileNumber := (self fileNumberFrom: aSoilJournalFragmentFile filename) + 1.
+	aSoilJournalFragmentFile close.
+	currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber)
+]
+
 { #category : #enumerating }
 SoilPersistentDatabaseJournal >> entriesDo: aBlock [
 	self fragmentFiles reverse do: [ :file |
@@ -278,6 +289,9 @@ SoilPersistentDatabaseJournal >> openFragmentFileNumber: anInteger [
 
 { #category : #'instance creation' }
 SoilPersistentDatabaseJournal >> openFragmentFileReadOnly: filename [ 
+	"open a fragment file in read-only mode. Used by recovery which only reads
+	the file, so it does not request write access to a path that may already be
+	open for writing (fails on Windows)"
 	^ (SoilJournalFragmentFile path: self path / filename )
 		databaseJournal: self;
 		openReadOnly;
@@ -329,15 +343,20 @@ SoilPersistentDatabaseJournal >> sortedFiles [
 ]
 
 { #category : #accessing }
-SoilPersistentDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock [ 
+SoilPersistentDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock [
 	| fragmentFiles fileIndex |
+	"open the fragment files read-only: this only reads them and the journal may
+	hold its current fragment file open for writing. A second open in write mode
+	of the same path fails on Windows. The handles are closed when done"
 	fragmentFiles := self fragmentFiles do: #openReadOnly.
-	fileIndex := fragmentFiles 
-		detectIndex: [ :fragment | fragment firstTransactionId <= index  ]
-		ifNone: [ self error: 'fileIndex not found, should not happen' ].
-	(fragmentFiles copyFrom: fileIndex to: fragmentFiles size) do: [ :fragmentFile |
-		fragmentFile transactionJournals do: [ :transactionJournal |
-			aBlock value: transactionJournal ] ].
+	[
+		fileIndex := fragmentFiles
+			detectIndex: [ :fragment | fragment firstTransactionId <= index  ]
+			ifNone: [ self error: 'fileIndex not found, should not happen' ].
+		(fragmentFiles copyFrom: fileIndex to: fragmentFiles size) do: [ :fragmentFile |
+			fragmentFile transactionJournals do: [ :transactionJournal |
+				aBlock value: transactionJournal ] ] ]
+		ensure: [ fragmentFiles do: [ :each | each close ] ]
 ]
 
 { #category : #writing }

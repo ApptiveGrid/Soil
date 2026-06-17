@@ -14,6 +14,10 @@ SoilNewBTreeListIndexEntry >> commitIn: soil recovery: aBoolean [
 
 	| index indexManager |
 	indexManager := (soil objectRepository segmentAt: segment) indexManager.
+	"if the index is already open (e.g. repeated commits of the same new index via
+	commitAndContinue) reuse it instead of opening the same file a second time,
+	which fails on Windows"
+	(indexManager indexes at: id ifAbsent: [ nil ]) ifNotNil: [ :existing | ^ existing ].
 	index := SoilBTree new
 		path: (indexManager pathFor: id);
 		initializeFilesystem;

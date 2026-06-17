@@ -132,9 +132,13 @@ SoilDatabaseRecovery >> recover [
 			journal cycleFragmentFileAfter: fragmentFile.
 			soil checkpoint.
 			^ self ].
-	"If the last checkpoint was successful we are at the end of the file and 
-	can return because the database is in a sane state"
-	fragmentFile atEnd ifTrue: [ ^ self ].
+	"If the last checkpoint was successful we are at the end of the file and
+	can return because the database is in a sane state. Close the read-only
+	recovery handle so the journal can later open the file for writing (a second
+	open in write mode while this one is still open fails on Windows)"
+	fragmentFile atEnd ifTrue: [
+		fragmentFile close.
+		^ self ].
 	
 	"the fragment file contains more entries after the last checkpoint. Read the
 	current fragment file to its end and apply all transaction logs/checkpoints found"

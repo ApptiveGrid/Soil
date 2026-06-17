@@ -83,7 +83,7 @@ SoilBasicVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [
 	aSoilJournalFragmentFile openReadOnly.
 	[ self visitAll: aSoilJournalFragmentFile transactionJournals ]
 		ensure: [ aSoilJournalFragmentFile close ].
-	^ aSoilJournalFragmentFile 
+	^ aSoilJournalFragmentFile
 ]
 
 { #category : #visiting }
