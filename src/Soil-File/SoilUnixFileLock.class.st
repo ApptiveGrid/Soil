@@ -43,7 +43,7 @@ SoilUnixFileLock class >> canLock: fileHandle from: start length: length exclusi
 SoilUnixFileLock class >> fcntl: fd command: cmd struct: struct [
 
 	^ self 
-		ffiCall: #(int fcntl(int fd, int cmd, #SoilUnixFileLock *struct))
+		ffiCall: #(int fcntl(int fd, int cmd, SoilUnixFileLock *struct))
 		library: LibC
 		fixedArgumentCount: 2
 ]

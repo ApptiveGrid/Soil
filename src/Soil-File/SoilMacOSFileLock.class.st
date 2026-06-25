@@ -42,7 +42,7 @@ SoilMacOSFileLock class >> canLock: fileHandle from: start to: length exclusive:
 { #category : #private }
 SoilMacOSFileLock class >> fcntl: fd command: cmd struct: struct [
 	^ self 
-		ffiCall: #(int fcntl(int fd, int cmd, #SoilMacOSFileLock *struct)) 
+		ffiCall: #(int fcntl(int fd, int cmd, SoilMacOSFileLock *struct))
 		library: LibC
 		fixedArgumentCount: 2
 ]
