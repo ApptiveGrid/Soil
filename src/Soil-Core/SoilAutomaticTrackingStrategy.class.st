@@ -9,7 +9,7 @@ SoilAutomaticTrackingStrategy >> markDirty: anObject [
 	"do nothing"
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #strategy }
 SoilAutomaticTrackingStrategy >> prepareCommit [ 
 	transaction objectMap do: [ :each | 
 		each hasChanged ifTrue: [ 
@@ -17,7 +17,7 @@ SoilAutomaticTrackingStrategy >> prepareCommit [
 	self serializeObjects 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #strategy }
 SoilAutomaticTrackingStrategy >> recordMaterialized: record materializer: materializer [
 	super recordMaterialized: record materializer: materializer.
 	record ensureFingerprint 

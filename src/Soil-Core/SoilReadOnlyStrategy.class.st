@@ -35,7 +35,7 @@ SoilReadOnlyStrategy >> markDirty: anObject [
 			signal ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #strategy }
 SoilReadOnlyStrategy >> prepareCommit [ 
 	ignoreWriteAttempts ifFalse: [ 
 		transaction objectMap do: [ :each | 
@@ -45,7 +45,7 @@ SoilReadOnlyStrategy >> prepareCommit [
 					signal ] ] ]
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #strategy }
 SoilReadOnlyStrategy >> recordMaterialized: record materializer: materializer [
 	super recordMaterialized: record materializer: materializer.
 	"if we want to find out what has changed we need to make a 

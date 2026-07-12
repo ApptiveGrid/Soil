@@ -101,11 +101,6 @@ SoilGraphImporter >> metaSegment [
 
 ]
 
-{ #category : #accessing }
-SoilGraphImporter >> newId [
-	^ newId
-]
-
 { #category : #'instance creation' }
 SoilGraphImporter >> newObjectIdFor: aSoilObjectId [ 
 	| current |

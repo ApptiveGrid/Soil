@@ -486,7 +486,7 @@ SoilTransaction >> materializeRecord: record [
 	^ record 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #testing }
 SoilTransaction >> needsCommit [ 
 
 	^ self isWritable and: [ self hasChanges ]
