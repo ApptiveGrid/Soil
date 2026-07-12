@@ -99,7 +99,7 @@ SoilObjectId >> asSoilObjectProxy [
 		objectId: self
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #tools }
 SoilObjectId >> findReferencesIn: aDatabase [
 	^ SoilReferenceFinder new
 		soil: aDatabase;
@@ -187,7 +187,7 @@ SoilObjectId >> setIndex: anInteger [
 	index := anInteger 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #'recursive hash' }
 SoilObjectId >> soilRecursiveHashWith: aSet [ 
 	^ (segment soilRecursiveHashWith: aSet) bitXor: (index soilRecursiveHashWith: aSet)
 ]

@@ -9,7 +9,7 @@ SoilManualTrackingStrategy >> markDirty: anObject [
 	transaction addObjectToBeCommited: anObject 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #strategy }
 SoilManualTrackingStrategy >> prepareCommit [ 
 	self serializeObjects 
 ]

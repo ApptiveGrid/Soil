@@ -8,7 +8,7 @@ Class {
 	#category : #'Soil-Core'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #public }
 SoilCommitStrategy >> beAutoMigrating [
 	autoMigration := true
 ]
@@ -34,17 +34,17 @@ SoilCommitStrategy >> isWritable [
 	self subclassResponsibility 
 ]
 
-{ #category : #public }
+{ #category : #strategy }
 SoilCommitStrategy >> markDirty: anObject [ 
 	self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #strategy }
 SoilCommitStrategy >> prepareCommit [ 
 	self subclassResponsibility 
 ]
 
-{ #category : #'as yet unclassified' }
+{ #category : #strategy }
 SoilCommitStrategy >> recordMaterialized: record materializer: materializer [
 	(autoMigration and: [ materializer clusterCanBeMigrated ]) 
 		ifTrue: [ self addRecord: record. ].
