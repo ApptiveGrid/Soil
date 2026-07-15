@@ -40,6 +40,7 @@ and then read about [Changelogs](https://github.com/ApptiveGrid/Soil/blob/main/d
 We use github for organizing our development. You can see what we are doing right now on the [project board](https://github.com/orgs/ApptiveGrid/projects/2). An up-to-date list of milestones you can find in [milestones](https://github.com/ApptiveGrid/Soil/milestones?direction=desc&sort=completeness&state=open). 
 
 ### Talks about Soil
+- ESUG 2026 talk "Soil: architectural insights" Slides [PDF](https://archive.marcusdenker.de/Soil/Videos/26-ESUG/2026-07-07-ESUG-Soil-architectural-insights.pdf)
 - UK Smalltalk User Group: "Soil: a database for fun and profit", 26 November 2025 [YouTube](https://www.youtube.com/watch?v=mem0laBTbjU)
 - ESUG 2025 talks
 	-  "Rhizome - Distribution in Soil" Slides [Video Youtube](https://youtu.be/pTT-vy8qS4Y), [Slides PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
@@ -59,6 +60,7 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 - Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
 
 ### NEWS
+- ESUG 2026 Slides are online: "Soil: architectural insights" Slides [PDF](https://archive.marcusdenker.de/Soil/Videos/26-ESUG/2026-07-07-ESUG-Soil-architectural-insights.pdf) 2026-07-15
 - [ANN] Release V4 [Announcement](https://github.com/ApptiveGrid/Soil/blob/main/docs/versions/ann-v4.md) 2026-03-13
 - Recording online: Soil: a database for fun and profit - 26 November 2025 UK Smalltalk User Group [YouTube](https://www.youtube.com/watch?v=mem0laBTbjU) 2026-01-05
 - [ANN] Release V3 [Changelog](https://github.com/ApptiveGrid/Soil/blob/v3/docs/changelog.md) 2025-07-02
