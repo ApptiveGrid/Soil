@@ -105,6 +105,15 @@ SoilBehaviorRegistry >> initializeFilesystem [
 ]
 
 { #category : #queries }
+SoilBehaviorRegistry >> invalidateHistoryForBehaviorWithIndex: objectIndex [
+	"Drop the cached version-history chain for this behavior, if any, so the next
+	lookup reloads it fresh from the segment. Must be called after a new behavior
+	version has actually been committed to disk - see
+	SoilTransaction>>invalidateChangedBehaviorHistories."
+	versions removeKey: objectIndex ifAbsent: [ ]
+]
+
+{ #category : #queries }
 SoilBehaviorRegistry >> loadHistoryForBehaviorWithIndex: objectIndex transaction: transaction [
 	|  records chain |
 
