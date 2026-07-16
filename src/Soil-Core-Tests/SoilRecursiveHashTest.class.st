@@ -1,7 +1,7 @@
 Class {
 	#name : #SoilRecursiveHashTest,
 	#superclass : #TestCase,
-	#category : #'Soil-Core-Tests'
+	#category : #'Soil-Core-Tests-Model'
 }
 
 { #category : #tests }

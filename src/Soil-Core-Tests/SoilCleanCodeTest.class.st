@@ -27,6 +27,12 @@ SoilCleanCodeTest class >> cleanupWhiteSpaceTrimRight [
 		refactoring execute ]
 ]
 
+{ #category : #accessing }
+SoilCleanCodeTest class >> defaultTimeLimit [
+
+	^ 30 seconds
+]
+
 { #category : #running }
 SoilCleanCodeTest >> assertValidLintRule: aLintRule [
 	self assertValidLintRule: aLintRule withExceptions: #()
