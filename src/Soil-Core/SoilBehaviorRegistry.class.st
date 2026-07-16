@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'soil',
 		'index',
-		'versions'
+		'versions',
+		'versionsLock'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -17,59 +18,102 @@ SoilBehaviorRegistry >> addSpecialObjects [
 ]
 
 { #category : #queries }
+SoilBehaviorRegistry >> appendCommittedVersion: aBehaviorDescription forIndex: objectIndex [
+	"Called right after a new behavior version has been successfully committed to disk
+	(see SoilTransaction>>updateBehaviorHistoryCachesAfterCommit). If this behaviors
+	history is already cached, extend it in place - O(1), no reload from disk needed,
+	and the already-cached older versions remain valid forever since persisted behavior
+	descriptions never change. If nothing is cached yet, there is nothing to do here:
+	the next lookup will load the full, up-to-date history straight from disk."
+	versionsLock critical: [
+		(versions at: objectIndex ifAbsent: [ nil ]) ifNotNil: [ :chain |
+			chain addFirst: aBehaviorDescription ] ]
+]
+
+{ #category : #queries }
 SoilBehaviorRegistry >> behaviorDescriptionWithIndex: behaviorIndex andVersion: version transaction: transaction [
 	| versionsOfBehavior found |
-	self loadHistoryForBehaviorWithIndex: behaviorIndex transaction: transaction.
-	versionsOfBehavior := versions 
-		at: behaviorIndex 
-		ifAbsent: [ Error signal: 'cannot find behavior description at index ', behaviorIndex asString ].
-	found := versionsOfBehavior 
-		detect: [ :behav | (behav version = version) and: [
-				 "class could have changed, clear current flag"
-				 behav clearCurrent. true ] ]
-		ifNone: [ nil ].
-	found ifNotNil: [ ^ found ].
-	"The cached version chain can be stale relative to what has actually been committed
-	since it was first loaded. Force a reload and retry once before giving up, instead
-	of raising SoilObjectNotFound for a version that has since actually been persisted."
-	versions removeKey: behaviorIndex.
-	self loadHistoryForBehaviorWithIndex: behaviorIndex transaction: transaction.
-	versionsOfBehavior := versions 
-		at: behaviorIndex 
-		ifAbsent: [ Error signal: 'cannot find behavior description at index ', behaviorIndex asString ].
-	^ versionsOfBehavior 
-		detect: [ :behav | (behav version = version) and: [ behav clearCurrent. true ] ]
-		ifNone: [(SoilObjectNotFound new segment: 0; index: behaviorIndex) signal]
+	found := versionsLock critical: [
+		self ensureHistoryLoadedForBehaviorWithIndex: behaviorIndex transaction: transaction.
+		versionsOfBehavior := versions 
+			at: behaviorIndex 
+			ifAbsent: [ Error signal: 'cannot find behavior description at index ', behaviorIndex asString ].
+		versionsOfBehavior 
+			detect: [ :behav | (behav version = version) and: [ 
+				"class could have changed, clear current flag"
+				behav clearCurrent. true ] ]
+			ifNone: [ 
+				"Should be rare now that new versions are appended to the cache right when
+				they are committed - kept as a defensive fallback in case cache and disk
+				ever disagree."
+				versions removeKey: behaviorIndex.
+				self ensureHistoryLoadedForBehaviorWithIndex: behaviorIndex transaction: transaction.
+				versionsOfBehavior := versions 
+					at: behaviorIndex 
+					ifAbsent: [ Error signal: 'cannot find behavior description at index ', behaviorIndex asString ].
+				versionsOfBehavior 
+					detect: [ :behav | (behav version = version) and: [ behav clearCurrent. true ] ]
+					ifNone: [ nil ] ] ].
+	found ifNil: [ (SoilObjectNotFound new segment: 0; index: behaviorIndex) signal ].
+	^ found
 ]
 
 { #category : #queries }
 SoilBehaviorRegistry >> behaviorVersionsUpTo: aBehaviorDescription transaction: transaction [ 
-	| objectId chain offset |
+	| objectId chain offset workingChain guess result |
 	objectId := self 
 		nameAt: aBehaviorDescription behaviorIdentifier 
 		ifAbsent: [ Error signal: 'cannot find behavior description for ', aBehaviorDescription behaviorIdentifier ].
-	self loadHistoryForBehaviorWithIndex: objectId index transaction: transaction.
-	chain := versions at: objectId index.
-	chain first isCurrent ifFalse: [ 
-		chain addFirst: ((SoilBehaviorDescription for: aBehaviorDescription objectClass) version: (chain first version + 1))].
-	offset := chain detectIndex: [ :each | each matchesDescription: aBehaviorDescription ] ifNone: [ 0 ].
-	offset = 0 ifTrue: [ 
-		"The cached version chain can be stale relative to what has actually been committed
-		since it was first loaded. Force a reload of the history for this behavior and retry
-		once before giving up, instead of raising a raw collection-not-found error."
-		versions removeKey: objectId index.
-		self loadHistoryForBehaviorWithIndex: objectId index transaction: transaction.
+	result := versionsLock critical: [
+		self ensureHistoryLoadedForBehaviorWithIndex: objectId index transaction: transaction.
 		chain := versions at: objectId index.
-		chain first isCurrent ifFalse: [ 
-			chain addFirst: ((SoilBehaviorDescription for: aBehaviorDescription objectClass) version: (chain first version + 1))].
-		offset := chain detectIndex: [ :each | each matchesDescription: aBehaviorDescription ] ifNone: [
-			(SoilObjectNotFound new segment: 0; index: objectId index) signal ] ].
-	^ chain copyFrom: 1 to: offset
+		"If the persisted chain's head does not match the class's current live shape yet
+		(no write has happened since the shape changed in the image), we need a stand-in
+		for that purpose. It is purely local to this call and is never stored in the shared
+		cache - only appendCommittedVersion:forIndex: (called after an actual commit)
+		is allowed to add real entries to the cached chain."
+		guess := chain first isCurrent
+			ifTrue: [ nil ]
+			ifFalse: [ (SoilBehaviorDescription for: aBehaviorDescription objectClass) version: chain first version + 1 ].
+		workingChain := guess ifNil: [ chain ] ifNotNil: [ (OrderedCollection with: guess) , chain ].
+		offset := workingChain detectIndex: [ :each | each matchesDescription: aBehaviorDescription ] ifNone: [ 0 ].
+		offset = 0 ifTrue: [ 
+			"Should be rare now that new versions are appended to the cache right when they
+			are committed - kept as a defensive fallback in case cache and disk ever disagree."
+			versions removeKey: objectId index.
+			self ensureHistoryLoadedForBehaviorWithIndex: objectId index transaction: transaction.
+			chain := versions at: objectId index.
+			guess := chain first isCurrent
+				ifTrue: [ nil ]
+				ifFalse: [ (SoilBehaviorDescription for: aBehaviorDescription objectClass) version: chain first version + 1 ].
+			workingChain := guess ifNil: [ chain ] ifNotNil: [ (OrderedCollection with: guess) , chain ].
+			offset := workingChain detectIndex: [ :each | each matchesDescription: aBehaviorDescription ] ifNone: [
+				(SoilObjectNotFound new segment: 0; index: objectId index) signal ] ].
+		workingChain copyFrom: 1 to: offset ].
+	^ result
 ]
 
 { #category : #'open/close' }
 SoilBehaviorRegistry >> close [
 	index close
+]
+
+{ #category : #private }
+SoilBehaviorRegistry >> ensureHistoryLoadedForBehaviorWithIndex: objectIndex transaction: transaction [
+	"Private. Caller must already hold versionsLock. Loads the full version history for
+	this behavior from disk exactly once and caches it - persisted behavior descriptions
+	are immutable, so once loaded a chain never needs to be reloaded, only extended
+	(see SoilBehaviorRegistry>>appendCommittedVersion:forIndex:)."
+	| records chain |
+	(versions includesKey: objectIndex) ifTrue: [ ^ self ].
+	records := self segment allVersionsAt: objectIndex.
+	chain := records collect: [ :record |
+		record
+			transaction: transaction;
+			materializeObject ].
+	versions
+		at: objectIndex
+		put: chain
 ]
 
 { #category : #accessing }
@@ -84,11 +128,11 @@ SoilBehaviorRegistry >> index [
 
 { #category : #initialization }
 SoilBehaviorRegistry >> initialize [
-
 	super initialize.
 	versions := Dictionary new
 		            at: 2
-		            put: (OrderedCollection with: SoilBehaviorDescription meta); yourself
+		            put: (OrderedCollection with: SoilBehaviorDescription meta); yourself.
+	versionsLock := Semaphore forMutualExclusion
 ]
 
 { #category : #initialization }
@@ -105,30 +149,9 @@ SoilBehaviorRegistry >> initializeFilesystem [
 ]
 
 { #category : #queries }
-SoilBehaviorRegistry >> invalidateHistoryForBehaviorWithIndex: objectIndex [
-	"Drop the cached version-history chain for this behavior, if any, so the next
-	lookup reloads it fresh from the segment. Must be called after a new behavior
-	version has actually been committed to disk - see
-	SoilTransaction>>invalidateChangedBehaviorHistories."
-	versions removeKey: objectIndex ifAbsent: [ ]
-]
-
-{ #category : #queries }
 SoilBehaviorRegistry >> loadHistoryForBehaviorWithIndex: objectIndex transaction: transaction [
-	|  records chain |
-
-	"check if we loaded the history already"
-	(versions includesKey: objectIndex ) ifTrue: [ ^ self ].
-
-	records := self segment allVersionsAt: objectIndex.
-	chain := records collect: [ :record |
-		record
-			transaction: transaction;
-			materializeObject  ].
-
-	versions
-		at: objectIndex
-		put: chain
+	versionsLock critical: [
+		self ensureHistoryLoadedForBehaviorWithIndex: objectIndex transaction: transaction ]
 ]
 
 { #category : #accessing }

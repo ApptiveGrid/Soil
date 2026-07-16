@@ -24,12 +24,14 @@ SoilBehaviorRegistryTest >> tearDown [
 ]
 
 { #category : #tests }
-SoilBehaviorRegistryTest >> testInvalidatesHistoryCacheAfterNewVersionCommitted [
+SoilBehaviorRegistryTest >> testAppendsNewVersionToHistoryCacheAfterCommit [
 	"After a new behavior version is committed for a class, a version-history chain
-	that was already cached before that commit must be dropped, not left stale -
-	see SoilTransaction>>invalidateChangedBehaviorHistories."
-	| cls obj tx idx |
-	cls := (SoilBaseTestObject << #SOBehaviorRegistryInvalidationTestObject
+	that was already cached before that commit must be extended in place (the new
+	version appended to the front), not dropped and reloaded from disk - see
+	SoilTransaction>>updateBehaviorHistoryCachesAfterCommit and
+	SoilBehaviorRegistry>>appendCommittedVersion:forIndex:."
+	| cls obj tx idx cachedChain sizeBefore |
+	cls := (SoilBaseTestObject << #SOBehaviorRegistryAppendTestObject
 		layout: FixedLayout;
 		slots: { #one. #two };
 		package: self class package name) install.
@@ -41,13 +43,16 @@ SoilBehaviorRegistryTest >> testInvalidatesHistoryCacheAfterNewVersionCommitted 
 		tx commit.
 		idx := (registry nameAt: cls soilBehaviorIdentifier ifAbsent: [ nil ]) index.
 
-		"force the version-history cache to load, simulating a prior read"
+		"force the version-history cache to load, simulating a prior read, and keep a
+		handle to the exact cached OrderedCollection instance"
 		tx := soil newTransaction.
 		registry loadHistoryForBehaviorWithIndex: idx transaction: tx.
 		tx abort.
-		self assert: ((registry instVarNamed: #versions) includesKey: idx).
+		cachedChain := (registry instVarNamed: #versions) at: idx.
+		sizeBefore := cachedChain size.
 
-		"changing the shape and committing a new version must invalidate the cache"
+		"changing the shape and committing a new version must extend the SAME cached
+		chain object in place, not replace or drop it"
 		cls removeSlot: (cls slotNamed: #two); addSlot: #three asSlot.
 		obj := cls new.
 		obj instVarNamed: #one put: 99.
@@ -55,7 +60,9 @@ SoilBehaviorRegistryTest >> testInvalidatesHistoryCacheAfterNewVersionCommitted 
 		tx root: obj.
 		tx commit.
 
-		self deny: ((registry instVarNamed: #versions) includesKey: idx) ]
+		self assert: ((registry instVarNamed: #versions) at: idx) identicalTo: cachedChain.
+		self assert: cachedChain size equals: sizeBefore + 1.
+		self assert: cachedChain first isCurrent ]
 		ensure: [ cls removeFromSystem ]
 ]
 

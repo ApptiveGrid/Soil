@@ -14,7 +14,7 @@ Class {
 		'createdAt',
 		'indexUpdatesToCommit',
 		'commitStrategy',
-		'changedBehaviorIndexes'
+		'changedBehaviorDescriptions'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -114,7 +114,7 @@ SoilTransaction >> basicCommit [
 	resources"
 	self needsCommit ifFalse: [ 
 		soil notificationHandler transactionCommitted: self.
-		self invalidateChangedBehaviorHistories.
+		self updateBehaviorHistoryCachesAfterCommit.
 		^ self ].
 	"only one transactions is allowed at a time. We use the critical block of the database
 	to avoid parallel committing"
@@ -140,9 +140,9 @@ SoilTransaction >> basicCommit [
 		soil journal addTransactionJournal: journal ]
 				ensure: [self releaseLocks ] ].
 	soil notificationHandler transactionCommitted: self.
-	"a new behavior version, if any, is now durably committed - drop the now-stale
-	cached version histories in SoilBehaviorRegistry so the next lookup reloads them"
-	self invalidateChangedBehaviorHistories
+	"any new behavior versions committed above are now durable - extend
+	SoilBehaviorRegistrys cached version histories to match"
+	self updateBehaviorHistoryCachesAfterCommit
 ]
 
 { #category : #accessing }
@@ -184,7 +184,7 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 	objectId := soil behaviorRegistry
 		nameAt: aClass soilBehaviorIdentifier
 		ifAbsent: nil.
-			
+
 	objectId ifNotNil: [ 
 		behaviorDescription := (objectId index == 2)
 			ifTrue: [ ^ SoilBehaviorDescription meta ]
@@ -194,7 +194,7 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 		"the description in the database might not be current, if not, we create a new one later"
 		behaviorDescription isCurrent 
 			ifTrue: [ ^ behaviorDescription ] ].
-				
+
 	"behaviorDescription is only set if we've found an old version"
 	behaviorDescription 
 		ifNotNil: [ 
@@ -204,17 +204,17 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 				incrementVersion.
 			"add a new version record to keep the previous position"
 			self makeNewVersion: behaviorDescription.
-			"remember this behavior so its stale cached version history in
-			SoilBehaviorRegistry can be invalidated once this transaction commits
-			(see SoilTransaction>>invalidateChangedBehaviorHistories)"
-			changedBehaviorIndexes add: behaviorDescription objectId index ]
+			"remember this behavior so its new, now-persisted version can be appended to
+			SoilBehaviorRegistrys cached version history once this transaction commits
+			(see SoilTransaction>>updateBehaviorHistoryCachesAfterCommit)"
+			changedBehaviorDescriptions add: behaviorDescription ]
 		ifNil: [  
 			"this is a new description with version 1"
 			behaviorDescription := (SoilBehaviorDescription for: aClass)
 				beFirstVersion;
 				objectId: self newMetaObjectId.
 			self atObjectId: behaviorDescription objectId putObject: behaviorDescription. ].
-		behaviorDescriptions
+	behaviorDescriptions
 		at: aClass soilBehaviorIdentifier
 		put: behaviorDescription.
 	^ behaviorDescription
@@ -387,7 +387,7 @@ SoilTransaction >> initialize [
 	behaviorDescriptions := Dictionary new.
 	locks := OrderedCollection new.
 	indexUpdatesToCommit := OrderedCollection new.
-	changedBehaviorIndexes := Set new.
+	changedBehaviorDescriptions := OrderedCollection new.
 	self beAutomaticWriteTracking
 ]
 
@@ -406,19 +406,6 @@ SoilTransaction >> initializeObjectId: anObjectId [
 	as well as the new version"
 	assoc value: assoc value + 1.
 	anObjectId index: assoc value
-]
-
-{ #category : #public }
-SoilTransaction >> invalidateChangedBehaviorHistories [
-	"After a successful commit, any SoilBehaviorRegistry version-history cache we
-	added a new version to during this transaction is stale (it was loaded before
-	this commit happened) and must be dropped so the next lookup reloads it fresh.
-	Must only be called after a successful commit, never on abort - an aborted
-	transaction must not be able to change shared, cross-transaction state."
-	changedBehaviorIndexes isEmpty ifTrue: [ ^ self ].
-	changedBehaviorIndexes do: [ :eachIndex |
-		soil behaviorRegistry invalidateHistoryForBehaviorWithIndex: eachIndex ].
-	changedBehaviorIndexes := Set new
 ]
 
 { #category : #testing }
@@ -713,6 +700,21 @@ SoilTransaction >> start [
 { #category : #accessing }
 SoilTransaction >> transactionManager [ 
 	^ soil transactionManager
+]
+
+{ #category : #public }
+SoilTransaction >> updateBehaviorHistoryCachesAfterCommit [
+	"After a successful commit, any new behavior version created during this transaction
+	is now durably persisted - extend SoilBehaviorRegistrys cached version history for
+	each of them in place (O(1) append, no reload of the whole history from disk).
+	Must only be called after a successful commit, never on abort - an aborted
+	transaction must not be able to change shared, cross-transaction state."
+	changedBehaviorDescriptions isEmpty ifTrue: [ ^ self ].
+	changedBehaviorDescriptions do: [ :description |
+		soil behaviorRegistry
+			appendCommittedVersion: description
+			forIndex: description objectId index ].
+	changedBehaviorDescriptions := OrderedCollection new
 ]
 
 { #category : #accessing }
