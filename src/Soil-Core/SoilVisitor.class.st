@@ -21,7 +21,7 @@ SoilVisitor >> beBreadthFirst [
 { #category : #api }
 SoilVisitor >> beDepthFirst [ 
 	depthFirst := true.
-	seen := nil.
+	seen := Set new.
 	toBeProcessed := nil
 ]
 
