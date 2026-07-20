@@ -169,13 +169,11 @@ SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [
 { #category : #visiting }
 SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	super visitPersistentClusterVersion: aSoilPersistentClusterVersion.
-	(aSoilPersistentClusterVersion objectId segment == 0)
-		ifTrue: [ 
-			"as there could be very old objects we need to copy all  versions of 
-			the behavior descriptions"
-			self copyAllClusterVersions: aSoilPersistentClusterVersion  ]
-		ifFalse: [  
-			self copySourceCluster: (self makeCopy: aSoilPersistentClusterVersion) ].
-
-	^ aSoilPersistentClusterVersion 
+	"A backup must be a faithful copy of the source database, including full
+	MVCC history - not just the current version. This applies to every segment,
+	not only the meta segment (behavior descriptions): any object can have
+	readers with an old readVersion that need historical versions to still be
+	readable after a restore, exactly like behavior descriptions do."
+	self copyAllClusterVersions: aSoilPersistentClusterVersion.
+	^ aSoilPersistentClusterVersion
 ]

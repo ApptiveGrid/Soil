@@ -160,6 +160,39 @@ SoilBackupTest >> testBackupOldVersion [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testBackupPreservesFullVersionHistoryForRegularObjects [
+	"A backup must be a faithful copy of the source database - including full MVCC
+	history for regular objects (segment 1), not just behavior descriptions
+	(segment 0). Before the fix, SoilBackupVisitor only copied the current version
+	of regular clusters (via resetPreviousVersion), so an old readVersion became
+	unreadable (or silently returned nil/wrong data) after restore."
+	| tx tx2 visitor tx3 |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #versionOne) ).
+	tx makeRoot: tx root nested.
+	tx commit.
+
+	self assert: soil control databaseVersion equals: 1.
+
+	tx2 := soil newTransaction.
+	tx2 root nested label: #versionTwo.
+	tx2 markDirty: tx2 root nested.
+	tx2 commit.
+
+	backupSoil := Soil createOnPath: self path, #backup.
+	visitor := SoilBackupVisitor new
+		target: backupSoil;
+		backup: soil.
+	backupSoil close; open.
+
+	"the backup itself (a normal, unversioned full backup) must still be able to
+	answer a historical read for version 1, exactly like the source database can"
+	tx3 := backupSoil newTransactionForVersion: 1.
+	[ self assert: tx3 root nested label equals: #versionOne ]
+		ensure: [ tx3 abort ]
+]
+
+{ #category : #tests }
 SoilBackupTest >> testBackupTheBackup [
 	| tx visitor dict secondBackup txn |
 	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
