@@ -36,11 +36,13 @@ SoilReadOnlyStrategy >> markDirty: anObject [
 ]
 
 { #category : #strategy }
-SoilReadOnlyStrategy >> prepareCommit [ 
-	ignoreWriteAttempts ifFalse: [ 
-		transaction objectMap do: [ :each | 
+SoilReadOnlyStrategy >> prepareCommit [
+	"iterate over a snapshot, not the live objectMap - see
+	SoilAutomaticTrackingStrategy>>prepareCommit for why"
+	ignoreWriteAttempts ifFalse: [
+		transaction objectMap values do: [ :each |
 			each hasChanged ifTrue: [
-				 ^ SoilWriteOnReadOnlyTransaction new 
+				 ^ SoilWriteOnReadOnlyTransaction new
 					object: each object;
 					signal ] ] ]
 ]

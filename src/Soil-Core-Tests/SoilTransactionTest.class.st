@@ -112,7 +112,33 @@ SoilTransactionTest >> testFindRecords [
 ]
 
 { #category : #tests }
-SoilTransactionTest >> testRootObject [ 
+SoilTransactionTest >> testPrepareCommitSurvivesObjectMapGrowingDuringScan [
+	"prepareCommit iterates transaction objectMap to find changed records. If handling
+	one record causes further objects to become known to the transaction (as a lazily
+	materializing reference can), objectMap grows while it is being scanned. Pharo's
+	HashedCollection>>do: does not tolerate that: growing the dictionary mid-iteration
+	can silently skip entries that were already there before the growth, so a changed
+	record can be dropped from the commit without any error. This reproduces that shape
+	directly against objectMap, independent of what actually triggers the growth."
+	| tx map growingRecord changedRecords |
+	tx := SoilTransaction new.
+	map := tx objectMap.
+	changedRecords := OrderedCollection new.
+	1 to: 8 do: [ :i | | record |
+		record := SoilTestGrowingRecord new.
+		record changed: true.
+		changedRecords add: record.
+		map at: Object new put: record ].
+	growingRecord := changedRecords first.
+	growingRecord onHasChanged: [
+		1 to: 200 do: [ :i | map at: Object new put: SoilTestGrowingRecord new ] ].
+	tx commitStrategy prepareCommit.
+	changedRecords do: [ :record |
+		self assert: (tx commitStrategy records includes: record) ]
+]
+
+{ #category : #tests }
+SoilTransactionTest >> testRootObject [
 	| tx obj |
 	obj := Object new.
 	tx := soil newTransaction.
