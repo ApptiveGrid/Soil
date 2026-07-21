@@ -198,7 +198,7 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 					see the registry entry yet find nothing at its own snapshot version.
 					Fetch it at its current/latest version instead of raising -- it's schema
 					metadata, not data subject to this transaction's isolation."
-					(self objectAtLatestVersionWithId: objectId)
+					(self latestObjectWithId: objectId)
 						ifNotNil: [ :object | object objectId: objectId ]
 						ifNil: [ Error signal: ('could not find object with ', objectId asString, ' for class ', aClass name, ' in transaction ', self printString) ] ] ].
 		"the description in the database might not be current, if not, we create a new one later"
@@ -612,7 +612,7 @@ SoilTransaction >> objectWithId: objectId [
 ]
 
 { #category : #private }
-SoilTransaction >> objectAtLatestVersionWithId: objectId [
+SoilTransaction >> latestObjectWithId: objectId [
 	"Like #objectWithId: but reads the record at its current/latest version
 	instead of restricting the lookup to this transaction's readVersion. Used
 	only for behavior descriptions (see #behaviorDescriptionFor:), which are
