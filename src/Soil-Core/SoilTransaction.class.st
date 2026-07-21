@@ -188,9 +188,19 @@ SoilTransaction >> behaviorDescriptionFor: aClass [
 	objectId ifNotNil: [ 
 		behaviorDescription := (objectId index == 2)
 			ifTrue: [ ^ SoilBehaviorDescription meta ]
-			ifFalse: [ (self objectWithId: objectId) 
+			ifFalse: [ (self objectWithId: objectId)
 				ifNotNil: [ :object | object objectId: objectId ]
-				ifNil: [ Error signal: ('could not find object with ', objectId asString, ' for class ', aClass name, ' in transaction ', self printString) ] ].
+				ifNil: [
+					"The behavior registry's name index is visible immediately across
+					transactions the moment any transaction commits a new description,
+					unlike the object data itself which stays scoped to this transaction's
+					own readVersion. A transaction opened just before such a commit can
+					see the registry entry yet find nothing at its own snapshot version.
+					Fetch it at its current/latest version instead of raising -- it's schema
+					metadata, not data subject to this transaction's isolation."
+					(self latestObjectWithId: objectId)
+						ifNotNil: [ :object | object objectId: objectId ]
+						ifNil: [ Error signal: ('could not find object with ', objectId asString, ' for class ', aClass name, ' in transaction ', self printString) ] ] ].
 		"the description in the database might not be current, if not, we create a new one later"
 		behaviorDescription isCurrent 
 			ifTrue: [ ^ behaviorDescription ] ].
@@ -584,15 +594,40 @@ SoilTransaction >> objectRepository [
 
 { #category : #api }
 SoilTransaction >> objectWithId: objectId [
-	idMap ifNil: [ 
+	idMap ifNil: [
 		SoilTransactionAlreadyAborted signal: 'this transaction has already been aborted' ].
 
-	idMap 
+	idMap
 		at: objectId
 		ifPresent: [ :record | ^ record object ].
 
 	^ (self recordWithId: objectId)
 		ifNotNil: [ :record |
+			self materializeRecord: record.
+			idMap at: objectId put: record.
+			objectMap at: record object put: record.
+			record object
+				soilLoadedIn: self;
+				yourself ]
+]
+
+{ #category : #private }
+SoilTransaction >> latestObjectWithId: objectId [
+	"Like #objectWithId: but reads the record at its current/latest version
+	instead of restricting the lookup to this transaction's readVersion. Used
+	only for behavior descriptions (see #behaviorDescriptionFor:), which are
+	schema metadata expected to be visible cross-transaction the instant
+	they're committed, not ordinary data subject to snapshot isolation."
+	| record |
+	idMap ifNil: [ ^ nil ].
+	idMap
+		at: objectId
+		ifPresent: [ :cached | ^ cached object ].
+	record := [ self objectRepository at: objectId ]
+		on: SoilIndexOutOfRange
+		do: [ :error | nil ].
+	^ record
+		ifNotNil: [
 			self materializeRecord: record.
 			idMap at: objectId put: record.
 			objectMap at: record object put: record.
