@@ -262,3 +262,66 @@ SoilGraphExporterTest >> testFailedImportDoesNotCorruptBehaviorRegistryForOtherC
 		mismatchClass ifNotNil: [ mismatchClass removeFromSystem ].
 		thirdClass ifNotNil: [ thirdClass removeFromSystem ] ]
 ]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testImportedBehaviorSurvivesCloseAndReopenEvenWithoutOtherChanges [
+	"SoilGraphImporter writes behavior descriptions and object data directly to the
+	segments, bypassing the transaction's normal markDirty:/commitStrategy tracking.
+	SoilTransactionManager>>commitTransaction: only checkpoints (which flushes the
+	behaviorRegistry's skip list index to disk) when the transaction's own needsCommit
+	is true. Committing right after an import with genuinely NOTHING else changed in the
+	same transaction must not silently fail to persist the newly imported behavior - the
+	space must still be usable after the target database is closed and reopened, not just
+	within the same session."
+
+	| tx object bytes exportTx importer targetTx path reopened importedOid |
+	object := migrationClass new
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2;
+		instVarNamed: #three put: 3;
+		yourself.
+	tx := soil newTransaction.
+	tx root: object.
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	path := self targetPath.
+	targetSoil := Soil createOnPath: path.
+	targetTx := targetSoil newTransaction.
+	targetTx root: SoilPersistentDictionary new.
+	targetTx commit.
+
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	importedOid := targetTx objectIdOf: importer importedObjects first.
+	"commit with genuinely nothing else touched - targetTx root is untouched, still the
+	same empty dictionary committed above. This is the exact scenario that used to
+	silently lose the import on the next close/reopen."
+	targetTx commit.
+
+	targetSoil close.
+	reopened := Soil openOnPath: path.
+	targetSoil := reopened.
+
+	self
+		assert: (reopened behaviorRegistry nameAt: #SOGraphExportMigrationObject ifAbsent: [ #absent ])
+		~= #absent.
+
+	tx := reopened newTransaction.
+	self assert: ((tx objectWithId: importedOid) instVarNamed: #one) equals: 1.
+	self assert: ((tx objectWithId: importedOid) instVarNamed: #two) equals: 2.
+	self assert: ((tx objectWithId: importedOid) instVarNamed: #three) equals: 3
+]

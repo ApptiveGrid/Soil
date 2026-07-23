@@ -41,7 +41,23 @@ SoilGraphImporter >> import [
 			clusters add: self readCluster ].
 
 		soil objectRepository metaSegment updateLastObjectIndex: (lastIndex at: 1).
-		soil objectRepository firstSegment updateLastObjectIndex: (lastIndex at: 2)
+		soil objectRepository firstSegment updateLastObjectIndex: (lastIndex at: 2).
+		"readCluster/importBehaviorCluster: write behavior descriptions and object data
+		directly to the segments, bypassing the transaction's normal tracking entirely - with
+		the default SoilAutomaticTrackingStrategy, markDirty: is a no-op and changes are only
+		detected via a live fingerprint comparison in objectMap, neither of which this direct
+		writing ever touches. So unless the caller happens to make some unrelated, genuine
+		mutation elsewhere in the same transaction, needsCommit stays false,
+		SoilTransactionManager>>commitTransaction: never checkpoints, and the behaviorRegistry's
+		skip list index (and everything else written here) is silently never flushed to disk -
+		it looks fully committed and works for the rest of the session, but the import is gone
+		the moment the database is closed and reopened. Register the already-written records for
+		the top-level imported objects directly with the commit strategy so needsCommit is
+		genuinely true and the existing, correctly-ordered post-commit checkpoint takes care of
+		it - do not checkpoint here directly, since this runs before the caller's own commit and
+		would corrupt its journal/position bookkeeping."
+		self importedObjects do: [ :each |
+			transaction commitStrategy addRecord: (transaction objectMap at: each) ]
 	] on: Error do: [ :e |
 		"readCluster/importBehaviorCluster: write directly to the segments as they go,
 		never rolled back by aborting the enclosing transaction, and lastObjectIndex is
