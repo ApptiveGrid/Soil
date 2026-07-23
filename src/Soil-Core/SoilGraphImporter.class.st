@@ -51,13 +51,14 @@ SoilGraphImporter >> import [
 		SoilTransactionManager>>commitTransaction: never checkpoints, and the behaviorRegistry's
 		skip list index (and everything else written here) is silently never flushed to disk -
 		it looks fully committed and works for the rest of the session, but the import is gone
-		the moment the database is closed and reopened. Register the already-written records for
-		the top-level imported objects directly with the commit strategy so needsCommit is
-		genuinely true and the existing, correctly-ordered post-commit checkpoint takes care of
-		it - do not checkpoint here directly, since this runs before the caller's own commit and
-		would corrupt its journal/position bookkeeping."
-		self importedObjects do: [ :each |
-			transaction commitStrategy addRecord: (transaction objectMap at: each) ]
+		the moment the database is closed and reopened. Flag the transaction directly instead of
+		routing any of the imported objects through the normal commitStrategy/objectMap path -
+		that would force every one of them to be re-serialized on commit, which is exactly the
+		per-object overhead this bulk import is meant to avoid. Do not checkpoint here directly
+		either: this runs before the caller's own commit and would corrupt its journal/position
+		bookkeeping - the flag just makes the existing, correctly-ordered post-commit checkpoint
+		actually fire."
+		transaction markNeedsCheckpoint
 	] on: Error do: [ :e |
 		"readCluster/importBehaviorCluster: write directly to the segments as they go,
 		never rolled back by aborting the enclosing transaction, and lastObjectIndex is

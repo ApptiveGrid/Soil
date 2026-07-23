@@ -14,7 +14,8 @@ Class {
 		'createdAt',
 		'indexUpdatesToCommit',
 		'commitStrategy',
-		'changedBehaviorDescriptions'
+		'changedBehaviorDescriptions',
+		'needsCheckpoint'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -370,12 +371,12 @@ SoilTransaction >> findRecords: aBlock [
 ]
 
 { #category : #testing }
-SoilTransaction >> hasChanges [ 
+SoilTransaction >> hasChanges [
 	"before committing a transaction collects changes in the journal. While committing
-	recordsToCommit gets populated. We want to ask for modifications regardless of the 
+	recordsToCommit gets populated. We want to ask for modifications regardless of the
 	phase of the transaction so we check both"
-	^ commitStrategy hasChanges or: [ 
-			self hasJournalEntries ]
+	^ commitStrategy hasChanges or: [
+			self hasJournalEntries or: [ needsCheckpoint == true ] ]
 ]
 
 { #category : #testing }
@@ -486,7 +487,17 @@ SoilTransaction >> makeRoot: anObject [
 { #category : #public }
 SoilTransaction >> markDirty: anObject [
 
-	commitStrategy markDirty: anObject 
+	commitStrategy markDirty: anObject
+]
+
+{ #category : #public }
+SoilTransaction >> markNeedsCheckpoint [
+	"used by operations that write directly to segments, bypassing the normal
+	markDirty:/commitStrategy tracking (see SoilGraphImporter>>import), to make sure
+	needsCommit is true so SoilTransactionManager>>commitTransaction: checkpoints and
+	persists those writes - without requiring anything to be re-serialized through the
+	normal, tracked path"
+	needsCheckpoint := true
 ]
 
 { #category : #api }
