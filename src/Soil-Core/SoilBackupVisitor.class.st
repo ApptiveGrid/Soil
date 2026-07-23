@@ -141,12 +141,6 @@ SoilBackupVisitor >> visitDatabaseJournal: aSoilJournal [
 ]
 
 { #category : #visiting }
-SoilBackupVisitor >> visitFirstSegment: aSoilObjectSegment [ 
-	self processObjectId: SoilObjectId root.
-	self visitObjectSegment: aSoilObjectSegment 
-]
-
-{ #category : #visiting }
 SoilBackupVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
 	aSoilJournalFragmentFile copyTo: target journal path / aSoilJournalFragmentFile basename.
 	^ aSoilJournalFragmentFile 

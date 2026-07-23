@@ -79,6 +79,33 @@ SoilBackupTest >> testBackupCurrentVersion [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testBackupInDepthFirstMode [
+	"SoilVisitor>>beDepthFirst used to null out `seen`, which processObjectId:
+	dereferences unconditionally regardless of traversal mode - depth-first
+	backups crashed with a DNU (receiver of #includes: is nil) before the fix
+	in SoilVisitor. Nothing in the codebase currently switches a visitor to
+	depth-first mode, but the mode must still work correctly."
+	| tx tx2 visitor tx3 |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #versionOne) ).
+	tx makeRoot: tx root nested.
+	tx commit.
+
+	backupSoil := Soil createOnPath: self path, #backup.
+	[ 
+	visitor := SoilBackupVisitor new 
+		target: backupSoil;
+		beDepthFirst;
+		backup: soil.
+	backupSoil close; open.
+
+	tx3 := backupSoil newTransaction.
+	  self assert: tx3 root nested label equals: #versionOne ]
+		ensure: [ 
+			tx3 abort ].
+]
+
+{ #category : #tests }
 SoilBackupTest >> testBackupOldBehavior [ 
 	| tx visitor tx3 object objectId versions object2 |
 	migrationClass := self createMigrationClass.
