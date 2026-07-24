@@ -4,7 +4,7 @@
 
 Soil is an object oriented database in [pharo](http://pharo.org). It is transaction based having ACID transactions. It has binary search capabilities with SkipList and BTree+ indexes. It aims to be a simple yet powerful database making it easy to develop with, easy to debug with, easy to inspect, ... 
 
-To read more please have a look at the [documentation](./docs/soil.md)
+To read more please have a look at the [documentation](./docs/soil.md), to learn about Soil internals, follow the [Soil Blog Series](https://norbert.hartl.name/blog/series/soil.html) 
 
 ## Loading
 
@@ -60,6 +60,7 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 - Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
 
 ### NEWS
+- A Blog Series about Soil internals [Soil Blog](https://norbert.hartl.name/blog/series/soil.html) 2026-07-24
 - ESUG 2026 Slides are online: "Soil: architectural insights" Slides [PDF](https://archive.marcusdenker.de/Soil/Videos/26-ESUG/2026-07-07-ESUG-Soil-architectural-insights.pdf) 2026-07-15
 - [ANN] Release V4 [Announcement](https://github.com/ApptiveGrid/Soil/blob/main/docs/versions/ann-v4.md) 2026-03-13
 - Recording online: Soil: a database for fun and profit - 26 November 2025 UK Smalltalk User Group [YouTube](https://www.youtube.com/watch?v=mem0laBTbjU) 2026-01-05
