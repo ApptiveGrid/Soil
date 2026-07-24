@@ -118,6 +118,25 @@ SoilObjectRepository >> copyVersionChain: aCollectionOfClusterVersions [
 	^ position
 ]
 
+{ #category : #copying }
+SoilObjectRepository >> copyVersionChain: aCollectionOfClusterVersions upToReadVersion: aNumberOrNil [
+	"Like copyVersionChain: but drop versions no reader can still see: a version is
+	discardable once the smallest read version has moved to or past the version that
+	superseded it, or when there is no open transaction at all (mirrors
+	SoilIndexCleaner>>canDiscardOldState:). The current (newest) version is always
+	kept; nil (no open transactions) keeps only it. The kept suffix is copied via
+	copyVersionChain:, so I4 (previousVersionPosition rebuild, oldest kept -> 0) holds."
+	| kept newerVersion |
+	kept := OrderedCollection new.
+	newerVersion := nil.
+	aCollectionOfClusterVersions do: [ :each |
+		(newerVersion notNil and: [ aNumberOrNil isNil or: [ aNumberOrNil >= newerVersion ] ])
+			ifTrue: [ ^ self copyVersionChain: kept ].
+		kept add: each.
+		newerVersion := each version ].
+	^ self copyVersionChain: kept
+]
+
 { #category : #accessing }
 SoilObjectRepository >> firstSegment [
 	^ segments first
