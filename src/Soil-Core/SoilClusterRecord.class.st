@@ -76,6 +76,18 @@ SoilClusterRecord >> bytes: anObject [
 	bytes := anObject
 ]
 
+{ #category : #copying }
+SoilClusterRecord >> copyResetPreviousVersion [
+	"Return a shallow copy carrying the persisted state but with the previous
+	version link reset, ready to be (re)written into a target repository."
+	^ self copy
+		behaviorDescriptions: self behaviorDescriptions;
+		references: self references;
+		bytes: self bytes;
+		version: self version;
+		resetPreviousVersion
+]
+
 { #category : #api }
 SoilClusterRecord >> detachFromSegment [
 	"remove all information that belongs to the segment where the cluster
