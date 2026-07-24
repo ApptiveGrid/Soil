@@ -139,6 +139,64 @@ SoilObjectRepositoryTest >> testSegmentInitializationFromDisk [
 
 ]
 
+{ #category : #tests }
+SoilObjectRepositoryTest >> testSegmentReplaceCurtailedLeavesOriginalIntact [
+	"documented caller pattern: build clone, fail before the swap, ifCurtailed deletes
+	the orphan clone and the original segment is untouched."
+	| tx segment clone clonePath |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #kept)).
+	tx makeRoot: tx root nested.
+	tx commit.
+	soil checkpoint.
+	segment := soil objectRepository firstSegment.
+	clonePath := segment path, #gc.
+	[ [ clone := self verbatimCloneOf: segment.
+	    Error signal: 'boom before replace' ]
+		ifCurtailed: [ clone ifNotNil: [ clone close ]. clonePath ensureDeleteAll ] ]
+		on: Error do: [ :e | ].
+	self deny: clonePath exists.
+	tx := soil newTransaction.
+	[ self assert: tx root nested label equals: #kept ] ensure: [ tx abort ]
+]
+
+{ #category : #tests }
+SoilObjectRepositoryTest >> testSegmentReplacePreservesIndexes [
+	"the clone carries the whole segment directory, indexes included; an indexed
+	dictionary must still resolve after the swap (the old copy helper dropped indexes)."
+	| tx dict segment clone |
+	tx := soil newTransaction.
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList) keySize: 8; maxLevel: 16; yourself.
+	tx root: dict.
+	dict at: #foo put: (SoilTestNestedObject new label: #indexed).
+	tx commit.
+	soil checkpoint.
+	segment := soil objectRepository firstSegment.
+	clone := self verbatimCloneOf: segment.
+	segment replaceWith: clone.
+	tx := soil newTransaction.
+	[ self assert: (tx root at: #foo) label equals: #indexed ] ensure: [ tx abort ]
+]
+
+{ #category : #tests }
+SoilObjectRepositoryTest >> testSegmentReplaceRoundtrip [
+	"replaceWith: swaps in a fully written clone, leaves the DB logically identical,
+	and removes the clone directory (no leftover .gc copy - moveTo: would leak it)."
+	| tx segment clone clonePath |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #kept)).
+	tx makeRoot: tx root nested.
+	tx commit.
+	soil checkpoint.
+	segment := soil objectRepository firstSegment.
+	clonePath := segment path, #gc.
+	clone := self verbatimCloneOf: segment.
+	segment replaceWith: clone.
+	self deny: clonePath exists.
+	tx := soil newTransaction.
+	[ self assert: tx root nested label equals: #kept ] ensure: [ tx abort ]
+]
+
 { #category : #helpers }
 SoilObjectRepositoryTest >> threeVersionNestedObjectId [
 	"commit versions #v1/#v2/#v3 (db versions 1/2/3) of a nested object; answer its objectId"
@@ -159,4 +217,21 @@ SoilObjectRepositoryTest >> threeVersionNestedObjectId [
 	oid := tx objectIdOf: tx root nested.
 	tx abort.
 	^ oid
+]
+
+{ #category : #helpers }
+SoilObjectRepositoryTest >> verbatimCloneOf: aSourceSegment [
+	"A complete on-disk copy of the segment (objects + index + indexes) at the .gc path -
+	the trivially valid clone a swap test needs, without faking any vacuum logic. The
+	caller has flushed the source to disk (soil checkpoint) beforehand."
+	| clonePath |
+	clonePath := aSourceSegment path, #gc.
+	clonePath ensureDeleteAll.
+	aSourceSegment path copyAllTo: clonePath.
+	^ SoilObjectSegment new
+		id: aSourceSegment id;
+		objectRepository: soil objectRepository;
+		path: clonePath;
+		open;
+		yourself
 ]
