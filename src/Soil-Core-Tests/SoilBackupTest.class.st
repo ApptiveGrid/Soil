@@ -304,7 +304,65 @@ SoilBackupTest >> testBackupWithIndexRemoval [
 ]
 
 { #category : #tests }
-SoilBackupTest >> testSimpleBackup [ 
+SoilBackupTest >> testCopyClusterVersionChainRebuildsPreviousVersionPosition [
+	"I4: in the target the copied chain is backward-reachable from the current
+	version and terminates at previousVersionPosition 0."
+	| tx tx2 tx3 objectId versions |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #versionOne)).
+	tx makeRoot: tx root nested.
+	tx commit.
+	tx2 := soil newTransaction.
+	tx2 root nested label: #versionTwo.
+	tx2 markDirty: tx2 root nested.
+	tx2 commit.
+	tx3 := soil newTransaction.
+	tx3 root nested label: #versionThree.
+	tx3 markDirty: tx3 root nested.
+	tx3 commit.
+	backupSoil := Soil createOnPath: self path, #backup.
+	SoilBackupVisitor new target: backupSoil; backup: soil.
+	backupSoil close; open.
+	tx := backupSoil newTransaction.
+	objectId := tx objectIdOf: tx root nested.
+	tx abort.
+	versions := (backupSoil objectRepository segmentAt: objectId segment)
+		allVersionsAt: objectId index.
+	self assert: versions size equals: 3.
+	self assert: versions last previousVersionPosition equals: 0.
+	self assert: (versions allButLast allSatisfy: [ :each | each previousVersionPosition > 0 ])
+]
+
+{ #category : #tests }
+SoilBackupTest >> testCopyClusterVersionChainRoundtrip [
+	"Roundtrip: a 3-version chain copied into a fresh target must answer at:version:
+	for every reader version exactly like the source database."
+	| tx tx2 tx3 |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #versionOne)).
+	tx makeRoot: tx root nested.
+	tx commit.
+	tx2 := soil newTransaction.
+	tx2 root nested label: #versionTwo.
+	tx2 markDirty: tx2 root nested.
+	tx2 commit.
+	tx3 := soil newTransaction.
+	tx3 root nested label: #versionThree.
+	tx3 markDirty: tx3 root nested.
+	tx3 commit.
+	self assert: soil control databaseVersion equals: 3.
+	backupSoil := Soil createOnPath: self path, #backup.
+	SoilBackupVisitor new target: backupSoil; backup: soil.
+	backupSoil close; open.
+	1 to: 3 do: [ :v | | srcTx dstTx |
+		srcTx := soil newTransactionForVersion: v.
+		dstTx := backupSoil newTransactionForVersion: v.
+		[ self assert: dstTx root nested label equals: srcTx root nested label ]
+			ensure: [ srcTx abort. dstTx abort ] ]
+]
+
+{ #category : #tests }
+SoilBackupTest >> testSimpleBackup [
 	| tx backup tx2 nested |
 	soil control
 		databaseFormatVersion: Soil databaseFormatVersion; 

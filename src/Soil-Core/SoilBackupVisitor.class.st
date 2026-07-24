@@ -21,20 +21,15 @@ SoilBackupVisitor >> backup: aSoil [
 ]
 
 { #category : #copying }
-SoilBackupVisitor >> copyAllClusterVersions: aSoilPersistentClusterVersion [ 
-	| versions position |
-	"if there is no previous version is a single copy"
-	aSoilPersistentClusterVersion hasPreviousVersion 
-		ifFalse: [ ^ self copySourceCluster: aSoilPersistentClusterVersion  ].
-	versions := (soil objectRepository segmentAt: aSoilPersistentClusterVersion objectId segment)
-		allVersionsAt: aSoilPersistentClusterVersion objectId index.
-	position := 0.
-	"for multiple versions we need to iterate from oldest to newest to set the
-	correct previous version positions"
-	versions reverseDo: [ :cluster | | newCluster |
-		newCluster := self makeCopy: cluster.
-		newCluster previousVersionPosition: position.
-		position := self copyCluster: newCluster ]
+SoilBackupVisitor >> copyAllClusterVersions: aSoilPersistentClusterVersion [
+	"if there is no previous version this is a single copy"
+	aSoilPersistentClusterVersion hasPreviousVersion
+		ifFalse: [ ^ self copySourceCluster: aSoilPersistentClusterVersion ].
+	"for multiple versions copy the whole chain oldest-to-newest so the
+	previousVersionPosition links can be rebuilt in the target"
+	^ self copyClusterVersionChain:
+		((soil objectRepository segmentAt: aSoilPersistentClusterVersion objectId segment)
+			allVersionsAt: aSoilPersistentClusterVersion objectId index)
 ]
 
 { #category : #visiting }
@@ -47,8 +42,22 @@ SoilBackupVisitor >> copyCluster: aSoilPersistentClusterVersion [
 		self processObjectId: reference ].
 	aSoilPersistentClusterVersion indexIds do:[ :indexId |
 		self copyIndexAt: indexId segment: aSoilPersistentClusterVersion segment ].
-	^ position 
+	^ position
 
+]
+
+{ #category : #copying }
+SoilBackupVisitor >> copyClusterVersionChain: aCollectionOfClusterVersions [
+	"Copy a full version chain (ordered newest->oldest, as allVersionsAt: returns)
+	into the target, rebuilding previousVersionPosition in the target. Returns the
+	position of the current (newest) version in the target."
+	| position |
+	position := 0.
+	aCollectionOfClusterVersions reverseDo: [ :cluster | | newCluster |
+		newCluster := self makeCopy: cluster.
+		newCluster previousVersionPosition: position.
+		position := self copyCluster: newCluster ].
+	^ position
 ]
 
 { #category : #visiting }
