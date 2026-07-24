@@ -106,6 +106,34 @@ SoilBackupTest >> testBackupInDepthFirstMode [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testBackupInDepthFirstModePreservesVersionHistory [
+	"Depth-first backup writes referenced objects inline while walking, so the
+	target byte layout differs from breadth-first; the copied version chain must
+	still be logically faithful - every reader version readable as in the source."
+	| tx tx2 tx3 |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #versionOne)).
+	tx makeRoot: tx root nested.
+	tx commit.
+	tx2 := soil newTransaction.
+	tx2 root nested label: #versionTwo.
+	tx2 markDirty: tx2 root nested.
+	tx2 commit.
+	tx3 := soil newTransaction.
+	tx3 root nested label: #versionThree.
+	tx3 markDirty: tx3 root nested.
+	tx3 commit.
+	backupSoil := Soil createOnPath: self path, #backup.
+	SoilBackupVisitor new target: backupSoil; beDepthFirst; backup: soil.
+	backupSoil close; open.
+	1 to: 3 do: [ :v | | srcTx dstTx |
+		srcTx := soil newTransactionForVersion: v.
+		dstTx := backupSoil newTransactionForVersion: v.
+		[ self assert: dstTx root nested label equals: srcTx root nested label ]
+			ensure: [ srcTx abort. dstTx abort ] ]
+]
+
+{ #category : #tests }
 SoilBackupTest >> testBackupOldBehavior [ 
 	| tx visitor tx3 object objectId versions object2 |
 	migrationClass := self createMigrationClass.

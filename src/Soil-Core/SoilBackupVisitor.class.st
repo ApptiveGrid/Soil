@@ -22,41 +22,25 @@ SoilBackupVisitor >> backup: aSoil [
 
 { #category : #copying }
 SoilBackupVisitor >> copyAllClusterVersions: aSoilPersistentClusterVersion [
-	"if there is no previous version this is a single copy"
+	"copy the full version chain; a single-version object is just a one-element chain"
 	aSoilPersistentClusterVersion hasPreviousVersion
-		ifFalse: [ ^ self copySourceCluster: aSoilPersistentClusterVersion ].
-	"for multiple versions copy the whole chain oldest-to-newest so the
-	previousVersionPosition links can be rebuilt in the target"
+		ifFalse: [ ^ self copyClusterVersionChain: { aSoilPersistentClusterVersion } ].
 	^ self copyClusterVersionChain:
 		((soil objectRepository segmentAt: aSoilPersistentClusterVersion objectId segment)
 			allVersionsAt: aSoilPersistentClusterVersion objectId index)
 ]
 
-{ #category : #visiting }
-SoilBackupVisitor >> copyCluster: aSoilPersistentClusterVersion [ 
-	| position |
-	position := target objectRepository 
-		at: aSoilPersistentClusterVersion objectId
-		putBytes: aSoilPersistentClusterVersion serialize.
-	aSoilPersistentClusterVersion references do: [ :reference |
-		self processObjectId: reference ].
-	aSoilPersistentClusterVersion indexIds do:[ :indexId |
-		self copyIndexAt: indexId segment: aSoilPersistentClusterVersion segment ].
-	^ position
-
-]
-
 { #category : #copying }
 SoilBackupVisitor >> copyClusterVersionChain: aCollectionOfClusterVersions [
-	"Copy a full version chain (ordered newest->oldest, as allVersionsAt: returns)
-	into the target, rebuilding previousVersionPosition in the target. Returns the
-	position of the current (newest) version in the target."
+	"Write the whole version chain into the target, then run the backup-specific
+	graph traversal (references + indexes) in the same oldest-to-newest order the
+	per-version copy used before."
 	| position |
-	position := 0.
-	aCollectionOfClusterVersions reverseDo: [ :cluster | | newCluster |
-		newCluster := self makeCopy: cluster.
-		newCluster previousVersionPosition: position.
-		position := self copyCluster: newCluster ].
+	position := target objectRepository copyVersionChain: aCollectionOfClusterVersions.
+	aCollectionOfClusterVersions reverseDo: [ :cluster |
+		cluster references do: [ :reference | self processObjectId: reference ].
+		cluster indexIds do: [ :indexId |
+			self copyIndexAt: indexId segment: cluster segment ] ].
 	^ position
 ]
 
@@ -89,13 +73,6 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	sourceSegment indexManager removeIndexWithId: indexId
 ]
 
-{ #category : #visiting }
-SoilBackupVisitor >> copySourceCluster: aSoilPersistentClusterVersion [ 
-	| clusterCopy |
-	clusterCopy := self makeCopy: aSoilPersistentClusterVersion.
-	^ self copyCluster: clusterCopy
-]
-
 { #category : #accessing }
 SoilBackupVisitor >> databaseVersion: anObject [
 
@@ -105,16 +82,6 @@ SoilBackupVisitor >> databaseVersion: anObject [
 { #category : #visiting }
 SoilBackupVisitor >> indexNotFound: indexId [ 
 	 Error signal: 'cannot find index with id ', indexId printString
-]
-
-{ #category : #visiting }
-SoilBackupVisitor >> makeCopy: aSoilPersistentClusterVersion [ 
-	^ aSoilPersistentClusterVersion copy
-		behaviorDescriptions: aSoilPersistentClusterVersion behaviorDescriptions;
-		references: aSoilPersistentClusterVersion references;
-		bytes: aSoilPersistentClusterVersion bytes;
-		version: aSoilPersistentClusterVersion version;
-		resetPreviousVersion.
 ]
 
 { #category : #api }

@@ -104,6 +104,20 @@ SoilObjectRepository >> close [
 	segments do: #close
 ]
 
+{ #category : #copying }
+SoilObjectRepository >> copyVersionChain: aCollectionOfClusterVersions [
+	"Copy a full version chain (ordered newest->oldest, as allVersionsAt: returns)
+	into this repository, rebuilding previousVersionPosition. Returns the position
+	of the current (newest) version."
+	| position |
+	position := 0.
+	aCollectionOfClusterVersions reverseDo: [ :cluster | | copy |
+		copy := cluster copyResetPreviousVersion.
+		copy previousVersionPosition: position.
+		position := self at: cluster objectId putBytes: copy serialize ].
+	^ position
+]
+
 { #category : #accessing }
 SoilObjectRepository >> firstSegment [
 	^ segments first
