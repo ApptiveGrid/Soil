@@ -216,10 +216,23 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 	(cluster == aCluster) ifTrue: [ 
 		 cluster := self updateCluster: aCluster ].
 	
-	self writeBehaviorDescriptions: (cluster behaviorDescriptions collect: [:each | 
+	self writeBehaviorDescriptions: (cluster behaviorDescriptions collect: [:each |
 		(each isKindOf: SoilVersionedObjectId)
 			ifTrue: [ self behaviorAt: each index ]
-			ifFalse: [ self behaviorAt: each objectId index ] ]).
+			ifFalse: [
+				"each is already a live, up-to-date SoilBehaviorDescription -
+				migrateCluster:/updateCluster: just materialized and re-serialized aCluster
+				under the current class shape, mutating this very description in place.
+				self behaviorAt: would re-read the meta segment by index, which still holds
+				the OLD, not-yet-committed on-disk bytes: exporting that stale description
+				would declare a field order that does not match the payload bytes we are
+				about to write below, silently swapping values on import. Re-derive a fresh
+				record from this exact live object instead of going back to disk."
+				(transaction objectMap at: each) asNewClusterVersion
+					version: 1;
+					transaction: transaction;
+					serializeObject;
+					yourself ] ]).
 	"write the cleaned and up-to-date cluster"
 	cluster 
 		transaction: transaction;

@@ -170,6 +170,13 @@ SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 ]
 
 { #category : #accessing }
+SoilBehaviorRegistry >> removeNameAt: classIdentifier ifAbsent: aBlock [
+	"used to undo a nameAt:put: made during an import that failed partway through -
+	see SoilGraphImporter>>import"
+	^ self index removeKey: classIdentifier ifAbsent: aBlock
+]
+
+{ #category : #accessing }
 SoilBehaviorRegistry >> newIterator [
 	^ self index newIterator 
 		returnObjectId;
