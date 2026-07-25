@@ -279,8 +279,26 @@ SoilObjectSegment >> path: anObject [
 ]
 
 { #category : #printing }
-SoilObjectSegment >> printOn: aStream [ 
-	aStream << 'segment #' << id asString 
+SoilObjectSegment >> printOn: aStream [
+	aStream << 'segment #' << id asString
+]
+
+{ #category : #gc }
+SoilObjectSegment >> replaceWith: aCloneSegment [
+	"Atomically swap this segment's on-disk file set (the directory .../segments/<id>)
+	with a fully written clone produced by makeGCClone (.../segments/<id>.gc). Both share
+	the same parent directory, so a single renameTo: is an atomic rename that also removes
+	the clone directory - moveTo: would recursively COPY a directory and leave the source
+	behind. Quiescent caller only; wrap build+replace in
+	ifCurtailed: [ aCloneSegment path ensureDeleteAll ] so a crash before the rename leaves
+	the original untouched and the clone a deletable orphan."
+	| myPath |
+	aCloneSegment flush; close.
+	self close.
+	myPath := self path.
+	myPath ensureDeleteAll.
+	aCloneSegment path renameTo: myPath basename.
+	self open
 ]
 
 { #category : #accessing }
