@@ -1,93 +1,62 @@
 Class {
 	#name : #SoilGarbageCollectVisitor,
-	#superclass : #SoilVisitor,
+	#superclass : #SoilCopyingVisitor,
 	#instVars : [
-		'newSegment',
-		'indexIds',
-		'behaviorDescriptions',
-		'currentSegment'
+		'readVersion',
+		'clones'
 	],
 	#category : #'Soil-Core-Visitor'
 }
 
-{ #category : #api }
-SoilGarbageCollectVisitor >> cleanIndexes [
-	self halt.
+{ #category : #running }
+SoilGarbageCollectVisitor >> carryIndexesInto: cloneSegment from: sourceSegment [
+	"indexes map key->objectId (position-independent); heap compaction keeps objectIds
+	stable, so copy the index files verbatim into the clone"
+	(cloneSegment path / #indexes) ensureDeleteAll.
+	(sourceSegment path / #indexes) copyAllTo: (cloneSegment path / #indexes)
 ]
 
-{ #category : #api }
-SoilGarbageCollectVisitor >> compactIndexes [
-
+{ #category : #copying }
+SoilGarbageCollectVisitor >> copyIndexAt: indexId segment: segmentId [
+	"indexes are carried verbatim per segment (see run); nothing to do per index, and
+	the reachability of index values comes from the inherited traversal"
+	^ self
 ]
 
-{ #category : #api }
-SoilGarbageCollectVisitor >> garbageCollectHeap [
-	currentSegment := soil objectRepository firstSegment.
-	newSegment := currentSegment makeGCClone.
-	indexIds := Set new.
-	behaviorDescriptions := Set new.
-	self processObjectId: SoilObjectId root.
-	self processLoop.
-	newSegment := nil 
+{ #category : #copying }
+SoilGarbageCollectVisitor >> keptVersionsOf: aCollectionOfClusterVersions [
+	"the vacuum prunes: keep only versions still needed by the smallest open reader"
+	^ (soil objectRepository segmentAt: aCollectionOfClusterVersions first objectId segment)
+		keptVersionsOf: aCollectionOfClusterVersions upToReadVersion: readVersion
 ]
 
-{ #category : #api }
-SoilGarbageCollectVisitor >> garbageCollectMeta [
-self halt.
-	newSegment := soil objectRepository metaSegment makeGCClone.
-	toBeProcessed := behaviorDescriptions asOrderedCollection.
-	self processLoop.
-	newSegment := nil 
+{ #category : #processing }
+SoilGarbageCollectVisitor >> processBehaviorDescription: aSoilObjectId [
+	"meta segment (behavior descriptions) is left untouched by this vacuum, so do not
+	traverse into it (I2 deferred)"
+	^ aSoilObjectId
 ]
 
 { #category : #running }
 SoilGarbageCollectVisitor >> run [
-	self 
-		garbageCollectHeap;
-		garbageCollectMeta;
-		cleanIndexes;
-		compactIndexes
-	
+	"quiescent object-heap vacuum: compact each object segment into a clone (reachable,
+	gated version chains + verbatim indexes) and atomically swap it in"
+	readVersion := soil transactionManager smallestReadVersion.
+	clones := Dictionary new.
+	soil objectRepository flush.
+	[ soil objectRepository segments do: [ :segment | | clone |
+		clone := segment makeGCClone.
+		clone lastObjectIndex: segment lastObjectIndex.
+		self carryIndexesInto: clone from: segment.
+		clones at: segment id put: clone ].
+	  self processObjectId: SoilObjectId root.
+	  self processLoop.
+	  soil objectRepository segments do: [ :segment |
+		segment replaceWith: (clones at: segment id) ] ]
+		ifCurtailed: [ clones valuesDo: [ :clone | clone path ensureDeleteAll ] ]
 ]
 
-{ #category : #visiting }
-SoilGarbageCollectVisitor >> visitDatabaseJournal: aSoilJournal [ 
-	"we ignore the journal for now"
-]
-
-{ #category : #visiting }
-SoilGarbageCollectVisitor >> visitObjectSegment: aSoilObjectSegment [ 
-	self halt.
-	self processObjectId: SoilObjectId root.
-]
-
-{ #category : #visiting }
-SoilGarbageCollectVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
-	newSegment  
-		at: aSoilPersistentClusterVersion objectId index
-		putBytes: aSoilPersistentClusterVersion serialize.
-	aSoilPersistentClusterVersion references do: [ :reference |
-		self processObjectId: reference ].
-	behaviorDescriptions addAll: aSoilPersistentClusterVersion behaviorDescriptions.
-	[aSoilPersistentClusterVersion indexIds do: [ :indexId |
-		 self visit: (currentSegment indexManager at: indexId ifAbsent: [ Error signal ]) ] ]
-	on: Error do: [:x | ].
-
-	^ aSoilPersistentClusterVersion 
-]
-
-{ #category : #visiting }
-SoilGarbageCollectVisitor >> visitSkipList: aSoilSkipList [ 
-	| newSkipList |
-	indexIds add: aSoilSkipList indexId.
-	newSkipList := newSegment indexManager  
-		createIndexWithId: aSoilSkipList indexId 
-		class: aSoilSkipList class. 
-	newSkipList initializeParametersFrom: aSoilSkipList. 
-	
-	aSoilSkipList newIterator associationsDo: [ :item |
-		item value isRemoved ifFalse: [ 
-			newSkipList at: item key put: item value.
-			self processObjectId: item value asSoilObjectId  ]  ].
-	newSkipList close.
+{ #category : #copying }
+SoilGarbageCollectVisitor >> targetSegmentFor: aSegmentId [
+	^ clones at: aSegmentId
 ]
