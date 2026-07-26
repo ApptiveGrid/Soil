@@ -102,8 +102,17 @@ SoilConsistencyVisitor >> processObjectId: aSoilObjectId [
 	super processObjectId: aSoilObjectId 
 ]
 
+{ #category : #checking }
+SoilConsistencyVisitor >> validate: aSoil [
+	"run the index<->heap consistency check over aSoil; raise if any inconsistency was found"
+	soil := aSoil.
+	self check.
+	errors ifNotEmpty: [
+		Error signal: 'consistency check found ', errors size printString, ' error(s): ', errors printString ]
+]
+
 { #category : #visiting }
-SoilConsistencyVisitor >> visitDatabaseJournal: aJournal [ 
+SoilConsistencyVisitor >> visitDatabaseJournal: aJournal [
 
 ]
 
