@@ -39,8 +39,8 @@ SoilGarbageCollectVisitor >> processBehaviorDescription: aSoilObjectId [
 
 { #category : #running }
 SoilGarbageCollectVisitor >> run [
-	"quiescent object-heap vacuum: compact each object segment into a clone (reachable,
-	gated version chains + verbatim indexes) and atomically swap it in"
+	"quiescent object-heap garbage collect: compact each object segment into a clone
+	(reachable, gated version chains + verbatim indexes) and atomically swap it in"
 	readVersion := soil transactionManager smallestReadVersion.
 	clones := Dictionary new.
 	soil objectRepository flush.
@@ -53,7 +53,8 @@ SoilGarbageCollectVisitor >> run [
 	  self processLoop.
 	  soil objectRepository segments do: [ :segment |
 		segment replaceWith: (clones at: segment id) ] ]
-		ifCurtailed: [ clones valuesDo: [ :clone | clone path ensureDeleteAll ] ]
+		ifCurtailed: [ clones valuesDo: [ :clone | clone path ensureDeleteAll ] ].
+	soil metadata updateLastGarbageCollect
 ]
 
 { #category : #copying }

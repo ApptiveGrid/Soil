@@ -23,8 +23,8 @@ SoilGarbageCollectorTest >> tearDown [
 ]
 
 { #category : #tests }
-SoilGarbageCollectorTest >> testVacuumCurtailedLeavesDatabaseIntact [
-	"if the vacuum fails mid-run (injected during the copy phase, after clones are built),
+SoilGarbageCollectorTest >> testGarbageCollectCurtailedLeavesDatabaseIntact [
+	"if the collect fails mid-run (injected during the copy phase, after clones are built),
 	ifCurtailed deletes the clones and the original database is untouched."
 	| tx clonePath |
 	tx := soil newTransaction.
@@ -41,7 +41,7 @@ SoilGarbageCollectorTest >> testVacuumCurtailedLeavesDatabaseIntact [
 ]
 
 { #category : #tests }
-SoilGarbageCollectorTest >> testVacuumDropsUnreachableObject [
+SoilGarbageCollectorTest >> testGarbageCollectDropsUnreachableObject [
 	"an object no longer reachable from root is not copied into the compacted segment."
 	| tx dead deadOid tx2 |
 	tx := soil newTransaction.
@@ -58,12 +58,12 @@ SoilGarbageCollectorTest >> testVacuumDropsUnreachableObject [
 	tx2 commit.
 	soil checkpoint.
 	self assert: (soil objectRepository firstSegment basicAt: deadOid index ifAbsent: [ nil ]) notNil.
-	soil vacuum.
+	soil garbageCollect.
 	self assert: (soil objectRepository firstSegment basicAt: deadOid index ifAbsent: [ #gone ]) equals: #gone
 ]
 
 { #category : #tests }
-SoilGarbageCollectorTest >> testVacuumKeepsCurrentVersionAndReclaimsOldVersions [
+SoilGarbageCollectorTest >> testGarbageCollectKeepsCurrentVersionAndReclaimsOldVersions [
 	"no open reader: the current version stays readable, the superseded version is
 	dropped, and the objects file shrinks."
 	| tx tx2 sizeBefore oid |
@@ -81,7 +81,7 @@ SoilGarbageCollectorTest >> testVacuumKeepsCurrentVersionAndReclaimsOldVersions 
 	soil checkpoint.
 	sizeBefore := (soil objectRepository firstSegment path / #objects) size.
 	self assert: (soil objectRepository firstSegment allVersionsAt: oid index) size equals: 2.
-	soil vacuum.
+	soil garbageCollect.
 	tx := soil newTransaction.
 	[ self assert: tx root nested label equals: #v2 ] ensure: [ tx abort ].
 	self assert: (soil objectRepository firstSegment allVersionsAt: oid index) size equals: 1.
@@ -89,8 +89,8 @@ SoilGarbageCollectorTest >> testVacuumKeepsCurrentVersionAndReclaimsOldVersions 
 ]
 
 { #category : #tests }
-SoilGarbageCollectorTest >> testVacuumKeepsVersionsAnOpenReaderNeeds [
-	"a reader pinned at an old readVersion must still find its version after the vacuum."
+SoilGarbageCollectorTest >> testGarbageCollectKeepsVersionsAnOpenReaderNeeds [
+	"a reader pinned at an old readVersion must still find its version after the collect."
 	| tx tx2 oid readerTx |
 	tx := soil newTransaction.
 	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #v1)).
@@ -104,36 +104,49 @@ SoilGarbageCollectorTest >> testVacuumKeepsVersionsAnOpenReaderNeeds [
 	oid := tx objectIdOf: tx root nested.
 	tx abort.
 	readerTx := soil newTransactionForVersion: 1.
-	[ soil vacuum.
+	[ soil garbageCollect.
 	  self assert: (soil objectRepository firstSegment allVersionsAt: oid index) size equals: 2.
 	  self assert: readerTx root nested label equals: #v1 ]
 		ensure: [ readerTx abort ]
 ]
 
 { #category : #tests }
-SoilGarbageCollectorTest >> testVacuumLeavesNoCloneDirectory [
-	"after a successful vacuum the clone directory has been renamed into place, not left behind."
+SoilGarbageCollectorTest >> testGarbageCollectLeavesNoCloneDirectory [
+	"after a successful collect the clone directory has been renamed into place, not left behind."
 	| tx |
 	tx := soil newTransaction.
 	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #kept)).
 	tx makeRoot: tx root nested.
 	tx commit.
 	soil checkpoint.
-	soil vacuum.
+	soil garbageCollect.
 	self deny: (soil objectRepository firstSegment path, #gc) exists
 ]
 
 { #category : #tests }
-SoilGarbageCollectorTest >> testVacuumPreservesIndexedDictionary [
+SoilGarbageCollectorTest >> testGarbageCollectPreservesIndexedDictionary [
 	"indexes are carried verbatim; the indexed dictionary and its index-only-reachable
-	value must still resolve after the vacuum."
+	value must still resolve after the collect."
 	| tx |
 	tx := soil newTransaction.
 	tx root: ((SoilIndexedDictionary newWithBackend: SoilSkipList) keySize: 8; maxLevel: 16; yourself).
 	tx root at: #foo put: (SoilTestNestedObject new label: #indexed).
 	tx commit.
 	soil checkpoint.
-	soil vacuum.
+	soil garbageCollect.
 	tx := soil newTransaction.
 	[ self assert: (tx root at: #foo) label equals: #indexed ] ensure: [ tx abort ]
+]
+
+{ #category : #tests }
+SoilGarbageCollectorTest >> testGarbageCollectSetsLastGarbageCollect [
+	"a successful collect records a fresh timestamp in the metadata (advances past the default)."
+	| tx before |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #kept)).
+	tx makeRoot: tx root nested.
+	tx commit.
+	before := soil metadata lastGarbageCollect.
+	soil garbageCollect.
+	self assert: soil metadata lastGarbageCollect > before
 ]
