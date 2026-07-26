@@ -229,8 +229,10 @@ Soil >> fuelAccept: aGeneralMapper [
 
 { #category : #'memory space' }
 Soil >> garbageCollect [
-	Error signal: 'garbage collect is not ready to be used, yet'.
-	SoilGarbageCollectVisitor new 
+	"Offline object-heap garbage collection (Track A): compact each object segment,
+	dropping unreachable objects and version-chain entries no open reader still needs.
+	Quiescent - no concurrent writers during the run. Meta segment untouched."
+	SoilGarbageCollectVisitor new
 		soil: self;
 		run
 ]
@@ -520,16 +522,6 @@ Soil >> transactionClass [
 Soil >> transactionManager [
 
 	^ transactionManager
-]
-
-{ #category : #'memory space' }
-Soil >> vacuum [
-	"Offline object-heap garbage collection (Track A): compact each object segment,
-	dropping unreachable objects and version-chain entries no open reader still needs.
-	Quiescent - no concurrent writers during the run. Meta segment untouched."
-	SoilGarbageCollectVisitor new
-		soil: self;
-		run
 ]
 
 { #category : #writing }
