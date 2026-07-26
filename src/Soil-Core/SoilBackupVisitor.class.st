@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilBackupVisitor,
-	#superclass : #SoilVisitor,
+	#superclass : #SoilCopyingVisitor,
 	#instVars : [
 		'target'
 	],
@@ -18,30 +18,6 @@ SoilBackupVisitor >> backup: aSoil [
 	
 	self visit: soil.
 	target close
-]
-
-{ #category : #copying }
-SoilBackupVisitor >> copyAllClusterVersions: aSoilPersistentClusterVersion [
-	"copy the full version chain; a single-version object is just a one-element chain"
-	aSoilPersistentClusterVersion hasPreviousVersion
-		ifFalse: [ ^ self copyClusterVersionChain: { aSoilPersistentClusterVersion } ].
-	^ self copyClusterVersionChain:
-		((soil objectRepository segmentAt: aSoilPersistentClusterVersion objectId segment)
-			allVersionsAt: aSoilPersistentClusterVersion objectId index)
-]
-
-{ #category : #copying }
-SoilBackupVisitor >> copyClusterVersionChain: aCollectionOfClusterVersions [
-	"Write the whole version chain into the target, then run the backup-specific
-	graph traversal (references + indexes) in the same oldest-to-newest order the
-	per-version copy used before."
-	| position |
-	position := target objectRepository copyVersionChain: aCollectionOfClusterVersions.
-	aCollectionOfClusterVersions reverseDo: [ :cluster |
-		cluster references do: [ :reference | self processObjectId: reference ].
-		cluster indexIds do: [ :indexId |
-			self copyIndexAt: indexId segment: cluster segment ] ].
-	^ position
 ]
 
 { #category : #visiting }
@@ -95,6 +71,11 @@ SoilBackupVisitor >> target: aSoil [
 	target := aSoil
 ]
 
+{ #category : #copying }
+SoilBackupVisitor >> targetSegmentFor: aSegmentId [
+	^ target objectRepository segmentAt: aSegmentId
+]
+
 { #category : #accessing }
 SoilBackupVisitor >> version: anObject [
 
@@ -136,14 +117,3 @@ SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [
 		lastObjectIndex: aSoilObjectSegment lastObjectIndex  
 ]
 
-{ #category : #visiting }
-SoilBackupVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
-	super visitPersistentClusterVersion: aSoilPersistentClusterVersion.
-	"A backup must be a faithful copy of the source database, including full
-	MVCC history - not just the current version. This applies to every segment,
-	not only the meta segment (behavior descriptions): any object can have
-	readers with an old readVersion that need historical versions to still be
-	readable after a restore, exactly like behavior descriptions do."
-	self copyAllClusterVersions: aSoilPersistentClusterVersion.
-	^ aSoilPersistentClusterVersion
-]
