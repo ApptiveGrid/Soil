@@ -117,6 +117,27 @@ SoilObjectSegment >> close [
 		indexManager close ]
 ]
 
+{ #category : #copying }
+SoilObjectSegment >> copyVersionChain: aCollectionOfClusterVersions [
+	"Copy a version chain (ordered newest->oldest, as allVersionsAt: returns) into this
+	segment, rebuilding previousVersionPosition; returns the position of the current
+	(newest) version. Unlike SoilObjectRepository>>copyVersionChain: this targets *this*
+	segment directly - e.g. a detached makeGCClone the repository cannot route to - and
+	does not fire notificationHandler recordWritten: (GC-internal copy)."
+	| position |
+	position := 0.
+	aCollectionOfClusterVersions reverseDo: [ :cluster | | copy |
+		copy := cluster copyResetPreviousVersion.
+		copy previousVersionPosition: position.
+		position := self at: cluster objectId index putBytes: copy serialize ].
+	^ position
+]
+
+{ #category : #copying }
+SoilObjectSegment >> copyVersionChain: aCollectionOfClusterVersions upToReadVersion: aNumberOrNil [
+	^ self copyVersionChain: (self keptVersionsOf: aCollectionOfClusterVersions upToReadVersion: aNumberOrNil)
+]
+
 { #category : #accessing }
 SoilObjectSegment >> flush [
 	self indexManager flush
@@ -202,6 +223,23 @@ SoilObjectSegment >> isMeta [
 { #category : #testing }
 SoilObjectSegment >> isMetaSegment [
 	^ id == 0
+]
+
+{ #category : #copying }
+SoilObjectSegment >> keptVersionsOf: aCollectionOfClusterVersions upToReadVersion: aNumberOrNil [
+	"Return the suffix (newest->oldest) of the chain still needed by a reader at
+	aNumberOrNil (nil = no open transaction): a superseded version is droppable once the
+	smallest read version has reached the version that superseded it. The current version
+	is always kept. Mirrors SoilIndexCleaner>>canDiscardOldState:."
+	| kept newerVersion |
+	kept := OrderedCollection new.
+	newerVersion := nil.
+	aCollectionOfClusterVersions do: [ :each |
+		(newerVersion notNil and: [ aNumberOrNil isNil or: [ aNumberOrNil >= newerVersion ] ])
+			ifTrue: [ ^ kept ].
+		kept add: each.
+		newerVersion := each version ].
+	^ kept
 ]
 
 { #category : #accessing }

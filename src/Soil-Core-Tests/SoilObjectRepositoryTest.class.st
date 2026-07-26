@@ -140,6 +140,21 @@ SoilObjectRepositoryTest >> testSegmentInitializationFromDisk [
 ]
 
 { #category : #tests }
+SoilObjectRepositoryTest >> testSegmentLevelCopyVersionChainIntoClone [
+	"the segment-level copy writes a gated chain into a detached makeGCClone - what the
+	vacuum needs and what the repository-level copyVersionChain: cannot do (it routes by
+	objectId segment to the repository's own segments)."
+	| oid segment clone |
+	oid := self threeVersionNestedObjectId.
+	segment := soil objectRepository firstSegment.
+	self assert: (segment allVersionsAt: oid index) size equals: 3.
+	clone := segment makeGCClone.
+	[ clone copyVersionChain: (segment allVersionsAt: oid index) upToReadVersion: nil.
+	  self assert: (clone allVersionsAt: oid index) size equals: 1 ]
+		ensure: [ clone close. clone path ensureDeleteAll ]
+]
+
+{ #category : #tests }
 SoilObjectRepositoryTest >> testSegmentReplaceCurtailedLeavesOriginalIntact [
 	"documented caller pattern: build clone, fail before the swap, ifCurtailed deletes
 	the orphan clone and the original segment is untouched."

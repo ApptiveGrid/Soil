@@ -106,35 +106,20 @@ SoilObjectRepository >> close [
 
 { #category : #copying }
 SoilObjectRepository >> copyVersionChain: aCollectionOfClusterVersions [
-	"Copy a full version chain (ordered newest->oldest, as allVersionsAt: returns)
-	into this repository, rebuilding previousVersionPosition. Returns the position
-	of the current (newest) version."
-	| position |
-	position := 0.
-	aCollectionOfClusterVersions reverseDo: [ :cluster | | copy |
-		copy := cluster copyResetPreviousVersion.
-		copy previousVersionPosition: position.
-		position := self at: cluster objectId putBytes: copy serialize ].
-	^ position
+	"Delegate to the segment that owns the chain (all versions of an object share one
+	objectId/segment). See SoilObjectSegment>>copyVersionChain:."
+	aCollectionOfClusterVersions isEmpty ifTrue: [ ^ 0 ].
+	^ (self segmentAt: aCollectionOfClusterVersions first objectId segment)
+		copyVersionChain: aCollectionOfClusterVersions
 ]
 
 { #category : #copying }
 SoilObjectRepository >> copyVersionChain: aCollectionOfClusterVersions upToReadVersion: aNumberOrNil [
-	"Like copyVersionChain: but drop versions no reader can still see: a version is
-	discardable once the smallest read version has moved to or past the version that
-	superseded it, or when there is no open transaction at all (mirrors
-	SoilIndexCleaner>>canDiscardOldState:). The current (newest) version is always
-	kept; nil (no open transactions) keeps only it. The kept suffix is copied via
-	copyVersionChain:, so I4 (previousVersionPosition rebuild, oldest kept -> 0) holds."
-	| kept newerVersion |
-	kept := OrderedCollection new.
-	newerVersion := nil.
-	aCollectionOfClusterVersions do: [ :each |
-		(newerVersion notNil and: [ aNumberOrNil isNil or: [ aNumberOrNil >= newerVersion ] ])
-			ifTrue: [ ^ self copyVersionChain: kept ].
-		kept add: each.
-		newerVersion := each version ].
-	^ self copyVersionChain: kept
+	"Delegate the retention gate + copy to the owning segment. See
+	SoilObjectSegment>>copyVersionChain:upToReadVersion: and keptVersionsOf:upToReadVersion:."
+	aCollectionOfClusterVersions isEmpty ifTrue: [ ^ 0 ].
+	^ (self segmentAt: aCollectionOfClusterVersions first objectId segment)
+		copyVersionChain: aCollectionOfClusterVersions upToReadVersion: aNumberOrNil
 ]
 
 { #category : #accessing }
