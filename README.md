@@ -16,17 +16,17 @@ Metacello new
 	baseline: 'Soil';
 	load.
 ```
-Note: For now, Windows is not supported. But v5 will most likely add support for windows
+Note: For now, Windows is not supported. Work on this is ongoing (see [PR #980](https://github.com/ApptiveGrid/Soil/pull/980)) and it is planned for an upcoming release
 
 **caution** Soil is in an early stage meaning there are might be things missing. It is battle tested as it is the driving database behind [ApptiveGrid](http://www.apptivegrid.de) but you might have different requirements. If so, tell us!
 
 ## Latest release
 
-The latest release is [v4](https://github.com/ApptiveGrid/Soil/tree/v4) which you can load via
+The latest release is [v5](https://github.com/ApptiveGrid/Soil/tree/v5) which you can load via
 
 ```smalltalk
 Metacello new 
-	repository: 'github://ApptiveGrid/Soil:v4/src';
+	repository: 'github://ApptiveGrid/Soil:v5/src';
 	baseline: 'Soil';
 	load.
 ```
@@ -60,6 +60,7 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 - Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
 
 ### NEWS
+- [ANN] Release V5 [Announcement](https://github.com/ApptiveGrid/Soil/blob/main/docs/versions/ann-v5.md) 2026-07-28
 - A Blog Series about Soil internals [Soil Blog](https://norbert.hartl.name/blog/series/soil.html) 2026-07-24
 - ESUG 2026 Slides are online: "Soil: architectural insights" Slides [PDF](https://archive.marcusdenker.de/Soil/Videos/26-ESUG/2026-07-07-ESUG-Soil-architectural-insights.pdf) 2026-07-15
 - [ANN] Release V4 [Announcement](https://github.com/ApptiveGrid/Soil/blob/main/docs/versions/ann-v4.md) 2026-03-13
