@@ -170,13 +170,6 @@ SoilBehaviorRegistry >> nameAt: classIdentifier put: objectId [
 ]
 
 { #category : #accessing }
-SoilBehaviorRegistry >> removeNameAt: classIdentifier ifAbsent: aBlock [
-	"used to undo a nameAt:put: made during an import that failed partway through -
-	see SoilGraphImporter>>import"
-	^ self index removeKey: classIdentifier ifAbsent: aBlock
-]
-
-{ #category : #accessing }
 SoilBehaviorRegistry >> newIterator [
 	^ self index newIterator 
 		returnObjectId;
@@ -219,6 +212,13 @@ SoilBehaviorRegistry >> recreateIndex [
 		index removeKey: 0 ifAbsent: [ zeroFound := false ] ].
 	"as we are on it we can also compact the index"
 	index compact
+]
+
+{ #category : #accessing }
+SoilBehaviorRegistry >> removeNameAt: classIdentifier ifAbsent: aBlock [
+	"used to undo a nameAt:put: made during an import that failed partway through -
+	see SoilGraphImporter>>import"
+	^ self index removeKey: classIdentifier ifAbsent: aBlock
 ]
 
 { #category : #accessing }

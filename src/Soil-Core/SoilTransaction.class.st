@@ -459,6 +459,31 @@ SoilTransaction >> journal [
 		journal := self newJournal ]
 ]
 
+{ #category : #private }
+SoilTransaction >> latestObjectWithId: objectId [
+	"Like #objectWithId: but reads the record at its current/latest version
+	instead of restricting the lookup to this transaction's readVersion. Used
+	only for behavior descriptions (see #behaviorDescriptionFor:), which are
+	schema metadata expected to be visible cross-transaction the instant
+	they're committed, not ordinary data subject to snapshot isolation."
+	| record |
+	idMap ifNil: [ ^ nil ].
+	idMap
+		at: objectId
+		ifPresent: [ :cached | ^ cached object ].
+	record := [ self objectRepository at: objectId ]
+		on: SoilIndexOutOfRange
+		do: [ :error | nil ].
+	^ record
+		ifNotNil: [
+			self materializeRecord: record.
+			idMap at: objectId put: record.
+			objectMap at: record object put: record.
+			record object
+				soilLoadedIn: self;
+				yourself ]
+]
+
 { #category : #api }
 SoilTransaction >> lockObjectId: aSOObjectId [ 
 	^ self objectRepository lockObjectId: aSOObjectId for: self
@@ -614,31 +639,6 @@ SoilTransaction >> objectWithId: objectId [
 
 	^ (self recordWithId: objectId)
 		ifNotNil: [ :record |
-			self materializeRecord: record.
-			idMap at: objectId put: record.
-			objectMap at: record object put: record.
-			record object
-				soilLoadedIn: self;
-				yourself ]
-]
-
-{ #category : #private }
-SoilTransaction >> latestObjectWithId: objectId [
-	"Like #objectWithId: but reads the record at its current/latest version
-	instead of restricting the lookup to this transaction's readVersion. Used
-	only for behavior descriptions (see #behaviorDescriptionFor:), which are
-	schema metadata expected to be visible cross-transaction the instant
-	they're committed, not ordinary data subject to snapshot isolation."
-	| record |
-	idMap ifNil: [ ^ nil ].
-	idMap
-		at: objectId
-		ifPresent: [ :cached | ^ cached object ].
-	record := [ self objectRepository at: objectId ]
-		on: SoilIndexOutOfRange
-		do: [ :error | nil ].
-	^ record
-		ifNotNil: [
 			self materializeRecord: record.
 			idMap at: objectId put: record.
 			objectMap at: record object put: record.
