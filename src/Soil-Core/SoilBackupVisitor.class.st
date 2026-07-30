@@ -116,4 +116,3 @@ SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [
 	(target objectRepository segmentAt: aSoilObjectSegment id)
 		lastObjectIndex: aSoilObjectSegment lastObjectIndex  
 ]
-
