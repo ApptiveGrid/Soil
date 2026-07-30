@@ -40,7 +40,7 @@ and then read about [Changelogs](https://github.com/ApptiveGrid/Soil/blob/main/d
 We use github for organizing our development. You can see what we are doing right now on the [project board](https://github.com/orgs/ApptiveGrid/projects/2). An up-to-date list of milestones you can find in [milestones](https://github.com/ApptiveGrid/Soil/milestones?direction=desc&sort=completeness&state=open). 
 
 ### Talks about Soil
-- ESUG 2026 talk "Soil: architectural insights" Slides [PDF](https://archive.marcusdenker.de/Soil/Videos/26-ESUG/2026-07-07-ESUG-Soil-architectural-insights.pdf)
+- ESUG 2026 talk "Soil: architectural insights" Slides [PDF](https://archive.marcusdenker.de/Soil/Videos/26-ESUG/2026-07-07-ESUG-Soil-architectural-insights.pdf), [SlideShare](https://www.slideshare.net/slideshow/soil-v5-advanced-architectural-insights-into-efficient-concurrent-object-graph-persistence/288896858)
 - UK Smalltalk User Group: "Soil: a database for fun and profit", 26 November 2025 [YouTube](https://www.youtube.com/watch?v=mem0laBTbjU), [Slides PDF](https://archive.marcusdenker.de/Soil/Videos/25-UKSTUG/soil.pdf)
 - ESUG 2025 talks
 	-  "Rhizome - Distribution in Soil" Slides [Video Youtube](https://youtu.be/pTT-vy8qS4Y), [Slides PDF](https://archive.esug.org/ESUG2025/day2/209-hart-rhizome.pdf), [SlideShare](https://www.slideshare.net/slideshow/rhizome-distribution-in-soil-esug-2025/281735029)
