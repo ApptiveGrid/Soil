@@ -79,11 +79,14 @@ SoilBasicVisitor >> visitIndexManager: aSoilIndexManager [
 ]
 
 { #category : #visiting }
-SoilBasicVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
-	aSoilJournalFragmentFile open.
+SoilBasicVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [
+	"only read the fragment file. Opening read-only avoids a second write-mode
+	open of a file the journal may already hold open for writing (fails on
+	Windows). SoilBackupVisitor overrides this to copy the file instead"
+	aSoilJournalFragmentFile openReadOnly.
 	[ self visitAll: aSoilJournalFragmentFile transactionJournals ]
 		ensure: [ aSoilJournalFragmentFile close ].
-	^ aSoilJournalFragmentFile 
+	^ aSoilJournalFragmentFile
 ]
 
 { #category : #visiting }

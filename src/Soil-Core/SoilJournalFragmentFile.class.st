@@ -239,7 +239,16 @@ SoilJournalFragmentFile >> inspectionTransactionJournals: aBuilder [
 { #category : #'open/close' }
 SoilJournalFragmentFile >> open [
 	self isOpen ifTrue: [ self error: 'File already open' ].
-	stream := SoilLockableStream path: path 
+	stream := SoilLockableStream path: path
+]
+
+{ #category : #'open/close' }
+SoilJournalFragmentFile >> openReadOnly [
+	"open the fragment file in read-only mode. Used during recovery which only
+	reads the file. This avoids opening the same path in write mode from a
+	second stream while the journal holds it open for writing (fails on Windows)"
+	self isOpen ifTrue: [ self error: 'File already open' ].
+	stream := SoilLockableStream readOnlyPath: path
 ]
 
 { #category : #accessing }

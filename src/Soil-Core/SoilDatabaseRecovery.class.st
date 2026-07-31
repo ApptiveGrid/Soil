@@ -61,11 +61,10 @@ SoilDatabaseRecovery >> readFragmentFileProtected: aSoilFragmentFile [
 			(journal lastFileNumber = aSoilFragmentFile fileNumber)
 				ifFalse: [ SoilDatabaseIsInconsistent signal: 'after a truncated file there should not be another one' ].
 			"we currently have no way of reading behind a truncated piece of a fragment. We cycle
-			the fragment file in order to write new entries to a new file. Future reads can just 
-			skip a fragment file on truncated reads"
-			journal 
-				currentFragmentFile: aSoilFragmentFile;
-				cycleFragmentFile ]
+			the fragment file in order to write new entries to a new file. Future reads can just
+			skip a fragment file on truncated reads. The fragment file was opened read-only for
+			recovery, so we cycle from it without flushing/syncing it"
+			journal cycleFragmentFileFrom: aSoilFragmentFile ]
 ]
 
 { #category : #private }
@@ -102,16 +101,19 @@ SoilDatabaseRecovery >> recover [
 	checkpointEntry := [ SoilJournalEntry readFrom: fragmentFile stream ]
 		on: Error 
 		do: [ :error | 
-			"in case of a bogus checkpoint position we cannot recover the file but 
-			create a new one and continue"
-			journal 
-				currentFragmentFile: fragmentFile;
-				cycleFragmentFile.
+			"in case of a bogus checkpoint position we cannot recover the file but
+			create a new one and continue. The fragment file was opened read-only,
+			so we cycle from it without flushing/syncing it"
+			journal cycleFragmentFileFrom: fragmentFile.
 			soil checkpoint.
 			^ self ].
-	"If the last checkpoint was successful we are at the end of the file and 
-	can return because the database is in a sane state"
-	fragmentFile atEnd ifTrue: [ ^ self ].
+	"If the last checkpoint was successful we are at the end of the file and
+	can return because the database is in a sane state. Close the read-only
+	recovery handle so the journal can later open the file for writing (a second
+	open in write mode while this one is still open fails on Windows)"
+	fragmentFile atEnd ifTrue: [
+		fragmentFile close.
+		^ self ].
 	
 	"the fragment file contains more entries after the last checkpoint. Read the
 	current fragment file to its end and apply all transaction logs/checkpoints found"
