@@ -41,9 +41,9 @@ SoilObjectProxy >> fuelReplacement [
 ]
 
 { #category : #inspector }
-SoilObjectProxy >> inspectionObject [
+SoilObjectProxy >> inspectionObject: aBuilder [
 	<inspectorPresentationOrder: 30 title: 'object'>
-	^ StRawInspection on: self soilRealObject 
+	^ aBuilder instantiate: StRawInspectionPresenter on: self soilRealObject 
 
 ]
 
