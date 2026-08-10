@@ -7,8 +7,14 @@ Class {
 	#category : #'Soil-Core'
 }
 
+{ #category : #initialization }
+SoilReadOnlyStrategy >> initialize [
+	super initialize.
+	ignoreWriteAttempts := false
+]
+
 { #category : #accessing }
-SoilReadOnlyStrategy >> errorOnWriteAttempts [ 
+SoilReadOnlyStrategy >> errorOnWriteAttempts [
 	ignoreWriteAttempts := false
 ]
 
