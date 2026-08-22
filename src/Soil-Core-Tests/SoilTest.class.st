@@ -411,6 +411,36 @@ SoilTest >> testMigrationVersionsHalf [
 ]
 
 { #category : #tests }
+SoilTest >> testPrintString [
+
+	self
+		assert: soil printString
+		equals: 'Soil [0] ' , soil path pathString
+]
+
+{ #category : #tests }
+SoilTest >> testPrintStringAfterCommit [
+
+	soil newTransaction
+		root: Object new;
+		commit.
+
+	self
+		assert: soil printString
+		equals: 'Soil [1] ' , soil path pathString
+]
+
+{ #category : #tests }
+SoilTest >> testPrintStringWhenClosed [
+
+	soil close.
+
+	self
+		assert: soil printString
+		equals: 'Soil [closed] ' , soil path pathString
+]
+
+{ #category : #tests }
 SoilTest >> testRootSendingClass [
 	"We have a root in a Dictionary and that object overrides #= that checks using #class.
 	This tests that the proxy forwards #class correctly"
