@@ -7,12 +7,6 @@ Class {
 	#category : #'Soil-Core'
 }
 
-{ #category : #initialization }
-SoilReadOnlyStrategy >> initialize [
-	super initialize.
-	ignoreWriteAttempts := false
-]
-
 { #category : #accessing }
 SoilReadOnlyStrategy >> errorOnWriteAttempts [
 	ignoreWriteAttempts := false
@@ -26,6 +20,12 @@ SoilReadOnlyStrategy >> hasChanges [
 { #category : #accessing }
 SoilReadOnlyStrategy >> ignoreWriteAttempts [ 
 	ignoreWriteAttempts := true
+]
+
+{ #category : #initialization }
+SoilReadOnlyStrategy >> initialize [
+	super initialize.
+	ignoreWriteAttempts := false
 ]
 
 { #category : #testing }

@@ -450,8 +450,8 @@ Soil >> path: aString [
 Soil >> printOn: aStream [ 
 	aStream << 'Soil ['.
 	self isOpen 
-		ifTrue: [ self control databaseVersion printString ]
-		ifFalse: [ #closed ].
+		ifTrue: [ self control databaseVersion printOn: aStream ]
+		ifFalse: [ aStream << #closed ].
 	aStream 
 		<< '] '
 		<< self path pathString
