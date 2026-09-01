@@ -14,11 +14,6 @@ SoilGraphExporterTest >> path [
 	^ 'soil-tests' asFileReference
 ]
 
-{ #category : #accessing }
-SoilGraphExporterTest >> targetPath [
-	^ self path, #target
-]
-
 { #category : #running }
 SoilGraphExporterTest >> setUp [
 	super setUp.
@@ -32,6 +27,11 @@ SoilGraphExporterTest >> setUp [
 		package: self class package name) install
 ]
 
+{ #category : #accessing }
+SoilGraphExporterTest >> targetPath [
+	^ self path, #target
+]
+
 { #category : #running }
 SoilGraphExporterTest >> tearDown [
 	migrationClass ifNotNil: [
@@ -43,6 +43,45 @@ SoilGraphExporterTest >> tearDown [
 		targetSoil
 			close;
 			destroy ]
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testExportImportWithoutReorderRoundTrips [
+	"sanity check: the common case (no reorder ever happened) must keep working"
+
+	| tx object bytes exportTx importer imported targetTx |
+	object := migrationClass new
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2;
+		instVarNamed: #three put: 3;
+		yourself.
+	tx := soil newTransaction.
+	tx root: object.
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+	targetTx commit.
+
+	self assert: (imported instVarNamed: #one) equals: 1.
+	self assert: (imported instVarNamed: #two) equals: 2.
+	self assert: (imported instVarNamed: #three) equals: 3
 ]
 
 { #category : #tests }
@@ -94,94 +133,6 @@ SoilGraphExporterTest >> testExportOfClusterNotTouchedSinceReorderMatchesLiveSha
 	self assert: (imported instVarNamed: #one) equals: 1.
 	self assert: (imported instVarNamed: #two) equals: 2.
 	self assert: (imported instVarNamed: #three) equals: 3
-]
-
-{ #category : #tests }
-SoilGraphExporterTest >> testExportImportWithoutReorderRoundTrips [
-	"sanity check: the common case (no reorder ever happened) must keep working"
-
-	| tx object bytes exportTx importer imported targetTx |
-	object := migrationClass new
-		instVarNamed: #one put: 1;
-		instVarNamed: #two put: 2;
-		instVarNamed: #three put: 3;
-		yourself.
-	tx := soil newTransaction.
-	tx root: object.
-	tx commit.
-
-	exportTx := soil newTransaction.
-	bytes := ByteArray streamContents: [ :stream |
-		(SoilGraphExporter new
-			transaction: exportTx;
-			addObject: exportTx root;
-			yourself)
-				stream: stream;
-				export ].
-	exportTx abort.
-
-	targetSoil := Soil createOnPath: self targetPath.
-	targetTx := targetSoil newTransaction.
-	importer := SoilGraphImporter new
-		transaction: targetTx;
-		stream: bytes readStream;
-		yourself.
-	importer import.
-	imported := importer importedObjects first.
-	targetTx commit.
-
-	self assert: (imported instVarNamed: #one) equals: 1.
-	self assert: (imported instVarNamed: #two) equals: 2.
-	self assert: (imported instVarNamed: #three) equals: 3
-]
-
-{ #category : #tests }
-SoilGraphExporterTest >> testImportRaisesOnGenuineShapeMismatch [
-	"if the target database already has a native, current behavior description for the
-	class that genuinely differs from what is being imported, the importer must fail loudly
-	instead of silently reusing the wrong description - see SoilGraphImporter>>importBehaviorCluster:."
-
-	| tx object bytes exportTx importer targetTx |
-	targetSoil := Soil createOnPath: self targetPath.
-	tx := targetSoil newTransaction.
-	tx root: (migrationClass new
-		instVarNamed: #one put: 'native-one';
-		instVarNamed: #two put: 'native-two';
-		instVarNamed: #three put: 'native-three';
-		yourself).
-	tx commit.
-
-	"reorder only in the source's understanding - the target keeps its original shape as current"
-	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
-		layout: FixedLayout;
-		slots: { #one. #three. #two };
-		package: self class package name) install.
-
-	tx := soil newTransaction.
-	tx root: (migrationClass new
-		instVarNamed: #one put: 1;
-		instVarNamed: #two put: 2;
-		instVarNamed: #three put: 3;
-		yourself).
-	tx commit.
-
-	exportTx := soil newTransaction.
-	bytes := ByteArray streamContents: [ :stream |
-		(SoilGraphExporter new
-			transaction: exportTx;
-			addObject: exportTx root;
-			yourself)
-				stream: stream;
-				export ].
-	exportTx abort.
-
-	targetTx := targetSoil newTransaction.
-	importer := SoilGraphImporter new
-		transaction: targetTx;
-		stream: bytes readStream;
-		yourself.
-	self should: [ importer import ] raise: Error.
-	targetTx abort
 ]
 
 { #category : #tests }
@@ -261,6 +212,55 @@ SoilGraphExporterTest >> testFailedImportDoesNotCorruptBehaviorRegistryForOtherC
 		newClass ifNotNil: [ newClass removeFromSystem ].
 		mismatchClass ifNotNil: [ mismatchClass removeFromSystem ].
 		thirdClass ifNotNil: [ thirdClass removeFromSystem ] ]
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testImportRaisesOnGenuineShapeMismatch [
+	"if the target database already has a native, current behavior description for the
+	class that genuinely differs from what is being imported, the importer must fail loudly
+	instead of silently reusing the wrong description - see SoilGraphImporter>>importBehaviorCluster:."
+
+	| tx object bytes exportTx importer targetTx |
+	targetSoil := Soil createOnPath: self targetPath.
+	tx := targetSoil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 'native-one';
+		instVarNamed: #two put: 'native-two';
+		instVarNamed: #three put: 'native-three';
+		yourself).
+	tx commit.
+
+	"reorder only in the source's understanding - the target keeps its original shape as current"
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #three. #two };
+		package: self class package name) install.
+
+	tx := soil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2;
+		instVarNamed: #three put: 3;
+		yourself).
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	self should: [ importer import ] raise: Error.
+	targetTx abort
 ]
 
 { #category : #tests }
