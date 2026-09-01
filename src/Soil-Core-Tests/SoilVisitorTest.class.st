@@ -12,6 +12,15 @@ SoilVisitorTest >> path [
 	^ 'soil-tests' asFileReference
 ]
 
+{ #category : #initialization }
+SoilVisitorTest >> setUp [
+	super setUp.
+	soil := Soil path: self path.
+	soil
+		destroy;
+		initializeFilesystem
+]
+
 { #category : #helpers }
 SoilVisitorTest >> simpleGraph [
 	^ SoilTestGraphRoot new
@@ -23,20 +32,16 @@ SoilVisitorTest >> simpleGraph [
 		yourself
 ]
 
-{ #category : #initialization }
-SoilVisitorTest >> setUp [
-	super setUp.
-	soil := Soil path: self path.
-	soil
-		destroy;
-		initializeFilesystem
-]
-
 { #category : #running }
 SoilVisitorTest >> tearDown [
 	super tearDown.
 	soil ifNotNil: [
 		soil close ]
+]
+
+{ #category : #tests }
+SoilVisitorTest >> testBreadthFirstIsDefault [
+	self deny: (SoilVisitor new instVarNamed: #depthFirst)
 ]
 
 { #category : #tests }
@@ -59,9 +64,4 @@ SoilVisitorTest >> testDepthFirstTraversalDoesNotRaiseError [
 	visitor beDepthFirst.
 
 	self shouldnt: [ visitor visit: soil ] raise: Error
-]
-
-{ #category : #tests }
-SoilVisitorTest >> testBreadthFirstIsDefault [
-	self deny: (SoilVisitor new instVarNamed: #depthFirst)
 ]

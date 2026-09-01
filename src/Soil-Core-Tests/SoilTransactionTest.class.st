@@ -112,6 +112,23 @@ SoilTransactionTest >> testFindRecords [
 ]
 
 { #category : #tests }
+SoilTransactionTest >> testNewReadOnlyTransactionDoesNotCrashOnRoot [
+	"regression test for SoilReadOnlyStrategy's missing initialize (see
+	SoilReadOnlyStrategyTest) - exercised here through the real, plain Soil>>
+	newReadOnlyTransaction path (not AGBaseDatabase's overridden one, which
+	always explicitly calls errorOnWriteAttempts/ignoreWriteAttempts right after
+	construction and so never hit the nil default in practice)."
+	| tx |
+	tx := soil newTransaction.
+	tx root: Object new.
+	tx commit.
+
+	tx := soil newReadOnlyTransaction.
+	self assert: tx root class equals: Object.
+	tx abort
+]
+
+{ #category : #tests }
 SoilTransactionTest >> testPrepareCommitSurvivesObjectMapGrowingDuringScan [
 	"prepareCommit iterates transaction objectMap to find changed records. If handling
 	one record causes further objects to become known to the transaction (as a lazily
@@ -135,23 +152,6 @@ SoilTransactionTest >> testPrepareCommitSurvivesObjectMapGrowingDuringScan [
 	tx commitStrategy prepareCommit.
 	changedRecords do: [ :record |
 		self assert: (tx commitStrategy records includes: record) ]
-]
-
-{ #category : #tests }
-SoilTransactionTest >> testNewReadOnlyTransactionDoesNotCrashOnRoot [
-	"regression test for SoilReadOnlyStrategy's missing initialize (see
-	SoilReadOnlyStrategyTest) - exercised here through the real, plain Soil>>
-	newReadOnlyTransaction path (not AGBaseDatabase's overridden one, which
-	always explicitly calls errorOnWriteAttempts/ignoreWriteAttempts right after
-	construction and so never hit the nil default in practice)."
-	| tx |
-	tx := soil newTransaction.
-	tx root: Object new.
-	tx commit.
-
-	tx := soil newReadOnlyTransaction.
-	self assert: tx root class equals: Object.
-	tx abort
 ]
 
 { #category : #tests }
