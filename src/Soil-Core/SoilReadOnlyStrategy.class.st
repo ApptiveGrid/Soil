@@ -25,7 +25,7 @@ SoilReadOnlyStrategy >> ignoreWriteAttempts [
 { #category : #initialization }
 SoilReadOnlyStrategy >> initialize [
 	super initialize.
-	ignoreWriteAttempts := false
+	ignoreWriteAttempts := true
 ]
 
 { #category : #testing }
