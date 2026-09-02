@@ -388,7 +388,7 @@ SoilTest >> testMigrationHalfForced [
 { #category : #tests }
 SoilTest >> testMigrationVersionsFull [
 	soil fabric applicationMigrationClass: SoilTestApplicationMigrationFull.
-	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 2 3 4 ).
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 1 2 3 4 ).
 	
 	soil control applicationVersion: 2.
 	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 3 4 ).
@@ -399,7 +399,7 @@ SoilTest >> testMigrationVersionsFull [
 { #category : #tests }
 SoilTest >> testMigrationVersionsHalf [
 	soil fabric applicationMigrationClass: SoilTestApplicationMigrationHalf.
-	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 2 ).
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 1 2 ).
 	
 	soil control applicationVersion: 2.
 	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( ).
