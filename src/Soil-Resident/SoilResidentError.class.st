@@ -1,3 +1,8 @@
+"
+Abstract superclass of the errors this package signals. Carries the resident
+name the error is about, because in every one of these cases the name is the
+whole diagnosis.
+"
 Class {
 	#name : #SoilResidentError,
 	#superclass : #SoilError,

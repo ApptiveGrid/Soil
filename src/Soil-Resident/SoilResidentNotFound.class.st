@@ -1,3 +1,8 @@
+"
+Signalled when a resident is asked for by a name no resident carries. This is
+what named access answers with instead of nil: code that wants a resident wants
+it, and a nil would surface as a doesNotUnderstand somewhere further away.
+"
 Class {
 	#name : #SoilResidentNotFound,
 	#superclass : #SoilResidentError,
