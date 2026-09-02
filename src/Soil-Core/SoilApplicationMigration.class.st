@@ -3,10 +3,44 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'soil',
-		'all'
+		'all',
+		'targetVersion'
+	],
+	#classInstVars : [
+		'targetVersion'
 	],
 	#category : #'Soil-Core-Migration'
 }
+
+{ #category : #versions }
+SoilApplicationMigration class >> defaultTargetVersion [
+	"the version that is live when none has been armed. Applications that decide
+	this elsewhere, e.g. by declaring in the code base which version goes to
+	production, override this with that number"
+	^ self maxVersion
+]
+
+{ #category : #versions }
+SoilApplicationMigration class >> maxVersion [
+	"for callers that have no migration at hand, e.g. when stamping a freshly
+	created database with the version its code is at"
+	^ self new maxVersion
+]
+
+{ #category : #versions }
+SoilApplicationMigration class >> targetVersion [
+	"the version that is meant to be live. A version method is written and
+	tested first and armed afterwards, by setting this, which makes the version a
+	deployment artefact rather than a consequence of the code being loaded"
+	^ targetVersion ifNil: [ self defaultTargetVersion ]
+]
+
+{ #category : #versions }
+SoilApplicationMigration class >> targetVersion: anIntegerOrNil [ 
+	"arm up to this version, or nil to fall back to #defaultTargetVersion. Held
+	per class, so arming one migration does not arm another"
+	targetVersion := anIntegerOrNil
+]
 
 { #category : #versions }
 SoilApplicationMigration >> availableVersions [
@@ -14,11 +48,13 @@ SoilApplicationMigration >> availableVersions [
 	stop := false.
 	versions := OrderedCollection new.
 	persistentVersion := self persistentVersion.
+	"versions that are applied already are none of our business. Checking the
+	auto flag only for the ones above the persistent version keeps an old
+	non-auto version from blocking everything behind it"
 	self versionPragmas do: [ :pragma |
-		(pragma arguments second | all) ifFalse: [ stop := true ].
-		stop ifFalse: [  
-			(pragma arguments first > persistentVersion) ifTrue: [ 
-				versions add: pragma ] ] ].
+		(pragma arguments first > persistentVersion) ifTrue: [ 
+			(pragma arguments second | all) ifFalse: [ stop := true ].
+			stop ifFalse: [ versions add: pragma ] ] ].
 	^ versions collect: [ :pragma | pragma arguments first ]
 ]
 
@@ -49,10 +85,21 @@ SoilApplicationMigration >> log: aString [
 		emit
 ]
 
+{ #category : #versions }
+SoilApplicationMigration >> maxVersion [
+	"the version the loaded code is at: the highest one its version methods
+	declare, regardless of the auto flag. Zero when it declares none, so such a
+	migration never considers a database behind. Reads no database, so it can be
+	asked before there is one"
+	^ self versionPragmas
+		ifEmpty: [ 0 ]
+		ifNotEmpty: [ :pragmas | pragmas last arguments first ]
+]
+
 { #category : #API }
 SoilApplicationMigration >> migrate [
 	self needsMigration ifFalse: [ 
-		self log: 'application version already at ', self targetVersion printString, ', nothing to migrate'.
+		self log: 'application version already at ', self persistentVersion printString, ', nothing to migrate'.
 		^ self ].
 	self log: 'application version ', self persistentVersion printString, ' needs to be migrated to ', self targetVersion printString.
 	self migrateUpToVersion: self targetVersion
@@ -128,12 +175,14 @@ SoilApplicationMigration >> soil: anObject [
 
 { #category : #versions }
 SoilApplicationMigration >> targetVersion [
-	"the version to migrate up to. Defaults to the highest version that can be
-	reached through the pragmas. Applications keeping their target version
-	elsewhere, e.g. in the code base, override this"
-	^ self availableVersions
-		ifEmpty: [ self persistentVersion ]
-		ifNotEmpty: [ :versions | versions last ]
+	"the version to migrate up to. Defaults to what the class has armed, set it
+	to stop short of that for a single run"
+	^ targetVersion ifNil: [ self class targetVersion ]
+]
+
+{ #category : #versions }
+SoilApplicationMigration >> targetVersion: anInteger [ 
+	targetVersion := anInteger
 ]
 
 { #category : #accessing }
