@@ -72,6 +72,19 @@ SoilResidentTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilResidentTest >> testAddingATakenNameIsRefused [
+	"the resident already here may be started and holding a process; replacing it
+	silently would leave it running and unreachable"
+	| supervisor |
+	self addResident: SoilTestResidentDescription new.
+	supervisor := self startedSupervisor.
+	self
+		should: [ supervisor addResident: SoilTestResident new ]
+		raise: SoilResidentAlreadyPresent.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
 SoilResidentTest >> testAnswerErrorsAreIsolatedAndCountAsBusy [
 	"a resident that throws on an answer must not drag the others along, and an
 	answer we could not get counts in the direction that keeps the database open"
@@ -205,6 +218,22 @@ SoilResidentTest >> testHangingResidentIsTerminatedAfterTimeout [
 ]
 
 { #category : #tests }
+SoilResidentTest >> testLoadingTwiceIsRefused [
+	"a second load would build a second set of instances while the first set is
+	started and holding processes"
+	| supervisor txn |
+	self addResident: SoilTestResidentDescription new.
+	supervisor := self startedSupervisor.
+	txn := soil newTransaction.
+	[ self
+		should: [ supervisor loadFrom: txn ]
+		raise: SoilResidentsAlreadyLoaded ]
+		ensure: [ txn abort ].
+	self assert: supervisor residents size equals: 1.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
 SoilResidentTest >> testNoTickWhileStopped [
 	| supervisor resident before |
 	self addResident: SoilTestResidentDescription new.
@@ -288,6 +317,21 @@ SoilResidentTest >> testResidentNamedSignalsWhenAbsent [
 	self
 		should: [ supervisor residentNamed: #nothingHere ]
 		raise: SoilResidentNotFound
+]
+
+{ #category : #tests }
+SoilResidentTest >> testStartingTwiceStartsNothingTwice [
+	"a second start would give a resident that already has a process a second one"
+	| supervisor resident txn |
+	self addResident: SoilTestResidentDescription new.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #dummy.
+	self assert: resident startCount equals: 1.
+
+	txn := soil newTransaction.
+	[ supervisor startAllIn: txn ] ensure: [ txn abort ].
+	self assert: resident startCount equals: 1.
+	self stop: supervisor within: 5 seconds
 ]
 
 { #category : #tests }

@@ -126,6 +126,12 @@ SoilResident >> initialize [
 ]
 
 { #category : #testing }
+SoilResident >> isCreated [
+	"I exist but my #startIn: has not run -- between phase one and phase two"
+	^ state = #created
+]
+
+{ #category : #testing }
 SoilResident >> isIdle [
 	"am I working right now? A question, not a decision -- and it answers 'is
 	there unprocessed work', not 'is my semaphore above zero': semaphores count

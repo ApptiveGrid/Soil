@@ -34,8 +34,13 @@ SoilResidentSupervisor class >> soilTransientInstVars [
 
 { #category : #adding }
 SoilResidentSupervisor >> addResident: aResident [
+	"refuses a name that is taken rather than replacing silently: the resident
+	already here may be started and holding a process, and named access would
+	then hand out the newcomer while the old one keeps running unreachable"
 	aResident supervisor: self.
 	mutex critical: [
+		(residents includesKey: aResident name) ifTrue: [
+			SoilResidentAlreadyPresent signalForName: aResident name ].
 		residents
 			at: aResident name
 			put: aResident ]
@@ -84,6 +89,11 @@ SoilResidentSupervisor >> hasPendingWork [
 	^ self residents anySatisfy: [ :each | self pendingWorkOf: each ]
 ]
 
+{ #category : #testing }
+SoilResidentSupervisor >> hasResidents [
+	^ self residents notEmpty
+]
+
 { #category : #private }
 SoilResidentSupervisor >> idleStateOf: aResident [
 	"a resident that throws on an answer must not drag the others along. An
@@ -114,7 +124,11 @@ SoilResidentSupervisor >> isIdle [
 SoilResidentSupervisor >> loadFrom: aTransaction [
 	"phase one of the two-phase start: create every instance, start none. That
 	resolves dependencies structurally -- no start order, no cycles, no declared
-	dependencies"
+	dependencies.
+
+	Refuses to run twice: a second load would build a second set of instances
+	while the first set is started and holding processes."
+	self hasResidents ifTrue: [ SoilResidentsAlreadyLoaded new signal ].
 	(self registryIn: aTransaction) ifNotNil: [ :registry |
 		registry descriptionsDo: [ :description |
 			self addResident: (description newInstanceIn: aTransaction) ] ]
@@ -183,12 +197,15 @@ SoilResidentSupervisor >> startAllIn: aTransaction [
 	resident. A failure is left behind visibly as #failed plus the error, not
 	merely logged -- the embedder needs the answer to decide"
 	self residents do: [ :each |
-		[ each startIn: aTransaction.
-		each markStarted ]
-			on: Error
-			do: [ :err |
-				each markFailed: err.
-				self log: 'resident ', each name asString, ' failed to start: ', err messageText ] ]
+		"only what has not been started: a second start would create a second
+		process for a resident that already has one"
+		each isCreated ifTrue: [
+			[ each startIn: aTransaction.
+			each markStarted ]
+				on: Error
+				do: [ :err |
+					each markFailed: err.
+					self log: 'resident ', each name asString, ' failed to start: ', err messageText ] ] ]
 ]
 
 { #category : #running }
