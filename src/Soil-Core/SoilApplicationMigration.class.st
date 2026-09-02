@@ -88,7 +88,7 @@ SoilApplicationMigration >> migrateVersion: version transaction: aSoilTransactio
 	^ (pragma arguments second | all) 
 		ifTrue: [  
 			self log: 'migrating to application version ', version printString.
-			self perform: pragma method selector with: aSoilTransaction.
+			self runMigration: pragma method selector withTransaction: aSoilTransaction.
 			true ]
 		ifFalse: [ 
 			self log: 'stopping before application version ', version printString, ', it is not applied automatically'.
@@ -110,6 +110,14 @@ SoilApplicationMigration >> persistentVersion [
 SoilApplicationMigration >> persistentVersion: version [ 
 	
 	^ soil control applicationVersion: version 
+]
+
+{ #category : #API }
+SoilApplicationMigration >> runMigration: aSelector withTransaction: aSoilTransaction [
+	"the single place a version step is invoked from. Applications that need
+	state of their own around a step, e.g. an ambient context built from the
+	transaction, override this and call super inside it"
+	self perform: aSelector with: aSoilTransaction
 ]
 
 { #category : #accessing }
