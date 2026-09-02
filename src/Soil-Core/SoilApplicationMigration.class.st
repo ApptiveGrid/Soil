@@ -34,20 +34,18 @@ SoilApplicationMigration >> initialize [
 	all := false
 ]
 
-{ #category : #accessing }
-SoilApplicationMigration >> lastVersion [
-	^ self availableVersions last
-]
-
 { #category : #API }
 SoilApplicationMigration >> migrate [
-	self migrateUpToVersion: self lastVersion
+	self needsMigration ifFalse: [ ^ self ].
+	self migrateUpToVersion: self targetVersion
 ]
 
 { #category : #API }
 SoilApplicationMigration >> migrateUpToVersion: applicationVersion [  
 	| txn succeeded |
-	self persistentVersion to: applicationVersion do: [ :version |
+	"persistentVersion is the version that has been applied already, so the
+	first step still to run is the one following it"
+	self persistentVersion + 1 to: applicationVersion do: [ :version |
 		succeeded := false.
 		txn := soil newTransaction.
 		[ 
@@ -73,6 +71,11 @@ SoilApplicationMigration >> migrateVersion: version transaction: aSoilTransactio
 		ifFalse: [ false ]
 ]
 
+{ #category : #testing }
+SoilApplicationMigration >> needsMigration [
+	^ self persistentVersion < self targetVersion
+]
+
 { #category : #versions }
 SoilApplicationMigration >> persistentVersion [
 	
@@ -89,6 +92,16 @@ SoilApplicationMigration >> persistentVersion: version [
 SoilApplicationMigration >> soil: anObject [
 
 	soil := anObject
+]
+
+{ #category : #versions }
+SoilApplicationMigration >> targetVersion [
+	"the version to migrate up to. Defaults to the highest version that can be
+	reached through the pragmas. Applications keeping their target version
+	elsewhere, e.g. in the code base, override this"
+	^ self availableVersions
+		ifEmpty: [ self persistentVersion ]
+		ifNotEmpty: [ :versions | versions last ]
 ]
 
 { #category : #accessing }

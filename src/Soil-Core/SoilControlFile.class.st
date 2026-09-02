@@ -133,7 +133,9 @@ SoilControlFile >> initialize [
 SoilControlFile >> initializeStart [
 	self databaseFormatVersion: Soil databaseFormatVersion.
 	self basicDatabaseVersion: 0.
-	self applicationVersion: 1
+	"no application migration has run yet. Version 1 is a step like any other
+	and has to stay available to a fresh database"
+	self applicationVersion: 0
 ]
 
 { #category : #inspector }
