@@ -40,9 +40,21 @@ SoilApplicationMigration >> initialize [
 	all := false
 ]
 
+{ #category : #logging }
+SoilApplicationMigration >> log: aString [
+	"where the migration reports what it is doing. Applications that collect
+	their log elsewhere override this"
+	(SoilSignal on: aString)
+		databaseId: soil name;
+		emit
+]
+
 { #category : #API }
 SoilApplicationMigration >> migrate [
-	self needsMigration ifFalse: [ ^ self ].
+	self needsMigration ifFalse: [ 
+		self log: 'application version already at ', self targetVersion printString, ', nothing to migrate'.
+		^ self ].
+	self log: 'application version ', self persistentVersion printString, ' needs to be migrated to ', self targetVersion printString.
 	self migrateUpToVersion: self targetVersion
 ]
 
@@ -75,9 +87,12 @@ SoilApplicationMigration >> migrateVersion: version transaction: aSoilTransactio
 	pragma := self versionPragmaAt: version.
 	^ (pragma arguments second | all) 
 		ifTrue: [  
+			self log: 'migrating to application version ', version printString.
 			self perform: pragma method selector with: aSoilTransaction.
 			true ]
-		ifFalse: [ false ]
+		ifFalse: [ 
+			self log: 'stopping before application version ', version printString, ', it is not applied automatically'.
+			false ]
 ]
 
 { #category : #testing }
