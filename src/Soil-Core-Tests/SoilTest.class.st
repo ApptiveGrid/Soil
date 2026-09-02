@@ -401,6 +401,58 @@ SoilTest >> testMigrationKeepsVersionsBeforeFailingOne [
 ]
 
 { #category : #tests }
+SoilTest >> testMigrationStopsAtNonAutoVersionAndKeepsNeedingIt [
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationHalf.
+	soil newApplicationMigration migrate.
+	"the run stops before the version that is not applied automatically. The
+	database must not look fully migrated afterwards, the target is still the
+	highest version there is"
+	self assert: soil control applicationVersion equals: 2.
+	self assert: soil newApplicationMigration needsMigration.
+	self assert: soil newApplicationMigration targetVersion equals: 4
+]
+
+{ #category : #tests }
+SoilTest >> testMigrationToGivenTargetVersion [
+	| migration txn |
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationFull.
+	migration := soil newApplicationMigration 
+		targetVersion: 2; 
+		yourself.
+	self assert: migration maxVersion equals: 4.
+	migration migrate.
+	self assert: soil control applicationVersion equals: 2.
+	self deny: migration needsMigration.
+	txn := soil newTransaction.
+	self assert: (txn root at: #two) equals: 2.
+	self deny: (txn root includesKey: #three).
+	txn abort
+]
+
+{ #category : #tests }
+SoilTest >> testMigrationToVersionArmedOnTheClass [
+	[ SoilTestApplicationMigrationFull targetVersion: 2.
+	  soil fabric applicationMigrationClass: SoilTestApplicationMigrationFull.
+	  self assert: soil newApplicationMigration targetVersion equals: 2.
+	  "the armed version is held per class, arming one must not arm another"
+	  self assert: SoilTestApplicationMigrationHalf targetVersion equals: 4.
+	  soil migrateApplication.
+	  self assert: soil control applicationVersion equals: 2.
+	  self deny: soil newApplicationMigration needsMigration ]
+		ensure: [ SoilTestApplicationMigrationFull targetVersion: nil ].
+	self assert: SoilTestApplicationMigrationFull targetVersion equals: 4
+]
+
+{ #category : #tests }
+SoilTest >> testMigrationVersionsAfterAppliedNonAutoVersion [
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationHalf.
+	soil control applicationVersion: 3.
+	"version 3 is not applied automatically, but it is applied. It must not
+	block the versions behind it"
+	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 4 )
+]
+
+{ #category : #tests }
 SoilTest >> testMigrationVersionsFull [
 	soil fabric applicationMigrationClass: SoilTestApplicationMigrationFull.
 	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 1 2 3 4 ).
