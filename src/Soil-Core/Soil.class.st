@@ -369,6 +369,13 @@ Soil >> migrateDatabaseFormat [
 		migrate
 ]
 
+{ #category : #accessing }
+Soil >> name [
+	"how this database is addressed: the name of its directory. Not an identity,
+	two databases below different roots can carry the same one"
+	^ self path basename
+]
+
 { #category : #actions }
 Soil >> newApplicationMigration [  
 	^ self applicationMigrationClass new 

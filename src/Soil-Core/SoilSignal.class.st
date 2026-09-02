@@ -3,7 +3,8 @@ Class {
 	#superclass : #WrapperSignal,
 	#instVars : [
 		'message',
-		'id'
+		'id',
+		'databaseId'
 	],
 	#classVars : [
 		'IdCounter'
@@ -28,6 +29,16 @@ SoilSignal class >> nextId [
 { #category : #'system startup' }
 SoilSignal class >> startUp [
 	IdCounter := 0
+]
+
+{ #category : #accessing }
+SoilSignal >> databaseId [
+	^ databaseId
+]
+
+{ #category : #accessing }
+SoilSignal >> databaseId: anObject [
+	databaseId := anObject
 ]
 
 { #category : #'instance creation' }
@@ -67,6 +78,9 @@ SoilSignal >> printOneLineOn: stream [
 	stream space.
 	self processId printOn: stream base: 10 length: 6 padded: true.
 	stream space.
+	databaseId ifNotNil: [ 
+		stream << (databaseId asString padRightTo: 24).
+		stream space ].
 	message ifNotNil: [  
 		message printOn: stream.
 		stream space ].
