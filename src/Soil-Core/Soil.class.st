@@ -345,6 +345,13 @@ Soil >> metadata [
 	^ metadata
 ]
 
+{ #category : #actions }
+Soil >> migrateApplication [
+	"run the application migration up to the version the migration considers
+	current. Answering early when there is nothing to do"
+	^ self newApplicationMigration migrate
+]
+
 { #category : #migration }
 Soil >> migrateDatabaseFormat [
 	"open for migration by just resuming the incompatible version 

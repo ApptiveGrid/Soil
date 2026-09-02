@@ -22,6 +22,12 @@ SoilApplicationMigration >> availableVersions [
 	^ versions collect: [ :pragma | pragma arguments first ]
 ]
 
+{ #category : #hooks }
+SoilApplicationMigration >> didMigrateVersion: version transaction: aSoilTransaction [
+	"a version has been applied and the persistent version has been advanced"
+	soil metadata updateLastModified
+]
+
 { #category : #accessing }
 SoilApplicationMigration >> forceMigration: anObject [
 
@@ -44,7 +50,9 @@ SoilApplicationMigration >> migrate [
 SoilApplicationMigration >> migrateUpToVersion: applicationVersion [  
 	| txn succeeded |
 	"persistentVersion is the version that has been applied already, so the
-	first step still to run is the one following it"
+	first step still to run is the one following it. Every step runs in a
+	transaction of its own and is committed on its own, so a failing step does
+	not roll back the steps that already succeeded"
 	self persistentVersion + 1 to: applicationVersion do: [ :version |
 		succeeded := false.
 		txn := soil newTransaction.
@@ -56,7 +64,8 @@ SoilApplicationMigration >> migrateUpToVersion: applicationVersion [
 					succeeded 
 						ifTrue: [ 
 							txn commit.
-							self persistentVersion: version ]
+							self persistentVersion: version.
+							self didMigrateVersion: version transaction: txn ]
 						ifFalse: [ txn abort ] ] ]
 ]
 
@@ -118,6 +127,9 @@ SoilApplicationMigration >> versionPragmaAt: anInteger [
 
 { #category : #versions }
 SoilApplicationMigration >> versionPragmas [ 
+	"only the methods of this very class are searched, inherited ones are not.
+	Version steps therefore have to live in the class that is instantiated,
+	subclassing to override a hook does not carry them along"
 	^ Pragma 
 		allNamed: #applicationVersion:auto:
 		in: self class

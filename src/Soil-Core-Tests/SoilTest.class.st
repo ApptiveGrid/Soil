@@ -386,6 +386,21 @@ SoilTest >> testMigrationHalfForced [
 ]
 
 { #category : #tests }
+SoilTest >> testMigrationKeepsVersionsBeforeFailingOne [
+	| txn |
+	soil fabric applicationMigrationClass: SoilTestApplicationMigrationFailing.
+	self should: [ soil newApplicationMigration migrate ] raise: Error.
+	"the versions applied before the failing one keep their commit and the
+	persistent version stops right before it, so a later run resumes there"
+	self assert: soil control applicationVersion equals: 2.
+	txn := soil newTransaction.
+	self assert: (txn root at: #two) equals: 2.
+	self deny: (txn root includesKey: #three).
+	txn abort.
+	self assert: soil newApplicationMigration needsMigration
+]
+
+{ #category : #tests }
 SoilTest >> testMigrationVersionsFull [
 	soil fabric applicationMigrationClass: SoilTestApplicationMigrationFull.
 	self assertCollection: soil newApplicationMigration availableVersions hasSameElements: #( 1 2 3 4 ).
