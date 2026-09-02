@@ -21,7 +21,8 @@ Class {
 		'soil',
 		'residents',
 		'mutex',
-		'tickProcess'
+		'tickProcess',
+		'tickInterval'
 	],
 	#category : #'Soil-Resident'
 }
@@ -38,6 +39,20 @@ SoilResidentSupervisor >> addResident: aResident [
 		residents
 			at: aResident name
 			put: aResident ]
+]
+
+{ #category : #running }
+SoilResidentSupervisor >> ensureTickProcess [
+	"defensive: bring the tick back if its process was terminated. A process
+	cannot revive itself once it is gone, so somebody from outside has to look --
+	the embedder calls this from a path it walks anyway, the way it already does
+	for its own maintenance process.
+
+	Does nothing until an interval has been set: without one there is no tick to
+	keep alive."
+	tickInterval ifNil: [ ^ self ].
+	(tickProcess isNil or: [ tickProcess isTerminated ])
+		ifTrue: [ self startTickProcess ]
 ]
 
 { #category : #accessing }
@@ -180,10 +195,19 @@ SoilResidentSupervisor >> startAllIn: aTransaction [
 SoilResidentSupervisor >> startTickEvery: aDuration [
 	"the interval is the embedder's business -- I only offer the tick. My own
 	process, not a resident's: otherwise a hanging resident could not revive
-	itself"
+	itself.
+
+	I remember the interval so #ensureTickProcess can bring the process back
+	without being told again."
 	self stopTick.
+	tickInterval := aDuration.
+	self startTickProcess
+]
+
+{ #category : #private }
+SoilResidentSupervisor >> startTickProcess [
 	tickProcess := [
-		[ aDuration wait.
+		[ tickInterval wait.
 		self tick ] repeat ]
 		forkNamed: 'soil resident tick'
 ]
@@ -217,6 +241,9 @@ SoilResidentSupervisor >> stopAllIn: aTransaction timeout: aDuration [
 
 { #category : #running }
 SoilResidentSupervisor >> stopTick [
+	"forgets the interval as well: otherwise #ensureTickProcess would revive the
+	very tick that the stop just cleared away"
+	tickInterval := nil.
 	tickProcess ifNotNil: [
 		tickProcess terminate.
 		tickProcess := nil ]
@@ -232,6 +259,16 @@ SoilResidentSupervisor >> tick [
 			[ each tick ]
 				on: Error
 				do: [ :err | self log: 'resident ', each name asString, ' failed on tick: ', err messageText ] ] ]
+]
+
+{ #category : #accessing }
+SoilResidentSupervisor >> tickProcess [
+	^ tickProcess
+]
+
+{ #category : #testing }
+SoilResidentSupervisor >> tickProcessIsRunning [
+	^ tickProcess notNil and: [ tickProcess isTerminated not ]
 ]
 
 { #category : #stopping }

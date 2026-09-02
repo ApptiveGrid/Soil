@@ -112,6 +112,7 @@ SoilTestResident >> tick [
 	"pull the process up again if it has terminated -- what the tick is for"
 	tickCount := tickCount + 1.
 	self hasRunningProcess ifFalse: [
+		self noteProcessRestart.
 		process := [ self runLoop ] forkNamed: 'soil test resident' ]
 ]
 

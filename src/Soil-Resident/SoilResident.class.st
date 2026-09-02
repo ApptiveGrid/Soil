@@ -30,7 +30,8 @@ Class {
 		'supervisor',
 		'state',
 		'stopRequested',
-		'error'
+		'error',
+		'restartCount'
 	],
 	#category : #'Soil-Resident'
 }
@@ -120,7 +121,8 @@ SoilResident >> hasRunningProcess [
 SoilResident >> initialize [
 	super initialize.
 	state := #created.
-	stopRequested := false
+	stopRequested := false.
+	restartCount := 0
 ]
 
 { #category : #testing }
@@ -180,6 +182,18 @@ SoilResident >> newTransaction [
 	^ supervisor newTransaction
 ]
 
+{ #category : #accessing }
+SoilResident >> noteProcessRestart [
+	"a resident that revives its own process in #tick counts the restart here, so
+	a crash loop becomes visible instead of masquerading as health -- restarting
+	silently looks exactly like being healthy from the outside.
+
+	Deliberately only counted, with no upper bound: what number should turn a
+	resident into #failed is decided once a real active resident has produced
+	real numbers."
+	restartCount := restartCount + 1
+]
+
 { #category : #stopping }
 SoilResident >> requestStop [
 	"cooperative, never Process>>suspend: that mid-transaction leaves half writes
@@ -196,6 +210,12 @@ SoilResident >> requestStop [
 { #category : #accessing }
 SoilResident >> residentNamed: aSymbol [
 	^ supervisor residentNamed: aSymbol
+]
+
+{ #category : #accessing }
+SoilResident >> restartCount [
+	"how often my process had to be revived. For diagnosis"
+	^ restartCount
 ]
 
 { #category : #testing }

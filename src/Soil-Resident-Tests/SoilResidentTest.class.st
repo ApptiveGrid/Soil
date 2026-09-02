@@ -72,6 +72,21 @@ SoilResidentTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilResidentTest >> testAnswerErrorsAreIsolatedAndCountAsBusy [
+	"a resident that throws on an answer must not drag the others along, and an
+	answer we could not get counts in the direction that keeps the database open"
+	| supervisor |
+	self addResident: SoilTestThrowingResidentDescription new.
+	self addResident: SoilTestPassiveResidentDescription new.
+	supervisor := self startedSupervisor.
+
+	self deny: supervisor isIdle.
+	self assert: supervisor hasPendingWork.
+	"the passive one is untouched and still answers for itself"
+	self assert: (supervisor residentNamed: #passive) isIdle
+]
+
+{ #category : #tests }
 SoilResidentTest >> testDummyResidentBlocksAndReleasesIdle [
 	"the point of the whole exercise: while a work unit runs, the resident says
 	it is not idle, and afterwards it says it is again"
@@ -92,6 +107,32 @@ SoilResidentTest >> testDummyResidentBlocksAndReleasesIdle [
 	self waitUntil: [ supervisor isIdle ] within: 1 second.
 	self deny: supervisor hasPendingWork.
 	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testEnsureTickProcessRevivesATerminatedTick [
+	"a process cannot revive itself once it is gone, so somebody from outside has
+	to look"
+	| supervisor |
+	self addResident: SoilTestResidentDescription new.
+	supervisor := self startedSupervisor.
+	supervisor startTickEvery: 10 seconds.
+	self assert: supervisor tickProcessIsRunning.
+
+	supervisor tickProcess terminate.
+	self deny: supervisor tickProcessIsRunning.
+	supervisor ensureTickProcess.
+	self assert: supervisor tickProcessIsRunning.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testEnsureTickProcessStaysQuietWithoutAnInterval [
+	"without an interval there is no tick to keep alive"
+	| supervisor |
+	supervisor := self startedSupervisor.
+	supervisor ensureTickProcess.
+	self deny: supervisor tickProcessIsRunning
 ]
 
 { #category : #tests }
@@ -125,6 +166,24 @@ SoilResidentTest >> testFailingResidentLeavesOthersUntouched [
 		assertCollection: (supervisor failedResidents collect: [ :each | each name ])
 		hasSameElements: #( failing ).
 	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testFlushErrorsAreIsolated [
+	"a failed flush of one resident must not cost the others theirs"
+	| supervisor passive txn flushed |
+	self addResident: SoilTestThrowingResidentDescription new.
+	self addResident: SoilTestPassiveResidentDescription new.
+	supervisor := self startedSupervisor.
+	passive := supervisor residentNamed: #passive.
+	passive book; book.
+
+	self stop: supervisor within: 5 seconds.
+
+	txn := soil newTransaction.
+	flushed := [ ((soil residentRegistryIn: txn) descriptionNamed: #passive) workspace at: #flushed ]
+		ensure: [ txn abort ].
+	self assert: flushed equals: 2
 ]
 
 { #category : #tests }
@@ -242,6 +301,65 @@ SoilResidentTest >> testStopAcknowledgedByCooperativeResident [
 	pending := self stop: supervisor within: 5 seconds.
 	self assert: pending isEmpty.
 	self assert: resident isStopped
+]
+
+{ #category : #tests }
+SoilResidentTest >> testStopTickKeepsEnsureFromRevivingIt [
+	"otherwise the defensive restart would bring back the very tick the stop just
+	cleared away"
+	| supervisor |
+	self addResident: SoilTestResidentDescription new.
+	supervisor := self startedSupervisor.
+	supervisor startTickEvery: 10 seconds.
+	self stop: supervisor within: 5 seconds.
+	self deny: supervisor tickProcessIsRunning.
+
+	supervisor ensureTickProcess.
+	self deny: supervisor tickProcessIsRunning
+]
+
+{ #category : #tests }
+SoilResidentTest >> testTickCountsProcessRestarts [
+	"restarting silently looks exactly like being healthy from the outside, so the
+	restart is counted"
+	| supervisor resident |
+	self addResident: SoilTestResidentDescription new.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #dummy.
+	self assert: resident restartCount equals: 0.
+
+	resident process terminate.
+	supervisor tick.
+	self assert: resident restartCount equals: 1.
+	self assert: resident hasRunningProcess.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testTickErrorsAreIsolated [
+	"a throwing resident must not abort the run for the others"
+	| supervisor dummy |
+	self addResident: SoilTestThrowingResidentDescription new.
+	self addResident: SoilTestResidentDescription new.
+	supervisor := self startedSupervisor.
+	dummy := supervisor residentNamed: #dummy.
+
+	supervisor tick.
+	self assert: dummy tickCount equals: 1.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testTickProcessFiresOnItsInterval [
+	"the interval is the embedder's, the process is the supervisor's"
+	| supervisor dummy |
+	self addResident: SoilTestResidentDescription new.
+	supervisor := self startedSupervisor.
+	dummy := supervisor residentNamed: #dummy.
+	supervisor startTickEvery: 20 milliSeconds.
+
+	self waitUntil: [ dummy tickCount >= 2 ] within: 5 seconds.
+	self stop: supervisor within: 5 seconds
 ]
 
 { #category : #tests }

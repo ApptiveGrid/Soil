@@ -20,14 +20,6 @@ Soil >> residentRegistryIn: aTransaction [
 	an embedder's override falls away."
 	^ nil
 ]
-
-{ #category : #'*Soil-Resident' }
-Soil >> residentStopTimeout [
-	"how long the stop waits for receipts before it terminates after all. A
-	default so a plain Soil database can close at all; an embedder that has
-	measured its residents' stop durations overrides it"
-	^ 10 seconds
-]
 { #category : #'*Soil-Resident' }
 Soil >> residentSupervisorClass [
 	^ SoilResidentSupervisor
