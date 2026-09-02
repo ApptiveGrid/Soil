@@ -45,7 +45,7 @@ SoilApplicationMigration >> log: aString [
 	"where the migration reports what it is doing. Applications that collect
 	their log elsewhere override this"
 	(SoilSignal on: aString)
-		databaseId: soil name;
+		databaseName: soil name;
 		emit
 ]
 
