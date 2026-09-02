@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'message',
 		'id',
-		'databaseId'
+		'databaseName'
 	],
 	#classVars : [
 		'IdCounter'
@@ -32,13 +32,13 @@ SoilSignal class >> startUp [
 ]
 
 { #category : #accessing }
-SoilSignal >> databaseId [
-	^ databaseId
+SoilSignal >> databaseName [
+	^ databaseName
 ]
 
 { #category : #accessing }
-SoilSignal >> databaseId: anObject [
-	databaseId := anObject
+SoilSignal >> databaseName: anObject [
+	databaseName := anObject
 ]
 
 { #category : #'instance creation' }
@@ -78,8 +78,8 @@ SoilSignal >> printOneLineOn: stream [
 	stream space.
 	self processId printOn: stream base: 10 length: 6 padded: true.
 	stream space.
-	databaseId ifNotNil: [ 
-		stream << (databaseId asString padRightTo: 24).
+	databaseName ifNotNil: [ 
+		stream << (databaseName asString padRightTo: 24).
 		stream space ].
 	message ifNotNil: [  
 		message printOn: stream.
