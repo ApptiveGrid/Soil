@@ -25,19 +25,20 @@ SoilResidentCleanCodeTest class >> shouldInheritSelectors [
 ]
 
 { #category : #accessing }
-SoilResidentCleanCodeTest >> allowedPackageNames [
-	"what Soil-Resident may reference: Soil's own packages, plus whatever Soil-Core
-	already depends on. Computed rather than listed, so the set follows Soil-Core
-	instead of going stale"
+SoilResidentCleanCodeTest >> allowedClasses [
+	"the classes Soil-Core's own source already references. That is the right
+	yardstick for two different worries at once: they are inside what Soil depends
+	on, and they are safe across every Pharo version in Soil's build matrix,
+	because Soil-Core is built against all of them.
+
+	Computed rather than listed, so the set follows Soil-Core instead of going
+	stale. Only `Soil package` is consulted -- enumerating packages by name needs
+	an organizer whose own class name differs across those Pharo versions, which
+	is exactly the kind of slip this test exists to catch."
 	| allowed |
 	allowed := Set new.
-	allowed
-		addAll: ((PackageOrganizer default packages
-			select: [ :each | each name beginsWith: 'Soil' ])
-			collect: [ :each | each name ]).
 	Soil package methods do: [ :method |
-		self classesReferencedBy: method do: [ :class |
-			class instanceSide package ifNotNil: [ :package | allowed add: package name ] ] ].
+		self classesReferencedBy: method do: [ :class | allowed add: class instanceSide ] ].
 	^ allowed
 ]
 
@@ -46,6 +47,14 @@ SoilResidentCleanCodeTest >> classesReferencedBy: aMethod do: aBlock [
 	aMethod literals do: [ :literal |
 		(literal isVariableBinding and: [ literal value isBehavior ])
 			ifTrue: [ aBlock value: literal value ] ]
+]
+
+{ #category : #accessing }
+SoilResidentCleanCodeTest >> isOwnClass: aClass [
+	"Soil's own classes need no further justification"
+	^ aClass instanceSide package
+		ifNotNil: [ :package | package name beginsWith: 'Soil' ]
+		ifNil: [ false ]
 ]
 
 { #category : #running }
@@ -67,34 +76,38 @@ SoilResidentCleanCodeTest >> testEveryClassHasAComment [
 
 { #category : #tests }
 SoilResidentCleanCodeTest >> testNoReferencesOutsideSoilsOwnDependencies [
-	"A development image has everything loaded, so a reference from here into an
-	embedder resolves and the build is the first place it breaks. This is the
-	check that catches it while it is still cheap."
+	"Two things a development image cannot show by itself. Everything is loaded
+	here, so a reference upwards into an embedder resolves and the build is the
+	first place it breaks. And every Pharo version in the build matrix is loaded
+	as one -- a class that exists only in the newest of them resolves here too.
+
+	Compared per class, not per package: PackageOrganizer sits in a package
+	Soil-Core does reference, so a package-granular check let it through and the
+	Pharo 11 build was the first to say so."
 	| allowed violations |
-	allowed := self allowedPackageNames.
-	violations := Dictionary new.
+	allowed := self allowedClasses.
+	violations := Set new.
 	self packageToCheck methods do: [ :method |
 		self classesReferencedBy: method do: [ :class |
-			class instanceSide package ifNotNil: [ :package |
-				(allowed includes: package name) ifFalse: [
-					(violations at: package name ifAbsentPut: [ Set new ])
-						add: class name ] ] ] ].
+			((allowed includes: class instanceSide)
+				or: [ self isOwnClass: class ]) ifFalse: [
+					violations add: class instanceSide name ] ] ].
 	self
 		assert: violations isEmpty
-		description: 'Soil-Resident references classes outside Soil and its own dependencies: '
-			, violations asString
+		description: 'Soil-Resident references classes that Soil itself does not use, so they are neither known to be dependencies nor known to exist in every supported Pharo: '
+			, violations asSortedCollection asArray asString
 ]
 
 { #category : #tests }
 SoilResidentCleanCodeTest >> testNoUncategorizedMethods [
 	"inherited as skipped because Soil-Core carries known violations; the new
 	package has none and should keep it that way"
-	| uncategorized |
-	uncategorized := self packageToCheck methods
-		select: [ :method |
-			method protocolName isNil
-				or: [ method protocolName = Protocol unclassified ] ].
+	| classes violating |
+	classes := self packageToCheck definedClasses
+		, (self packageToCheck definedClasses collect: [ :each | each classSide ]).
+	violating := classes
+		select: [ :class | class protocolNames includes: #'as yet unclassified' ].
 	self
-		assert: uncategorized isEmpty
-		description: 'the following methods are uncategorized: ' , uncategorized asString
+		assert: violating isEmpty
+		description: 'the following classes have uncategorized methods: ' , violating asString
 ]
