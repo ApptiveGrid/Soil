@@ -71,6 +71,14 @@ SoilCleanCodeTest >> packageToCheck [
 	^ Soil package
 ]
 
+{ #category : #running }
+SoilCleanCodeTest >> soilTransientDeclarationPackages [
+	"the declaration protocol is implemented in Soil-Serializer and used from both packages,
+	also as extensions of classes defined elsewhere"
+
+	^ { Soil package. SoilBehaviorDescription package }
+]
+
 { #category : #tests }
 SoilCleanCodeTest >> testCodeCoverage [
 
@@ -126,6 +134,22 @@ SoilCleanCodeTest >> testNoDuplicatedMethodInHierarchy [
 		self 
 		assert: methods isEmpty 
 		description: ('the following methods are already in the superclass hierarchy and can be removed: ', methods asString)
+]
+
+{ #category : #tests }
+SoilCleanCodeTest >> testNoIgnoredSoilTransientDeclaration [
+	"Soil reads #soilTransientInstVars and nothing else. A declaration under the name
+	#soilTransientInstanceVariables is silently ignored, so the instance variables it names
+	stay persistent although they were meant to be kept out of the store."
+
+	| violating |
+	violating := (self soilTransientDeclarationPackages flatCollect: [ :each | 
+		              each methods ]) select: [ :method | 
+		             method selector = #soilTransientInstanceVariables or: [ 
+			             method messages includes: #soilTransientInstanceVariables ] ].
+	self 
+		assert: violating isEmpty 
+		description: 'the following methods use #soilTransientInstanceVariables, which Soil never sends. Use #soilTransientInstVars instead: ', violating asArray printString
 ]
 
 { #category : #tests }
@@ -264,4 +288,30 @@ SoilCleanCodeTest >> testReDoNotSendSuperInitializeInClassSideRule [
 { #category : #tests }
 SoilCleanCodeTest >> testReInstanceVariableCapitalizationRule [
 	self assertValidLintRule: ReInstanceVariableCapitalizationRule new
+]
+
+{ #category : #tests }
+SoilCleanCodeTest >> testSoilTransientInstVarsNameInstanceVariables [
+	"Every name in a #soilTransientInstVars declaration has to be an instance variable of the 
+	declaring class or of one of its subclasses, which inherit the declaration. A name that 
+	matches no instance variable is a no-op and hides the intention to keep that variable out 
+	of the store."
+
+	| violating |
+	violating := OrderedCollection new.
+	(self soilTransientDeclarationPackages flatCollect: [ :each | each methods ]) 
+		do: [ :method | 
+			(method selector = #soilTransientInstVars and: [ 
+				method methodClass isClassSide and: [ 
+					method methodClass instanceSide isClass ] ]) ifTrue: [ 
+				| class |
+				class := method methodClass instanceSide.
+				class soilTransientInstVars do: [ :name | 
+					((class allInstVarNames includes: name asString) or: [ 
+						class allSubclasses anySatisfy: [ :each | 
+							each allInstVarNames includes: name asString ] ]) ifFalse: [ 
+						violating add: class name -> name ] ] ] ].
+	self 
+		assert: violating isEmpty 
+		description: 'the following #soilTransientInstVars entries do not name an instance variable: ', violating asArray printString
 ]
