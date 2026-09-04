@@ -15,11 +15,6 @@ SoilTransactionJournal class >> readFrom: aStream [
 		yourself
 ]
 
-{ #category : #accessing }
-SoilTransactionJournal class >> soilTransientInstVars [ 
-	^ #( transaction )
-]
-
 { #category : #visiting }
 SoilTransactionJournal >> acceptSoil: aSoilVisitor [ 
 	^ aSoilVisitor visitTransactionJournal: self
