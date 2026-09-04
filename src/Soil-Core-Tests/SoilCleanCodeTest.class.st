@@ -71,6 +71,23 @@ SoilCleanCodeTest >> packageToCheck [
 	^ Soil package
 ]
 
+{ #category : #helpers }
+SoilCleanCodeTest >> protocolNameOf: aMethod [
+		"how a method is asked for its protocol differs across the Pharo versions this
+		builds on. Try what is there -- and fail loudly rather than answer nil if
+		nothing is, because a silent nil would leave this check green and empty, which
+		is the failure mode it exists to prevent."
+		| protocol |
+		(aMethod respondsTo: #protocolName) ifTrue: [ ^ aMethod protocolName ].
+		(aMethod respondsTo: #protocol) ifTrue: [
+			protocol := aMethod protocol.
+			^ protocol ifNotNil: [
+				protocol isString
+					ifTrue: [ protocol ]
+					ifFalse: [ protocol name ] ] ].
+		self fail: 'no known way to ask a CompiledMethod for its protocol in this Pharo'
+]
+
 { #category : #running }
 SoilCleanCodeTest >> soilTransientDeclarationPackages [
 	"the declaration protocol is implemented in Soil-Serializer and used from both packages,
@@ -173,18 +190,20 @@ SoilCleanCodeTest >> testNoShadowedVariablesInMethods [
 
 { #category : #tests }
 SoilCleanCodeTest >> testNoUncategorizedMethods [
-	"Check that we have no #'as yet unclassified' protocols left"
-
-	| violating classes |
-	self skip.
-	classes := self packageToCheck definedClasses
-	           , (self packageToCheck definedClasses collect: [ :each | each classSide ]).
-
-	violating := classes select: [ :class | 
-		             class protocolNames includes: #'as yet unclassified' ].
+	"Asked per method rather than per class. The class-side variant that the
+	inherited version uses walks metaclasses, and #protocolNames is not on the
+	metaclass path in every Pharo of the build matrix -- which nobody noticed
+	because the inherited version never ran. Package>>methods covers both sides
+	anyway."
+	| uncategorized |
+	
+	uncategorized := self packageToCheck methods select: [ :method |
+		| protocol |
+		protocol := self protocolNameOf: method.
+		protocol isNil or: [ protocol asString = 'as yet unclassified' ] ].
 	self
-		assert: violating isEmpty
-		description: 'the following classes have uncategorized methods: ', violating asString
+		assert: uncategorized isEmpty
+		description: 'the following methods are uncategorized: ' , uncategorized asString
 ]
 
 { #category : #tests }
@@ -194,7 +213,6 @@ SoilCleanCodeTest >> testNoUnimplementedCalls [
 	"To tag selectors send that are not implemented that should not trigger this rule, use the pragma 
 	<ignoreNotImplementedSelectors: #(selector:to:be:ignored)>"
 	
-	self skip.
 	remaining := self packageToCheck methods select: [ :meth | 
 		             | ignored |
 		             ignored := meth allIgnoredNotImplementedSelectors.
