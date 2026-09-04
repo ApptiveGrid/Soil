@@ -56,18 +56,22 @@ SoilPersistentDatabaseJournal >> currentFragmentFile [
 ]
 
 { #category : #fragmentfile }
-SoilPersistentDatabaseJournal >> currentFragmentFile: aSoilJournalFragmentFile [ 
-	currentFragmentFile := aSoilJournalFragmentFile
+SoilPersistentDatabaseJournal >> cycleFragmentFile [
+	currentFragmentFile 
+		flush;
+		writeContentsToDisk.
+	self cycleFragmentFileAfter: currentFragmentFile
 ]
 
 { #category : #fragmentfile }
-SoilPersistentDatabaseJournal >> cycleFragmentFile [
+SoilPersistentDatabaseJournal >> cycleFragmentFileAfter: aSoilJournalFragmentFile [ 
+	"Continue writing in a fresh fragment file following the given one. The file
+	passed in may have been opened for reading - recovery reads a fragment and
+	then needs a writable file to proceed - so it is only closed here, without
+	flushing or syncing."
 	| nextFileNumber |
-	nextFileNumber := (self fileNumberFrom: currentFragmentFile filename) + 1.
-	currentFragmentFile 
-		flush;
-		writeContentsToDisk;
-		close.
+	nextFileNumber := (self fileNumberFrom: aSoilJournalFragmentFile filename) + 1.
+	aSoilJournalFragmentFile close.
 	currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber)
 ]
 
@@ -268,7 +272,16 @@ SoilPersistentDatabaseJournal >> openFragmentFile: filename [
 
 { #category : #'instance creation' }
 SoilPersistentDatabaseJournal >> openFragmentFileNumber: anInteger [ 
-	^ self openFragmentFile: (self filenameFrom: anInteger)
+	"only recovery reads fragment files by number, so this opens read-only"
+	^ self openFragmentFileReadOnly: (self filenameFrom: anInteger)
+]
+
+{ #category : #'instance creation' }
+SoilPersistentDatabaseJournal >> openFragmentFileReadOnly: filename [ 
+	^ (SoilJournalFragmentFile path: self path / filename )
+		databaseJournal: self;
+		openReadOnly;
+		yourself
 ]
 
 { #category : #private }
@@ -318,7 +331,7 @@ SoilPersistentDatabaseJournal >> sortedFiles [
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> transactionJournalsStartingAt: index do: aBlock [ 
 	| fragmentFiles fileIndex |
-	fragmentFiles := self fragmentFiles do: #open.
+	fragmentFiles := self fragmentFiles do: #openReadOnly.
 	fileIndex := fragmentFiles 
 		detectIndex: [ :fragment | fragment firstTransactionId <= index  ]
 		ifNone: [ self error: 'fileIndex not found, should not happen' ].

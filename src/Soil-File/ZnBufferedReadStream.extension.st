@@ -1,6 +1,13 @@
 Extension { #name : #ZnBufferedReadStream }
 
 { #category : #'*Soil-File' }
+ZnBufferedReadStream >> isOpen [
+	"Soil opens journal fragment files that are read back from disk through a
+	plain read stream. #isOpen completes the protocol SoilBinaryFile expects."
+	^ self closed not
+]
+
+{ #category : #'*Soil-File' }
 ZnBufferedReadStream >> nextLengthEncodedInteger [
 	| value |
 	value := self next.

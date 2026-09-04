@@ -63,9 +63,7 @@ SoilDatabaseRecovery >> readFragmentFileProtected: aSoilFragmentFile [
 			"we currently have no way of reading behind a truncated piece of a fragment. We cycle
 			the fragment file in order to write new entries to a new file. Future reads can just 
 			skip a fragment file on truncated reads"
-			journal 
-				currentFragmentFile: aSoilFragmentFile;
-				cycleFragmentFile ]
+			journal cycleFragmentFileAfter: aSoilFragmentFile ]
 ]
 
 { #category : #private }
@@ -104,9 +102,7 @@ SoilDatabaseRecovery >> recover [
 		do: [ :error | 
 			"in case of a bogus checkpoint position we cannot recover the file but 
 			create a new one and continue"
-			journal 
-				currentFragmentFile: fragmentFile;
-				cycleFragmentFile.
+			journal cycleFragmentFileAfter: fragmentFile.
 			soil checkpoint.
 			^ self ].
 	"If the last checkpoint was successful we are at the end of the file and 

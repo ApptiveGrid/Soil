@@ -90,6 +90,46 @@ SoilDatabaseJournalTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilDatabaseJournalTest >> testCurrentFragmentFileStaysWritable [
+	"read-write is reserved for the fragment file currently being written"
+	| readBack |
+	self addDictionaryRoot.
+	self assert: soil journal currentFragmentFile stream class equals: SoilLockableStream.
+	readBack := soil journal openFragmentFileNumber: 0.
+	[ self assert: readBack stream class equals: ZnBufferedReadStream ]
+		ensure: [ readBack close ]
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testLazilyOpenedFragmentFileIsReadOnly [
+	"fragment files listed from disk open lazily, and that lazy open is read-only"
+	| fragmentFile |
+	self addDictionaryRoot.
+	soil checkpoint.
+	fragmentFile := soil journal fragmentFiles first.
+	self deny: fragmentFile isOpen.
+	[ self assert: fragmentFile entries isNotEmpty.
+	  self assert: fragmentFile isOpen.
+	  self should: [ fragmentFile stream nextPut: 42 ] raise: MessageNotUnderstood ]
+		ensure: [ fragmentFile close ]
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testReadOnlyFragmentFileRejectsWrites [
+	"a fragment file read back from disk carries no write protocol at all"
+	| fragmentFile sizeBefore |
+	self addDictionaryRoot.
+	soil checkpoint.
+	fragmentFile := soil journal openFragmentFileNumber: 0.
+	sizeBefore := fragmentFile size.
+	[ self should: [ fragmentFile stream nextPut: 42 ] raise: MessageNotUnderstood.
+	  self should: [ fragmentFile stream nextPutAll: #( 1 2 3 4 ) ] raise: MessageNotUnderstood.
+	  self should: [ fragmentFile flush ] raise: MessageNotUnderstood.
+	  self assert: fragmentFile size equals: sizeBefore ]
+		ensure: [ fragmentFile close ]
+]
+
+{ #category : #tests }
 SoilDatabaseJournalTest >> testRecoverWithAtEnd [
 	soil close.
 	soil open.
@@ -220,6 +260,19 @@ SoilDatabaseJournalTest >> testRemoveFragmentFiles [
 	soil setup maxFragmentFiles: 5.
 	10 timesRepeat: [ soil journal cycleFragmentFile ].
 	self assert: soil journal sortedFiles size equals: 5	
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testSeveralReadersOfSameFragmentFile [
+	"readers of the same fragment file do not lock each other out"
+	| first second |
+	self addDictionaryRoot.
+	soil checkpoint.
+	first := soil journal openFragmentFileNumber: 0.
+	second := soil journal openFragmentFileNumber: 0.
+	[ self assert: first entries isNotEmpty.
+	  self assert: second entries size equals: first entries size ]
+		ensure: [ first close. second close ]
 ]
 
 { #category : #tests }
