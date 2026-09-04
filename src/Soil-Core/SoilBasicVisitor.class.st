@@ -80,7 +80,7 @@ SoilBasicVisitor >> visitIndexManager: aSoilIndexManager [
 
 { #category : #visiting }
 SoilBasicVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
-	aSoilJournalFragmentFile open.
+	aSoilJournalFragmentFile openReadOnly.
 	[ self visitAll: aSoilJournalFragmentFile transactionJournals ]
 		ensure: [ aSoilJournalFragmentFile close ].
 	^ aSoilJournalFragmentFile 

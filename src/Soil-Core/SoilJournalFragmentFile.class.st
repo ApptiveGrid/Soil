@@ -242,6 +242,17 @@ SoilJournalFragmentFile >> open [
 	stream := SoilLockableStream path: path 
 ]
 
+{ #category : #'open/close' }
+SoilJournalFragmentFile >> openReadOnly [
+	"Open the fragment file for reading only. A fragment file that has been read
+	back from disk is never written to, so it does not need a lockable stream:
+	the file handle is opened non-writable and any write attempt fails at the
+	stream level. Read-write is reserved for the fragment file currently being
+	written."
+	self isOpen ifTrue: [ self error: 'File already open' ].
+	stream := path binaryReadStream
+]
+
 { #category : #accessing }
 SoilJournalFragmentFile >> path [
 	^ path
@@ -282,6 +293,16 @@ SoilJournalFragmentFile >> setToStart [
 { #category : #accessing }
 SoilJournalFragmentFile >> size [ 
 	^ stream size 
+]
+
+{ #category : #accessing }
+SoilJournalFragmentFile >> stream [
+	"A fragment file reaching this lazy open has never been opened explicitly.
+	The fragment files that are written to are opened through #openFragmentFile:
+	without exception, so whoever arrives here is a reader."
+	^ stream ifNil: [
+		self openReadOnly.
+		stream ]
 ]
 
 { #category : #journal }
