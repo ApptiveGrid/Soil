@@ -188,6 +188,14 @@ SoilResident >> newTransaction [
 	^ supervisor newTransaction
 ]
 
+{ #category : #notifying }
+SoilResident >> noteChanged [
+	"a detached object of mine reports that something about it changed. Default:
+	treat it as work to do and wake up. Overridden by residents that need to tell
+	'there is new work' apart from the wake-up that #requestStop sends."
+	self wakeUp
+]
+
 { #category : #accessing }
 SoilResident >> noteProcessRestart [
 	"a resident that revives its own process in #tick counts the restart here, so

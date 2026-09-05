@@ -1,0 +1,130 @@
+"
+What a detached object is for: living on after the transaction it came from is
+gone. Every test here closes that transaction before it asks anything, because
+that is the whole claim -- a SoilObjectProxy would fail at exactly this point.
+
+The object I detach is a plain one, SoilTestClusterRoot, and that is not an
+accident. Detaching does not make a Soil-managed collection transaction-free: a
+SoilPersistentDictionary stays bound to the transaction it was read in and
+refuses once that is aborted, no matter who holds it. So what may be detached is
+what is a plain object once materialized -- which is exactly the shape of the
+real case, a limits object with ivars.
+"
+Class {
+	#name : #SoilDetachedObjectTest,
+	#superclass : #TestCase,
+	#instVars : [
+		'soil'
+	],
+	#category : #'Soil-Core-Tests'
+}
+
+{ #category : #helpers }
+SoilDetachedObjectTest >> detachedFullyFrom: aBlock [
+	"mint a fully detached object inside a transaction and leave that transaction
+	behind -- aborted, gone, nothing to resolve through afterwards"
+	| txn detached |
+	txn := soil newTransaction.
+	detached := SoilFullyDetachedObject on: (aBlock value: txn) in: txn.
+	txn abort.
+	^ detached
+]
+
+{ #category : #accessing }
+SoilDetachedObjectTest >> path [
+	^ 'soil-detached-object-tests'
+]
+
+{ #category : #running }
+SoilDetachedObjectTest >> setUp [
+	| txn kept |
+	super setUp.
+	soil := Soil path: self path.
+	soil
+		destroy;
+		initializeFilesystem.
+	txn := soil newTransaction.
+	txn root: SoilPersistentDictionary new.
+	txn commit.
+	txn := soil newTransaction.
+	kept := SoilTestClusterRoot new nested: 1; yourself.
+	txn makeRoot: kept.
+	txn root at: #kept put: kept.
+	txn commit
+]
+
+{ #category : #running }
+SoilDetachedObjectTest >> tearDown [
+	soil ifNotNil: [
+		soil close.
+		soil destroy ].
+	super tearDown
+]
+
+{ #category : #tests }
+SoilDetachedObjectTest >> testAnswersFromTheHeldObjectWithoutATransaction [
+	"the claim in one line: the minting transaction is gone, and sends still work"
+	| detached |
+	detached := self detachedFullyFrom: [ :txn | txn root at: #kept ].
+	self assert: detached nested equals: 1
+]
+
+{ #category : #tests }
+SoilDetachedObjectTest >> testChangedDoesNothingOnItsOwn [
+	"the fully detached one only offers the hook; giving it a meaning is the
+	subclasses' business"
+	| detached |
+	detached := self detachedFullyFrom: [ :txn | txn root at: #kept ].
+	detached changed.
+	self assert: detached nested equals: 1
+]
+
+{ #category : #tests }
+SoilDetachedObjectTest >> testKeepsTheObjectIdItWasMintedWith [
+	"the id is what makes a later write-back possible without searching again"
+	| txn detached expected |
+	txn := soil newTransaction.
+	expected := txn objectIdOf: (txn root at: #kept).
+	detached := SoilFullyDetachedObject on: (txn root at: #kept) in: txn.
+	txn abort.
+	self assert: detached objectId equals: expected
+]
+
+{ #category : #tests }
+SoilDetachedObjectTest >> testMutationStaysLocalUntilSomebodyWritesItBack [
+	"the fully detached one cannot write, so a change to the held object is not in
+	the store -- this is what the resident's grace period buys, and why the write
+	has to be somebody's job"
+	| detached txn |
+	detached := self detachedFullyFrom: [ :txn2 | txn2 root at: #kept ].
+	detached nested: 42.
+	self assert: detached nested equals: 42.
+	txn := soil newTransaction.
+	self assert: ([ (txn root at: #kept) nested ] ensure: [ txn abort ]) equals: 1
+]
+
+{ #category : #tests }
+SoilDetachedObjectTest >> testWriteBackPutsTheObjectBackAtItsId [
+	"the one thing the database gives me: a transaction of my own, on demand and
+	named, not as a side effect of some forwarded send"
+	| txn detached readBack |
+	txn := soil newTransaction.
+	detached := SoilDetachedObject on: (txn root at: #kept) in: txn.
+	txn abort.
+
+	detached nested: 42.
+	detached writeBack.
+
+	txn := soil newTransaction.
+	readBack := [ (txn root at: #kept) nested ] ensure: [ txn abort ].
+	self assert: readBack equals: 42
+]
+
+{ #category : #tests }
+SoilDetachedObjectTest >> testWriteBackTakesItsDatabaseFromTheMintingTransaction [
+	| txn detached |
+	txn := soil newTransaction.
+	detached := SoilDetachedObject on: (txn root at: #kept) in: txn.
+	txn abort.
+	self assert: detached soil identicalTo: soil
+]
