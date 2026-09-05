@@ -102,6 +102,26 @@ SoilDetachedObjectTest >> testTwoDetachedHandlesOnTheSameObjectAreIdentical [
 ]
 
 { #category : #tests }
+SoilDetachedObjectTest >> testRecognisesItsOwnMaterializationButNotAForeignOne [
+	"the objectId decides only where the other side stands in for a stored object
+	too. A plain object carries none, so all that is left to compare against is
+	the materialization I hold -- and another transaction's copy of the same
+	stored object is a different object. SoilObjectProxy answers true here
+	because what it unwraps to is its own; a detached handle cannot, and that is
+	the price of holding a materialization instead of resolving one. Asking a
+	transaction mid-comparison would pay it, and reading never opens one."
+	| detached foreign txn |
+	detached := self detachedFullyFrom: [ :mintingTxn | mintingTxn root at: #kept ].
+	self assert: (detached isIdenticalTo: detached soilRealObject).
+
+	txn := soil newTransaction.
+	foreign := (txn root at: #kept) theNonSoilProxy.
+	self assert: detached objectId equals: (txn objectIdOf: foreign).
+	self deny: (detached isIdenticalTo: foreign).
+	txn abort
+]
+
+{ #category : #tests }
 SoilDetachedObjectTest >> testAnswersFromTheHeldObjectWithoutATransaction [
 	"the claim in one line: the minting transaction is gone, and sends still work"
 	| detached |

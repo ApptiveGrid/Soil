@@ -24,6 +24,21 @@ Soil-managed collection is only half detachable: reading from a detached
 SoilPersistentDictionary still works, but writing does not, because #at:put: has
 to make the stored value a cluster root and that needs a transaction.
 
+How I am compared: #isEqualTo: and #isIdenticalTo: are the load-bearing pair,
+and everything that must not be fooled by a stand-in has to use them. #= and
+#hash I do not define, so they go through #doesNotUnderstand: to the object I
+hold, exactly as on SoilObjectProxy. That makes me unreliable as a member of a
+Set or as a key in a Dictionary, and it is not something to repair here:
+collection code resolves a proxy in passing in many places, and #== is inlined
+and cannot be overridden at all. That is a Pharo-level topic, not mine.
+
+What I do answer, I answer by objectId, as soon as the other side stands in for
+a stored object too. Against a plain object I fall back to the one I hold, so I
+recognise my own materialization and not a foreign one -- another transaction's
+copy of the same stored object is a different object and carries no objectId to
+ask about. Reflective sends are no exception: #perform: is not on ProtoObject
+either, so it reaches the object I hold rather than me.
+
 The contract that carries all of this: I am the only writer of my object. A
 second writer's change would be overwritten silently by the next write-back,
 because I hand out the object I hold and not what is currently in the store.
