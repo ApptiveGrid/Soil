@@ -63,6 +63,45 @@ SoilDetachedObjectTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilDetachedObjectTest >> testAProxyAndADetachedHandleOnTheSameObjectAreIdentical [
+	"and in both directions -- an asymmetric identity would be worse than none"
+	| txn proxy detached |
+	txn := soil newTransaction.
+	proxy := txn root at: #kept.
+	detached := SoilFullyDetachedObject on: proxy in: txn.
+	self assert: proxy isSoilProxy.
+
+	self assert: (detached isIdenticalTo: proxy).
+	self assert: (proxy isIdenticalTo: detached).
+	txn abort
+]
+
+{ #category : #tests }
+SoilDetachedObjectTest >> testComparingWithAnUnrelatedObjectStaysFalse [
+	| detached |
+	detached := self detachedFullyFrom: [ :txn | txn root at: #kept ].
+	self deny: (detached isIdenticalTo: SoilTestClusterRoot new).
+	self deny: (detached isEqualTo: SoilTestClusterRoot new)
+]
+
+{ #category : #tests }
+SoilDetachedObjectTest >> testTwoDetachedHandlesOnTheSameObjectAreIdentical [
+	"the case that shows why the objectId is the criterion and the materialized
+	object is not: each transaction materializes its own, so #== falls apart while
+	the id does not"
+	| first second |
+	first := self detachedFullyFrom: [ :txn | txn root at: #kept ].
+	second := self detachedFullyFrom: [ :txn | txn root at: #kept ].
+
+	self assert: first objectId equals: second objectId.
+	self deny: first soilRealObject == second soilRealObject.
+
+	self assert: (first isIdenticalTo: second).
+	self assert: (second isIdenticalTo: first).
+	self assert: (first isEqualTo: second)
+]
+
+{ #category : #tests }
 SoilDetachedObjectTest >> testAnswersFromTheHeldObjectWithoutATransaction [
 	"the claim in one line: the minting transaction is gone, and sends still work"
 	| detached |

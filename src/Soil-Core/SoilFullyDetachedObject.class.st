@@ -48,8 +48,11 @@ SoilFullyDetachedObject class >> on: anObject in: aTransaction [
 	loaded in. Holding one would make me fail the moment that transaction is gone,
 	which is precisely the situation I exist for.
 
-	Written out rather than as a cascade on purpose: a cascade ends in #yourself,
-	and on a forwarding proxy that is a trap -- see my own #yourself"
+	Written out rather than as a cascade on purpose. #yourself is not defined on
+	ProtoObject, so it goes through #doesNotUnderstand: and answers the object I
+	hold -- and that is deliberate, the way a wrapper is unwrapped, as it is on
+	SoilObjectProxy. A cascade ending in #yourself would therefore hand out the
+	object instead of me."
 	| detached real |
 	real := anObject theNonSoilProxy.
 	detached := self new.
@@ -89,11 +92,19 @@ SoilFullyDetachedObject >> fuelReplacement [
 
 { #category : #testing }
 SoilFullyDetachedObject >> isEqualTo: anObject [
+	"see #isIdenticalTo: for why the objectId decides"
+	anObject isSoilProxy ifTrue: [ ^ objectId = anObject objectId ].
 	^ object = anObject
 ]
 
 { #category : #testing }
 SoilFullyDetachedObject >> isIdenticalTo: anObject [
+	"whenever the other side stands in for a stored object too, the objectId is the
+	criterion and not the materialized object. Two handles on the same stored
+	object are the same thing even when they hold different materializations of it
+	-- which is exactly what two detached objects minted in different transactions
+	do, because each transaction materializes its own."
+	anObject isSoilProxy ifTrue: [ ^ objectId = anObject objectId ].
 	^ object == anObject
 ]
 
@@ -104,9 +115,12 @@ SoilFullyDetachedObject >> isNil [
 
 { #category : #testing }
 SoilFullyDetachedObject >> isSoilProxy [
-	"no -- a proxy resolves through a transaction, and that is exactly what I do
-	not do"
-	^ false
+	"yes. Not because I resolve through a transaction -- I do not -- but because
+	that is what everyone who asks this means: a stand-in for a stored object,
+	which must not be compared with #== and knows how to compare itself. It is
+	also why I descend from ProtoObject, so that as little as possible is answered
+	without going through #doesNotUnderstand:."
+	^ true
 ]
 
 { #category : #accessing }
@@ -140,14 +154,6 @@ SoilFullyDetachedObject >> soilRealObject [
 { #category : #soil }
 SoilFullyDetachedObject >> soilSerialize: aSerializer [
 	^ object soilSerialize: aSerializer
-]
-
-{ #category : #accessing }
-SoilFullyDetachedObject >> yourself [
-	"ProtoObject does not have it, so without this it would go through
-	#doesNotUnderstand: and answer the object I hold instead of me -- which turns
-	every cascade that ends in #yourself into a silent unwrapping"
-	^ self
 ]
 
 { #category : #soil }
