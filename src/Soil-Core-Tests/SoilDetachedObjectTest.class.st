@@ -4,11 +4,12 @@ gone. Every test here closes that transaction before it asks anything, because
 that is the whole claim -- a SoilObjectProxy would fail at exactly this point.
 
 The object I detach is a plain one, SoilTestClusterRoot, and that is not an
-accident. Detaching does not make a Soil-managed collection transaction-free: a
-SoilPersistentDictionary stays bound to the transaction it was read in and
-refuses once that is aborted, no matter who holds it. So what may be detached is
-what is a plain object once materialized -- which is exactly the shape of the
-real case, a limits object with ivars.
+accident. A Soil-managed collection is only half detachable: reading from a
+detached SoilPersistentDictionary works after its transaction is gone, because
+#at:ifAbsent: goes straight to the inner dictionary, but writing does not --
+#at:put: has to make every stored value a cluster root, and that needs a
+transaction. So the shape that detaches cleanly today is what is a plain object
+once materialized, which is exactly the real case: a limits object with ivars.
 "
 Class {
 	#name : #SoilDetachedObjectTest,

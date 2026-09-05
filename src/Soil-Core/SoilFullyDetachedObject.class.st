@@ -19,6 +19,11 @@ way of #changed, which I leave empty -- my subclasses give it a meaning. The one
 who is told decides when and in which transaction the write happens, and can
 coalesce a burst of changes into a single one.
 
+What may be handed to me is what is a plain object once materialized. A
+Soil-managed collection is only half detachable: reading from a detached
+SoilPersistentDictionary still works, but writing does not, because #at:put: has
+to make the stored value a cluster root and that needs a transaction.
+
 The contract that carries all of this: I am the only writer of my object. A
 second writer's change would be overwritten silently by the next write-back,
 because I hand out the object I hold and not what is currently in the store.
