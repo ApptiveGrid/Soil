@@ -165,12 +165,18 @@ SoilObjectRepositoryTest >> testSegmentCreation [
 
 { #category : #tests }
 SoilObjectRepositoryTest >> testSegmentInitializationFromDisk [ 
-	soil objectRepository instVarNamed: #segments put: nil.
-	('soil-tests' asFileReference / #segments / '1') ensureCreateDirectory.
+	"read the segments back on a database that is not already open. Forcing a
+	reload under a live one opens every segment file a second time, which Windows
+	refuses - and the failure then only showed up as a nil in tearDown"
+
+	| reopened |
 	('soil-tests' asFileReference / #segments / '2') ensureCreateDirectory.
 	('soil-tests' asFileReference / #segments / '3') ensureCreateDirectory.
-	self assert: soil objectRepository segments size equals: 3.
-
+	soil close.
+	soil := nil.
+	reopened := (Soil path: 'soil-tests') open.
+	[ self assert: reopened objectRepository segments size equals: 3 ]
+		ensure: [ reopened close ]
 ]
 
 { #category : #tests }
