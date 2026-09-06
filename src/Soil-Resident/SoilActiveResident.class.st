@@ -227,6 +227,28 @@ SoilActiveResident >> tick [
 ]
 
 { #category : #waiting }
+SoilActiveResident >> wait: aSemaphore upTo: aDuration [
+	"How a Semaphore is asked to wait with a timeout differs across the Pharo
+	versions Soil builds on: #waitTimeoutMilliseconds: does not exist in Pharo 11,
+	and #waitTimeoutMSecs: is deprecated from Pharo 12 on. A development image can
+	show neither -- it is one version, and there whichever selector it has simply
+	works.
+
+	Fails loudly rather than answering something if neither is there, the way
+	SoilResidentCleanCodeTest>>protocolNameOf: does for the same kind of drift.
+
+	Both spellings answer whether the deadline expired. I answer the opposite,
+	because what a caller wants to know is whether something happened."
+	| milliseconds |
+	milliseconds := aDuration asMilliSeconds.
+	(aSemaphore respondsTo: #waitTimeoutMilliseconds:) ifTrue: [
+		^ (aSemaphore waitTimeoutMilliseconds: milliseconds) not ].
+	(aSemaphore respondsTo: #waitTimeoutMSecs:) ifTrue: [
+		^ (aSemaphore waitTimeoutMSecs: milliseconds) not ].
+	self error: 'no known way to wait on a Semaphore with a timeout in this Pharo'
+]
+
+{ #category : #waiting }
 SoilActiveResident >> waitForWork [
 	"what a strategy uses to block until something happens. All signals are
 	consumed, so n signals do not become n runs -- the flag says whether there is
@@ -238,7 +260,7 @@ SoilActiveResident >> waitForWork [
 { #category : #waiting }
 SoilActiveResident >> waitForWorkUpTo: aDuration [
 	"the same, bounded. Returns early when woken -- by new work or by a stop"
-	workSignal waitTimeoutMilliseconds: aDuration asMilliSeconds.
+	self wait: workSignal upTo: aDuration.
 	workSignal consumeAllSignals
 ]
 

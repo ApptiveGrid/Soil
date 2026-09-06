@@ -104,7 +104,7 @@ SoilTestActiveResident >> throwOnStep: aBoolean [
 SoilTestActiveResident >> waitForStepWithin: aDuration [
 	"answers whether a step finished in time, so that tests synchronise on the
 	work rather than on a sleep long enough to be safe"
-	^ (stepSignal waitTimeoutMilliseconds: aDuration asMilliSeconds) not
+	^ self wait: stepSignal upTo: aDuration
 ]
 
 { #category : #accessing }

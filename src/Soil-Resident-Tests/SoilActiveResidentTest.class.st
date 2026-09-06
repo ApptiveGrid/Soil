@@ -192,6 +192,21 @@ SoilActiveResidentTest >> testThePendingFlagIsClearedBeforeTheStepNotAfter [
 ]
 
 { #category : #tests }
+SoilActiveResidentTest >> testTheTimedWaitAnswersWhetherSomethingHappened [
+	"the two spellings that #wait:upTo: bridges both answer 'the deadline
+	expired', and it answers the opposite. Getting that polarity backwards would
+	leave every waiting test passing for the wrong reason"
+	| resident semaphore |
+	resident := SoilTestActiveResident new.
+	semaphore := Semaphore new.
+
+	self deny: (resident wait: semaphore upTo: 20 milliSeconds).
+
+	semaphore signal.
+	self assert: (resident wait: semaphore upTo: 20 milliSeconds)
+]
+
+{ #category : #tests }
 SoilActiveResidentTest >> testTickRevivesATerminatedProcessAndCountsTheRestart [
 	"a dead process would leave the work undone forever, and restarting silently
 	looks exactly like health from the outside"
