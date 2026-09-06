@@ -95,7 +95,9 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aBehaviorDescription transaction: 
 
 { #category : #'open/close' }
 SoilBehaviorRegistry >> close [
-	index close
+	"the index is nil until the registry is opened, and stays nil if opening failed"
+
+	index ifNotNil: [ index close ]
 ]
 
 { #category : #private }

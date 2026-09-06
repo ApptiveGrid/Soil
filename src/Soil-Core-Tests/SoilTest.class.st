@@ -194,6 +194,21 @@ SoilTest >> testCyclicProblemPharoSet [
 ]
 
 { #category : #tests }
+SoilTest >> testCloseClosesEveryPartEvenAfterOneFails [
+	"a close that stops at its first failure leaves everything behind it open - which
+	is how one file that will not close becomes a handle leak, and on Windows the
+	reason the next open fails"
+
+	self assert: soil control stream isOpen.
+	self assert: soil metadata stream isOpen.
+	soil instVarNamed: 'objectRepository' put: Object new.
+	self should: [ soil close ] raise: MessageNotUnderstood.
+	self deny: soil control stream isOpen.
+	self deny: soil metadata stream isOpen.
+	soil := nil
+]
+
+{ #category : #tests }
 SoilTest >> testDisabledFsync [
 	| tx |
 	soil setup disableFsync.
