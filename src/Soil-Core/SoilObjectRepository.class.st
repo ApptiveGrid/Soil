@@ -159,30 +159,27 @@ SoilObjectRepository >> initializeFilesystem [
 
 { #category : #initialization }
 SoilObjectRepository >> loadSegments [
-	| segmentPath directories |
+	"Build what #initializeFilesystem builds: an OrderedCollection of segments in
+	ascending id order. Whatever ids are on disk are the ids - they are not
+	positions, and nothing here assumes they run without a gap."
+
+	| segmentPath ids |
 	segmentPath := self path / #segments.
 	segmentPath exists ifFalse: [ SoilSoilNotInitialized signal: 'soil instance on ', segmentPath pathString, ' has not been initialized' ].
-	directories := segmentPath directories.
-	segments := Array new: directories size - 1.
-	directories do: [ :directory | | segmentId segment |
-		segmentId := directory basename asInteger.
-		segment := SoilObjectSegment new 
-			id: segmentId;
-			objectRepository: self.
-		segmentId == 0 
-			ifTrue: [ 
-				metaSegment := self newMetaSegment
-					open;
-					yourself ]
-			ifFalse: [ 
-				segments 
-					at: segmentId 
-					put: (self newSegment 
-						id: segmentId;
-						open;
-						yourself) ] ].
+	ids := ((segmentPath directories collect: [ :each | each basename asInteger ])
+		reject: #isNil) asSortedCollection.
+	(ids includes: 0) ifTrue: [
+		metaSegment := self newMetaSegment
+			open;
+			yourself ].
+	segments := OrderedCollection new.
+	ids do: [ :id |
+		id = 0 ifFalse: [
+			segments add: (self newSegment
+				id: id;
+				open;
+				yourself) ] ].
 	^ segments
-	
 ]
 
 { #category : #accessing }
@@ -243,10 +240,17 @@ SoilObjectRepository >> path: anObject [
 ]
 
 { #category : #accessing }
-SoilObjectRepository >> segmentAt: anInteger [ 
-	^ anInteger == 0 
+SoilObjectRepository >> segmentAt: anInteger [
+	"segment ids are ids, not positions into #segments - a SoilObjectId carries the
+	id of the segment it lives in, so ids can never be renumbered and a segment that
+	is ever removed has to leave its id vacant"
+
+	^ anInteger == 0
 		ifTrue: [ metaSegment ]
-		ifFalse: [ self segments at: anInteger ]
+		ifFalse: [
+			self segments
+				detect: [ :each | each id = anInteger ]
+				ifNone: [ SoilInvalidSegmentIndex signal: 'there is no segment ', anInteger printString ] ]
 ]
 
 { #category : #accessing }
