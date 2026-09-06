@@ -47,12 +47,14 @@ BinaryFileStream >> flockClass [
 ]
 
 { #category : #'*Soil-File' }
-BinaryFileStream >> fsync [ 
-	| fd err |
-	fd := self fileno.
-	err := self fsync: self fileno.
-	(err == 0) ifFalse: [ 
-		Error signal: 'fsync(', fd printString, ') failed with error code: ', err printString ]
+BinaryFileStream >> fsync [
+	"ask the platform to flush this file to disk - what that call is differs per
+	platform, the file handle does not"
+
+	| errorCode |
+	errorCode := OSPlatform current syncFile: self fileHandle.
+	errorCode = 0 ifFalse: [
+		Error signal: 'syncing file failed with error code: ' , errorCode printString ]
 ]
 
 { #category : #'*Soil-File' }
