@@ -1,44 +1,9 @@
 Extension { #name : #BinaryFileStream }
 
 { #category : #'*Soil-File' }
-BinaryFileStream >> fdatasync [ 
-	| fd err |
-	fd := self fileno.
-	err := self fdatasync: self fileno.
-	(err == 0) ifFalse: [ 
-		Error signal: 'fdatasync(', fd printString, ') failed with error code: ', err printString ]
-]
-
-{ #category : #'*Soil-File' }
-BinaryFileStream >> fdatasync: fd [
-	^ self 
-		ffiCall: #(int fdatasync(int fd))
-		module: LibC
-]
-
-{ #category : #'*Soil-File' }
 BinaryFileStream >> fileHandle [
 
 	^ handle pointerAt: 9
-]
-
-{ #category : #'*Soil-File' }
-BinaryFileStream >> fileno [
-
-	| fd |
-	fd := self fileno: self fileHandle.
-	(fd == -1) ifTrue: [ 
-		Error signal: 'cannot get file descriptor for ', self name, ': error = ', ((ExternalAddress loadSymbol: #errno) signedLongAt: 1) printString].
-	^ fd
-	
-]
-
-{ #category : #'*Soil-File' }
-BinaryFileStream >> fileno: stream [
-
-	^ self 
-		ffiCall: #(int fileno("FILE *"void *stream))
-		module: LibC
 ]
 
 { #category : #'*Soil-File' }
@@ -55,13 +20,6 @@ BinaryFileStream >> fsync [
 	errorCode := OSPlatform current syncFile: self fileHandle.
 	errorCode = 0 ifFalse: [
 		Error signal: 'syncing file failed with error code: ' , errorCode printString ]
-]
-
-{ #category : #'*Soil-File' }
-BinaryFileStream >> fsync: fd [
-	^ self 
-		ffiCall: #(int fsync(int fd))
-		module: LibC
 ]
 
 { #category : #'*Soil-File' }
@@ -101,19 +59,6 @@ BinaryFileStream >> lockForAppendStartingAt: offset [
 		lock: self fileHandle
 		from: offset
 		length: 0
-]
-
-{ #category : #'*Soil-File' }
-BinaryFileStream >> sync [ 
-	^ self sync: (self fileno: self fileHandle).
-	
-]
-
-{ #category : #'*Soil-File' }
-BinaryFileStream >> sync: fd [
-	^ self 
-		ffiCall: #(int fsync(int fd))
-		module: LibC
 ]
 
 { #category : #'*Soil-File' }
