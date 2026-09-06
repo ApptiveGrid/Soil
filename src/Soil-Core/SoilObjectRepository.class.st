@@ -100,8 +100,12 @@ SoilObjectRepository >> cacheSegmentAt: index using: aBlock [
 
 { #category : #'opening/closing' }
 SoilObjectRepository >> close [
-	metaSegment close.
-	segments do: #close
+	"closing what was never opened is nothing to do, not an error - #segments is
+	loaded lazily, so it can still be nil here, and a failure while loading leaves
+	it that way. Failing in #close would then bury the failure that caused it"
+
+	metaSegment ifNotNil: [ metaSegment close ].
+	segments ifNotNil: [ segments do: #close ]
 ]
 
 { #category : #copying }
