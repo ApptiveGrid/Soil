@@ -145,6 +145,13 @@ SoilIndex >> basicRemoveKey: key value: aValue ifAbsent: aBlock [
 	^ self subclassResponsibility
 ]
 
+{ #category : #accessing }
+SoilIndex >> beMemoryStore [
+	"keep the pages of this index in memory instead of in a file. Used for
+	indexes that only get a file when the transaction creating them commits"
+	self store: self newMemoryStore
+]
+
 { #category : #removing }
 SoilIndex >> cleanPage: page [
 	page canBeRemoved ifFalse: [ ^self ].
@@ -368,6 +375,12 @@ SoilIndex >> newIndexEntryClass [
 { #category : #'instance creation' }
 SoilIndex >> newIterator [
 	^ self subclassResponsibility
+]
+
+{ #category : #'instance creation' }
+SoilIndex >> newMemoryStore [
+	^ SoilMemoryIndexStore new
+		index: self
 ]
 
 { #category : #'instance creation' }
