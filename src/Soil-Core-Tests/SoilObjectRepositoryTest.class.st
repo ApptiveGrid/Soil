@@ -30,6 +30,40 @@ SoilObjectRepositoryTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilObjectRepositoryTest >> testAddSegmentAfterOpeningFromDisk [
+	"a database read back from disk has to accept a new segment just like a fresh
+	one - it did not, because #loadSegments built an Array where #addNewSegment:
+	expects something it can add to"
+
+	| reopened |
+	soil close.
+	soil := nil.
+	reopened := (Soil path: 'soil-tests') open.
+	[ reopened objectRepository addNewSegment: (reopened objectRepository newSegment
+			id: 2;
+			yourself).
+	  self assert: (reopened objectRepository segmentAt: 2) id equals: 2 ]
+		ensure: [ reopened close ]
+]
+
+{ #category : #tests }
+SoilObjectRepositoryTest >> testSegmentIdsMayHaveGaps [
+	"segment ids are part of object identity - a SoilObjectId names the segment it
+	lives in - so they can never be renumbered, and a segment that is removed has to
+	leave its id vacant. A database with a gap therefore has to open and work."
+
+	| reopened |
+	('soil-tests' asFileReference / #segments / '3') ensureCreateDirectory.
+	soil close.
+	soil := nil.
+	reopened := (Soil path: 'soil-tests') open.
+	[ self assert: (reopened objectRepository segments collect: [ :each | each id ]) asArray equals: #( 1 3 ).
+	  self assert: (reopened objectRepository segmentAt: 3) id equals: 3.
+	  self should: [ reopened objectRepository segmentAt: 2 ] raise: SoilInvalidSegmentIndex ]
+		ensure: [ reopened close ]
+]
+
+{ #category : #tests }
 SoilObjectRepositoryTest >> testCacheObjectRecordMetrics [
 	| txn root segment metrics txn2 |
 	soil notificationHandler: SoilMetrics new.
