@@ -96,7 +96,7 @@ SoilFileWithLayout >> initializeFilesystem [
 SoilFileWithLayout >> open [ 
 	| create |
 	create := self path exists.
-	stream := self path binaryReadWriteStream.
+	stream := self soil streamOnPath: self path.
 	create ifFalse: [
 		stream
 			position: 0; 
