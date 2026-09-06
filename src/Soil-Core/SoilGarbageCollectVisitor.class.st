@@ -53,7 +53,13 @@ SoilGarbageCollectVisitor >> run [
 	  self processLoop.
 	  soil objectRepository segments do: [ :segment |
 		segment replaceWith: (clones at: segment id) ] ]
-		ifCurtailed: [ clones valuesDo: [ :clone | clone path ensureDeleteAll ] ].
+		ifCurtailed: [ clones valuesDo: [ :clone |
+			"close before deleting. An open file cannot be removed on Windows, so the
+			clone would survive the abort there; on POSIX it is removed but its handles
+			leak. A clone that failed halfway may not close cleanly - that must not stop
+			the deletion, and raising here would replace the error we are unwinding from"
+			[ clone close ] on: Error do: [ :error | ].
+			clone path ensureDeleteAll ] ].
 	soil metadata updateLastGarbageCollect
 ]
 

@@ -23,6 +23,25 @@ SoilGarbageCollectorTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilGarbageCollectorTest >> testGarbageCollectCurtailedClosesTheClones [
+	"deleting the clone directory is not enough: the files inside have to be closed
+	first. On POSIX an open file is removed anyway and only the handle leaks, so
+	the deletion alone looks like it worked"
+
+	| tx visitor |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #kept)).
+	tx makeRoot: tx root nested.
+	tx commit.
+	soil checkpoint.
+	visitor := SoilGarbageCollectorFailingVisitor new soil: soil; yourself.
+	[ visitor run ] on: Error do: [ :error | ].
+	(visitor instVarNamed: 'clones') valuesDo: [ :clone |
+		self deny: (clone instVarNamed: 'objectFile') isOpen.
+		self deny: (clone instVarNamed: 'indexFile') isOpen ]
+]
+
+{ #category : #tests }
 SoilGarbageCollectorTest >> testGarbageCollectCurtailedLeavesDatabaseIntact [
 	"if the collect fails mid-run (injected during the copy phase, after clones are built),
 	ifCurtailed deletes the clones and the original database is untouched."
