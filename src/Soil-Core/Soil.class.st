@@ -45,6 +45,27 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #'opening/closing' }
+Soil class >> closeAll: aCollection [
+	"Close every element, skipping nils, and answer only once all of them have been
+	tried. Closing is release, and stopping at the first failure leaves everything
+	behind it open - which is how one file that will not close turns into a handle
+	leak, or on Windows into the reason the next open fails.
+
+	The first error is signalled at the end, so a caller still learns the database
+	did not close cleanly instead of finding out later. That is a decision, not a
+	shortcut, which is why it lives here once instead of in each caller."
+
+	| firstError |
+	firstError := nil.
+	aCollection do: [ :each |
+		each ifNotNil: [
+			[ each close ]
+				on: Error
+				do: [ :error | firstError ifNil: [ firstError := error ] ] ] ].
+	firstError ifNotNil: [ firstError signal ]
+]
+
 { #category : #accessing }
 Soil class >> characterEncoding: aString [ 
 	SoilObjectCodec characterEncoding: aString
@@ -184,16 +205,7 @@ Soil >> checkpoint [
 
 { #category : #'opening/closing' }
 Soil >> close [
-	objectRepository ifNotNil: [ 
-		objectRepository close ].
-	behaviorRegistry ifNotNil: [ 
-		behaviorRegistry close ].
-	control ifNotNil: [ 
-		control close ].
-	journal ifNotNil: [ 
-		journal close ].
-	metadata ifNotNil: [ 
-		metadata close ]
+	Soil closeAll: { objectRepository . behaviorRegistry . control . journal . metadata }
 ]
 
 { #category : #accessing }

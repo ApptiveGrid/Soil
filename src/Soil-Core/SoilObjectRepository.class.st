@@ -104,8 +104,9 @@ SoilObjectRepository >> close [
 	loaded lazily, so it can still be nil here, and a failure while loading leaves
 	it that way. Failing in #close would then bury the failure that caused it"
 
-	metaSegment ifNotNil: [ metaSegment close ].
-	segments ifNotNil: [ segments do: #close ]
+	Soil closeAll: ((OrderedCollection with: metaSegment)
+		addAll: (segments ifNil: [ #() ]);
+		yourself)
 ]
 
 { #category : #copying }

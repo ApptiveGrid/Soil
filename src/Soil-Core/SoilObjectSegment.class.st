@@ -109,12 +109,7 @@ SoilObjectSegment >> basicAt: index version: version [
 
 { #category : #'open/close' }
 SoilObjectSegment >> close [
-	indexFile ifNotNil: [ 
-		indexFile close ].
-	objectFile ifNotNil: [ 
-		objectFile close ].
-	indexManager ifNotNil: [ 
-		indexManager close ]
+	Soil closeAll: { indexFile . objectFile . indexManager }
 ]
 
 { #category : #copying }

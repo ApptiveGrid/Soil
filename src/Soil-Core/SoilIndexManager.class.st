@@ -53,10 +53,14 @@ SoilIndexManager >> at: indexId put: aSoilIndex [
 
 { #category : #'open/close' }
 SoilIndexManager >> close [
-	semaphore critical: [  
-		indexes copy keysAndValuesDo: [ :id :index |
-			index close.
-			indexes removeKey: id ] ]
+	"empty the register first: an index that will not close is still gone from here,
+	otherwise a failed close leaves the rest of them registered as if they were open"
+
+	| open |
+	semaphore critical: [
+		open := indexes values.
+		indexes keys copy do: [ :id | indexes removeKey: id ] ].
+	Soil closeAll: open
 ]
 
 { #category : #api }
