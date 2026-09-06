@@ -69,7 +69,10 @@ SoilIndexedCollectionTest >> testAddedObjectIsFoundInAllIndexes [
 ]
 
 { #category : #tests }
-SoilIndexedCollectionTest >> testIndexesAreOrderedByTheirOwnKey [
+SoilIndexedCollectionTest >> testEachIndexIsKeyedByItsOwnSelector [
+	"looked up by key, not by position: index keys made from strings of different
+	length do not sort alphabetically (see String>>asIndexKeyOfSize:), so the order
+	the values come back in says nothing about which key they were stored under"
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: self newCollection.
@@ -80,11 +83,13 @@ SoilIndexedCollectionTest >> testIndexesAreOrderedByTheirOwnKey [
 
 	tx2 := soil newTransaction.
 	self
-		assert: ((tx2 root indexFor: #lastName) values collect: [ :each | each lastName ]) asArray
-		equals: #( 'Adams' 'Zimmer' ).
+		assert: (((tx2 root indexFor: #lastName) newIterator at: 'Adams')
+			collect: [ :each | each firstName ]) asArray
+		equals: #( 'Zoe' ).
 	self
-		assert: ((tx2 root indexFor: #firstName) values collect: [ :each | each firstName ]) asArray
-		equals: #( 'Alice' 'Zoe' ).
+		assert: (((tx2 root indexFor: #firstName) newIterator at: 'Alice')
+			collect: [ :each | each lastName ]) asArray
+		equals: #( 'Zimmer' ).
 	tx2 abort
 ]
 
