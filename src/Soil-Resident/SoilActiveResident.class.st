@@ -228,7 +228,12 @@ SoilActiveResident >> tick [
 
 { #category : #waiting }
 SoilActiveResident >> wait: aSemaphore upTo: aDuration [
-	"How a Semaphore is asked to wait with a timeout differs across the Pharo
+	<ignoreNotImplementedSelectors: #( waitTimeoutMilliseconds: waitTimeoutMSecs: )>
+	"The pragma is not a way around the lint rule, it is the answer to it: one of
+	the two selectors below is missing in whichever Pharo is running, and which
+	one that is, is the whole point of this method.
+
+	How a Semaphore is asked to wait with a timeout differs across the Pharo
 	versions Soil builds on: #waitTimeoutMilliseconds: does not exist in Pharo 11,
 	and #waitTimeoutMSecs: is deprecated from Pharo 12 on. A development image can
 	show neither -- it is one version, and there whichever selector it has simply
