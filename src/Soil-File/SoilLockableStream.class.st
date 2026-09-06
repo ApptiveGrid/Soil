@@ -6,8 +6,7 @@ Class {
 		'fileLocked',
 		'fileStream',
 		'lockRegistry',
-		'locks',
-		'readOnly'
+		'locks'
 	],
 	#classInstVars : [
 		'defaultImageLocked',
@@ -37,19 +36,9 @@ SoilLockableStream class >> defaultImageLocked: aBoolean [
 ]
 
 { #category : #'instance creation' }
-SoilLockableStream class >> path: aStringOrFileReference [
-	^ self new
+SoilLockableStream class >> path: aStringOrFileReference [ 
+	^ self new 
 		initializePath: aStringOrFileReference;
-		yourself
-]
-
-{ #category : #'instance creation' }
-SoilLockableStream class >> readOnlyPath: aStringOrFileReference [
-	"Open the file in read-only mode. Used for operations that only read a
-	file (e.g. journal recovery) so they do not request write access to a
-	path that may already be open for writing, which fails on Windows"
-	^ self new
-		initializeReadOnlyPath: aStringOrFileReference;
 		yourself
 ]
 
@@ -113,20 +102,9 @@ SoilLockableStream >> initialize [
 ]
 
 { #category : #initialization }
-SoilLockableStream >> initializePath: aStringOrFileReference [
+SoilLockableStream >> initializePath: aStringOrFileReference [ 
 	fileStream := aStringOrFileReference asFileReference binaryReadWriteStream.
-	lockRegistry := SoilFileLockRegistry forPath: aStringOrFileReference asFileReference
-]
-
-{ #category : #initialization }
-SoilLockableStream >> initializeReadOnlyPath: aStringOrFileReference [
-	"open the file read-only and lock in image only. A read-only handle cannot
-	hold an OS write lock, and read-only operations (recovery) read a consistent
-	snapshot, so OS file locking is not needed here"
-	fileStream := aStringOrFileReference asFileReference binaryReadOnlyStream.
-	lockRegistry := SoilFileLockRegistry forPath: aStringOrFileReference asFileReference.
-	readOnly := true.
-	self lockOnlyInImage
+	lockRegistry := SoilFileLockRegistry forPath: aStringOrFileReference asFileReference 
 ]
 
 { #category : #testing }
@@ -168,11 +146,6 @@ SoilLockableStream >> lockOnlyInImage [
 { #category : #accessing }
 SoilLockableStream >> locks [
 	^ locks
-]
-
-{ #category : #accessing }
-SoilLockableStream >> readOnly [
-	^ readOnly ifNil: [ readOnly := false ]
 ]
 
 { #category : #reading }

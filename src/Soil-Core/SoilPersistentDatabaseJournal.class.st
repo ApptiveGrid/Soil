@@ -75,17 +75,6 @@ SoilPersistentDatabaseJournal >> cycleFragmentFileAfter: aSoilJournalFragmentFil
 	currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber)
 ]
 
-{ #category : #fragmentfile }
-SoilPersistentDatabaseJournal >> cycleFragmentFileFrom: aSoilJournalFragmentFile [
-	"cycle to a new writable fragment file based on a fragment file that was
-	opened read-only during recovery. The read-only file is only closed (it must
-	not be flushed/synced) before the next writable fragment file is created"
-	| nextFileNumber |
-	nextFileNumber := (self fileNumberFrom: aSoilJournalFragmentFile filename) + 1.
-	aSoilJournalFragmentFile close.
-	currentFragmentFile := self createFragmentFile: (self filenameFrom: nextFileNumber)
-]
-
 { #category : #enumerating }
 SoilPersistentDatabaseJournal >> entriesDo: aBlock [
 	self fragmentFiles reverse do: [ :file |

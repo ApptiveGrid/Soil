@@ -244,15 +244,6 @@ SoilJournalFragmentFile >> open [
 
 { #category : #'open/close' }
 SoilJournalFragmentFile >> openReadOnly [
-	"open the fragment file in read-only mode. Used during recovery which only
-	reads the file. This avoids opening the same path in write mode from a
-	second stream while the journal holds it open for writing (fails on Windows)"
-	self isOpen ifTrue: [ self error: 'File already open' ].
-	stream := SoilLockableStream readOnlyPath: path
-]
-
-{ #category : #'open/close' }
-SoilJournalFragmentFile >> openReadOnly [
 	"Open the fragment file for reading only. A fragment file that has been read
 	back from disk is never written to, so it does not need a lockable stream:
 	the file handle is opened non-writable and any write attempt fails at the
