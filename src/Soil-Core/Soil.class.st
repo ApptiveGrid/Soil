@@ -39,7 +39,8 @@ Class {
 		'setup',
 		'fabric',
 		'metadata',
-		'transactionManager'
+		'transactionManager',
+		'readOnly'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -142,6 +143,15 @@ Soil >> basicOpen [
 { #category : #accessing }
 Soil >> behaviorRegistry [
 	^ behaviorRegistry
+]
+
+{ #category : #testing }
+Soil >> canRecover [
+	"Whether this image may write to the database in order to recover it. Two
+	independent reasons say no: the database was opened read-only, or the medium
+	refuses writes."
+
+	^ self readOnly not and: [ self path isWritable ]
 ]
 
 { #category : #checking }
@@ -249,6 +259,7 @@ Soil >> garbageCollect [
 { #category : #initialization }
 Soil >> initialize [ 
 	super initialize.
+	readOnly := false.
 	semaphore := Semaphore forMutualExclusion 
 ]
 
@@ -471,6 +482,21 @@ Soil >> printOn: aStream [
 		<< self path pathString
 ]
 
+{ #category : #accessing }
+Soil >> readOnly [
+	"Answer whether this database is open for reading only. Set it before #open."
+
+	^ readOnly
+]
+
+{ #category : #accessing }
+Soil >> readOnly: aBoolean [
+	"Open every file of this database non-writable. Set before #open; changing it
+	on an open database does not reopen what is already open."
+
+	readOnly := aBoolean
+]
+
 { #category : #refactorings }
 Soil >> renameClassNamed: oldName to: newName [
 	| transaction behaviorDescription objectId |
@@ -534,6 +560,18 @@ Soil >> setup [
 		setup := SoilSetup new 
 			soil: self;
 			yourself ] 
+]
+
+{ #category : #'instance creation' }
+Soil >> streamOnPath: aFileReference [
+	"Answer the stream every file of this database is opened through. A read-only
+	database hands out a plain read stream: the file descriptor is opened
+	non-writable, so a write attempt fails at the stream level rather than being
+	caught by a Soil-side check. Locking is not needed there - no read path locks."
+
+	^ readOnly
+		ifTrue: [ aFileReference asFileReference binaryReadStream ]
+		ifFalse: [ self lockableStream initializePath: aFileReference ]
 ]
 
 { #category : #transactions }

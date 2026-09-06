@@ -64,7 +64,7 @@ SoilBinaryFile >> lockAppendingFor: lockContext [
 { #category : #'open/close' }
 SoilBinaryFile >> open [
 	self isOpen ifTrue: [ self error: 'File already open' ].
-	stream := self soil lockableStream initializePath: self path
+	stream := self soil streamOnPath: self path
 ]
 
 { #category : #accessing }
@@ -94,7 +94,7 @@ SoilBinaryFile >> soil [
 { #category : #accessing }
 SoilBinaryFile >> stream [
 	^ stream ifNil: [ 
-		stream := SoilLockableStream path: self path ]
+		stream := self soil streamOnPath: self path ]
 ]
 
 { #category : #accessing }
