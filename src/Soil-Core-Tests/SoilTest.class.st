@@ -587,33 +587,39 @@ SoilTest >> testSerializingRootTwoCluster [
 
 { #category : #tests }
 SoilTest >> testSerializingToSavedRoot [
+	"Close each database before opening the next. Three writable handles on one
+	database at the same time only works where the platform tolerates it - Windows
+	refuses the second open of the control file, and the two extra instances were
+	never closed either way."
+
 	| tx theRoot modelMap modelName theModel tx2 soil2 tx3 soil3 materializedRoot materializedModelMap |
 	tx := soil newTransaction.
 	theRoot := Dictionary new.
 	tx root: theRoot.
 	tx commit.
-	soil2 := (Soil path: soil path) open.
-	tx2 := soil2 newTransaction.
-	theRoot := tx2 root.
-	"theRoot := Dictionary new.
-	tx2 root: theRoot."
-	theModel := self simpleGraph.
-	modelName := theModel class name.
-	modelMap := Dictionary new.
-	theRoot at: modelName put: modelMap.
-	tx2 markDirty: theRoot.
-	tx2 makeRoot: modelMap.
-	modelMap at: 'foo' put: theModel.
-	tx2 commit.
-
-	soil3 := (Soil path: soil path) open.
-	tx3 := soil3 newTransaction.
-	materializedRoot := tx3 root.
-	materializedModelMap := materializedRoot at: modelName.
-	self assert: materializedModelMap isSoilProxy.
-	self assert: materializedModelMap soilRealObject class equals: Dictionary.
-	self assert: (materializedModelMap soilRealObject at: 'foo') class equals: SoilTestGraphRoot.
-	self assert: (materializedModelMap soilRealObject at: 'foo') nested reference nested label equals: 'nested under cluster'
+	soil close.
+	soil := nil.
+	soil2 := (Soil path: self path) open.
+	[ tx2 := soil2 newTransaction.
+	  theRoot := tx2 root.
+	  theModel := self simpleGraph.
+	  modelName := theModel class name.
+	  modelMap := Dictionary new.
+	  theRoot at: modelName put: modelMap.
+	  tx2 markDirty: theRoot.
+	  tx2 makeRoot: modelMap.
+	  modelMap at: 'foo' put: theModel.
+	  tx2 commit ]
+		ensure: [ soil2 close ].
+	soil3 := (Soil path: self path) open.
+	[ tx3 := soil3 newTransaction.
+	  materializedRoot := tx3 root.
+	  materializedModelMap := materializedRoot at: modelName.
+	  self assert: materializedModelMap isSoilProxy.
+	  self assert: materializedModelMap soilRealObject class equals: Dictionary.
+	  self assert: (materializedModelMap soilRealObject at: 'foo') class equals: SoilTestGraphRoot.
+	  self assert: (materializedModelMap soilRealObject at: 'foo') nested reference nested label equals: 'nested under cluster' ]
+		ensure: [ soil3 close ]
 ]
 
 { #category : #tests }
