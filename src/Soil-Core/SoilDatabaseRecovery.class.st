@@ -9,6 +9,23 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
+{ #category : #testing }
+SoilDatabaseRecovery >> isNeeded [
+	"Whether there is anything past the last checkpoint to replay. Reads only, and
+	through the streams the database was opened with, so this can be asked of a
+	database lying on read-only media."
+
+	| lastCheckpoint fragmentFile |
+	lastCheckpoint := soil control lastCheckpoint.
+	(journal existsFragmentFileForLSN: lastCheckpoint) ifFalse: [ ^ true ].
+	fragmentFile := journal openFragmentForLSN: lastCheckpoint.
+	^ [ [ SoilJournalEntry readFrom: fragmentFile stream ]
+			on: Error
+			do: [ :error | ^ true ].
+		fragmentFile atEnd not ]
+			ensure: [ fragmentFile close ]
+]
+
 { #category : #accessing }
 SoilDatabaseRecovery >> journal: aSoilPersistentDatabaseJournal [ 
 	journal := aSoilPersistentDatabaseJournal 
@@ -81,6 +98,16 @@ SoilDatabaseRecovery >> readTransactionJournal: transactionJournal from: stream 
 { #category : #api }
 SoilDatabaseRecovery >> recover [
 	| lastCheckpoint checkpointEntry fragmentFile |
+	"nothing past the last checkpoint means nothing to do, and nothing to write"
+	self isNeeded ifFalse: [ ^ self ].
+	"from here on recovery writes - the heap, the control file, sometimes a fresh
+	fragment file. Refusing here rather than failing inside one of those writes is
+	what lets a database on read-only media be opened at all: the reader learns that
+	the state is not readable as it stands, and can repair a copy it may write to."
+	soil canRecover ifFalse: [
+		SoilDatabaseNeedsRecovery new
+			soil: soil;
+			signal ].
 	"read the log sequence number of the last successful checkpoint from the control 
 	file. A successful checkpoint includes writing the transaction logs to disk, 
 	commit the contents to the heap, write the checkpoint entry"

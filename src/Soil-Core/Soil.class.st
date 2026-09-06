@@ -145,6 +145,15 @@ Soil >> behaviorRegistry [
 	^ behaviorRegistry
 ]
 
+{ #category : #testing }
+Soil >> canRecover [
+	"Whether this image may write to the database in order to recover it. Two
+	independent reasons say no: the database was opened read-only, or the medium
+	refuses writes."
+
+	^ self readOnly not and: [ self path isWritable ]
+]
+
 { #category : #checking }
 Soil >> checkConsistency [
 	"Opt-in structural check of this database: index<->heap consistency (I3) and version
