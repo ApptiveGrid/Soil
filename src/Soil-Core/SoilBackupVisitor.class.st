@@ -23,11 +23,17 @@ SoilBackupVisitor >> backup: aSoil [
 { #category : #visiting }
 SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 
-	| sourceSegment sourceIndex targetSegment targetIndex iterator assoc |
+	| sourceSegment sourceIndex targetSegment targetIndex iterator assoc isBehaviorIndex |
+	"the behavior registry (identifier index of the meta segment) is already open
+	via soil behaviorRegistry. Reuse that open index instead of opening the same
+	file a second time through the index manager, which fails on Windows"
+	isBehaviorIndex := (segmentId = 0) and: [ indexId = #identifier ].
 	sourceSegment := soil objectRepository segmentAt: segmentId.
-	sourceIndex := sourceSegment indexManager
-		               at: indexId
-		               ifAbsent: [ ^ self indexNotFound: indexId ].
+	sourceIndex := isBehaviorIndex
+		               ifTrue: [ soil behaviorRegistry index ]
+		               ifFalse: [ sourceSegment indexManager
+				               at: indexId
+				               ifAbsent: [ ^ self indexNotFound: indexId ] ].
 
 	"create an index of same kind and configuration in the target database"
 	targetSegment := target objectRepository segmentAt: segmentId.
@@ -46,7 +52,10 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	targetIndex
 		flush;
 		close.
-	sourceSegment indexManager removeIndexWithId: indexId
+	"do not close the behavior registry index here, it is owned by soil and
+	still in use; only release indexes we opened through the index manager"
+	isBehaviorIndex ifFalse: [
+		sourceSegment indexManager removeIndexWithId: indexId ]
 ]
 
 { #category : #accessing }
@@ -104,10 +113,14 @@ SoilBackupVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [
 ]
 
 { #category : #visiting }
-SoilBackupVisitor >> visitMetaSegment: aSoilMetaSegment [ 
+SoilBackupVisitor >> visitMetaSegment: aSoilMetaSegment [
 	super visitMetaSegment: aSoilMetaSegment.
-	self copyIndexAt: #identifier segment: 0. 
-	^ aSoilMetaSegment  
+	"the target's behavior registry opened the identifier index when the target
+	filesystem was initialized. Close it first so copyIndexAt: can rebuild that
+	index without opening the same file a second time (which fails on Windows)"
+	target behaviorRegistry close.
+	self copyIndexAt: #identifier segment: 0.
+	^ aSoilMetaSegment
 ]
 
 { #category : #visiting }
