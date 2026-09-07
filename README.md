@@ -8,7 +8,7 @@ To read more please have a look at the [documentation](./docs/soil.md), to learn
 
 ## Loading
 
-Load it in 64bit Pharo 11/12/13/alpha with Metacello:
+Load it in 64bit Pharo 11/12/13/14 with Metacello:
 
 ```smalltalk
 Metacello new 
@@ -16,7 +16,6 @@ Metacello new
 	baseline: 'Soil';
 	load.
 ```
-Note: For now, Windows is not supported. Work on this is ongoing (see [PR #980](https://github.com/ApptiveGrid/Soil/pull/980)) and it is planned for an upcoming release
 
 **caution** Soil is in an early stage meaning there are might be things missing. It is battle tested as it is the driving database behind [ApptiveGrid](http://www.apptivegrid.de) but you might have different requirements. If so, tell us!
 
@@ -60,6 +59,7 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 - Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
 
 ### NEWS
+- [ANN] Windows suppot has been merged in main (development) branch 2026-09-06
 - [ANN] Release V5 [Announcement](https://github.com/ApptiveGrid/Soil/blob/main/docs/versions/ann-v5.md) 2026-07-28
 - A Blog Series about Soil internals [Soil Blog](https://norbert.hartl.name/blog/series/soil.html) 2026-07-24
 - ESUG 2026 Slides are online: "Soil: architectural insights" Slides [PDF](https://archive.marcusdenker.de/Soil/Videos/26-ESUG/2026-07-07-ESUG-Soil-architectural-insights.pdf) 2026-07-15
