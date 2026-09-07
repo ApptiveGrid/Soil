@@ -82,6 +82,46 @@ SoilActiveResidentTest >> testACoalescingWindowTurnsABurstIntoOneStep [
 ]
 
 { #category : #tests }
+SoilActiveResidentTest >> testACoalescingWindowIsNotCutShortByTheWorkItCollects [
+	"the window has to be waited out both when work is already pending as we enter
+	it -- the signal is then still standing -- and when a change arrives while it
+	runs. Both are the very work it collects.
+
+	Counting steps is not enough to see this, which is why the burst test above
+	stayed green while neither held: a collapsed window still produces exactly one
+	step, only far too early. So this one asserts the time."
+	| resident started |
+	resident := self residentWith: [ :d |
+		d cadence: #coalescing; window: 1 second ].
+
+	started := DateAndTime now.
+	resident noteWork.
+	200 milliSeconds asDelay wait.
+	resident noteWork.
+
+	self assert: (resident waitForStepWithin: 5 seconds).
+	self assert: DateAndTime now - started >= 1 second.
+	self assert: resident stepCount equals: 1
+]
+
+{ #category : #tests }
+SoilActiveResidentTest >> testACoalescingWindowIsCutShortByAStopRequest [
+	"the other half of the contract: a stop must not have to sit out the window,
+	or the embedder's stop timeout would have to exceed the longest window in the
+	system. An hour of window left, and the stop still comes back at once."
+	| resident started |
+	resident := self residentWith: [ :d |
+		d cadence: #coalescing; window: 1 hour ].
+
+	resident noteWork.
+	[ resident strategy isInWindow ] whileFalse: [ 10 milliSeconds asDelay wait ].
+
+	started := DateAndTime now.
+	self assert: (self stopWithin: 5 seconds) isEmpty.
+	self assert: DateAndTime now - started < 5 seconds
+]
+
+{ #category : #tests }
 SoilActiveResidentTest >> testAThrowingStepIsCountedAndTheLoopSurvivesIt [
 	"a transient failure must not take a resident down; a permanent one shows up
 	as a climbing count rather than as silence"

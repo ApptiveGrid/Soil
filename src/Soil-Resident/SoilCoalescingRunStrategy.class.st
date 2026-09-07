@@ -16,20 +16,39 @@ Class {
 	#name : #SoilCoalescingRunStrategy,
 	#superclass : #SoilSignalRunStrategy,
 	#instVars : [
-		'window'
+		'window',
+		'deadline'
 	],
 	#category : #'Soil-Resident'
 }
 
 { #category : #waiting }
 SoilCoalescingRunStrategy >> awaitDue [
+	"the window is waited out against a deadline, not against a single wait on the
+	work signal. Two things would otherwise cut it short, and both are the very
+	work it exists to collect: a signal still standing when we get here -- super
+	returns at once whenever work was already pending, leaving the signal up -- and
+	a change arriving while we wait. Only a stop may end the window early, and it
+	still does: the flag is checked every turn, and #requestStop wakes us to see it."
 	super awaitDue.
-	resident shouldStop ifFalse: [ resident waitForWorkUpTo: self window ]
+	deadline := DateAndTime now + self window.
+	[ [ resident shouldStop not and: [ DateAndTime now < deadline ] ] whileTrue: [
+		resident waitForWorkUpTo: deadline - DateAndTime now ] ]
+		ensure: [ deadline := nil ]
 ]
 
 { #category : #accessing }
 SoilCoalescingRunStrategy >> defaultWindow [
 	^ 30 seconds
+]
+
+{ #category : #testing }
+SoilCoalescingRunStrategy >> isInWindow [
+	"am I inside the collecting window right now? The one state of mine worth
+	asking about from outside: a caller that needs a resident to have really
+	reached its window cannot read that off the resident, whose #isWorking covers
+	the step and deliberately not the wait before it."
+	^ deadline notNil
 ]
 
 { #category : #accessing }
