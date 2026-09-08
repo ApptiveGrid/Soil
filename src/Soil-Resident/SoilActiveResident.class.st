@@ -39,7 +39,9 @@ Class {
 		'pendingWork',
 		'working',
 		'lastStepError',
-		'stepErrorCount'
+		'stepErrorCount',
+		'stepCount',
+		'reportedStepCount'
 	],
 	#category : #'Soil-Resident'
 }
@@ -67,7 +69,8 @@ SoilActiveResident >> handleStepError: anError [
 	"my step threw. Keep it and count it, then let the loop go on. Subclasses that
 	can tell a transient failure from a fatal one may decide otherwise"
 	lastStepError := anError.
-	stepErrorCount := stepErrorCount + 1
+	stepErrorCount := stepErrorCount + 1.
+	self emit: 'step ', stepCount printString, ' failed: ', anError messageText
 ]
 
 { #category : #testing }
@@ -81,6 +84,8 @@ SoilActiveResident >> initialize [
 	working := false.
 	pendingWork := false.
 	stepErrorCount := 0.
+	stepCount := 0.
+	reportedStepCount := 0.
 	workSignal := Semaphore new
 ]
 
@@ -166,7 +171,9 @@ SoilActiveResident >> runStepProtected [
 	returns early on the flag would otherwise cause"
 	working := true.
 	pendingWork := false.
+	stepCount := stepCount + 1.
 	workSignal consumeAllSignals.
+	self emitsEveryStep ifTrue: [ self emit: 'step ', stepCount printString ].
 	[ [ self runStep ]
 		on: Error
 		do: [ :anError | self handleStepError: anError ] ]
@@ -223,7 +230,48 @@ SoilActiveResident >> tick [
 	count it, so that a crash loop is visible instead of looking like health"
 	self hasRunningProcess ifFalse: [
 		self noteProcessRestart.
-		self startProcess ]
+		self startProcess ].
+	self reportWorkSinceLastTick
+]
+
+{ #category : #logging }
+SoilActiveResident >> emitsEveryStep [
+	"the one reporting level whose volume scales with the work, so it is the one
+	the embedder may turn down. Without a supervisor there is nobody to report to
+	anyway"
+	^ supervisor notNil and: [ supervisor emitsEveryStep ]
+]
+
+{ #category : #logging }
+SoilActiveResident >> reportWorkSinceLastTick [
+	"a periodic line, but only when something happened: a resident that worked says
+	how much, one that sat still says nothing. Silence on a tick therefore means
+	'nothing to do', which is a different statement from the silence this whole
+	mechanism was built to end - that one meant 'no idea'.
+
+	The counters are cumulative and the line is a delta, because what one wants to
+	read off a series of these is the rate."
+	| done |
+	done := stepCount - reportedStepCount.
+	done = 0 ifTrue: [ ^ self ].
+	reportedStepCount := stepCount.
+	self emit: (self count: done of: 'step'), ' since the last report, ',
+		(self count: stepErrorCount of: 'error'), ' in all'
+]
+
+{ #category : #logging }
+SoilActiveResident >> count: anInteger of: aNoun [
+	"so that a report says '1 step' and not '1 steps'. A line written to be read by
+	somebody should read like a line"
+	^ anInteger printString, ' ', (anInteger = 1 ifTrue: [ aNoun ] ifFalse: [ aNoun, 's' ])
+]
+
+{ #category : #accessing }
+SoilActiveResident >> stepCount [
+	"how many work units I have entered. Counted before the step rather than after,
+	so a step that never returns is still counted - that is the one whose number
+	somebody will be looking for"
+	^ stepCount
 ]
 
 { #category : #waiting }

@@ -22,7 +22,8 @@ Class {
 		'residents',
 		'mutex',
 		'tickProcess',
-		'tickInterval'
+		'tickInterval',
+		'emitsEveryStep'
 	],
 	#category : #'Soil-Resident'
 }
@@ -75,7 +76,7 @@ SoilResidentSupervisor >> flushAll [
 	self residents do: [ :each |
 		[ each flushOnStop ]
 			on: Error
-			do: [ :err | self log: 'resident ', each name asString, ' failed to flush on stop: ', err messageText ] ]
+			do: [ :err | each emit: 'failed to flush on stop: ', err messageText ] ]
 ]
 
 { #category : #hooks }
@@ -102,7 +103,7 @@ SoilResidentSupervisor >> idleStateOf: aResident [
 	^ [ aResident isIdle ]
 		on: Error
 		do: [ :err |
-			self log: 'resident ', aResident name asString, ' failed to answer isIdle: ', err messageText.
+			aResident emit: 'failed to answer isIdle: ', err messageText.
 			false ]
 ]
 
@@ -110,7 +111,8 @@ SoilResidentSupervisor >> idleStateOf: aResident [
 SoilResidentSupervisor >> initialize [
 	super initialize.
 	residents := Dictionary new.
-	mutex := Mutex new
+	mutex := Mutex new.
+	emitsEveryStep := true
 ]
 
 { #category : #testing }
@@ -135,12 +137,28 @@ SoilResidentSupervisor >> loadFrom: aTransaction [
 ]
 
 { #category : #logging }
-SoilResidentSupervisor >> log: aString [
-	"overridable: an embedder that has its own logging fills this. Soil's default
-	emits a signal, the same way SoilApplicationMigration does"
-	SoilSignal new
-		databaseName: (soil ifNotNil: [ soil name ]);
-		emit: aString
+SoilResidentSupervisor >> emit: aString [
+	"through the database rather than emitting for myself: Soil>>emit: is the one
+	seam an embedder fills, and a resident line has no reason to need a second one.
+
+	Tolerates a missing database - a supervisor built without one is a unit test,
+	and a test has no business being stopped by a log line."
+	soil ifNotNil: [ :database | database emit: aString ]
+]
+
+{ #category : #accessing }
+SoilResidentSupervisor >> emitsEveryStep [
+	"whether the residents report every single work unit, and not only their state
+	changes and what a tick summarises. On by default because a resident that says
+	nothing between starting and stopping is exactly the silence this reporting
+	exists to end - but it is the one level whose volume scales with the work, so
+	an embedder under load can turn it down without touching code."
+	^ emitsEveryStep
+]
+
+{ #category : #accessing }
+SoilResidentSupervisor >> emitsEveryStep: aBoolean [
+	emitsEveryStep := aBoolean
 ]
 
 { #category : #transactions }
@@ -155,7 +173,7 @@ SoilResidentSupervisor >> pendingWorkOf: aResident [
 	^ [ aResident hasPendingWork ]
 		on: Error
 		do: [ :err |
-			self log: 'resident ', aResident name asString, ' failed to answer hasPendingWork: ', err messageText.
+			aResident emit: 'failed to answer hasPendingWork: ', err messageText.
 			true ]
 ]
 
@@ -195,7 +213,9 @@ SoilResidentSupervisor >> soil: aSoil [
 SoilResidentSupervisor >> startAllIn: aTransaction [
 	"phase two: now each instance gets its start, with errors isolated per
 	resident. A failure is left behind visibly as #failed plus the error, not
-	merely logged -- the embedder needs the answer to decide"
+	merely logged -- the embedder needs the answer to decide. Reporting it is
+	#markFailed:'s business, not mine: it is a state change like the others, and
+	saying it here as well would say it twice"
 	self residents do: [ :each |
 		"only what has not been started: a second start would create a second
 		process for a resident that already has one"
@@ -203,9 +223,7 @@ SoilResidentSupervisor >> startAllIn: aTransaction [
 			[ each startIn: aTransaction.
 			each markStarted ]
 				on: Error
-				do: [ :err |
-					each markFailed: err.
-					self log: 'resident ', each name asString, ' failed to start: ', err messageText ] ] ]
+				do: [ :err | each markFailed: err ] ] ]
 ]
 
 { #category : #running }
@@ -245,13 +263,13 @@ SoilResidentSupervisor >> stopAllIn: aTransaction timeout: aDuration [
 	self residents do: [ :each |
 		[ each requestStop ]
 			on: Error
-			do: [ :err | self log: 'resident ', each name asString, ' failed on requestStop: ', err messageText ] ].
+			do: [ :err | each emit: 'failed on requestStop: ', err messageText ] ].
 	pending := self waitForReceipts: aDuration.
 	pending do: [ :each |
-		self log: 'resident ', each name asString, ' did not acknowledge the stop within ', aDuration asString, ', terminating'.
+		each emit: 'did not acknowledge the stop within ', aDuration asString, ', terminating'.
 		[ each terminateProcesses ]
 			on: Error
-			do: [ :err | self log: 'resident ', each name asString, ' failed to terminate: ', err messageText ] ].
+			do: [ :err | each emit: 'failed to terminate: ', err messageText ] ].
 	self flushAll.
 	^ pending
 ]
@@ -275,7 +293,7 @@ SoilResidentSupervisor >> tick [
 		(each isStopping or: [ each isStopped ]) ifFalse: [
 			[ each tick ]
 				on: Error
-				do: [ :err | self log: 'resident ', each name asString, ' failed on tick: ', err messageText ] ] ]
+				do: [ :err | each emit: 'failed on tick: ', err messageText ] ] ]
 ]
 
 { #category : #accessing }

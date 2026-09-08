@@ -131,7 +131,7 @@ Soil >> backupTo: aStringOrFileReference [
 { #category : #'opening/closing' }
 Soil >> basicOpen [
 	self isOpen ifTrue: [ self error: 'Database already open' ].
-	('open soil database at ', path asString) soilEmit.
+	self emit: 'open database at ', path asString.
 	control := SoilControlFile new
 		soil: self;
 		open.
@@ -222,6 +222,26 @@ Soil >> critical: aBlock [
 { #category : #accessing }
 Soil >> defaultFabricClass [ 
 	^ SoilFabric 
+]
+
+{ #category : #logging }
+Soil >> emit: aString [
+	"where this database says what it is doing, and the one place an embedder has
+	to fill to collect it elsewhere. Everything in Soil that reports comes through
+	here rather than emitting for itself, so overriding is a single decision per
+	database instead of one per reporter.
+
+	The default emits a SoilSignal naming the database - which reaches a logger
+	that was started for SoilSignal, and nothing else. SoilSignal is a sibling of
+	an embedder's own signal class, not an ancestor of it, so an embedder that
+	does not override me has to name SoilSignal to its logger.
+
+	Built with #on: rather than #emit:, the way SoilApplicationMigration already
+	builds its own: #emit: fills #message and leaves the wrapped object empty, and
+	the printing then puts a trailing 'nil' on every line."
+	(SoilSignal on: aString)
+		databaseName: self name;
+		emit
 ]
 
 { #category : #public }

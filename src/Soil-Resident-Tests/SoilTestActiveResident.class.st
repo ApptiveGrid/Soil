@@ -1,6 +1,7 @@
 "
-The dummy active resident: it counts its steps and can be told to leave work
-behind, to throw, and which cadence to run on. Everything it does is in memory,
+The dummy active resident: it can be told to leave work behind, to throw, and
+which cadence to run on. Counting its steps is no longer its own business -
+SoilActiveResident does that, which is what this class faked before. Everything it does is in memory,
 so that a drain test is not a test of transaction speed.
 
 Which strategy it uses arrives as a Symbol rather than as a class, because the
@@ -14,7 +15,6 @@ Class {
 		'cadence',
 		'window',
 		'interval',
-		'stepCount',
 		'prepareCount',
 		'workToLeave',
 		'throwOnStep',
@@ -31,7 +31,6 @@ SoilTestActiveResident >> cadence: aSymbol [
 { #category : #initialization }
 SoilTestActiveResident >> initialize [
 	super initialize.
-	stepCount := 0.
 	prepareCount := 0.
 	workToLeave := 0.
 	throwOnStep := false.
@@ -74,9 +73,11 @@ SoilTestActiveResident >> prepareIn: aTransaction [
 
 { #category : #running }
 SoilTestActiveResident >> runStep [
-	"the signal is given in the ensure, so that a throwing step is observable too"
-	[ stepCount := stepCount + 1.
-	workToLeave > 0 ifTrue: [
+	"the signal is given in the ensure, so that a throwing step is observable too.
+	The steps are not counted here any more - SoilActiveResident counts them now,
+	and it counts them before the step rather than inside it, so one that never
+	returns is counted too"
+	[ workToLeave > 0 ifTrue: [
 		workToLeave := workToLeave - 1.
 		self noteWork ].
 	throwOnStep ifTrue: [ Error signal: 'the step was told to throw' ] ]
@@ -88,11 +89,6 @@ SoilTestActiveResident >> runStrategyClass [
 	cadence = #coalescing ifTrue: [ ^ SoilCoalescingRunStrategy ].
 	cadence = #interval ifTrue: [ ^ SoilIntervalRunStrategy ].
 	^ SoilSignalRunStrategy
-]
-
-{ #category : #accessing }
-SoilTestActiveResident >> stepCount [
-	^ stepCount
 ]
 
 { #category : #accessing }
