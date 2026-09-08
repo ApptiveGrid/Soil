@@ -121,10 +121,12 @@ Soil >> backupTo: aStringOrFileReference [
 		path: aStringOrFileReference asFileReference;
 		destroy;
 		initializeFilesystem.
+	self emit: 'backing up to ', aStringOrFileReference asString.
 	SoilBackupVisitor new 
 		target: backupSoil;
 		backup: self.
-	backupSoil close
+	backupSoil close.
+	self emit: 'backup to ', aStringOrFileReference asString, ' finished'
 		
 ]
 
@@ -200,11 +202,17 @@ Soil >> checkpoint [
 		creates a real checkpoint"
 		entry commitIn: self.
  ].
+	"deliberately silent: SoilTransactionManager>>commitTransaction: checkpoints on
+	every commit that changed something, so this is the hot path and not the rare
+	lifecycle step it looks like from its callers in recovery and on a first open"
 	^ entry
 ]
 
 { #category : #'opening/closing' }
 Soil >> close [
+	"said before rather than after, because the interesting case is the one where
+	closing does not return"
+	self emit: 'closing database'.
 	Soil closeAll: { objectRepository . behaviorRegistry . control . journal . metadata }
 ]
 

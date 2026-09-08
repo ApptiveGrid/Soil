@@ -4,7 +4,8 @@ Class {
 	#instVars : [
 		'soil',
 		'journal',
-		'lsn'
+		'lsn',
+		'replayedTransactions'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -53,7 +54,8 @@ SoilDatabaseRecovery >> readFragmentFile: aSoilJournalFragmentFile [
 			"transaction journals are written always completely so we can read until we 
 			discover a commit entry. "
 			self readTransactionJournal: transactionJournal from: aSoilJournalFragmentFile stream.
-			transactionJournal commitIn: soil recovery: true ].
+			transactionJournal commitIn: soil recovery: true.
+			replayedTransactions ifNotNil: [ replayedTransactions := replayedTransactions + 1 ] ].
 		"reading a checkpoint entry is unlikely. It should be possible only if there was an 
 		error after writing the checkpoint entry and before marking that position in the control
 		file. But it is possible it happens so we just need to complete it by updating the 
@@ -95,16 +97,25 @@ SoilDatabaseRecovery >> readTransactionJournal: transactionJournal from: stream 
 	SoilTruncatedRead signal: 'reading of transaction journal is incomplete'
 ]
 
+{ #category : #private }
+SoilDatabaseRecovery >> count: anInteger of: aNoun [
+	"so that a report says '1 transaction' and not '1 transactions'"
+	^ anInteger printString, ' ', (anInteger = 1 ifTrue: [ aNoun ] ifFalse: [ aNoun, 's' ])
+]
+
 { #category : #api }
 SoilDatabaseRecovery >> recover [
 	| lastCheckpoint checkpointEntry fragmentFile |
 	"nothing past the last checkpoint means nothing to do, and nothing to write"
-	self isNeeded ifFalse: [ ^ self ].
+	self isNeeded ifFalse: [
+		soil emit: 'recovery: nothing past the last checkpoint'.
+		^ self ].
 	"from here on recovery writes - the heap, the control file, sometimes a fresh
 	fragment file. Refusing here rather than failing inside one of those writes is
 	what lets a database on read-only media be opened at all: the reader learns that
 	the state is not readable as it stands, and can repair a copy it may write to."
 	soil canRecover ifFalse: [
+		soil emit: 'recovery: needed, but this image may not write to the database'.
 		SoilDatabaseNeedsRecovery new
 			soil: soil;
 			signal ].
@@ -118,6 +129,8 @@ SoilDatabaseRecovery >> recover [
 	filesystem inconsistency we can continue to use the database with the last checkpointed
 	state. This may become a configuration option later"
 	(journal existsFragmentFileForLSN: lastCheckpoint) ifFalse: [ 
+		soil emit: 'recovery: the fragment file for the last checkpoint ',
+			lastCheckpoint printString, ' is missing - starting a new one and checkpointing'.
 		journal cycleFragmentFile.
 		soil checkpoint.
 		^ self ].
@@ -129,6 +142,9 @@ SoilDatabaseRecovery >> recover [
 		do: [ :error | 
 			"in case of a bogus checkpoint position we cannot recover the file but 
 			create a new one and continue"
+			soil emit: 'recovery: the last checkpoint position ', lastCheckpoint printString,
+				' does not read back (', error messageText,
+				') - starting a new fragment file and checkpointing'.
 			journal cycleFragmentFileAfter: fragmentFile.
 			soil checkpoint.
 			^ self ].
@@ -137,11 +153,16 @@ SoilDatabaseRecovery >> recover [
 	recovery handle so the journal can later open the file for writing (a second
 	open in write mode while this one is still open fails on Windows)"
 	fragmentFile atEnd ifTrue: [
+		soil emit: 'recovery: nothing to replay, the last checkpoint ',
+			lastCheckpoint printString, ' ends the journal'.
 		fragmentFile close.
 		^ self ].
 	
 	"the fragment file contains more entries after the last checkpoint. Read the
 	current fragment file to its end and apply all transaction logs/checkpoints found"
+	soil emit: 'recovery: replaying the journal from the last checkpoint ',
+		lastCheckpoint printString.
+	replayedTransactions := 0.
 	self readFragmentFileProtected: fragmentFile.
 	fragmentFile close.
 	
@@ -159,6 +180,10 @@ SoilDatabaseRecovery >> recover [
 	to mark that we covered about the extra entries or bogus data so future reads can
 	proceed from here"
 	soil checkpoint.
+	soil emit: 'recovery: replayed ',
+		(self count: replayedTransactions of: 'transaction'), ' from ',
+		(self count: journal lastFileNumber - lastCheckpoint fileNumber + 1 of: 'fragment file'),
+		', checkpointed'
 ]
 
 { #category : #accessing }
