@@ -71,6 +71,20 @@ SoilResident >> descriptionIn: aTransaction [
 	^ aTransaction objectWithId: descriptionId
 ]
 
+{ #category : #logging }
+SoilResident >> emit: aString [
+	"every line of mine names me, so that lines from several residents in one
+	database can be told apart and a stable prefix can be searched for. That the
+	prefix is decided here once, rather than written out at each of the places
+	that report, is the point of this method - it does not save typing, it keeps
+	the lines the same shape.
+
+	Reports through the supervisor, which reports through the database. A resident
+	without a supervisor is one that was never added to one, which happens in unit
+	tests, and a test has no business being stopped by a log line."
+	supervisor ifNotNil: [ :s | s emit: 'resident ', self name asString, ': ', aString ]
+]
+
 { #category : #accessing }
 SoilResident >> error [
 	"the start error, if I am #failed"
@@ -164,18 +178,21 @@ SoilResident >> markFailed: anError [
 	"my #startIn: has thrown. I am not usable; whether that keeps the database
 	from opening is the embedder's decision"
 	state := #failed.
-	error := anError
+	error := anError.
+	self emit: 'failed to start: ', anError messageText
 ]
 
 { #category : #accessing }
 SoilResident >> markStarted [
-	state := #started
+	state := #started.
+	self emit: 'started'
 ]
 
 { #category : #accessing }
 SoilResident >> markStopped [
 	"called by my own process when it has left its loop between two work units"
-	state := #stopped
+	state := #stopped.
+	self emit: 'stopped'
 ]
 
 { #category : #accessing }
@@ -204,8 +221,10 @@ SoilResident >> noteProcessRestart [
 
 	Deliberately only counted, with no upper bound: what number should turn a
 	resident into #failed is decided once a real active resident has produced
-	real numbers."
-	restartCount := restartCount + 1
+	real numbers. Counted and said: a number nobody reads is not visibility, and
+	a restart is rare enough that saying it costs nothing."
+	restartCount := restartCount + 1.
+	self emit: 'process restarted (', restartCount printString, ')'
 ]
 
 { #category : #stopping }
@@ -217,6 +236,7 @@ SoilResident >> requestStop [
 	right away."
 	stopRequested := true.
 	state := #stopping.
+	self emit: 'stopping'.
 	self wakeUp.
 	self hasRunningProcess ifFalse: [ self markStopped ]
 ]
