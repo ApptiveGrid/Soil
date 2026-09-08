@@ -10,6 +10,12 @@ Class {
 	#category : #'Soil-Core-Journal'
 }
 
+{ #category : #private }
+SoilDatabaseRecovery >> count: anInteger of: aNoun [
+	"so that a report says '1 transaction' and not '1 transactions'"
+	^ anInteger printString, ' ', (anInteger = 1 ifTrue: [ aNoun ] ifFalse: [ aNoun, 's' ])
+]
+
 { #category : #testing }
 SoilDatabaseRecovery >> isNeeded [
 	"Whether there is anything past the last checkpoint to replay. Reads only, and
@@ -95,12 +101,6 @@ SoilDatabaseRecovery >> readTransactionJournal: transactionJournal from: stream 
 		(entry class == SoilCommitTransactionEntry) 
 			ifTrue: [ ^ transactionJournal ] ].
 	SoilTruncatedRead signal: 'reading of transaction journal is incomplete'
-]
-
-{ #category : #private }
-SoilDatabaseRecovery >> count: anInteger of: aNoun [
-	"so that a report says '1 transaction' and not '1 transactions'"
-	^ anInteger printString, ' ', (anInteger = 1 ifTrue: [ aNoun ] ifFalse: [ aNoun, 's' ])
 ]
 
 { #category : #api }

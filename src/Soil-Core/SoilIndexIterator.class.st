@@ -41,6 +41,7 @@ SoilIndexIterator >> at: aKeyObject ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexIterator >> at: aKeyObject put: anObject [
+	<ignoreForCoverage>
 	self
 		deprecated: 'Please use #at:add:'
 		transformWith: '`@receiver at: `@arg1 put: `@arg2' -> '`@receiver at: `@arg1 add: `@arg2'.
@@ -60,11 +61,6 @@ SoilIndexIterator >> atIndex: anInteger [
 { #category : #private }
 SoilIndexIterator >> basicAt: key add: anObject [
 	self subclassResponsibility 
-]
-
-{ #category : #private }
-SoilIndexIterator >> basicAt: indexKey put: anObject [
-	self subclassResponsibility
 ]
 
 { #category : #private }

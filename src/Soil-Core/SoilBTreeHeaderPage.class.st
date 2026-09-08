@@ -111,11 +111,6 @@ SoilBTreeHeaderPage >> size [
 ]
 
 { #category : #accessing }
-SoilBTreeHeaderPage >> size: anInteger [
- 	size := anInteger
-]
-
-{ #category : #accessing }
 SoilBTreeHeaderPage >> uniqueKeys [
 	^ uniqueKeys
 ]
