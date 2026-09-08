@@ -29,6 +29,9 @@ SoilObjectRepository >> addNewSegment: aSegment [
 		objectRepository: self;
 		initializeFilesystem.
 	segments add: aSegment.
+	"once per segment in a database's life - today only the first one, from
+	#initializeFilesystem. Cheap to say, and the kind of thing one wants dated"
+	soil emit: 'segment ', aSegment id printString, ' created'.
 	^ aSegment 
 ]
 

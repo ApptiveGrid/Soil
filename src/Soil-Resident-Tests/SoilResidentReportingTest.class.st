@@ -140,9 +140,14 @@ SoilResidentReportingTest >> testATickWithoutWorkSaysNothing [
 { #category : #tests }
 SoilResidentReportingTest >> testEveryLineNamesItsResident [
 	"several residents report into one database, so a line that does not say whose
-	it is cannot be read"
+	it is cannot be read.
+
+	The database reports about itself as well - a segment created, an open, a close -
+	so what is asked here is that a resident's lines name it, not that every line the
+	database collected does. Hence the clearing: from there on only the resident acts."
 	| resident |
 	resident := self residentWith: [ :d | d ].
+	soil reported removeAll.
 	resident noteWork.
 	self assert: (resident waitForStepWithin: 2 seconds).
 	self deny: soil reported isEmpty.
