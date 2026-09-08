@@ -20,6 +20,27 @@ Class {
 }
 
 { #category : #helpers }
+SoilResidentReportingTest >> entriesOf: aMemoryLogger [
+	<ignoreNotImplementedSelectors: #( entries recordings )>
+	"The pragma is not a way around the lint rule, it is the answer to it: one of
+	the two selectors below is missing in whichever Pharo is running, and which one
+	that is, is the whole point of this method - the same shape, and for the same
+	reason, as SoilActiveResident>>wait:upTo:.
+
+	What a MemoryLogger calls its collected signals differs across the Pharo
+	versions Soil builds on: #entries does not exist before Pharo 13, and
+	#recordings is deprecated from Pharo 13 on. Asking #entries first therefore
+	never reaches the deprecated one where it is deprecated - which matters more
+	here than tidiness, because that deprecation carries a transformWith: rule and
+	rewrites the source of whichever method called it.
+
+	Fails loudly rather than answering something if neither is there."
+	(aMemoryLogger respondsTo: #entries) ifTrue: [ ^ aMemoryLogger entries ].
+	(aMemoryLogger respondsTo: #recordings) ifTrue: [ ^ aMemoryLogger recordings ].
+	self error: 'no known way to read a MemoryLogger in this Pharo'
+]
+
+{ #category : #helpers }
 SoilResidentReportingTest >> path [
 	^ 'soil-resident-reporting-tests'
 ]
@@ -164,15 +185,16 @@ SoilResidentReportingTest >> testStepsAreSilentWhenTurnedDown [
 SoilResidentReportingTest >> testTheDefaultSeamEmitsASoilSignalNamingTheDatabase [
 	"what a database that does not override Soil>>emit: does - the only test here
 	that goes through Beacon, because it is the only one about the default"
-	| logger plain |
+	| logger plain collected |
 	plain := Soil path: self path , '-default'.
 	plain destroy; initializeFilesystem.
 	logger := MemoryLogger new.
 	[ logger runFor: SoilSignal during: [ plain emit: 'something happened' ] ]
 		ensure: [ plain close. plain destroy ].
-	"#entries, not #recordings: the latter is deprecated in Pharo 13 with a
-	transformWith: rule, and running the test would rewrite this method"
-	self assert: logger entries size equals: 1.
-	self assert: logger entries first class equals: SoilSignal.
-	self assert: logger entries first databaseName equals: plain name
+	"read through #entriesOf:, because what a logger calls its collected signals
+	differs across the Pharo versions Soil builds on"
+	collected := self entriesOf: logger.
+	self assert: collected size equals: 1.
+	self assert: collected first class equals: SoilSignal.
+	self assert: collected first databaseName equals: plain name
 ]
