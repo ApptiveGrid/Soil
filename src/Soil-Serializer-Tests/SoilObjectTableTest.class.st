@@ -20,7 +20,7 @@ SoilObjectTableTest >> testAdd [
 ]
 
 { #category : #tests }
-SoilObjectTableTest >> testIdenityIndexOf [
+SoilObjectTableTest >> testIdentityIndexOf [
 	| table |
 	table := SoilObjectTable new.
 	table add: 'Hello'.
@@ -30,4 +30,14 @@ SoilObjectTableTest >> testIdenityIndexOf [
 	self assert: (table identityIndexOf: #hello) equals: 2.
 	self assert: (table identityIndexOf: 'Hello') equals: 1.
 	self assert: (table identityIndexOf: '2') equals: 0.
+]
+
+{ #category : #tests }
+SoilObjectTableTest >> testIsEmpty [
+
+	| table |
+	table := SoilObjectTable new.
+	self assert: table isEmpty.
+	table add: 'Hello'.
+	self assert: table isEmpty not
 ]
