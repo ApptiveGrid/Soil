@@ -48,7 +48,7 @@ SoilResidentTest >> startedSupervisor [
 	supervisor := soil newResidentSupervisor.
 	txn := soil newTransaction.
 	[ supervisor loadFrom: txn.
-	supervisor startAllIn: txn ]
+	supervisor startAllIn: txn tickEvery: 1 hour reportEvery: 1 hour ]
 		ensure: [ txn abort ].
 	^ supervisor
 ]
@@ -129,7 +129,7 @@ SoilResidentTest >> testEnsureTickProcessRevivesATerminatedTick [
 	| supervisor |
 	self addResident: SoilTestResidentDescription new.
 	supervisor := self startedSupervisor.
-	supervisor startTickEvery: 10 seconds.
+	supervisor startTickEvery: 10 seconds reportEvery: 1 hour.
 	self assert: supervisor tickProcessIsRunning.
 
 	supervisor tickProcess terminate.
@@ -329,7 +329,7 @@ SoilResidentTest >> testStartingTwiceStartsNothingTwice [
 	self assert: resident startCount equals: 1.
 
 	txn := soil newTransaction.
-	[ supervisor startAllIn: txn ] ensure: [ txn abort ].
+	[ supervisor startAllIn: txn tickEvery: 1 hour reportEvery: 1 hour ] ensure: [ txn abort ].
 	self assert: resident startCount equals: 1.
 	self stop: supervisor within: 5 seconds
 ]
@@ -354,7 +354,7 @@ SoilResidentTest >> testStopTickKeepsEnsureFromRevivingIt [
 	| supervisor |
 	self addResident: SoilTestResidentDescription new.
 	supervisor := self startedSupervisor.
-	supervisor startTickEvery: 10 seconds.
+	supervisor startTickEvery: 10 seconds reportEvery: 1 hour.
 	self stop: supervisor within: 5 seconds.
 	self deny: supervisor tickProcessIsRunning.
 
@@ -400,7 +400,7 @@ SoilResidentTest >> testTickProcessFiresOnItsInterval [
 	self addResident: SoilTestResidentDescription new.
 	supervisor := self startedSupervisor.
 	dummy := supervisor residentNamed: #dummy.
-	supervisor startTickEvery: 20 milliSeconds.
+	supervisor startTickEvery: 20 milliSeconds reportEvery: 1 hour.
 
 	self waitUntil: [ dummy tickCount >= 2 ] within: 5 seconds.
 	self stop: supervisor within: 5 seconds
@@ -435,7 +435,7 @@ SoilResidentTest >> testTwoPhaseStart [
 	[ supervisor loadFrom: txn.
 	self assert: supervisor residents size equals: 2.
 	self assert: (supervisor residents noneSatisfy: [ :each | each isStarted ]).
-	supervisor startAllIn: txn.
+	supervisor startAllIn: txn tickEvery: 1 hour reportEvery: 1 hour.
 	self assert: (supervisor residents allSatisfy: [ :each | each isStarted ]) ]
 		ensure: [ txn abort ].
 	self stop: supervisor within: 5 seconds

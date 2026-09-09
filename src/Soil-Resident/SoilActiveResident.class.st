@@ -243,6 +243,16 @@ SoilActiveResident >> emitsEveryStep [
 ]
 
 { #category : #logging }
+SoilActiveResident >> statusLine [
+	"the counters are cumulative here, where #reportWorkSinceLastTick reports a
+	delta: that one answers 'what is happening right now', this one 'what has
+	happened at all'. Read together over a series of reports they give the rate
+	as well, which is why the periodic line does not need to be a delta too."
+	^ super statusLine, ', ', (self count: stepCount of: 'step'),
+		', ', (self count: stepErrorCount of: 'error')
+]
+
+{ #category : #logging }
 SoilActiveResident >> reportWorkSinceLastTick [
 	"a periodic line, but only when something happened: a resident that worked says
 	how much, one that sat still says nothing. Silence on a tick therefore means
@@ -257,13 +267,6 @@ SoilActiveResident >> reportWorkSinceLastTick [
 	reportedStepCount := stepCount.
 	self emit: (self count: done of: 'step'), ' since the last report, ',
 		(self count: stepErrorCount of: 'error'), ' in all'
-]
-
-{ #category : #logging }
-SoilActiveResident >> count: anInteger of: aNoun [
-	"so that a report says '1 step' and not '1 steps'. A line written to be read by
-	somebody should read like a line"
-	^ anInteger printString, ' ', (anInteger = 1 ifTrue: [ aNoun ] ifFalse: [ aNoun, 's' ])
 ]
 
 { #category : #accessing }
