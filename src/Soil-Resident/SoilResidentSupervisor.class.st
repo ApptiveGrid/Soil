@@ -240,12 +240,23 @@ SoilResidentSupervisor >> soil: aSoil [
 ]
 
 { #category : #running }
-SoilResidentSupervisor >> startAllIn: aTransaction [
+SoilResidentSupervisor >> startAllIn: aTransaction tickEvery: aDuration reportEvery: aReportDuration [
 	"phase two: now each instance gets its start, with errors isolated per
 	resident. A failure is left behind visibly as #failed plus the error, not
 	merely logged -- the embedder needs the answer to decide. Reporting it is
 	#markFailed:'s business, not mine: it is a state change like the others, and
-	saying it here as well would say it twice"
+	saying it here as well would say it twice.
+
+	The intervals are in the signature for the same reason the timeout is in
+	#stopAllIn:timeout:'s: what belongs to a start must not depend on somebody
+	remembering it afterwards. Started without a tick, residents run unsupervised
+	-- a process that dies never comes back, because a process cannot revive
+	itself -- and they say nothing at all. That was the state this whole
+	mechanism was in for weeks, and leaving the tick a separate call that an
+	embedder may or may not make would leave it one send away from returning.
+
+	No residents, no tick: a tick process for an empty collection would wake up
+	forever to iterate nothing, once per open database."
 	self residents do: [ :each |
 		"only what has not been started: a second start would create a second
 		process for a resident that already has one"
@@ -253,7 +264,9 @@ SoilResidentSupervisor >> startAllIn: aTransaction [
 			[ each startIn: aTransaction.
 			each markStarted ]
 				on: Error
-				do: [ :err | each markFailed: err ] ] ]
+				do: [ :err | each markFailed: err ] ] ].
+	self hasResidents ifTrue: [
+		self startTickEvery: aDuration reportEvery: aReportDuration ]
 ]
 
 { #category : #running }

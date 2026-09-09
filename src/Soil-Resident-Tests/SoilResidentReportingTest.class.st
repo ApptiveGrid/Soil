@@ -53,7 +53,7 @@ SoilResidentReportingTest >> residentWith: aBlock [
 	soil addResidentDescription: description.
 	txn := soil newTransaction.
 	[ supervisor loadFrom: txn.
-	supervisor startAllIn: txn ]
+	supervisor startAllIn: txn tickEvery: 1 hour reportEvery: 1 hour ]
 		ensure: [ txn abort ].
 	^ supervisor residentNamed: #active
 ]
@@ -76,7 +76,7 @@ SoilResidentReportingTest >> startAll [
 	| txn |
 	txn := soil newTransaction.
 	[ supervisor loadFrom: txn.
-	supervisor startAllIn: txn ]
+	supervisor startAllIn: txn tickEvery: 1 hour reportEvery: 1 hour ]
 		ensure: [ txn abort ]
 ]
 
@@ -103,7 +103,6 @@ SoilResidentReportingTest >> testARevivedTickSaysSoAndCounts [
 	restart, and a climbing number is a crash loop rather than a one-off"
 	| resident |
 	resident := self residentWith: [ :d | d ].
-	supervisor startTickEvery: 1 hour reportEvery: 1 hour.
 	supervisor tickProcess terminate.
 	supervisor ensureTickProcess.
 
@@ -127,24 +126,37 @@ SoilResidentReportingTest >> testAnActiveResidentAddsItsStepsAndErrorsToTheRepor
 SoilResidentReportingTest >> testNothingIsReportedBeforeTheIntervalHasPassed [
 	"otherwise the interval would not be one"
 	self residentWith: [ :d | d ].
-	supervisor startTickEvery: 1 hour reportEvery: 1 hour.
 	supervisor tick.
 
 	self assert: (soil reportedMatching: 'steps, 0 errors') size equals: 0
 ]
 
 { #category : #tests }
-SoilResidentReportingTest >> testStartingTheTickSaysSo [
+SoilResidentReportingTest >> testStartingTheResidentsStartsTheTickAndSaysSo [
 	"the first report is a whole interval away, so a silent start would leave that
-	interval indistinguishable from a tick that never came up"
+	interval indistinguishable from a tick that never came up - and starting the
+	residents is the only moment at which anybody can be sure it happened at all"
 	self residentWith: [ :d | d ].
-	supervisor startTickEvery: 30 seconds reportEvery: 30 minutes.
 
+	self assert: supervisor tickProcessIsRunning.
 	self assert: (soil reportedMatching: 'ticking every') size equals: 1.
 	self assert: (soil reportedMatching: 'reporting every') size equals: 1.
-	"and it says who it ticks for, because a tick with no residents is the case
-	worth noticing"
+	"and it says who it ticks for"
 	self assert: (soil reportedMatching: 'for active') size equals: 1
+]
+
+{ #category : #tests }
+SoilResidentReportingTest >> testNoResidentsMeansNoTickAndNoLine [
+	"a tick process for an empty collection would wake up forever to iterate
+	nothing, once per open database - and would announce itself while at it"
+	| txn |
+	txn := soil newTransaction.
+	[ supervisor loadFrom: txn.
+	supervisor startAllIn: txn tickEvery: 1 hour reportEvery: 1 hour ]
+		ensure: [ txn abort ].
+
+	self deny: supervisor tickProcessIsRunning.
+	self assert: (soil reportedMatching: 'ticking every') size equals: 0
 ]
 
 { #category : #tests }
@@ -188,7 +200,7 @@ SoilResidentReportingTest >> testAFailedStartIsReportedOnce [
 	soil addResidentDescription: description.
 	txn := soil newTransaction.
 	[ supervisor loadFrom: txn.
-	supervisor startAllIn: txn ]
+	supervisor startAllIn: txn tickEvery: 1 hour reportEvery: 1 hour ]
 		ensure: [ txn abort ].
 	self assert: (soil reportedMatching: 'failed to start') size equals: 1
 ]

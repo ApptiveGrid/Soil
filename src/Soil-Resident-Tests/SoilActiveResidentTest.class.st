@@ -34,7 +34,7 @@ SoilActiveResidentTest >> residentWith: aBlock [
 	supervisor := soil newResidentSupervisor.
 	txn := soil newTransaction.
 	[ supervisor loadFrom: txn.
-	supervisor startAllIn: txn ]
+	supervisor startAllIn: txn tickEvery: 1 hour reportEvery: 1 hour ]
 		ensure: [ txn abort ].
 	^ supervisor residentNamed: #active
 ]
