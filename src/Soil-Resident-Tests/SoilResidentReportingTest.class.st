@@ -70,6 +70,17 @@ SoilResidentReportingTest >> setUp [
 ]
 
 { #category : #helpers }
+SoilResidentReportingTest >> startAll [
+	"every description has to be registered before this: #loadFrom: refuses a
+	second load, deliberately, so residents come up in one go and not one by one"
+	| txn |
+	txn := soil newTransaction.
+	[ supervisor loadFrom: txn.
+	supervisor startAllIn: txn ]
+		ensure: [ txn abort ]
+]
+
+{ #category : #helpers }
 SoilResidentReportingTest >> stopWithin: aDuration [
 	| txn |
 	txn := soil newTransaction.
@@ -84,6 +95,88 @@ SoilResidentReportingTest >> tearDown [
 		soil close.
 		soil destroy ].
 	super tearDown
+]
+
+{ #category : #tests }
+SoilResidentReportingTest >> testARevivedTickSaysSoAndCounts [
+	"a tick that had to be brought back is the same news as a resident's process
+	restart, and a climbing number is a crash loop rather than a one-off"
+	| resident |
+	resident := self residentWith: [ :d | d ].
+	supervisor startTickEvery: 1 hour reportEvery: 1 hour.
+	supervisor tickProcess terminate.
+	supervisor ensureTickProcess.
+
+	self assert: supervisor tickRestartCount equals: 1.
+	self assert: (soil reportedMatching: 'the tick process was gone') size equals: 1.
+	self assert: (soil reportedMatching: 'starting it again (1)') size equals: 1
+]
+
+{ #category : #tests }
+SoilResidentReportingTest >> testAnActiveResidentAddsItsStepsAndErrorsToTheReport [
+	"the base says who and how, the subclass adds what only it counts"
+	| resident |
+	resident := self residentWith: [ :d | d ].
+	resident noteWork.
+	self assert: (resident waitForStepWithin: 2 seconds).
+
+	self assert: resident statusLine equals: 'active started, 1 step, 0 errors'
+]
+
+{ #category : #tests }
+SoilResidentReportingTest >> testNothingIsReportedBeforeTheIntervalHasPassed [
+	"otherwise the interval would not be one"
+	self residentWith: [ :d | d ].
+	supervisor startTickEvery: 1 hour reportEvery: 1 hour.
+	supervisor tick.
+
+	self assert: (soil reportedMatching: 'steps, 0 errors') size equals: 0
+]
+
+{ #category : #tests }
+SoilResidentReportingTest >> testStartingTheTickSaysSo [
+	"the first report is a whole interval away, so a silent start would leave that
+	interval indistinguishable from a tick that never came up"
+	self residentWith: [ :d | d ].
+	supervisor startTickEvery: 30 seconds reportEvery: 30 minutes.
+
+	self assert: (soil reportedMatching: 'ticking every') size equals: 1.
+	self assert: (soil reportedMatching: 'reporting every') size equals: 1.
+	"and it says who it ticks for, because a tick with no residents is the case
+	worth noticing"
+	self assert: (soil reportedMatching: 'for active') size equals: 1
+]
+
+{ #category : #tests }
+SoilResidentReportingTest >> testTheReportComesEvenWhenNothingHappened [
+	"the point of the whole heartbeat: every other line here hangs on an event, so
+	a quiet database said nothing at all - and a living tick was not to be told
+	apart from a dead one"
+	| resident |
+	resident := self residentWith: [ :d | d ].
+	supervisor startTickEvery: 1 hour reportEvery: 20 milliSeconds.
+	self assert: resident stepCount equals: 0.
+	50 milliSeconds wait.
+	supervisor tick.
+
+	self assert: (soil reportedMatching: 'active started, 0 steps, 0 errors') size equals: 1
+]
+
+{ #category : #tests }
+SoilResidentReportingTest >> testTheReportNamesEveryResidentInOneLine [
+	"one line for the database rather than one per resident: at this interval what
+	somebody wants is a glance"
+	soil addResidentDescription: SoilTestActiveResidentDescription new.
+	soil addResidentDescription: SoilTestResidentDescription new.
+	self startAll.
+	supervisor startTickEvery: 1 hour reportEvery: 20 milliSeconds.
+	50 milliSeconds wait.
+	supervisor tick.
+
+	self assert: (soil reportedMatching: 'active started') size equals: 1.
+	self assert: (soil reportedMatching: 'dummy started') size equals: 1.
+	self assert: ((soil reportedMatching: 'dummy started') first
+		includesSubstring: 'active started')
 ]
 
 { #category : #tests }

@@ -129,7 +129,7 @@ SoilResidentTest >> testEnsureTickProcessRevivesATerminatedTick [
 	| supervisor |
 	self addResident: SoilTestResidentDescription new.
 	supervisor := self startedSupervisor.
-	supervisor startTickEvery: 10 seconds.
+	supervisor startTickEvery: 10 seconds reportEvery: 1 hour.
 	self assert: supervisor tickProcessIsRunning.
 
 	supervisor tickProcess terminate.
@@ -354,7 +354,7 @@ SoilResidentTest >> testStopTickKeepsEnsureFromRevivingIt [
 	| supervisor |
 	self addResident: SoilTestResidentDescription new.
 	supervisor := self startedSupervisor.
-	supervisor startTickEvery: 10 seconds.
+	supervisor startTickEvery: 10 seconds reportEvery: 1 hour.
 	self stop: supervisor within: 5 seconds.
 	self deny: supervisor tickProcessIsRunning.
 
@@ -400,7 +400,7 @@ SoilResidentTest >> testTickProcessFiresOnItsInterval [
 	self addResident: SoilTestResidentDescription new.
 	supervisor := self startedSupervisor.
 	dummy := supervisor residentNamed: #dummy.
-	supervisor startTickEvery: 20 milliSeconds.
+	supervisor startTickEvery: 20 milliSeconds reportEvery: 1 hour.
 
 	self waitUntil: [ dummy tickCount >= 2 ] within: 5 seconds.
 	self stop: supervisor within: 5 seconds

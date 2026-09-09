@@ -72,6 +72,31 @@ SoilResident >> descriptionIn: aTransaction [
 ]
 
 { #category : #logging }
+SoilResident >> count: anInteger of: aNoun [
+	"so that a report says '1 step' and not '1 steps'. A line written to be read by
+	somebody should read like a line"
+	^ anInteger printString, ' ', (anInteger = 1 ifTrue: [ aNoun ] ifFalse: [ aNoun, 's' ])
+]
+
+{ #category : #logging }
+SoilResident >> statusLine [
+	"what I contribute to the supervisor's periodic report: who I am and how I am,
+	in the fewest words that still tell a healthy resident from a stuck one.
+
+	Deliberately not sent through #emit:, because this is not a line of its own -
+	the supervisor joins what all residents say into one. Subclasses add what only
+	they count, and call me first, so that the state stays at the front of every
+	entry no matter who wrote the rest."
+	| line |
+	line := self name asString, ' ', state.
+	restartCount > 0 ifTrue: [
+		line := line, ', ', (self count: restartCount of: 'restart') ].
+	self hasFailed ifTrue: [
+		line := line, ' (', (error ifNil: [ 'no error recorded' ] ifNotNil: [ :e | e messageText ifNil: [ e class name ] ]), ')' ].
+	^ line
+]
+
+{ #category : #logging }
 SoilResident >> emit: aString [
 	"every line of mine names me, so that lines from several residents in one
 	database can be told apart and a stable prefix can be searched for. That the

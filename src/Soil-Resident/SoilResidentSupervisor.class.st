@@ -5,8 +5,9 @@ as the database is open; my persisted counterpart is the
 SoilResidentRegistry.
 
 I do not evaluate. I gather answers and pass them on; whether a close, an error
-or nothing at all follows is the embedder's decision. Accordingly I know no
-timeout and no interval of my own -- both are handed to me from outside.
+or nothing at all follows is the embedder's decision. Accordingly I hold no
+timeout and no interval of my own -- the stop timeout, the tick and the
+reporting interval are all handed to me from outside.
 
 My mutex protects my own dictionary against concurrent lookup, tick and
 start/stop. It is deliberately not the mutex that closes the race between an
@@ -23,6 +24,9 @@ Class {
 		'mutex',
 		'tickProcess',
 		'tickInterval',
+		'tickRestartCount',
+		'reportInterval',
+		'nextReportAt',
 		'emitsEveryStep'
 	],
 	#category : #'Soil-Resident'
@@ -55,10 +59,18 @@ SoilResidentSupervisor >> ensureTickProcess [
 	for its own maintenance process.
 
 	Does nothing until an interval has been set: without one there is no tick to
-	keep alive."
+	keep alive.
+
+	Reports, and counts: a tick that had to be brought back is the same kind of
+	news as a resident's process restart, and a climbing number here is a crash
+	loop rather than a one-off. The regular start does not come through here, so
+	this line only ever means a revival."
 	tickInterval ifNil: [ ^ self ].
-	(tickProcess isNil or: [ tickProcess isTerminated ])
-		ifTrue: [ self startTickProcess ]
+	(tickProcess isNil or: [ tickProcess isTerminated ]) ifFalse: [ ^ self ].
+	tickRestartCount := tickRestartCount + 1.
+	self emit: 'residents: the tick process was gone, starting it again (',
+		tickRestartCount printString, ')'.
+	self startTickProcess
 ]
 
 { #category : #accessing }
@@ -112,6 +124,7 @@ SoilResidentSupervisor >> initialize [
 	super initialize.
 	residents := Dictionary new.
 	mutex := Mutex new.
+	tickRestartCount := 0.
 	emitsEveryStep := true
 ]
 
@@ -134,6 +147,23 @@ SoilResidentSupervisor >> loadFrom: aTransaction [
 	(self registryIn: aTransaction) ifNotNil: [ :registry |
 		registry descriptionsDo: [ :description |
 			self addResident: (description newInstanceIn: aTransaction) ] ]
+]
+
+{ #category : #logging }
+SoilResidentSupervisor >> durationString: aDuration [
+	<ignoreNotImplementedSelectors: #( humanReadablePrintString )>
+	"'30 minutes' rather than '0:00:30:00'. The whole worth of the line this goes
+	into is that somebody can read it, so the interval should read like one.
+
+	Version-tolerant for the same reason and in the same shape as
+	SoilActiveResident>>wait:upTo: and SoilResidentReportingTest>>entriesOf::
+	Soil builds on four Pharos and #humanReadablePrintString appears in none of
+	the rest of this codebase, so it is asked for rather than assumed. The
+	fallback is Duration's own printString, which is what the stop timeout has
+	always used."
+	^ (aDuration respondsTo: #humanReadablePrintString)
+		ifTrue: [ aDuration humanReadablePrintString ]
+		ifFalse: [ aDuration asString ]
 ]
 
 { #category : #logging }
@@ -227,16 +257,86 @@ SoilResidentSupervisor >> startAllIn: aTransaction [
 ]
 
 { #category : #running }
-SoilResidentSupervisor >> startTickEvery: aDuration [
-	"the interval is the embedder's business -- I only offer the tick. My own
+SoilResidentSupervisor >> startTickEvery: aDuration reportEvery: aReportDuration [
+	"both intervals are the embedder's business -- I only offer the tick. My own
 	process, not a resident's: otherwise a hanging resident could not revive
 	itself.
 
-	I remember the interval so #ensureTickProcess can bring the process back
-	without being told again."
+	I remember them so #ensureTickProcess can bring the process back without being
+	told again.
+
+	Deliberately one message and not two: a tick that can be started without a
+	reporting interval is a tick that reports nothing, and nothing is exactly what
+	could not be told apart from a tick that is not running. The one-argument form
+	this replaces had no caller at all for weeks, which is how #ensureTickProcess
+	came to be inert - the same mistake is not worth making twice.
+
+	Says so, once, because the whole point of the periodic report is that somebody
+	can see the mechanism is alive; a start that happened silently would leave the
+	first report an unexplained half hour away."
 	self stopTick.
 	tickInterval := aDuration.
-	self startTickProcess
+	reportInterval := aReportDuration.
+	nextReportAt := DateAndTime now + aReportDuration.
+	self startTickProcess.
+	self emit: 'residents: ticking every ', (self durationString: aDuration),
+		', reporting every ', (self durationString: aReportDuration),
+		', for ', self residentNames
+]
+
+{ #category : #logging }
+SoilResidentSupervisor >> reportIfDue [
+	"the heartbeat: a line on a fixed schedule, whether or not anything happened.
+
+	Every other line this mechanism emits hangs on an event, which means a
+	database where nothing happens says nothing at all - and the silence of a
+	living tick reads exactly like the silence of a dead one. That confusion is
+	what this whole reporting effort was built to end, and leaving the periodic
+	line to depend on work reproduced it one level up. So this is the one line
+	allowed to say nothing new.
+
+	Against a deadline rather than a count of ticks, so the interval means what it
+	says even when the tick interval is changed underneath it."
+	nextReportAt ifNil: [ ^ self ].
+	DateAndTime now < nextReportAt ifTrue: [ ^ self ].
+	nextReportAt := DateAndTime now + reportInterval.
+	self emit: self reportLine
+]
+
+{ #category : #logging }
+SoilResidentSupervisor >> reportLine [
+	"one line for the whole database rather than one per resident: at this
+	interval what somebody wants is a glance, and a glance is easier when the
+	residents stand next to each other. Each of them says its own part - only a
+	resident knows what it counts."
+	^ String streamContents: [ :stream |
+		stream nextPutAll: 'residents: '.
+		self residents
+			do: [ :each | stream nextPutAll: each statusLine ]
+			separatedBy: [ stream nextPutAll: '; ' ] ]
+]
+
+{ #category : #accessing }
+SoilResidentSupervisor >> reportInterval [
+	"how far apart my periodic reports are, or nil while no tick is running. The
+	embedder that handed the interval in is entitled to check that it arrived"
+	^ reportInterval
+]
+
+{ #category : #accessing }
+SoilResidentSupervisor >> residentNames [
+	"for the lines that say who is involved without saying anything about them yet"
+	^ String streamContents: [ :stream |
+		self residents
+			do: [ :each | stream nextPutAll: each name asString ]
+			separatedBy: [ stream nextPutAll: ', ' ] ]
+]
+
+{ #category : #accessing }
+SoilResidentSupervisor >> tickRestartCount [
+	"how often my tick process had to be brought back. For diagnosis, and the same
+	question SoilResident>>restartCount answers about a resident's own process"
+	^ tickRestartCount
 ]
 
 { #category : #private }
@@ -279,6 +379,7 @@ SoilResidentSupervisor >> stopTick [
 	"forgets the interval as well: otherwise #ensureTickProcess would revive the
 	very tick that the stop just cleared away"
 	tickInterval := nil.
+	nextReportAt := nil.
 	tickProcess ifNotNil: [
 		tickProcess terminate.
 		tickProcess := nil ]
@@ -293,7 +394,8 @@ SoilResidentSupervisor >> tick [
 		(each isStopping or: [ each isStopped ]) ifFalse: [
 			[ each tick ]
 				on: Error
-				do: [ :err | each emit: 'failed on tick: ', err messageText ] ] ]
+				do: [ :err | each emit: 'failed on tick: ', err messageText ] ] ].
+	self reportIfDue
 ]
 
 { #category : #accessing }
