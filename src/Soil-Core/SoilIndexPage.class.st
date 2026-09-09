@@ -76,11 +76,6 @@ SoilIndexPage >> isHeaderPage [
 	^ false
 ]
 
-{ #category : #testing }
-SoilIndexPage >> isLastPage [
-	self shouldBeImplemented.
-]
-
 { #category : #writing }
 SoilIndexPage >> itemsSizeSize [
 	"as long as we target 65536 bytes as maximum page size a two-byte 

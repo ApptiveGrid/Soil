@@ -12,11 +12,13 @@ Class {
 
 { #category : #visiting }
 SoilSkipListDictionary >> acceptSoil: aSoilVisitor [
+	<ignoreForCoverage> "class deprecated"
 	aSoilVisitor visitSkipListDictionary: self 
 ]
 
 { #category : #initialization }
-SoilSkipListDictionary >> initialize [ 
+SoilSkipListDictionary >> initialize [
+	<ignoreForCoverage> "class deprecated"
 	super initialize.
 	self createIndexWith: SoilSkipList
 ]

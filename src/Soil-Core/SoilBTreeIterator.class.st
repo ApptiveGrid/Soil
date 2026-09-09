@@ -20,6 +20,7 @@ SoilBTreeIterator >> basicAt: indexKey add: anObject [
 
 { #category : #accessing }
 SoilBTreeIterator >> basicAt: indexKey put: anObject [
+	<ignoreForCoverage>
 	self
 		deprecated: 'Please use #basicAt:add:'
 		transformWith: '`@receiver basicAt: `@arg1 put: `@arg2' -> '`@receiver basicAt: `@arg1 add: `@arg2'.

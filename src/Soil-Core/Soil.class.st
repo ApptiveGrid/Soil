@@ -45,6 +45,11 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
+{ #category : #accessing }
+Soil class >> characterEncoding: aString [ 
+	SoilObjectCodec characterEncoding: aString
+]
+
 { #category : #'opening/closing' }
 Soil class >> closeAll: aCollection [
 	"Close every element, skipping nils, and answer only once all of them have been
@@ -64,11 +69,6 @@ Soil class >> closeAll: aCollection [
 				on: Error
 				do: [ :error | firstError ifNil: [ firstError := error ] ] ] ].
 	firstError ifNotNil: [ firstError signal ]
-]
-
-{ #category : #accessing }
-Soil class >> characterEncoding: aString [ 
-	SoilObjectCodec characterEncoding: aString
 ]
 
 { #category : #'instance creation' }
@@ -232,6 +232,15 @@ Soil >> defaultFabricClass [
 	^ SoilFabric 
 ]
 
+{ #category : #public }
+Soil >> destroy [
+	self isOpen ifTrue: [ 
+		self close ].
+	path exists ifFalse: [ ^ self ].
+	path children do: #deleteAll.
+	path delete
+]
+
 { #category : #logging }
 Soil >> emit: aString [
 	"where this database says what it is doing, and the one place an embedder has
@@ -250,15 +259,6 @@ Soil >> emit: aString [
 	(SoilSignal on: aString)
 		databaseName: self name;
 		emit
-]
-
-{ #category : #public }
-Soil >> destroy [
-	self isOpen ifTrue: [ 
-		self close ].
-	path exists ifFalse: [ ^ self ].
-	path children do: #deleteAll.
-	path delete
 ]
 
 { #category : #accessing }

@@ -12,6 +12,7 @@ Class {
 
 { #category : #initialization }
 SoilBTreeDictionary >> initialize [ 
+	<ignoreForCoverage> "class deprecated"
 	super initialize.
 	self createIndexWith: SoilBTree
 ]

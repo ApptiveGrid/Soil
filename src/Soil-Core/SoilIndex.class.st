@@ -92,6 +92,7 @@ SoilIndex >> at: anObject ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndex >> at: aKeyObject put: anObject [
+	<ignoreForCoverage>
 	self
 		deprecated: 'Please use #at:add:'
 		transformWith: '`@receiver at: `@arg1 put: `@arg2' -> '`@receiver at: `@arg1 add: `@arg2'.
@@ -112,6 +113,7 @@ SoilIndex >> basicAt: key add: anObject [
 
 { #category : #accessing }
 SoilIndex >> basicAt: key put: anObject [
+	<ignoreForCoverage>
 	self
 		deprecated: 'Please use #basicAt:add:'
 		transformWith: '`@receiver basicAt: `@arg1 put: `@arg2' -> '`@receiver basicAt: `@arg1 add: `@arg2'.
