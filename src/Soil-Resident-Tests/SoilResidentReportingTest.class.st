@@ -167,6 +167,19 @@ SoilResidentReportingTest >> testStartingAndStoppingAreReported [
 ]
 
 { #category : #tests }
+SoilResidentReportingTest >> testStoppingTwiceIsReportedOnce [
+	"an embedder that stops explicitly and then closes stops twice, and the second
+	one is not a state change - saying it again would describe a transition that
+	did not happen"
+	self residentWith: [ :d | d ].
+	self stopWithin: 2 seconds.
+	self stopWithin: 2 seconds.
+	supervisor := nil.
+	self assert: (soil reportedMatching: 'stopping') size equals: 1.
+	self assert: (soil reportedMatching: 'stopped') size equals: 1
+]
+
+{ #category : #tests }
 SoilResidentReportingTest >> testStepsAreReportedWhenAskedFor [
 	| resident |
 	resident := self residentWith: [ :d | d ].

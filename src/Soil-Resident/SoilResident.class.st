@@ -190,7 +190,11 @@ SoilResident >> markStarted [
 
 { #category : #accessing }
 SoilResident >> markStopped [
-	"called by my own process when it has left its loop between two work units"
+	"called by my own process when it has left its loop between two work units.
+
+	Reports only a transition that happened: #terminateProcesses marks a resident
+	stopped as well, and it may run after the loop already did"
+	state = #stopped ifTrue: [ ^ self ].
 	state := #stopped.
 	self emit: 'stopped'
 ]
@@ -233,7 +237,13 @@ SoilResident >> requestStop [
 	and held locks behind. I only set the flag -- a resident with a process checks
 	it between two work units and answers #isStopped once it has left the loop.
 	Without a process there is nobody who would notice the flag, so I am stopped
-	right away."
+	right away.
+
+	Asking a resident that has already stopped to stop does nothing at all. It used
+	to put it back into #stopping and out again, which is a state cycle that never
+	happened - and said so twice in the log. Two stops in a row is not exotic: an
+	embedder that stops explicitly and then closes does exactly that."
+	self isStopped ifTrue: [ ^ self ].
 	stopRequested := true.
 	state := #stopping.
 	self emit: 'stopping'.
