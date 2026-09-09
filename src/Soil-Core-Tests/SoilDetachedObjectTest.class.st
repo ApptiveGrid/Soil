@@ -77,51 +77,6 @@ SoilDetachedObjectTest >> testAProxyAndADetachedHandleOnTheSameObjectAreIdentica
 ]
 
 { #category : #tests }
-SoilDetachedObjectTest >> testComparingWithAnUnrelatedObjectStaysFalse [
-	| detached |
-	detached := self detachedFullyFrom: [ :txn | txn root at: #kept ].
-	self deny: (detached isIdenticalTo: SoilTestClusterRoot new).
-	self deny: (detached isEqualTo: SoilTestClusterRoot new)
-]
-
-{ #category : #tests }
-SoilDetachedObjectTest >> testTwoDetachedHandlesOnTheSameObjectAreIdentical [
-	"the case that shows why the objectId is the criterion and the materialized
-	object is not: each transaction materializes its own, so #== falls apart while
-	the id does not"
-	| first second |
-	first := self detachedFullyFrom: [ :txn | txn root at: #kept ].
-	second := self detachedFullyFrom: [ :txn | txn root at: #kept ].
-
-	self assert: first objectId equals: second objectId.
-	self deny: first soilRealObject == second soilRealObject.
-
-	self assert: (first isIdenticalTo: second).
-	self assert: (second isIdenticalTo: first).
-	self assert: (first isEqualTo: second)
-]
-
-{ #category : #tests }
-SoilDetachedObjectTest >> testRecognisesItsOwnMaterializationButNotAForeignOne [
-	"the objectId decides only where the other side stands in for a stored object
-	too. A plain object carries none, so all that is left to compare against is
-	the materialization I hold -- and another transaction's copy of the same
-	stored object is a different object. SoilObjectProxy answers true here
-	because what it unwraps to is its own; a detached handle cannot, and that is
-	the price of holding a materialization instead of resolving one. Asking a
-	transaction mid-comparison would pay it, and reading never opens one."
-	| detached foreign txn |
-	detached := self detachedFullyFrom: [ :mintingTxn | mintingTxn root at: #kept ].
-	self assert: (detached isIdenticalTo: detached soilRealObject).
-
-	txn := soil newTransaction.
-	foreign := (txn root at: #kept) theNonSoilProxy.
-	self assert: detached objectId equals: (txn objectIdOf: foreign).
-	self deny: (detached isIdenticalTo: foreign).
-	txn abort
-]
-
-{ #category : #tests }
 SoilDetachedObjectTest >> testAnswersFromTheHeldObjectWithoutATransaction [
 	"the claim in one line: the minting transaction is gone, and sends still work"
 	| detached |
@@ -137,6 +92,14 @@ SoilDetachedObjectTest >> testChangedDoesNothingOnItsOwn [
 	detached := self detachedFullyFrom: [ :txn | txn root at: #kept ].
 	detached changed.
 	self assert: detached nested equals: 1
+]
+
+{ #category : #tests }
+SoilDetachedObjectTest >> testComparingWithAnUnrelatedObjectStaysFalse [
+	| detached |
+	detached := self detachedFullyFrom: [ :txn | txn root at: #kept ].
+	self deny: (detached isIdenticalTo: SoilTestClusterRoot new).
+	self deny: (detached isEqualTo: SoilTestClusterRoot new)
 ]
 
 { #category : #tests }
@@ -161,6 +124,43 @@ SoilDetachedObjectTest >> testMutationStaysLocalUntilSomebodyWritesItBack [
 	self assert: detached nested equals: 42.
 	txn := soil newTransaction.
 	self assert: ([ (txn root at: #kept) nested ] ensure: [ txn abort ]) equals: 1
+]
+
+{ #category : #tests }
+SoilDetachedObjectTest >> testRecognisesItsOwnMaterializationButNotAForeignOne [
+	"the objectId decides only where the other side stands in for a stored object
+	too. A plain object carries none, so all that is left to compare against is
+	the materialization I hold -- and another transaction's copy of the same
+	stored object is a different object. SoilObjectProxy answers true here
+	because what it unwraps to is its own; a detached handle cannot, and that is
+	the price of holding a materialization instead of resolving one. Asking a
+	transaction mid-comparison would pay it, and reading never opens one."
+	| detached foreign txn |
+	detached := self detachedFullyFrom: [ :mintingTxn | mintingTxn root at: #kept ].
+	self assert: (detached isIdenticalTo: detached soilRealObject).
+
+	txn := soil newTransaction.
+	foreign := (txn root at: #kept) theNonSoilProxy.
+	self assert: detached objectId equals: (txn objectIdOf: foreign).
+	self deny: (detached isIdenticalTo: foreign).
+	txn abort
+]
+
+{ #category : #tests }
+SoilDetachedObjectTest >> testTwoDetachedHandlesOnTheSameObjectAreIdentical [
+	"the case that shows why the objectId is the criterion and the materialized
+	object is not: each transaction materializes its own, so #== falls apart while
+	the id does not"
+	| first second |
+	first := self detachedFullyFrom: [ :txn | txn root at: #kept ].
+	second := self detachedFullyFrom: [ :txn | txn root at: #kept ].
+
+	self assert: first objectId equals: second objectId.
+	self deny: first soilRealObject == second soilRealObject.
+
+	self assert: (first isIdenticalTo: second).
+	self assert: (second isIdenticalTo: first).
+	self assert: (first isEqualTo: second)
 ]
 
 { #category : #tests }

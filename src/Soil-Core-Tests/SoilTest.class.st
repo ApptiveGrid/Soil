@@ -116,6 +116,21 @@ SoilTest >> testCheckpointEmptyRecordsToCommit [
 ]
 
 { #category : #tests }
+SoilTest >> testCloseClosesEveryPartEvenAfterOneFails [
+	"a close that stops at its first failure leaves everything behind it open - which
+	is how one file that will not close becomes a handle leak, and on Windows the
+	reason the next open fails"
+
+	self assert: soil control stream isOpen.
+	self assert: soil metadata stream isOpen.
+	soil instVarNamed: 'objectRepository' put: Object new.
+	self should: [ soil close ] raise: MessageNotUnderstood.
+	self deny: soil control stream isOpen.
+	self deny: soil metadata stream isOpen.
+	soil := nil
+]
+
+{ #category : #tests }
 SoilTest >> testCyclic [
 	"This test shows that Soil has no problem to serialize cyclic structures
 	In this test, both are roots and thus external references"
@@ -191,21 +206,6 @@ SoilTest >> testCyclicProblemPharoSet [
 	self
 		assert: ((txn root at: #o1) includes: (txn root at: #o2));
 		assert: ((txn root at: #o2) includes: (txn root at: #o1))"
-]
-
-{ #category : #tests }
-SoilTest >> testCloseClosesEveryPartEvenAfterOneFails [
-	"a close that stops at its first failure leaves everything behind it open - which
-	is how one file that will not close becomes a handle leak, and on Windows the
-	reason the next open fails"
-
-	self assert: soil control stream isOpen.
-	self assert: soil metadata stream isOpen.
-	soil instVarNamed: 'objectRepository' put: Object new.
-	self should: [ soil close ] raise: MessageNotUnderstood.
-	self deny: soil control stream isOpen.
-	self deny: soil metadata stream isOpen.
-	soil := nil
 ]
 
 { #category : #tests }

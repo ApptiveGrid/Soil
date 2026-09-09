@@ -5,6 +5,36 @@ Class {
 }
 
 { #category : #tests }
+SoilRecursiveHashTest >> testBehavior [
+	| object objec2 |
+	object := Object.
+	objec2 := Array.
+	
+	self assert: object soilRecursiveHash isInteger.
+	self deny: object soilRecursiveHash equals: objec2
+]
+
+{ #category : #tests }
+SoilRecursiveHashTest >> testBitsLayout [
+	| object object2|
+	object := IntegerArray new: 5 withAll: 2.
+	object2 := IntegerArray new: 5 withAll: 2.
+	
+	self assert: object soilRecursiveHash isInteger.
+	self deny: object soilRecursiveHash equals: object2
+]
+
+{ #category : #tests }
+SoilRecursiveHashTest >> testByteArray [
+	| object object2 |
+	object := #[1 1 1].
+	object2 := #[1 1 2].
+	
+	self assert: object soilRecursiveHash isInteger.
+	self deny: object soilRecursiveHash equals: object2
+]
+
+{ #category : #tests }
 SoilRecursiveHashTest >> testCollectionPositionExchanged [
 	| array hash1 tmp hash2 |
 	array := Array with: #foo with: #bar.
@@ -54,6 +84,14 @@ SoilRecursiveHashTest >> testDictionaryKeysExchanged [
 ]
 
 { #category : #tests }
+SoilRecursiveHashTest >> testEphemeronLayout [
+	| object |
+	object := WeakKeyAssociation new.
+	"just a smoke test"
+	self assert: object soilRecursiveHash isInteger
+]
+
+{ #category : #tests }
 SoilRecursiveHashTest >> testImmediateCharacter [
 	| hash |
 	hash := $A soilRecursiveHash.
@@ -85,4 +123,12 @@ SoilRecursiveHashTest >> testObject [
 		three: { #key -> #value } asDictionary.
 	self assert: object soilRecursiveHash equals: object soilRecursiveHash 
 	
+]
+
+{ #category : #tests }
+SoilRecursiveHashTest >> testWeakLayout [
+	| object |
+	object := WeakArray new.
+	"just a smoke test"
+	self assert: object soilRecursiveHash isInteger
 ]

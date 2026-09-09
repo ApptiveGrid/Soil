@@ -263,19 +263,6 @@ SoilDatabaseJournalTest >> testRemoveFragmentFiles [
 ]
 
 { #category : #tests }
-SoilDatabaseJournalTest >> testSeveralReadersOfSameFragmentFile [
-	"readers of the same fragment file do not lock each other out"
-	| first second |
-	self addDictionaryRoot.
-	soil checkpoint.
-	first := soil journal openFragmentFileNumber: 0.
-	second := soil journal openFragmentFileNumber: 0.
-	[ self assert: first entries isNotEmpty.
-	  self assert: second entries size equals: first entries size ]
-		ensure: [ first close. second close ]
-]
-
-{ #category : #tests }
 SoilDatabaseJournalTest >> testReplicationToEmptyDatabase [
 	| tx |
 	self fillDatabase. 
@@ -310,4 +297,17 @@ SoilDatabaseJournalTest >> testReplicationToNonEmptyDatabase [
 	tx := soil newTransaction.
 	self assert: (tx root nested at: #foo) label equals: #newLabel.	
 	tx abort.
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testSeveralReadersOfSameFragmentFile [
+	"readers of the same fragment file do not lock each other out"
+	| first second |
+	self addDictionaryRoot.
+	soil checkpoint.
+	first := soil journal openFragmentFileNumber: 0.
+	second := soil journal openFragmentFileNumber: 0.
+	[ self assert: first entries isNotEmpty.
+	  self assert: second entries size equals: first entries size ]
+		ensure: [ first close. second close ]
 ]

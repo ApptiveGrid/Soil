@@ -47,23 +47,6 @@ SoilObjectRepositoryTest >> testAddSegmentAfterOpeningFromDisk [
 ]
 
 { #category : #tests }
-SoilObjectRepositoryTest >> testSegmentIdsMayHaveGaps [
-	"segment ids are part of object identity - a SoilObjectId names the segment it
-	lives in - so they can never be renumbered, and a segment that is removed has to
-	leave its id vacant. A database with a gap therefore has to open and work."
-
-	| reopened |
-	('soil-tests' asFileReference / #segments / '3') ensureCreateDirectory.
-	soil close.
-	soil := nil.
-	reopened := (Soil path: 'soil-tests') open.
-	[ self assert: (reopened objectRepository segments collect: [ :each | each id ]) asArray equals: #( 1 3 ).
-	  self assert: (reopened objectRepository segmentAt: 3) id equals: 3.
-	  self should: [ reopened objectRepository segmentAt: 2 ] raise: SoilInvalidSegmentIndex ]
-		ensure: [ reopened close ]
-]
-
-{ #category : #tests }
 SoilObjectRepositoryTest >> testCacheObjectRecordMetrics [
 	| txn root segment metrics txn2 |
 	soil notificationHandler: SoilMetrics new.
@@ -161,6 +144,23 @@ SoilObjectRepositoryTest >> testSegmentCreation [
 	self assert: ('soil-tests' asFileReference / #segments / '2') exists.
 	self assert: soil objectRepository segments size equals: 2.
 
+]
+
+{ #category : #tests }
+SoilObjectRepositoryTest >> testSegmentIdsMayHaveGaps [
+	"segment ids are part of object identity - a SoilObjectId names the segment it
+	lives in - so they can never be renumbered, and a segment that is removed has to
+	leave its id vacant. A database with a gap therefore has to open and work."
+
+	| reopened |
+	('soil-tests' asFileReference / #segments / '3') ensureCreateDirectory.
+	soil close.
+	soil := nil.
+	reopened := (Soil path: 'soil-tests') open.
+	[ self assert: (reopened objectRepository segments collect: [ :each | each id ]) asArray equals: #( 1 3 ).
+	  self assert: (reopened objectRepository segmentAt: 3) id equals: 3.
+	  self should: [ reopened objectRepository segmentAt: 2 ] raise: SoilInvalidSegmentIndex ]
+		ensure: [ reopened close ]
 ]
 
 { #category : #tests }
