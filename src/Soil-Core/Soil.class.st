@@ -133,7 +133,7 @@ Soil >> backupTo: aStringOrFileReference [
 { #category : #'opening/closing' }
 Soil >> basicOpen [
 	self isOpen ifTrue: [ self error: 'Database already open' ].
-	self emit: 'open database at ', path asString.
+	self emit: 'open database at ', path fullName.
 	control := SoilControlFile new
 		soil: self;
 		open.
