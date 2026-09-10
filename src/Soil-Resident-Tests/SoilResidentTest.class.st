@@ -308,6 +308,51 @@ SoilResidentTest >> testPassiveResidentStopsWithoutProcess [
 ]
 
 { #category : #tests }
+SoilResidentTest >> testProcessRestartsAreUnlimitedByDefault [
+	"nil is the default and means no bound: which number is right depends on what a
+	resident does, so the package does not invent one"
+	| supervisor resident |
+	self addResident: SoilTestActiveResidentDescription new.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #active.
+	self assert: resident maxProcessRestarts isNil.
+
+	3 timesRepeat: [
+		resident process terminate.
+		supervisor tick ].
+	self assert: resident restartCount equals: 3.
+	self deny: resident hasFailed.
+	self assert: resident hasRunningProcess.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testProcessRestartsStopAtTheLimit [
+	"bringing a resident back forever is a loop, not resilience. At its limit it
+	gives up visibly and stays #failed, and the error keeps the number it gave up at"
+	| supervisor resident |
+	self addResident: SoilTestActiveResidentDescription new.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #active.
+	resident maxRestarts: 1.
+
+	resident process terminate.
+	supervisor tick.
+	self assert: resident restartCount equals: 1.
+	self assert: resident hasRunningProcess.
+	self deny: resident hasFailed.
+
+	resident process terminate.
+	supervisor tick.
+	self assert: resident hasFailed.
+	self deny: resident hasRunningProcess.
+	self assert: resident restartCount equals: 1.
+	self assert: resident error class equals: SoilResidentRestartLimitReached.
+	self assert: resident error messageText equals: 'gave up restarting active after 1 restart'.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
 SoilResidentTest >> testRegistryIsClusterRootWithStableObjectId [
 	"deliberately a cluster root of its own from stage one, so named roots later
 	only add a name -> object id entry instead of moving data in databases in

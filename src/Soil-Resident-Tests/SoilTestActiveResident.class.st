@@ -18,7 +18,8 @@ Class {
 		'prepareCount',
 		'workToLeave',
 		'throwOnStep',
-		'stepSignal'
+		'stepSignal',
+		'maxRestarts'
 	],
 	#category : #'Soil-Resident-Tests'
 }
@@ -45,6 +46,19 @@ SoilTestActiveResident >> interval [
 { #category : #accessing }
 SoilTestActiveResident >> interval: aDuration [
 	interval := aDuration
+]
+
+{ #category : #accessing }
+SoilTestActiveResident >> maxProcessRestarts [
+	"nil unless a test sets one, which is the inherited default"
+	^ maxRestarts
+]
+
+{ #category : #accessing }
+SoilTestActiveResident >> maxRestarts: anIntegerOrNil [
+	"how many revivals of my process I tolerate, so that a test can reach the limit
+	in two terminations instead of many"
+	maxRestarts := anIntegerOrNil
 ]
 
 { #category : #accessing }

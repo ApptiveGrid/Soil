@@ -102,6 +102,30 @@ SoilActiveResident >> lastStepError [
 	^ lastStepError
 ]
 
+{ #category : #accessing }
+SoilActiveResident >> maxProcessRestarts [
+	"how many revivals of my process I tolerate before I give up and stay #failed.
+
+	nil means no limit, and nil is the default. Which number is right depends on what
+	a resident does -- one that talks to a foreign host on every step is a different
+	case from one that only writes back a collected window -- and that is the
+	embedder's knowledge, not this package's. A concrete resident overrides me, or
+	reads the number off its description in #prepareIn:.
+
+	The counter itself has been kept since the mechanism was built; only the bound
+	was missing, and it was left out rather than guessed."
+	^ nil
+]
+
+{ #category : #testing }
+SoilActiveResident >> mayRestartProcess [
+	"revivals are counted, not deaths: with a limit of three, three restarts happen
+	and the fourth death is the one that gives up"
+	^ self maxProcessRestarts
+		ifNil: [ true ]
+		ifNotNil: [ :limit | self restartCount < limit ]
+]
+
 { #category : #'instance creation' }
 SoilActiveResident >> newRunStrategy [
 	^ self runStrategyClass new
@@ -227,10 +251,18 @@ SoilActiveResident >> terminateProcesses [
 { #category : #running }
 SoilActiveResident >> tick [
 	"a terminated process would leave my work undone forever. Bring it back, and
-	count it, so that a crash loop is visible instead of looking like health"
+	count it, so that a crash loop is visible instead of looking like health.
+
+	Unless I have been brought back as often as I tolerate. Then bringing me back
+	again is not resilience but a loop, and the honest answer is to give up visibly
+	and let the embedder decide -- which is what #failed means everywhere else in
+	this package."
 	self hasRunningProcess ifFalse: [
-		self noteProcessRestart.
-		self startProcess ].
+		self mayRestartProcess
+			ifTrue: [
+				self noteProcessRestart.
+				self startProcess ]
+			ifFalse: [ self markFailedAfterRestartLimit ] ].
 	self reportWorkSinceLastTick
 ]
 
