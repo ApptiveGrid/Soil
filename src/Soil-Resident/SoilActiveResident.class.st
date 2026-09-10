@@ -41,7 +41,8 @@ Class {
 		'lastStepError',
 		'stepErrorCount',
 		'stepCount',
-		'reportedStepCount'
+		'reportedStepCount',
+		'stepStartedAt'
 	],
 	#category : #'Soil-Resident'
 }
@@ -50,7 +51,11 @@ Class {
 SoilActiveResident class >> soilTransientInstVars [
 	"nothing about me is persisted either; the list has to repeat the inherited
 	entry, because a subclass declaration replaces its superclass's rather than
-	adding to it"
+	adding to it.
+
+	What is listed here is what must not be dragged into a written graph, not
+	everything that is transient in spirit: the counters and #stepStartedAt are
+	plain values and stand outside for the same reason #stepCount does."
 	^ #( supervisor process workSignal strategy )
 ]
 
@@ -192,10 +197,16 @@ SoilActiveResident >> runStepProtected [
 	something happened, and what happened is about to be handled. Left standing,
 	the next turn would find the flag down, wait on a signal that is already
 	answered, and run an empty step -- which is exactly what a strategy that
-	returns early on the flag would otherwise cause"
+	returns early on the flag would otherwise cause.
+
+	The count and the start time are set before #working, not after, so that
+	whoever finds me working reads a number and a timestamp that already belong to
+	the step I am in. The other order leaves a window in which a report says
+	'in step 3' about step 4, or reads no start time at all"
+	stepCount := stepCount + 1.
+	stepStartedAt := DateAndTime now.
 	working := true.
 	pendingWork := false.
-	stepCount := stepCount + 1.
 	workSignal consumeAllSignals.
 	self emitsEveryStep ifTrue: [ self emit: 'step ', stepCount printString ].
 	[ [ self runStep ]
@@ -275,13 +286,44 @@ SoilActiveResident >> emitsEveryStep [
 ]
 
 { #category : #logging }
+SoilActiveResident >> durationString: aDuration [
+	"'14 minutes' rather than '0:00:14:00'. A line whose whole worth is that
+	somebody reads it should carry an interval that reads like one.
+
+	Which selector does that differs across the Pharo versions Soil builds on, and
+	that question is answered once, in SoilResidentSupervisor>>durationString: --
+	repeating the version check here would mean two places to get it wrong. The
+	nil guard has the same shape and the same reason as #emitsEveryStep: a
+	resident without a supervisor is one that was never added to one, which
+	happens in unit tests, and Duration's own printString is what the lines here
+	have always fallen back to anyway."
+	^ supervisor
+		ifNil: [ aDuration asString ]
+		ifNotNil: [ :s | s durationString: aDuration ]
+]
+
+{ #category : #logging }
 SoilActiveResident >> statusLine [
 	"the counters are cumulative here, where #reportWorkSinceLastTick reports a
 	delta: that one answers 'what is happening right now', this one 'what has
 	happened at all'. Read together over a series of reports they give the rate
 	as well, which is why the periodic line does not need to be a delta too."
-	^ super statusLine, ', ', (self count: stepCount of: 'step'),
-		', ', (self count: stepErrorCount of: 'error')
+	| line |
+	line := super statusLine, ', ', (self count: stepCount of: 'step'),
+		', ', (self count: stepErrorCount of: 'error').
+	self isWorking ifTrue: [
+		line := line, ', in step ', stepCount printString, ' for ',
+			(self durationString: self currentStepDuration) ].
+	^ line
+]
+
+{ #category : #logging }
+SoilActiveResident >> currentStepDuration [
+	"how long I have been in the step I am in. Only meaningful while #isWorking --
+	#stepStartedAt is deliberately not cleared when a step returns, because a field
+	that is set on the way in and cleared on the way out has a window in which a
+	reader finds nothing while #working already says yes"
+	^ DateAndTime now - stepStartedAt
 ]
 
 { #category : #logging }
@@ -292,10 +334,25 @@ SoilActiveResident >> reportWorkSinceLastTick [
 	mechanism was built to end - that one meant 'no idea'.
 
 	The counters are cumulative and the line is a delta, because what one wants to
-	read off a series of these is the rate."
+	read off a series of these is the rate.
+
+	The one silence that had to go is the one in the middle: a step that never
+	returns leaves the delta at zero, exactly like an idle resident, so 'nothing to
+	do' and 'stuck inside a work unit' read the same. #restartCount does not see it
+	either -- that one counts dead processes, and this process is alive and simply
+	not coming back. So when nothing finished and I am still in a step, I say which
+	step and since when.
+
+	Only when nothing finished: a busy resident is inside a step at most tick times
+	too, and saying 'still in step 4711, started 2 milliseconds ago' at every report
+	would be noise about a resident that is demonstrably making progress."
 	| done |
 	done := stepCount - reportedStepCount.
-	done = 0 ifTrue: [ ^ self ].
+	done = 0 ifTrue: [
+		self isWorking ifTrue: [
+			self emit: 'still in step ', stepCount printString, ', started ',
+				(self durationString: self currentStepDuration), ' ago' ].
+		^ self ].
 	reportedStepCount := stepCount.
 	self emit: (self count: done of: 'step'), ' since the last report, ',
 		(self count: stepErrorCount of: 'error'), ' in all'

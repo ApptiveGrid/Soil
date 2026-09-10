@@ -232,6 +232,54 @@ SoilResidentReportingTest >> testATickReportsWorkDoneSinceTheLastOne [
 ]
 
 { #category : #tests }
+SoilResidentReportingTest >> testAResidentHangingInAStepSaysSoOnTheTick [
+	"the silence that was left: a step that never returns leaves the delta at zero,
+	exactly like an idle resident - and the restart counter does not see it either,
+	because the process is alive and simply not coming back"
+	| resident |
+	resident := self residentWith: [ :d | d ].
+	resident hangOnStep: true.
+	resident noteWork.
+	self assert: (resident waitForHangingStepWithin: 2 seconds).
+	"the first tick still has a delta - the step is counted on the way in - so it
+	is the second one that has nothing to report and speaks up anyway"
+	resident tick.
+	resident tick.
+
+	self assert: (soil reportedMatching: 'still in step 1, started') size equals: 1.
+	resident releaseHangingStep
+]
+
+{ #category : #tests }
+SoilResidentReportingTest >> testATickAfterAFinishedStepSaysNothingAboutHanging [
+	"the line belongs to a step that did not come back, not to every quiet tick -
+	otherwise it would be the noise that testATickWithoutWorkSaysNothing rules out"
+	| resident |
+	resident := self residentWith: [ :d | d ].
+	resident noteWork.
+	self assert: (resident waitForStepWithin: 2 seconds).
+	resident tick.
+	resident tick.
+
+	self assert: (soil reportedMatching: 'still in step') isEmpty
+]
+
+{ #category : #tests }
+SoilResidentReportingTest >> testTheStatusLineSaysThatAStepIsStillRunning [
+	"'what has happened at all' has to include 'and one of it has not finished' -
+	the half-hourly report is where somebody looks first, and a resident stuck in
+	a work unit stands there with the same line as a healthy idle one"
+	| resident |
+	resident := self residentWith: [ :d | d ].
+	resident hangOnStep: true.
+	resident noteWork.
+	self assert: (resident waitForHangingStepWithin: 2 seconds).
+
+	self assert: (resident statusLine beginsWith: 'active started, 1 step, 0 errors, in step 1 for ').
+	resident releaseHangingStep
+]
+
+{ #category : #tests }
 SoilResidentReportingTest >> testATickWithoutWorkSaysNothing [
 	"otherwise a quiet resident would fill the log at the tick's cadence, and the
 	lines that mean something would drown in the ones that do not"
