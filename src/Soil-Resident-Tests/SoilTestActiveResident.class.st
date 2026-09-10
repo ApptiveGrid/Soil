@@ -1,6 +1,6 @@
 "
-The dummy active resident: it can be told to leave work behind, to throw, and
-which cadence to run on. Counting its steps is no longer its own business -
+The dummy active resident: it can be told to leave work behind, to throw, to
+hang inside a step until the test lets it out, and which cadence to run on. Counting its steps is no longer its own business -
 SoilActiveResident does that, which is what this class faked before. Everything it does is in memory,
 so that a drain test is not a test of transaction speed.
 
@@ -19,7 +19,10 @@ Class {
 		'workToLeave',
 		'throwOnStep',
 		'stepSignal',
-		'maxRestarts'
+		'maxRestarts',
+		'hangOnStep',
+		'inHangingStep',
+		'leaveHangingStep'
 	],
 	#category : #'Soil-Resident-Tests'
 }
@@ -35,7 +38,10 @@ SoilTestActiveResident >> initialize [
 	prepareCount := 0.
 	workToLeave := 0.
 	throwOnStep := false.
-	stepSignal := Semaphore new
+	stepSignal := Semaphore new.
+	hangOnStep := false.
+	inHangingStep := Semaphore new.
+	leaveHangingStep := Semaphore new
 ]
 
 { #category : #accessing }
@@ -94,8 +100,37 @@ SoilTestActiveResident >> runStep [
 	[ workToLeave > 0 ifTrue: [
 		workToLeave := workToLeave - 1.
 		self noteWork ].
+	hangOnStep ifTrue: [
+		inHangingStep signal.
+		leaveHangingStep wait ].
 	throwOnStep ifTrue: [ Error signal: 'the step was told to throw' ] ]
 		ensure: [ stepSignal signal ]
+]
+
+{ #category : #accessing }
+SoilTestActiveResident >> hangOnStep: aBoolean [
+	"the coming steps block inside the work unit until #releaseHangingStep. What
+	the existing SoilTestHangingResident does not give: that one is passive and
+	ignores the stop flag, which is the stop-timeout path. This is a live process
+	sitting in a step, which is the case a restart counter cannot see"
+	hangOnStep := aBoolean
+]
+
+{ #category : #accessing }
+SoilTestActiveResident >> releaseHangingStep [
+	"lets the waiting step finish and takes the switch back out, so the next step
+	does not hang again. A test that made a step hang has to call me, or its
+	process is still in there when the test is over"
+	hangOnStep := false.
+	leaveHangingStep signal
+]
+
+{ #category : #waiting }
+SoilTestActiveResident >> waitForHangingStepWithin: aDuration [
+	"answers whether the step got as far as hanging, so a test synchronises on
+	being inside a work unit the way #waitForStepWithin: synchronises on one
+	being over"
+	^ self wait: inHangingStep upTo: aDuration
 ]
 
 { #category : #accessing }
