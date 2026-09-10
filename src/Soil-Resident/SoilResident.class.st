@@ -208,6 +208,40 @@ SoilResident >> markFailed: anError [
 ]
 
 { #category : #accessing }
+SoilResident >> markFailedAfterRestartLimit [
+	"my process has died more often than I tolerate, so I am not brought back any
+	more. Kept as state plus error rather than signalled, exactly as #markFailed:
+	keeps a failed start.
+
+	This is where I stay: the supervisor's tick passes a failed resident by, so
+	nothing brings me back on its own. The way out is the embedder's, through
+	SoilResidentSupervisor>>restartResidentNamed:in:timeout:."
+	state := #failed.
+	error := SoilResidentRestartLimitReached new
+		         name: self name;
+		         restartCount: restartCount;
+		         yourself.
+	self emit: error messageText
+]
+
+{ #category : #accessing }
+SoilResident >> markFailedAfterRestartLimit [
+	"my process has died more often than I tolerate, so I am not brought back any
+	more. Kept as state plus error rather than signalled, exactly as #markFailed:
+	keeps a failed start.
+
+	This is where I stay: the supervisor's tick passes a failed resident by, so
+	nothing brings me back on its own. The way out is the embedder's, through
+	SoilResidentSupervisor>>restartResidentNamed:in:timeout:."
+	state := #failed.
+	error := SoilResidentRestartLimitReached new
+		         name: self name;
+		         restartCount: restartCount;
+		         yourself.
+	self emit: error messageText
+]
+
+{ #category : #accessing }
 SoilResident >> markStarted [
 	state := #started.
 	self emit: 'started'
