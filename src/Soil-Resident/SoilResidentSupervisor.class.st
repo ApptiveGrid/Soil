@@ -459,9 +459,22 @@ SoilResidentSupervisor >> stopTick [
 SoilResidentSupervisor >> tick [
 	"serially, one after the other, with errors isolated per resident: a throwing
 	resident must not abort the run. No tick while stopping or stopped, otherwise
-	the tick starts up again what the stop is just clearing away"
+	the tick starts up again what the stop is just clearing away.
+
+	And none for a resident that has failed, for the same kind of reason. An active
+	resident brings its own process back in its tick, and it does not ask what state
+	it is in when it does -- so a resident whose #startIn: threw got its run loop
+	started by the very next tick, with a #prepareIn: that never completed. Measured
+	before this guard: process gone to running again within one tick, #restartCount
+	climbing by one per tick while the state stayed #failed. That also made an upper
+	bound on restarts pointless, because the counter it watches was driven by the
+	tick rather than by real process deaths.
+
+	A failed resident is by definition unusable -- whether that keeps the database
+	from opening is the embedder's decision, and until it decides, doing nothing is
+	the honest answer."
 	self residents do: [ :each |
-		(each isStopping or: [ each isStopped ]) ifFalse: [
+		(each isStopping or: [ each isStopped or: [ each hasFailed ] ]) ifFalse: [
 			[ each tick ]
 				on: Error
 				do: [ :err | each emit: 'failed on tick: ', err messageText ] ] ].

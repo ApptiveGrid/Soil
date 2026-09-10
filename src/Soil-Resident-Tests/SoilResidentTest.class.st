@@ -244,6 +244,27 @@ SoilResidentTest >> testLoadingTwiceIsRefused [
 ]
 
 { #category : #tests }
+SoilResidentTest >> testNoTickForAFailedResident [
+	"an active resident revives its own process in its tick without asking what
+	state it is in, so a resident whose #startIn: threw used to get its run loop
+	started by the very next tick -- unprepared -- and one counted restart per tick
+	on top, which is what would have made an upper bound on restarts pointless"
+	| supervisor resident |
+	self addResident: SoilTestActiveResidentDescription new.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #active.
+	resident terminateProcesses.
+	resident markFailed: (Error new messageText: 'put here by the test').
+	self assert: resident hasFailed.
+	self deny: resident hasRunningProcess.
+
+	supervisor tick.
+	self deny: resident hasRunningProcess.
+	self assert: resident restartCount equals: 0.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
 SoilResidentTest >> testNoTickWhileStopped [
 	| supervisor resident before |
 	self addResident: SoilTestResidentDescription new.
