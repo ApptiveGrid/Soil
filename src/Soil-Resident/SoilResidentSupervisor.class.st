@@ -360,6 +360,63 @@ SoilResidentSupervisor >> startTickProcess [
 		forkNamed: 'soil resident tick'
 ]
 
+{ #category : #running }
+SoilResidentSupervisor >> restartResidentNamed: aSymbol in: aTransaction timeout: aDuration [
+	"stop one resident and start it again, so that it reads its configuration off
+	its description anew. This is the one path from a running resident back to a
+	started one: #startAllIn: starts only what is #created and walks past a stopped
+	one.
+
+	Cooperative like every stop here -- the receipt arrives between two work units,
+	and only the timeout terminates after all. A restart therefore waits out at most
+	one work unit; it does not cut into one.
+
+	Also the way back for a resident that is #failed.
+
+	Answers the resident, so that the caller can see what it became: a restart whose
+	#startIn: threw is #failed, not started.
+
+	Unknown name signals SoilResidentNotFound rather than doing nothing: an embedder
+	asking to restart something that is not here has the wrong name, and a silent no
+	is how that stays unnoticed."
+	| resident |
+	resident := self residentNamed: aSymbol.
+	self stopResident: resident timeout: aDuration.
+	resident restartIn: aTransaction.
+	^ resident
+]
+
+{ #category : #stopping }
+SoilResidentSupervisor >> stopResidentNamed: aSymbol timeout: aDuration [
+	"stop a single resident and leave it stopped -- what an embedder needs to put one
+	resident aside without closing the database, and the counterpart to
+	#restartResidentNamed:in:timeout:.
+
+	Answers whether the receipt arrived in time; false means the process was
+	terminated the hard way."
+	^ self stopResident: (self residentNamed: aSymbol) timeout: aDuration
+]
+
+{ #category : #private }
+SoilResidentSupervisor >> stopResident: aResident timeout: aDuration [
+	"ask, wait for the receipt, terminate if it did not come. The single-resident
+	shape of #stopAllIn:timeout:, and deliberately not reused by it: the group asks
+	everybody before it waits for anybody, because a resident still running could
+	talk to one already stopped. With one resident there is nobody to be out of step
+	with.
+
+	Answers whether the receipt arrived in time."
+	[ aResident requestStop ]
+		on: Error
+		do: [ :err | aResident emit: 'failed on requestStop: ', err messageText ].
+	(self waitFor: { aResident } upTo: aDuration) ifEmpty: [ ^ true ].
+	aResident emit: 'did not acknowledge the stop within ', aDuration asString, ', terminating'.
+	[ aResident terminateProcesses ]
+		on: Error
+		do: [ :err | aResident emit: 'failed to terminate: ', err messageText ].
+	^ false
+]
+
 { #category : #stopping }
 SoilResidentSupervisor >> stopAllIn: aTransaction timeout: aDuration [
 	"symmetric stop. Stopped in one phase, a resident still running could talk to
@@ -422,13 +479,24 @@ SoilResidentSupervisor >> tickProcessIsRunning [
 ]
 
 { #category : #stopping }
-SoilResidentSupervisor >> waitForReceipts: aDuration [
+SoilResidentSupervisor >> waitFor: aCollectionOfResidents upTo: aDuration [
 	"poll rather than wait out the whole timeout, so a quick stop returns
-	quickly. Answers whoever is still missing"
+	quickly. Answers whoever is still missing.
+
+	The collection is taken as given rather than re-read every turn: the group stop
+	hands in the residents it asked, and waiting for one that was added while the
+	stop was already running would wait for a receipt nobody was asked for."
 	| deadline pending |
 	deadline := DateAndTime now + aDuration.
-	[ pending := self residents reject: [ :each | each isStopped ].
+	[ pending := aCollectionOfResidents reject: [ :each | each isStopped ].
 	pending isEmpty or: [ DateAndTime now > deadline ] ]
 		whileFalse: [ 50 milliSeconds wait ].
 	^ pending
+]
+
+{ #category : #stopping }
+SoilResidentSupervisor >> waitForReceipts: aDuration [
+	"the group's receipts. One resident's are awaited by #stopResident:timeout:,
+	through the same poll"
+	^ self waitFor: self residents upTo: aDuration
 ]

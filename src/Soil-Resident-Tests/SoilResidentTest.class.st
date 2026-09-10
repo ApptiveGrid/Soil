@@ -30,6 +30,16 @@ SoilResidentTest >> residentRegistryObjectId [
 		ensure: [ txn abort ]
 ]
 
+{ #category : #helpers }
+SoilResidentTest >> restart: aSupervisor resident: aSymbol within: aDuration [
+	"like #stop:within:, the embedder's transaction stays reading and is discarded:
+	a resident reads its configuration in it and opens its own to write"
+	| txn |
+	txn := soil newTransaction.
+	^ [ aSupervisor restartResidentNamed: aSymbol in: txn timeout: aDuration ]
+		ensure: [ txn isAborted ifFalse: [ txn abort ] ]
+]
+
 { #category : #running }
 SoilResidentTest >> setUp [
 	super setUp.
@@ -317,6 +327,107 @@ SoilResidentTest >> testResidentNamedSignalsWhenAbsent [
 	self
 		should: [ supervisor residentNamed: #nothingHere ]
 		raise: SoilResidentNotFound
+]
+
+{ #category : #tests }
+SoilResidentTest >> testRestartingAnUnknownNameSignals [
+	"an embedder asking to restart something that is not here has the wrong name,
+	and a silent no is how that stays unnoticed"
+	| supervisor |
+	self addResident: SoilTestResidentDescription new.
+	supervisor := self startedSupervisor.
+
+	self
+		should: [ self restart: supervisor resident: #nosuchresident within: 5 seconds ]
+		raise: SoilResidentNotFound.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testRestartingBringsAFailedResidentBack [
+	"the way back: a resident that #failed -- at its first start or through a later
+	guard -- is startable again, and its start really runs"
+	| supervisor resident |
+	self addResident: SoilTestResidentDescription new.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #dummy.
+	resident markFailed: (Error new messageText: 'put here by the test').
+	self assert: resident hasFailed.
+
+	self restart: supervisor resident: #dummy within: 5 seconds.
+	self assert: resident isStarted.
+	self deny: resident hasFailed.
+	self assert: resident startCount equals: 2.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testRestartingClearsTheStopFlagSoWorkGoesOn [
+	"the trap this exists to avoid: the stop flag survives a stop, and a loop
+	started with it still up leaves at its first check and marks itself stopped
+	again -- a restart that reports success and started nothing"
+	| supervisor resident |
+	self addResident: SoilTestActiveResidentDescription new.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #active.
+
+	self restart: supervisor resident: #active within: 5 seconds.
+	self assert: resident isStarted.
+	self deny: resident shouldStop.
+	resident noteWork.
+	self assert: (resident waitForStepWithin: 5 seconds).
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testRestartingReadsTheConfigurationAgain [
+	"what the whole call is for: #prepareIn: is where a resident reads its
+	description, so a second run of it is the observable that the new configuration
+	arrived"
+	| supervisor resident |
+	self addResident: SoilTestActiveResidentDescription new.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #active.
+	self assert: resident prepareCount equals: 1.
+
+	self
+		assert: (self restart: supervisor resident: #active within: 5 seconds)
+		identicalTo: resident.
+	self assert: resident prepareCount equals: 2.
+	self assert: resident isStarted.
+	self assert: resident hasRunningProcess.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testStoppingAHangingResidentReportsTheHardWayOut [
+	"false means the receipt did not arrive and the process was terminated after
+	all -- the same deliberate exit the group stop takes"
+	| supervisor hanging |
+	self addResident: SoilTestHangingResidentDescription new.
+	supervisor := self startedSupervisor.
+	hanging := supervisor residentNamed: #hanging.
+
+	self deny: (supervisor stopResidentNamed: #hanging timeout: 200 milliSeconds).
+	self assert: hanging isStopped.
+	self deny: hanging hasRunningProcess
+]
+
+{ #category : #tests }
+SoilResidentTest >> testStoppingOneResidentLeavesTheOthersRunning [
+	"putting one resident aside must not close the database down around the others"
+	| supervisor dummy active |
+	self addResident: SoilTestResidentDescription new.
+	self addResident: SoilTestActiveResidentDescription new.
+	supervisor := self startedSupervisor.
+	dummy := supervisor residentNamed: #dummy.
+	active := supervisor residentNamed: #active.
+
+	self assert: (supervisor stopResidentNamed: #dummy timeout: 5 seconds).
+	self assert: dummy isStopped.
+	self assert: active isStarted.
+	self assert: active hasRunningProcess.
+	self stop: supervisor within: 5 seconds
 ]
 
 { #category : #tests }
