@@ -40,6 +40,22 @@ SoilResidentTest >> restart: aSupervisor resident: aSymbol within: aDuration [
 		ensure: [ txn isAborted ifFalse: [ txn abort ] ]
 ]
 
+{ #category : #helpers }
+SoilResidentTest >> switchOff: aBoolean residentNamed: aSymbol [
+	"the embedder's half of the switch: the flag is persisted, so writing it is a
+	transaction of its own that the caller commits. Soil never writes a description
+	itself, and applying it to a running resident is the separate #restart:"
+	| txn |
+	txn := soil newTransaction.
+	[ | description |
+	description := (soil residentRegistryIn: txn) descriptionNamed: aSymbol.
+	aBoolean
+		ifTrue: [ description disable ]
+		ifFalse: [ description enable ].
+	txn commit ]
+		ensure: [ txn isAborted ifFalse: [ txn abort ] ]
+]
+
 { #category : #running }
 SoilResidentTest >> setUp [
 	super setUp.
@@ -129,6 +145,123 @@ SoilResidentTest >> testDummyResidentBlocksAndReleasesIdle [
 	self waitUntil: [ resident stepCount = 1 ] within: 5 seconds.
 	self waitUntil: [ supervisor isIdle ] within: 1 second.
 	self deny: supervisor hasPendingWork.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testADisabledDescriptionIsNotStarted [
+	"the point of a persisted flag: it is read before anybody starts, so a resident
+	that is switched off never runs a first work unit"
+	| supervisor resident |
+	self addResident: SoilTestActiveResidentDescription new.
+	self switchOff: true residentNamed: #active.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #active.
+
+	self assert: resident isDisabled.
+	self deny: resident isStarted.
+	self deny: resident hasRunningProcess.
+	self assert: resident prepareCount equals: 0.
+	self assert: (soil reportedMatching: 'resident active: disabled') size equals: 1.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testADisabledResidentIsIdleAndHasNoWork [
+	"otherwise a switched-off resident would keep the database from closing, which
+	is the opposite of what switching it off is for"
+	| supervisor resident |
+	self addResident: SoilTestActiveResidentDescription new.
+	self switchOff: true residentNamed: #active.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #active.
+	"even after somebody hands it work: it is not there to take it"
+	resident noteWork.
+
+	self assert: resident isIdle.
+	self deny: resident hasPendingWork.
+	self assert: supervisor isIdle.
+	self deny: supervisor hasPendingWork.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testTheTickDoesNotStartADisabledResident [
+	"an active resident brings its own process back in its tick without asking what
+	state it is in. Without the guard the very next tick would start the loop of a
+	resident that never ran #prepareIn: - and would undo the switch while doing it"
+	| supervisor resident |
+	self addResident: SoilTestActiveResidentDescription new.
+	self switchOff: true residentNamed: #active.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #active.
+
+	supervisor tick.
+	supervisor tick.
+
+	self assert: resident isDisabled.
+	self deny: resident hasRunningProcess.
+	self assert: resident restartCount equals: 0.
+	self assert: resident prepareCount equals: 0.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testSwitchingOffAndRestartingStopsTheResident [
+	"the runtime half, in the direction that matters most: a resident that is
+	running now is off after the flag is written and the restart applies it"
+	| supervisor resident |
+	self addResident: SoilTestActiveResidentDescription new.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #active.
+	self assert: resident isStarted.
+
+	self switchOff: true residentNamed: #active.
+	self restart: supervisor resident: #active within: 5 seconds.
+
+	self assert: resident isDisabled.
+	self deny: resident hasRunningProcess.
+	"and it did not run another work unit on the way out"
+	self assert: resident prepareCount equals: 1.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testSwitchingOnAndRestartingStartsTheResident [
+	"the way back, through the same call - and #prepareIn: running is the observable
+	that it really started rather than just changed state"
+	| supervisor resident |
+	self addResident: SoilTestActiveResidentDescription new.
+	self switchOff: true residentNamed: #active.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #active.
+	self assert: resident isDisabled.
+
+	self switchOff: false residentNamed: #active.
+	self restart: supervisor resident: #active within: 5 seconds.
+
+	self assert: resident isStarted.
+	self deny: resident isOutOfService.
+	self assert: resident hasRunningProcess.
+	self assert: resident prepareCount equals: 1.
+	self stop: supervisor within: 5 seconds
+]
+
+{ #category : #tests }
+SoilResidentTest >> testRestartingLeavesADisabledResidentDisabled [
+	"a restart is the apply-the-configuration call, not a way past it: as long as
+	the flag stands, no caller can start what it switched off"
+	| supervisor resident |
+	self addResident: SoilTestActiveResidentDescription new.
+	self switchOff: true residentNamed: #active.
+	supervisor := self startedSupervisor.
+	resident := supervisor residentNamed: #active.
+
+	self restart: supervisor resident: #active within: 5 seconds.
+
+	self assert: resident isDisabled.
+	self deny: resident hasRunningProcess.
+	self assert: resident prepareCount equals: 0.
 	self stop: supervisor within: 5 seconds
 ]
 
