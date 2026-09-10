@@ -256,6 +256,32 @@ SoilResident >> noteProcessRestart [
 	self emit: 'process restarted (', restartCount printString, ')'
 ]
 
+{ #category : #running }
+SoilResident >> restartIn: aTransaction [
+	"start again, reading my configuration off my description the way a first start
+	does -- #startIn: is 'read the config, then run', and there is no second place
+	that pair lives.
+
+	Whoever changed my description calls this. The base deliberately does not watch
+	for such a change: what follows from one differs per field -- an interval is a
+	setter, a changed host invalidates the progress kept in my workspace -- so the
+	decision belongs to the embedder that made the change, not to a version marker
+	here (Norbert, 2026-09-10).
+
+	Clears the stop flag first. It survives a stop, and a loop started with it still
+	up leaves at its very first check and marks itself stopped again: a restart that
+	reports success and started nothing.
+
+	Also the way back for a resident that is #failed, whether its first start threw
+	or a later guard put it there. A #startIn: that throws again lands in
+	#markFailed: exactly as it does in phase two."
+	stopRequested := false.
+	[ self startIn: aTransaction.
+	self markStarted ]
+		on: Error
+		do: [ :err | self markFailed: err ]
+]
+
 { #category : #stopping }
 SoilResident >> requestStop [
 	"cooperative, never Process>>suspend: that mid-transaction leaves half writes
