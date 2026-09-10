@@ -256,13 +256,23 @@ SoilResidentSupervisor >> startAllIn: aTransaction tickEvery: aDuration reportEv
 	embedder may or may not make would leave it one send away from returning.
 
 	No residents, no tick: a tick process for an empty collection would wake up
-	forever to iterate nothing, once per open database."
+	forever to iterate nothing, once per open database. A database whose residents
+	are all switched off still gets one -- the tick is what keeps the periodic
+	report coming, and 'everything here is disabled' is exactly a thing somebody
+	should be able to read."
 	self residents do: [ :each |
 		"only what has not been started: a second start would create a second
 		process for a resident that already has one"
 		each isCreated ifTrue: [
-			[ each startIn: aTransaction.
-			each markStarted ]
+			[ "and only what is not switched off in its description. Asked before
+			the start rather than stopped after it: a resident whose first work unit
+			talks to a foreign host would otherwise have done that once before
+			anybody noticed it was meant to be off"
+			(each isDisabledIn: aTransaction)
+				ifTrue: [ each markDisabled ]
+				ifFalse: [
+					each startIn: aTransaction.
+					each markStarted ] ]
 				on: Error
 				do: [ :err | each markFailed: err ] ] ].
 	self hasResidents ifTrue: [
@@ -472,9 +482,12 @@ SoilResidentSupervisor >> tick [
 
 	A failed resident is by definition unusable -- whether that keeps the database
 	from opening is the embedder's decision, and until it decides, doing nothing is
-	the honest answer."
+	the honest answer. The same holds for one that is switched off, and for the same
+	measured reason: it never ran #prepareIn: either, so a tick that revived its
+	process would start a loop that was never prepared -- and would quietly undo the
+	switch while it was at it. Both are #isOutOfService."
 	self residents do: [ :each |
-		(each isStopping or: [ each isStopped or: [ each hasFailed ] ]) ifFalse: [
+		(each isStopping or: [ each isStopped or: [ each isOutOfService ] ]) ifFalse: [
 			[ each tick ]
 				on: Error
 				do: [ :err | each emit: 'failed on tick: ', err messageText ] ] ].

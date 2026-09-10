@@ -16,6 +16,13 @@ My state machine:
 	created --startIn:--> started --requestStop--> stopping --> stopped
 	   |
 	   +--startIn: throws--> failed
+	   |
+	   +--my description says so--> disabled
+
+#failed and #disabled are the two I never leave on my own, and they answer the
+same three questions the same way -- see #isOutOfService. The way out of either
+is #restartIn:, which reads the description again and lands back in #disabled
+if the flag is still set.
 
 The transitions are driven by the supervisor, which isolates errors per resident;
 I keep the state and answer the questions about it. What I answer are questions
@@ -140,13 +147,45 @@ SoilResident >> hasPendingWork [
 	"is there unprocessed work? A question, not a decision -- the embedder reads
 	it, I never decide whether the database closes.
 
-	A #failed resident answers no here rather than leaving it to the subclass,
-	so it cannot block a decision it can no longer influence.
+	A resident that is #outOfService answers no here rather than leaving it to the
+	subclass, so it cannot block a decision it can no longer influence.
 
 	Whoever signals new work has to set the underlying flag synchronously, in the
 	signalling process -- not first in the woken resident process. Between signal
 	and scheduling is exactly the window in which the embedder's sweep strikes."
-	^ self hasFailed not and: [ self basicHasPendingWork ]
+	^ self isOutOfService not and: [ self basicHasPendingWork ]
+]
+
+{ #category : #testing }
+SoilResident >> isDisabled [
+	"switched off in my description and left that way. Not an error and not a stop:
+	I never ran this time round, and I will not until somebody clears the flag"
+	^ state = #disabled
+]
+
+{ #category : #testing }
+SoilResident >> isDisabledIn: aTransaction [
+	"what my description says, read now -- the persisted answer, where #isDisabled
+	is the live one. The two differ exactly between somebody writing the flag and
+	the restart that applies it.
+
+	Without a description there is nothing that could have switched me off. That is
+	a resident added straight to a supervisor, which happens in unit tests, and the
+	guard has the same reason as the one in #emit:."
+	^ descriptionId
+		ifNil: [ false ]
+		ifNotNil: [ (self descriptionIn: aTransaction) isDisabled ]
+]
+
+{ #category : #testing }
+SoilResident >> isOutOfService [
+	"I cannot work and will not become able to on my own -- broken or switched off.
+	It has a name because three different questions ask exactly this and all three
+	answer it the same way for both cases: whether a tick should reach me, whether
+	I count as idle, and whether I can still have work pending. A chain of #or: at
+	each of the three says less than one word does, and the next state of this kind
+	would have to be added to all three."
+	^ self hasFailed or: [ self isDisabled ]
 ]
 
 { #category : #testing }
@@ -177,9 +216,9 @@ SoilResident >> isIdle [
 	signals up, and you get n idle runs after n signals. A dirty flag beats the
 	signal counter.
 
-	A #failed resident answers idle for the same reason it answers no pending
-	work, and here too rather than in the subclass."
-	^ self hasFailed or: [ self basicIsIdle ]
+	A resident that is #outOfService answers idle for the same reason it answers no
+	pending work, and here too rather than in the subclass."
+	^ self isOutOfService or: [ self basicIsIdle ]
 ]
 
 { #category : #testing }
@@ -239,6 +278,15 @@ SoilResident >> markFailedAfterRestartLimit [
 		         restartCount: restartCount;
 		         yourself.
 	self emit: error messageText
+]
+
+{ #category : #accessing }
+SoilResident >> markDisabled [
+	"my description says I am switched off, so my start did not happen. Said out
+	loud, because a resident that is simply absent from the report is the silence
+	this whole mechanism exists to end -- 'disabled' is an answer, 'nothing' is not"
+	state := #disabled.
+	self emit: 'disabled'
 ]
 
 { #category : #accessing }
@@ -308,10 +356,20 @@ SoilResident >> restartIn: aTransaction [
 
 	Also the way back for a resident that is #failed, whether its first start threw
 	or a later guard put it there. A #startIn: that throws again lands in
-	#markFailed: exactly as it does in phase two."
+	#markFailed: exactly as it does in phase two.
+
+	And the way in and out of #disabled, which is why the flag is checked here
+	rather than answered by a call of its own: reading the description *is* what
+	this method does, and a switched-off resident is a piece of configuration like
+	any other. Both directions are therefore the same call -- write the flag and
+	restart to switch off, clear it and restart to switch on -- and no caller can
+	start something that the persisted flag says is off."
 	stopRequested := false.
-	[ self startIn: aTransaction.
-	self markStarted ]
+	[ (self isDisabledIn: aTransaction)
+		ifTrue: [ self markDisabled ]
+		ifFalse: [
+			self startIn: aTransaction.
+			self markStarted ] ]
 		on: Error
 		do: [ :err | self markFailed: err ]
 ]

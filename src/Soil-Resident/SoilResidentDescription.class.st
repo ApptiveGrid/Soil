@@ -14,10 +14,37 @@ Class {
 	#name : #SoilResidentDescription,
 	#superclass : #Object,
 	#instVars : [
-		'workspace'
+		'workspace',
+		'disabled'
 	],
 	#category : #'Soil-Resident'
 }
+
+{ #category : #accessing }
+SoilResidentDescription >> disable [
+	"switch me off and keep me off. Whoever calls me is inside a transaction and
+	commits it -- the flag is persisted precisely so that it outlives the image,
+	which is what tells it apart from a #requestStop: a stop is a runtime fact and
+	is gone with the process.
+
+	Taking effect on a resident that is already running is a second step, and it is
+	SoilResident>>restartIn: -- the one place a description is read anyway."
+	disabled := true
+]
+
+{ #category : #accessing }
+SoilResidentDescription >> enable [
+	"the way back. Also a second step to take effect, and the same one"
+	disabled := false
+]
+
+{ #category : #testing }
+SoilResidentDescription >> isDisabled [
+	"Compared against true rather than answered straight: every description that
+	already sits in a database gets the new field as nil when Soil migrates it,
+	and nil means 'was never switched off'."
+	^ disabled == true
+]
 
 { #category : #testing }
 SoilResidentDescription >> hasWorkspace [
