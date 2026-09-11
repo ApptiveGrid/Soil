@@ -247,7 +247,6 @@ SoilSerializerCleanCodeTest >> testNoUnsentMessages [
 	"No other exceptions beside the ones mentioned here should be allowed"
 	 SystemVersion current major = 11 ifTrue: [  
 		validExceptions := {
-		SoilBasicMaterializer>>#nextUUID: .
 		SoilMaterializer>>#nextCompiledBlock12: . 
 		SoilMaterializer>>#nextCompiledMethod12: }
 	]. 
