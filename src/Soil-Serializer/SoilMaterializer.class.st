@@ -11,7 +11,7 @@ Class {
 	#category : #'Soil-Serializer-Serializer/Materializer'
 }
 
-{ #category : #'as yet unclassified' }
+{ #category : #public }
 SoilMaterializer >> behaviorDescriptionIsNotCurrent: aSoilBehaviorDescription [ 
 	includesMigratedObjects := true
 ]
