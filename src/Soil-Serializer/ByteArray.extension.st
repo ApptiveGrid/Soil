@@ -8,7 +8,7 @@ ByteArray >> soilBasicSerialize: serializer [
 
 { #category : #'*Soil-Serializer' }
 ByteArray >> soilMaterialize [
-	| stream registry a |
+	| stream registry |
 	stream := self readStream.
 	registry := SoilStandaloneObjectRegistry readFrom: stream.
 	^ SoilMaterializer new 

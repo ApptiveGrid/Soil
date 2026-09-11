@@ -98,6 +98,11 @@ SoilPersistentDictionary >> detect: detectBlock ifNone: noneBlock [
 		ifNone: noneBlock 
 ]
 
+{ #category : #accessing }
+SoilPersistentDictionary >> dict [
+	^dict
+]
+
 { #category : #initialization }
 SoilPersistentDictionary >> ensureValuesAreRoot [
 	dict do: [:each | 
@@ -166,7 +171,7 @@ SoilPersistentDictionary >> soilBasicSerialize: aSerializer [
 	transaction ifNil: [
 		transaction := aSerializer transaction.
 		self ensureValuesAreRoot ].
-	super soilBasicSerialize: aSerializer 
+	aSerializer nextPutPersistentDictionary: self
 ]
 
 { #category : #initialization }

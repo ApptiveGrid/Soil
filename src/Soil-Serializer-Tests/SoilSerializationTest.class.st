@@ -244,6 +244,21 @@ SoilSerializationTest >> testSerializationSet [
 ]
 
 { #category : #'tests-encoded-subclasses' }
+SoilSerializationTest >> testSerializationSoilPersistentDictionary [
+	"SortedCollection is a subclass of OrderedCollection, make sure it works"
+
+	| object serialized materialized |
+	object := SoilPersistentDictionary new.
+	serialized := self serializeToBytes: object.
+	
+	"this is serialized using TypeCodePersistentDictionary"
+	self assert: (serialized at: 7) equals: TypeCodePersistentDictionary.
+
+	materialized := self materializeFromBytes: serialized.
+	self assert: materialized dict equals: object dict
+]
+
+{ #category : #'tests-encoded-subclasses' }
 SoilSerializationTest >> testSerializationSortedCollection [
 	"SortedCollection is a subclass of OrderedCollection, make sure it works"
 
