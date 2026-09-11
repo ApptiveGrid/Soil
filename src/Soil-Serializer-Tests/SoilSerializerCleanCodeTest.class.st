@@ -149,6 +149,7 @@ SoilSerializerCleanCodeTest >> testNoDuplicatedMethodInHierarchy [
  			ifNil: [ false ] ]
  		ifNil: [ false ]].
 	
+	validExceptions := { }.
 	"No other exceptions beside the ones mentioned here should be allowed"
 	 SystemVersion current major > 11 ifTrue: [  
 		validExceptions := {WeakLayout>>#soilBasicSerialize:with:}]. 
