@@ -238,11 +238,25 @@ SoilSerializerCleanCodeTest >> testNoUnsentMessages [
 	"Fail if there are methods implemented whose selectors is not sent anywhere in Pharo.
 	Please add a test or remove the method!"
 
-	| found methods|
+	| found methods validExceptions |
 	found := self packageToCheck allUnsentMessages.
 	methods := self packageToCheck methods select: [ :method | found includes: method selector ].
 	methods := methods reject: [:method | method hasPragmaNamed: #inspectorPresentationOrder:title:
   ].
+  validExceptions := { }.
+	"No other exceptions beside the ones mentioned here should be allowed"
+	 SystemVersion current major = 11 ifTrue: [  
+		validExceptions := {
+		SoilBasicMaterializer>>#nextUUID: .
+		SoilMaterializer>>#nextCompiledBlock12: . 
+		SoilMaterializer>>#nextCompiledMethod12: .
+		SoilSerializer>>#nextPutUUID:}
+	]. 
+
+	methods := methods asOrderedCollection
+								removeAll: validExceptions;
+								yourself.
+
 	
 	self
 		assert: methods isEmpty
