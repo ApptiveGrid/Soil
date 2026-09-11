@@ -150,7 +150,8 @@ SoilSerializerCleanCodeTest >> testNoDuplicatedMethodInHierarchy [
  		ifNil: [ false ]].
 	
 	"No other exceptions beside the ones mentioned here should be allowed"
-	validExceptions := {WeakLayout>>#soilBasicSerialize:with:}. "Pharo11 needs it"
+	 SystemVersion current major > 11 ifTrue: [  
+		validExceptions := {WeakLayout>>#soilBasicSerialize:with:}]. 
 
 	methods := methods asOrderedCollection
 								removeAll: validExceptions;
