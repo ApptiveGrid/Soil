@@ -249,8 +249,7 @@ SoilSerializerCleanCodeTest >> testNoUnsentMessages [
 		validExceptions := {
 		SoilBasicMaterializer>>#nextUUID: .
 		SoilMaterializer>>#nextCompiledBlock12: . 
-		SoilMaterializer>>#nextCompiledMethod12: .
-		SoilSerializer>>#nextPutUUID:}
+		SoilMaterializer>>#nextCompiledMethod12: }
 	]. 
 
 	methods := methods asOrderedCollection
