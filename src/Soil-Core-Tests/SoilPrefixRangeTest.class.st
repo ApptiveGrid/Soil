@@ -39,9 +39,10 @@ SoilPrefixRangeTest >> readAll: aRange from: anIndex [
 	"what a reader on a shared index does: jump to the start of its own section, then on
 	past each key it read, and stop when the range says the key is no longer its own.
 
-	The second guard is not redundant. Past the last key of the index #nextKeyCloseTo:
-	answers the *last* key rather than nil and leaves the iterator sitting on it, so a loop
-	that ends only on nil reads that one entry for ever."
+	The second guard is not redundant. Asked for a key behind everything the index holds,
+	#nextKeyCloseTo: answers the *last* key rather than nil -- before the key asked for
+	rather than after it. A loop that ends only on nil would read that entry again and
+	again."
 
 	| iterator read key found |
 	iterator := anIndex newIterator.
