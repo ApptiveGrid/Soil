@@ -68,7 +68,7 @@ SoilActiveResidentTest >> tearDown [
 
 { #category : #tests }
 SoilActiveResidentTest >> testACoalescingWindowTurnsABurstIntoOneStep [
-	"the reason the strategy exists: work that is triggered far more often than it
+	"the reason the run strategy exists: work that is triggered far more often than it
 	needs to be done must not cost one step per trigger"
 	| resident |
 	resident := self residentWith: [ :d |
@@ -114,7 +114,7 @@ SoilActiveResidentTest >> testACoalescingWindowIsCutShortByAStopRequest [
 		d cadence: #coalescing; window: 1 hour ].
 
 	resident noteWork.
-	[ resident strategy isInWindow ] whileFalse: [ 10 milliSeconds asDelay wait ].
+	[ resident runStrategy isInWindow ] whileFalse: [ 10 milliSeconds asDelay wait ].
 
 	started := DateAndTime now.
 	self assert: (self stopWithin: 5 seconds) isEmpty.
@@ -145,7 +145,7 @@ SoilActiveResidentTest >> testAThrowingStepIsCountedAndTheLoopSurvivesIt [
 
 { #category : #tests }
 SoilActiveResidentTest >> testAnIntervalIsDueAtOnceAndNotAgainBeforeItElapsed [
-	"unit test on the strategy, without a process: a freshly opened database
+	"unit test on the run strategy, without a process: a freshly opened database
 	should not stay stale for a first interval, and afterwards the clock decides"
 	| strategy |
 	strategy := SoilIntervalRunStrategy new
