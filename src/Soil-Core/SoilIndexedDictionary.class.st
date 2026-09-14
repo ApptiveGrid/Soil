@@ -179,6 +179,40 @@ SoilIndexedDictionary >> maxLevel: anInteger [
 
 ]
 
+{ #category : #accessing }
+SoilIndexedDictionary >> moveKey: oldKey to: newKey [ 
+	^ self 
+		moveKey: oldKey 
+		to: newKey 
+		ifAbsent: [ KeyNotFound signalFor: oldKey in: self ]
+]
+
+{ #category : #accessing }
+SoilIndexedDictionary >> moveKey: oldKey to: newKey ifAbsent: aBlock [
+	"Move the entry at oldKey to newKey. The value travels as its SoilObjectId, so the
+	referenced object is never materialized. Doing the same with #removeKey: followed by
+	#at:put: does materialize it: #removeKey: answers an unresolved SoilObjectProxy, and
+	#at:put: sends #makeRoot: which resolves it. That matters for callers who move a key
+	repeatedly on the same entry, like a queue applying backoff to its due time.
+	Both halves run in the caller's transaction, which is where the atomicity comes from.
+	Moving needs a unique index, otherwise it is undefined which of the entries under oldKey
+	travels. A dictionary is unique by definition, so there is nothing to check here; whoever
+	lifts this to an index that allows duplicates has to answer that question first."
+	| objectId oldValueAtNewKey |
+	objectId := (self removeKey: oldKey ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
+	oldValueAtNewKey := self newIterator at: newKey add: objectId.
+
+	transaction addJournalEntry: (SoilAddKeyEntry new
+			 segment: [ self segment ];
+			 id: id;
+			 key: (index indexKey: newKey);
+			 value: objectId;
+			 oldValue: oldValueAtNewKey).
+
+	self indexUpdated.
+	^ objectId
+]
+
 { #category : #private }
 SoilIndexedDictionary >> newIterator [
 	^ index newIterator
