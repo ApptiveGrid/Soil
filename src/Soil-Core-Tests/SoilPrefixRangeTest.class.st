@@ -39,18 +39,15 @@ SoilPrefixRangeTest >> readAll: aRange from: anIndex [
 	"what a reader on a shared index does: jump to the start of its own section, then on
 	past each key it read, and stop when the range says the key is no longer its own.
 
-	The second guard is not redundant. Asked for a key behind everything the index holds,
-	#nextKeyCloseTo: answers the *last* key rather than nil -- before the key asked for
-	rather than after it. A loop that ends only on nil would read that entry again and
-	again."
+	Past the last key of the index #nextKeyCloseTo: answers nil, so the loop ends there on
+	its own and the range only has to answer for keys that do exist."
 
 	| iterator read key found |
 	iterator := anIndex newIterator.
 	read := OrderedCollection new.
 	key := aRange firstIndexKey.
 	[ found := iterator nextKeyCloseTo: key.
-	  found notNil
-		and: [ found >= key and: [ aRange includesKey: found ] ] ] whileTrue: [
+	  found notNil and: [ aRange includesKey: found ] ] whileTrue: [
 			read add: (iterator at: found) asInteger.
 			key := found + 1 ].
 	^ read asArray
