@@ -179,6 +179,51 @@ SoilIndexedDictionary >> maxLevel: anInteger [
 
 ]
 
+{ #category : #accessing }
+SoilIndexedDictionary >> moveKey: oldKey to: newKey [ 
+	^ self 
+		moveKey: oldKey 
+		to: newKey 
+		ifAbsent: [ KeyNotFound signalFor: oldKey in: self ]
+]
+
+{ #category : #accessing }
+SoilIndexedDictionary >> moveKey: oldKey to: newKey ifAbsent: aBlock [
+	"The transactional half of SoilIndexIterator>>#moveKey:to:ifAbsent:. Both index halves
+	run on one iterator; what is added here are the two journal entries and marking the
+	index for the commit. It does the two steps itself rather than calling the iterator's
+	move, because the journal needs both values: the one that moved and the one that was
+	overwritten at newKey.
+
+	The value never leaves its SoilObjectId, so the object it refers to stays on disk. That
+	is the reason this is one operation and not a #removeKey: followed by an #at:put:,
+	which resolves the proxy through #makeRoot:. It matters for callers that move the same
+	entry again and again, like a queue pushing out the due time of an entry under backoff.
+
+	An entry already at newKey is overwritten, just like #at:put: does. The atomicity comes
+	from the caller's transaction: an abort in between leaves the entry under its old key."
+	| iterator objectId overwritten |
+	iterator := self newIterator.
+	objectId := (iterator removeKey: oldKey ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
+	overwritten := iterator at: newKey add: objectId.
+
+	transaction addJournalEntry: (SoilRemoveKeyEntry new 
+			 segment: [ self segment ];
+			 id: id;
+			 key: (index indexKey: oldKey);
+			 oldValue: objectId).
+
+	transaction addJournalEntry: (SoilAddKeyEntry new
+			 segment: [ self segment ];
+			 id: id;
+			 key: (index indexKey: newKey);
+			 value: objectId;
+			 oldValue: overwritten).
+
+	self indexUpdated.
+	^ objectId
+]
+
 { #category : #private }
 SoilIndexedDictionary >> newIterator [
 	^ index newIterator

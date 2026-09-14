@@ -64,6 +64,51 @@ SoilIndexIteratorTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilIndexIteratorTest >> testMoveKey [
+	| iterator |
+	uniqueKeys ifFalse: [ ^ self skip ].
+	iterator := index newIterator.
+	iterator at: 1 add: 1 asDummySoilObjectId.
+
+	iterator moveKey: 1 to: 2.
+
+	self assert: (iterator at: 2 ifAbsent: [ nil ]) notNil.
+	self assert: (iterator at: 1 ifAbsent: [ nil ]) isNil.
+	self assert: index size equals: 1
+]
+
+{ #category : #tests }
+SoilIndexIteratorTest >> testMoveKeyOnNonUniqueIndexIsRefused [
+	"With duplicates #removeKey: takes every entry under the key while only one could be
+	added back - the move refuses instead of dropping the rest."
+	| iterator |
+	uniqueKeys ifTrue: [ ^ self skip ].
+	iterator := index newIterator.
+	iterator at: 1 add: 1 asDummySoilObjectId.
+	iterator at: 1 add: 2 asDummySoilObjectId.
+
+	self should: [ iterator moveKey: 1 to: 2 ] raise: SoilError.
+
+	self assertCollection: (iterator at: 1) hasSameElements: { 1 asDummySoilObjectId. 2 asDummySoilObjectId }.
+	self assert: (iterator at: 2 ifAbsent: [ nil ]) isNil
+]
+
+{ #category : #tests }
+SoilIndexIteratorTest >> testMoveKeyOverwritesTheTarget [
+	"Same as #at:put: - the target is overwritten, not protected."
+	| iterator |
+	uniqueKeys ifFalse: [ ^ self skip ].
+	iterator := index newIterator.
+	iterator at: 1 add: 1 asDummySoilObjectId.
+	iterator at: 2 add: 2 asDummySoilObjectId.
+
+	iterator moveKey: 1 to: 2.
+
+	self assert: (iterator at: 2) equals: 1 asDummySoilObjectId.
+	self assert: (iterator at: 1 ifAbsent: [ nil ]) isNil
+]
+
+{ #category : #tests }
 SoilIndexIteratorTest >> testAddRandom [
 
 	| iterator numEntries entries result |

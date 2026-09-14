@@ -76,6 +76,93 @@ SoilIndexedDictionaryTest >> testAddAndRemoveExistingList [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testMoveKey [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 'key1' put: (OrderedCollection with: 'payload').
+	tx commit.
+
+	tx2 := soil newTransaction.
+	tx2 root moveKey: 'key1' to: 'key2'.
+	tx2 commit.
+
+	tx := soil newTransaction.
+	self assert: (tx root at: 'key2') first equals: 'payload'.
+	self assert: (tx root at: 'key1' ifAbsent: [ nil ]) isNil.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testMoveKeyDoesNotMaterializeTheValue [
+	"This is why the move exists as one operation: #removeKey: followed by #at:put: would
+	resolve the proxy and read the object from disk, a move only carries its SoilObjectId."
+	| tx tx2 proxy |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 'key1' put: (OrderedCollection with: 'payload').
+	tx commit.
+
+	tx2 := soil newTransaction.
+	proxy := tx2 root removeKey: 'key1'.
+	self assert: proxy isSoilProxy.
+	self assert: proxy objectIsNotLoaded.
+	tx2 abort.
+
+	tx2 := soil newTransaction.
+	tx2 root moveKey: 'key1' to: 'key2'.
+	proxy := tx2 root at: 'key2'.
+	self assert: proxy objectIsNotLoaded.
+	tx2 commit
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testMoveKeyIfAbsent [
+	| tx |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 'key1' put: (OrderedCollection with: 'payload').
+	tx commit.
+
+	tx := soil newTransaction.
+	self assert: (tx root moveKey: 'nope' to: 'key2' ifAbsent: [ #absent ]) equals: #absent.
+	self assert: (tx root at: 'key2' ifAbsent: [ nil ]) isNil.
+	self assert: (tx root at: 'key1') first equals: 'payload'.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testMoveKeyIsRolledBackOnAbort [
+	| tx |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 'key1' put: (OrderedCollection with: 'payload').
+	tx commit.
+
+	tx := soil newTransaction.
+	tx root moveKey: 'key1' to: 'key2'.
+	tx abort.
+
+	tx := soil newTransaction.
+	self assert: (tx root at: 'key1') first equals: 'payload'.
+	self assert: (tx root at: 'key2' ifAbsent: [ nil ]) isNil.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testMoveKeyMissingRaisesKeyNotFound [
+	| tx |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 'key1' put: (OrderedCollection with: 'payload').
+	tx commit.
+
+	tx := soil newTransaction.
+	self should: [ tx root moveKey: 'nope' to: 'key2' ] raise: KeyNotFound.
+	tx abort
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testAddRandom [
 	| tx numEntries entries result |
 	

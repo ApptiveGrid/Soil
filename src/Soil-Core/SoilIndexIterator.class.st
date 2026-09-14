@@ -345,6 +345,33 @@ SoilIndexIterator >> lastPage [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> moveKey: oldKey to: newKey [ 
+	^ self 
+		moveKey: oldKey 
+		to: newKey 
+		ifAbsent: [ KeyNotFound signalFor: oldKey in: self ]
+]
+
+{ #category : #accessing }
+SoilIndexIterator >> moveKey: oldKey to: newKey ifAbsent: aBlock [
+	"Move the entry at oldKey to newKey and answer the value that moved. Both halves run on
+	this iterator - the descent to the two keys has to happen either way, but one iterator
+	is enough for both. The value travels as it is, so the object it refers to is never
+	resolved.
+
+	An entry already sitting at newKey is overwritten, just like #at:put: does.
+
+	Needs an index with unique keys. With duplicates, #removeKey: takes every entry under
+	oldKey while only one can be added back, and the rest would disappear without a word."
+	| oldValue |
+	index hasUniqueKeys ifFalse: [ 
+		SoilError signal: 'moving a key needs an index with unique keys' ].
+	oldValue := self removeKey: oldKey ifAbsent: [ ^ aBlock value ].
+	self at: newKey add: oldValue asSoilObjectId.
+	^ oldValue
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> next [
 	| nextAssociation |
 	nextAssociation := self basicNextAssociation ifNil: [ ^nil ].
