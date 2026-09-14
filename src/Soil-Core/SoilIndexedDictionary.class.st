@@ -189,25 +189,36 @@ SoilIndexedDictionary >> moveKey: oldKey to: newKey [
 
 { #category : #accessing }
 SoilIndexedDictionary >> moveKey: oldKey to: newKey ifAbsent: aBlock [
-	"Move the entry at oldKey to newKey. The value travels as its SoilObjectId, so the
-	referenced object is never materialized. Doing the same with #removeKey: followed by
-	#at:put: does materialize it: #removeKey: answers an unresolved SoilObjectProxy, and
-	#at:put: sends #makeRoot: which resolves it. That matters for callers who move a key
-	repeatedly on the same entry, like a queue applying backoff to its due time.
-	Both halves run in the caller's transaction, which is where the atomicity comes from.
-	Moving needs a unique index, otherwise it is undefined which of the entries under oldKey
-	travels. A dictionary is unique by definition, so there is nothing to check here; whoever
-	lifts this to an index that allows duplicates has to answer that question first."
-	| objectId oldValueAtNewKey |
-	objectId := (self removeKey: oldKey ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
-	oldValueAtNewKey := self newIterator at: newKey add: objectId.
+	"The transactional half of SoilIndexIterator>>#moveKey:to:ifAbsent:. Both index halves
+	run on one iterator; what is added here are the two journal entries and marking the
+	index for the commit. It does the two steps itself rather than calling the iterator's
+	move, because the journal needs both values: the one that moved and the one that was
+	overwritten at newKey.
+
+	The value never leaves its SoilObjectId, so the object it refers to stays on disk. That
+	is the reason this is one operation and not a #removeKey: followed by an #at:put:,
+	which resolves the proxy through #makeRoot:. It matters for callers that move the same
+	entry again and again, like a queue pushing out the due time of an entry under backoff.
+
+	An entry already at newKey is overwritten, just like #at:put: does. The atomicity comes
+	from the caller's transaction: an abort in between leaves the entry under its old key."
+	| iterator objectId overwritten |
+	iterator := self newIterator.
+	objectId := (iterator removeKey: oldKey ifAbsent: [ ^ aBlock value ]) asSoilObjectId.
+	overwritten := iterator at: newKey add: objectId.
+
+	transaction addJournalEntry: (SoilRemoveKeyEntry new 
+			 segment: [ self segment ];
+			 id: id;
+			 key: (index indexKey: oldKey);
+			 oldValue: objectId).
 
 	transaction addJournalEntry: (SoilAddKeyEntry new
 			 segment: [ self segment ];
 			 id: id;
 			 key: (index indexKey: newKey);
 			 value: objectId;
-			 oldValue: oldValueAtNewKey).
+			 oldValue: overwritten).
 
 	self indexUpdated.
 	^ objectId
