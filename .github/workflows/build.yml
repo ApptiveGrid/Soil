@@ -30,6 +30,8 @@ jobs:
             allow-failure: true
     name: ${{ matrix.pharoversion }}-${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    # Windows only runs after the merge to main, pull requests stay Linux-only.
+    if: matrix.os == 'ubuntu-latest' || github.event_name == 'push'
     continue-on-error: ${{ matrix.allow-failure == true }}
     steps:
       - uses: actions/checkout@v2
