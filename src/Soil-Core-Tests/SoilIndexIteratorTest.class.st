@@ -810,6 +810,53 @@ SoilIndexIteratorTest >> testNextKeyCloseTo [
 ]
 
 { #category : #tests }
+SoilIndexIteratorTest >> testNextKeyCloseToBehindLastKey [
+
+	| iterator |
+	index at: 10 add: (10 asByteArrayOfSize: 8).
+	index at: 20 add: (20 asByteArrayOfSize: 8).
+
+	"on the last key there is nothing left to read"
+	iterator := index newIterator.
+	iterator nextKeyCloseTo: 20.
+	self assert: iterator nextAssociation isNil.
+
+	"behind the last key there is nothing left to read either"
+	iterator := index newIterator.
+	iterator nextKeyCloseTo: 100.
+	self assert: iterator nextAssociation isNil.
+
+	"reading backwards from behind the last key starts with the last key"
+	iterator := index newIterator.
+	iterator nextKeyCloseTo: 100.
+	self assert: iterator previousAssociation key equals: 20
+]
+
+{ #category : #tests }
+SoilIndexIteratorTest >> testNextKeyCloseToBehindPageEnd [
+
+	| capacity iterator page gapKey |
+	capacity := index headerPage itemCapacity * 2.
+	"even keys only, so that there is a key between the last item of a page and the first
+	item of the page after it"
+	1 to: capacity do: [ :n | index at: n * 2 add: (n asByteArrayOfSize: 8) ].
+	iterator := index newIterator.
+	page := iterator findPageFor: 2.
+	self deny: page isLastPage.
+	gapKey := page lastKey + 1.
+
+	"no key of this page comes after gapKey, so we are answered its last one"
+	self assert: (iterator nextKeyCloseTo: gapKey) equals: page lastKey.
+	"reading goes on with the first item of the page after, not with the page we are on"
+	self assert: iterator nextAssociation key equals: page lastKey + 2.
+
+	"reading backwards goes on with the last item of the page, it is not skipped"
+	iterator := index newIterator.
+	iterator nextKeyCloseTo: gapKey.
+	self assert: iterator previousAssociation key equals: page lastKey
+]
+
+{ #category : #tests }
 SoilIndexIteratorTest >> testNextPage [
 
 	| capacity iterator value expected |

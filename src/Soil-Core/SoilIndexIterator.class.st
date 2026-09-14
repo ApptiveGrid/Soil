@@ -432,9 +432,15 @@ SoilIndexIterator >> nextKeyCloseTo: key [
 	self findPageFor: indexKey.
 	currentKey := currentPage keyOrClosestAfter: indexKey.
 	currentPageIndex := currentPage indexOfKey: currentKey.
-	"if there is no close key found, we position the cursor at the end, so that asking for the next association will return nil" 
-	^ currentKey
-		ifNil: [ currentKey := currentPage lastKey ]
+	"if there is no close key on this page, key sits behind everything the page holds. We put
+	the cursor one behind the last item of the page, so that reading on lands in the right
+	place in either direction: the next association is nil on the last page and the first
+	item of the following page otherwise, the previous association is the last item of this
+	page. The answered key is the key of that last item and therefore before key instead of
+	after it - odd, but what the callers expect."
+	^ currentKey ifNil: [ 
+		currentPageIndex := currentPage numberOfItems + 1.
+		currentKey := currentPage lastKey ]
 ]
 
 { #category : #accessing }
