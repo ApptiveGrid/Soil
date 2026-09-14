@@ -35,6 +35,14 @@ SoilIndexedDictionaryTest >> path [
 ]
 
 { #category : #running }
+SoilIndexedDictionaryTest >> reopen [
+	"close the database and open it from disk again, so what follows reads what was
+	written and not what an index still holds in memory"
+	soil close.
+	soil := (Soil path: self path) open
+]
+
+{ #category : #running }
 SoilIndexedDictionaryTest >> setUp [ 
 	super setUp.
 	soil := Soil path: self path.
@@ -964,6 +972,31 @@ SoilIndexedDictionaryTest >> testRemoveKey [
 	tx2 root removeKey: #two ifAbsent: [ tag := true ].
 	self assert: tag
 
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testRemoveKeySurvivesReopen [
+	"a transaction that only removes carries nothing else to disk - no #at:put:, no new
+	object record. Reopening is what separates a removal that was committed from one
+	that only happened to the index in memory"
+	| tx |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
+	tx commit.
+	self reopen.
+
+	tx := soil newTransaction.
+	tx root removeKey: #two.
+	tx commit.
+	self reopen.
+
+	tx := soil newTransaction.
+	self assert: (tx root at: #two ifAbsent: [ nil ]) isNil.
+	self assert: (tx root at: #one) equals: #onevalue.
+	self assert: tx root size equals: 1.
+	tx abort
 ]
 
 { #category : #'tests - concurrent' }
