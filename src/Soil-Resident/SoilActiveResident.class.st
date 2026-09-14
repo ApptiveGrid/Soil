@@ -13,7 +13,7 @@ two vary independently. A resident's purpose says nothing about whether it runs
 on a clock, on a signal, or on a signal followed by a collecting window; and the
 same cadence serves residents that have nothing else in common.
 
-The only thing a strategy may ask me is #hasPendingWork, and that is a flag,
+The only thing a run strategy may ask me is #hasPendingWork, and that is a flag,
 never a question put to the database. Measured on the existing AGQueueTracker:
 ""is there more data"" is answered there as a side effect of doing the work,
 inside the transaction that does it. Asking separately would cost a second
@@ -35,7 +35,7 @@ Class {
 	#instVars : [
 		'process',
 		'workSignal',
-		'strategy',
+		'runStrategy',
 		'pendingWork',
 		'working',
 		'lastStepError',
@@ -56,7 +56,7 @@ SoilActiveResident class >> soilTransientInstVars [
 	What is listed here is what must not be dragged into a written graph, not
 	everything that is transient in spirit: the counters and #stepStartedAt are
 	plain values and stand outside for the same reason #stepCount does."
-	^ #( supervisor process workSignal strategy )
+	^ #( supervisor process workSignal runStrategy )
 ]
 
 { #category : #testing }
@@ -179,7 +179,7 @@ SoilActiveResident >> runLoop [
 	"the stop flag is checked twice per turn on purpose: once before waiting, and
 	once after, because #requestStop wakes me precisely while I wait"
 	[ self shouldStop ] whileFalse: [
-		self strategy awaitDue.
+		self runStrategy awaitDue.
 		self shouldStop ifFalse: [ self runStepProtected ] ].
 	self markStopped
 ]
@@ -196,7 +196,7 @@ SoilActiveResident >> runStepProtected [
 	The signals that led here are spent in the same breath: a signal says that
 	something happened, and what happened is about to be handled. Left standing,
 	the next turn would find the flag down, wait on a signal that is already
-	answered, and run an empty step -- which is exactly what a strategy that
+	answered, and run an empty step -- which is exactly what a run strategy that
 	returns early on the flag would otherwise cause.
 
 	The count and the start time are set before #working, not after, so that
@@ -213,6 +213,17 @@ SoilActiveResident >> runStepProtected [
 		on: Error
 		do: [ :anError | self handleStepError: anError ] ]
 			ensure: [ working := false ]
+]
+
+{ #category : #accessing }
+SoilActiveResident >> runStrategy [
+	^ runStrategy ifNil: [ runStrategy := self newRunStrategy ]
+]
+
+{ #category : #accessing }
+SoilActiveResident >> runStrategy: aRunStrategy [
+	runStrategy := aRunStrategy.
+	aRunStrategy resident: self
 ]
 
 { #category : #accessing }
@@ -239,17 +250,6 @@ SoilActiveResident >> startProcess [
 SoilActiveResident >> stepErrorCount [
 	"how many steps of mine threw. A crash loop is a climbing number here"
 	^ stepErrorCount
-]
-
-{ #category : #accessing }
-SoilActiveResident >> strategy [
-	^ strategy ifNil: [ strategy := self newRunStrategy ]
-]
-
-{ #category : #accessing }
-SoilActiveResident >> strategy: aRunStrategy [
-	strategy := aRunStrategy.
-	aRunStrategy resident: self
 ]
 
 { #category : #stopping }
@@ -395,7 +395,7 @@ SoilActiveResident >> wait: aSemaphore upTo: aDuration [
 
 { #category : #waiting }
 SoilActiveResident >> waitForWork [
-	"what a strategy uses to block until something happens. All signals are
+	"what a run strategy uses to block until something happens. All signals are
 	consumed, so n signals do not become n runs -- the flag says whether there is
 	work, the signal only says that something happened"
 	workSignal wait.
@@ -411,6 +411,6 @@ SoilActiveResident >> waitForWorkUpTo: aDuration [
 
 { #category : #stopping }
 SoilActiveResident >> wakeUp [
-	"my loop blocks in the strategy and would never get to see the stop flag"
+	"my loop blocks in the run strategy and would never get to see the stop flag"
 	workSignal signal
 ]
