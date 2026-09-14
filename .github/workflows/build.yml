@@ -18,18 +18,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
         pharoversion: [ Pharo64-14, Pharo64-13, Pharo64-12, Pharo64-11 ]
         include:
           - pharoversion: Pharo64-14
             allow-failure: true
-          # Windows is not green yet - the file handling work is still in
-          # flight. Run it for the signal, do not let it fail the build.
-          # Remove this entry once Windows passes.
-          - os: windows-latest
-            allow-failure: true
-    name: ${{ matrix.pharoversion }}-${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+    name: ${{ matrix.pharoversion }}-ubuntu-latest
+    runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.allow-failure == true }}
     steps:
       - uses: actions/checkout@v2
@@ -41,3 +35,26 @@ jobs:
         shell: bash
         timeout-minutes: 15
 
+  build-windows:
+    # Windows only runs after the merge to main, pull requests stay Linux-only.
+    # The matrix context is not available in a job level if, hence a separate job.
+    if: github.event_name == 'push'
+    strategy:
+      fail-fast: false
+      matrix:
+        pharoversion: [ Pharo64-14, Pharo64-13, Pharo64-12, Pharo64-11 ]
+    name: ${{ matrix.pharoversion }}-windows-latest
+    runs-on: windows-latest
+    # Windows is not green yet - the file handling work is still in
+    # flight. Run it for the signal, do not let it fail the build.
+    # Set this to false once Windows passes.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: hpi-swa/setup-smalltalkCI@v1
+        id: smalltalkci
+        with:
+          smalltalk-version: ${{ matrix.pharoversion }}
+      - run: smalltalkci -s ${{ steps.smalltalkci.outputs.smalltalk-version }}
+        shell: bash
+        timeout-minutes: 15
