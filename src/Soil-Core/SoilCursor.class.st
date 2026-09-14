@@ -50,10 +50,9 @@ SoilCursor >> asIterator [
 	"Answer an iterator on the holder, positioned here and nothing more - reading is the
 	iterator's job. Without a key the iterator stays at the beginning.
 
-	The answer of #nextKeyCloseTo: is dropped on purpose. It is not nil when it finds
-	nothing after the key but the last key it looked at, so taking that answer for a new
-	position would silently move the cursor to the end of the index. Positions come from
-	associations that were read, see SoilBasicCursor>>#advancedTo:."
+	The answer of #nextKeyCloseTo: is dropped on purpose: a position comes from an
+	association that was read, not from a key we merely looked for, see
+	SoilBasicCursor>>#advancedTo:."
 	| iterator |
 	iterator := holder newIterator.
 	key ifNotNil: [ iterator nextKeyCloseTo: key ].

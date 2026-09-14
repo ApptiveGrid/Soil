@@ -781,10 +781,8 @@ SoilIndexIteratorTest >> testNextCloseTo [
 	self
 		assertSoilDuplicate: (iterator nextCloseTo: 20)
 		equals: (20 asByteArrayOfSize: 8).
-	"this is a bit odd, when looking with larger values we get the last one"
-	self
-		assertSoilDuplicate: (iterator nextCloseTo: 100)
-		equals: (20 asByteArrayOfSize: 8)
+	"behind the last key there is no entry left to answer"
+	self assert: (iterator nextCloseTo: 100) equals: nil
 ]
 
 { #category : #tests }
@@ -805,8 +803,8 @@ SoilIndexIteratorTest >> testNextKeyCloseTo [
 	self assert: (iterator nextKeyCloseTo: 11) equals: 20.
 	self assert: (iterator nextKeyCloseTo: 15) equals: 20.
 	self assert: (iterator nextKeyCloseTo: 20) equals: 20.
-	"this is a bit odd, when looking with larger values we get the last one"
-	self assert: (iterator nextKeyCloseTo: 100) equals: 20
+	"behind the last key there is no key left to answer"
+	self assert: (iterator nextKeyCloseTo: 100) equals: nil
 ]
 
 { #category : #tests }
@@ -845,12 +843,12 @@ SoilIndexIteratorTest >> testNextKeyCloseToBehindPageEnd [
 	self deny: page isLastPage.
 	gapKey := page lastKey + 1.
 
-	"no key of this page comes after gapKey, so we are answered its last one"
-	self assert: (iterator nextKeyCloseTo: gapKey) equals: page lastKey.
-	"reading goes on with the first item of the page after, not with the page we are on"
-	self assert: iterator nextAssociation key equals: page lastKey + 2.
+	"no key of this page comes after gapKey, but the page after it has one"
+	self assert: (iterator nextKeyCloseTo: gapKey) equals: page lastKey + 2.
+	"the cursor sits on that entry, so reading on answers the one behind it"
+	self assert: iterator nextAssociation key equals: page lastKey + 4.
 
-	"reading backwards goes on with the last item of the page, it is not skipped"
+	"reading backwards answers the last item of the page gapKey belongs to"
 	iterator := index newIterator.
 	iterator nextKeyCloseTo: gapKey.
 	self assert: iterator previousAssociation key equals: page lastKey

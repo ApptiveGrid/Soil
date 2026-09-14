@@ -802,10 +802,12 @@ SoilIndexedDictionaryTest >> testNextCloseTo [
 	self assert: (tx2 root nextCloseTo: #'5') equals: #one.
 	self assert: (tx2 root nextCloseTo: #'10') equals: #one.
 	self assert: (tx2 root nextCloseTo: #'11') equals: #two.
-	self assert: (tx2 root nextCloseTo: #'15 ') equals: #two.
+	"the trailing space this key used to carry made it a third byte long, which put it
+	behind #'20' instead of between the two entries as the row suggests"
+	self assert: (tx2 root nextCloseTo: #'15') equals: #two.
 	self assert: (tx2 root nextCloseTo: #'20') equals: #two.
-	"this is a bit odd, when looking with larger values we get the last one"
-	self assert: (tx2 root nextCloseTo: #'100') equals: #two
+	"behind the last key there is no entry left to answer"
+	self assert: (tx2 root nextCloseTo: #'100') equals: nil
 ]
 
 { #category : #tests }

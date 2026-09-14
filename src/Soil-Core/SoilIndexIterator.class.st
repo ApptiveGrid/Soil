@@ -418,7 +418,8 @@ SoilIndexIterator >> nextAssociationAfter: key [
 
 { #category : #accessing }
 SoilIndexIterator >> nextCloseTo: key [
-	"return the next entry after key, even if key itself is not there"
+	"Answer the value of the first entry at or after key, even if key itself is not there.
+	nil when the index holds nothing at or after key."
 	| nextExisitingKey |
 	nextExisitingKey := (self nextKeyCloseTo: key) ifNil: [ ^nil ]. 
 	^ self at: nextExisitingKey
@@ -426,21 +427,31 @@ SoilIndexIterator >> nextCloseTo: key [
 
 { #category : #accessing }
 SoilIndexIterator >> nextKeyCloseTo: key [
-	"Note: returned key will be an index key"
-	| indexKey |
+	"Answer the key of the first entry at or after key and leave the cursor on that entry.
+	Answer nil when the index holds nothing at or after key, with the cursor one behind the
+	last item, so that reading backwards still answers that item instead of skipping it.
+	Note: returned key will be an index key"
+	| indexKey pageForKey |
 	indexKey := index indexKey: key.
 	self findPageFor: indexKey.
 	currentKey := currentPage keyOrClosestAfter: indexKey.
-	currentPageIndex := currentPage indexOfKey: currentKey.
-	"if there is no close key on this page, key sits behind everything the page holds. We put
-	the cursor one behind the last item of the page, so that reading on lands in the right
-	place in either direction: the next association is nil on the last page and the first
-	item of the following page otherwise, the previous association is the last item of this
-	page. The answered key is the key of that last item and therefore before key instead of
-	after it - odd, but what the callers expect."
-	^ currentKey ifNil: [ 
-		currentPageIndex := currentPage numberOfItems + 1.
-		currentKey := currentPage lastKey ]
+	currentKey ifNotNil: [ 
+		currentPageIndex := currentPage indexOfKey: currentKey.
+		^ currentKey ].
+	"No key of this page comes at or after key. That does not mean the index has none:
+	#keyOrClosestAfter: looks at a single page while #findPageFor: stops at the page key
+	would belong to, and key can land in the gap between that page and the one after it.
+	So we look on, and the first item we meet is the entry key asked for."
+	pageForKey := currentPage.
+	[ (currentPage := self nextPage) notNil ] whileTrue: [ 
+		currentPage isEmpty ifFalse: [ 
+			currentPageIndex := 1.
+			^ currentKey := currentPage firstItem key ] ].
+	"nothing follows that holds anything, so key sits behind the whole index"
+	currentPage := pageForKey.
+	currentPageIndex := currentPage numberOfItems + 1.
+	currentKey := currentPage lastKey.
+	^ nil
 ]
 
 { #category : #accessing }
