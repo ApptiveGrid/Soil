@@ -134,6 +134,19 @@ SoilIndexedDictionary >> index [
 
 { #category : #accessing }
 SoilIndexedDictionary >> indexUpdated [ 
+	"This marker is idle and is kept anyway. Nothing reads #dirty but the guard below, and
+	nothing reads the transaction's indexUpdatesToCommit at all: b249af9 gave that collection
+	two readers in 2023, the cleanups around ce89216 took both away in June 2025, and d854cf9
+	brought #addIndexUpdate: back from the v3 branch in January 2026 without them.
+
+	Its old job is done elsewhere now. A transaction counts as changed through
+	#hasJournalEntries, and the checkpoint reaches the indexes through
+	SoilIndexManager>>#dirtyIndexes, which asks each SoilIndex for its own #dirtyPages -
+	a different dirtiness than this one.
+
+	That is why #removeKey:ifAbsent: does not call this and does not need to: a removal-only
+	transaction commits and survives a reopen, which
+	SoilIndexedDictionaryTest>>#testRemoveKeySurvivesReopen holds to."
 	dirty ifFalse: [  
 		dirty := true.
 		transaction addIndexUpdate: self ].
