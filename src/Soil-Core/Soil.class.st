@@ -150,9 +150,6 @@ Soil >> basicOpen [
 		yourself.
 	journal := SoilPersistentDatabaseJournal new
 		soil: self.
-	"journal open might checkpoint so we set the journal 
-	instance variable first before calling open"
-	journal open.
 	notificationHandler := SoilNotificationHandler new
 		soil: self.
 	metadata := SoilMetadata new 

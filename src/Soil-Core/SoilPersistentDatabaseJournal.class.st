@@ -258,16 +258,6 @@ SoilPersistentDatabaseJournal >> objectEntriesSelect: aBlock [
 ]
 
 { #category : #'instance creation' }
-SoilPersistentDatabaseJournal >> open [ 
-	"if there are no fragment files then we create one with 
-	a checkpoint entry to enable consistency with later 
-	operations assuming there is a checkpoint"
-	self sortedFiles ifEmpty: [ 
-		soil checkpoint ]
-	
-]
-
-{ #category : #'instance creation' }
 SoilPersistentDatabaseJournal >> openFragmentFile: filename [ 
 	^ (SoilJournalFragmentFile path: self path / filename )
 		databaseJournal: self;
