@@ -485,7 +485,7 @@ SoilBackupTest >> testTheJournalIsCopiedWhenItIsAskedFor [
 		initializeFilesystem.
 	visitor := SoilBackupVisitor new
 		target: backup;
-		copiesJournal: true;
+		copyJournal: true;
 		yourself.
 	visitor backup: soil.
 	backupSoil := backup.

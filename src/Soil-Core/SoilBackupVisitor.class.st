@@ -3,7 +3,7 @@ Class {
 	#superclass : #SoilCopyingVisitor,
 	#instVars : [
 		'target',
-		'copiesJournal'
+		'copyJournal'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -60,7 +60,7 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 ]
 
 { #category : #accessing }
-SoilBackupVisitor >> copiesJournal [
+SoilBackupVisitor >> copyJournal [
 	"whether the source's journal fragments go into the copy. False, because they are
 	not needed to read it and they are not small.
 
@@ -73,12 +73,12 @@ SoilBackupVisitor >> copiesJournal [
 	Kept as an option because a copy that is meant to be inspected rather than read
 	may want the history, and because a caller that relied on the fragments being
 	there should be able to say so rather than find out."
-	^ copiesJournal ifNil: [ false ]
+	^ copyJournal ifNil: [ false ]
 ]
 
 { #category : #accessing }
-SoilBackupVisitor >> copiesJournal: aBoolean [
-	copiesJournal := aBoolean
+SoilBackupVisitor >> copyJournal: aBoolean [
+	copyJournal := aBoolean
 ]
 
 { #category : #accessing }
@@ -134,14 +134,14 @@ SoilBackupVisitor >> visitDatabaseJournal: aSoilJournal [
 	nothing coming in there is nothing to collide with, and that fresh fragment is
 	exactly what a new database should have."
 	(target path / #journal) ensureCreateDirectory.
-	self copiesJournal ifTrue: [
+	self copyJournal ifTrue: [
 		target journal sortedFiles do: #delete ].
 	^ super visitDatabaseJournal: aSoilJournal
 ]
 
 { #category : #visiting }
 SoilBackupVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
-	self copiesJournal ifFalse: [ ^ aSoilJournalFragmentFile ].
+	self copyJournal ifFalse: [ ^ aSoilJournalFragmentFile ].
 	aSoilJournalFragmentFile copyTo: target journal path / aSoilJournalFragmentFile basename.
 	^ aSoilJournalFragmentFile 
 ]
