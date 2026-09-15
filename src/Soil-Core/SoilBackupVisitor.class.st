@@ -132,10 +132,18 @@ SoilBackupVisitor >> visitDatabaseJournal: aSoilJournal [
 	target was created moments ago and brought a first fragment along which carries
 	the same name as the source's first one and would make the copy fail. With
 	nothing coming in there is nothing to collide with, and that fresh fragment is
-	exactly what a new database should have."
+	exactly what a new database should have.
+
+	The fragment is closed before it is deleted. It is opened lazily, the first time
+	anything touches the target's journal, and Windows refuses to delete a file that
+	is still open - on POSIX the unlink succeeds and the open handle keeps the old
+	inode alive, so this only ever showed there. Forgetting it afterwards lets the
+	next write open a fresh one."
 	(target path / #journal) ensureCreateDirectory.
 	self copyJournal ifTrue: [
-		target journal sortedFiles do: #delete ].
+		target journal close.
+		target journal sortedFiles do: #delete.
+		target journal resetFragmentFile ].
 	^ super visitDatabaseJournal: aSoilJournal
 ]
 
