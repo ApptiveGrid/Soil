@@ -31,7 +31,13 @@ SoilReadOnlyDatabaseTest >> damageJournal [
 SoilReadOnlyDatabaseTest >> fileSizes [
 	"the size of every file on disk, so a test can show that nothing was written"
 
-	^ (soil path allChildren
+	^ self fileSizesIn: soil path
+]
+
+{ #category : #running }
+SoilReadOnlyDatabaseTest >> fileSizesIn: aFileReference [
+
+	^ (aFileReference allChildren
 		select: [ :each | each isFile ])
 			inject: Dictionary new
 			into: [ :sizes :each | sizes at: each fullName put: each size; yourself ]
@@ -116,6 +122,27 @@ SoilReadOnlyDatabaseTest >> testDamagedDatabaseSignalsRatherThanWriting [
 	readOnly readOnly: true.
 	self should: [ readOnly open ] raise: SoilDatabaseNeedsRecovery.
 	self assert: self fileSizes equals: before
+]
+
+{ #category : #tests }
+SoilReadOnlyDatabaseTest >> testFreshlyCreatedDatabaseOpensWithoutWriting [
+	"a database created and never committed to is complete as it stands - it used
+	to have an empty journal, which the first open filled in by writing one,
+	read-only or not"
+
+	| path fresh before |
+	path := 'soil-tests-fresh' asFileReference.
+	(Soil path: path)
+		destroy;
+		initializeFilesystem;
+		close.
+	before := self fileSizesIn: path.
+	fresh := Soil path: path.
+	fresh readOnly: true.
+	[
+	fresh open.
+	self assert: (self fileSizesIn: path) equals: before ]
+		ensure: [ fresh close ]
 ]
 
 { #category : #tests }
