@@ -57,10 +57,15 @@ SoilPersistentDatabaseJournal >> currentFragmentFile [
 
 { #category : #fragmentfile }
 SoilPersistentDatabaseJournal >> cycleFragmentFile [
-	currentFragmentFile 
+	"through the accessor, not the instance variable: recovery cycles the fragment
+	file when the one the last checkpoint names has gone missing, and it gets here
+	before anything has opened a fragment file"
+	| file |
+	file := self currentFragmentFile.
+	file 
 		flush;
 		writeContentsToDisk.
-	self cycleFragmentFileAfter: currentFragmentFile
+	self cycleFragmentFileAfter: file
 ]
 
 { #category : #fragmentfile }
