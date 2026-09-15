@@ -46,11 +46,15 @@ SoilPersistentDatabaseJournal >> createFragmentFile: filename [
 
 { #category : #private }
 SoilPersistentDatabaseJournal >> currentFragmentFile [
+	"the file the last checkpoint names is the one being written to. When it is not
+	there - a journal that lost its files, which is how recovery gets here - it is
+	created with its header, rather than opened into existence by the write stream
+	and left without one"
 	| currentLSN filename |
 	^ currentFragmentFile ifNil: [  
 		currentLSN := soil control lastCheckpoint.
 		filename := self filenameFrom: currentLSN fileNumber.
-		currentFragmentFile := (currentLSN isInitial) 
+		currentFragmentFile := (currentLSN isInitial or: [ (self path / filename) exists not ]) 
 			ifTrue: [ self createFragmentFile: filename ]
 			ifFalse: [ self openFragmentFile: filename ] ]
 ]

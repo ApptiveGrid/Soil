@@ -106,6 +106,27 @@ SoilDatabaseJournalTest >> testCreatingADatabaseLeavesAFragmentFileBehind [
 ]
 
 { #category : #tests }
+SoilDatabaseJournalTest >> testFragmentFileLostFromTheJournalIsRecreatedWithItsHeader [
+	"the file the last checkpoint names can be gone, and that is how recovery gets
+	to the journal. Writing to a name that is not there opens the file into
+	existence, and used to leave one without a header behind"
+
+	| reopened |
+	self addDictionaryRoot.
+	soil close.
+	(soil path / #journal) files do: #delete.
+	reopened := Soil path: 'soil-tests'.
+	[
+	reopened open.
+	self deny: reopened journal fragmentFiles isEmpty.
+	reopened journal fragmentFiles do: [ :each |
+		self
+			assert: (each path binaryReadStreamDo: [ :in | in next: each prefix size ])
+			equals: each prefix ] ]
+		ensure: [ reopened close ]
+]
+
+{ #category : #tests }
 SoilDatabaseJournalTest >> testCurrentFragmentFileStaysWritable [
 	"read-write is reserved for the fragment file currently being written"
 	| readBack |
