@@ -102,7 +102,11 @@ SoilBackupVisitor >> visitControl: aSoilControlFile [
 
 { #category : #visiting }
 SoilBackupVisitor >> visitDatabaseJournal: aSoilJournal [ 
+	"the source's journal replaces the target's wholesale. The target was created
+	moments ago and brought its own first fragment file along, which carries the
+	same name as the source's first one and would make the copy fail"
 	(target path / #journal) ensureCreateDirectory.
+	target journal sortedFiles do: #delete.
 	^ super visitDatabaseJournal: aSoilJournal
 ]
 

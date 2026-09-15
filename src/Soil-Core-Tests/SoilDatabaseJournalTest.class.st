@@ -90,6 +90,22 @@ SoilDatabaseJournalTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilDatabaseJournalTest >> testCreatingADatabaseLeavesAFragmentFileBehind [
+	"a database is complete the moment it is created: the journal has its first
+	fragment file and a checkpoint entry, so no later open has to write one"
+
+	| created |
+	created := (Soil path: 'soil-tests-created')
+		destroy;
+		initializeFilesystem;
+		yourself.
+	[
+	self assert: created journal sortedFiles size equals: 1.
+	self deny: created control lastCheckpoint isInitial ]
+		ensure: [ created close ]
+]
+
+{ #category : #tests }
 SoilDatabaseJournalTest >> testCurrentFragmentFileStaysWritable [
 	"read-write is reserved for the fragment file currently being written"
 	| readBack |

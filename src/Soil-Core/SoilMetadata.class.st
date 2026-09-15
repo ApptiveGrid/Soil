@@ -17,14 +17,6 @@ SoilMetadata class >> fileLayout [
 		 }
 ]
 
-{ #category : #'open/close' }
-SoilMetadata >> ensurePresent [ 
-	"this is a legacy method to create for older databases that do not
-	have the metadata file already"
-	self path exists ifFalse: [ 
-		self initializeFilesystem ]
-]
-
 { #category : #inspector }
 SoilMetadata >> inspectionMetadata: aBuilder [
 	<inspectorPresentationOrder: 1000 title: 'metadata'>

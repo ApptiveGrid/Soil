@@ -237,12 +237,6 @@ SoilJournalFragmentFile >> inspectionTransactionJournals: aBuilder [
 ]
 
 { #category : #'open/close' }
-SoilJournalFragmentFile >> open [
-	self isOpen ifTrue: [ self error: 'File already open' ].
-	stream := SoilLockableStream path: path 
-]
-
-{ #category : #'open/close' }
 SoilJournalFragmentFile >> openReadOnly [
 	"Open the fragment file for reading only. A fragment file that has been read
 	back from disk is never written to, so it does not need a lockable stream:
@@ -293,6 +287,11 @@ SoilJournalFragmentFile >> setToStart [
 { #category : #accessing }
 SoilJournalFragmentFile >> size [ 
 	^ stream size 
+]
+
+{ #category : #accessing }
+SoilJournalFragmentFile >> soil [
+	^ databaseJournal soil
 ]
 
 { #category : #accessing }

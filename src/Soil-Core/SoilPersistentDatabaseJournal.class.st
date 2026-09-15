@@ -57,10 +57,15 @@ SoilPersistentDatabaseJournal >> currentFragmentFile [
 
 { #category : #fragmentfile }
 SoilPersistentDatabaseJournal >> cycleFragmentFile [
-	currentFragmentFile 
+	"through the accessor, not the instance variable: recovery cycles the fragment
+	file when the one the last checkpoint names has gone missing, and it gets here
+	before anything has opened a fragment file"
+	| file |
+	file := self currentFragmentFile.
+	file 
 		flush;
 		writeContentsToDisk.
-	self cycleFragmentFileAfter: currentFragmentFile
+	self cycleFragmentFileAfter: file
 ]
 
 { #category : #fragmentfile }
@@ -250,16 +255,6 @@ SoilPersistentDatabaseJournal >> objectEntriesSelect: aBlock [
 		 (aBlock value: entry) ifTrue: [ 
 			entries add: entry ] ].
 	^ entries
-]
-
-{ #category : #'instance creation' }
-SoilPersistentDatabaseJournal >> open [ 
-	"if there are no fragment files then we create one with 
-	a checkpoint entry to enable consistency with later 
-	operations assuming there is a checkpoint"
-	self sortedFiles ifEmpty: [ 
-		soil checkpoint ]
-	
 ]
 
 { #category : #'instance creation' }
