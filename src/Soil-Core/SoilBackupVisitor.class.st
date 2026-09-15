@@ -2,7 +2,8 @@ Class {
 	#name : #SoilBackupVisitor,
 	#superclass : #SoilCopyingVisitor,
 	#instVars : [
-		'target'
+		'target',
+		'copiesJournal'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -59,6 +60,28 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 ]
 
 { #category : #accessing }
+SoilBackupVisitor >> copiesJournal [
+	"whether the source's journal fragments go into the copy. False, because they are
+	not needed to read it and they are not small.
+
+	A backup is written by walking the source at a pinned databaseVersion and writing
+	fresh object and index files into a freshly initialized target. The target's
+	positions are therefore its own, and the source's journal entries describe
+	positions in the source - measured on a database of forty commits, the fragments
+	were half of the copy, and deleting them from it left every value readable.
+
+	Kept as an option because a copy that is meant to be inspected rather than read
+	may want the history, and because a caller that relied on the fragments being
+	there should be able to say so rather than find out."
+	^ copiesJournal ifNil: [ false ]
+]
+
+{ #category : #accessing }
+SoilBackupVisitor >> copiesJournal: aBoolean [
+	copiesJournal := aBoolean
+]
+
+{ #category : #accessing }
 SoilBackupVisitor >> databaseVersion: anObject [
 
 	databaseVersion := anObject
@@ -102,16 +125,23 @@ SoilBackupVisitor >> visitControl: aSoilControlFile [
 
 { #category : #visiting }
 SoilBackupVisitor >> visitDatabaseJournal: aSoilJournal [ 
-	"the source's journal replaces the target's wholesale. The target was created
-	moments ago and brought its own first fragment file along, which carries the
-	same name as the source's first one and would make the copy fail"
+	"the directory is made either way. A copy is opened like any other database and
+	writes its own journal from then on; what it does not need is the source's.
+
+	The target's own fragments are cleared only when the source's are coming in: the
+	target was created moments ago and brought a first fragment along which carries
+	the same name as the source's first one and would make the copy fail. With
+	nothing coming in there is nothing to collide with, and that fresh fragment is
+	exactly what a new database should have."
 	(target path / #journal) ensureCreateDirectory.
-	target journal sortedFiles do: #delete.
+	self copiesJournal ifTrue: [
+		target journal sortedFiles do: #delete ].
 	^ super visitDatabaseJournal: aSoilJournal
 ]
 
 { #category : #visiting }
 SoilBackupVisitor >> visitJournalFragmentFile: aSoilJournalFragmentFile [ 
+	self copiesJournal ifFalse: [ ^ aSoilJournalFragmentFile ].
 	aSoilJournalFragmentFile copyTo: target journal path / aSoilJournalFragmentFile basename.
 	^ aSoilJournalFragmentFile 
 ]
