@@ -125,7 +125,15 @@ SoilBackupVisitor >> visitMetaSegment: aSoilMetaSegment [
 
 { #category : #visiting }
 SoilBackupVisitor >> visitObjectSegment: aSoilObjectSegment [ 
+	"the tolerant setter, not the strict one. A fresh target does not start empty:
+	SoilObjectRepository>>initializeFilesystem gives its first segment
+	lastObjectIndex 1 and its meta segment 2, as placeholders for the root and the
+	meta description. #lastObjectIndex: demands strict growth and refuses anything
+	that is not past those, so a database small enough that its own index has not
+	overtaken the placeholder cannot be copied at all - and that is the one case
+	where equality means the copy is faithful rather than an index that failed to
+	grow."
 	super visitObjectSegment: aSoilObjectSegment.
 	(target objectRepository segmentAt: aSoilObjectSegment id)
-		lastObjectIndex: aSoilObjectSegment lastObjectIndex  
+		updateLastObjectIndex: aSoilObjectSegment lastObjectIndex
 ]
