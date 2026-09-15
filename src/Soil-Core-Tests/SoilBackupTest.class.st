@@ -134,6 +134,26 @@ SoilBackupTest >> testBackupInDepthFirstModePreservesVersionHistory [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testBackupOfADatabaseThatOnlyHasItsRoot [
+	"the smallest database there is: one commit, nothing in it but the root. Its
+	first segment then stands at lastObjectIndex 1, which is exactly the placeholder
+	#initializeFilesystem gives a fresh target - and copying that value is a copy,
+	not an index that failed to grow. Before this was tolerated, such a database
+	could not be backed up at all, which is the state a user database is in between
+	being created and being used for the first time."
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: SoilPersistentDictionary new.
+	tx commit.
+	soil backupTo: self backupPath.
+	backupSoil := Soil new
+		path: self backupPath;
+		open.
+	tx2 := backupSoil newTransaction.
+	self assert: tx2 root class equals: SoilPersistentDictionary
+]
+
+{ #category : #tests }
 SoilBackupTest >> testBackupOldBehavior [ 
 	| tx visitor tx3 object objectId versions object2 |
 	migrationClass := self createMigrationClass.
