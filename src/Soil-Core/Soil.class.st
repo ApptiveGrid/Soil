@@ -154,7 +154,6 @@ Soil >> basicOpen [
 		soil: self.
 	metadata := SoilMetadata new 
 			soil: self;
-			ensurePresent;
 			open;
 			yourself
 	
