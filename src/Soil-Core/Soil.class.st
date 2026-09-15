@@ -332,7 +332,11 @@ Soil >> initializeFilesystem [
 	metadata := SoilMetadata new 
 			soil: self;
 			initializeFilesystem;
-			yourself
+			yourself.
+	"the journal gets its first fragment file and a checkpoint entry right here,
+	where writing is the point. A database is complete the moment it is created,
+	so no later open has to repair one"
+	self checkpoint
 ]
 
 { #category : #inspector }
