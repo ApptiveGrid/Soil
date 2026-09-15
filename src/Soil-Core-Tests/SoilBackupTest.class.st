@@ -431,3 +431,65 @@ SoilBackupTest >> testSimpleBackup [
 	
 	
 ]
+
+{ #category : #tests }
+SoilBackupTest >> testTheJournalIsNotCopiedAndIsNotMissed [
+	"a copy is written by walking the source at a pinned version and writing fresh
+	object and index files, so its positions are its own and the source's journal
+	entries describe somebody else's. Measured on a database of forty commits, the
+	fragments were half of the copy and deleting them from it left every value
+	readable.
+
+	Compared rather than counted: whether a freshly initialized database brings a
+	first fragment along differs between Soil versions, and what this is about is
+	that the source's history does not come with it."
+	| tx backup tx2 sizeOf |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: nil).
+	tx commit.
+	1 to: 5 do: [ :each |
+		tx := soil newTransaction.
+		tx root nested: each printString.
+		tx markDirty: tx root.
+		tx commit ].
+	soil backupTo: self backupPath.
+	sizeOf := [ :directory |
+		directory exists
+			ifTrue: [ directory files inject: 0 into: [ :sum :each | sum + each size ] ]
+			ifFalse: [ 0 ] ].
+	self
+		assert: (self backupPath asFileReference / #journal) exists
+		description: 'the copy writes its own journal from the moment it is opened'.
+	self
+		assert: (sizeOf value: self backupPath asFileReference / #journal)
+			< (sizeOf value: self path / #journal)
+		description: 'the source history did not come with it'.
+	backup := Soil new
+		path: self backupPath;
+		open.
+	backupSoil := backup.
+	tx2 := backup newTransaction.
+	[ self assert: tx2 root nested equals: '5' ] ensure: [ tx2 abort ]
+]
+
+{ #category : #tests }
+SoilBackupTest >> testTheJournalIsCopiedWhenItIsAskedFor [
+	"for a copy that is meant to be inspected rather than read"
+	| tx visitor backup |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: nil).
+	tx commit.
+	backup := Soil new
+		path: self backupPath;
+		destroy;
+		initializeFilesystem.
+	visitor := SoilBackupVisitor new
+		target: backup;
+		copyJournal: true;
+		yourself.
+	visitor backup: soil.
+	backupSoil := backup.
+	self
+		assert: (self backupPath asFileReference / #journal) files notEmpty
+		description: 'asked for, the source fragments are there'
+]
