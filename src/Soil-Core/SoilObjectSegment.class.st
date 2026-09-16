@@ -26,12 +26,26 @@ SoilObjectSegment >> allRecords [
 
 { #category : #accessing }
 SoilObjectSegment >> allVersionsAt: index [ 
-	| obj versions objectId |
+	"a chain that leads back to a position it has already been at is not a long
+	history, it is a broken one - and followed to its end it never ends, because the
+	zero that stops this loop is never reached. Every version passed on the way is
+	kept, so what a damaged chain costs is not a slow backup but the process doing it.
+
+	Guarded here and not in every walker: #basicAt:version: and #at:version: follow
+	the same links but stop at the first version they can use, so they only circle
+	when asked for a version the cycle does not contain. This one follows the chain to
+	its end unconditionally."
+	| obj versions objectId positions |
 	obj := self at: index.
 	versions := OrderedCollection new.
 	versions add: obj.
 	objectId := obj objectId.
+	positions := Set with: obj position.
 	[ obj previousVersionPosition == 0 ] whileFalse: [ 
+		(positions includes: obj previousVersionPosition) ifTrue: [ 
+			SoilDatabaseIsInconsistent signal: 'version chain of ' , objectId printString 
+				, ' returns to position ' , obj previousVersionPosition printString ].
+		positions add: obj previousVersionPosition.
 		obj := objectFile atPosition: obj previousVersionPosition.
 		obj objectId: objectId.
 		versions add: obj ].
