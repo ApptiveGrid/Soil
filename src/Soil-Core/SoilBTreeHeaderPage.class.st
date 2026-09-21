@@ -111,6 +111,12 @@ SoilBTreeHeaderPage >> size [
 ]
 
 { #category : #accessing }
+SoilBTreeHeaderPage >> size: anInteger [
+	size := anInteger.
+	needWrite := true
+]
+
+{ #category : #accessing }
 SoilBTreeHeaderPage >> uniqueKeys [
 	^ uniqueKeys
 ]
