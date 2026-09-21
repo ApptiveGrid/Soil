@@ -811,6 +811,34 @@ SoilIndexedDictionaryTest >> testNextCloseTo [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testRecomputeSizeAfterTheCounterDrifted [
+	"#size answers a counter kept incrementally by #increaseSize and #decreaseSize, so it
+	can drift away from what the pages actually hold. #recomputeSize counts what is there
+	and stores that. It goes through #thePersistentInstance because a transaction's index
+	is a copy-on-write wrapper: its pages are copies and its #addDirtyPage: does nothing,
+	so a repair applied there would never reach the disk."
+	| tx index |
+	tx := soil newTransaction.
+	tx root: dict.
+	1 to: 50 do: [ :i | tx root at: ('key', (i printPaddedWith: $0 to: 6)) put: i ].
+	tx commit.
+	self reopen.
+
+	tx := soil newTransaction.
+	index := tx root index thePersistentInstance.
+	index headerPage size: 7.
+	self assert: tx root size equals: 7.
+	self assert: index recomputeSize equals: 50.
+	tx abort.
+	soil checkpoint.
+	self reopen.
+
+	tx := soil newTransaction.
+	self assert: tx root size equals: 50.
+	tx abort
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testRecoverAddedKeys [
 	| tx tx2 blockedTx |
 	"We test that added keys are not shown in a prior transaction"

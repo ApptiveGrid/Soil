@@ -36,7 +36,6 @@ SoilSkipListHeaderPage >> canBeRemoved [
 
 { #category : #utilities }
 SoilSkipListHeaderPage >> decreaseSize [
-	(size = -1) ifTrue: [ ^ self ].
 	size := size - 1.
 	needWrite := true
 ]
@@ -64,7 +63,6 @@ SoilSkipListHeaderPage >> headerSize [
 
 { #category : #utilities }
 SoilSkipListHeaderPage >> increaseSize [
-	(size = -1) ifTrue: [ ^ self ].
 	size := size + 1.
 	needWrite := true
 ]
@@ -167,7 +165,8 @@ SoilSkipListHeaderPage >> size [
 
 { #category : #accessing }
 SoilSkipListHeaderPage >> size: anInteger [ 
-	size := anInteger
+	size := anInteger.
+	needWrite := true
 ]
 
 { #category : #accessing }

@@ -460,6 +460,21 @@ SoilIndex >> readPageFrom: aStream [
 	^ page readFrom: aStream 
 ]
 
+{ #category : #accessing }
+SoilIndex >> recomputeSize [
+	"Count what the pages actually hold and make that this index's size. The counter is
+	kept incrementally by #increaseSize and #decreaseSize, so it can drift away from the
+	entries that are really there. Answers the new size.
+
+	Slow: it walks the whole index. Meant for repairing a database, not for the hot path -
+	#size answers the stored counter and stays cheap."
+	| counted |
+	counted := self newIterator sizeViaIteration.
+	self headerPage size: counted.
+	self addDirtyPage: self headerPage.
+	^ counted
+]
+
 { #category : #removing }
 SoilIndex >> recyclePage: aPage [
 	"the header stays untouched even it it gets empty"
