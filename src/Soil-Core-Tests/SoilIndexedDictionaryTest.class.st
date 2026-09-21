@@ -1002,6 +1002,45 @@ SoilIndexedDictionaryTest >> testRemoveKeySurvivesReopen [
 ]
 
 { #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testRemoveKeySurvivesReopenWhileAnotherTransactionIsOpen [
+	"A removal writes its tombstone straight into the page's items collection
+	(SoilIndexIterator>>#removeKey:ifAbsent:), which does not set #needWrite the way
+	#addItem: does, while #decreaseSize marks the header page. So the counter reaches the
+	disk and the data page does not: while another transaction holds a read version older
+	than the removal, SoilIndexCleaner>>#canDiscardOldState: refuses to clean that page,
+	and nothing else marks it. After a reopen the removed key is back and the size counter
+	is short of the entries actually in the index - and the next insert on that page writes
+	the resurrected entry out for good.
+
+	The entries are many because a key has to land on a data page of its own; with a handful
+	of them everything sits on the header page, which #decreaseSize marks anyway. That is
+	why #testRemoveKeySurvivesReopen next door stays green."
+	| tx reader entries |
+	tx := soil newTransaction.
+	tx root: dict.
+	1 to: 2000 do: [ :i | tx root at: ('key', (i printPaddedWith: $0 to: 6)) put: i ].
+	tx commit.
+	self reopen.
+
+	"a transaction open across the removal holds a read version older than it"
+	reader := soil newTransaction.
+	reader root at: 'key000001'.
+
+	tx := soil newTransaction.
+	tx root removeKey: 'key001000'.
+	tx commit.
+	reader abort.
+	self reopen.
+
+	tx := soil newTransaction.
+	entries := 0.
+	tx root index newIterator associationsDo: [ :each | entries := entries + 1 ].
+	self assert: (tx root at: 'key001000' ifAbsent: [ nil ]) isNil.
+	self assert: tx root size equals: entries.
+	tx abort
+]
+
+{ #category : #'tests - concurrent' }
 SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 
 	| tx tx2 |
