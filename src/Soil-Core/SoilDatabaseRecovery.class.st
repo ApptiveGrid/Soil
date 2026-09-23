@@ -5,7 +5,8 @@ Class {
 		'soil',
 		'journal',
 		'lsn',
-		'replayedTransactions'
+		'replayedTransactions',
+		'reason'
 	],
 	#category : #'Soil-Core-Journal'
 }
@@ -20,17 +21,39 @@ SoilDatabaseRecovery >> count: anInteger of: aNoun [
 SoilDatabaseRecovery >> isNeeded [
 	"Whether there is anything past the last checkpoint to replay. Reads only, and
 	through the streams the database was opened with, so this can be asked of a
-	database lying on read-only media."
+	database lying on read-only media.
+
+	Three different states answer yes, and #reason keeps which one it was - the caller
+	that may not write has to decide what to do about it, and 'needs recovery' alone
+	does not say enough to decide anything."
 
 	| lastCheckpoint fragmentFile |
+	reason := nil.
 	lastCheckpoint := soil control lastCheckpoint.
-	(journal existsFragmentFileForLSN: lastCheckpoint) ifFalse: [ ^ true ].
+	(journal existsFragmentFileForLSN: lastCheckpoint) ifFalse: [
+		reason := 'the fragment file for the last checkpoint ' , lastCheckpoint printString
+			, ' is missing'.
+		^ true ].
 	fragmentFile := journal openFragmentForLSN: lastCheckpoint.
 	^ [ [ SoilJournalEntry readFrom: fragmentFile stream ]
 			on: Error
-			do: [ :error | ^ true ].
-		fragmentFile atEnd not ]
+			do: [ :error |
+				reason := 'the last checkpoint ' , lastCheckpoint printString
+					, ' does not read back (' , error messageText , ')'.
+				^ true ].
+		fragmentFile atEnd
+			ifTrue: [ false ]
+			ifFalse: [
+				reason := 'there are journal entries past the last checkpoint '
+					, lastCheckpoint printString.
+				true ] ]
 			ensure: [ fragmentFile close ]
+]
+
+{ #category : #testing }
+SoilDatabaseRecovery >> reason [
+	"what #isNeeded found, in words - nil until it has been asked"
+	^ reason
 ]
 
 { #category : #accessing }
@@ -118,6 +141,7 @@ SoilDatabaseRecovery >> recover [
 		soil emit: 'recovery: needed, but this image may not write to the database'.
 		SoilDatabaseNeedsRecovery new
 			soil: soil;
+			reason: self reason;
 			signal ].
 	"read the log sequence number of the last successful checkpoint from the control 
 	file. A successful checkpoint includes writing the transaction logs to disk, 
