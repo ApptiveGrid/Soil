@@ -18,10 +18,16 @@ Class {
 
 { #category : #accessing }
 SoilGraphExporter class >> formatVersion [
-	"the version of the stream #export writes. Raise it whenever the format changes, so
-	that SoilGraphImporter refuses what it cannot read rather than misreading it - an
-	export is meant to be short-lived, but nothing stops one from being kept."
-	^ 2
+	"the version of the stream #export writes. It exists so that SoilGraphImporter refuses
+	a stream it cannot read instead of misreading it - everything after this field is read
+	by position, so a foreign stream would not fail, it would come out looking like data.
+
+	Raise it when a stream from the old format could still meet a new importer. Today none
+	can: an export is written and read within one operation, seconds apart, and nothing
+	keeps one. So the format may change without a new number - it did when replacements
+	started carrying names (Norbert, 2026-09-23). The day exports are stored, shipped or
+	queued, every change needs one."
+	^ 1
 ]
 
 { #category : #adding }
