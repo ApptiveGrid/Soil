@@ -98,7 +98,11 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 							idMap 
 								at: cluster objectId 
 								put: (presentOid asObjectIdVersion: presentBehavior object version) ]
-						ifFalse: [ Error signal: 'there is a shape difference in behavior. Yet not covered case' ] ] ] 
+						ifFalse: [ 
+							self 
+								importBehaviorOfDifferentShape: cluster 
+								knownAs: presentBehavior 
+								at: presentOid ] ] ] 
 		ifNil: [ 
 			"The behavior is not in the database so we import the behavior with 
 			version 1"
@@ -111,6 +115,59 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 			"remember this so import can undo it if anything later in this same import
 			fails - see #import"
 			addedBehaviorNames add: cluster object behaviorIdentifier ]
+]
+
+{ #category : #importing }
+SoilGraphImporter >> importBehaviorOfDifferentShape: cluster knownAs: presentBehavior at: presentOid [
+	"The target's current shape for this class is not the one being imported. Two of the
+	three ways that happens are ordinary and both end in a description this database can
+	read, so neither is a conflict:
+
+	1. The target knows the imported shape as an older version of the chain. Then the
+	   objects being imported carry a shape this database can migrate from, and pointing
+	   them at that version is all that is needed - materializing them later runs the
+	   usual shape adaptation.
+	2. The imported shape is the one the class has in this image, and the target simply
+	   has not written an object of that class since it changed. That is the next version
+	   of the chain, and it is appended here exactly as an ordinary commit would have
+	   appended it.
+
+	What is left over is a shape that is neither in the chain nor the live class, which
+	means the exporting image runs different code than this one - #updateCluster: raises
+	the source to *its* current state, and that is then not ours. That one raises."
+	| knownVersion newVersion |
+	knownVersion := soil behaviorRegistry
+		                versionOfBehaviorWithIndex: presentOid index
+		                matching: cluster object
+		                transaction: transaction.
+	knownVersion ifNotNil: [
+		^ idMap
+			  at: cluster objectId
+			  put: (presentOid asObjectIdVersion: knownVersion) ].
+
+	(cluster object matchesDescription:
+		 (SoilBehaviorDescription for: cluster object objectClass)) ifFalse: [
+		^ SoilBehaviorShapeConflict new
+			  behaviorIdentifier: cluster object behaviorIdentifier;
+			  importedInstVarNames: cluster object instVarNames;
+			  presentInstVarNames: presentBehavior object instVarNames;
+			  signal ].
+
+	newVersion := presentBehavior object version + 1.
+	self metaSegment
+		at: presentOid index
+		putBytes: ((presentBehavior asNewClusterVersion)
+				 object: (cluster object version: newVersion; yourself);
+				 version: newVersion;
+				 transaction: transaction;
+				 serializeObject;
+				 serialize).
+	soil behaviorRegistry
+		appendCommittedVersion: cluster object
+		forIndex: presentOid index.
+	idMap
+		at: cluster objectId
+		put: (presentOid asObjectIdVersion: newVersion)
 ]
 
 { #category : #'instance creation' }

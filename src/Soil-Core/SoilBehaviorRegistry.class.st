@@ -93,6 +93,20 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aBehaviorDescription transaction: 
 	^ result
 ]
 
+{ #category : #queries }
+SoilBehaviorRegistry >> versionOfBehaviorWithIndex: objectIndex matching: aBehaviorDescription transaction: aTransaction [
+	"the version of the persisted description at objectIndex whose shape equals
+	aBehaviorDescription, or nil if no version in the chain has that shape. Unlike
+	#behaviorVersionsUpTo:transaction: this answers a question instead of building a
+	migration path, and it does not raise when nothing matches - the caller decides what
+	an unknown shape means."
+	^ versionsLock critical: [
+		self ensureHistoryLoadedForBehaviorWithIndex: objectIndex transaction: aTransaction.
+		((versions at: objectIndex) 
+			detect: [ :each | each matchesDescription: aBehaviorDescription ]
+			ifNone: [ nil ]) ifNotNil: [ :found | found version ] ]
+]
+
 { #category : #'open/close' }
 SoilBehaviorRegistry >> close [
 	"the index is nil until the registry is opened, and stays nil if opening failed"

@@ -140,7 +140,13 @@ SoilGraphExporterTest >> testFailedImportDoesNotCorruptBehaviorRegistryForOtherC
 	"A partially-failing import (one class new to the target succeeds, a later class
 	genuinely mismatches and raises) must not leave the succeeded class dangling in the
 	behaviorRegistry name index - otherwise a later, unrelated write can reuse the same
-	behavior index and alias two different classes onto it. See SoilGraphImporter>>import."
+	behavior index and alias two different classes onto it. See SoilGraphImporter>>import.
+
+	The mismatch has to be a genuine one since the importer learned the version chain:
+	a shape the target holds as an older version, or the one the live class has, are both
+	ordinary and no longer raise. So the class changes a third time *after* the export -
+	what arrives is then neither the target's shape nor this image's, which is what an
+	exporting image running different code would send."
 
 	| newClass mismatchClass thirdClass tx sourceExportTx exporter bytes importer targetTx |
 	[
@@ -185,12 +191,19 @@ SoilGraphExporterTest >> testFailedImportDoesNotCorruptBehaviorRegistryForOtherC
 					export ].
 		sourceExportTx abort.
 
+		"the live shape moves on after the export: the bytes now carry a shape that is
+		neither in the target's chain nor the class as it is here"
+		mismatchClass := (SoilBaseTestObject << #SOGraphImportMismatchClass
+			layout: FixedLayout;
+			slots: { #q1. #q3 };
+			package: self class package name) install.
+
 		targetTx := targetSoil newTransaction.
 		importer := SoilGraphImporter new
 			transaction: targetTx;
 			stream: bytes readStream;
 			yourself.
-		self should: [ importer import ] raise: Error.
+		self should: [ importer import ] raise: SoilBehaviorShapeConflict.
 		targetTx abort.
 
 		self
@@ -215,12 +228,18 @@ SoilGraphExporterTest >> testFailedImportDoesNotCorruptBehaviorRegistryForOtherC
 ]
 
 { #category : #tests }
-SoilGraphExporterTest >> testImportRaisesOnGenuineShapeMismatch [
-	"if the target database already has a native, current behavior description for the
-	class that genuinely differs from what is being imported, the importer must fail loudly
-	instead of silently reusing the wrong description - see SoilGraphImporter>>importBehaviorCluster:."
+SoilGraphExporterTest >> testImportOfALiveShapeBecomesTheNextVersionInTheTarget [
+	"The target holds an older shape as its current one and the import brings the shape of
+	the class as it lives in this image. That is not a conflict: it is what an ordinary
+	commit in the target would have produced, and the importer appends it as the next
+	version of the chain rather than reusing the description that is already there.
 
-	| tx object bytes exportTx importer targetTx |
+	Was testImportRaisesOnGenuineShapeMismatch, which expected an Error here. The
+	protection that comment named - never silently reuse a description that does not fit -
+	still holds, and is asserted below: the imported object reads back with its own values,
+	which it could not if it had been read through the target's older description."
+
+	| tx bytes exportTx importer targetTx imported |
 	targetSoil := Soil createOnPath: self targetPath.
 	tx := targetSoil newTransaction.
 	tx root: (migrationClass new
@@ -230,7 +249,7 @@ SoilGraphExporterTest >> testImportRaisesOnGenuineShapeMismatch [
 		yourself).
 	tx commit.
 
-	"reorder only in the source's understanding - the target keeps its original shape as current"
+	"reorder in the image - the target keeps its original shape as current"
 	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
 		layout: FixedLayout;
 		slots: { #one. #three. #two };
@@ -259,7 +278,17 @@ SoilGraphExporterTest >> testImportRaisesOnGenuineShapeMismatch [
 		transaction: targetTx;
 		stream: bytes readStream;
 		yourself.
-	self should: [ importer import ] raise: Error.
+	importer import.
+	imported := importer importedObjects first.
+	targetTx commit.
+
+	self assert: (imported instVarNamed: #one) equals: 1.
+	self assert: (imported instVarNamed: #two) equals: 2.
+	self assert: (imported instVarNamed: #three) equals: 3.
+
+	"and the object that was already there is untouched"
+	targetTx := targetSoil newTransaction.
+	self assert: (targetTx root instVarNamed: #two) equals: 'native-two'.
 	targetTx abort
 ]
 
