@@ -17,6 +17,10 @@ SoilGraphExporterTest >> path [
 { #category : #running }
 SoilGraphExporterTest >> setUp [
 	super setUp.
+	"a target database left behind by a test whose tearDown did not get through would
+	make every later test here fail on an existing directory, and the one real failure
+	would arrive as a page of them"
+	(Soil path: self targetPath) destroy.
 	soil := Soil path: self path.
 	soil
 		destroy;
