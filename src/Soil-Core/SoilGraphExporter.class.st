@@ -223,9 +223,8 @@ SoilGraphExporter >> visitBTreeDictionary: aBTreeDictionary [
 	Nobody hits this - no BTree dictionary is used in Soil outside its own tests, nor in
 	ApptiveGrid. It is here so that whoever is first gets told what happened instead of a
 	doesNotUnderstand somewhere in the visiting."
-	^ SoilUnsupportedInExport new
-		  structure: aBTreeDictionary;
-		  signal
+	^ SoilUnsupportedError signal:
+		  'a graph export cannot carry a ' , aBTreeDictionary class name
 ]
 
 { #category : #visiting }

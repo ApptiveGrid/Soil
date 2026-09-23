@@ -152,7 +152,7 @@ SoilGraphExporterTest >> testExportRefusesAStructureItCannotCarry [
 					yourself)
 						stream: stream;
 						export ] ]
-		raise: SoilUnsupportedInExport.
+		raise: SoilUnsupportedError.
 	exportTx abort
 ]
 
