@@ -25,7 +25,7 @@ VariableLayout >> soilBasicSerialize: anObject with: serializer [
 
 	serializer nextPutLengthEncodedInteger: basicSize.
 	host hasSoilTransientInstVars 
-		ifFalse: [1 to: host instSize do: [:index | (anObject instVarAt: index)  theNonSoilProxy soilSerialize: serializer] ]
-		ifTrue: [description instVarNames do: [:ivarName | ((host slotNamed: ivarName) read: anObject) theNonSoilProxy soilSerialize: serializer ] ].
+		ifFalse: [1 to: host instSize do: [:index | (anObject instVarAt: index)  soilSerialize: serializer] ]
+		ifTrue: [description instVarNames do: [:ivarName | ((host slotNamed: ivarName) read: anObject) soilSerialize: serializer ] ].
 	1 to: basicSize do: [:i | (anObject basicAt: i) soilSerialize: serializer ]
 ]

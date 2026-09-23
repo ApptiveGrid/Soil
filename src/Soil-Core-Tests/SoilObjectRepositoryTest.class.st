@@ -47,6 +47,45 @@ SoilObjectRepositoryTest >> testAddSegmentAfterOpeningFromDisk [
 ]
 
 { #category : #tests }
+SoilObjectRepositoryTest >> testWritingACollectionOfRootsDoesNotReadThemAll [
+	"Adding one element to a collection of five hundred cluster roots read all five hundred
+	of them. The collection comes back from disk as proxies, and every path into the
+	serializer resolved a proxy before writing it: reading the cluster behind it,
+	materializing the object, and then writing the id that was in the proxy all along.
+
+	Counted with Soils own metrics rather than by instrumenting - #objectRecordsRead is
+	what a commit costs in reads. Against the code before this, it counts five hundred."
+
+	| reopened txn newOne metrics |
+	txn := soil newTransaction.
+	txn root: OrderedCollection new.
+	1 to: 500 do: [ :i |
+		| each |
+		each := SoilTestGraphRoot new nested: 'element ' , i printString; yourself.
+		txn makeRoot: each.
+		txn root add: each ].
+	txn markDirty: txn root.
+	txn commit.
+	soil close.
+	soil := nil.
+
+	"reopened, so the elements are proxies and nothing is materialized yet"
+	reopened := (Soil path: 'soil-tests') open.
+	[ txn := reopened newTransaction.
+	  self assert: txn root size equals: 500.
+	  reopened notificationHandler: SoilMetrics new.
+	  newOne := SoilTestGraphRoot new nested: 'one more'; yourself.
+	  txn makeRoot: newOne.
+	  txn root add: newOne.
+	  txn markDirty: txn root.
+	  txn commit.
+	  metrics := reopened notificationHandler.
+	  self assert: metrics objectRecordsRead equals: 0.
+	  self assert: metrics objectRecordsWritten equals: 2 ]
+		ensure: [ reopened close ]
+]
+
+{ #category : #tests }
 SoilObjectRepositoryTest >> testCacheObjectRecordMetrics [
 	| txn root segment metrics txn2 |
 	soil notificationHandler: SoilMetrics new.

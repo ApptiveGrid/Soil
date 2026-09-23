@@ -83,31 +83,37 @@ SoilNewClusterVersion >> indexOfBehaviorDescription: aBehavior [
 
 { #category : #accessing }
 SoilNewClusterVersion >> indexOfExternalReference: anObject [
-	| index |
 	(anObject == object) ifTrue: [ ^ 0 ].
-	index := externalObjects identityIndexOf: anObject.
-	(index > 0) ifTrue: [
-		"anObject is an external object but has already been registered. Just
-		returning the index of the registered reference"
-		^ index ].
+	"a proxy says what it points at without being read, which is the one case where the id
+	is known before the object is"
+	anObject isSoilProxy ifTrue: [
+		^ self referenceTo: anObject objectId for: anObject ].
 	transaction objectIndex
 		at: anObject
 		ifPresent: [ :record |
-			"anObject is an external object. Allocate a new local index and
-			return that"
-			self addObject: record object reference: record objectId.
-			^ references size ]
-		ifAbsent: [ | record |
+			"anObject is an external object. Allocate a new local index and return that"
+			^ self referenceTo: record objectId for: record object ]
+		ifAbsent: [
 			(anObject class isSoilClusterRoot) ifTrue: [
-				"anObject could be made cluster root per class side setting. In that
-				case we add it as cluster root to the transaction so the following
-				will find it"
+				"anObject could be made cluster root per class side setting. In that case we
+				add it as cluster root to the transaction so the following will find it"
 				transaction addClusterObject: anObject.
-				record := transaction objectIndex at: anObject.
-				self addObject: record object reference: record objectId.
-				^ references size ].
-			].
+				^ self referenceTo: (transaction objectIndex at: anObject) objectId for: anObject ] ].
 	^ 0
+]
+
+{ #category : #accessing }
+SoilNewClusterVersion >> referenceTo: anObjectId for: anObject [
+	"the index under which this cluster refers to anObjectId, adding it if this is the
+	first time. The same target can arrive twice - once read, once as a proxy - and a
+	cluster carries each reference once."
+	| index |
+	index := externalObjects identityIndexOf: anObject.
+	index > 0 ifTrue: [ ^ index ].
+	index := references indexOf: anObjectId.
+	index > 0 ifTrue: [ ^ index ].
+	self addObject: anObject reference: anObjectId.
+	^ references size
 ]
 
 { #category : #initialization }
