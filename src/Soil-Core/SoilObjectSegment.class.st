@@ -66,6 +66,37 @@ SoilObjectSegment >> at: anInteger [
 ]
 
 { #category : #accessing }
+SoilObjectSegment >> at: anInteger putObject: anObject asVersion: aVersion transaction: aTransaction [
+	"write anObject as a new version of whatever is stored at anInteger, chained to it.
+	Between #at:putBytes:, which leaves building and serializing the record to the caller,
+	and the transaction's own path, which makes the object visible only once the
+	transaction commits - this writes now, which is what a bulk import needs to be able to
+	read back what it has just written."
+	| record |
+	record := (self basicAt: anInteger ifAbsent: [ nil ])
+		          ifNil: [
+			          SoilNewClusterVersion new
+				          object: anObject;
+				          objectId: (SoilObjectId segment: id index: anInteger);
+				          yourself ]
+		          ifNotNil: [ :present |
+			          (present
+				           transaction: aTransaction;
+				           materializeObject;
+				           asNewClusterVersion)
+				          object: anObject;
+				          yourself ].
+	self
+		at: anInteger
+		putBytes: (record
+				 version: aVersion;
+				 transaction: aTransaction;
+				 serializeObject;
+				 serialize).
+	^ record
+]
+
+{ #category : #accessing }
 SoilObjectSegment >> at: anInteger putBytes: bytes [ 
 	| position |
 	position := objectFile appendBytes: bytes.

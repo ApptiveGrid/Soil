@@ -17,6 +17,49 @@ SoilBehaviorRegistry >> addSpecialObjects [
 		put: SoilBehaviorDescription metaId
 ]
 
+{ #category : #accessing }
+SoilBehaviorRegistry >> addNewDescription: aBehaviorDescription withId: anObjectId transaction: aTransaction [
+	"a class this database has not stored before: version 1 under that id, and the name
+	registered so that it can be found at all. Registering the name is what makes this the
+	registry's business - the record itself is written by the segment.
+
+	The name goes in directly rather than through the commit, because an import has to be
+	able to read back what it just wrote, before its transaction ends. Whoever calls this
+	is responsible for taking the name out again if their own work fails afterwards."
+	self segment
+		at: anObjectId index
+		putObject: (aBehaviorDescription
+				 beFirstVersion;
+				 objectId: anObjectId;
+				 yourself)
+		asVersion: 1
+		transaction: aTransaction.
+	self nameAt: aBehaviorDescription behaviorIdentifier put: anObjectId.
+	^ aBehaviorDescription
+]
+
+{ #category : #accessing }
+SoilBehaviorRegistry >> addNewVersion: aBehaviorDescription withId: anObjectId transaction: aTransaction [
+	"the next version of a class this database already knows: the shape comes from the
+	description handed in, the version number and the place in the chain are ours.
+	Answers the version it got.
+
+	Extending the cached chain belongs to the same step, not to the caller -
+	#appendCommittedVersion:forIndex: left out would leave a reader that has this chain
+	cached blind to the new version until the database is reopened."
+	| newVersion |
+	newVersion := (aTransaction objectWithId: anObjectId) version + 1.
+	self segment
+		at: anObjectId index
+		putObject: (aBehaviorDescription
+				 version: newVersion;
+				 yourself)
+		asVersion: newVersion
+		transaction: aTransaction.
+	self appendCommittedVersion: aBehaviorDescription forIndex: anObjectId index.
+	^ newVersion
+]
+
 { #category : #queries }
 SoilBehaviorRegistry >> appendCommittedVersion: aBehaviorDescription forIndex: objectIndex [
 	"Called right after a new behavior version has been successfully committed to disk

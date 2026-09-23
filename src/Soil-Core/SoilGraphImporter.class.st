@@ -6,7 +6,6 @@ Class {
 		'transaction',
 		'lastIndex',
 		'idMap',
-		'metaSegment',
 		'clusters',
 		'toBeReplaced',
 		'replacements',
@@ -135,40 +134,35 @@ SoilGraphImporter >> importBehaviorCluster: cluster [
 	"A behavior that arrives either has a counterpart here or it does not, and if it does,
 	its shape either matches that counterpart or it does not."
 	self
-		presentBehaviorFor: cluster
-		ifPresent: [ :presentBehavior :presentOid |
-			(presentBehavior object matchesDescription: cluster object)
+		presentDescriptionFor: cluster
+		ifPresent: [ :presentDescription :presentOid |
+			(presentDescription matchesDescription: cluster object)
 				ifTrue: [
 					self
-						useVersion: presentBehavior object version
+						useVersion: presentDescription version
 						for: cluster
 						at: presentOid ]
 				ifFalse: [
 					self
 						importBehaviorOfDifferentShape: cluster
-						knownAs: presentBehavior
+						knownAs: presentDescription
 						at: presentOid ] ]
 		ifAbsent: [ self importBehaviorNewToThisDatabase: cluster ]
 ]
 
 { #category : #importing }
 SoilGraphImporter >> importBehaviorNewToThisDatabase: cluster [
-	"nothing to reconcile: it becomes version 1 and the name is registered. #import undoes
-	that registration if anything later in the same import fails."
-	| newOid |
-	cluster object version: 1.
-	newOid := self newObjectIdFor: cluster objectId version: 1.
-	self metaSegment
-		at: newOid index
-		putBytes: (cluster asNewClusterVersion
-				 version: 1;
-				 serialize).
-	soil behaviorRegistry nameAt: cluster object behaviorIdentifier put: newOid.
+	"a class this database has not stored before. The id is ours; the name the registry
+	writes is what #undoBehaviorNamesAddedSoFar takes back if anything later fails."
+	soil behaviorRegistry
+		addNewDescription: cluster object
+		withId: (self newObjectIdFor: cluster objectId version: 1)
+		transaction: transaction.
 	addedBehaviorNames add: cluster object behaviorIdentifier
 ]
 
 { #category : #importing }
-SoilGraphImporter >> importBehaviorOfDifferentShape: cluster knownAs: presentBehavior at: presentOid [
+SoilGraphImporter >> importBehaviorOfDifferentShape: cluster knownAs: presentDescription at: presentOid [
 	"The target's current shape for this class is not the one being imported. Two of the
 	three ways that happens are ordinary and both end in a description this database can
 	read, so neither is a conflict:
@@ -195,45 +189,30 @@ SoilGraphImporter >> importBehaviorOfDifferentShape: cluster knownAs: presentBeh
 		(self versionKnownInChainFor: cluster at: presentOid) ifNotNil: [ :knownVersion |
 			^ self useVersion: knownVersion for: cluster at: presentOid ] ].
 	self shapeOfTheLiveClassIn: cluster ifFalse: [
-		^ self signalShapeConflictFor: cluster against: presentBehavior ].
-	^ self appendAsNextVersion: cluster after: presentBehavior at: presentOid
+		^ self signalShapeConflictFor: cluster against: presentDescription ].
+	^ self addNextVersionOf: cluster at: presentOid
 ]
 
 { #category : #importing }
-SoilGraphImporter >> appendAsNextVersion: cluster after: presentBehavior at: presentOid [
-	"written where an ordinary commit would have written it: same slot, one version on"
-	| newVersion |
-	newVersion := presentBehavior object version + 1.
-	self metaSegment
-		at: presentOid index
-		putBytes: (presentBehavior asNewClusterVersion
-				 object: (cluster object
-						  version: newVersion;
-						  yourself);
-				 version: newVersion;
-				 transaction: transaction;
-				 serializeObject;
-				 serialize).
-	soil behaviorRegistry
-		appendCommittedVersion: cluster object
-		forIndex: presentOid index.
-	^ self useVersion: newVersion for: cluster at: presentOid
+SoilGraphImporter >> addNextVersionOf: cluster at: presentOid [
+	^ self
+		  useVersion: (soil behaviorRegistry
+				   addNewVersion: cluster object
+				   withId: presentOid
+				   transaction: transaction)
+		  for: cluster
+		  at: presentOid
 ]
 
 { #category : #importing }
-SoilGraphImporter >> presentBehaviorFor: cluster ifPresent: presentBlock ifAbsent: absentBlock [
+SoilGraphImporter >> presentDescriptionFor: cluster ifPresent: presentBlock ifAbsent: absentBlock [
 	| presentOid |
 	presentOid := self presentBehaviorWithName: cluster object behaviorIdentifier.
 	presentOid ifNil: [ ^ absentBlock value ].
 	^ presentBlock
-		  value: ((self metaSegment
-				    basicAt: presentOid index
-				    ifAbsent: [
-					    Error signal:
-							    'the behavior is present by name but not as object on the heap' ])
-				   transaction: transaction;
-				   materializeObject;
-				   yourself)
+		  value: ((transaction objectWithId: presentOid) ifNil: [
+				   Error signal:
+						   'the behavior is present by name but not as object on the heap' ])
 		  value: presentOid
 ]
 
@@ -245,11 +224,11 @@ SoilGraphImporter >> shapeOfTheLiveClassIn: cluster ifFalse: aBlock [
 ]
 
 { #category : #importing }
-SoilGraphImporter >> signalShapeConflictFor: cluster against: presentBehavior [
+SoilGraphImporter >> signalShapeConflictFor: cluster against: presentDescription [
 	^ SoilBehaviorShapeConflict new
 		  behaviorIdentifier: cluster object behaviorIdentifier;
 		  importedInstVarNames: cluster object instVarNames;
-		  presentInstVarNames: presentBehavior object instVarNames;
+		  presentInstVarNames: presentDescription instVarNames;
 		  signal
 ]
 
@@ -288,12 +267,6 @@ SoilGraphImporter >> initialize [
 	acceptsExportsFromOlderVersions := false
 ]
 
-{ #category : #importing }
-SoilGraphImporter >> metaSegment [ 
-	^ metaSegment ifNil: [  
-		metaSegment := soil objectRepository metaSegment ]
-
-]
 
 { #category : #'instance creation' }
 SoilGraphImporter >> newObjectIdFor: aSoilObjectId [ 
