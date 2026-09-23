@@ -97,6 +97,66 @@ SoilGraphExporterTest >> testAnOlderExportIsAConflictUnlessItIsAskedFor [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testImportRefusesAStreamOfAnotherFormatVersion [
+	"Everything after the version field is read by position, so a stream from another
+	version would not fail on its own - it would be read as if it were this one. The
+	refusal at the first field is the only place where the difference is still visible."
+
+	| tx bytes exportTx importer targetTx |
+	tx := soil newTransaction.
+	tx root: (migrationClass new instVarNamed: #one put: 1; yourself).
+	tx commit.
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	"say it is a version this importer does not read"
+	bytes
+		at: 1 put: 0;
+		at: 2 put: SoilGraphExporter formatVersion + 1.
+
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	self should: [ importer import ] raise: SoilIncompatibleExportFormat.
+	targetTx abort
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testExportRefusesAStructureItCannotCarry [
+	"The format writes an index as its three sizes and rebuilds a SoilSkipList from them,
+	so a BTree dictionary would arrive as something it was not. Nobody has one - this is
+	about what the first person to try is told."
+
+	| tx exportTx |
+	tx := soil newTransaction.
+	tx root: (SoilBTreeDictionary new keySize: 10; yourself).
+	tx commit.
+
+	exportTx := soil newTransaction.
+	self
+		should: [
+			ByteArray streamContents: [ :stream |
+				(SoilGraphExporter new
+					transaction: exportTx;
+					addObject: exportTx root;
+					yourself)
+						stream: stream;
+						export ] ]
+		raise: SoilUnsupportedError.
+	exportTx abort
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testExportCarriesTheEntriesOfAnIndex [
 	"Without #skipIndexes: the entries of an index go along, and their values are object
 	ids - a SoilSkipListDictionary holding objects is what a grid's rows are in

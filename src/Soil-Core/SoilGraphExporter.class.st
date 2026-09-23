@@ -16,6 +16,14 @@ Class {
 	#category : #'Soil-Core-Error'
 }
 
+{ #category : #accessing }
+SoilGraphExporter class >> formatVersion [
+	"the version of the stream #export writes. Raise it whenever the format changes, so
+	that SoilGraphImporter refuses what it cannot read rather than misreading it - an
+	export is meant to be short-lived, but nothing stops one from being kept."
+	^ 1
+]
+
 { #category : #adding }
 SoilGraphExporter >> addObject: anObject [ 
 	self addObjectId: (transaction objectIdOf: anObject)
@@ -44,8 +52,12 @@ SoilGraphExporter >> behaviorAt: index [
 
 { #category : #actions }
 SoilGraphExporter >> export [
-	"export format: 
-	1. exported objects 
+	"export format:
+	0. the version of this format
+	An importer that does not know it refuses the stream instead of reading it wrongly -
+	see SoilGraphExporter class>>formatVersion"
+	stream nextPutAll: (self class formatVersion asByteArrayOfSize: 2).
+	"1. exported objects 
 	A list of arbitrary object clusters to be exported"
 	stream nextPut: toBeExported size. 
 	toBeExported do: [ :oid |
@@ -199,6 +211,20 @@ SoilGraphExporter >> updateCluster: aCluster [
 	transaction registerRecord: cluster.
 	^ cluster
 			
+]
+
+{ #category : #visiting }
+SoilGraphExporter >> visitBTreeDictionary: aBTreeDictionary [
+	"An export carries a SoilSkipListDictionary and nothing else of its kind: the format
+	writes an index as keySize, valueSize and maxLevel, and #readIndexOfCluster:withId:
+	builds a SoilSkipList from that. A BTree would arrive as a SkipList, which works and is
+	not what was exported.
+
+	Nobody hits this - no BTree dictionary is used in Soil outside its own tests, nor in
+	ApptiveGrid. It is here so that whoever is first gets told what happened instead of a
+	doesNotUnderstand somewhere in the visiting."
+	^ SoilUnsupportedError signal:
+		  'a graph export cannot carry a ' , aBTreeDictionary class name
 ]
 
 { #category : #visiting }

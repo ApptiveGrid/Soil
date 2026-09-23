@@ -41,6 +41,7 @@ SoilGraphImporter >> acceptsExportsFromOlderVersions [
 { #category : #importing }
 SoilGraphImporter >> import [
 	[ self
+		  readFormatVersion;
 		  memoizeSegmentIndexes;
 		  readObjectIdsBeingImported;
 		  readObjectIdsToBeReplaced;
@@ -87,6 +88,20 @@ SoilGraphImporter >> makeTheImportPartOfTheCommit [
 SoilGraphImporter >> readClusters [
 	clusters := OrderedCollection new.
 	[ stream atEnd ] whileFalse: [ clusters add: self readCluster ]
+]
+
+{ #category : #importing }
+SoilGraphImporter >> readFormatVersion [
+	"the first thing in the stream, and the only thing that can be read from a stream
+	whose format is unknown. Refusing here is the point: everything after this is read by
+	position, so a stream from another version would not fail, it would be misread."
+	| version |
+	version := (stream next: 2) asInteger.
+	version = SoilGraphExporter formatVersion ifFalse: [
+		SoilIncompatibleExportFormat new
+			importerUnderstands: SoilGraphExporter formatVersion;
+			streamSays: version;
+			signal ]
 ]
 
 { #category : #importing }
