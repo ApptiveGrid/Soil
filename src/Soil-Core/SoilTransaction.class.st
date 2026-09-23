@@ -87,6 +87,42 @@ SoilTransaction >> addObjectToBeCommited: anObject [
 ]
 
 { #category : #accessing }
+SoilTransaction >> atObjectId: anObjectId putObject: anObject asVersion: aVersion [
+	"#atObjectId:putObject: hands the record to the commit strategy, so the object appears
+	when this transaction commits. This one writes it now, as a new version of whatever is
+	stored at that id and chained to it.
+
+	The difference is the moment, and it exists for the bulk import: SoilGraphImporter
+	writes its objects straight into the segments and has to be able to read them back
+	before its own commit - AGUser>>importSpace:in: names and re-identifies them the moment
+	#import returns. Nothing else should need this; an ordinary write goes through the
+	commit and gets the journal, the recovery and the tracking with it."
+	| segment record |
+	segment := self objectRepository segmentAt: anObjectId segment.
+	record := (segment basicAt: anObjectId index ifAbsent: [ nil ])
+		          ifNil: [
+			          SoilNewClusterVersion new
+				          object: anObject;
+				          objectId: anObjectId;
+				          yourself ]
+		          ifNotNil: [ :present |
+			          (present
+				           transaction: self;
+				           materializeObject;
+				           asNewClusterVersion)
+				          object: anObject;
+				          yourself ].
+	segment
+		at: anObjectId index
+		putBytes: (record
+				 version: aVersion;
+				 transaction: self;
+				 serializeObject;
+				 serialize).
+	^ record
+]
+
+{ #category : #accessing }
 SoilTransaction >> atObjectId: objectId putObject: anObject [
 	| record |
 	record := SoilNewClusterVersion new

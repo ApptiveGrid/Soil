@@ -46,6 +46,57 @@ SoilGraphExporterTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testAnOlderExportIsAConflictUnlessItIsAskedFor [
+	"The counterpart of testImportOfAShapeTheTargetKnowsAsAnOlderVersion: the same stream,
+	the same target, without #acceptExportsFromOlderVersions.
+
+	By default what arrives counts as the newest shape of its class - either the one the
+	target already holds or the next version. This stream is neither: the class moved on
+	after the export and the target wrote that newer shape, so the arriving one sits behind
+	both. It is refused instead of being filed under the version it resembles, and the
+	error names both shapes."
+
+	| tx bytes exportTx importer targetTx |
+	targetSoil := Soil createOnPath: self targetPath.
+	tx := targetSoil newTransaction.
+	tx root: (migrationClass new instVarNamed: #one put: 'native-one'; yourself).
+	tx commit.
+
+	tx := soil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2;
+		instVarNamed: #three put: 3;
+		yourself).
+	tx commit.
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #three. #two };
+		package: self class package name) install.
+	targetTx := targetSoil newTransaction.
+	targetTx root: (migrationClass new instVarNamed: #one put: 'newer-one'; yourself).
+	targetTx commit.
+
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	self should: [ importer import ] raise: SoilBehaviorShapeConflict.
+	targetTx abort
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testExportImportWithoutReorderRoundTrips [
 	"sanity check: the common case (no reorder ever happened) must keep working"
 
@@ -140,7 +191,13 @@ SoilGraphExporterTest >> testFailedImportDoesNotCorruptBehaviorRegistryForOtherC
 	"A partially-failing import (one class new to the target succeeds, a later class
 	genuinely mismatches and raises) must not leave the succeeded class dangling in the
 	behaviorRegistry name index - otherwise a later, unrelated write can reuse the same
-	behavior index and alias two different classes onto it. See SoilGraphImporter>>import."
+	behavior index and alias two different classes onto it. See SoilGraphImporter>>import.
+
+	The mismatch has to be a genuine one since the importer learned the version chain:
+	a shape the target holds as an older version, or the one the live class has, are both
+	ordinary and no longer raise. So the class changes a third time *after* the export -
+	what arrives is then neither the target's shape nor this image's, which is what an
+	exporting image running different code would send."
 
 	| newClass mismatchClass thirdClass tx sourceExportTx exporter bytes importer targetTx |
 	[
@@ -185,12 +242,19 @@ SoilGraphExporterTest >> testFailedImportDoesNotCorruptBehaviorRegistryForOtherC
 					export ].
 		sourceExportTx abort.
 
+		"the live shape moves on after the export: the bytes now carry a shape that is
+		neither in the target's chain nor the class as it is here"
+		mismatchClass := (SoilBaseTestObject << #SOGraphImportMismatchClass
+			layout: FixedLayout;
+			slots: { #q1. #q3 };
+			package: self class package name) install.
+
 		targetTx := targetSoil newTransaction.
 		importer := SoilGraphImporter new
 			transaction: targetTx;
 			stream: bytes readStream;
 			yourself.
-		self should: [ importer import ] raise: Error.
+		self should: [ importer import ] raise: SoilBehaviorShapeConflict.
 		targetTx abort.
 
 		self
@@ -215,12 +279,16 @@ SoilGraphExporterTest >> testFailedImportDoesNotCorruptBehaviorRegistryForOtherC
 ]
 
 { #category : #tests }
-SoilGraphExporterTest >> testImportRaisesOnGenuineShapeMismatch [
-	"if the target database already has a native, current behavior description for the
-	class that genuinely differs from what is being imported, the importer must fail loudly
-	instead of silently reusing the wrong description - see SoilGraphImporter>>importBehaviorCluster:."
+SoilGraphExporterTest >> testImportOfAShapeTheTargetKnowsAsAnOlderVersion [
+	"The stream carries a shape the target has already moved past: it holds a newer one as
+	current and the imported one behind it in the chain. That is what arrives from an image
+	running older code, and here it is produced by exporting first and changing the class
+	afterwards - after which the exported shape is no longer the current one.
 
-	| tx object bytes exportTx importer targetTx |
+	The importer must point the objects at the version the chain already has, and they must
+	read back through the usual shape adaptation."
+
+	| tx bytes exportTx importer targetTx imported |
 	targetSoil := Soil createOnPath: self targetPath.
 	tx := targetSoil newTransaction.
 	tx root: (migrationClass new
@@ -230,7 +298,182 @@ SoilGraphExporterTest >> testImportRaisesOnGenuineShapeMismatch [
 		yourself).
 	tx commit.
 
-	"reorder only in the source's understanding - the target keeps its original shape as current"
+	tx := soil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2;
+		instVarNamed: #three put: 3;
+		yourself).
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	"the class moves on after the export"
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #three. #two };
+		package: self class package name) install.
+
+	"and the target writes the new shape, so the exported one sits behind it in its chain"
+	targetTx := targetSoil newTransaction.
+	targetTx root: (migrationClass new
+		instVarNamed: #one put: 'newer-one';
+		instVarNamed: #two put: 'newer-two';
+		instVarNamed: #three put: 'newer-three';
+		yourself).
+	targetTx commit.
+
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		acceptExportsFromOlderVersions;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+	targetTx commit.
+
+	self assert: (imported instVarNamed: #one) equals: 1.
+	self assert: (imported instVarNamed: #two) equals: 2.
+	self assert: (imported instVarNamed: #three) equals: 3.
+
+	"and it took the shape that was already in the chain rather than appending one:
+	two versions written by the target, none added by the import"
+	self
+		assert: (targetSoil objectRepository metaSegment allVersionsAt:
+				 (targetSoil behaviorRegistry
+					  nameAt: #SOGraphExportMigrationObject
+					  ifAbsent: [ self fail ]) index) size
+		equals: 2
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testImportTakesTheNewestVersionOfAShapeThatOccursTwice [
+	"A shape can appear more than once in a chain: take an instance variable away and put
+	it back, and version 1 and version 3 look the same while meaning different things. The
+	chain this builds is (3: one two three), (2: one two), (1: one two three) - measured,
+	not assumed.
+
+	The importer answers the newest of the two. What this test shows is that such a chain
+	imports cleanly and keeps #three; it does *not* show that the older choice would lose
+	it. It would not: PointerLayout>>updateIvars:with:for: does not migrate along the
+	version the record carries, it looks the shape up again through
+	#behaviorVersionsUpTo:transaction: - which takes the newest match as well. Tried with
+	the lookup inverted to answer the oldest match, and this test stays green. The choice
+	is still worth making deliberately: it is the one the materializer makes, and two
+	answers to the same question are a place for the two to drift apart."
+
+	| tx bytes exportTx importer targetTx imported |
+	targetSoil := Soil createOnPath: self targetPath.
+	tx := targetSoil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 'v1-one';
+		instVarNamed: #two put: 'v1-two';
+		instVarNamed: #three put: 'v1-three';
+		yourself).
+	tx commit.
+
+	tx := soil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2;
+		instVarNamed: #three put: 3;
+		yourself).
+	tx commit.
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	"version 2 in the target: #three is gone"
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #two };
+		package: self class package name) install.
+	targetTx := targetSoil newTransaction.
+	targetTx root: (migrationClass new
+		instVarNamed: #one put: 'v2-one';
+		instVarNamed: #two put: 'v2-two';
+		yourself).
+	targetTx commit.
+
+	"version 3: #three is back, so this shape equals version 1"
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #two. #three };
+		package: self class package name) install.
+	targetTx := targetSoil newTransaction.
+	targetTx root: (migrationClass new
+		instVarNamed: #one put: 'v3-one';
+		instVarNamed: #two put: 'v3-two';
+		instVarNamed: #three put: 'v3-three';
+		yourself).
+	targetTx commit.
+
+	"version 4, so that the imported shape is not the current one"
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #three. #two };
+		package: self class package name) install.
+	targetTx := targetSoil newTransaction.
+	targetTx root: (migrationClass new
+		instVarNamed: #one put: 'v4-one';
+		instVarNamed: #two put: 'v4-two';
+		instVarNamed: #three put: 'v4-three';
+		yourself).
+	targetTx commit.
+
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		acceptExportsFromOlderVersions;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+	targetTx commit.
+
+	self assert: (imported instVarNamed: #one) equals: 1.
+	self assert: (imported instVarNamed: #two) equals: 2.
+	self assert: (imported instVarNamed: #three) equals: 3
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testImportOfALiveShapeBecomesTheNextVersionInTheTarget [
+	"The target holds an older shape as its current one and the import brings the shape of
+	the class as it lives in this image. That is not a conflict: it is what an ordinary
+	commit in the target would have produced, and the importer appends it as the next
+	version of the chain rather than reusing the description that is already there.
+
+	Was testImportRaisesOnGenuineShapeMismatch, which expected an Error here. The
+	protection that comment named - never silently reuse a description that does not fit -
+	still holds, and is asserted below: the imported object reads back with its own values,
+	which it could not if it had been read through the target's older description."
+
+	| tx bytes exportTx importer targetTx imported |
+	targetSoil := Soil createOnPath: self targetPath.
+	tx := targetSoil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 'native-one';
+		instVarNamed: #two put: 'native-two';
+		instVarNamed: #three put: 'native-three';
+		yourself).
+	tx commit.
+
+	"reorder in the image - the target keeps its original shape as current"
 	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
 		layout: FixedLayout;
 		slots: { #one. #three. #two };
@@ -259,7 +502,17 @@ SoilGraphExporterTest >> testImportRaisesOnGenuineShapeMismatch [
 		transaction: targetTx;
 		stream: bytes readStream;
 		yourself.
-	self should: [ importer import ] raise: Error.
+	importer import.
+	imported := importer importedObjects first.
+	targetTx commit.
+
+	self assert: (imported instVarNamed: #one) equals: 1.
+	self assert: (imported instVarNamed: #two) equals: 2.
+	self assert: (imported instVarNamed: #three) equals: 3.
+
+	"and the object that was already there is untouched"
+	targetTx := targetSoil newTransaction.
+	self assert: (targetTx root instVarNamed: #two) equals: 'native-two'.
 	targetTx abort
 ]
 
