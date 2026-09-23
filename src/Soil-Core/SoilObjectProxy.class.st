@@ -137,7 +137,8 @@ SoilObjectProxy >> soilRecursiveHashWith: aSet [
 
 { #category : #soil }
 SoilObjectProxy >> soilSerialize: aSerializer [ 
-	^ self soilRealObject soilSerialize: aSerializer 
+	"as the reference it is - the serializer resolves it only if it has nowhere to put one"
+	^ aSerializer nextPutProxy: self
 ]
 
 { #category : #soil }

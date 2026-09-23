@@ -29,14 +29,14 @@ SoilSerializer >> nextPutArray: anArray [
 		nextPutByte: TypeCodeArray;
 		nextPutLengthEncodedInteger: anArray size.
 	1 to: anArray size do: [:i | 
-		(anArray at: i) theNonSoilProxy soilSerialize: self ].
+		(anArray at: i) soilSerialize: self ].
 ]
 
 { #category : #writing }
 SoilSerializer >> nextPutAssociation: anAssociation [ 
 	self nextPutByte: TypeCodeAssociation.
-	anAssociation key theNonSoilProxy soilSerialize: self.
-	anAssociation value theNonSoilProxy soilSerialize: self.
+	anAssociation key soilSerialize: self.
+	anAssociation value soilSerialize: self.
 ]
 
 { #category : #writing }
@@ -97,8 +97,24 @@ SoilSerializer >> nextPutDictionary: aDictionary [
 		nextPutByte: TypeCodeDictionary;
 		nextPutLengthEncodedInteger: aDictionary size.
 	aDictionary keysAndValuesDo: [:key :value |
-		key theNonSoilProxy soilSerialize: self.
-		value theNonSoilProxy soilSerialize: self ]
+		key soilSerialize: self.
+		value soilSerialize: self ]
+]
+
+{ #category : #registry }
+SoilSerializer >> nextPutProxy: aProxy [
+	"A proxy is a reference that has not been read. Writing it as one is the whole point:
+	resolving it first reads the cluster it points at, only to throw that object away
+	again and write its id - one read per reference, every time an object is written back.
+
+	If there is no registry, or it will not take the proxy, there is nothing to write a
+	reference into and the object itself has to go in."
+	| index |
+	index := externalObjectRegistry
+		ifNil: [ 0 ]
+		ifNotNil: [ externalObjectRegistry indexOfExternalReference: aProxy ].
+	index = 0 ifTrue: [ ^ aProxy soilRealObject soilSerialize: self ].
+	self nextPutExternalReference: index
 ]
 
 { #category : #registry }
@@ -114,8 +130,8 @@ SoilSerializer >> nextPutIdentityDictionary: anIdentityDictionary [
 		nextPutByte: TypeCodeIdentityDictionary;
 		nextPutLengthEncodedInteger: anIdentityDictionary size.
 	anIdentityDictionary keysAndValuesDo: [:key :value |
-		key theNonSoilProxy soilSerialize: self.
-		value theNonSoilProxy soilSerialize: self ]
+		key soilSerialize: self.
+		value soilSerialize: self ]
 ]
 
 { #category : #writing }
@@ -135,7 +151,7 @@ SoilSerializer >> nextPutOrderedCollection: aCollection [
 	self
 		nextPutByte: TypeCodeOrderedCollection;
 		nextPutLengthEncodedInteger: aCollection size.
-	aCollection do: [:each | each theNonSoilProxy soilSerialize: self ].
+	aCollection do: [:each | each soilSerialize: self ].
 ]
 
 { #category : #writing }
@@ -144,8 +160,8 @@ SoilSerializer >> nextPutPersistentDictionary: aPersistentDictionary [
 		nextPutByte: TypeCodePersistentDictionary;
 		nextPutLengthEncodedInteger: aPersistentDictionary size.
 	aPersistentDictionary keysAndValuesDo: [:key :value |
-		key theNonSoilProxy soilSerialize: self.
-		value theNonSoilProxy soilSerialize: self ]
+		key soilSerialize: self.
+		value soilSerialize: self ]
 ]
 
 { #category : #writing }

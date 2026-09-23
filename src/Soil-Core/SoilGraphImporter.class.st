@@ -368,21 +368,14 @@ SoilGraphImporter >> readCluster [
 { #category : #importing }
 SoilGraphImporter >> readClusterHeader [
 	"the object's id in the source, the behaviors it needs, and the cluster itself. The
-	behaviors come first because the cluster refers to them.
-
-	The version stamped here is the importing transaction's, not the database's. A record
-	is readable by a transaction whose readVersion is at least the record's version, and
-	an imported object has no older version to fall back to - so stamping it with the
-	database's current version made the import invisible to the very transaction that ran
-	it, as soon as anything else had committed since that transaction started. Which, in a
-	database that is being used, is most of the time."
+	behaviors come first because the cluster refers to them."
 	| objectId |
 	objectId := self newObjectIdFor: (SoilObjectId readFrom: stream).
 	(stream next: 8) asInteger timesRepeat: [ self readBehaviorDescription ].
 	^ (SoilPersistentClusterVersion new readFrom: stream)
 		  detachFromSegment;
 		  objectId: objectId;
-		  version: transaction readVersion;
+		  version: self databaseVersion;
 		  yourself
 ]
 
