@@ -146,6 +146,22 @@ SoilReadOnlyDatabaseTest >> testTheRefusalSaysWhyRecoveryIsNeeded [
 ]
 
 { #category : #tests }
+SoilReadOnlyDatabaseTest >> testAWriteThroughARecordIsNamedLikeEveryOther [
+	"#markDirty: and #prepareCommit answer a write attempt by the same rule - ignore it,
+	or name it. #addRecord: used to answer with a doesNotUnderstand, so a caller that had
+	asked for errors learned the name of a missing method instead of what it had done."
+
+	| strategy record |
+	strategy := SoilReadOnlyStrategy new.
+	record := SoilNewClusterVersion new object: Object new; yourself.
+	strategy addRecord: record.
+	strategy errorOnWriteAttempts.
+	self
+		should: [ strategy addRecord: record ]
+		raise: SoilWriteOnReadOnlyTransaction
+]
+
+{ #category : #tests }
 SoilReadOnlyDatabaseTest >> testFreshlyCreatedDatabaseOpensWithoutWriting [
 	"a database created and never committed to is complete as it stands - it used
 	to have an empty journal, which the first open filled in by writing one,

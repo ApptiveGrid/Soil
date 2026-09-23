@@ -275,6 +275,77 @@ SoilGraphExporterTest >> testExportRefusesTheSameReplacementNameTwice [
 	tx abort
 ]
 
+{ #category : #running }
+SoilGraphExporterTest >> fileSizes [
+	"what the source database is made of right now - enough to tell whether anything
+	wrote to it"
+	^ ((self path allChildren select: #isFile) collect: [ :each |
+		   each fullName -> each size ]) asArray sort: [ :a :b | a key <= b key ]
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testExportRunsOnASourceOpenedReadOnly [
+	"A copy reads a database another image owns and may not write to it. The export does
+	raise clusters whose behavior version is behind - #updateCluster: materializes them
+	and serializes them under the current shape - and all of that has to stay inside the
+	exporter: what reaches the source is nothing.
+
+	The database here holds two versions of one class, so the first object is genuinely
+	behind and #updateCluster: has work to do; the assertion on the file sizes is what
+	says the work did not land in the source."
+
+	| bytes exportTx readOnly before targetTx importer imported tx |
+	tx := soil newTransaction.
+	tx root: (OrderedCollection with: (migrationClass new
+		instVarNamed: #one put: 'behind';
+		yourself)).
+	tx makeRoot: tx root first.
+	tx commit.
+
+	"the class moves on and an object of the new shape is written, so the database itself
+	carries a newer version of that behavior than the first object does"
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #two. #three. #four };
+		package: self class package name) install.
+	tx := soil newTransaction.
+	tx root add: (migrationClass new instVarNamed: #one put: 'current'; yourself).
+	tx markDirty: tx root.
+	tx makeRoot: tx root last.
+	tx commit.
+	soil close.
+	soil := nil.
+
+	readOnly := Soil path: self path.
+	readOnly readOnly: true.
+	readOnly open.
+	[ before := self fileSizes.
+	exportTx := readOnly newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+	self assert: self fileSizes equals: before ]
+		ensure: [ readOnly close ].
+
+	"and what came out is a complete stream"
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+	self assert: (imported first instVarNamed: #one) equals: 'behind'.
+	self assert: (imported second instVarNamed: #one) equals: 'current'.
+	targetTx commit
+]
+
 { #category : #tests }
 SoilGraphExporterTest >> testExportCarriesTheEntriesOfAnIndex [
 	"Without #skipIndexes: the entries of an index go along, and their values are object
