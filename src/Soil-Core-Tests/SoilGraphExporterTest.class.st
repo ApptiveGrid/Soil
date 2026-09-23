@@ -97,6 +97,52 @@ SoilGraphExporterTest >> testAnOlderExportIsAConflictUnlessItIsAskedFor [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testExportCarriesTheEntriesOfAnIndex [
+	"Without #skipIndexes: the entries of an index go along, and their values are object
+	ids - a SoilSkipListDictionary holding objects is what a grid's rows are in
+	ApptiveGrid. The exporter used to take those values for raw bytes and died on
+	#readStream; #skipIndexes: hid it, because a skipped index writes its sizes and no
+	entries at all."
+
+	| tx bytes exportTx importer targetTx imported dictionary |
+	tx := soil newTransaction.
+	dictionary := SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+	tx root: dictionary.
+	dictionary
+		at: 1 put: (SoilTestGraphRoot new nested: 'first'; yourself);
+		at: 2 put: (SoilTestGraphRoot new nested: 'second'; yourself).
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+
+	"read before the commit: what the dictionary answers is a proxy, and it would fault
+	against a transaction that is gone by the time the assertion looks at it"
+	self assert: (imported at: 1) nested equals: 'first'.
+	self assert: (imported at: 2) nested equals: 'second'.
+	targetTx commit
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testExportImportWithoutReorderRoundTrips [
 	"sanity check: the common case (no reorder ever happened) must keep working"
 
