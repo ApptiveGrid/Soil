@@ -29,7 +29,8 @@ Class {
 	#name : #SoilDatabaseNeedsRecovery,
 	#superclass : #SoilError,
 	#instVars : [
-		'soil'
+		'soil',
+		'reason'
 	],
 	#category : #'Soil-Core-Error'
 }
@@ -40,7 +41,19 @@ SoilDatabaseNeedsRecovery >> messageText [
 	^ messageText ifNil: [
 		'the database at ',
 		(soil ifNil: [ '<unknown>' ] ifNotNil: [ soil path pathString ]),
-		' needs recovery, but it cannot be written to' ]
+		' needs recovery, but it cannot be written to',
+		(reason ifNil: [ '' ] ifNotNil: [ :each | ': ', each ]) ]
+]
+
+{ #category : #accessing }
+SoilDatabaseNeedsRecovery >> reason [
+	"what made recovery necessary, as SoilDatabaseRecovery>>isNeeded found it"
+	^ reason
+]
+
+{ #category : #accessing }
+SoilDatabaseNeedsRecovery >> reason: aString [
+	reason := aString
 ]
 
 { #category : #accessing }

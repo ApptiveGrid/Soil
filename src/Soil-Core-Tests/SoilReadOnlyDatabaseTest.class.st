@@ -125,6 +125,27 @@ SoilReadOnlyDatabaseTest >> testDamagedDatabaseSignalsRatherThanWriting [
 ]
 
 { #category : #tests }
+SoilReadOnlyDatabaseTest >> testTheRefusalSaysWhyRecoveryIsNeeded [
+	"'needs recovery' alone does not say enough to decide anything. Three different
+	states answer yes - the journal runs past the checkpoint, the checkpoint does not
+	read back, its fragment file is gone - and they call for different repairs, so the
+	one that was found is in the message."
+
+	| error |
+	self writeSecondTransaction.
+	soil close.
+	self damageJournal.
+	readOnly := Soil path: 'soil-tests'.
+	readOnly readOnly: true.
+	error := [ readOnly open. nil ]
+		on: SoilDatabaseNeedsRecovery
+		do: [ :each | each ].
+	self assert: error notNil.
+	self assert: error reason notNil.
+	self assert: (error messageText endsWith: error reason)
+]
+
+{ #category : #tests }
 SoilReadOnlyDatabaseTest >> testFreshlyCreatedDatabaseOpensWithoutWriting [
 	"a database created and never committed to is complete as it stands - it used
 	to have an empty journal, which the first open filled in by writing one,
