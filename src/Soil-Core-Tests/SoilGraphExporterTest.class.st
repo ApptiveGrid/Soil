@@ -46,6 +46,65 @@ SoilGraphExporterTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testAssumingTheImportedShapeIsNewestSkipsTheChain [
+	"The same setup as testImportOfAShapeTheTargetKnowsAsAnOlderVersion - the target has
+	moved past the exported shape - read the other way. Told that nothing older can arrive,
+	the importer does not look the shape up and appends it as the next version instead, so
+	the chain grows by one."
+
+	| tx bytes exportTx importer targetTx imported chainSize |
+	targetSoil := Soil createOnPath: self targetPath.
+	tx := targetSoil newTransaction.
+	tx root: (migrationClass new instVarNamed: #one put: 'native-one'; yourself).
+	tx commit.
+
+	tx := soil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2;
+		instVarNamed: #three put: 3;
+		yourself).
+	tx commit.
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #three. #two };
+		package: self class package name) install.
+	targetTx := targetSoil newTransaction.
+	targetTx root: (migrationClass new instVarNamed: #one put: 'newer-one'; yourself).
+	targetTx commit.
+
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		assumeImportedShapesAreNewest;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+	targetTx commit.
+
+	self assert: (imported instVarNamed: #one) equals: 1.
+	self assert: (imported instVarNamed: #two) equals: 2.
+	self assert: (imported instVarNamed: #three) equals: 3.
+
+	chainSize := (targetSoil objectRepository metaSegment allVersionsAt:
+		              (targetSoil behaviorRegistry
+			               nameAt: #SOGraphExportMigrationObject
+			               ifAbsent: [ self fail ]) index) size.
+	self assert: chainSize equals: 3
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testExportImportWithoutReorderRoundTrips [
 	"sanity check: the common case (no reorder ever happened) must keep working"
 

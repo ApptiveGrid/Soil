@@ -11,10 +11,32 @@ Class {
 		'toBeReplaced',
 		'replacements',
 		'legacyOids',
-		'addedBehaviorNames'
+		'addedBehaviorNames',
+		'assumesImportedShapesAreNewest'
 	],
 	#category : #'Soil-Core-Error'
 }
+
+{ #category : #accessing }
+SoilGraphImporter >> assumeImportedShapesAreNewest [
+	"Take every shape that arrives for the newest one this class has, and append it as the
+	next version without looking at the chain. Say this when the stream cannot be older
+	than the target - two images of one deployment, or an export taken moments ago.
+
+	It is the cheaper reading and the more definite one: no shape is looked up, so no shape
+	can be mistaken for an older one it happens to equal. What it gives up is the ability
+	to take an export that *is* older: such a stream is then appended as if it were new,
+	which grows the chain by a version that is in truth behind the one before it."
+	assumesImportedShapesAreNewest := true
+]
+
+{ #category : #accessing }
+SoilGraphImporter >> assumesImportedShapesAreNewest [
+	"false by default: an arriving shape is looked up in the chain first, so an export
+	older than the target still finds its version. See #assumeImportedShapesAreNewest for
+	the other reading and what each costs."
+	^ assumesImportedShapesAreNewest ifNil: [ false ]
+]
 
 { #category : #importing }
 SoilGraphImporter >> import [
@@ -136,22 +158,23 @@ SoilGraphImporter >> importBehaviorOfDifferentShape: cluster knownAs: presentBeh
 	means the exporting image runs different code than this one - #updateCluster: raises
 	the source to *its* current state, and that is then not ours. That one raises."
 	| knownVersion newVersion |
-	knownVersion := soil behaviorRegistry
-		                versionOfBehaviorWithIndex: presentOid index
-		                matching: cluster object
-		                transaction: transaction.
-	knownVersion ifNotNil: [
-		^ idMap
-			  at: cluster objectId
-			  put: (presentOid asObjectIdVersion: knownVersion) ].
+	self assumesImportedShapesAreNewest ifFalse: [
+		knownVersion := soil behaviorRegistry
+			                versionOfBehaviorWithIndex: presentOid index
+			                matching: cluster object
+			                transaction: transaction.
+		knownVersion ifNotNil: [
+			^ idMap
+				  at: cluster objectId
+				  put: (presentOid asObjectIdVersion: knownVersion) ].
 
-	(cluster object matchesDescription:
-		 (SoilBehaviorDescription for: cluster object objectClass)) ifFalse: [
-		^ SoilBehaviorShapeConflict new
-			  behaviorIdentifier: cluster object behaviorIdentifier;
-			  importedInstVarNames: cluster object instVarNames;
-			  presentInstVarNames: presentBehavior object instVarNames;
-			  signal ].
+		(cluster object matchesDescription:
+			 (SoilBehaviorDescription for: cluster object objectClass)) ifFalse: [
+			^ SoilBehaviorShapeConflict new
+				  behaviorIdentifier: cluster object behaviorIdentifier;
+				  importedInstVarNames: cluster object instVarNames;
+				  presentInstVarNames: presentBehavior object instVarNames;
+				  signal ] ].
 
 	newVersion := presentBehavior object version + 1.
 	self metaSegment
@@ -185,7 +208,8 @@ SoilGraphImporter >> initialize [
 	super initialize.
 	idMap := Dictionary new.
 	replacements := OrderedCollection new.
-	addedBehaviorNames := OrderedCollection new
+	addedBehaviorNames := OrderedCollection new.
+	assumesImportedShapesAreNewest := false
 ]
 
 { #category : #importing }
