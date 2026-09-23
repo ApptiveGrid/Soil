@@ -41,11 +41,11 @@ SoilGraphImporter >> acceptsExportsFromOlderVersions [
 { #category : #importing }
 SoilGraphImporter >> import [
 	[ self
-		  startAfterTheObjectIdsAlreadyInUse;
+		  memoizeSegmentIndexes;
 		  readObjectIdsBeingImported;
 		  readObjectIdsToBeReplaced;
 		  readClusters;
-		  claimTheObjectIdsHandedOut;
+		  updateSegmentIndexes;
 		  makeTheImportPartOfTheCommit ]
 		on: Error
 		do: [ :e |
@@ -54,9 +54,10 @@ SoilGraphImporter >> import [
 ]
 
 { #category : #importing }
-SoilGraphImporter >> claimTheObjectIdsHandedOut [
-	"Only now, once every cluster is written. Until here a failure leaves the bytes
-	written so far orphaned, and the next allocation simply overwrites them."
+SoilGraphImporter >> updateSegmentIndexes [
+	"the counterpart of #memoizeSegmentIndexes, and it runs only once every cluster is
+	written. Until then a failure leaves the bytes written so far orphaned: no segment
+	says those ids are taken, so the next allocation simply writes over them."
 	soil objectRepository metaSegment updateLastObjectIndex: (lastIndex at: 1).
 	soil objectRepository firstSegment updateLastObjectIndex: (lastIndex at: 2)
 ]
@@ -107,10 +108,12 @@ SoilGraphImporter >> readObjectIdsToBeReplaced [
 ]
 
 { #category : #importing }
-SoilGraphImporter >> startAfterTheObjectIdsAlreadyInUse [
-	"The exported ids mean nothing here, so every one of them is remapped to an id after
-	the ones this database has handed out. Wasteful in id space, and the alternative would
-	be to look up each one."
+SoilGraphImporter >> memoizeSegmentIndexes [
+	"where each segment has handed out ids up to. #newObjectIdFor: counts on from here,
+	because the ids in the stream are positions in the source's segments and are taken
+	here - so every imported object is remapped to one after the last in use. Wasteful in
+	id space; the alternative would be a lookup per id. #updateSegmentIndexes writes the
+	counted-up values back at the end."
 	lastIndex := Array new: 2.
 	lastIndex at: 1 put: transaction objectRepository metaSegment lastObjectIndex.
 	lastIndex at: 2 put: (transaction objectRepository segmentAt: 1) lastObjectIndex
