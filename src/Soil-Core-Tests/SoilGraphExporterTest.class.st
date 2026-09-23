@@ -284,6 +284,7 @@ SoilGraphExporterTest >> fileSizes [
 ]
 
 { #category : #tests }
+<<<<<<< Updated upstream
 SoilGraphExporterTest >> testImportIsVisibleToTheTransactionThatRanIt [
 	"An import writes its records straight into the segments, and a record is only readable
 	by a transaction whose readVersion is at least the version of the record - an imported
@@ -301,14 +302,54 @@ SoilGraphExporterTest >> testImportIsVisibleToTheTransactionThatRanIt [
 	tx commit.
 
 	exportTx := soil newTransaction.
+=======
+SoilGraphExporterTest >> testExportOfAFreshPersistentDictionaryRunsOnAReadOnlySource [
+	"A SoilPersistentDictionary that does not know a transaction yet makes roots out of
+	its values when it is serialized (#ensureValuesAreRoot). On a database opened
+	read-only that used to be refused outright, although the values had come out of that
+	very database as roots and saying so again writes nothing.
+
+	The block here is what a space copy does: it hands back a copy of the object with a
+	dictionary of its own, holding the values it keeps. That dictionary is new, so it has
+	no transaction, so every value goes through #makeRoot: - in a database this image may
+	not write to."
+
+	| tx bytes exportTx readOnly before dictionary |
+	tx := soil newTransaction.
+	dictionary := SoilPersistentDictionary new.
+	tx root: (migrationClass new instVarNamed: #one put: dictionary; yourself).
+	dictionary at: 1 put: (SoilTestGraphRoot new nested: 'a value of its own'; yourself).
+	tx commit.
+	soil close.
+	soil := nil.
+
+	readOnly := Soil path: self path.
+	readOnly readOnly: true.
+	readOnly open.
+	[ before := self fileSizes.
+	"read-only, as the copy path opens it: the database belongs to another image"
+	exportTx := readOnly newReadOnlyTransaction.
+>>>>>>> Stashed changes
 	bytes := ByteArray streamContents: [ :stream |
 		(SoilGraphExporter new
 			transaction: exportTx;
 			addObject: exportTx root;
+<<<<<<< Updated upstream
+=======
+			migrate: migrationClass to: [ :each |
+				| fresh |
+				fresh := SoilPersistentDictionary new.
+				(each instVarNamed: #one) keysAndValuesDo: [ :key :value |
+					fresh at: key put: value ].
+				each copy
+					instVarNamed: #one put: fresh;
+					yourself ];
+>>>>>>> Stashed changes
 			yourself)
 				stream: stream;
 				export ].
 	exportTx abort.
+<<<<<<< Updated upstream
 
 	targetSoil := Soil createOnPath: self targetPath.
 	tx := targetSoil newTransaction.
@@ -332,6 +373,11 @@ SoilGraphExporterTest >> testImportIsVisibleToTheTransactionThatRanIt [
 	self assert: importer importedObjects first notNil.
 	self assert: importer importedObjects first nested equals: 'exported'.
 	targetTx commit
+=======
+	self assert: bytes isNotEmpty.
+	self assert: self fileSizes equals: before ]
+		ensure: [ readOnly close ]
+>>>>>>> Stashed changes
 ]
 
 { #category : #tests }
