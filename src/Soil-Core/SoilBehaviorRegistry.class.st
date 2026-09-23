@@ -21,19 +21,18 @@ SoilBehaviorRegistry >> addSpecialObjects [
 SoilBehaviorRegistry >> addNewDescription: aBehaviorDescription withId: anObjectId transaction: aTransaction [
 	"a class this database has not stored before: version 1 under that id, and the name
 	registered so that it can be found at all. Registering the name is what makes this the
-	registry's business - the record itself is written by the segment.
+	registry's business - the record itself is written by the transaction.
 
 	The name goes in directly rather than through the commit, because an import has to be
 	able to read back what it just wrote, before its transaction ends. Whoever calls this
 	is responsible for taking the name out again if their own work fails afterwards."
-	self segment
-		at: anObjectId index
+	aTransaction
+		atObjectId: anObjectId
 		putObject: (aBehaviorDescription
 				 beFirstVersion;
 				 objectId: anObjectId;
 				 yourself)
-		asVersion: 1
-		transaction: aTransaction.
+		asVersion: 1.
 	self nameAt: aBehaviorDescription behaviorIdentifier put: anObjectId.
 	^ aBehaviorDescription
 ]
@@ -49,13 +48,12 @@ SoilBehaviorRegistry >> addNewVersion: aBehaviorDescription withId: anObjectId t
 	cached blind to the new version until the database is reopened."
 	| newVersion |
 	newVersion := (aTransaction objectWithId: anObjectId) version + 1.
-	self segment
-		at: anObjectId index
+	aTransaction
+		atObjectId: anObjectId
 		putObject: (aBehaviorDescription
 				 version: newVersion;
 				 yourself)
-		asVersion: newVersion
-		transaction: aTransaction.
+		asVersion: newVersion.
 	self appendCommittedVersion: aBehaviorDescription forIndex: anObjectId index.
 	^ newVersion
 ]
