@@ -21,7 +21,7 @@ SoilGraphExporter class >> formatVersion [
 	"the version of the stream #export writes. Raise it whenever the format changes, so
 	that SoilGraphImporter refuses what it cannot read rather than misreading it - an
 	export is meant to be short-lived, but nothing stops one from being kept."
-	^ 1
+	^ 2
 ]
 
 { #category : #adding }
@@ -67,9 +67,11 @@ SoilGraphExporter >> export [
 	These are objects that will not be serialized but still have 
 	references in clusters to it. This is to prevent exporting all
 	of the graph. The dangeling references need to be re-mapped by
-	the importer"
+	the importer, which finds its own object for each of them under the
+	name written here"
 	stream nextPut: replacements size.
-	replacements do: [ :oid |
+	replacements keysAndValuesDo: [ :name :oid |
+		self writeName: name.
 		oid writeOn: stream ].
 	"Now write out all reachable clusters but not the non-mapped"
 	self processLoop
@@ -96,7 +98,7 @@ SoilGraphExporter >> initialize [
 	behaviors := Dictionary new.
 	clusters := 0.
 	toBeExported := OrderedCollection new.
-	replacements := OrderedCollection new.
+	replacements := Dictionary new.
 ]
 
 { #category : #visiting }
@@ -153,13 +155,36 @@ SoilGraphExporter >> migrateCluster: cluster [
 
 { #category : #accessing }
 SoilGraphExporter >> processObjectId: oid [ 
-	(replacements includes: oid) ifTrue: [ ^ self ].
+	(self isReplaced: oid) ifTrue: [ ^ self ].
 	super processObjectId: oid 
 ]
 
 { #category : #actions }
-SoilGraphExporter >> replaceObject: anObject [
-	replacements add: (transaction objectIdOf: anObject)
+SoilGraphExporter >> replaceObject: anObject as: aName [
+	"leave anObject out of the export and let the importing side put its own object in its
+	place. The name is how the two sides agree on which object that is - object ids cannot
+	say it, they mean nothing across databases, and counting them means the two sides have
+	to register in the same order. The importer registers under the same name."
+	(replacements includesKey: aName) ifTrue: [
+		SoilInvalidReplacement signal:
+			'an object is already registered to be replaced as ' , aName printString ].
+	replacements at: aName put: (transaction objectIdOf: anObject)
+]
+
+{ #category : #testing }
+SoilGraphExporter >> isReplaced: aSoilObjectId [
+	"whether the caller left this object to the importing side, in which case the export
+	carries references to it but not the object itself"
+	^ replacements anySatisfy: [ :each | each = aSoilObjectId ]
+]
+
+{ #category : #writing }
+SoilGraphExporter >> writeName: aName [
+	| bytes |
+	bytes := aName asString asByteArray.
+	stream
+		nextPut: bytes size;
+		nextPutAll: bytes
 ]
 
 { #category : #configuration }

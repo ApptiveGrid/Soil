@@ -116,10 +116,30 @@ SoilGraphImporter >> readObjectIdsBeingImported [
 { #category : #importing }
 SoilGraphImporter >> readObjectIdsToBeReplaced [
 	"objects the export left out because they exist here already - the receiving user, for
-	one. References to them are re-pointed at what #replaceObject: registered."
-	toBeReplaced := Array new: stream next.
-	1 to: toBeReplaced size do: [ :n |
-		toBeReplaced at: n put: (SoilObjectId readFrom: stream) ]
+	one. References to them are re-pointed at the object #replaceObject:as: registered
+	under the same name. Reading the names is also where a missing registration is found,
+	before anything has been written."
+	| name |
+	toBeReplaced := Dictionary new.
+	stream next timesRepeat: [
+		name := self readName.
+		self replacementNamed: name.
+		toBeReplaced at: (SoilObjectId readFrom: stream) put: name ]
+]
+
+{ #category : #importing }
+SoilGraphImporter >> readName [
+	^ (stream next: stream next) asString asSymbol
+]
+
+{ #category : #accessing }
+SoilGraphImporter >> replacementNamed: aName [
+	^ replacements
+		at: aName
+		ifAbsent: [
+			SoilInvalidReplacement signal:
+				'the export leaves out an object to be replaced as ' , aName printString
+				, ', and nothing is registered under that name' ]
 ]
 
 { #category : #importing }
@@ -280,7 +300,7 @@ SoilGraphImporter >> importedOids [
 SoilGraphImporter >> initialize [
 	super initialize.
 	idMap := Dictionary new.
-	replacements := OrderedCollection new.
+	replacements := Dictionary new.
 	addedBehaviorNames := OrderedCollection new.
 	acceptsExportsFromOlderVersions := false
 ]
@@ -402,9 +422,10 @@ SoilGraphImporter >> remapReferencesOf: cluster [
 	object's new id - or at something the export left out, and then it points at what the
 	caller registered for it through #replaceObject:"
 	cluster references: (cluster references collect: [ :id |
-		 (toBeReplaced includes: id)
-			 ifTrue: [ replacements at: (toBeReplaced indexOf: id) ]
-			 ifFalse: [ self newObjectIdFor: id ] ])
+		 toBeReplaced
+			 at: id
+			 ifPresent: [ :name | self replacementNamed: name ]
+			 ifAbsent: [ self newObjectIdFor: id ] ])
 ]
 
 { #category : #importing }
@@ -414,8 +435,10 @@ SoilGraphImporter >> store: cluster [
 
 
 { #category : #actions }
-SoilGraphImporter >> replaceObject: anAGUser [ 
-	replacements add: (transaction objectIdOf: anAGUser)
+SoilGraphImporter >> replaceObject: anObject as: aName [
+	"the object this database puts in place of the one the export left out under that name.
+	See SoilGraphExporter>>replaceObject:as: for why it is a name and not a position."
+	replacements at: aName put: (transaction objectIdOf: anObject)
 ]
 
 { #category : #accessing }
