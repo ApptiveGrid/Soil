@@ -284,6 +284,57 @@ SoilGraphExporterTest >> fileSizes [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testImportIsVisibleToTheTransactionThatRanIt [
+	"An import writes its records straight into the segments, and a record is only readable
+	by a transaction whose readVersion is at least the version of the record - an imported
+	object has no older version to fall back to, so a record stamped too high reads as
+	nothing at all.
+
+	Here something else commits into the target after the importing transaction has
+	started, which is the normal state of a database in use: the database version moves on
+	while the transaction keeps the version it began with. The import has to stay readable
+	for that transaction, which is the one that will go on to use what it imported."
+
+	| tx bytes exportTx importer targetTx meanwhile |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: 'exported'; yourself).
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	targetSoil := Soil createOnPath: self targetPath.
+	tx := targetSoil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: 'target'; yourself).
+	tx commit.
+
+	"the importing transaction starts here ..."
+	targetTx := targetSoil newTransaction.
+	"... and somebody else commits before the import runs"
+	meanwhile := targetSoil newTransaction.
+	meanwhile root nested: 'moved on'.
+	meanwhile markDirty: meanwhile root.
+	meanwhile commit.
+	self assert: targetTx readVersion < targetSoil control databaseVersion.
+
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	self assert: importer importedObjects first notNil.
+	self assert: importer importedObjects first nested equals: 'exported'.
+	targetTx commit
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testExportRunsOnASourceOpenedReadOnly [
 	"A copy reads a database another image owns and may not write to it. The export does
 	raise clusters whose behavior version is behind - #updateCluster: materializes them
