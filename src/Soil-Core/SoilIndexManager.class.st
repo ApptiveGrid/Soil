@@ -65,10 +65,17 @@ SoilIndexManager >> close [
 
 { #category : #api }
 SoilIndexManager >> createIndexWithId: indexId class: aClass [ 
-	^ aClass new 
-		path: (self pathFor: indexId);
-		initializeFilesystem;
-		initializeHeaderPage
+	"the new index is open when it is handed out, so it is registered like every other
+	open one. Without that nobody holds it: #close does not know it, and the next #at:
+	for the same id opens the same file a second time. On POSIX that was a leaked handle
+	and a second page cache on one file; on Windows an open file cannot be deleted, which
+	is where a graph import of an index left the database undeletable."
+	^ self
+		at: indexId
+		put: (aClass new
+			path: (self pathFor: indexId);
+			initializeFilesystem;
+			initializeHeaderPage)
 ]
 
 { #category : #accessing }

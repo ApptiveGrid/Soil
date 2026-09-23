@@ -50,9 +50,10 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 			targetIndex basicAt: assoc key add: assoc value.
 			"recurse further into the values of the index"
 			self processObjectId: assoc value asSoilObjectId ] ].
-	targetIndex
-		flush;
-		close.
+	"both indexes are registered with their managers now, so both are released the same
+	way - the target's too, which used to be closed by hand while staying registered"
+	targetIndex flush.
+	targetSegment indexManager removeIndexWithId: indexId.
 	"do not close the behavior registry index here, it is owned by soil and
 	still in use; only release indexes we opened through the index manager"
 	isBehaviorIndex ifFalse: [
