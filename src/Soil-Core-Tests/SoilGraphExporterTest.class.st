@@ -304,6 +304,101 @@ SoilGraphExporterTest >> testImportOfAShapeTheTargetKnowsAsAnOlderVersion [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testImportTakesTheNewestVersionOfAShapeThatOccursTwice [
+	"A shape can appear more than once in a chain: take an instance variable away and put
+	it back, and version 1 and version 3 look the same while meaning different things. The
+	chain this builds is (3: one two three), (2: one two), (1: one two three) - measured,
+	not assumed.
+
+	The importer answers the newest of the two. What this test shows is that such a chain
+	imports cleanly and keeps #three; it does *not* show that the older choice would lose
+	it. It would not: PointerLayout>>updateIvars:with:for: does not migrate along the
+	version the record carries, it looks the shape up again through
+	#behaviorVersionsUpTo:transaction: - which takes the newest match as well. Tried with
+	the lookup inverted to answer the oldest match, and this test stays green. The choice
+	is still worth making deliberately: it is the one the materializer makes, and two
+	answers to the same question are a place for the two to drift apart."
+
+	| tx bytes exportTx importer targetTx imported |
+	targetSoil := Soil createOnPath: self targetPath.
+	tx := targetSoil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 'v1-one';
+		instVarNamed: #two put: 'v1-two';
+		instVarNamed: #three put: 'v1-three';
+		yourself).
+	tx commit.
+
+	tx := soil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2;
+		instVarNamed: #three put: 3;
+		yourself).
+	tx commit.
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	"version 2 in the target: #three is gone"
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #two };
+		package: self class package name) install.
+	targetTx := targetSoil newTransaction.
+	targetTx root: (migrationClass new
+		instVarNamed: #one put: 'v2-one';
+		instVarNamed: #two put: 'v2-two';
+		yourself).
+	targetTx commit.
+
+	"version 3: #three is back, so this shape equals version 1"
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #two. #three };
+		package: self class package name) install.
+	targetTx := targetSoil newTransaction.
+	targetTx root: (migrationClass new
+		instVarNamed: #one put: 'v3-one';
+		instVarNamed: #two put: 'v3-two';
+		instVarNamed: #three put: 'v3-three';
+		yourself).
+	targetTx commit.
+
+	"version 4, so that the imported shape is not the current one"
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #three. #two };
+		package: self class package name) install.
+	targetTx := targetSoil newTransaction.
+	targetTx root: (migrationClass new
+		instVarNamed: #one put: 'v4-one';
+		instVarNamed: #two put: 'v4-two';
+		instVarNamed: #three put: 'v4-three';
+		yourself).
+	targetTx commit.
+
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+	targetTx commit.
+
+	self assert: (imported instVarNamed: #one) equals: 1.
+	self assert: (imported instVarNamed: #two) equals: 2.
+	self assert: (imported instVarNamed: #three) equals: 3
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testImportOfALiveShapeBecomesTheNextVersionInTheTarget [
 	"The target holds an older shape as its current one and the import brings the shape of
 	the class as it lives in this image. That is not a conflict: it is what an ordinary
