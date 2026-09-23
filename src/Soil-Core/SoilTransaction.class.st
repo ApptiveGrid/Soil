@@ -534,12 +534,22 @@ SoilTransaction >> makeNewVersion: classDescription [
 
 { #category : #api }
 SoilTransaction >> makeRoot: anObject [ 
-	| objectId |
+	"An object this transaction already holds a record for is a cluster root already, and
+	saying so a second time changes nothing - so it is not a write attempt, and a
+	read-only transaction can answer it.
+
+	SoilPersistentDictionary>>ensureValuesAreRoot sends this for every value each time the
+	dictionary is serialized, which is how reading turned into a refusal: exporting from a
+	database opened read-only died on the first persistent dictionary it met, although
+	every one of its values had come out of that same database as a root."
+	| object objectId |
+	object := anObject theNonSoilProxy.
+	(objectMap at: object ifAbsent: [ nil ]) ifNotNil: [ :record | ^ record objectId ].
 	self isWritable ifFalse: [ 
 		SoilWriteOnReadOnlyTransaction new 
 			object: anObject;
 			signal ].
-	objectId := self addClusterObject: anObject theNonSoilProxy.
+	objectId := self addClusterObject: object.
 	anObject soilClusterRootIn: self.
 	^ objectId
 

@@ -284,6 +284,105 @@ SoilGraphExporterTest >> fileSizes [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testImportIsVisibleToTheTransactionThatRanIt [
+	"An import writes its records straight into the segments, and a record is only readable
+	by a transaction whose readVersion is at least the version of the record - an imported
+	object has no older version to fall back to, so a record stamped too high reads as
+	nothing at all.
+
+	Here something else commits into the target after the importing transaction has
+	started, which is the normal state of a database in use: the database version moves on
+	while the transaction keeps the version it began with. The import has to stay readable
+	for that transaction, which is the one that will go on to use what it imported."
+
+	| tx bytes exportTx importer targetTx meanwhile |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: 'exported'; yourself).
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	targetSoil := Soil createOnPath: self targetPath.
+	tx := targetSoil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: 'target'; yourself).
+	tx commit.
+
+	"the importing transaction starts here ..."
+	targetTx := targetSoil newTransaction.
+	"... and somebody else commits before the import runs"
+	meanwhile := targetSoil newTransaction.
+	meanwhile root nested: 'moved on'.
+	meanwhile markDirty: meanwhile root.
+	meanwhile commit.
+	self assert: targetTx readVersion < targetSoil control databaseVersion.
+
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	self assert: importer importedObjects first notNil.
+	self assert: importer importedObjects first nested equals: 'exported'.
+	targetTx commit
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testExportOfAFreshPersistentDictionaryRunsOnAReadOnlySource [
+	"A SoilPersistentDictionary that does not know a transaction yet makes roots out of
+	its values when it is serialized (#ensureValuesAreRoot). On a database opened
+	read-only that used to be refused outright, although the values had come out of that
+	very database as roots and saying so again writes nothing.
+
+	The block here is what a space copy does: it hands back a copy of the object with a
+	dictionary of its own, holding the values it keeps. That dictionary is new, so it has
+	no transaction, so every value goes through #makeRoot: - in a database this image may
+	not write to."
+
+	| tx bytes exportTx readOnly before dictionary |
+	tx := soil newTransaction.
+	dictionary := SoilPersistentDictionary new.
+	tx root: (migrationClass new instVarNamed: #one put: dictionary; yourself).
+	dictionary at: 1 put: (SoilTestGraphRoot new nested: 'a value of its own'; yourself).
+	tx commit.
+	soil close.
+	soil := nil.
+
+	readOnly := Soil path: self path.
+	readOnly readOnly: true.
+	readOnly open.
+	[ before := self fileSizes.
+	"read-only, as the copy path opens it: the database belongs to another image"
+	exportTx := readOnly newReadOnlyTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			migrate: migrationClass to: [ :each |
+				| fresh |
+				fresh := SoilPersistentDictionary new.
+				(each instVarNamed: #one) keysAndValuesDo: [ :key :value |
+					fresh at: key put: value ].
+				each copy
+					instVarNamed: #one put: fresh;
+					yourself ];
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+	self assert: bytes isNotEmpty.
+	self assert: self fileSizes equals: before ]
+		ensure: [ readOnly close ]
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testExportRunsOnASourceOpenedReadOnly [
 	"A copy reads a database another image owns and may not write to it. The export does
 	raise clusters whose behavior version is behind - #updateCluster: materializes them
