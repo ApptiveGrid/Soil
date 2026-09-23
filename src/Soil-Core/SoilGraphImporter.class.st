@@ -12,30 +12,31 @@ Class {
 		'replacements',
 		'legacyOids',
 		'addedBehaviorNames',
-		'assumesImportedShapesAreNewest'
+		'acceptsExportsFromOlderVersions'
 	],
 	#category : #'Soil-Core-Error'
 }
 
 { #category : #accessing }
-SoilGraphImporter >> assumeImportedShapesAreNewest [
-	"Take every shape that arrives for the newest one this class has, and append it as the
-	next version without looking at the chain. Say this when the stream cannot be older
-	than the target - two images of one deployment, or an export taken moments ago.
+SoilGraphImporter >> acceptExportsFromOlderVersions [
+	"Look an arriving shape up in the chain of its class before treating it as a new one,
+	so that a stream written by an image with older code still finds the version it belongs
+	to. Off by default, and switching it on means accepting an imprecision: shapes are
+	compared field by field, so a shape that equals an older version is taken *for* that
+	older version - and two versions look alike as soon as an instance variable is removed
+	and put back.
 
-	It is the cheaper reading and the more definite one: no shape is looked up, so no shape
-	can be mistaken for an older one it happens to equal. What it gives up is the ability
-	to take an export that *is* older: such a stream is then appended as if it were new,
-	which grows the chain by a version that is in truth behind the one before it."
-	assumesImportedShapesAreNewest := true
+	Without it the rule is plain and can be stated in one line: what arrives is the newest
+	shape of its class, either the one the target already holds or the next version. A
+	shape that is neither raises, rather than being filed under a version it happens to
+	resemble."
+	acceptsExportsFromOlderVersions := true
 ]
 
 { #category : #accessing }
-SoilGraphImporter >> assumesImportedShapesAreNewest [
-	"false by default: an arriving shape is looked up in the chain first, so an export
-	older than the target still finds its version. See #assumeImportedShapesAreNewest for
-	the other reading and what each costs."
-	^ assumesImportedShapesAreNewest ifNil: [ false ]
+SoilGraphImporter >> acceptsExportsFromOlderVersions [
+	"false by default - see #acceptExportsFromOlderVersions for what saying it costs"
+	^ acceptsExportsFromOlderVersions ifNil: [ false ]
 ]
 
 { #category : #importing }
@@ -185,12 +186,14 @@ SoilGraphImporter >> importBehaviorOfDifferentShape: cluster knownAs: presentBeh
 	means the exporting image runs different code than this one - #updateCluster: raises
 	the source to *its* current state, and that is then not ours. That one raises.
 
-	A caller who knows that nothing older can arrive says so with
-	#assumeImportedShapesAreNewest, and then only the second reading applies."
-	self assumesImportedShapesAreNewest ifTrue: [
-		^ self appendAsNextVersion: cluster after: presentBehavior at: presentOid ].
-	(self versionKnownInChainFor: cluster at: presentOid) ifNotNil: [ :knownVersion |
-		^ self useVersion: knownVersion for: cluster at: presentOid ].
+	The first reading is the one that has to be asked for: #acceptExportsFromOlderVersions
+	turns the chain lookup on and with it the imprecision that a shape equal to an older
+	version is taken for that version. Off, only the second applies - and the third then
+	catches everything that is not the shape of the live class, instead of it being filed
+	under a version it happens to resemble."
+	self acceptsExportsFromOlderVersions ifTrue: [
+		(self versionKnownInChainFor: cluster at: presentOid) ifNotNil: [ :knownVersion |
+			^ self useVersion: knownVersion for: cluster at: presentOid ] ].
 	self shapeOfTheLiveClassIn: cluster ifFalse: [
 		^ self signalShapeConflictFor: cluster against: presentBehavior ].
 	^ self appendAsNextVersion: cluster after: presentBehavior at: presentOid
@@ -282,7 +285,7 @@ SoilGraphImporter >> initialize [
 	idMap := Dictionary new.
 	replacements := OrderedCollection new.
 	addedBehaviorNames := OrderedCollection new.
-	assumesImportedShapesAreNewest := false
+	acceptsExportsFromOlderVersions := false
 ]
 
 { #category : #importing }

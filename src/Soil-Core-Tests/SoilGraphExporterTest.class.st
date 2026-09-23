@@ -46,13 +46,17 @@ SoilGraphExporterTest >> tearDown [
 ]
 
 { #category : #tests }
-SoilGraphExporterTest >> testAssumingTheImportedShapeIsNewestSkipsTheChain [
-	"The same setup as testImportOfAShapeTheTargetKnowsAsAnOlderVersion - the target has
-	moved past the exported shape - read the other way. Told that nothing older can arrive,
-	the importer does not look the shape up and appends it as the next version instead, so
-	the chain grows by one."
+SoilGraphExporterTest >> testAnOlderExportIsAConflictUnlessItIsAskedFor [
+	"The counterpart of testImportOfAShapeTheTargetKnowsAsAnOlderVersion: the same stream,
+	the same target, without #acceptExportsFromOlderVersions.
 
-	| tx bytes exportTx importer targetTx imported chainSize |
+	By default what arrives counts as the newest shape of its class - either the one the
+	target already holds or the next version. This stream is neither: the class moved on
+	after the export and the target wrote that newer shape, so the arriving one sits behind
+	both. It is refused instead of being filed under the version it resembles, and the
+	error names both shapes."
+
+	| tx bytes exportTx importer targetTx |
 	targetSoil := Soil createOnPath: self targetPath.
 	tx := targetSoil newTransaction.
 	tx root: (migrationClass new instVarNamed: #one put: 'native-one'; yourself).
@@ -86,22 +90,10 @@ SoilGraphExporterTest >> testAssumingTheImportedShapeIsNewestSkipsTheChain [
 	targetTx := targetSoil newTransaction.
 	importer := SoilGraphImporter new
 		transaction: targetTx;
-		assumeImportedShapesAreNewest;
 		stream: bytes readStream;
 		yourself.
-	importer import.
-	imported := importer importedObjects first.
-	targetTx commit.
-
-	self assert: (imported instVarNamed: #one) equals: 1.
-	self assert: (imported instVarNamed: #two) equals: 2.
-	self assert: (imported instVarNamed: #three) equals: 3.
-
-	chainSize := (targetSoil objectRepository metaSegment allVersionsAt:
-		              (targetSoil behaviorRegistry
-			               nameAt: #SOGraphExportMigrationObject
-			               ifAbsent: [ self fail ]) index) size.
-	self assert: chainSize equals: 3
+	self should: [ importer import ] raise: SoilBehaviorShapeConflict.
+	targetTx abort
 ]
 
 { #category : #tests }
@@ -342,6 +334,7 @@ SoilGraphExporterTest >> testImportOfAShapeTheTargetKnowsAsAnOlderVersion [
 	targetTx := targetSoil newTransaction.
 	importer := SoilGraphImporter new
 		transaction: targetTx;
+		acceptExportsFromOlderVersions;
 		stream: bytes readStream;
 		yourself.
 	importer import.
@@ -446,6 +439,7 @@ SoilGraphExporterTest >> testImportTakesTheNewestVersionOfAShapeThatOccursTwice 
 	targetTx := targetSoil newTransaction.
 	importer := SoilGraphImporter new
 		transaction: targetTx;
+		acceptExportsFromOlderVersions;
 		stream: bytes readStream;
 		yourself.
 	importer import.
