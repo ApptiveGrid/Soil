@@ -156,6 +156,121 @@ SoilGraphExporterTest >> testExportRefusesAStructureItCannotCarry [
 	exportTx abort
 ]
 
+{ #category : #running }
+SoilGraphExporterTest >> exportLeavingOutTwoObjects [
+	"a graph of three objects where two are left out of the export and named, so that the
+	importing side supplies its own objects for them. Answers the stream."
+
+	| tx exportTx root |
+	tx := soil newTransaction.
+	root := SoilTestGraphRoot new
+		nested: (Array
+			with: (SoilTestGraphRoot new nested: 'source first'; yourself)
+			with: (SoilTestGraphRoot new nested: 'source second'; yourself));
+		yourself.
+	tx root: root.
+	root nested do: [ :each | tx makeRoot: each ].
+	tx commit.
+
+	exportTx := soil newTransaction.
+	^ [ ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			replaceObject: (exportTx root nested first) as: #first;
+			replaceObject: (exportTx root nested second) as: #second;
+			yourself)
+				stream: stream;
+				export ] ]
+		ensure: [ exportTx abort ]
+]
+
+{ #category : #running }
+SoilGraphExporterTest >> targetWithTwoStandIns [
+	"two objects in a fresh target database, to stand in for the ones the export left out.
+	Answers the transaction to import into, with the stand-ins as its root."
+
+	| tx |
+	targetSoil := Soil createOnPath: self targetPath.
+	tx := targetSoil newTransaction.
+	tx root: (Array
+		with: (SoilTestGraphRoot new nested: 'target first'; yourself)
+		with: (SoilTestGraphRoot new nested: 'target second'; yourself)).
+	tx root do: [ :each | tx makeRoot: each ].
+	tx commit.
+	^ targetSoil newTransaction
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testReplacementsArePairedByNameNotByPosition [
+	"Two left-out objects, registered on the importing side in the opposite order. What
+	pairs them is the name both sides used, so the order they were registered in does not
+	matter - pairing them by position, as the import used to, would swap them here and say
+	nothing about it."
+
+	| bytes targetTx importer imported |
+	bytes := self exportLeavingOutTwoObjects.
+	targetTx := self targetWithTwoStandIns.
+
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		replaceObject: (targetTx root second) as: #second;
+		replaceObject: (targetTx root first) as: #first;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+
+	"read before the commit: these are proxies and would fault against a transaction that
+	is gone by the time the assertion looks at them"
+	self assert: (imported nested first) nested equals: 'target first'.
+	self assert: (imported nested second) nested equals: 'target second'.
+	targetTx commit
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testImportRefusesAStreamNamingAnUnregisteredReplacement [
+	"The export leaves an object out and names it; if the importing side registers nothing
+	under that name, there is nothing to point the references at. It is said before the
+	import writes anything, and the name is in the message."
+
+	| bytes targetTx |
+	bytes := self exportLeavingOutTwoObjects.
+	targetTx := self targetWithTwoStandIns.
+
+	self
+		should: [
+			(SoilGraphImporter new
+				transaction: targetTx;
+				stream: bytes readStream;
+				replaceObject: (targetTx root first) as: #first;
+				yourself)
+					import ]
+		raise: SoilInvalidReplacement.
+	targetTx abort
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testExportRefusesTheSameReplacementNameTwice [
+	"Two objects under one name would leave the importing side with one of them silently
+	unreplaced - the mistake the names are there to prevent."
+
+	| tx exporter |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: 'a'; yourself).
+	tx commit.
+
+	tx := soil newTransaction.
+	exporter := SoilGraphExporter new
+		transaction: tx;
+		replaceObject: tx root as: #first;
+		yourself.
+	self
+		should: [ exporter replaceObject: tx root as: #first ]
+		raise: SoilInvalidReplacement.
+	tx abort
+]
+
 { #category : #tests }
 SoilGraphExporterTest >> testExportCarriesTheEntriesOfAnIndex [
 	"Without #skipIndexes: the entries of an index go along, and their values are object
