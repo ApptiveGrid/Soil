@@ -267,12 +267,13 @@ SoilGraphExporter >> visitSkipListDictionary: aSkipListDictionary [
 		ifFalse: [ 
 			count := 0.
 			stream nextPutAll: (index values size asByteArrayOfSize: 8).
-			index newIterator associationsDo: [ :assoc |
+			index newIterator associationsDo: [ :assoc | | objectId |
 				count := count + 1.
-				self processObjectId: (SoilObjectId readFrom: assoc value readStream).
+				objectId := assoc value asSoilObjectId.
+				self processObjectId: objectId.
 				stream 
 					nextPutAll: (assoc key asByteArrayOfSize: keySize);
-					nextPutAll: (assoc value asByteArrayOfSize: valueSize ) ] ]
+					nextPutAll: (objectId asByteArrayOfSize: valueSize ) ] ]
 ]
 
 { #category : #visiting }
