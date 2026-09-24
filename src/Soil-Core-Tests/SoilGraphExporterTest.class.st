@@ -323,6 +323,58 @@ SoilGraphExporterTest >> testAMigrationCannotIntroduceANewClusterRoot [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testAMigrationKeepsWhatPointsBackAtTheClusterRoot [
+	"A migration hands back another object for the cluster - here the plainest one there
+	is, a copy. The copy shares what was embedded in the original, and that embedded object
+	points back at the object it was copied from.
+
+	The serializer knows the cluster root by identity: it is the first object it writes, and
+	everything pointing at it afterwards becomes an internal reference. After a migration
+	the root is the copy, so the back pointer names something the serializer has not seen -
+	and it used to write it out a second time. The import then built two objects where the
+	source had one, and the second one kept the id it had in the source database."
+
+	| tx bytes exportTx targetTx importer imported backPointerClass |
+	backPointerClass := (SoilBaseTestObject << #SOGraphExportBackPointer
+		layout: FixedLayout;
+		slots: { #owner };
+		package: self class package name) install.
+	[ | root inner |
+	tx := soil newTransaction.
+	root := migrationClass new.
+	inner := backPointerClass new.
+	inner instVarNamed: #owner put: root.
+	root instVarNamed: #one put: inner.
+	tx root: root.
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			migrate: migrationClass to: [ :each | each copy ];
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+	self
+		assert: ((imported instVarNamed: #one) instVarNamed: #owner) == imported
+		description: 'what was pointed back at the cluster root arrived as a second object'.
+	targetTx commit ]
+		ensure: [ backPointerClass removeFromSystem ]
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testAMigrationForOneObjectLeavesTheOthersAlone [
 	"#migrate:to: speaks for every instance of a class, which is no help when one object of
 	that class has to be exported differently from its siblings - a dictionary that is to

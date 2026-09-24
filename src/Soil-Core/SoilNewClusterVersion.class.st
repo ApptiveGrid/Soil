@@ -3,7 +3,8 @@ Class {
 	#superclass : #SoilClusterRecord,
 	#instVars : [
 		'externalObjects',
-		'previousVersionRecord'
+		'previousVersionRecord',
+		'objectBeforeMigration'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -79,6 +80,22 @@ SoilNewClusterVersion >> indexOfBehaviorDescription: aBehavior [
 	(index > 0) ifTrue: [ ^ index ].
 	behaviorDescriptions add: (transaction behaviorDescriptionFor: aBehavior).
 	^ behaviorDescriptions size
+]
+
+{ #category : #accessing }
+SoilNewClusterVersion >> objectBeforeMigration: anObject [
+	"what this cluster held before a migration replaced it - see #standsForTheClusterRoot:"
+	objectBeforeMigration := anObject
+]
+
+{ #category : #serializing }
+SoilNewClusterVersion >> standsForTheClusterRoot: anObject [
+	"a migration hands back another object for this cluster. An object embedded in the
+	cluster still points back at the one it replaced, and that is this same root: without
+	this the serializer does not recognise it, writes it a second time, and the importer
+	builds two objects where the source had one - the second one still carrying the id it
+	had in the database the copy came from."
+	^ objectBeforeMigration notNil and: [ anObject == objectBeforeMigration ]
 ]
 
 { #category : #accessing }

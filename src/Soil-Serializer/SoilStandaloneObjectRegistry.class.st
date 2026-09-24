@@ -47,6 +47,11 @@ SoilStandaloneObjectRegistry >> indexOfBehaviorDescription: aBehavior [
 	^ index + 1
 ]
 
+{ #category : #accessing }
+SoilStandaloneObjectRegistry >> standsForTheClusterRoot: anObject [
+	^ false
+]
+
 { #category : #query }
 SoilStandaloneObjectRegistry >> indexOfExternalReference: aCollection [ 
 	^ 0

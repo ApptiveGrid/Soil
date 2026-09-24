@@ -183,6 +183,7 @@ SoilGraphExporter >> migrateCluster: cluster [
 		materializeObject.
 	
 	newCluster := cluster asNewClusterVersion.
+	newCluster objectBeforeMigration: cluster object.
 	newCluster object: (block value: cluster object).
 	newCluster version: 1.
 	newCluster 
