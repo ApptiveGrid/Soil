@@ -209,6 +209,12 @@ SoilSerializer >> registerObject: anObject ifAbsent: aBlock [
 		objectIdTable add: anObject.
 		^ aBlock value ].
 	index := objectIdTable identityIndexOf: anObject.
+	(index = 0 and: [ externalObjectRegistry notNil and: [
+		externalObjectRegistry standsForTheClusterRoot: anObject ] ]) ifTrue: [
+			"a migration replaced the cluster root while exporting, and something embedded
+			in the cluster still points back at the object it replaced - that is this same
+			root, and it is written as the reference it is instead of a second time"
+			index := objectIdTable identityIndexOf: clusterRoot ].
 	(index > 0) ifTrue: [
 		self nextPutInternalReference: index.
 		^ self ].

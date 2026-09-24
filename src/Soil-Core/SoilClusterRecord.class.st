@@ -229,6 +229,12 @@ SoilClusterRecord >> serialize [
 ]
 
 { #category : #serializing }
+SoilClusterRecord >> standsForTheClusterRoot: anObject [
+	"only a cluster whose object was replaced has a second object that means its root"
+	^ false
+]
+
+{ #category : #serializing }
 SoilClusterRecord >> serializeOn: stream [
 	bytes ifNil: [ self serializeObject ].
 	stream 
