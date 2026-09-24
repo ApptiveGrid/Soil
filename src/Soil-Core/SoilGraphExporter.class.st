@@ -11,7 +11,8 @@ Class {
 		'behaviors',
 		'clusters',
 		'replacements',
-		'toBeExported'
+		'toBeExported',
+		'objectMigrations'
 	],
 	#category : #'Soil-Core-Error'
 }
@@ -105,6 +106,7 @@ SoilGraphExporter >> initialize [
 	clusters := 0.
 	toBeExported := OrderedCollection new.
 	replacements := Dictionary new.
+	objectMigrations := Dictionary new.
 ]
 
 { #category : #visiting }
@@ -134,18 +136,48 @@ SoilGraphExporter >> migrate: aClass to: aBlock [
 ]
 
 { #category : #migration }
+SoilGraphExporter >> assertMigrationKeptItsReferences: aCluster [
+	"A migration may hand back another object, but every cluster root it points at has to be
+	one the database already knows. An object created while exporting has no object id - one
+	is handed out when a transaction commits, and an export commits nothing - so it would go
+	into the stream as a reference to index 0 and the importer would have nothing to look up.
+	Say that here, where the migration is, instead of letting the record refuse it later
+	without naming a cause."
+	aCluster references 
+		detect: [ :each | each index = 0 ]
+		ifFound: [ :each |
+			SoilUnsupportedError signal: 'a migration cannot introduce new cluster roots: ', 
+				aCluster object class name, 
+				' points at an object that has no object id yet' ]
+]
+
+{ #category : #migration }
 SoilGraphExporter >> migrateAll: aCollection to: aBlock [ 
 	aCollection do: [ :cls |
 		self migrate: cls to: aBlock  ]
 ]
 
+{ #category : #migration }
+SoilGraphExporter >> migrateObject: anObject to: aBlock [
+	"a migration for this one object rather than for every instance of its class. Use it to
+	change what a single cluster carries: the cluster keeps its object id, so everything that
+	points at it still does. Putting a changed copy into the object that holds it would not
+	work - the copy is a new object without an id, see #assertMigrationKeptItsReferences:."
+	objectMigrations 
+		at: (transaction objectIdOf: anObject)
+		put: aBlock
+]
+
 { #category : #actions }
 SoilGraphExporter >> migrateCluster: cluster [ 
 	| block newCluster |
-	cluster behaviorDescriptions ifEmpty: [ ^ cluster ].
-	block := migrationMap
-		at: cluster behaviorDescriptions first index
-		ifAbsent: [ ^ cluster ].
+	block := objectMigrations 
+		at: cluster objectId 
+		ifAbsent: [ 
+			cluster behaviorDescriptions ifEmpty: [ ^ cluster ].
+			migrationMap
+				at: cluster behaviorDescriptions first index
+				ifAbsent: [ ^ cluster ] ].
 	cluster 
 		transaction: transaction;
 		materializeObject.
@@ -156,6 +188,7 @@ SoilGraphExporter >> migrateCluster: cluster [
 	newCluster 
 		transaction: transaction;
 		serializeObject.
+	self assertMigrationKeptItsReferences: newCluster.
 	^ newCluster
 ]
 
