@@ -175,6 +175,42 @@ SoilActiveResident >> processName [
 ]
 
 { #category : #running }
+SoilActiveResident >> enterStep [
+	"answers whether the step may begin, and if so has begun it: I count as working
+	from here on.
+
+	At the embedder's gate, because a step that falls due by the clock is announced
+	by nothing -- no pending flag goes up beforehand, the way #noteWork raises one
+	for work that is handed to me. Between an embedder asking whether I am idle and
+	acting on the answer I could otherwise start a unit it never saw, and the close
+	that follows would wait out its timeout for that unit and then terminate it.
+	Holding the gate, the embedder can ask and request the stop in one step; I wait
+	here meanwhile and find the flag once it opens. The unit itself runs outside the
+	gate, so a long one holds up nobody who only wants to ask.
+
+	The flag is read in here and not only in #runLoop: the loop's check happens
+	before I get to the gate, and the stop may be requested while I wait at it"
+	^ self passGateDuring: [
+		self shouldStop
+			ifTrue: [ false ]
+			ifFalse: [
+				stepCount := stepCount + 1.
+				stepStartedAt := DateAndTime now.
+				working := true.
+				true ] ]
+]
+
+{ #category : #running }
+SoilActiveResident >> passGateDuring: aBlock [
+	"through the gate my supervisor was handed. Without a supervisor, or one
+	without a gate, there is nobody to wait for -- which is the case in unit tests
+	and for any embedder that does not close on idleness"
+	^ supervisor
+		ifNil: [ aBlock value ]
+		ifNotNil: [ :s | s passWorkGateDuring: aBlock ]
+]
+
+{ #category : #running }
 SoilActiveResident >> runLoop [
 	"the stop flag is checked twice per turn on purpose: once before waiting, and
 	once after, because #requestStop wakes me precisely while I wait"
@@ -202,10 +238,11 @@ SoilActiveResident >> runStepProtected [
 	The count and the start time are set before #working, not after, so that
 	whoever finds me working reads a number and a timestamp that already belong to
 	the step I am in. The other order leaves a window in which a report says
-	'in step 3' about step 4, or reads no start time at all"
-	stepCount := stepCount + 1.
-	stepStartedAt := DateAndTime now.
-	working := true.
+	'in step 3' about step 4, or reads no start time at all.
+
+	All three are set at the embedder's gate, and only there may the stop flag
+	still turn the step down; see #enterStep"
+	self enterStep ifFalse: [ ^ self ].
 	pendingWork := false.
 	workSignal consumeAllSignals.
 	self emitsEveryStep ifTrue: [ self emit: 'step ', stepCount printString ].
