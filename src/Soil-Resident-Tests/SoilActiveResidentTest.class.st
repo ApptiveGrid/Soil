@@ -27,11 +27,19 @@ SoilActiveResidentTest >> path [
 SoilActiveResidentTest >> residentWith: aBlock [
 	"add a dummy active resident configured by the block, start everything the way
 	an embedder does, and answer the running instance"
+	^ self residentWith: aBlock behind: nil
+]
+
+{ #category : #helpers }
+SoilActiveResidentTest >> residentWith: aBlock behind: aGate [
+	"the same, with a work gate handed to the supervisor before anything starts --
+	the first step of an interval resident is due at once and passes it too"
 	| description txn |
 	description := SoilTestActiveResidentDescription new.
 	aBlock value: description.
 	soil addResidentDescription: description.
 	supervisor := soil newResidentSupervisor.
+	supervisor workGate: aGate.
 	txn := soil newTransaction.
 	[ supervisor loadFrom: txn.
 	supervisor startAllIn: txn tickEvery: 1 hour reportEvery: 1 hour ]
@@ -160,6 +168,56 @@ SoilActiveResidentTest >> testAnIntervalIsDueAtOnceAndNotAgainBeforeItElapsed [
 
 	strategy lastRun: DateAndTime now - 11 minutes.
 	self assert: strategy isDue
+]
+
+{ #category : #tests }
+SoilActiveResidentTest >> testAStepThatFellDueAtAHeldGateRunsOnceItOpens [
+	"the gate delays a step, it does not drop it: nobody asked for a stop, so the
+	resident that waited there goes on into its unit"
+	| gate resident |
+	gate := SoilTestWorkGate new.
+	resident := self
+		residentWith: [ :d | d cadence: #interval; interval: 1 hour ]
+		behind: gate.
+	self assert: (resident waitForStepWithin: 3 seconds).
+
+	gate critical: [
+		gate arrivals consumeAllSignals.
+		resident runStrategy lastRun: DateAndTime now - 2 hours.
+		resident wakeUp.
+		self assert: (resident wait: gate arrivals upTo: 3 seconds).
+		self deny: resident isWorking ].
+
+	self assert: (resident waitForStepWithin: 3 seconds).
+	self assert: resident stepCount equals: 2
+]
+
+{ #category : #tests }
+SoilActiveResidentTest >> testAStopRequestedWhileTheGateIsHeldKeepsTheWaitingStepFromBeginning [
+	"the race an embedder's idle sweep has with a resident driven by the clock: the
+	step falls due between the question and the stop, and nothing announced it. The
+	embedder holds the gate while it asks and requests the stop; the resident that
+	fell due meanwhile waits there and leaves without starting, so the stop is
+	acknowledged at once instead of being waited out and ending in a terminate"
+	| gate resident |
+	gate := SoilTestWorkGate new.
+	resident := self
+		residentWith: [ :d | d cadence: #interval; interval: 1 hour ]
+		behind: gate.
+	self assert: (resident waitForStepWithin: 3 seconds).
+
+	gate critical: [
+		gate arrivals consumeAllSignals.
+		self assert: supervisor isIdle.
+		resident runStrategy lastRun: DateAndTime now - 2 hours.
+		resident wakeUp.
+		self assert: (resident wait: gate arrivals upTo: 3 seconds).
+		supervisor requestStopAll ].
+
+	self assert: (self stopWithin: 2 seconds) isEmpty.
+	supervisor := nil.
+	self assert: resident isStopped.
+	self assert: resident stepCount equals: 1
 ]
 
 { #category : #tests }

@@ -13,7 +13,9 @@ My mutex protects my own dictionary against concurrent lookup, tick and
 start/stop. It is deliberately not the mutex that closes the race between an
 embedder's sweep and a resident starting work: that one belongs to whoever owns
 the open databases, and a resident's work unit must not run inside a critical
-block of mine.
+block of mine. What I hold for it is only the place where it is handed in -- my
+work gate, see #workGate: -- and the residents pass through it on their way into
+a step, not for the length of one.
 "
 Class {
 	#name : #SoilResidentSupervisor,
@@ -27,14 +29,15 @@ Class {
 		'tickRestartCount',
 		'reportInterval',
 		'nextReportAt',
-		'emitsEveryStep'
+		'emitsEveryStep',
+		'workGate'
 	],
 	#category : #'Soil-Resident'
 }
 
 { #category : #accessing }
 SoilResidentSupervisor class >> soilTransientInstVars [
-	^ #( soil tickProcess )
+	^ #( soil tickProcess workGate )
 ]
 
 { #category : #adding }
@@ -427,6 +430,30 @@ SoilResidentSupervisor >> stopResident: aResident timeout: aDuration [
 	^ false
 ]
 
+{ #category : #running }
+SoilResidentSupervisor >> passWorkGateDuring: aBlock [
+	"what a resident does on its way into a step. Without a gate the block just
+	runs: nobody has asked for one, so there is nobody to wait for"
+	^ workGate
+		ifNil: [ aBlock value ]
+		ifNotNil: [ :gate | gate critical: aBlock ]
+]
+
+{ #category : #stopping }
+SoilResidentSupervisor >> requestStopAll [
+	"the first half of the symmetric stop: ask everybody, wait for nobody.
+
+	On its own for an embedder that decides and asks in one step, under its work
+	gate, and waits outside of it -- a resident waiting at the gate could not
+	acknowledge while the gate is held. #stopAllIn:timeout: asks again afterwards,
+	which does nothing to a resident that is stopping already"
+	self stopTick.
+	self residents do: [ :each |
+		[ each requestStop ]
+			on: Error
+			do: [ :err | each emit: 'failed on requestStop: ', err messageText ] ]
+]
+
 { #category : #stopping }
 SoilResidentSupervisor >> stopAllIn: aTransaction timeout: aDuration [
 	"symmetric stop. Stopped in one phase, a resident still running could talk to
@@ -439,11 +466,7 @@ SoilResidentSupervisor >> stopAllIn: aTransaction timeout: aDuration [
 
 	Answers the residents that did not acknowledge in time."
 	| pending |
-	self stopTick.
-	self residents do: [ :each |
-		[ each requestStop ]
-			on: Error
-			do: [ :err | each emit: 'failed on requestStop: ', err messageText ] ].
+	self requestStopAll.
 	pending := self waitForReceipts: aDuration.
 	pending do: [ :each |
 		each emit: 'did not acknowledge the stop within ', aDuration asString, ', terminating'.
@@ -463,6 +486,18 @@ SoilResidentSupervisor >> stopTick [
 	tickProcess ifNotNil: [
 		tickProcess terminate.
 		tickProcess := nil ]
+]
+
+{ #category : #accessing }
+SoilResidentSupervisor >> workGate: aGate [
+	"handed in by the embedder: anything that answers #critical:, typically a Mutex
+	of its own. While the embedder holds it, no resident begins a step -- one that
+	is in a step already goes on -- so a question to #isIdle and a #requestStopAll
+	inside it are one step as far as the residents can tell.
+
+	The embedder's and not mine, because deciding when a database is quiet enough
+	to close is its business. I only offer the place where the residents meet it"
+	workGate := aGate
 ]
 
 { #category : #running }

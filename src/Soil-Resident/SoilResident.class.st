@@ -385,8 +385,12 @@ SoilResident >> requestStop [
 	Asking a resident that has already stopped to stop does nothing at all. It used
 	to put it back into #stopping and out again, which is a state cycle that never
 	happened - and said so twice in the log. Two stops in a row is not exotic: an
-	embedder that stops explicitly and then closes does exactly that."
-	self isStopped ifTrue: [ ^ self ].
+	embedder that stops explicitly and then closes does exactly that.
+
+	The same holds while I am still stopping: the flag is up and I have been
+	woken, and asking again would only log a second 'stopping'. An embedder that
+	requests the stop under its work gate and then closes asks exactly twice"
+	(self isStopped or: [ self isStopping ]) ifTrue: [ ^ self ].
 	stopRequested := true.
 	state := #stopping.
 	self emit: 'stopping'.
