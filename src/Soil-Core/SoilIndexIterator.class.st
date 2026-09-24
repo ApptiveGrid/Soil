@@ -110,6 +110,34 @@ SoilIndexIterator >> basicNextAssociation [
 ]
 
 { #category : #private }
+SoilIndexIterator >> basicNextKeyCloseTo: key [
+	"the key of the first item at or after key on the pages, whether this iterator sees it or
+	not -- see #nextKeyCloseTo:. Leaves the cursor on that item, or behind the last item of
+	the page key belongs to when nothing follows"
+	| indexKey pageForKey |
+	indexKey := index indexKey: key.
+	self findPageFor: indexKey.
+	currentKey := currentPage keyOrClosestAfter: indexKey.
+	currentKey ifNotNil: [ 
+		currentPageIndex := currentPage indexOfKey: currentKey.
+		^ currentKey ].
+	"No key of this page comes at or after key. That does not mean the index has none:
+	#keyOrClosestAfter: looks at a single page while #findPageFor: stops at the page key
+	would belong to, and key can land in the gap between that page and the one after it.
+	So we look on, and the first item we meet is the entry key asked for."
+	pageForKey := currentPage.
+	[ (currentPage := self nextPage) notNil ] whileTrue: [ 
+		currentPage isEmpty ifFalse: [ 
+			currentPageIndex := 1.
+			^ currentKey := currentPage firstItem key ] ].
+	"nothing follows that holds anything, so key sits behind the whole index"
+	currentPage := pageForKey.
+	currentPageIndex := currentPage numberOfItems + 1.
+	currentKey := currentPage lastKey.
+	^ nil
+]
+
+{ #category : #private }
 SoilIndexIterator >> basicPreviousAssociation [
 	| item |
 	"Find the association before"
@@ -296,6 +324,17 @@ SoilIndexIterator >> index: anIndex [
 	index := anIndex
 ]
 
+{ #category : #private }
+SoilIndexIterator >> isCurrentItemVisible [
+	"whether the item the cursor is on is there for this iterator: not removed for its
+	transaction and not added after it began -- the question #findOne:ifAbsent: asks"
+	| item |
+	item := currentPage itemAtIndex: currentPageIndex.
+	^ (self restoreItem: currentKey -> item value)
+		ifNil: [ false ]
+		ifNotNil: [ :restored | restored value notNil ]
+]
+
 { #category : #testing }
 SoilIndexIterator >> isEmpty [
  
@@ -430,28 +469,26 @@ SoilIndexIterator >> nextKeyCloseTo: key [
 	"Answer the key of the first entry at or after key and leave the cursor on that entry.
 	Answer nil when the index holds nothing at or after key, with the cursor one behind the
 	last item, so that reading backwards still answers that item instead of skipping it.
-	Note: returned key will be an index key"
-	| indexKey pageForKey |
-	indexKey := index indexKey: key.
-	self findPageFor: indexKey.
-	currentKey := currentPage keyOrClosestAfter: indexKey.
-	currentKey ifNotNil: [ 
-		currentPageIndex := currentPage indexOfKey: currentKey.
-		^ currentKey ].
-	"No key of this page comes at or after key. That does not mean the index has none:
-	#keyOrClosestAfter: looks at a single page while #findPageFor: stops at the page key
-	would belong to, and key can land in the gap between that page and the one after it.
-	So we look on, and the first item we meet is the entry key asked for."
-	pageForKey := currentPage.
-	[ (currentPage := self nextPage) notNil ] whileTrue: [ 
-		currentPage isEmpty ifFalse: [ 
-			currentPageIndex := 1.
-			^ currentKey := currentPage firstItem key ] ].
-	"nothing follows that holds anything, so key sits behind the whole index"
-	currentPage := pageForKey.
-	currentPageIndex := currentPage numberOfItems + 1.
-	currentKey := currentPage lastKey.
-	^ nil
+	Note: returned key will be an index key
+
+	An entry is one this iterator sees, the same that #at: finds. A removal leaves a
+	tombstone on its page for as long as an older reader may still need the entry, and the
+	page lookup answers it like any other key -- whoever then asked #at: for that key got
+	KeyNotFound for a key it had just been given. So a key that is not there for my
+	transaction is stepped over. An older reader, for which it is not removed, still gets it."
+	| found |
+	found := self basicNextKeyCloseTo: key.
+	[ found notNil and: [ self isCurrentItemVisible not ] ] whileTrue: [
+		| page |
+		page := currentPage.
+		found := self basicNextAssociation ifNotNil: [ :item | item key ].
+		found ifNil: [
+			"only what this iterator does not see follows, so key sits behind everything
+			it does see"
+			currentPage := page.
+			currentPageIndex := page numberOfItems + 1.
+			currentKey := page lastKey ] ].
+	^ found
 ]
 
 { #category : #accessing }
