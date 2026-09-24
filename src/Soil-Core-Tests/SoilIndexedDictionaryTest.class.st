@@ -979,6 +979,88 @@ SoilIndexedDictionaryTest >> testRecoverMulitpleDuplicateKeysAdd [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testNextKeyCloseToAnswersNothingWhenOnlyARemovedKeyFollows [
+	"behind the tombstone there is nothing, so there is nothing to answer -- and the cursor
+	sits behind the last item, the way it does when the index simply ends. The keys asked
+	for are as long as the stored ones: index keys order by length first"
+
+	| tx reader iterator |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
+	tx commit.
+	reader := soil newTransaction.
+	reader root at: #one.
+	tx := soil newTransaction.
+	tx root removeKey: #two.
+	tx commit.
+
+	tx := soil newTransaction.
+	iterator := tx root newIterator.
+	self assert: (iterator nextKeyCloseTo: #pqr) isNil.
+	self assert: iterator nextAssociation isNil.
+	self assert: iterator previousAssociation value equals: #onevalue.
+	tx abort.
+	reader abort
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testNextKeyCloseToSkipsAKeyRemovedWhileAnOlderReaderWasOpen [
+	"a removal leaves a tombstone on the page for as long as an older reader may still need
+	the entry (see #testRemoveKeySurvivesReopenWhileAnotherTransactionIsOpen). The key that
+	answers is one #at: finds: a scan that positions on a tombstone and then asks for it
+	gets KeyNotFound for a key it was just given"
+
+	| tx reader iterator |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
+	tx commit.
+	reader := soil newTransaction.
+	reader root at: #two.
+	tx := soil newTransaction.
+	tx root removeKey: #one.
+	tx commit.
+
+	tx := soil newTransaction.
+	iterator := tx root newIterator.
+	self
+		assert: (iterator nextKeyCloseTo: #aaa)
+		equals: (iterator index indexKey: #two).
+	self assert: (iterator at: (iterator nextKeyCloseTo: #aaa)) equals: #twovalue.
+	"the cursor is on the entry answered, so reading on answers what is behind it"
+	iterator nextKeyCloseTo: #a.
+	self assert: iterator nextAssociation isNil.
+	tx abort.
+	reader abort
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testNextKeyCloseToStillAnswersARemovedKeyToAnOlderReader [
+	"the tombstone is there for the older reader, and for it the entry is not removed. What
+	is skipped is what the iterator's own transaction does not see, not every tombstone"
+
+	| tx reader |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
+	tx commit.
+	reader := soil newTransaction.
+	reader root at: #two.
+	tx := soil newTransaction.
+	tx root removeKey: #one.
+	tx commit.
+
+	self
+		assert: (reader root newIterator nextKeyCloseTo: #aaa)
+		equals: (reader root index indexKey: #one).
+	reader abort
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testRemoveKey [
 	| tx tx2 tag return |
 	tx := soil newTransaction.
