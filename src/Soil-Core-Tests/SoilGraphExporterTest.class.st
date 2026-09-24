@@ -284,6 +284,98 @@ SoilGraphExporterTest >> fileSizes [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testAMigrationCannotIntroduceANewClusterRoot [
+	"A migration may hand back another object, but everything it points at has to be
+	something the source database already knows. An object made while exporting gets its
+	object id when a transaction commits, and an export commits nothing, so it would be
+	written as a reference to index 0 - a reference the importer has nothing to look up
+	for. The exporter says that where the migration is instead of letting the record
+	refuse it later without naming a cause."
+
+	| tx exportTx root kept |
+	tx := soil newTransaction.
+	root := SoilPersistentDictionary new.
+	tx root: root.
+	kept := SoilPersistentDictionary new.
+	root at: #kept put: kept.
+	kept at: 1 put: (SoilTestGraphRoot new nested: 'one'; yourself).
+	tx commit.
+
+	exportTx := soil newTransaction.
+	self
+		should: [
+			ByteArray streamContents: [ :stream |
+				(SoilGraphExporter new
+					transaction: exportTx;
+					addObject: exportTx root;
+					yourself)
+						migrateObject: (exportTx root at: #kept)
+						to: [ :each |
+							"a persistent dictionary makes a cluster root of every value it is
+							handed, so this one is new and has no object id"
+							each copy
+								at: 2 put: (SoilTestGraphRoot new nested: 'made up'; yourself);
+								yourself ];
+						stream: stream;
+						export ] ]
+		raise: SoilUnsupportedError.
+	exportTx abort
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testAMigrationForOneObjectLeavesTheOthersAlone [
+	"#migrate:to: speaks for every instance of a class, which is no help when one object of
+	that class has to be exported differently from its siblings - a dictionary that is to
+	travel without some of its entries, say. #migrateObject:to: names the one cluster; it
+	keeps its object id, so everything pointing at it still does.
+
+	Taking entries out is the whole of what such a migration can do to a persistent
+	dictionary: anything put in would be a new cluster root, see
+	testAMigrationCannotIntroduceANewClusterRoot."
+
+	| tx bytes exportTx importer targetTx root thinned untouched imported |
+	tx := soil newTransaction.
+	root := SoilPersistentDictionary new.
+	tx root: root.
+	thinned := SoilPersistentDictionary new.
+	untouched := SoilPersistentDictionary new.
+	root
+		at: #thinned put: thinned;
+		at: #untouched put: untouched.
+	thinned
+		at: 1 put: (SoilTestGraphRoot new nested: 'goes'; yourself);
+		at: 2 put: (SoilTestGraphRoot new nested: 'stays'; yourself).
+	untouched at: 1 put: (SoilTestGraphRoot new nested: 'stays too'; yourself).
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				migrateObject: (exportTx root at: #thinned)
+				to: [ :each | each copy removeKey: 1; yourself ];
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+	self assert: (imported at: #thinned) keys asSortedCollection asArray equals: #( 2 ).
+	self assert: (imported at: #thinned) values anyOne nested equals: 'stays'.
+	self assert: (imported at: #untouched) size equals: 1.
+	self assert: (imported at: #untouched) values anyOne nested equals: 'stays too'.
+	targetTx commit
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testImportIsVisibleToTheTransactionThatRanIt [
 	"An import writes its records straight into the segments, and a record is only readable
 	by a transaction whose readVersion is at least the version of the record - an imported
