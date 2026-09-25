@@ -187,7 +187,7 @@ SoilGraphExporter >> migrateCluster: cluster [
 	newCluster version: 1.
 	newCluster 
 		transaction: transaction;
-		serializeObject.
+		bytes: (self serializeCluster: newCluster replacing: cluster object).
 	self assertMigrationKeptItsReferences: newCluster.
 	^ newCluster
 ]
@@ -232,6 +232,23 @@ SoilGraphExporter >> skipIndexes: aCollection [
 		(each class = SoilObjectId)
 			ifTrue: [ each ]
 			ifFalse: [ transaction objectIdOf: each  ] ]
+]
+
+{ #category : #private }
+SoilGraphExporter >> serializeCluster: aCluster replacing: anObject [
+	"the migration made another object the root of aCluster, and what in the cluster still
+	points at anObject has to arrive as that root, see SoilGraphExportSerializer"
+	^ ByteArray streamContents: [ :aStream |
+		(transaction newSerializer: self serializerClass)
+			replacedRoot: anObject;
+			stream: aStream;
+			externalObjectRegistry: aCluster;
+			serialize: aCluster object ]
+]
+
+{ #category : #accessing }
+SoilGraphExporter >> serializerClass [
+	^ SoilGraphExportSerializer
 ]
 
 { #category : #accessing }

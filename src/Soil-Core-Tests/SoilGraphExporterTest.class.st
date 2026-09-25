@@ -376,6 +376,51 @@ SoilGraphExporterTest >> testAMigrationForOneObjectLeavesTheOthersAlone [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testAMigrationKeepsWhatPointsBackAtTheClusterRoot [
+	"The serializer knows the cluster root by identity: it is written first, and whatever
+	points at it later becomes an internal reference. A migration hands back another
+	object as the root - a copy, typically - while an object embedded in the cluster still
+	points at the one it replaced. That one has to stand for the root as well, or it is
+	written a second time and the import builds a second object out of it."
+
+	| tx bytes exportTx importer targetTx root holder imported |
+	tx := soil newTransaction.
+	root := SoilPersistentDictionary new.
+	tx root: root.
+	holder := SoilTestGraphRoot new.
+	"the array is embedded in the cluster of the holder and points back at it"
+	holder nested: (Array with: holder).
+	root at: #holder put: holder.
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				migrateObject: (exportTx root at: #holder)
+				to: [ :each | each copy ];
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	"the dictionary answers a proxy, and a proxy is never identical to what it stands for"
+	imported := (importer importedObjects first at: #holder) yourself.
+	self
+		assert: imported nested first == imported
+		description: 'what was pointed back at the cluster root arrived as a second object'.
+	targetTx commit
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testImportIsVisibleToTheTransactionThatRanIt [
 	"An import writes its records straight into the segments, and a record is only readable
 	by a transaction whose readVersion is at least the version of the record - an imported
