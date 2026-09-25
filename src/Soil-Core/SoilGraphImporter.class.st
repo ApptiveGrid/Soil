@@ -39,6 +39,17 @@ SoilGraphImporter >> acceptsExportsFromOlderVersions [
 ]
 
 { #category : #importing }
+SoilGraphImporter >> addNextVersionOf: cluster at: presentOid [
+	^ self
+		  useVersion: (soil behaviorRegistry
+				   addNewVersion: cluster object
+				   withId: presentOid
+				   transaction: transaction)
+		  for: cluster
+		  at: presentOid
+]
+
+{ #category : #importing }
 SoilGraphImporter >> import [
 	[ self
 		  readFormatVersion;
@@ -53,119 +64,6 @@ SoilGraphImporter >> import [
 			self undoBehaviorNamesAddedSoFar.
 			e pass ]
 ]
-
-{ #category : #importing }
-SoilGraphImporter >> updateSegmentIndexes [
-	"the counterpart of #memoizeSegmentIndexes, and it runs only once every cluster is
-	written. Until then a failure leaves the bytes written so far orphaned: no segment
-	says those ids are taken, so the next allocation simply writes over them."
-	soil objectRepository metaSegment updateLastObjectIndex: (lastIndex at: 1).
-	soil objectRepository firstSegment updateLastObjectIndex: (lastIndex at: 2)
-]
-
-{ #category : #importing }
-SoilGraphImporter >> makeTheImportPartOfTheCommit [
-	"#readCluster and #importBehaviorCluster: write behavior descriptions and object data
-	straight to the segments, past the transaction's normal tracking: with the default
-	SoilAutomaticTrackingStrategy, markDirty: is a no-op and changes are noticed through a
-	live fingerprint comparison in objectMap, and direct writing touches neither. So unless
-	the caller happens to make some unrelated, genuine change in the same transaction,
-	needsCommit stays false, SoilTransactionManager>>commitTransaction: never checkpoints,
-	and everything written here - the behaviorRegistry's skip list index included - is
-	silently never flushed. It looks committed and works for the rest of the session, and
-	the import is gone the moment the database is closed and reopened.
-
-	Flagging the transaction is the cheap way: routing the imported objects through the
-	normal commitStrategy/objectMap path would re-serialize every one of them on commit,
-	which is the per-object cost this bulk import exists to avoid. Checkpointing here
-	directly is not an option either - this runs before the caller's own commit and would
-	corrupt its journal and position bookkeeping. The flag only makes the existing,
-	correctly ordered post-commit checkpoint fire."
-	transaction markNeedsCheckpoint
-]
-
-{ #category : #importing }
-SoilGraphImporter >> readClusters [
-	clusters := OrderedCollection new.
-	[ stream atEnd ] whileFalse: [ clusters add: self readCluster ]
-]
-
-{ #category : #importing }
-SoilGraphImporter >> readFormatVersion [
-	"the first thing in the stream, and the only thing that can be read from a stream
-	whose format is unknown. Refusing here is the point: everything after this is read by
-	position, so a stream from another version would not fail, it would be misread."
-	| version |
-	version := (stream next: 2) asInteger.
-	version = SoilGraphExporter formatVersion ifFalse: [
-		SoilIncompatibleExportFormat new
-			importerUnderstands: SoilGraphExporter formatVersion;
-			streamSays: version;
-			signal ]
-]
-
-{ #category : #importing }
-SoilGraphImporter >> readObjectIdsBeingImported [
-	"the objects this stream carries, under the ids they had in the source. They get
-	different ones here, and #importedOids translates back through them."
-	legacyOids := Array new: stream next.
-	1 to: legacyOids size do: [ :n |
-		legacyOids at: n put: (SoilObjectId readFrom: stream) ]
-]
-
-{ #category : #importing }
-SoilGraphImporter >> readObjectIdsToBeReplaced [
-	"objects the export left out because they exist here already - the receiving user, for
-	one. References to them are re-pointed at the object #replaceObject:as: registered
-	under the same name. Reading the names is also where a missing registration is found,
-	before anything has been written."
-	| name |
-	toBeReplaced := Dictionary new.
-	stream next timesRepeat: [
-		name := self readName.
-		self replacementNamed: name.
-		toBeReplaced at: (SoilObjectId readFrom: stream) put: name ]
-]
-
-{ #category : #importing }
-SoilGraphImporter >> readName [
-	^ (stream next: stream next) asString asSymbol
-]
-
-{ #category : #accessing }
-SoilGraphImporter >> replacementNamed: aName [
-	^ replacements
-		at: aName
-		ifAbsent: [
-			SoilInvalidReplacement signal:
-				'the export leaves out an object to be replaced as ' , aName printString
-				, ', and nothing is registered under that name' ]
-]
-
-{ #category : #importing }
-SoilGraphImporter >> memoizeSegmentIndexes [
-	"where each segment has handed out ids up to. #newObjectIdFor: counts on from here,
-	because the ids in the stream are positions in the source's segments and are taken
-	here - so every imported object is remapped to one after the last in use. Wasteful in
-	id space; the alternative would be a lookup per id. #updateSegmentIndexes writes the
-	counted-up values back at the end."
-	lastIndex := Array new: 2.
-	lastIndex at: 1 put: transaction objectRepository metaSegment lastObjectIndex.
-	lastIndex at: 2 put: (transaction objectRepository segmentAt: 1) lastObjectIndex
-]
-
-{ #category : #importing }
-SoilGraphImporter >> undoBehaviorNamesAddedSoFar [
-	"Everything else this import wrote is orphaned by the failure and will be overwritten:
-	object data and behavior descriptions go straight to the segments, and the id counters
-	are only advanced once all of it succeeded. Behavior *names* are the exception - they
-	are looked up by class name, independently of any object reference, so one left behind
-	would keep pointing at a slot that a later, unrelated class then reuses, aliasing two
-	classes onto one behavior index."
-	addedBehaviorNames do: [ :name |
-		soil behaviorRegistry removeNameAt: name ifAbsent: [  ] ]
-]
-
 
 { #category : #importing }
 SoilGraphImporter >> importBehaviorCluster: cluster [
@@ -231,61 +129,6 @@ SoilGraphImporter >> importBehaviorOfDifferentShape: cluster knownAs: presentDes
 	^ self addNextVersionOf: cluster at: presentOid
 ]
 
-{ #category : #importing }
-SoilGraphImporter >> addNextVersionOf: cluster at: presentOid [
-	^ self
-		  useVersion: (soil behaviorRegistry
-				   addNewVersion: cluster object
-				   withId: presentOid
-				   transaction: transaction)
-		  for: cluster
-		  at: presentOid
-]
-
-{ #category : #importing }
-SoilGraphImporter >> presentDescriptionFor: cluster ifPresent: presentBlock ifAbsent: absentBlock [
-	| presentOid |
-	presentOid := self presentBehaviorWithName: cluster object behaviorIdentifier.
-	presentOid ifNil: [ ^ absentBlock value ].
-	^ presentBlock
-		  value: ((transaction objectWithId: presentOid) ifNil: [
-				   Error signal:
-						   'the behavior is present by name but not as object on the heap' ])
-		  value: presentOid
-]
-
-{ #category : #importing }
-SoilGraphImporter >> shapeOfTheLiveClassIn: cluster ifFalse: aBlock [
-	^ (cluster object matchesDescription:
-		   (SoilBehaviorDescription for: cluster object objectClass))
-		  ifFalse: aBlock
-]
-
-{ #category : #importing }
-SoilGraphImporter >> signalShapeConflictFor: cluster against: presentDescription [
-	^ SoilBehaviorShapeConflict new
-		  behaviorIdentifier: cluster object behaviorIdentifier;
-		  importedInstVarNames: cluster object instVarNames;
-		  presentInstVarNames: presentDescription instVarNames;
-		  signal
-]
-
-{ #category : #importing }
-SoilGraphImporter >> useVersion: anInteger for: cluster at: presentOid [
-	"the imported objects are pointed at a description this database already holds"
-	^ idMap
-		  at: cluster objectId
-		  put: (presentOid asObjectIdVersion: anInteger)
-]
-
-{ #category : #importing }
-SoilGraphImporter >> versionKnownInChainFor: cluster at: presentOid [
-	^ soil behaviorRegistry
-		  versionOfBehaviorWithIndex: presentOid index
-		  matching: cluster object
-		  transaction: transaction
-]
-
 { #category : #'instance creation' }
 SoilGraphImporter >> importedObjects [
 	^ self importedOids collect: [ :each | transaction objectWithId: each ]
@@ -305,6 +148,38 @@ SoilGraphImporter >> initialize [
 	acceptsExportsFromOlderVersions := false
 ]
 
+{ #category : #importing }
+SoilGraphImporter >> makeTheImportPartOfTheCommit [
+	"#readCluster and #importBehaviorCluster: write behavior descriptions and object data
+	straight to the segments, past the transaction's normal tracking: with the default
+	SoilAutomaticTrackingStrategy, markDirty: is a no-op and changes are noticed through a
+	live fingerprint comparison in objectMap, and direct writing touches neither. So unless
+	the caller happens to make some unrelated, genuine change in the same transaction,
+	needsCommit stays false, SoilTransactionManager>>commitTransaction: never checkpoints,
+	and everything written here - the behaviorRegistry's skip list index included - is
+	silently never flushed. It looks committed and works for the rest of the session, and
+	the import is gone the moment the database is closed and reopened.
+
+	Flagging the transaction is the cheap way: routing the imported objects through the
+	normal commitStrategy/objectMap path would re-serialize every one of them on commit,
+	which is the per-object cost this bulk import exists to avoid. Checkpointing here
+	directly is not an option either - this runs before the caller's own commit and would
+	corrupt its journal and position bookkeeping. The flag only makes the existing,
+	correctly ordered post-commit checkpoint fire."
+	transaction markNeedsCheckpoint
+]
+
+{ #category : #importing }
+SoilGraphImporter >> memoizeSegmentIndexes [
+	"where each segment has handed out ids up to. #newObjectIdFor: counts on from here,
+	because the ids in the stream are positions in the source's segments and are taken
+	here - so every imported object is remapped to one after the last in use. Wasteful in
+	id space; the alternative would be a lookup per id. #updateSegmentIndexes writes the
+	counted-up values back at the end."
+	lastIndex := Array new: 2.
+	lastIndex at: 1 put: transaction objectRepository metaSegment lastObjectIndex.
+	lastIndex at: 2 put: (transaction objectRepository segmentAt: 1) lastObjectIndex
+]
 
 { #category : #'instance creation' }
 SoilGraphImporter >> newObjectIdFor: aSoilObjectId [ 
@@ -332,10 +207,30 @@ SoilGraphImporter >> newObjectIdFor: aSoilObjectId version: anInteger [
 ]
 
 { #category : #importing }
+SoilGraphImporter >> pointAtLocalBehaviorDescriptions: cluster [
+	"the descriptions were mapped to this database's own while they were read - see
+	#importBehaviorCluster:"
+	cluster behaviorDescriptions: (cluster behaviorDescriptions collect: [ :each |
+		 idMap at: each objectId asSoilObjectId ])
+]
+
+{ #category : #importing }
 SoilGraphImporter >> presentBehaviorWithName: aSymbol [
 	^ soil behaviorRegistry 
 		nameAt: aSymbol
 		ifAbsent: [ nil ].
+]
+
+{ #category : #importing }
+SoilGraphImporter >> presentDescriptionFor: cluster ifPresent: presentBlock ifAbsent: absentBlock [
+	| presentOid |
+	presentOid := self presentBehaviorWithName: cluster object behaviorIdentifier.
+	presentOid ifNil: [ ^ absentBlock value ].
+	^ presentBlock
+		  value: ((transaction objectWithId: presentOid) ifNil: [
+				   Error signal:
+						   'the behavior is present by name but not as object on the heap' ])
+		  value: presentOid
 ]
 
 { #category : #importing }
@@ -387,10 +282,31 @@ SoilGraphImporter >> readClusterHeader [
 ]
 
 { #category : #importing }
+SoilGraphImporter >> readClusters [
+	clusters := OrderedCollection new.
+	[ stream atEnd ] whileFalse: [ clusters add: self readCluster ]
+]
+
+{ #category : #importing }
+SoilGraphImporter >> readFormatVersion [
+	"the first thing in the stream, and the only thing that can be read from a stream
+	whose format is unknown. Refusing here is the point: everything after this is read by
+	position, so a stream from another version would not fail, it would be misread."
+	| version |
+	version := (stream next: 2) asInteger.
+	version = SoilGraphExporter formatVersion ifFalse: [
+		SoilIncompatibleExportFormat new
+			importerUnderstands: SoilGraphExporter formatVersion;
+			streamSays: version;
+			signal ]
+]
+
+{ #category : #importing }
 SoilGraphImporter >> readIndexOfCluster: cluster withId: indexId [
 	"An index arrives as its three sizes and then its entries; a skipped one arrives with
 	the sizes and no entries, so the structure of a grid survives without its rows. The
 	values are object ids and are remapped like every other reference."
+
 	| keySize valueSize maxLevel index |
 	keySize := (stream next: 2) asInteger.
 	valueSize := (stream next: 2) asInteger.
@@ -405,7 +321,7 @@ SoilGraphImporter >> readIndexOfCluster: cluster withId: indexId [
 	(stream next: 8) asInteger timesRepeat: [
 		index
 			basicAt: (stream next: keySize) asInteger
-			put: (self newObjectIdFor: (SoilObjectId readFrom: stream)) ].
+			add: (self newObjectIdFor: (SoilObjectId readFrom: stream)) ].
 	index writePages
 ]
 
@@ -416,11 +332,31 @@ SoilGraphImporter >> readIndexesOf: cluster [
 ]
 
 { #category : #importing }
-SoilGraphImporter >> pointAtLocalBehaviorDescriptions: cluster [
-	"the descriptions were mapped to this database's own while they were read - see
-	#importBehaviorCluster:"
-	cluster behaviorDescriptions: (cluster behaviorDescriptions collect: [ :each |
-		 idMap at: each objectId asSoilObjectId ])
+SoilGraphImporter >> readName [
+	^ (stream next: stream next) asString asSymbol
+]
+
+{ #category : #importing }
+SoilGraphImporter >> readObjectIdsBeingImported [
+	"the objects this stream carries, under the ids they had in the source. They get
+	different ones here, and #importedOids translates back through them."
+	legacyOids := Array new: stream next.
+	1 to: legacyOids size do: [ :n |
+		legacyOids at: n put: (SoilObjectId readFrom: stream) ]
+]
+
+{ #category : #importing }
+SoilGraphImporter >> readObjectIdsToBeReplaced [
+	"objects the export left out because they exist here already - the receiving user, for
+	one. References to them are re-pointed at the object #replaceObject:as: registered
+	under the same name. Reading the names is also where a missing registration is found,
+	before anything has been written."
+	| name |
+	toBeReplaced := Dictionary new.
+	stream next timesRepeat: [
+		name := self readName.
+		self replacementNamed: name.
+		toBeReplaced at: (SoilObjectId readFrom: stream) put: name ]
 ]
 
 { #category : #importing }
@@ -435,17 +371,42 @@ SoilGraphImporter >> remapReferencesOf: cluster [
 			 ifAbsent: [ self newObjectIdFor: id ] ])
 ]
 
-{ #category : #importing }
-SoilGraphImporter >> store: cluster [
-	soil objectRepository at: cluster objectId putBytes: cluster serialize
-]
-
-
 { #category : #actions }
 SoilGraphImporter >> replaceObject: anObject as: aName [
 	"the object this database puts in place of the one the export left out under that name.
 	See SoilGraphExporter>>replaceObject:as: for why it is a name and not a position."
 	replacements at: aName put: (transaction objectIdOf: anObject)
+]
+
+{ #category : #accessing }
+SoilGraphImporter >> replacementNamed: aName [
+	^ replacements
+		at: aName
+		ifAbsent: [
+			SoilInvalidReplacement signal:
+				'the export leaves out an object to be replaced as ' , aName printString
+				, ', and nothing is registered under that name' ]
+]
+
+{ #category : #importing }
+SoilGraphImporter >> shapeOfTheLiveClassIn: cluster ifFalse: aBlock [
+	^ (cluster object matchesDescription:
+		   (SoilBehaviorDescription for: cluster object objectClass))
+		  ifFalse: aBlock
+]
+
+{ #category : #importing }
+SoilGraphImporter >> signalShapeConflictFor: cluster against: presentDescription [
+	^ SoilBehaviorShapeConflict new
+		  behaviorIdentifier: cluster object behaviorIdentifier;
+		  importedInstVarNames: cluster object instVarNames;
+		  presentInstVarNames: presentDescription instVarNames;
+		  signal
+]
+
+{ #category : #importing }
+SoilGraphImporter >> store: cluster [
+	soil objectRepository at: cluster objectId putBytes: cluster serialize
 ]
 
 { #category : #accessing }
@@ -457,4 +418,41 @@ SoilGraphImporter >> stream: aReadStream [
 SoilGraphImporter >> transaction: anAGBaseTransaction [ 
 	transaction := anAGBaseTransaction.
 	soil := anAGBaseTransaction soil 
+]
+
+{ #category : #importing }
+SoilGraphImporter >> undoBehaviorNamesAddedSoFar [
+	"Everything else this import wrote is orphaned by the failure and will be overwritten:
+	object data and behavior descriptions go straight to the segments, and the id counters
+	are only advanced once all of it succeeded. Behavior *names* are the exception - they
+	are looked up by class name, independently of any object reference, so one left behind
+	would keep pointing at a slot that a later, unrelated class then reuses, aliasing two
+	classes onto one behavior index."
+	addedBehaviorNames do: [ :name |
+		soil behaviorRegistry removeNameAt: name ifAbsent: [  ] ]
+]
+
+{ #category : #importing }
+SoilGraphImporter >> updateSegmentIndexes [
+	"the counterpart of #memoizeSegmentIndexes, and it runs only once every cluster is
+	written. Until then a failure leaves the bytes written so far orphaned: no segment
+	says those ids are taken, so the next allocation simply writes over them."
+	soil objectRepository metaSegment updateLastObjectIndex: (lastIndex at: 1).
+	soil objectRepository firstSegment updateLastObjectIndex: (lastIndex at: 2)
+]
+
+{ #category : #importing }
+SoilGraphImporter >> useVersion: anInteger for: cluster at: presentOid [
+	"the imported objects are pointed at a description this database already holds"
+	^ idMap
+		  at: cluster objectId
+		  put: (presentOid asObjectIdVersion: anInteger)
+]
+
+{ #category : #importing }
+SoilGraphImporter >> versionKnownInChainFor: cluster at: presentOid [
+	^ soil behaviorRegistry
+		  versionOfBehaviorWithIndex: presentOid index
+		  matching: cluster object
+		  transaction: transaction
 ]

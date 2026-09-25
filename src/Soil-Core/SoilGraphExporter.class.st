@@ -18,6 +18,12 @@ Class {
 	#category : #'Soil-Core-Error'
 }
 
+{ #category : #migration }
+SoilGraphExporter >> carriesMigratedBehavior: aCluster [
+	^ aCluster behaviorDescriptions anySatisfy: [ :each |
+		migrationMap includesKey: each index ]
+]
+
 { #category : #accessing }
 SoilGraphExporter class >> formatVersion [
 	"the version of the stream #export writes. It exists so that SoilGraphImporter refuses
@@ -47,6 +53,22 @@ SoilGraphExporter >> addObjects: aCollection [
 	aCollection do: [ :each |
 		self addObject: each ]
 	
+]
+
+{ #category : #migration }
+SoilGraphExporter >> assertMigrationKeptItsReferences: aCluster [
+	"A migration may hand back another object, but every cluster root it points at has to be
+	one the database already knows. An object created while exporting has no object id - one
+	is handed out when a transaction commits, and an export commits nothing - so it would go
+	into the stream as a reference to index 0 and the importer would have nothing to look up.
+	Say that here, where the migration is, instead of letting the record refuse it later
+	without naming a cause."
+	aCluster references 
+		detect: [ :each | each index = 0 ]
+		ifFound: [ :each |
+			SoilUnsupportedError signal: 'a migration cannot introduce new cluster roots: ', 
+				aCluster object class name, 
+				' points at an object that has no object id yet' ]
 ]
 
 { #category : #visiting }
@@ -111,6 +133,13 @@ SoilGraphExporter >> initialize [
 	classMigrations := Dictionary new.
 ]
 
+{ #category : #testing }
+SoilGraphExporter >> isReplaced: aSoilObjectId [
+	"whether the caller left this object to the importing side, in which case the export
+	carries references to it but not the object itself"
+	^ replacements anySatisfy: [ :each | each = aSoilObjectId ]
+]
+
 { #category : #visiting }
 SoilGraphExporter >> isUpToDateCluster: aCluster [
 	
@@ -141,42 +170,9 @@ SoilGraphExporter >> migrate: aClass to: aBlock [
 ]
 
 { #category : #migration }
-SoilGraphExporter >> assertMigrationKeptItsReferences: aCluster [
-	"A migration may hand back another object, but every cluster root it points at has to be
-	one the database already knows. An object created while exporting has no object id - one
-	is handed out when a transaction commits, and an export commits nothing - so it would go
-	into the stream as a reference to index 0 and the importer would have nothing to look up.
-	Say that here, where the migration is, instead of letting the record refuse it later
-	without naming a cause."
-	aCluster references 
-		detect: [ :each | each index = 0 ]
-		ifFound: [ :each |
-			SoilUnsupportedError signal: 'a migration cannot introduce new cluster roots: ', 
-				aCluster object class name, 
-				' points at an object that has no object id yet' ]
-]
-
-{ #category : #migration }
-SoilGraphExporter >> carriesMigratedBehavior: aCluster [
-	^ aCluster behaviorDescriptions anySatisfy: [ :each |
-		migrationMap includesKey: each index ]
-]
-
-{ #category : #migration }
 SoilGraphExporter >> migrateAll: aCollection to: aBlock [ 
 	aCollection do: [ :cls |
 		self migrate: cls to: aBlock  ]
-]
-
-{ #category : #migration }
-SoilGraphExporter >> migrateObject: anObject to: aBlock [
-	"a migration for this one object rather than for every instance of its class. Use it to
-	change what a single cluster carries: the cluster keeps its object id, so everything that
-	points at it still does. Putting a changed copy into the object that holds it would not
-	work - the copy is a new object without an id, see #assertMigrationKeptItsReferences:."
-	objectMigrations 
-		at: (transaction objectIdOf: anObject)
-		put: aBlock
 ]
 
 { #category : #actions }
@@ -209,6 +205,17 @@ SoilGraphExporter >> migrateCluster: cluster [
 	^ newCluster
 ]
 
+{ #category : #migration }
+SoilGraphExporter >> migrateObject: anObject to: aBlock [
+	"a migration for this one object rather than for every instance of its class. Use it to
+	change what a single cluster carries: the cluster keeps its object id, so everything that
+	points at it still does. Putting a changed copy into the object that holds it would not
+	work - the copy is a new object without an id, see #assertMigrationKeptItsReferences:."
+	objectMigrations 
+		at: (transaction objectIdOf: anObject)
+		put: aBlock
+]
+
 { #category : #accessing }
 SoilGraphExporter >> processObjectId: oid [ 
 	(self isReplaced: oid) ifTrue: [ ^ self ].
@@ -225,30 +232,6 @@ SoilGraphExporter >> replaceObject: anObject as: aName [
 		SoilInvalidReplacement signal:
 			'an object is already registered to be replaced as ' , aName printString ].
 	replacements at: aName put: (transaction objectIdOf: anObject)
-]
-
-{ #category : #testing }
-SoilGraphExporter >> isReplaced: aSoilObjectId [
-	"whether the caller left this object to the importing side, in which case the export
-	carries references to it but not the object itself"
-	^ replacements anySatisfy: [ :each | each = aSoilObjectId ]
-]
-
-{ #category : #writing }
-SoilGraphExporter >> writeName: aName [
-	| bytes |
-	bytes := aName asString asByteArray.
-	stream
-		nextPut: bytes size;
-		nextPutAll: bytes
-]
-
-{ #category : #configuration }
-SoilGraphExporter >> skipIndexes: aCollection [ 
-	indexesToSkip := aCollection collect: [ :each |
-		(each class = SoilObjectId)
-			ifTrue: [ each ]
-			ifFalse: [ transaction objectIdOf: each  ] ]
 ]
 
 { #category : #private }
@@ -268,6 +251,14 @@ SoilGraphExporter >> serializeCluster: aCluster from: anObject [
 { #category : #accessing }
 SoilGraphExporter >> serializerClass [
 	^ SoilGraphExportSerializer
+]
+
+{ #category : #configuration }
+SoilGraphExporter >> skipIndexes: aCollection [ 
+	indexesToSkip := aCollection collect: [ :each |
+		(each class = SoilObjectId)
+			ifTrue: [ each ]
+			ifFalse: [ transaction objectIdOf: each  ] ]
 ]
 
 { #category : #accessing }
@@ -420,4 +411,13 @@ SoilGraphExporter >> writeBehaviorDescriptions: aCollection [
 		record objectId writeOn: stream.
 		record serializeOn: stream
 	].
+]
+
+{ #category : #writing }
+SoilGraphExporter >> writeName: aName [
+	| bytes |
+	bytes := aName asString asByteArray.
+	stream
+		nextPut: bytes size;
+		nextPutAll: bytes
 ]

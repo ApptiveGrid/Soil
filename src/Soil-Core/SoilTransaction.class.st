@@ -87,6 +87,18 @@ SoilTransaction >> addObjectToBeCommited: anObject [
 ]
 
 { #category : #accessing }
+SoilTransaction >> atObjectId: objectId putObject: anObject [
+	| record |
+	record := SoilNewClusterVersion new
+		object: anObject;
+		objectId: objectId;
+		transaction: self.
+	idMap at: objectId put: record.
+	objectMap at: anObject put: record.
+	commitStrategy addRecord: record
+]
+
+{ #category : #accessing }
 SoilTransaction >> atObjectId: anObjectId putObject: anObject asVersion: aVersion [
 	"#atObjectId:putObject: hands the record to the commit strategy, so the object appears
 	when this transaction commits. This one writes it now, as a new version of whatever is
@@ -120,18 +132,6 @@ SoilTransaction >> atObjectId: anObjectId putObject: anObject asVersion: aVersio
 				 serializeObject;
 				 serialize).
 	^ record
-]
-
-{ #category : #accessing }
-SoilTransaction >> atObjectId: objectId putObject: anObject [
-	| record |
-	record := SoilNewClusterVersion new
-		object: anObject;
-		objectId: objectId;
-		transaction: self.
-	idMap at: objectId put: record.
-	objectMap at: anObject put: record.
-	commitStrategy addRecord: record
 ]
 
 { #category : #aborting }
