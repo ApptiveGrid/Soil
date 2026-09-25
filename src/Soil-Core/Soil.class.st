@@ -452,7 +452,14 @@ Soil >> newReadOnlyTransaction [
 
 { #category : #'instance creation' }
 Soil >> newSerializer [
-	^ self serializerClass new
+	^ self newSerializer: self serializerClass
+]
+
+{ #category : #'instance creation' }
+Soil >> newSerializer: aSerializerClass [
+	"a serializer of another class than the fabric's, for a caller with its own rules on
+	what to write, set up the way every serializer of this database is"
+	^ aSerializerClass new
 		soil: self;
 		yourself
 ]

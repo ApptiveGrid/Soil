@@ -634,10 +634,14 @@ SoilTransaction >> newPersistentClusterVersion [
 
 { #category : #accessing }
 SoilTransaction >> newSerializer [
-	^ soil newSerializer
+	^ self newSerializer: soil serializerClass
+]
+
+{ #category : #accessing }
+SoilTransaction >> newSerializer: aSerializerClass [
+	^ (soil newSerializer: aSerializerClass)
 		transaction: self;
 		yourself
-
 ]
 
 { #category : #accessing }

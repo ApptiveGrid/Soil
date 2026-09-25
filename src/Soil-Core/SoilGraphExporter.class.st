@@ -12,7 +12,8 @@ Class {
 		'clusters',
 		'replacements',
 		'toBeExported',
-		'objectMigrations'
+		'objectMigrations',
+		'classMigrations'
 	],
 	#category : #'Soil-Core-Error'
 }
@@ -73,6 +74,12 @@ SoilGraphExporter >> behaviorAt: index [
 
 ]
 
+{ #category : #migration }
+SoilGraphExporter >> carriesMigratedBehavior: aCluster [
+	^ aCluster behaviorDescriptions anySatisfy: [ :each |
+		migrationMap includesKey: each index ]
+]
+
 { #category : #actions }
 SoilGraphExporter >> export [
 	"export format:
@@ -123,6 +130,7 @@ SoilGraphExporter >> initialize [
 	toBeExported := OrderedCollection new.
 	replacements := Dictionary new.
 	objectMigrations := Dictionary new.
+	classMigrations := Dictionary new.
 ]
 
 { #category : #testing }
@@ -155,7 +163,10 @@ SoilGraphExporter >> migrate: aClass to: aBlock [
 		at: (transaction soil behaviorRegistry 
 			nameAt: aClass name 
 			ifAbsent: [Error signal: 'no class found']) index 
-		put: aBlock
+		put: aBlock.
+	"the behavior index finds the clusters that carry aClass, the class finds the objects
+	in them, see SoilGraphExportSerializer"
+	classMigrations at: aClass put: aBlock
 ]
 
 { #category : #migration }
@@ -173,17 +184,23 @@ SoilGraphExporter >> migrateCluster: cluster [
 			cluster behaviorDescriptions ifEmpty: [ ^ cluster ].
 			migrationMap
 				at: cluster behaviorDescriptions first index
-				ifAbsent: [ ^ cluster ] ].
+				ifAbsent: [ nil ] ].
+	"a class migration is for every object of the class, the ones embedded in a cluster
+	as well as the root"
+	(block isNil and: [ (self carriesMigratedBehavior: cluster) not ]) 
+		ifTrue: [ ^ cluster ].
 	cluster 
 		transaction: transaction;
 		materializeObject.
 	
 	newCluster := cluster asNewClusterVersion.
-	newCluster object: (block value: cluster object).
+	newCluster object: (block 
+		ifNil: [ cluster object ]
+		ifNotNil: [ block value: cluster object ]).
 	newCluster version: 1.
 	newCluster 
 		transaction: transaction;
-		serializeObject.
+		bytes: (self serializeCluster: newCluster from: cluster object).
 	self assertMigrationKeptItsReferences: newCluster.
 	^ newCluster
 ]
@@ -215,6 +232,25 @@ SoilGraphExporter >> replaceObject: anObject as: aName [
 		SoilInvalidReplacement signal:
 			'an object is already registered to be replaced as ' , aName printString ].
 	replacements at: aName put: (transaction objectIdOf: anObject)
+]
+
+{ #category : #private }
+SoilGraphExporter >> serializeCluster: aCluster from: anObject [
+	"aCluster object is what the migration made of anObject. Writing anObject with the
+	migrated root in its place keeps what points back at anObject pointing at the root,
+	see SoilGraphExportSerializer"
+	^ ByteArray streamContents: [ :aStream |
+		(transaction newSerializer: self serializerClass)
+			migrations: classMigrations;
+			replace: anObject with: aCluster object;
+			stream: aStream;
+			externalObjectRegistry: aCluster;
+			serialize: anObject ]
+]
+
+{ #category : #accessing }
+SoilGraphExporter >> serializerClass [
+	^ SoilGraphExportSerializer
 ]
 
 { #category : #configuration }
