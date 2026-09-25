@@ -56,6 +56,44 @@ SoilResidentTest >> switchOff: aBoolean residentNamed: aSymbol [
 		ensure: [ txn isAborted ifFalse: [ txn abort ] ]
 ]
 
+{ #category : #helpers }
+SoilResidentTest >> loadedSupervisor [
+	"phase one only: every instance exists, none is started. Enough for a resident
+	that is asked for its workspace, and nothing runs that would need stopping"
+	| supervisor txn |
+	supervisor := soil newResidentSupervisor.
+	txn := soil newTransaction.
+	[ supervisor loadFrom: txn ] ensure: [ txn abort ].
+	^ supervisor
+]
+
+{ #category : #helpers }
+SoilResidentTest >> replaceWorkspaceOf: aSymbol with: anObject asRoot: aBoolean [
+	"what an embedder might do to a description while its resident runs: point it at
+	another object, a cluster root of its own or not. Answers the object id the new
+	workspace has as the description sees it, read afresh -- nil when it has none"
+	| txn |
+	txn := soil newTransaction.
+	[ | description |
+	description := (soil residentRegistryIn: txn) descriptionNamed: aSymbol.
+	description workspace: anObject.
+	aBoolean ifTrue: [ txn makeRoot: anObject ].
+	txn commit ]
+		ensure: [ txn isAborted ifFalse: [ txn abort ] ].
+	txn := soil newTransaction.
+	^ [ ((soil residentRegistryIn: txn) descriptionNamed: aSymbol) workspaceId ]
+		ensure: [ txn abort ]
+]
+
+{ #category : #helpers }
+SoilResidentTest >> workspaceIdOf: aResident [
+	"the object id of the workspace a resident reaches right now"
+	| txn |
+	txn := soil newTransaction.
+	^ [ txn objectIdOf: (aResident workspaceIn: txn) ]
+		ensure: [ txn abort ]
+]
+
 { #category : #running }
 SoilResidentTest >> setUp [
 	super setUp.
@@ -95,6 +133,61 @@ SoilResidentTest >> tearDown [
 		soil close.
 		soil destroy ].
 	super tearDown
+]
+
+{ #category : #tests }
+SoilResidentTest >> testAResidentReachesItsWorkspaceWithoutReadingItsDescription [
+	"the description is read to create and configure me, and after that I go to my
+	workspace directly. Pointing the description elsewhere changes nothing for a
+	resident that is already running -- it is configuration, and it arrives with the
+	next start"
+	| resident before |
+	self addResident: SoilTestPassiveResidentDescription new.
+	resident := self loadedSupervisor residentNamed: #passive.
+	before := self workspaceIdOf: resident.
+	self assert: resident workspaceId equals: before.
+
+	self
+		replaceWorkspaceOf: #passive
+		with: (SoilPersistentDictionary new at: #flushed put: 0; yourself)
+		asRoot: true.
+	self assert: (self workspaceIdOf: resident) equals: before
+]
+
+{ #category : #tests }
+SoilResidentTest >> testARestartReadsAChangedWorkspace [
+	"a restart reads the configuration again, and where the workspace is belongs to it"
+	| resident after txn |
+	self addResident: SoilTestPassiveResidentDescription new.
+	resident := self loadedSupervisor residentNamed: #passive.
+	after := self
+		replaceWorkspaceOf: #passive
+		with: (SoilPersistentDictionary new at: #flushed put: 0; yourself)
+		asRoot: true.
+
+	txn := soil newTransaction.
+	[ resident restartIn: txn ] ensure: [ txn abort ].
+	self assert: resident workspaceId equals: after.
+	self assert: (self workspaceIdOf: resident) equals: after
+]
+
+{ #category : #tests }
+SoilResidentTest >> testAWorkspaceWithoutAnIdOfItsOwnIsReachedThroughTheDescription [
+	"a workspace that lives inside the description's own cluster has no object id to
+	remember. The resident then goes the old way, through the description, and the
+	description is read again for it -- the price of not making the workspace a root"
+	| resident txn |
+	self addResident: SoilTestPassiveResidentDescription new.
+	self
+		replaceWorkspaceOf: #passive
+		with: (OrderedCollection with: #inside)
+		asRoot: false.
+	resident := self loadedSupervisor residentNamed: #passive.
+	self assert: resident workspaceId isNil.
+
+	txn := soil newTransaction.
+	[ self assert: (resident workspaceIn: txn) asArray equals: #( #inside ) ]
+		ensure: [ txn abort ]
 ]
 
 { #category : #tests }

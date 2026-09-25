@@ -73,21 +73,37 @@ SoilResidentDescription >> name [
 { #category : #'instance creation' }
 SoilResidentDescription >> newInstanceIn: aTransaction [
 	"the resident remembers my object id, not me: it outlives many transactions
-	and resolves me in whichever one is running"
+	and resolves me in whichever one is running. It remembers my workspace's id as
+	well, so that it reaches the objects it works on directly -- I am read to create
+	and configure it, not on every work unit"
 	^ self instanceClass new
 		descriptionId: (aTransaction objectIdOf: self);
+		workspaceId: self workspaceId;
 		yourself
 ]
 
 { #category : #accessing }
 SoilResidentDescription >> workspace [
 	"the object under which everything hangs that the resident needs persistently.
-	A frequent pattern, not a requirement -- a description with several references
-	is just as valid"
+	The rule rather than a pattern (Norbert, 2026-09-25): most residents have state
+	to keep, and further references hang under the workspace. A resident that needs
+	none leaves it nil and ignores it"
 	^ workspace
 ]
 
 { #category : #accessing }
 SoilResidentDescription >> workspace: anObject [
 	workspace := anObject
+]
+
+{ #category : #accessing }
+SoilResidentDescription >> workspaceId [
+	"the object id of my workspace, for the resident to reach it without reading me.
+	Only a workspace that is a cluster root of its own has one -- read in a
+	transaction, it sits in me as a proxy that knows its id without being loaded.
+	nil when I have no workspace, or when it lives inside my own cluster; the resident
+	then goes through me as it always did"
+	^ (workspace notNil and: [ workspace isSoilProxy ])
+		ifTrue: [ workspace objectId ]
+		ifFalse: [ nil ]
 ]
