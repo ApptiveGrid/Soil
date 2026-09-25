@@ -51,18 +51,24 @@ SoilGraphImporter >> addNextVersionOf: cluster at: presentOid [
 
 { #category : #importing }
 SoilGraphImporter >> import [
-	[ self
-		  readFormatVersion;
-		  memoizeSegmentIndexes;
-		  readObjectIdsBeingImported;
-		  readObjectIdsToBeReplaced;
-		  readClusters;
-		  updateSegmentIndexes;
-		  makeTheImportPartOfTheCommit ]
-		on: Error
-		do: [ :e |
-			self undoBehaviorNamesAddedSoFar.
-			e pass ]
+	"inside the commit semaphore, where every commit hands out its ids: from
+	#memoizeSegmentIndexes to #updateSegmentIndexes the import counts on from the last
+	index of each segment and writes there, and a commit in between would be given the
+	same ids and have what it created overwritten. That the import holds up other
+	writers meanwhile is what every commit does."
+	soil critical: [
+		[ self
+			  readFormatVersion;
+			  memoizeSegmentIndexes;
+			  readObjectIdsBeingImported;
+			  readObjectIdsToBeReplaced;
+			  readClusters;
+			  updateSegmentIndexes;
+			  makeTheImportPartOfTheCommit ]
+			on: Error
+			do: [ :e |
+				self undoBehaviorNamesAddedSoFar.
+				e pass ] ]
 ]
 
 { #category : #importing }
