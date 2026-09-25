@@ -102,20 +102,6 @@ SoilNewClusterVersion >> indexOfExternalReference: anObject [
 	^ 0
 ]
 
-{ #category : #accessing }
-SoilNewClusterVersion >> referenceTo: anObjectId for: anObject [
-	"the index under which this cluster refers to anObjectId, adding it if this is the
-	first time. The same target can arrive twice - once read, once as a proxy - and a
-	cluster carries each reference once."
-	| index |
-	index := externalObjects identityIndexOf: anObject.
-	index > 0 ifTrue: [ ^ index ].
-	index := references indexOf: anObjectId.
-	index > 0 ifTrue: [ ^ index ].
-	self addObject: anObject reference: anObjectId.
-	^ references size
-]
-
 { #category : #initialization }
 SoilNewClusterVersion >> initialize [
 	super initialize.
@@ -150,6 +136,20 @@ SoilNewClusterVersion >> printOn: aStream [
 	aStream << ' '.
 	object printOn: aStream.
 	
+]
+
+{ #category : #accessing }
+SoilNewClusterVersion >> referenceTo: anObjectId for: anObject [
+	"the index under which this cluster refers to anObjectId, adding it if this is the
+	first time. The same target can arrive twice - once read, once as a proxy - and a
+	cluster carries each reference once."
+	| index |
+	index := externalObjects identityIndexOf: anObject.
+	index > 0 ifTrue: [ ^ index ].
+	index := references indexOf: anObjectId.
+	index > 0 ifTrue: [ ^ index ].
+	self addObject: anObject reference: anObjectId.
+	^ references size
 ]
 
 { #category : #serializing }

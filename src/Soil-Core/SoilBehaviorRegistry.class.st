@@ -10,13 +10,6 @@ Class {
 	#category : #'Soil-Core-Model'
 }
 
-{ #category : #adding }
-SoilBehaviorRegistry >> addSpecialObjects [
-	self
-		nameAt: #SoilBehaviorDescription
-		put: SoilBehaviorDescription metaId
-]
-
 { #category : #accessing }
 SoilBehaviorRegistry >> addNewDescription: aBehaviorDescription withId: anObjectId transaction: aTransaction [
 	"a class this database has not stored before: version 1 under that id, and the name
@@ -56,6 +49,13 @@ SoilBehaviorRegistry >> addNewVersion: aBehaviorDescription withId: anObjectId t
 		asVersion: newVersion.
 	self appendCommittedVersion: aBehaviorDescription forIndex: anObjectId index.
 	^ newVersion
+]
+
+{ #category : #adding }
+SoilBehaviorRegistry >> addSpecialObjects [
+	self
+		nameAt: #SoilBehaviorDescription
+		put: SoilBehaviorDescription metaId
 ]
 
 { #category : #queries }
@@ -132,20 +132,6 @@ SoilBehaviorRegistry >> behaviorVersionsUpTo: aBehaviorDescription transaction: 
 				(SoilObjectNotFound new segment: 0; index: objectId index) signal ] ].
 		workingChain copyFrom: 1 to: offset ].
 	^ result
-]
-
-{ #category : #queries }
-SoilBehaviorRegistry >> versionOfBehaviorWithIndex: objectIndex matching: aBehaviorDescription transaction: aTransaction [
-	"the version of the persisted description at objectIndex whose shape equals
-	aBehaviorDescription, or nil if no version in the chain has that shape. Unlike
-	#behaviorVersionsUpTo:transaction: this answers a question instead of building a
-	migration path, and it does not raise when nothing matches - the caller decides what
-	an unknown shape means."
-	^ versionsLock critical: [
-		self ensureHistoryLoadedForBehaviorWithIndex: objectIndex transaction: aTransaction.
-		((versions at: objectIndex) 
-			detect: [ :each | each matchesDescription: aBehaviorDescription ]
-			ifNone: [ nil ]) ifNotNil: [ :found | found version ] ]
 ]
 
 { #category : #'open/close' }
@@ -293,6 +279,20 @@ SoilBehaviorRegistry >> soil [
 { #category : #accessing }
 SoilBehaviorRegistry >> soil: aSoil [ 
 	soil := aSoil
+]
+
+{ #category : #queries }
+SoilBehaviorRegistry >> versionOfBehaviorWithIndex: objectIndex matching: aBehaviorDescription transaction: aTransaction [
+	"the version of the persisted description at objectIndex whose shape equals
+	aBehaviorDescription, or nil if no version in the chain has that shape. Unlike
+	#behaviorVersionsUpTo:transaction: this answers a question instead of building a
+	migration path, and it does not raise when nothing matches - the caller decides what
+	an unknown shape means."
+	^ versionsLock critical: [
+		self ensureHistoryLoadedForBehaviorWithIndex: objectIndex transaction: aTransaction.
+		((versions at: objectIndex) 
+			detect: [ :each | each matchesDescription: aBehaviorDescription ]
+			ifNone: [ nil ]) ifNotNil: [ :found | found version ] ]
 ]
 
 { #category : #writing }
