@@ -18,12 +18,6 @@ Class {
 	#category : #'Soil-Core-Error'
 }
 
-{ #category : #migration }
-SoilGraphExporter >> carriesMigratedBehavior: aCluster [
-	^ aCluster behaviorDescriptions anySatisfy: [ :each |
-		migrationMap includesKey: each index ]
-]
-
 { #category : #accessing }
 SoilGraphExporter class >> formatVersion [
 	"the version of the stream #export writes. It exists so that SoilGraphImporter refuses
@@ -78,6 +72,12 @@ SoilGraphExporter >> behaviorAt: index [
 		ifAbsentPut: [ 
 			 transaction materializeRecord: (self metaSegment at: index) ]
 
+]
+
+{ #category : #migration }
+SoilGraphExporter >> carriesMigratedBehavior: aCluster [
+	^ aCluster behaviorDescriptions anySatisfy: [ :each |
+		migrationMap includesKey: each index ]
 ]
 
 { #category : #actions }
