@@ -469,6 +469,93 @@ SoilGraphExporterTest >> testAMigrationOfAClassReachesWhatIsEmbeddedInACluster [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testAMigrationCanDropAClusterRoot [
+	"A migration that answers nil leaves the object behind: it does not go into the
+	stream, and what pointed at it points at nil in the target."
+
+	| tx bytes exportTx importer targetTx root imported |
+	tx := soil newTransaction.
+	root := SoilPersistentDictionary new.
+	tx root: root.
+	root at: #dropped put: (SoilTestGraphRoot new nested: 'secret'; yourself).
+	root at: #kept put: (SoilTestNestedObject new
+		label: 'kept';
+		reference: (root at: #dropped);
+		yourself).
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				migrate: SoilTestGraphRoot to: [ :each | nil ];
+				stream: stream;
+				export ].
+	exportTx abort.
+	self deny: (bytes asString includesSubstring: 'secret').
+
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	"the dictionary answers proxies, and #yourself reads through them"
+	imported := importer importedObjects first.
+	self assert: (imported at: #kept) yourself label equals: 'kept'.
+	self assert: (imported at: #kept) yourself reference yourself isNil.
+	targetTx commit
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testAMigrationCanDropAnEmbeddedObject [
+	"An embedded object that a migration drops becomes nil where it was, and each
+	reference to it is nil. Nothing after it moves: an object referenced twice behind
+	it still arrives as one."
+
+	| tx bytes exportTx importer targetTx root secret shared imported |
+	tx := soil newTransaction.
+	root := SoilPersistentDictionary new.
+	tx root: root.
+	secret := SoilTestNestedObject new label: 'secret'; yourself.
+	shared := OrderedCollection with: 'shared'.
+	root at: #holder put: (SoilTestGraphRoot new
+		nested: { secret. shared. shared. secret };
+		yourself).
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				migrate: SoilTestNestedObject to: [ :each | nil ];
+				stream: stream;
+				export ].
+	exportTx abort.
+	self deny: (bytes asString includesSubstring: 'secret').
+
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := (importer importedObjects first at: #holder) yourself nested.
+	self assert: imported size equals: 4.
+	self assert: imported first isNil.
+	self assert: imported fourth isNil.
+	self assert: imported second asArray equals: #( 'shared' ).
+	self assert: imported second identicalTo: imported third.
+	targetTx commit
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testAnImportHandsOutIdsUnderTheCommitSemaphore [
 	"An import counts its ids on from the last index of each segment and writes its
 	records straight into the segments. A commit hands out ids from the same counter.
