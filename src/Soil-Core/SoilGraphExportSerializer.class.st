@@ -1,26 +1,53 @@
 "
-I serialize a cluster whose root a migration of SoilGraphExporter has replaced.
+I serialize a cluster for SoilGraphExporter, with the objects its migrations replace written in their place.
 
-The serializer knows the cluster root by identity: it is written first, and whatever points at it later becomes an internal reference. A migration hands back another object as the root, typically a shallow copy, while an object embedded in the cluster still points at the one that was replaced. I take that one for the root as well, so it is not written a second time.
+A migration hands back another object, typically a shallow copy, while what the cluster points at is still the original. I leave the original where it is in my object table and write its replacement at that position. Whatever points at the original later becomes an internal reference to that position, and the import finds the replacement there. That is how a back pointer at a migrated cluster root arrives at the root, and how two references to one migrated object arrive at one replacement.
+
+Whether an object is embedded or referenced stays with my superclass. My replacements only take the place of what would be embedded; an object of a migrated class that is the root of another cluster remains a reference to it.
 "
 Class {
 	#name : #SoilGraphExportSerializer,
 	#superclass : #SoilSerializer,
 	#instVars : [
-		'replacedRoot'
+		'migrations',
+		'replacements'
 	],
 	#category : #'Soil-Core-Visitor'
 }
 
-{ #category : #registry }
-SoilGraphExportSerializer >> registerObject: anObject ifAbsent: aBlock [
-	"what still points at the root the migration replaced means the root"
-	^ super
-		registerObject: (anObject == replacedRoot ifTrue: [ clusterRoot ] ifFalse: [ anObject ])
-		ifAbsent: aBlock
+{ #category : #initialization }
+SoilGraphExportSerializer >> initialize [
+	super initialize.
+	migrations := Dictionary new.
+	replacements := IdentityDictionary new
 ]
 
 { #category : #accessing }
-SoilGraphExportSerializer >> replacedRoot: anObject [
-	replacedRoot := anObject
+SoilGraphExportSerializer >> migrations: aDictionary [
+	"blocks by class, each answering what an object of that class is written as"
+	migrations := aDictionary
+]
+
+{ #category : #registry }
+SoilGraphExportSerializer >> registerObject: anObject ifAbsent: aBlock [
+	"the block runs for what is embedded, after anObject took its place in the object table"
+	^ super 
+		registerObject: anObject 
+		ifAbsent: [
+			(self replacementFor: anObject)
+				ifNil: [ aBlock value ]
+				ifNotNil: [ :replacement | replacement soilBasicSerialize: self ] ]
+]
+
+{ #category : #accessing }
+SoilGraphExportSerializer >> replace: anObject with: aReplacement [
+	replacements at: anObject put: aReplacement
+]
+
+{ #category : #private }
+SoilGraphExportSerializer >> replacementFor: anObject [
+	^ replacements 
+		at: anObject 
+		ifAbsent: [ 
+			(migrations at: anObject class ifAbsent: [ ^ nil ]) value: anObject ]
 ]

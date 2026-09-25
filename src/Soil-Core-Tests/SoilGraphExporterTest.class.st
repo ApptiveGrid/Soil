@@ -387,9 +387,9 @@ SoilGraphExporterTest >> testAMigrationKeepsWhatPointsBackAtTheClusterRoot [
 	tx := soil newTransaction.
 	root := SoilPersistentDictionary new.
 	tx root: root.
-	holder := SoilTestGraphRoot new.
+	holder := SoilTestNestedObject new label: 'original'; yourself.
 	"the array is embedded in the cluster of the holder and points back at it"
-	holder nested: (Array with: holder).
+	holder reference: (Array with: holder).
 	root at: #holder put: holder.
 	tx commit.
 
@@ -400,7 +400,7 @@ SoilGraphExporterTest >> testAMigrationKeepsWhatPointsBackAtTheClusterRoot [
 			addObject: exportTx root;
 			yourself)
 				migrateObject: (exportTx root at: #holder)
-				to: [ :each | each copy ];
+				to: [ :each | each copy label: 'migrated'; yourself ];
 				stream: stream;
 				export ].
 	exportTx abort.
@@ -414,9 +414,57 @@ SoilGraphExporterTest >> testAMigrationKeepsWhatPointsBackAtTheClusterRoot [
 	importer import.
 	"the dictionary answers a proxy, and a proxy is never identical to what it stands for"
 	imported := (importer importedObjects first at: #holder) yourself.
+	self assert: imported label equals: 'migrated'.
 	self
-		assert: imported nested first == imported
+		assert: imported reference first == imported
 		description: 'what was pointed back at the cluster root arrived as a second object'.
+	targetTx commit
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testAMigrationOfAClassReachesWhatIsEmbeddedInACluster [
+	"#migrate:to: speaks for every object of a class, not only for the ones that are the
+	root of a cluster. An object embedded in another cluster is replaced as well, what
+	points at it twice arrives at one replacement, and what the replacement points back
+	at is still the root."
+
+	| tx bytes exportTx importer targetTx root holder nested imported |
+	tx := soil newTransaction.
+	root := SoilPersistentDictionary new.
+	tx root: root.
+	holder := SoilTestGraphRoot new.
+	nested := SoilTestNestedObject new
+		label: 'original';
+		reference: holder;
+		yourself.
+	holder nested: (Array with: nested with: nested).
+	root at: #holder put: holder.
+	tx commit.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				migrate: SoilTestNestedObject
+				to: [ :each | each copy label: 'migrated'; yourself ];
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	"the dictionary answers a proxy, and a proxy is never identical to what it stands for"
+	imported := (importer importedObjects first at: #holder) yourself.
+	self assert: imported nested first label equals: 'migrated'.
+	self assert: imported nested first identicalTo: imported nested second.
+	self assert: imported nested first reference identicalTo: imported.
 	targetTx commit
 ]
 
