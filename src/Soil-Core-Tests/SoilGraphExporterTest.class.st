@@ -469,6 +469,63 @@ SoilGraphExporterTest >> testAMigrationOfAClassReachesWhatIsEmbeddedInACluster [
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testAnImportHandsOutIdsUnderTheCommitSemaphore [
+	"An import counts its ids on from the last index of each segment and writes its
+	records straight into the segments. A commit hands out ids from the same counter.
+	Unless the import does that where every commit does - inside the database's commit
+	semaphore - a commit in between is given the ids the import is about to write, and
+	whatever it created is overwritten without a word. The importer here is held after
+	it took its ids, and the commit has to wait for it."
+
+	| tx exportTx bytes targetTx other importer imported committed |
+	tx := soil newTransaction.
+	tx root: SoilPersistentDictionary new.
+	tx root at: #exported put: (SoilTestGraphRoot new nested: 'imported'; yourself).
+	tx commit.
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: (exportTx root at: #exported);
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	targetSoil := Soil createOnPath: self targetPath.
+	tx := targetSoil newTransaction.
+	tx root: SoilPersistentDictionary new.
+	"the target knows the class already, so only the data segment is contested"
+	tx root at: #known put: (SoilTestGraphRoot new nested: 'known'; yourself).
+	tx commit.
+
+	targetTx := targetSoil newTransaction.
+	importer := SoilTestGatedGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	imported := Semaphore new.
+	committed := Semaphore new.
+	other := targetSoil newTransaction.
+	other root at: #meanwhile put: (SoilTestGraphRoot new nested: 'committed meanwhile'; yourself).
+	[ [ importer import ] ensure: [ imported signal ] ] fork.
+	[
+		self deny: (importer arrived waitTimeoutMSecs: 5000) description: 'the import did not start'.
+		[ other commit. committed signal ] fork.
+		self
+			assert: (committed waitTimeoutMSecs: 300)
+			description: 'a commit handed out ids while an import was under way' ]
+		ensure: [ importer proceed signal ].
+	self deny: (imported waitTimeoutMSecs: 5000) description: 'the import did not finish'.
+	self deny: (committed waitTimeoutMSecs: 5000) description: 'the commit did not finish'.
+	targetTx commit.
+
+	tx := targetSoil newTransaction.
+	self assert: (tx root at: #meanwhile) yourself nested equals: 'committed meanwhile'.
+	tx abort
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testImportIsVisibleToTheTransactionThatRanIt [
 	"An import writes its records straight into the segments, and a record is only readable
 	by a transaction whose readVersion is at least the version of the record - an imported
