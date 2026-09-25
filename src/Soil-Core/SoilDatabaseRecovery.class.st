@@ -50,12 +50,6 @@ SoilDatabaseRecovery >> isNeeded [
 			ensure: [ fragmentFile close ]
 ]
 
-{ #category : #testing }
-SoilDatabaseRecovery >> reason [
-	"what #isNeeded found, in words - nil until it has been asked"
-	^ reason
-]
-
 { #category : #accessing }
 SoilDatabaseRecovery >> journal: aSoilPersistentDatabaseJournal [ 
 	journal := aSoilPersistentDatabaseJournal 
@@ -124,6 +118,12 @@ SoilDatabaseRecovery >> readTransactionJournal: transactionJournal from: stream 
 		(entry class == SoilCommitTransactionEntry) 
 			ifTrue: [ ^ transactionJournal ] ].
 	SoilTruncatedRead signal: 'reading of transaction journal is incomplete'
+]
+
+{ #category : #testing }
+SoilDatabaseRecovery >> reason [
+	"what #isNeeded found, in words - nil until it has been asked"
+	^ reason
 ]
 
 { #category : #api }
