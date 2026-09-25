@@ -7,8 +7,9 @@ processes. Processes belong to the subclass, not to me: a passive resident has
 none, a queue has a dispatcher plus several workers, so a single #process field
 here would fit neither.
 
-I hold no materialized Soil objects, only #descriptionId. I outlive many
-transactions; a held object would be a snapshot that grows staler with every
+I hold no materialized Soil objects, only #descriptionId and #workspaceId. My
+description is read to create and configure me, at every start; the objects I work
+on I reach through my workspace's id. I outlive many transactions; a held object would be a snapshot that grows staler with every
 foreign change and, on writing, either conflicts or overwrites silently.
 
 My state machine:
@@ -34,6 +35,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'descriptionId',
+		'workspaceId',
 		'supervisor',
 		'state',
 		'stopRequested',
@@ -365,6 +367,7 @@ SoilResident >> restartIn: aTransaction [
 	restart to switch off, clear it and restart to switch on -- and no caller can
 	start something that the persisted flag says is off."
 	stopRequested := false.
+	workspaceId := (self descriptionIn: aTransaction) workspaceId.
 	[ (self isDisabledIn: aTransaction)
 		ifTrue: [ self markDisabled ]
 		ifFalse: [
@@ -491,6 +494,24 @@ SoilResident >> withTransactionDo: aBlock [
 
 { #category : #accessing }
 SoilResident >> workspaceIn: aTransaction [
-	^ (self descriptionIn: aTransaction) workspace
+	"the objects I work on, resolved in the transaction that is running now. Through
+	my workspace's id, not through my description: that one is read to create and
+	configure me, and a workspace pointed elsewhere on it is configuration for my next
+	start. A workspace without an id of its own is reached through the description,
+	as before"
+	^ workspaceId
+		ifNil: [ (self descriptionIn: aTransaction) workspace ]
+		ifNotNil: [ :id | aTransaction objectWithId: id ]
 ]
 
+{ #category : #accessing }
+SoilResident >> workspaceId [
+	"the object id of my workspace, taken from my description when I was created and
+	again at every restart. nil when my workspace has no id of its own"
+	^ workspaceId
+]
+
+{ #category : #accessing }
+SoilResident >> workspaceId: aSoilObjectId [
+	workspaceId := aSoilObjectId
+]
