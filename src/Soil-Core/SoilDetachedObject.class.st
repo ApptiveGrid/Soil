@@ -45,12 +45,16 @@ SoilDetachedObject >> soil: aSoil [
 
 { #category : #writing }
 SoilDetachedObject >> writeBack [
-	"my object, back at my objectId, in a transaction of my own. A commit leaves
-	the transaction aborted already, so the ensure does not touch it"
+	"my object, back at my objectId, in a transaction of my own - as the next version
+	of what is stored there. It used to go in as a record of its own, without a
+	predecessor, and a reader on an older version then found nothing at my objectId:
+	the metabase backup of every database whose limits were written during the copy
+	stopped on it (2026-09-26).
+
+	A commit leaves the transaction aborted already, so the ensure does not touch it"
 	| txn |
 	txn := soil newTransaction.
-	^ [ txn atObjectId: objectId putObject: object.
-	  txn markDirty: (txn objectWithId: objectId).
+	^ [ txn atObjectId: objectId putNewVersionOf: object.
 	  txn commit ]
 		ensure: [ txn isAborted ifFalse: [ txn abort ] ]
 ]

@@ -164,6 +164,26 @@ SoilDetachedObjectTest >> testTwoDetachedHandlesOnTheSameObjectAreIdentical [
 ]
 
 { #category : #tests }
+SoilDetachedObjectTest >> testWriteBackLeavesTheOlderVersionToAnOlderReader [
+	"a reader that started before the write-back still reads what it started on. That
+	needs the written record to be chained to the one it replaces: written as a record
+	of its own it had no predecessor, and a reader on an older version found nothing at
+	all at that objectId - the metabase backup of a database whose limits were written
+	during the copy stopped on exactly that (2026-09-26)"
+	| reader txn detached |
+	reader := soil newTransaction.
+	txn := soil newTransaction.
+	detached := SoilDetachedObject on: (txn root at: #kept) in: txn.
+	txn abort.
+
+	detached nested: 42.
+	detached writeBack.
+
+	[ self assert: (reader objectWithId: detached objectId) nested equals: 1 ]
+		ensure: [ reader abort ]
+]
+
+{ #category : #tests }
 SoilDetachedObjectTest >> testWriteBackPutsTheObjectBackAtItsId [
 	"the one thing the database gives me: a transaction of my own, on demand and
 	named, not as a side effect of some forwarded send"

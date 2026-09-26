@@ -87,6 +87,26 @@ SoilTransaction >> addObjectToBeCommited: anObject [
 ]
 
 { #category : #accessing }
+SoilTransaction >> atObjectId: anObjectId putNewVersionOf: anObject [
+	"anObject in place of what is stored at anObjectId, as its next version.
+	#atObjectId:putObject: is for an id that holds nothing yet: its record has no
+	predecessor. This one is derived from the stored record, and so it keeps the
+	position of what it replaces - a reader on an older version still finds that, the
+	commit checks it against a concurrent change, and the journal records a new
+	version with the old bytes, the way it does for any other change"
+	| record |
+	record := ((self recordWithId: anObjectId)
+		ifNil: [ SoilIndexOutOfRange signal: 'no object at ', anObjectId printString, ' to write a new version of' ])
+			transaction: self;
+			materializeObject;
+			asNewClusterVersion.
+	record object: anObject.
+	idMap at: anObjectId put: record.
+	objectMap at: anObject put: record.
+	commitStrategy addRecord: record
+]
+
+{ #category : #accessing }
 SoilTransaction >> atObjectId: objectId putObject: anObject [
 	| record |
 	record := SoilNewClusterVersion new
