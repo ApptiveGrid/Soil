@@ -50,31 +50,6 @@ SoilGraphImporter >> addNextVersionOf: cluster at: presentOid [
 ]
 
 { #category : #importing }
-SoilGraphImporter >> bytesOf: cluster withIndexId: oldId replacedBy: newId [
-	"The dictionary an index belongs to holds nothing but the id of its index - everything
-	else is transient, see SoilIndexedDictionary class>>soilTransientInstVars - so its bytes
-	are that id, written as a string. They are rewritten rather than the dictionary being
-	materialized: materializing opens the index under the id the dictionary carries, which
-	is the source's, and another database has no index under it.
-
-	The id is replaced as the serializer writes it, length included, and a cluster's bytes
-	hold no positions, so the new id may be longer or shorter. Found anywhere but exactly
-	once, the bytes are not what this expects, and that is said instead of guessed at."
-	| bytes old position |
-	bytes := cluster bytes.
-	old := self serializedString: oldId.
-	position := bytes indexOfSubCollection: old startingAt: 1.
-	(position = 0 or: [ (bytes indexOfSubCollection: old startingAt: position + 1) > 0 ])
-		ifTrue: [
-			SoilUnsupportedError signal:
-				'the bytes of an object that owns an index were expected to carry its id exactly once' ].
-	^ bytes
-		copyReplaceFrom: position
-		to: position + old size - 1
-		with: (self serializedString: newId)
-]
-
-{ #category : #importing }
 SoilGraphImporter >> import [
 	"inside the commit semaphore, where every commit hands out its ids: from
 	#memoizeSegmentIndexes to #updateSegmentIndexes the import counts on from the last
@@ -158,6 +133,43 @@ SoilGraphImporter >> importBehaviorOfDifferentShape: cluster knownAs: presentDes
 	self shapeOfTheLiveClassIn: cluster ifFalse: [
 		^ self signalShapeConflictFor: cluster against: presentDescription ].
 	^ self addNextVersionOf: cluster at: presentOid
+]
+
+{ #category : #importing }
+SoilGraphImporter >> importIndexesOf: cluster [
+	"An index gets an id of its own here, as every object gets an object id of its own.
+	The id it arrives with names the index file in the source, and in the database the
+	export came from - a copy of a space inside one user - creating the index under that
+	id put the copy's index where the source's was, and both read the same entries from
+	then on.
+
+	A cluster with an index is the dictionary that owns it, and it carries the id twice:
+	in the dictionary and in the cluster's list of its indexes. The dictionary is read,
+	given the new id and written again, and writing it fills the list. Reading it does not
+	touch the index, see SoilIndexedDictionary>>index.
+
+	Written again, the cluster has to point at the behavior descriptions it was read with.
+	Anything else means the serializer found the description wanting and made a new one
+	through the transaction, which hands out meta ids the import has counted on itself."
+	| dictionary newCluster |
+	cluster indexIds size = 1 ifFalse: [
+		SoilUnsupportedError signal: 'a cluster is expected to own one index at most' ].
+	dictionary := cluster
+		transaction: transaction;
+		materializeObject.
+	dictionary id: SoilIndexedDictionary newIndexId.
+	self readIndexOfCluster: cluster withId: dictionary id.
+	newCluster := cluster asNewClusterVersion
+		previousVersionPosition: 0;
+		version: cluster version;
+		yourself.
+	newCluster serializeObject.
+	(newCluster behaviorDescriptions collect: [ :each | each objectId index -> each version ]) asArray
+		= (cluster behaviorDescriptions collect: [ :each | each index -> each version ]) asArray
+			ifFalse: [
+				SoilUnsupportedError signal:
+					'writing an imported dictionary again asked for a behavior description the import did not bring' ].
+	^ newCluster
 ]
 
 { #category : #'instance creation' }
@@ -285,9 +297,10 @@ SoilGraphImporter >> readCluster [
 	cluster := self readClusterHeader.
 	self
 		remapReferencesOf: cluster;
-		readIndexesOf: cluster;
-		pointAtLocalBehaviorDescriptions: cluster;
-		store: cluster.
+		pointAtLocalBehaviorDescriptions: cluster.
+	cluster indexIds ifNotEmpty: [
+		cluster := self importIndexesOf: cluster ].
+	self store: cluster.
 	^ cluster
 ]
 
@@ -357,21 +370,6 @@ SoilGraphImporter >> readIndexOfCluster: cluster withId: indexId [
 ]
 
 { #category : #importing }
-SoilGraphImporter >> readIndexesOf: cluster [
-	"every index gets an id of its own here, as every object gets an object id of its own.
-	The id it arrives with names the index file in the source, and in the database the
-	export came from - a copy of a space inside one user - creating the index under that
-	id put the copy's index where the source's was, and both read the same entries from
-	then on. The id is in two places, the cluster's list of its indexes and the dictionary
-	the index belongs to, and both are changed."
-	cluster indexIds: (cluster indexIds collect: [ :indexId | | newId |
-		newId := SoilIndexedDictionary newIndexId.
-		self readIndexOfCluster: cluster withId: newId.
-		cluster bytes: (self bytesOf: cluster withIndexId: indexId replacedBy: newId).
-		newId ])
-]
-
-{ #category : #importing }
 SoilGraphImporter >> readName [
 	^ (stream next: stream next) asString asSymbol
 ]
@@ -426,14 +424,6 @@ SoilGraphImporter >> replacementNamed: aName [
 			SoilInvalidReplacement signal:
 				'the export leaves out an object to be replaced as ' , aName printString
 				, ', and nothing is registered under that name' ]
-]
-
-{ #category : #private }
-SoilGraphImporter >> serializedString: aString [
-	^ ByteArray streamContents: [ :bytes |
-		SoilSerializer new
-			stream: bytes;
-			nextPutString: aString ]
 ]
 
 { #category : #importing }

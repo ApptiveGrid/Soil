@@ -73,7 +73,7 @@ SoilIndexedDictionary >> at: key put: anObject [
 	transaction addJournalEntry: (SoilAddKeyEntry new
 			 segment: [ self segment ];
 			 id: id;
-			 key: (index indexKey: key);
+			 key: (self index indexKey: key);
 			 value: objectId;
 			 oldValue: oldValue).
 
@@ -89,7 +89,7 @@ SoilIndexedDictionary >> atIndex: anInteger [
 { #category : #accessing }
 SoilIndexedDictionary >> backend [
 	"return the backend used, which is the class of the index that we use"
-	^index class
+	^ self index class
 ]
 
 { #category : #accessing }
@@ -99,7 +99,7 @@ SoilIndexedDictionary >> basicAt: aString ifAbsent: aBlock [
 
 { #category : #rewriting }
 SoilIndexedDictionary >> compact [ 
-	index wrapped compact
+	self index wrapped compact
 ]
 
 { #category : #initialization }
@@ -134,8 +134,29 @@ SoilIndexedDictionary >> id [
 ]
 
 { #category : #accessing }
+SoilIndexedDictionary >> id: aString [
+	"the id of the index this dictionary uses. Only for a dictionary whose index is not
+	connected yet - the importer gives an imported dictionary the id of the index it
+	created for it. Once connected, the index keeps the id it was connected under."
+	index ifNotNil: [
+		SoilUnsupportedError signal: 'the index of this dictionary is connected already' ].
+	id := aString
+]
+
+{ #category : #accessing }
 SoilIndexedDictionary >> index [
-	^ index
+	"connected on first use, not when the dictionary is materialized. Materializing a
+	dictionary says nothing about wanting its entries - a grid is read for its name as
+	often as for its rows - and a dictionary that is read and not used does not open its
+	index file. It also lets a dictionary be read before the index under its id exists:
+	the graph import reads one, gives it an id of its own and writes it again, see
+	SoilGraphImporter>>importIndexesOf:.
+
+	A copy-on-write version, so that all changes are per transaction"
+	^ index ifNil: [
+		index := ((transaction segmentAt: segment) indexAt: id) asCopyOnWrite.
+		index id: id.
+		index ]
 ]
 
 { #category : #accessing }
@@ -172,12 +193,12 @@ SoilIndexedDictionary >> isEmpty [
 
 { #category : #testing }
 SoilIndexedDictionary >> isPresentOnDisk [
-	^ index isPresentOnDisk 
+	^ self index isPresentOnDisk 
 ]
 
 { #category : #accessing }
 SoilIndexedDictionary >> keySize: anInteger [ 
-	index keySize: anInteger 
+	self index keySize: anInteger 
 ]
 
 { #category : #accessing }
@@ -194,7 +215,7 @@ SoilIndexedDictionary >> last: anInteger [
 { #category : #accessing }
 SoilIndexedDictionary >> maxLevel: anInteger [
 	"Implemented here to allow to switch between SkipList and BTree easily in tests"
-	index maxLevel: anInteger
+	self index maxLevel: anInteger
 
 ]
 
@@ -229,13 +250,13 @@ SoilIndexedDictionary >> moveKey: oldKey to: newKey ifAbsent: aBlock [
 	transaction addJournalEntry: (SoilRemoveKeyEntry new 
 			 segment: [ self segment ];
 			 id: id;
-			 key: (index indexKey: oldKey);
+			 key: (self index indexKey: oldKey);
 			 oldValue: objectId).
 
 	transaction addJournalEntry: (SoilAddKeyEntry new
 			 segment: [ self segment ];
 			 id: id;
-			 key: (index indexKey: newKey);
+			 key: (self index indexKey: newKey);
 			 value: objectId;
 			 oldValue: overwritten).
 
@@ -245,7 +266,7 @@ SoilIndexedDictionary >> moveKey: oldKey to: newKey ifAbsent: aBlock [
 
 { #category : #private }
 SoilIndexedDictionary >> newIterator [
-	^ index newIterator
+	^ self index newIterator
 		returnProxyForTransaction: transaction;
 		journal: transaction soil journal;
 		readVersion: transaction readVersion 
@@ -264,7 +285,7 @@ SoilIndexedDictionary >> nextCloseTo: aKey [
 
 { #category : #accessing }
 SoilIndexedDictionary >> persistentIndex [
-	^ index persistentIndex 
+	^ self index persistentIndex 
 ]
 
 { #category : #printing }
@@ -288,7 +309,7 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 	transaction addJournalEntry: (SoilRemoveKeyEntry new 
 			segment: [ self segment ];
 			id: id;
-			key: (index indexKey: key); 
+			key: (self index indexKey: key); 
 			oldValue: oldValue asSoilObjectId ) .
 
 	^ oldValue
@@ -313,7 +334,7 @@ SoilIndexedDictionary >> removeKey: key value: value ifAbsent: aBlock [
 	transaction addJournalEntry: (SoilRemoveKeyEntry new 
 			segment: [ self segment ];
 			id: id;
-			key: (index indexKey: key); 
+			key: (self index indexKey: key); 
 			oldValue: oldValue asSoilObjectId ) .
 
 	^ oldValue
@@ -327,7 +348,7 @@ SoilIndexedDictionary >> reverseDo: aBlock [
 
 { #category : #rewriting }
 SoilIndexedDictionary >> rewriteUsing: aBlock [
-	index wrapped rewriteUsing: aBlock
+	self index wrapped rewriteUsing: aBlock
 ]
 
 { #category : #accessing }
@@ -358,7 +379,7 @@ SoilIndexedDictionary >> soilBasicSerialize: aSerializer [
 	aSerializer registerIndex: self.
 	self isPresentOnDisk ifFalse: [ 
 		transaction 
-			addJournalEntry: (index newIndexEntry 
+			addJournalEntry: (self index newIndexEntry 
 				id: id;
 				segment: (transaction objectIdOf: self) segment)
 			head: true ].
@@ -380,13 +401,10 @@ SoilIndexedDictionary >> soilLoadedIn: aTransaction [
 
 { #category : #serializing }
 SoilIndexedDictionary >> soilMaterialized: aMaterializer [
-	"connect the global index at materialization time when we
-	know the cluster root which defines the location of the index.
-	Store a copy-on-write version so all changes are per transaction"
+	"remember where the index is - the segment of the cluster root the dictionary was read
+	from. It is connected when it is first used, see #index"
 	transaction := aMaterializer transaction.
 	segment := aMaterializer segment.
-	index := (aMaterializer indexAt: id) asCopyOnWrite.
-	index id: id.
 	dirty := false
 ]
 

@@ -1061,6 +1061,25 @@ SoilIndexedDictionaryTest >> testNextKeyCloseToStillAnswersARemovedKeyToAnOlderR
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testReadingADictionaryLeavesItsIndexUntilItIsUsed [
+	"a dictionary is connected to its index when it is first used, not when it is read -
+	a grid is read for its name as often as for its rows, and the graph import reads a
+	dictionary before the index under its id exists"
+	| tx read |
+	tx := soil newTransaction.
+	tx root: dict.
+	tx root at: 'abc' asByteArray put: #one.
+	tx commit.
+	self reopen.
+	tx := soil newTransaction.
+	read := tx root.
+	self assert: (read instVarNamed: #index) isNil.
+	self assert: read size equals: 1.
+	self deny: (read instVarNamed: #index) isNil.
+	tx abort
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testRemoveKey [
 	| tx tx2 tag return |
 	tx := soil newTransaction.

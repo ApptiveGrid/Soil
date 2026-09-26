@@ -135,11 +135,6 @@ SoilClusterRecord >> indexIds [
 	^ indexIds
 ]
 
-{ #category : #accessing }
-SoilClusterRecord >> indexIds: aCollection [
-	indexIds := aCollection
-]
-
 { #category : #initialization }
 SoilClusterRecord >> initialize [ 
 	super initialize.
