@@ -80,7 +80,7 @@ SoilPersistentDictionary >> at: key ifPresent: aPresentBlock ifAbsent: anAbsentB
 
 { #category : #forwarded }
 SoilPersistentDictionary >> at: key put: value [
-	transaction ifNotNil: [:tr | tr makeRoot: value].
+	transaction ifNotNil: [ self ensureIsRoot: value ].
 	dict at: key put: value.
 	^value
 
@@ -104,11 +104,19 @@ SoilPersistentDictionary >> dict [
 ]
 
 { #category : #initialization }
-SoilPersistentDictionary >> ensureValuesAreRoot [
-	dict do: [:each | 
-		each isImmediateObject ifFalse: [
-			transaction makeRoot: each ] ]
+SoilPersistentDictionary >> ensureIsRoot: anObject [
+	"a value becomes a cluster root of its own, so that reading the dictionary does not
+	read every value along with it - unless the serializer writes the value in place
+	anyway. Then a root is a record nothing points at: #at:put: made one of every symbol,
+	nil, true and small integer it was handed, one per call, and a copied dictionary made
+	one of every symbol when it was written - see Object>>soilIsWrittenByValue"
+	anObject soilIsWrittenByValue ifFalse: [
+		transaction makeRoot: anObject ]
+]
 
+{ #category : #private }
+SoilPersistentDictionary >> ensureValuesAreRoot [
+	dict do: [ :each | self ensureIsRoot: each ]
 ]
 
 { #category : #forwarded }

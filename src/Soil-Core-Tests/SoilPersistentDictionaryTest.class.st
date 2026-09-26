@@ -21,11 +21,69 @@ SoilPersistentDictionaryTest >> setUp [
 		initializeFilesystem
 ]
 
+{ #category : #private }
+SoilPersistentDictionaryTest >> recordsHoldingValuesWrittenInPlace [
+	"the records of the data segment whose object the serializer would have written in place
+	- nothing can point at such a record, see Object>>soilIsWrittenByValue"
+	| tx segment found |
+	tx := soil newTransaction.
+	segment := soil objectRepository segmentAt: 1.
+	found := (1 to: segment lastObjectIndex) select: [ :index |
+		(tx objectWithId: (SoilObjectId segment: 1 index: index)) soilIsWrittenByValue ].
+	tx abort.
+	^ found
+]
+
 { #category : #running }
 SoilPersistentDictionaryTest >> tearDown [ 
 	super tearDown.
 	soil ifNotNil: [ 
 		soil close ]
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testAValueWrittenInPlaceGetsNoRecordOfItsOwn [
+	"#at:put: made a cluster root of every value it was handed. A symbol, nil, true or a
+	small integer is written into the dictionary itself all the same, so each got a record
+	nothing points at - one per #at:put:, on every commit that set one"
+	| tx |
+	tx := soil newTransaction.
+	tx root: SoilPersistentDictionary new.
+	tx commit.
+	tx := soil newTransaction.
+	tx root
+		at: #integer put: 1;
+		at: #nil put: nil;
+		at: #symbol put: #aSymbol;
+		at: #true put: true.
+	tx commit.
+	self assert: self recordsHoldingValuesWrittenInPlace isEmpty.
+	tx := soil newTransaction.
+	self assert: (tx root at: #integer) equals: 1.
+	self assert: (tx root at: #nil) isNil.
+	self assert: (tx root at: #symbol) equals: #aSymbol.
+	self assert: (tx root at: #true).
+	tx abort
+]
+
+{ #category : #tests }
+SoilPersistentDictionaryTest >> testADictionaryWrittenWithoutATransactionGivesItsSymbolsNoRecord [
+	"a dictionary that does not know its transaction yet - built outside one, or read and
+	copied - makes its values cluster roots when it is written, and a symbol went the same
+	way as the string next to it"
+	| tx dictionary |
+	dictionary := SoilPersistentDictionary new.
+	dictionary
+		at: #symbol put: #aSymbol;
+		at: #string put: 'a string'.
+	tx := soil newTransaction.
+	tx root: (Dictionary new at: #dictionary put: dictionary; yourself).
+	tx commit.
+	self assert: self recordsHoldingValuesWrittenInPlace isEmpty.
+	tx := soil newTransaction.
+	self assert: ((tx root at: #dictionary) at: #symbol) equals: #aSymbol.
+	self assert: ((tx root at: #dictionary) at: #string) equals: 'a string'.
+	tx abort
 ]
 
 { #category : #tests }

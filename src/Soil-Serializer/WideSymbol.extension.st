@@ -19,3 +19,8 @@ WideSymbol >> soilSerialize: serializer [
 	
 	self soilBasicSerialize: serializer
 ]
+
+{ #category : #'*Soil-Serializer' }
+WideSymbol >> soilIsWrittenByValue [
+	^ true
+]

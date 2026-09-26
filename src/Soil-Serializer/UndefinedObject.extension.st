@@ -14,3 +14,8 @@ UndefinedObject class >> soilMaterialize: materializer [
 UndefinedObject >> soilSerialize: serializer [ 
 	self soilBasicSerialize: serializer 
 ]
+
+{ #category : #'*Soil-Serializer' }
+UndefinedObject >> soilIsWrittenByValue [
+	^ true
+]
