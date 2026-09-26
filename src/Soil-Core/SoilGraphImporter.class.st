@@ -50,6 +50,31 @@ SoilGraphImporter >> addNextVersionOf: cluster at: presentOid [
 ]
 
 { #category : #importing }
+SoilGraphImporter >> bytesOf: cluster withIndexId: oldId replacedBy: newId [
+	"The dictionary an index belongs to holds nothing but the id of its index - everything
+	else is transient, see SoilIndexedDictionary class>>soilTransientInstVars - so its bytes
+	are that id, written as a string. They are rewritten rather than the dictionary being
+	materialized: materializing opens the index under the id the dictionary carries, which
+	is the source's, and another database has no index under it.
+
+	The id is replaced as the serializer writes it, length included, and a cluster's bytes
+	hold no positions, so the new id may be longer or shorter. Found anywhere but exactly
+	once, the bytes are not what this expects, and that is said instead of guessed at."
+	| bytes old position |
+	bytes := cluster bytes.
+	old := self serializedString: oldId.
+	position := bytes indexOfSubCollection: old startingAt: 1.
+	(position = 0 or: [ (bytes indexOfSubCollection: old startingAt: position + 1) > 0 ])
+		ifTrue: [
+			SoilUnsupportedError signal:
+				'the bytes of an object that owns an index were expected to carry its id exactly once' ].
+	^ bytes
+		copyReplaceFrom: position
+		to: position + old size - 1
+		with: (self serializedString: newId)
+]
+
+{ #category : #importing }
 SoilGraphImporter >> import [
 	"inside the commit semaphore, where every commit hands out its ids: from
 	#memoizeSegmentIndexes to #updateSegmentIndexes the import counts on from the last
@@ -333,8 +358,17 @@ SoilGraphImporter >> readIndexOfCluster: cluster withId: indexId [
 
 { #category : #importing }
 SoilGraphImporter >> readIndexesOf: cluster [
-	cluster indexIds do: [ :indexId |
-		self readIndexOfCluster: cluster withId: indexId ]
+	"every index gets an id of its own here, as every object gets an object id of its own.
+	The id it arrives with names the index file in the source, and in the database the
+	export came from - a copy of a space inside one user - creating the index under that
+	id put the copy's index where the source's was, and both read the same entries from
+	then on. The id is in two places, the cluster's list of its indexes and the dictionary
+	the index belongs to, and both are changed."
+	cluster indexIds: (cluster indexIds collect: [ :indexId | | newId |
+		newId := SoilIndexedDictionary newIndexId.
+		self readIndexOfCluster: cluster withId: newId.
+		cluster bytes: (self bytesOf: cluster withIndexId: indexId replacedBy: newId).
+		newId ])
 ]
 
 { #category : #importing }
@@ -392,6 +426,14 @@ SoilGraphImporter >> replacementNamed: aName [
 			SoilInvalidReplacement signal:
 				'the export leaves out an object to be replaced as ' , aName printString
 				, ', and nothing is registered under that name' ]
+]
+
+{ #category : #private }
+SoilGraphImporter >> serializedString: aString [
+	^ ByteArray streamContents: [ :bytes |
+		SoilSerializer new
+			stream: bytes;
+			nextPutString: aString ]
 ]
 
 { #category : #importing }

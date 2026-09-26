@@ -23,6 +23,12 @@ Class {
 	#category : #'Soil-Core-Index-Common'
 }
 
+{ #category : #accessing }
+SoilIndexedDictionary class >> newIndexId [
+	"the id a new index is created under, and the name of its file"
+	^ UUID new asString36
+]
+
 { #category : #'instance creation' }
 SoilIndexedDictionary class >> newWithBackend: aClass [
 	^ self new createIndexWith: aClass
@@ -155,7 +161,7 @@ SoilIndexedDictionary >> indexUpdated [
 { #category : #initialization }
 SoilIndexedDictionary >> initialize [ 
 	super initialize.
-	id := UUID new asString36.
+	id := self class newIndexId.
 	dirty := false
 ]
 

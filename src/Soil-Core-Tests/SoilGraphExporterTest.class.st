@@ -9,6 +9,17 @@ Class {
 	#category : #'Soil-Core-Tests-Visitor'
 }
 
+{ #category : #private }
+SoilGraphExporterTest >> entryIdsOf: aDictionary [
+	"the object ids an index holds, read from the index and not through the values - a
+	value is answered as a proxy, and two proxies for the same record are not identical"
+	| ids |
+	ids := OrderedCollection new.
+	aDictionary index newIterator associationsDo: [ :each |
+		ids add: each value asSoilObjectId ].
+	^ ids asArray
+]
+
 { #category : #accessing }
 SoilGraphExporterTest >> path [
 	^ 'soil-tests' asFileReference
@@ -553,6 +564,118 @@ SoilGraphExporterTest >> testAMigrationCanDropAnEmbeddedObject [
 	self assert: imported second asArray equals: #( 'shared' ).
 	self assert: imported second identicalTo: imported third.
 	targetTx commit
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testAnImportIntoTheSameDatabaseGivesTheIndexAnIdOfItsOwn [
+	"Copying into the database the export came from is what copying a space inside one
+	user is. The index arrived under the id of the one it was exported from, and creating
+	it under that id put the copy's index where the source's was: from then on both read
+	the same file, and the source's entries pointed at the copy's objects (alpha,
+	2026-09-26). The copy gets an index of its own, and the source keeps what it had - also
+	after the database is closed and opened again."
+
+	| tx sourceIds exportTx bytes importTx importer copyOid reopened source copy |
+	tx := soil newTransaction.
+	tx root: SoilPersistentDictionary new.
+	tx root at: #rows put: (SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself).
+	(tx root at: #rows)
+		at: 1 put: (SoilTestGraphRoot new nested: 'first'; yourself);
+		at: 2 put: (SoilTestGraphRoot new nested: 'second'; yourself).
+	tx commit.
+	tx := soil newTransaction.
+	sourceIds := self entryIdsOf: (tx root at: #rows).
+	tx abort.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: (exportTx root at: #rows);
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	importTx := soil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: importTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	copyOid := importTx objectIdOf: importer importedObjects first.
+	importTx root at: #copy put: importer importedObjects first.
+	importTx commit.
+
+	soil close.
+	reopened := Soil openOnPath: self path.
+	soil := reopened.
+	tx := reopened newTransaction.
+	source := tx root at: #rows.
+	copy := tx objectWithId: copyOid.
+	self deny: copy id equals: source id.
+	self assert: (self entryIdsOf: source) equals: sourceIds.
+	self assert: (copy at: 1) nested equals: 'first'.
+	self assert: (copy at: 2) nested equals: 'second'.
+	self assert: ((self entryIdsOf: copy) noneSatisfy: [ :each | sourceIds includes: each ]).
+	tx abort
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testASkippedIndexImportedIntoTheSameDatabaseLeavesTheSourceItsEntries [
+	"A skipped index arrives with its sizes and no entries - a space copied without its
+	rows. Created under the source's id, the empty index replaced the source's, and the
+	source lost every row it had (alpha, 2026-09-26)."
+
+	| tx sourceIds exportTx bytes importTx importer copyOid reopened source copy |
+	tx := soil newTransaction.
+	tx root: SoilPersistentDictionary new.
+	tx root at: #rows put: (SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself).
+	(tx root at: #rows)
+		at: 1 put: (SoilTestGraphRoot new nested: 'first'; yourself);
+		at: 2 put: (SoilTestGraphRoot new nested: 'second'; yourself).
+	tx commit.
+	tx := soil newTransaction.
+	sourceIds := self entryIdsOf: (tx root at: #rows).
+	tx abort.
+
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: (exportTx root at: #rows);
+			skipIndexes: { exportTx root at: #rows };
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	importTx := soil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: importTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	copyOid := importTx objectIdOf: importer importedObjects first.
+	importTx root at: #copy put: importer importedObjects first.
+	importTx commit.
+
+	soil close.
+	reopened := Soil openOnPath: self path.
+	soil := reopened.
+	tx := reopened newTransaction.
+	source := tx root at: #rows.
+	copy := tx objectWithId: copyOid.
+	self deny: copy id equals: source id.
+	self assert: (self entryIdsOf: source) equals: sourceIds.
+	self assert: copy isEmpty.
+	tx abort
 ]
 
 { #category : #tests }
