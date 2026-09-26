@@ -35,3 +35,8 @@ Class >> soilTransientInstVars [
 	Important: the array of names is for the *hierarchy*"
 	^ #()
 ]
+
+{ #category : #'*Soil-Serializer' }
+Class >> soilIsWrittenByValue [
+	^ true
+]

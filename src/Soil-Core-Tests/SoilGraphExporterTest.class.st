@@ -887,6 +887,51 @@ SoilGraphExporterTest >> testAnExportCommittedWithItsTransactionLeavesTheSourceA
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testExportOfADictionaryHoldingASymbolRunsInAReadOnlyTransaction [
+	"A dictionary that is written again during an export - here because a migration names
+	the class of the object it sits in - does not know its transaction and makes its values cluster roots. A symbol
+	among them was a write, and a read-only transaction refused it: copying a space
+	whose page block has a property holding a symbol died on it (ApptiveGrid,
+	AGCopyTest>>testCopySpaceWithBlock, 2026-09-26)."
+	| tx readOnly exportTx bytes targetTx importer imported |
+	tx := soil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: (SoilPersistentDictionary new
+			at: #symbol put: #aSymbol;
+			yourself);
+		yourself).
+	tx commit.
+	soil close.
+	soil := nil.
+
+	readOnly := Soil path: self path.
+	readOnly readOnly: true.
+	readOnly open.
+	[ exportTx := readOnly newReadOnlyTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			migrate: migrationClass to: [ :each | each copy ];
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort ]
+		ensure: [ readOnly close ].
+
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+	self assert: ((imported instVarNamed: #one) at: #symbol) equals: #aSymbol.
+	targetTx commit
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testExportRunsOnASourceOpenedReadOnly [
 	"A copy reads a database another image owns and may not write to it. The export does
 	raise clusters whose behavior version is behind - #updateCluster: materializes them
