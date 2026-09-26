@@ -255,10 +255,14 @@ SoilGraphExporter >> serializerClass [
 
 { #category : #configuration }
 SoilGraphExporter >> skipIndexes: aCollection [ 
-	indexesToSkip := aCollection collect: [ :each |
+	"the dictionaries whose entries stay behind, given as dictionaries or as their object
+	ids. Kept as the ids of their indexes: the dictionary an index is written from is the
+	one the export read, and a transaction that does not know it cannot answer its object
+	id - see #updateCluster:"
+	indexesToSkip := (aCollection collect: [ :each |
 		(each class = SoilObjectId)
-			ifTrue: [ each ]
-			ifFalse: [ transaction objectIdOf: each  ] ]
+			ifTrue: [ (soil objectRepository at: each) indexIds first ]
+			ifFalse: [ each id ] ]) asSet
 ]
 
 { #category : #accessing }
@@ -286,21 +290,24 @@ SoilGraphExporter >> updateCluster: aCluster [
 	is that the export is a short-lived structure that is used 
 	to be re-imported somewhere else. The common denominator here
 	is the actual state of the software. We can match that if we
-	make sure that the clusters are on the newest version "
-	| cluster |
+	make sure that the clusters are on the newest version.
+
+	The raised cluster goes into the stream and nowhere else. The source keeps the shape
+	it has: registered in the transaction, the cluster was written back when the
+	transaction committed, and a copy runs in the transaction of the request that asked
+	for it - every outdated record of a space was written again, for nothing the copy
+	needed "
 	(self isUpToDateCluster: aCluster) ifTrue: [ ^ aCluster ].
 	"if the cluster is not up-to-date we materialize the 
 	object which will upgrade it"
-	cluster := (aCluster 
+	^ (aCluster 
 		transaction: transaction;
 		materializeObject;
 		asNewClusterVersion)
 			version: 1;
 			transaction: transaction;
 			serializeObject;
-			yourself.
-	transaction registerRecord: cluster.
-	^ cluster
+			yourself
 			
 ]
 
@@ -360,10 +367,9 @@ SoilGraphExporter >> visitPersistentClusterVersion: aCluster [
 		self processObjectId: reference ].
 	cluster indexIds ifNotEmpty: [ 
 		cluster object ifNil: [  
-			transaction registerRecord: (cluster 
+			cluster 
 				transaction: transaction;
-				materializeObject;
-				yourself) ].
+				materializeObject ].
 		self visit: cluster object ].
 ]
 
@@ -378,7 +384,7 @@ SoilGraphExporter >> visitSkipListDictionary: aSkipListDictionary [
 			nextPutAll: ( keySize asByteArrayOfSize: 2);
 			nextPutAll: ( valueSize asByteArrayOfSize: 2 );
 			nextPutAll: ( maxLevel asByteArrayOfSize: 2 ).
-	(indexesToSkip includes: (transaction objectIdOf: aSkipListDictionary))
+	(indexesToSkip includes: aSkipListDictionary id)
 		ifTrue: [ 
 			stream nextPutAll: (0 asByteArrayOfSize: 8) ]
 		ifFalse: [ 
