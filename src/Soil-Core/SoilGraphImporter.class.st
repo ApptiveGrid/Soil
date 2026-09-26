@@ -135,6 +135,43 @@ SoilGraphImporter >> importBehaviorOfDifferentShape: cluster knownAs: presentDes
 	^ self addNextVersionOf: cluster at: presentOid
 ]
 
+{ #category : #importing }
+SoilGraphImporter >> importIndexesOf: cluster [
+	"An index gets an id of its own here, as every object gets an object id of its own.
+	The id it arrives with names the index file in the source, and in the database the
+	export came from - a copy of a space inside one user - creating the index under that
+	id put the copy's index where the source's was, and both read the same entries from
+	then on.
+
+	A cluster with an index is the dictionary that owns it, and it carries the id twice:
+	in the dictionary and in the cluster's list of its indexes. The dictionary is read,
+	given the new id and written again, and writing it fills the list. Reading it does not
+	touch the index, see SoilIndexedDictionary>>index.
+
+	Written again, the cluster has to point at the behavior descriptions it was read with.
+	Anything else means the serializer found the description wanting and made a new one
+	through the transaction, which hands out meta ids the import has counted on itself."
+	| dictionary newCluster |
+	cluster indexIds size = 1 ifFalse: [
+		SoilUnsupportedError signal: 'a cluster is expected to own one index at most' ].
+	dictionary := cluster
+		transaction: transaction;
+		materializeObject.
+	dictionary id: SoilIndexedDictionary newIndexId.
+	self readIndexOfCluster: cluster withId: dictionary id.
+	newCluster := cluster asNewClusterVersion
+		previousVersionPosition: 0;
+		version: cluster version;
+		yourself.
+	newCluster serializeObject.
+	(newCluster behaviorDescriptions collect: [ :each | each objectId index -> each version ]) asArray
+		= (cluster behaviorDescriptions collect: [ :each | each index -> each version ]) asArray
+			ifFalse: [
+				SoilUnsupportedError signal:
+					'writing an imported dictionary again asked for a behavior description the import did not bring' ].
+	^ newCluster
+]
+
 { #category : #'instance creation' }
 SoilGraphImporter >> importedObjects [
 	^ self importedOids collect: [ :each | transaction objectWithId: each ]
@@ -260,9 +297,10 @@ SoilGraphImporter >> readCluster [
 	cluster := self readClusterHeader.
 	self
 		remapReferencesOf: cluster;
-		readIndexesOf: cluster;
-		pointAtLocalBehaviorDescriptions: cluster;
-		store: cluster.
+		pointAtLocalBehaviorDescriptions: cluster.
+	cluster indexIds ifNotEmpty: [
+		cluster := self importIndexesOf: cluster ].
+	self store: cluster.
 	^ cluster
 ]
 
@@ -329,12 +367,6 @@ SoilGraphImporter >> readIndexOfCluster: cluster withId: indexId [
 			basicAt: (stream next: keySize) asInteger
 			add: (self newObjectIdFor: (SoilObjectId readFrom: stream)) ].
 	index writePages
-]
-
-{ #category : #importing }
-SoilGraphImporter >> readIndexesOf: cluster [
-	cluster indexIds do: [ :indexId |
-		self readIndexOfCluster: cluster withId: indexId ]
 ]
 
 { #category : #importing }
