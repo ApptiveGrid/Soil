@@ -835,6 +835,58 @@ SoilGraphExporterTest >> testExportOfAFreshPersistentDictionaryRunsOnAReadOnlySo
 ]
 
 { #category : #tests }
+SoilGraphExporterTest >> testAnExportCommittedWithItsTransactionLeavesTheSourceAsItIs [
+	"An export raises a cluster whose behavior version is behind to the current shape - for
+	the stream. The source keeps the shape it has. A copy runs in the transaction of the
+	request that asked for it, and that transaction commits: raising the source in passing
+	wrote every outdated record of a space again, ten thousand rows of one grid on alpha
+	(2026-09-26), for nothing the copy needed."
+
+	| tx before exportTx bytes targetTx importer imported |
+	tx := soil newTransaction.
+	tx root: (OrderedCollection with: (migrationClass new
+		instVarNamed: #one put: 'behind';
+		yourself)).
+	tx makeRoot: tx root first.
+	tx commit.
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #two. #three. #four };
+		package: self class package name) install.
+	tx := soil newTransaction.
+	tx root add: (migrationClass new instVarNamed: #one put: 'current'; yourself).
+	tx markDirty: tx root.
+	tx makeRoot: tx root last.
+	tx commit.
+
+	before := self fileSizes.
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx commit.
+	self assert: self fileSizes equals: before.
+
+	"and the stream carries the raised shape all the same"
+	targetSoil := Soil createOnPath: self targetPath.
+	targetTx := targetSoil newTransaction.
+	importer := SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself.
+	importer import.
+	imported := importer importedObjects first.
+	self assert: (imported first instVarNamed: #one) equals: 'behind'.
+	self assert: (imported first instVarNamed: #four) isNil.
+	self assert: (imported second instVarNamed: #one) equals: 'current'.
+	targetTx commit
+]
+
+{ #category : #tests }
 SoilGraphExporterTest >> testExportRunsOnASourceOpenedReadOnly [
 	"A copy reads a database another image owns and may not write to it. The export does
 	raise clusters whose behavior version is behind - #updateCluster: materializes them
