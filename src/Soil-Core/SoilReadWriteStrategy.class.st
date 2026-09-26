@@ -2,8 +2,7 @@ Class {
 	#name : #SoilReadWriteStrategy,
 	#superclass : #SoilCommitStrategy,
 	#instVars : [
-		'records',
-		'recordSet'
+		'records'
 	],
 	#category : #'Soil-Core'
 }
@@ -15,11 +14,7 @@ SoilReadWriteStrategy class >> isAbstract [
 
 { #category : #adding }
 SoilReadWriteStrategy >> addRecord: record [ 
-	"asked through a set, not the list: the list keeps the order the records are written
-	in, and looking a record up in it made every add go through all the ones before -
-	a commit of ten thousand records spent a quarter of its time here"
-	(recordSet includes: record) ifFalse: [  
-		recordSet add: record.
+	(records includes: record) ifFalse: [  
 		records add: record ]
 ]
 
@@ -61,8 +56,7 @@ SoilReadWriteStrategy >> records [
 
 { #category : #public }
 SoilReadWriteStrategy >> reset [ 
-	records := OrderedCollection new.
-	recordSet := Set new
+	records := OrderedCollection new
 ]
 
 { #category : #accessing }
@@ -77,9 +71,6 @@ SoilReadWriteStrategy >> serializeObjects [
 	are taken into account"
 	[ index <= records size ] whileTrue: [ | record |
 		record := (records at: index) asNewClusterVersion.
-		recordSet
-			remove: (records at: index);
-			add: record.
 		records at: index put: record.
 		record serializeObject.
 		index := index + 1 ]
