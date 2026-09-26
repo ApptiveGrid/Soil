@@ -120,8 +120,15 @@ SoilBackupVisitor >> visitControl: aSoilControlFile [
 	target control 
 		databaseFormatVersion: aSoilControlFile databaseFormatVersion;
 		databaseVersion: aSoilControlFile databaseVersion;
-		applicationVersion: aSoilControlFile applicationVersion;
-		checkpoint: aSoilControlFile lastCheckpoint
+		applicationVersion: aSoilControlFile applicationVersion.
+	"the checkpoint is a position in a journal, and it is the source's journal only
+	when that journal comes along. Without it the source's checkpoint names a
+	fragment the copy does not have: a writable open covers that up by starting a
+	new fragment, a read-only open - the way a backup is read to be checked -
+	refuses the copy as needing recovery. The target keeps the checkpoint it wrote
+	into its own first fragment when it was initialized"
+	self copyJournal ifTrue: [
+		target control checkpoint: aSoilControlFile lastCheckpoint ]
 ]
 
 { #category : #visiting }

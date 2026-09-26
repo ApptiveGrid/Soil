@@ -50,6 +50,30 @@ SoilBackupTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testABackupOpensReadOnly [
+	"a backup is checked by opening it for reading, and that open refuses a database
+	whose last checkpoint does not read back. The copy's checkpoint has to be one in
+	its own journal, not the source's, whose fragments stay behind"
+	| tx backup tx2 |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: nil).
+	tx commit.
+	1 to: 5 do: [ :each |
+		tx := soil newTransaction.
+		tx root nested: each printString.
+		tx markDirty: tx root.
+		tx commit ].
+	soil backupTo: self backupPath.
+	backup := Soil new
+		path: self backupPath;
+		readOnly: true;
+		open.
+	[ tx2 := backup newTransaction.
+	[ self assert: tx2 root nested equals: '5' ] ensure: [ tx2 abort ] ]
+		ensure: [ backup close ]
+]
+
+{ #category : #tests }
 SoilBackupTest >> testBackupCurrentVersion [ 
 	| tx tx2 visitor tx3 |
 	tx := soil newTransaction.
