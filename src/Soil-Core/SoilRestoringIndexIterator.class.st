@@ -31,24 +31,27 @@ SoilRestoringIndexIterator class >> on: aSoilIndex [
 
 { #category : #private }
 SoilRestoringIndexIterator >> historicValueFor: item [
- 	"a removed value will return item with value ObjectId 0:0"
-	 | journalEntry |
- 	readVersion ifNil: [ ^ item ].
- 	(self currentPage isOlderThan: readVersion) ifTrue: [ 
- 			"all modifications to this page have been done before we
- 			started the transaction, so the removal is visibile and 
- 			value absent"
- 			  ^  item ].
-
- 	"we determine all changes between our transaction and the
- 	last one modifying the page. if we get back changes for the
- 	key the value of the oldes entry has the value it had before"
-	journalEntry := self 
- 			lastJournalEntriesFor: item
- 			startingAt: self currentPage lastTransaction.
-			
- 	journalEntry ifNil: [^ item].
-	^ item key -> journalEntry oldValue 
+	"the item as it was at readVersion. The journal entries between the last transaction
+	that modified the page and readVersion are followed from the newest to the oldest:
+	each one that produced the value we hold says in its oldValue what the key held
+	before, so a key overwritten twice after readVersion goes back two steps and not one.
+	A key that did not exist at readVersion ends with the value nil, a removed one with
+	the removed marker"
+	| restored |
+	readVersion ifNil: [ ^ item ].
+	(self currentPage isOlderThan: readVersion) ifTrue: [
+		"all modifications to this page have been done before we
+		started the transaction, so the removal is visibile and
+		value absent"
+		^ item ].
+	restored := item.
+	self currentPage lastTransaction to: readVersion + 1 by: -1 do: [ :transactionId |
+		(journal transactionJournalAt: transactionId) entries reverseDo: [ :each |
+			restored value ifNil: [ ^ restored ].
+			((each class == SoilAddKeyEntry or: [ each class == SoilRemoveKeyEntry ])
+				and: [ each isForItem: restored index: index id ]) ifTrue: [
+					restored := restored key -> each oldValue ] ] ].
+	^ restored
 ]
 
 { #category : #accessing }
@@ -57,38 +60,21 @@ SoilRestoringIndexIterator >> journal: aSoilPersistentDatabaseJournal [
 ]
 
 { #category : #accessing }
-SoilRestoringIndexIterator >> lastJournalEntriesFor: item startingAt: anInteger [
-
-	"return the journal entry that logged the add or removed that changed the entry from the state of the last commited transaction, the oldValue of this entry is what we need to restore the state of the entry"
-
-	| transactionId lastEntry |
-	
-	transactionId := anInteger.
-	[ transactionId > readVersion ] whileTrue: [  
-		(journal transactionJournalAt: transactionId) entries do: [ :each | 
-			((each class == SoilAddKeyEntry) | (each class = SoilRemoveKeyEntry)) ifTrue: [ 
-			(each isForItem: item index: index id) ifTrue: [  
-					lastEntry := each] ]  ].
-		transactionId := transactionId - 1.
-	].
-   ^ lastEntry
-]
-
-{ #category : #accessing }
 SoilRestoringIndexIterator >> readVersion: anInteger [ 
 	readVersion := anInteger
 ]
 
 { #category : #private }
-SoilRestoringIndexIterator >> restoreItem: item [ 
-	"restore a value that has been removed by a later transaction
-	this method just wraps historicValueFor: and turns removed items into nil"
+SoilRestoringIndexIterator >> restoreItem: item [
+	"the item as it was at readVersion, nil if the key was removed by then or did not
+	exist yet. The latter comes back from historicValueFor: with the value nil, and
+	handed on as it is an iterator ends early at it or answers an association to nothing"
 	| newItem |
-	
 	newItem := self historicValueFor: item.
-	newItem ifNotNil: [
-			newItem value ifNotNil: [:it| it isRemoved ifTrue: [ ^ nil ]]].
-	^newItem
+	newItem ifNil: [ ^ nil ].
+	newItem value ifNil: [ ^ nil ].
+	newItem value isRemoved ifTrue: [ ^ nil ].
+	^ newItem
 ]
 
 { #category : #strategy }
