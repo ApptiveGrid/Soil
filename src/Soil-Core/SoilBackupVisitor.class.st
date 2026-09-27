@@ -56,17 +56,20 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 	at. Read as it is now, the index hands out entries committed after that version,
 	which point to objects the backup does not copy. The behavior registry is read as it
 	is now: its entries are not journaled as index entries, so there is nothing to
-	restore them from"
+	restore them from, and what it points at is asked for instead, see
+	#existsAtPinnedVersion:"
 	iterator := sourceIndex newIterator.
 	isBehaviorIndex ifFalse: [
 		iterator
 			journal: soil journal;
 			readVersion: self databaseVersion ].
 	[ (assoc := iterator nextAssociation) isNil ] whileFalse: [
-		assoc value isRemoved ifFalse: [
-			targetIndex basicAt: assoc key add: assoc value.
-			"recurse further into the values of the index"
-			self processObjectId: assoc value asSoilObjectId ] ].
+		(assoc value isRemoved not and: [
+			isBehaviorIndex not or: [ self existsAtPinnedVersion: assoc value asSoilObjectId ] ])
+			ifTrue: [
+				targetIndex basicAt: assoc key add: assoc value.
+				"recurse further into the values of the index"
+				self processObjectId: assoc value asSoilObjectId ] ].
 	"both indexes are registered with their managers now, so both are released the same
 	way - the target's too, which used to be closed by hand while staying registered"
 	targetIndex flush.
@@ -103,6 +106,28 @@ SoilBackupVisitor >> copyJournal: aBoolean [
 SoilBackupVisitor >> databaseVersion: anObject [
 
 	databaseVersion := anObject
+]
+
+{ #category : #visiting }
+SoilBackupVisitor >> existsAtPinnedVersion: aSoilObjectId [
+	"whether the object an entry of the behavior registry points at has a version at or
+	below the one this backup is taken at. The registry is read as it is now - its
+	entries are not journaled as index entries - so a class stored for the first time
+	after the pin has an entry whose description did not exist then, and #processLoop
+	read nil and failed on it. Left out, it is not in the copy either: an entry kept
+	without its object would dangle there. The other indexes are read at the pinned
+	version and need no asking.
+
+	The record is read a second time when #processLoop gets to it. That is the price
+	of asking here, before the entry is written into the target.
+
+	The meta description has no record to ask: it is pre-initialized, and the
+	behavior registry points at it from the first commit on - #processObjectId:
+	skips it for the same reason"
+	aSoilObjectId = SoilBehaviorDescription metaId ifTrue: [ ^ true ].
+	^ ((soil objectRepository segmentAt: aSoilObjectId segment)
+		basicAt: aSoilObjectId index
+		version: self databaseVersion) notNil
 ]
 
 { #category : #visiting }

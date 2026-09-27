@@ -108,22 +108,17 @@ SoilBackupTest >> testABackupKeepsTheIndexAsItWasWhileCommitsGoOn [
 ]
 
 { #category : #tests }
-SoilBackupTest >> testABackupLeavesOutAKeyAddedAfterItsVersion [
-	"the records are read at the version the backup is taken at, and the indexes have
-	to be read there as well. Read as they are now, an entry committed after that
-	version came into the copy and pointed to an object the backup does not copy - a
-	metabase backup stopped on it with nil objectId: at an event added one version
-	after the backup's"
-	| tx dict tx2 |
+SoilBackupTest >> testABackupLeavesOutAClassFirstStoredAfterItsVersion [
+	"the behavior registry is read as it is now. A class stored for the first time
+	after the backup's version has an entry there whose description did not exist at
+	that version, and the backup stopped on it with nil objectId:"
+	| tx tx2 |
 	tx := soil newTransaction.
-	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
-		keySize: 8;
-		maxLevel: 16.
-	tx root: dict.
-	dict at: #foo put: (SoilTestNestedObject new label: #foo).
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #beforeThePin)).
 	tx commit.
 	tx := soil newTransaction.
-	tx root at: #bar put: (SoilTestNestedObject new label: #bar).
+	tx root nested: (SoilTestClusterRoot new nested: #afterThePin).
+	tx markDirty: tx root.
 	tx commit.
 	backupSoil := Soil createOnPath: self path, #backup.
 	SoilBackupVisitor new
@@ -132,8 +127,34 @@ SoilBackupTest >> testABackupLeavesOutAKeyAddedAfterItsVersion [
 		backup: soil.
 	backupSoil close; open.
 	tx2 := backupSoil newTransaction.
-	[ self assert: (tx2 root at: #foo) label equals: #foo.
-	  self assert: (tx2 root at: #bar ifAbsent: [ #absent ]) equals: #absent ]
+	[ self assert: tx2 root nested label equals: #beforeThePin ]
+		ensure: [ tx2 abort ]
+]
+
+{ #category : #tests }
+SoilBackupTest >> testABackupKeepsTheValueAKeyHadAtItsVersion [
+	"a key overwritten after the backup's version points at an object that did not
+	exist at that version. Leaving such entries out lost the key from the copy,
+	although it was there at the version, with the value it had then"
+	| tx dict tx2 |
+	tx := soil newTransaction.
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
+		keySize: 8;
+		maxLevel: 16.
+	tx root: dict.
+	dict at: #foo put: (SoilTestNestedObject new label: #beforeThePin).
+	tx commit.
+	tx := soil newTransaction.
+	tx root at: #foo put: (SoilTestNestedObject new label: #afterThePin).
+	tx commit.
+	backupSoil := Soil createOnPath: self path, #backup.
+	SoilBackupVisitor new
+		target: backupSoil;
+		version: 1;
+		backup: soil.
+	backupSoil close; open.
+	tx2 := backupSoil newTransaction.
+	[ self assert: (tx2 root at: #foo) label equals: #beforeThePin ]
 		ensure: [ tx2 abort ]
 ]
 
@@ -386,6 +407,39 @@ SoilBackupTest >> testBackupTheBackup [
 	
 	secondBackup close; destroy
 		
+]
+
+{ #category : #tests }
+SoilBackupTest >> testAnIndexEntryCommittedAfterThePinIsLeftOut [
+	"the records are read at the pinned version, the index as it is now. A commit
+	that lands while the backup runs puts an entry into the index whose object has
+	no version at the pin - which used to end the backup in 'nil objectId:', every
+	night, on a database that is busy for as long as its backup takes"
+	| tx tx2 tx3 visitor dict |
+	tx := soil newTransaction.
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
+		keySize: 8;
+		maxLevel: 16.
+	tx root: dict.
+	dict at: #foo put: (SoilTestNestedObject new label: #beforeThePin).
+	tx commit.
+	tx2 := soil newTransaction.
+	tx2 root at: #bar put: (SoilTestNestedObject new label: #afterThePin).
+	tx2 commit.
+	backupSoil := Soil createOnPath: self path , #backup.
+	visitor := SoilBackupVisitor new
+		target: backupSoil;
+		version: 1;
+		yourself.
+	visitor backup: soil.
+	backupSoil := Soil new
+		path: self path , #backup;
+		readOnly: true;
+		open.
+	tx3 := backupSoil newTransaction.
+	[ self assert: (tx3 root at: #foo) label equals: #beforeThePin.
+	self assert: (tx3 root at: #bar ifAbsent: [ nil ]) isNil ]
+		ensure: [ tx3 abort ]
 ]
 
 { #category : #tests }
