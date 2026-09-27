@@ -34,13 +34,6 @@ SoilAddKeyEntry >> context [
 	^ id 
 ]
 
-{ #category : #initialization }
-SoilAddKeyEntry >> initialize [
-	super initialize.
-	"version 2 writes the value the key held before, see #writeOn:"
-	version := 2
-]
-
 { #category : #testing }
 SoilAddKeyEntry >> isForItem: anItem index: indexId [
 	id = indexId ifFalse: [ ^false ].
@@ -84,17 +77,16 @@ SoilAddKeyEntry >> providesObjectIds [
 
 { #category : #writing }
 SoilAddKeyEntry >> readFrom: aStream [ 
-	| idSize |
+	| idSize oldValueSize |
 	super readFrom: aStream.
 	idSize := aStream next.
 	id := (aStream next: idSize) asString.
 	key := (aStream next: aStream nextLengthEncodedInteger) asInteger.
 	value := (aStream next: (aStream nextLengthEncodedInteger) asInteger) asSoilObjectId .
-	version >= 2 ifTrue: [ | oldValueSize |
-		oldValueSize := aStream nextLengthEncodedInteger.
-		oldValue := oldValueSize = 0
-			ifTrue: [ nil ]
-			ifFalse: [ (aStream next: oldValueSize) asSoilObjectId ] ]
+	oldValueSize := aStream nextLengthEncodedInteger.
+	oldValue := oldValueSize = 0
+		ifTrue: [ nil ]
+		ifFalse: [ (aStream next: oldValueSize) asSoilObjectId ]
 ]
 
 { #category : #accessing }
@@ -110,9 +102,7 @@ SoilAddKeyEntry >> value: aString [
 { #category : #writing }
 SoilAddKeyEntry >> writeOn: aStream [ 
 	"the old value is written as well, empty when the key is new. A reader on an older
-	version restores the key from it, also when this entry is read back from disk. It
-	was not written up to version 1, and such an entry comes back without it; one of
-	that version is still written the way it was"
+	version restores the key from it, also when this entry is read back from disk"
 	| keyByteArray valueByteArray oldValueByteArray |
 	keyByteArray := key asByteArray.
 	valueByteArray := value asByteArray.
@@ -124,9 +114,7 @@ SoilAddKeyEntry >> writeOn: aStream [
 		nextPutLengthEncodedInteger: keyByteArray size;
 		nextPutAll: keyByteArray;
 		nextPutLengthEncodedInteger: valueByteArray size;
-		nextPutAll: valueByteArray.
-	version >= 2 ifTrue: [
-		aStream
-			nextPutLengthEncodedInteger: oldValueByteArray size;
-			nextPutAll: oldValueByteArray ]
+		nextPutAll: valueByteArray;
+		nextPutLengthEncodedInteger: oldValueByteArray size;
+		nextPutAll: oldValueByteArray
 ]
