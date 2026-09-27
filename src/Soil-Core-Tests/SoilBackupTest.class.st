@@ -74,6 +74,70 @@ SoilBackupTest >> testABackupOpensReadOnly [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testABackupKeepsTheIndexAsItWasWhileCommitsGoOn [
+	"the backup is a reader like any other while it runs. The index cleaner keeps the
+	state of an index page only as long as an open reader needs it, and a backup nobody
+	knew about lost an entry removed during the copy. The entry added during the copy
+	did not exist at the backup's version and stays out"
+	| tx dict visitor tx2 |
+	tx := soil newTransaction.
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
+		keySize: 8;
+		maxLevel: 16.
+	tx root: dict.
+	dict at: #foo put: (SoilTestNestedObject new label: #foo).
+	dict at: #bar put: (SoilTestNestedObject new label: #bar).
+	tx commit.
+	backupSoil := Soil createOnPath: self path, #backup.
+	visitor := SoilTestInterleavedBackupVisitor new
+		target: backupSoil;
+		beforeFirstIndex: [ | during |
+			during := soil newTransaction.
+			during root removeKey: #bar.
+			during root at: #baz put: (SoilTestNestedObject new label: #baz).
+			during commit ];
+		yourself.
+	visitor backup: soil.
+	self assert: soil control databaseVersion equals: 2.
+	backupSoil close; open.
+	tx2 := backupSoil newTransaction.
+	[ self assert: (tx2 root at: #foo) label equals: #foo.
+	  self assert: (tx2 root at: #bar) label equals: #bar.
+	  self assert: (tx2 root at: #baz ifAbsent: [ #absent ]) equals: #absent ]
+		ensure: [ tx2 abort ]
+]
+
+{ #category : #tests }
+SoilBackupTest >> testABackupLeavesOutAKeyAddedAfterItsVersion [
+	"the records are read at the version the backup is taken at, and the indexes have
+	to be read there as well. Read as they are now, an entry committed after that
+	version came into the copy and pointed to an object the backup does not copy - a
+	metabase backup stopped on it with nil objectId: at an event added one version
+	after the backup's"
+	| tx dict tx2 |
+	tx := soil newTransaction.
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
+		keySize: 8;
+		maxLevel: 16.
+	tx root: dict.
+	dict at: #foo put: (SoilTestNestedObject new label: #foo).
+	tx commit.
+	tx := soil newTransaction.
+	tx root at: #bar put: (SoilTestNestedObject new label: #bar).
+	tx commit.
+	backupSoil := Soil createOnPath: self path, #backup.
+	SoilBackupVisitor new
+		target: backupSoil;
+		version: 1;
+		backup: soil.
+	backupSoil close; open.
+	tx2 := backupSoil newTransaction.
+	[ self assert: (tx2 root at: #foo) label equals: #foo.
+	  self assert: (tx2 root at: #bar ifAbsent: [ #absent ]) equals: #absent ]
+		ensure: [ tx2 abort ]
+]
+
+{ #category : #tests }
 SoilBackupTest >> testBackupCurrentVersion [ 
 	| tx tx2 visitor tx3 |
 	tx := soil newTransaction.

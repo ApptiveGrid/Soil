@@ -10,14 +10,23 @@ Class {
 
 { #category : #api }
 SoilBackupVisitor >> backup: aSoil [ 
-	soil := aSoil.
 	"if there is no version set we take the actual database version. This 
 	is to create a consistent backup regardless if transactions are committed 
-	while we are doing the backup"
-	databaseVersion ifNil: [
-		databaseVersion := aSoil control databaseVersion ]. 
-	
-	self visit: soil.
+	while we are doing the backup.
+
+	The backup reads through a transaction at that version, open for as long as the
+	backup runs. Being registered with the transaction manager is what keeps the index
+	cleaner from discarding the state of an index page the backup still has to read: it
+	only keeps what the smallest open read version needs, and with nothing open it keeps
+	nothing"
+	| reader |
+	soil := aSoil.
+	reader := databaseVersion
+		ifNil: [ aSoil newTransaction ]
+		ifNotNil: [ :version | aSoil newTransactionForVersion: version ].
+	reader beReadOnly.
+	databaseVersion := reader readVersion.
+	[ self visit: soil ] ensure: [ reader abort ].
 	target close
 ]
 
@@ -43,8 +52,16 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 		               class: sourceIndex class.
 	targetIndex initializeParametersFrom: sourceIndex.
 
-	"copy all values to the new index"
+	"copy all values to the new index, as they were at the version the records are read
+	at. Read as it is now, the index hands out entries committed after that version,
+	which point to objects the backup does not copy. The behavior registry is read as it
+	is now: its entries are not journaled as index entries, so there is nothing to
+	restore them from"
 	iterator := sourceIndex newIterator.
+	isBehaviorIndex ifFalse: [
+		iterator
+			journal: soil journal;
+			readVersion: self databaseVersion ].
 	[ (assoc := iterator nextAssociation) isNil ] whileFalse: [
 		assoc value isRemoved ifFalse: [
 			targetIndex basicAt: assoc key add: assoc value.
@@ -91,6 +108,15 @@ SoilBackupVisitor >> databaseVersion: anObject [
 { #category : #visiting }
 SoilBackupVisitor >> indexNotFound: indexId [ 
 	 Error signal: 'cannot find index with id ', indexId printString
+]
+
+{ #category : #visiting }
+SoilBackupVisitor >> processIndexId: indexId segment: aSegment [
+	"copyIndexAt:segment: reads every index of a cluster that is copied, at the backup's
+	version, and queues its values. Walking the index here as well read it a second time,
+	and as it is now: entries committed after the backup's version queued objects that
+	do not exist at that version"
+	^ self
 ]
 
 { #category : #api }
