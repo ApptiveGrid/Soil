@@ -63,6 +63,44 @@ SoilIndexedDictionaryTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testAKeyAddedAfterAReaderStartedIsNotIteratedByIt [
+	"a key added after a reader started did not exist for it. Iterating, the reader got
+	it as a key without a value, and #first answered nil"
+	| tx reader |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #foo put: #one.
+	tx commit.
+	reader := soil newTransaction.
+	tx := soil newTransaction.
+	tx root at: #aaa put: #two.
+	tx commit.
+	[ self assert: reader root first equals: #one ]
+		ensure: [ reader abort ]
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testAKeyOverwrittenTwiceKeepsItsValueForAnOlderReader [
+	"a reader goes back through every overwrite committed after it started, not only the
+	last one. Going back one step it got the value in between, which did not exist yet
+	when the reader started"
+	| tx reader |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #foo put: #one.
+	tx commit.
+	reader := soil newTransaction.
+	tx := soil newTransaction.
+	tx root at: #foo put: #two.
+	tx commit.
+	tx := soil newTransaction.
+	tx root at: #foo put: #three.
+	tx commit.
+	[ self assert: (reader root at: #foo) equals: #one ]
+		ensure: [ reader abort ]
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testAddAndRemoveExistingList [
 	| tx tx2 tx3 |
 	"create skip list dictionary with a key ..."

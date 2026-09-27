@@ -10,14 +10,23 @@ Class {
 
 { #category : #api }
 SoilBackupVisitor >> backup: aSoil [ 
-	soil := aSoil.
 	"if there is no version set we take the actual database version. This 
 	is to create a consistent backup regardless if transactions are committed 
-	while we are doing the backup"
-	databaseVersion ifNil: [
-		databaseVersion := aSoil control databaseVersion ]. 
-	
-	self visit: soil.
+	while we are doing the backup.
+
+	The backup reads through a transaction at that version, open for as long as the
+	backup runs. Being registered with the transaction manager is what keeps the index
+	cleaner from discarding the state of an index page the backup still has to read: it
+	only keeps what the smallest open read version needs, and with nothing open it keeps
+	nothing"
+	| reader |
+	soil := aSoil.
+	reader := databaseVersion
+		ifNil: [ aSoil newTransaction ]
+		ifNotNil: [ :version | aSoil newTransactionForVersion: version ].
+	reader beReadOnly.
+	databaseVersion := reader readVersion.
+	[ self visit: soil ] ensure: [ reader abort ].
 	target close
 ]
 
@@ -43,10 +52,20 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 		               class: sourceIndex class.
 	targetIndex initializeParametersFrom: sourceIndex.
 
-	"copy the values that were there at the pinned version to the new index"
+	"copy all values to the new index, as they were at the version the records are read
+	at. Read as it is now, the index hands out entries committed after that version,
+	which point to objects the backup does not copy. The behavior registry is read as it
+	is now: its entries are not journaled as index entries, so there is nothing to
+	restore them from, and what it points at is asked for instead, see
+	#existsAtPinnedVersion:"
 	iterator := sourceIndex newIterator.
+	isBehaviorIndex ifFalse: [
+		iterator
+			journal: soil journal;
+			readVersion: self databaseVersion ].
 	[ (assoc := iterator nextAssociation) isNil ] whileFalse: [
-		(assoc value isRemoved not and: [ self existsAtPinnedVersion: assoc value asSoilObjectId ])
+		(assoc value isRemoved not and: [
+			isBehaviorIndex not or: [ self existsAtPinnedVersion: assoc value asSoilObjectId ] ])
 			ifTrue: [
 				targetIndex basicAt: assoc key add: assoc value.
 				"recurse further into the values of the index"
@@ -91,16 +110,13 @@ SoilBackupVisitor >> databaseVersion: anObject [
 
 { #category : #visiting }
 SoilBackupVisitor >> existsAtPinnedVersion: aSoilObjectId [
-	"whether the object an index entry points at has a version at or below the one
-	this backup is taken at. The records are read at that version, the index is
-	iterated as it is now - a commit that lands while the backup runs puts entries
-	into it whose objects did not exist at the pin, and #processLoop then read nil
-	and failed on it. Left out, they are not in the copy either: an entry kept
-	without its object would dangle there.
-
-	Not the whole of what the index said at the pin. An entry removed after it is
-	marked removed now and is left out as well, although it was there - the index
-	keeps no versions, so the copy holds what was there and is still there.
+	"whether the object an entry of the behavior registry points at has a version at or
+	below the one this backup is taken at. The registry is read as it is now - its
+	entries are not journaled as index entries - so a class stored for the first time
+	after the pin has an entry whose description did not exist then, and #processLoop
+	read nil and failed on it. Left out, it is not in the copy either: an entry kept
+	without its object would dangle there. The other indexes are read at the pinned
+	version and need no asking.
 
 	The record is read a second time when #processLoop gets to it. That is the price
 	of asking here, before the entry is written into the target.
@@ -120,12 +136,12 @@ SoilBackupVisitor >> indexNotFound: indexId [
 ]
 
 { #category : #visiting }
-SoilBackupVisitor >> processIndexValue: aSoilObjectId [
-	"the other way into an index: SoilVisitor>>visitPersistentClusterVersion: walks
-	every index of a cluster as well, beside #copyIndexAt:segment:, and queues what
-	it finds for #processLoop. Same rule, same reason - see #existsAtPinnedVersion:"
-	(self existsAtPinnedVersion: aSoilObjectId) ifFalse: [ ^ self ].
-	^ super processIndexValue: aSoilObjectId
+SoilBackupVisitor >> processIndexId: indexId segment: aSegment [
+	"copyIndexAt:segment: reads every index of a cluster that is copied, at the backup's
+	version, and queues its values. Walking the index here as well read it a second time,
+	and as it is now: entries committed after the backup's version queued objects that
+	do not exist at that version"
+	^ self
 ]
 
 { #category : #api }

@@ -45,10 +45,13 @@ SoilIndexManager >> at: indexId ifAbsent: aBlock [
 
 { #category : #accessing }
 SoilIndexManager >> at: indexId put: aSoilIndex [
+	"registered under an id, the index knows it, see #loadIndexWithId:ifNone:"
 	^ semaphore critical: [  
 		indexes 
 			at: indexId
-			put: aSoilIndex thePersistentInstance ]
+			put: (aSoilIndex thePersistentInstance
+				id: indexId;
+				yourself) ]
 ]
 
 { #category : #'open/close' }
@@ -119,12 +122,17 @@ SoilIndexManager >> initializeFilesystem [
 
 { #category : #api }
 SoilIndexManager >> loadIndexWithId: indexId ifNone: aBlock [
+	"the index knows the id it is loaded under. A restoring iterator finds the journal
+	entries of its index by that id, and without it an iterator on the index as the
+	manager hands it out answered every entry as it is now, whatever its readVersion"
 	| path |
 	path := self path / indexId , #index.
 	^ path exists
 		ifTrue: [ 
 			(self class indexClassFromFile: path) new 
-				path: path ]
+				path: path;
+				id: indexId;
+				yourself ]
 		ifFalse: [ aBlock value ]
 ]
 
