@@ -325,6 +325,39 @@ SoilBackupTest >> testBackupTheBackup [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testAnIndexEntryCommittedAfterThePinIsLeftOut [
+	"the records are read at the pinned version, the index as it is now. A commit
+	that lands while the backup runs puts an entry into the index whose object has
+	no version at the pin - which used to end the backup in 'nil objectId:', every
+	night, on a database that is busy for as long as its backup takes"
+	| tx tx2 tx3 visitor dict |
+	tx := soil newTransaction.
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
+		keySize: 8;
+		maxLevel: 16.
+	tx root: dict.
+	dict at: #foo put: (SoilTestNestedObject new label: #beforeThePin).
+	tx commit.
+	tx2 := soil newTransaction.
+	tx2 root at: #bar put: (SoilTestNestedObject new label: #afterThePin).
+	tx2 commit.
+	backupSoil := Soil createOnPath: self path , #backup.
+	visitor := SoilBackupVisitor new
+		target: backupSoil;
+		version: 1;
+		yourself.
+	visitor backup: soil.
+	backupSoil := Soil new
+		path: self path , #backup;
+		readOnly: true;
+		open.
+	tx3 := backupSoil newTransaction.
+	[ self assert: (tx3 root at: #foo) label equals: #beforeThePin.
+	self assert: (tx3 root at: #bar ifAbsent: [ nil ]) isNil ]
+		ensure: [ tx3 abort ]
+]
+
+{ #category : #tests }
 SoilBackupTest >> testBackupWithIndex [ 
 	| tx backup tx2 dict object |
 	tx := soil newTransaction.
