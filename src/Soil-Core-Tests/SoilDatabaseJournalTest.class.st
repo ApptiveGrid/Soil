@@ -90,6 +90,64 @@ SoilDatabaseJournalTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilDatabaseJournalTest >> testAJournalNoLongerInMemoryIsReadFromItsFragmentFile [
+	"only the last transaction journals are kept in memory. An older one is read back
+	from the fragment file it was written to, with the value a key held before"
+	| tx dict firstValue entry |
+	tx := soil newTransaction.
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
+		keySize: 8;
+		maxLevel: 8.
+	tx root: dict.
+	dict at: #foo put: (SoilTestNestedObject new label: #one).
+	tx commit.
+	tx := soil newTransaction.
+	tx root at: #foo put: (SoilTestNestedObject new label: #two).
+	tx commit.
+	1 to: 25 do: [ :each |
+		tx := soil newTransaction.
+		tx root at: ('k', each printString) put: each.
+		tx commit ].
+	entry := (soil journal transactionJournalAt: 2) entries
+		detect: [ :each | each class == SoilAddKeyEntry ].
+	firstValue := (soil journal transactionJournalAt: 1) entries
+		detect: [ :each | each class == SoilAddKeyEntry ].
+	self assert: entry oldValue equals: firstValue value
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testAJournalThatIsNowhereAnswersTheBlock [
+	"neither in memory nor in a fragment file: the oldest fragments are deleted, and the
+	reader asking takes what is there now"
+	self
+		assert: (soil journal transactionJournalAt: 1000 ifAbsent: [ #nowhere ])
+		equals: #nowhere
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testAnAddKeyEntryWritesTheValueTheKeyHeldBefore [
+	| entry stream readBack |
+	entry := SoilAddKeyEntry new
+		transactionId: 3;
+		segment: 1;
+		id: 'index';
+		key: 42;
+		value: (SoilObjectId segment: 1 index: 7);
+		oldValue: (SoilObjectId segment: 1 index: 5);
+		yourself.
+	stream := ByteArray new writeStream.
+	entry writeOn: stream.
+	readBack := SoilJournalEntry readFrom: stream contents readStream.
+	self assert: readBack oldValue equals: (SoilObjectId segment: 1 index: 5).
+	self assert: readBack value equals: (SoilObjectId segment: 1 index: 7).
+	entry oldValue: nil.
+	stream := ByteArray new writeStream.
+	entry writeOn: stream.
+	readBack := SoilJournalEntry readFrom: stream contents readStream.
+	self assert: readBack oldValue isNil
+]
+
+{ #category : #tests }
 SoilDatabaseJournalTest >> testCreatingADatabaseLeavesAFragmentFileBehind [
 	"a database is complete the moment it is created: the journal has its first
 	fragment file and a checkpoint entry, so no later open has to write one"

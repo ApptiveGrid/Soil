@@ -77,12 +77,16 @@ SoilAddKeyEntry >> providesObjectIds [
 
 { #category : #writing }
 SoilAddKeyEntry >> readFrom: aStream [ 
-	| idSize |
+	| idSize oldValueSize |
 	super readFrom: aStream.
 	idSize := aStream next.
 	id := (aStream next: idSize) asString.
 	key := (aStream next: aStream nextLengthEncodedInteger) asInteger.
 	value := (aStream next: (aStream nextLengthEncodedInteger) asInteger) asSoilObjectId .
+	oldValueSize := aStream nextLengthEncodedInteger.
+	oldValue := oldValueSize = 0
+		ifTrue: [ nil ]
+		ifFalse: [ (aStream next: oldValueSize) asSoilObjectId ]
 ]
 
 { #category : #accessing }
@@ -97,9 +101,12 @@ SoilAddKeyEntry >> value: aString [
 
 { #category : #writing }
 SoilAddKeyEntry >> writeOn: aStream [ 
-	| keyByteArray valueByteArray |
+	"the old value is written as well, empty when the key is new. A reader on an older
+	version restores the key from it, also when this entry is read back from disk"
+	| keyByteArray valueByteArray oldValueByteArray |
 	keyByteArray := key asByteArray.
 	valueByteArray := value asByteArray.
+	oldValueByteArray := oldValue ifNil: [ #[] ] ifNotNil: [ :old | old asByteArray ].
 	super writeOn: aStream.
 	aStream 
 		nextPut: id size; 
@@ -107,5 +114,7 @@ SoilAddKeyEntry >> writeOn: aStream [
 		nextPutLengthEncodedInteger: keyByteArray size;
 		nextPutAll: keyByteArray;
 		nextPutLengthEncodedInteger: valueByteArray size;
-		nextPutAll: valueByteArray
+		nextPutAll: valueByteArray;
+		nextPutLengthEncodedInteger: oldValueByteArray size;
+		nextPutAll: oldValueByteArray
 ]

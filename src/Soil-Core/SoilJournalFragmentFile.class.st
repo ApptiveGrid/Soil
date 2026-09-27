@@ -180,6 +180,17 @@ SoilJournalFragmentFile >> firstTransactionId [
 	^ SoilTransactionJournalEntry readTransactionIdFrom: stream
 ]
 
+{ #category : #accessing }
+SoilJournalFragmentFile >> firstTransactionIdIfNone: aBlock [
+	"a fragment begins with a checkpoint entry. One that was cycled to and not written to
+	yet holds nothing else"
+	self stream position: self dataPosition.
+	((SoilJournalEntry readFrom: self stream) class = SoilCheckpointEntry) ifFalse: [ 
+		Error signal: 'fragment file should start with a checkpoint entry' ].
+	stream atEnd ifTrue: [ ^ aBlock value ].
+	^ SoilTransactionJournalEntry readTransactionIdFrom: stream
+]
+
 { #category : #testing }
 SoilJournalFragmentFile >> hasSpace [
 	"a fragment file when writing to it must be smaller be with a 
@@ -317,6 +328,25 @@ SoilJournalFragmentFile >> transactionJournals [
 				ifAbsentPut: [ SoilTransactionJournal new index: entry transactionId ])
 					addEntry: entry ] ].
 	^ transactionJournals values
+]
+
+{ #category : #journal }
+SoilJournalFragmentFile >> transactionJournalAt: anInteger ifAbsent: aBlock [
+	"read the entries of one transaction. Reading stops at its commit entry, or at the
+	first entry of a later transaction: the fragment may be the one being written to,
+	and what comes after may not be complete"
+	| transactionJournal entry |
+	self stream position: self dataPosition.
+	[ stream atEnd ] whileFalse: [
+		entry := SoilJournalEntry readFrom: stream.
+		entry isTransactionEntry ifTrue: [
+			entry transactionId > anInteger ifTrue: [ ^ transactionJournal ifNil: aBlock ].
+			entry transactionId = anInteger ifTrue: [
+				(transactionJournal ifNil: [
+					transactionJournal := SoilTransactionJournal new index: anInteger ])
+						addEntry: entry.
+				entry class == SoilCommitTransactionEntry ifTrue: [ ^ transactionJournal ] ] ] ].
+	^ transactionJournal ifNil: aBlock
 ]
 
 { #category : #accessing }

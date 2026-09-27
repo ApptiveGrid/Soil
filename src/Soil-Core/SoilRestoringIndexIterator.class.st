@@ -36,7 +36,11 @@ SoilRestoringIndexIterator >> historicValueFor: item [
 	each one that produced the value we hold says in its oldValue what the key held
 	before, so a key overwritten twice after readVersion goes back two steps and not one.
 	A key that did not exist at readVersion ends with the value nil, a removed one with
-	the removed marker"
+	the removed marker.
+
+	A transaction journal that is neither in memory nor in a fragment file any more -
+	the oldest fragment files are deleted - leaves nothing to go back with, and the
+	item is taken as it is now"
 	| restored |
 	readVersion ifNil: [ ^ item ].
 	(self currentPage isOlderThan: readVersion) ifTrue: [
@@ -46,7 +50,7 @@ SoilRestoringIndexIterator >> historicValueFor: item [
 		^ item ].
 	restored := item.
 	self currentPage lastTransaction to: readVersion + 1 by: -1 do: [ :transactionId |
-		(journal transactionJournalAt: transactionId) entries reverseDo: [ :each |
+		(journal transactionJournalAt: transactionId ifAbsent: [ ^ item ]) entries reverseDo: [ :each |
 			restored value ifNil: [ ^ restored ].
 			((each class == SoilAddKeyEntry or: [ each class == SoilRemoveKeyEntry ])
 				and: [ each isForItem: restored index: index id ]) ifTrue: [

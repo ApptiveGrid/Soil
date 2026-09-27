@@ -180,6 +180,14 @@ SoilPersistentDatabaseJournal >> initialize [
 	semaphore := Mutex new
 ]
 
+{ #category : #accessing }
+SoilPersistentDatabaseJournal >> inMemoryTransactionJournalAt: anInteger ifAbsent: aBlock [
+	"the cache answers a missing key only through #at:ifAbsentPut:, which runs its block
+	inside the cache's lock. The block returns right away, so nothing slow happens
+	while commits wait for that lock"
+	^ transactionJournals at: anInteger ifAbsentPut: [ ^ aBlock value ]
+]
+
 { #category : #initialization }
 SoilPersistentDatabaseJournal >> initializeFilesystem [
 	self path ensureCreateDirectory
@@ -300,6 +308,21 @@ SoilPersistentDatabaseJournal >> path [
 	^ soil path / #journal
 ]
 
+{ #category : #reading }
+SoilPersistentDatabaseJournal >> readTransactionJournalAt: anInteger ifAbsent: aBlock [
+	"the transaction journal as it was written to the fragment files. The newest fragment
+	that begins at or before the transaction is the one it was written to - a
+	transaction journal is never split across fragments. Only fragments that are still
+	there can be asked: the oldest ones are deleted when there are more than
+	maxFragmentFiles"
+	self fragmentFiles do: [ :fragment |
+		[ (fragment firstTransactionIdIfNone: [ nil ])
+			ifNotNil: [ :first | first <= anInteger ifTrue: [
+				^ fragment transactionJournalAt: anInteger ifAbsent: aBlock ] ] ]
+			ensure: [ fragment close ] ].
+	^ aBlock value
+]
+
 { #category : #recover }
 SoilPersistentDatabaseJournal >> recover [
 	SoilDatabaseRecovery new 
@@ -328,6 +351,20 @@ SoilPersistentDatabaseJournal >> sortedFiles [
 			"a fragment file is always 10 characters long. 
 			40 bit (address space) / 8 (bits in a byte) * 2 (hex characters)"
 			(file basename size == 10) ]) sorted reverse
+]
+
+{ #category : #accessing }
+SoilPersistentDatabaseJournal >> transactionJournalAt: anInteger ifAbsent: aBlock [
+	"the last transaction journals are kept in memory. One that is not any more is read
+	back from the fragment file it was written to and kept again: a reader on an older
+	version asks for every transaction since then, often for more than the cache holds"
+	| transactionJournal |
+	^ self inMemoryTransactionJournalAt: anInteger ifAbsent: [
+		transactionJournal := self
+			readTransactionJournalAt: anInteger
+			ifAbsent: [ ^ aBlock value ].
+		transactionJournals at: anInteger put: transactionJournal.
+		transactionJournal ]
 ]
 
 { #category : #accessing }
