@@ -65,7 +65,14 @@ SoilDatabaseJournal >> soil: aSoil [
 
 { #category : #accessing }
 SoilDatabaseJournal >> transactionJournalAt: anInteger [ 
-	^ transactionJournals at: anInteger
+	^ self
+		transactionJournalAt: anInteger
+		ifAbsent: [ KeyNotFound signalFor: anInteger in: self ]
+]
+
+{ #category : #accessing }
+SoilDatabaseJournal >> transactionJournalAt: anInteger ifAbsent: aBlock [
+	^ transactionJournals at: anInteger ifAbsent: aBlock
 ]
 
 { #category : #accessing }

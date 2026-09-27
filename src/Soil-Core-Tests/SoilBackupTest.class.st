@@ -132,6 +132,40 @@ SoilBackupTest >> testABackupLeavesOutAClassFirstStoredAfterItsVersion [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testABackupGetsThroughMoreCommitsThanTheJournalsKeptInMemory [
+	"the backup reads its indexes at its version from the journals of every commit
+	since then. With more commits during the copy than journals are kept in memory it
+	stopped on KeyNotFound; they are read from the fragment files now"
+	| tx dict visitor tx2 |
+	tx := soil newTransaction.
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
+		keySize: 8;
+		maxLevel: 16.
+	tx root: dict.
+	dict at: #foo put: (SoilTestNestedObject new label: #beforeTheBackup).
+	tx commit.
+	backupSoil := Soil createOnPath: self path, #backup.
+	visitor := SoilTestInterleavedBackupVisitor new
+		target: backupSoil;
+		beforeFirstIndex: [
+			| during |
+			during := soil newTransaction.
+			during root at: #foo put: (SoilTestNestedObject new label: #duringTheBackup).
+			during commit.
+			1 to: 25 do: [ :each |
+				during := soil newTransaction.
+				during root at: ('k', each printString) put: (SoilTestNestedObject new label: each).
+				during commit ] ];
+		yourself.
+	visitor backup: soil.
+	backupSoil close; open.
+	tx2 := backupSoil newTransaction.
+	[ self assert: (tx2 root at: #foo) label equals: #beforeTheBackup.
+	  self assert: (tx2 root at: #k1 ifAbsent: [ #absent ]) equals: #absent ]
+		ensure: [ tx2 abort ]
+]
+
+{ #category : #tests }
 SoilBackupTest >> testABackupKeepsTheValueAKeyHadAtItsVersion [
 	"a key overwritten after the backup's version points at an object that did not
 	exist at that version. Leaving such entries out lost the key from the copy,

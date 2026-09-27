@@ -80,6 +80,29 @@ SoilIndexedDictionaryTest >> testAKeyAddedAfterAReaderStartedIsNotIteratedByIt [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testAReaderGoesBackFurtherThanTheJournalsKeptInMemory [
+	"a reader restores a key from the journals of every commit since it started. Only
+	the last of them are kept in memory, the others are read from the fragment files -
+	the reader failed with KeyNotFound on the first one that was not in memory"
+	| tx reader |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #foo put: #one.
+	tx commit.
+	reader := soil newTransaction.
+	tx := soil newTransaction.
+	tx root at: #foo put: #two.
+	tx commit.
+	1 to: 25 do: [ :each |
+		tx := soil newTransaction.
+		tx root at: ('k', each printString) put: each.
+		tx commit ].
+	[ self assert: (reader root at: #foo) equals: #one.
+	  self assert: (reader root at: #k1 ifAbsent: [ #absent ]) equals: #absent ]
+		ensure: [ reader abort ]
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testAKeyOverwrittenTwiceKeepsItsValueForAnOlderReader [
 	"a reader goes back through every overwrite committed after it started, not only the
 	last one. Going back one step it got the value in between, which did not exist yet
