@@ -43,13 +43,14 @@ SoilBackupVisitor >> copyIndexAt: indexId segment: segmentId [
 		               class: sourceIndex class.
 	targetIndex initializeParametersFrom: sourceIndex.
 
-	"copy all values to the new index"
+	"copy the values that were there at the pinned version to the new index"
 	iterator := sourceIndex newIterator.
 	[ (assoc := iterator nextAssociation) isNil ] whileFalse: [
-		assoc value isRemoved ifFalse: [
-			targetIndex basicAt: assoc key add: assoc value.
-			"recurse further into the values of the index"
-			self processObjectId: assoc value asSoilObjectId ] ].
+		(assoc value isRemoved not and: [ self existsAtPinnedVersion: assoc value asSoilObjectId ])
+			ifTrue: [
+				targetIndex basicAt: assoc key add: assoc value.
+				"recurse further into the values of the index"
+				self processObjectId: assoc value asSoilObjectId ] ].
 	"both indexes are registered with their managers now, so both are released the same
 	way - the target's too, which used to be closed by hand while staying registered"
 	targetIndex flush.
@@ -89,8 +90,42 @@ SoilBackupVisitor >> databaseVersion: anObject [
 ]
 
 { #category : #visiting }
+SoilBackupVisitor >> existsAtPinnedVersion: aSoilObjectId [
+	"whether the object an index entry points at has a version at or below the one
+	this backup is taken at. The records are read at that version, the index is
+	iterated as it is now - a commit that lands while the backup runs puts entries
+	into it whose objects did not exist at the pin, and #processLoop then read nil
+	and failed on it. Left out, they are not in the copy either: an entry kept
+	without its object would dangle there.
+
+	Not the whole of what the index said at the pin. An entry removed after it is
+	marked removed now and is left out as well, although it was there - the index
+	keeps no versions, so the copy holds what was there and is still there.
+
+	The record is read a second time when #processLoop gets to it. That is the price
+	of asking here, before the entry is written into the target.
+
+	The meta description has no record to ask: it is pre-initialized, and the
+	behavior registry points at it from the first commit on - #processObjectId:
+	skips it for the same reason"
+	aSoilObjectId = SoilBehaviorDescription metaId ifTrue: [ ^ true ].
+	^ ((soil objectRepository segmentAt: aSoilObjectId segment)
+		basicAt: aSoilObjectId index
+		version: self databaseVersion) notNil
+]
+
+{ #category : #visiting }
 SoilBackupVisitor >> indexNotFound: indexId [ 
 	 Error signal: 'cannot find index with id ', indexId printString
+]
+
+{ #category : #visiting }
+SoilBackupVisitor >> processIndexValue: aSoilObjectId [
+	"the other way into an index: SoilVisitor>>visitPersistentClusterVersion: walks
+	every index of a cluster as well, beside #copyIndexAt:segment:, and queues what
+	it finds for #processLoop. Same rule, same reason - see #existsAtPinnedVersion:"
+	(self existsAtPinnedVersion: aSoilObjectId) ifFalse: [ ^ self ].
+	^ super processIndexValue: aSoilObjectId
 ]
 
 { #category : #api }
