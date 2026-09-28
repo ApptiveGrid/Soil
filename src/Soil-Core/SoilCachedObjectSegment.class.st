@@ -33,6 +33,20 @@ SoilCachedObjectSegment >> at: anInteger putBytes: bytes [
 ]
 
 { #category : #accessing }
+SoilCachedObjectSegment >> putAll: aCollectionOfAssociations [
+	| positions |
+	positions := super putAll: aCollectionOfAssociations.
+	aCollectionOfAssociations with: positions do: [ :each :position |
+		cache 
+			at: each key 
+			put: ((SoilPersistentClusterVersion readFrom: each value readStream)
+				objectId: (SoilObjectId segment: id index: each key);
+				position: position;
+				yourself) ].
+	^ positions
+]
+
+{ #category : #accessing }
 SoilCachedObjectSegment >> cache [
 	^ cache
 ]

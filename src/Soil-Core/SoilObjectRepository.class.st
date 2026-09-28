@@ -67,6 +67,25 @@ SoilObjectRepository >> at: objectId putBytes: bytes [
 ]
 
 { #category : #accessing }
+SoilObjectRepository >> putAll: aCollectionOfAssociations [
+	"objectId -> bytes for each record, written per segment in one go - see
+	SoilObjectSegment>>putAll:. Answers the positions in the order of the collection"
+	| positions bySegment |
+	positions := Array new: aCollectionOfAssociations size.
+	bySegment := OrderedDictionary new.
+	aCollectionOfAssociations doWithIndex: [ :each :n |
+		(each key index == 0) ifTrue: [ Error signal: 'objectId is not initialized when trying to store' ].
+		(bySegment at: each key segment ifAbsentPut: [ OrderedCollection new ]) add: n ].
+	bySegment keysAndValuesDo: [ :segmentId :numbers |
+		((self segmentAt: segmentId) putAll: (numbers collect: [ :n | | each |
+			each := aCollectionOfAssociations at: n.
+			each key index -> each value ]))
+				with: numbers do: [ :position :n | positions at: n put: position ] ].
+	aCollectionOfAssociations do: [ :each | soil notificationHandler recordWritten: each key ].
+	^ positions
+]
+
+{ #category : #accessing }
 SoilObjectRepository >> at: objectid version: version [ 
 	| segment |
 	segment := self segmentAt: objectid segment.

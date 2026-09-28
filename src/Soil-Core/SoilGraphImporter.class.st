@@ -300,7 +300,6 @@ SoilGraphImporter >> readCluster [
 		pointAtLocalBehaviorDescriptions: cluster.
 	cluster indexIds ifNotEmpty: [
 		cluster := self importIndexesOf: cluster ].
-	self store: cluster.
 	^ cluster
 ]
 
@@ -327,8 +326,11 @@ SoilGraphImporter >> readClusterHeader [
 
 { #category : #importing }
 SoilGraphImporter >> readClusters [
+	"the records are written once all of them are read, in one go - see
+	SoilObjectRepository>>putAll:"
 	clusters := OrderedCollection new.
-	[ stream atEnd ] whileFalse: [ clusters add: self readCluster ]
+	[ stream atEnd ] whileFalse: [ clusters add: self readCluster ].
+	soil objectRepository putAll: (clusters collect: [ :each | each objectId -> each serialize ])
 ]
 
 { #category : #importing }
@@ -440,11 +442,6 @@ SoilGraphImporter >> signalShapeConflictFor: cluster against: presentDescription
 		  importedInstVarNames: cluster object instVarNames;
 		  presentInstVarNames: presentDescription instVarNames;
 		  signal
-]
-
-{ #category : #importing }
-SoilGraphImporter >> store: cluster [
-	soil objectRepository at: cluster objectId putBytes: cluster serialize
 ]
 
 { #category : #accessing }
