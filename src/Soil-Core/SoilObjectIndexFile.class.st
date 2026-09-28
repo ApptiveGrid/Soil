@@ -15,6 +15,30 @@ SoilObjectIndexFile >> at: index [
 ]
 
 { #category : #accessing }
+SoilObjectIndexFile >> putPositions: aCollectionOfAssociations [
+	"index -> position for each of them, and one flush for all. The slots of indexes that
+	follow each other lie next to each other in the file, so a run of them is written in
+	one go - which is what the new objects of a commit are. When an index occurs twice,
+	the later position is the one that stays, as with #at:putPosition: one after the other"
+	| positions indexes |
+	positions := Dictionary new.
+	aCollectionOfAssociations do: [ :each |
+		(each value > 0) ifFalse: [ SoilIndexOutOfRange signal: 'object index needs to be larger than zero' ].
+		positions at: each key put: each value ].
+	indexes := positions keys asSortedCollection asArray.
+	mutex critical: [
+		| runStart |
+		runStart := 1.
+		1 to: indexes size do: [ :n |
+			(n = indexes size or: [ (indexes at: n + 1) ~= ((indexes at: n) + 1) ]) ifTrue: [
+				stream position: (self indexPositionAt: (indexes at: runStart)).
+				runStart to: n do: [ :each |
+					stream nextPutAll: ((positions at: (indexes at: each)) asByteArrayOfSize: self objectIndexSize) ].
+				runStart := n + 1 ] ].
+		stream flush ]
+]
+
+{ #category : #accessing }
 SoilObjectIndexFile >> at: index putPosition: position [ 
 	(position > 0) ifFalse: [ SoilIndexOutOfRange signal: 'object index needs to be larger than zero' ].
 	mutex critical: [  

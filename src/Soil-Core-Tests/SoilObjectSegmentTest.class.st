@@ -60,6 +60,36 @@ SoilObjectSegmentTest >> testAVersionChainThatCirclesIsRefused [
 
 
 { #category : #tests }
+SoilObjectSegmentTest >> testPutAllWritesWhatAtPutBytesWritesOneByOne [
+	"records written together land where writing them one after the other puts them, byte
+	for byte in both files - with a gap between the indexes, where the run of slots is
+	broken, and an index that occurs twice, where the later position stays. Both segments
+	get the same first records, so that the slots exist in the in-memory index file"
+	| one all base records expected |
+	one := self newMemorySegment.
+	all := self newMemorySegment.
+	base := one lastObjectIndex.
+	1 to: 6 do: [ :n |
+		one at: base + n putBytes: #[ 0 ].
+		all at: base + n putBytes: #[ 0 ] ].
+	records := {
+		(base + 1) -> #[ 1 2 3 ].
+		(base + 2) -> #[ 4 5 ].
+		(base + 4) -> #[ 6 ].
+		(base + 2) -> #[ 7 8 9 10 ].
+		(base + 5) -> #[ 11 ] }.
+	expected := records collect: [ :each | one at: each key putBytes: each value ].
+	self assert: (all putAll: records) asArray equals: expected asArray.
+	self
+		assert: ((all instVarNamed: #objectFile) instVarNamed: #stream) contents
+		equals: ((one instVarNamed: #objectFile) instVarNamed: #stream) contents.
+	self
+		assert: ((all instVarNamed: #indexFile) instVarNamed: #stream) contents
+		equals: ((one instVarNamed: #indexFile) instVarNamed: #stream) contents.
+	self assert: (all basicAt: base + 2 length: 4) equals: #[ 7 8 9 10 ]
+]
+
+{ #category : #tests }
 SoilObjectSegmentTest >> testStoreObject [ 
 	| segment obj newIndex |
 	segment := self newMemorySegment.
