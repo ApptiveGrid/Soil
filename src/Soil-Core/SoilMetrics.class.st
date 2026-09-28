@@ -179,6 +179,17 @@ SoilMetrics >> objectsSerialized [
 	^ objectsSerialized
 ]
 
+{ #category : #metrics }
+SoilMetrics >> oldestReaderLag [
+	"How many versions have been committed since the oldest open transaction took its
+	read version. Nothing those commits superseded can be discarded while it stays
+	open - neither by the index cleaner nor by a garbage collect. Zero with nothing
+	open, and zero on a database nobody writes to, where holding on costs nothing"
+	^ soil transactionManager smallestReadVersion
+		ifNil: [ 0 ]
+		ifNotNil: [ :version | soil control databaseVersion - version ]
+]
+
 { #category : #counting }
 SoilMetrics >> recordRead: aSoilPersistentClusterVersion [ 
 	(aSoilPersistentClusterVersion objectId isMeta)
