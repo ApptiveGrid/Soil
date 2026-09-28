@@ -40,12 +40,10 @@ SoilVisitor >> initialize [
 
 { #category : #api }
 SoilVisitor >> processLoop [ 
-	| objectId record |
+	| objectId |
 	[ toBeProcessed isEmpty ] whileFalse: [  
 		objectId := toBeProcessed  removeFirst.
-		record := (soil objectRepository segmentAt: objectId segment) 
-			basicAt: objectId index version: self databaseVersion.
-		self visit: (record objectId: objectId) ]
+		self visit: (self recordAt: objectId) ]
 ]
 
 { #category : #accessing }
@@ -55,10 +53,20 @@ SoilVisitor >> processObjectId: aSoilObjectId [
 	seen add: aSoilObjectId.
 	^ depthFirst 
 		ifTrue: [
-			self visit: (soil objectRepository at: aSoilObjectId).
+			self visit: (self recordAt: aSoilObjectId).
 			aSoilObjectId ]
 		ifFalse: [  
 			toBeProcessed add: aSoilObjectId ]
+]
+
+{ #category : #accessing }
+SoilVisitor >> recordAt: aSoilObjectId [
+	"Every record is read at the databaseVersion, in whichever order the graph is
+	walked. The depth-first walk used to read the current version, past the cache and
+	past any transaction the visitor had been handed"
+	^ ((soil objectRepository segmentAt: aSoilObjectId segment)
+		basicAt: aSoilObjectId index
+		version: self databaseVersion) objectId: aSoilObjectId
 ]
 
 { #category : #accessing }
@@ -92,9 +100,27 @@ SoilVisitor >> transaction: aTransaction [
 { #category : #visiting }
 SoilVisitor >> visitFirstSegment: aSoilObjectSegment [ 
 	depthFirst 
-		ifTrue: [ self visit: (aSoilObjectSegment at: 1) ] 
+		ifTrue: [ self visit: (self recordAt: SoilObjectId root) ] 
 		ifFalse: [ self processObjectId: SoilObjectId root ].			
 	self visitObjectSegment: aSoilObjectSegment 
+]
+
+{ #category : #visiting }
+SoilVisitor >> visitIndex: anIndex [
+	"An index is read at the databaseVersion, like the records. Read as it is now, it
+	hands out entries committed after that version, which point to objects that do not
+	exist at it - see SoilBackupVisitor>>copyIndexAt:segment:, which learned it first.
+	The behavior registry is the exception: its entries are not journaled, so it can
+	only be read as it is now"
+	| iterator assoc |
+	iterator := anIndex newIterator.
+	anIndex == soil behaviorRegistry index ifFalse: [
+		iterator
+			journal: soil journal;
+			readVersion: self databaseVersion ].
+	[ (assoc := iterator nextAssociation) isNil ] whileFalse: [
+		assoc value isRemoved ifFalse: [
+			self processIndexValue: assoc value asSoilObjectId ] ]
 ]
 
 { #category : #visiting }

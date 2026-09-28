@@ -42,13 +42,11 @@ SoilFindRecordsVisitor >> processLoop [
 	"Overridden from SoilVisitor: a materialize error for one object must not
 	abort the whole scan - collect it in errors and continue with the next
 	queued object instead of letting it propagate out of find:in:."
-	| objectId record |
+	| objectId |
 	[ toBeProcessed isEmpty ] whileFalse: [ 
 		(numberOfRecords notNil and: [ records size >= numberOfRecords ]) ifTrue: [ ^ self ].
 		objectId := toBeProcessed removeFirst.
-		[ record := (soil objectRepository segmentAt: objectId segment) 
-			basicAt: objectId index version: self databaseVersion.
-		self visit: (record objectId: objectId) ]
+		[ self visit: (self recordAt: objectId) ]
 			on: Error
 			do: [ :e | errors add: objectId -> e messageText ] ]
 ]
