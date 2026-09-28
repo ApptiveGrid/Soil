@@ -34,6 +34,25 @@ SoilAddKeyEntry >> context [
 	^ id 
 ]
 
+{ #category : #writing }
+SoilAddKeyEntry >> hasOldValueOn: aStream [
+	"version 2 writes the old value. Up to version 1 it was not written, except for a
+	while it was, still as version 1: fragment files written then hold both. The byte
+	after the value tells them apart. With an old value it is the old value's size, 0
+	or the 8 bytes of an object id. Without one it is the type code of the next entry,
+	which is never 0 and not 8 either: an add key entry is followed by an entry of the
+	same transaction, never by the begin entry of the next one"
+	version >= 2 ifTrue: [ ^ true ].
+	^ #(0 8) includes: aStream peek
+]
+
+{ #category : #initialization }
+SoilAddKeyEntry >> initialize [
+	super initialize.
+	"version 2 writes the value the key held before, see #writeOn:"
+	version := 2
+]
+
 { #category : #testing }
 SoilAddKeyEntry >> isForItem: anItem index: indexId [
 	id = indexId ifFalse: [ ^false ].
@@ -77,12 +96,18 @@ SoilAddKeyEntry >> providesObjectIds [
 
 { #category : #writing }
 SoilAddKeyEntry >> readFrom: aStream [ 
-	| idSize oldValueSize |
+	| idSize |
 	super readFrom: aStream.
 	idSize := aStream next.
 	id := (aStream next: idSize) asString.
 	key := (aStream next: aStream nextLengthEncodedInteger) asInteger.
 	value := (aStream next: (aStream nextLengthEncodedInteger) asInteger) asSoilObjectId .
+	(self hasOldValueOn: aStream) ifTrue: [ self readOldValueFrom: aStream ]
+]
+
+{ #category : #writing }
+SoilAddKeyEntry >> readOldValueFrom: aStream [
+	| oldValueSize |
 	oldValueSize := aStream nextLengthEncodedInteger.
 	oldValue := oldValueSize = 0
 		ifTrue: [ nil ]
@@ -102,7 +127,9 @@ SoilAddKeyEntry >> value: aString [
 { #category : #writing }
 SoilAddKeyEntry >> writeOn: aStream [ 
 	"the old value is written as well, empty when the key is new. A reader on an older
-	version restores the key from it, also when this entry is read back from disk"
+	version restores the key from it, also when this entry is read back from disk. It
+	was not written up to version 1, and one of that version is still written the way
+	it was"
 	| keyByteArray valueByteArray oldValueByteArray |
 	keyByteArray := key asByteArray.
 	valueByteArray := value asByteArray.
@@ -114,7 +141,9 @@ SoilAddKeyEntry >> writeOn: aStream [
 		nextPutLengthEncodedInteger: keyByteArray size;
 		nextPutAll: keyByteArray;
 		nextPutLengthEncodedInteger: valueByteArray size;
-		nextPutAll: valueByteArray;
-		nextPutLengthEncodedInteger: oldValueByteArray size;
-		nextPutAll: oldValueByteArray
+		nextPutAll: valueByteArray.
+	version >= 2 ifTrue: [
+		aStream
+			nextPutLengthEncodedInteger: oldValueByteArray size;
+			nextPutAll: oldValueByteArray ]
 ]

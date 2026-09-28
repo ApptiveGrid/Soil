@@ -125,6 +125,78 @@ SoilDatabaseJournalTest >> testAJournalThatIsNowhereAnswersTheBlock [
 ]
 
 { #category : #tests }
+SoilDatabaseJournalTest >> testAnAddKeyEntryOfVersionOneReadsWithoutAnOldValue [
+	"up to version 1 an add key entry did not write the value the key held before.
+	Fragment files written then are read the way they were written, and the entry
+	after it is not read from the middle of one"
+	| old next stream first second |
+	old := SoilAddKeyEntry new
+		transactionId: 3;
+		segment: 1;
+		id: 'index';
+		key: 42;
+		value: (SoilObjectId segment: 1 index: 7);
+		oldValue: (SoilObjectId segment: 1 index: 5);
+		yourself.
+	old instVarNamed: #version put: 1.
+	next := SoilAddKeyEntry new
+		transactionId: 3;
+		segment: 1;
+		id: 'index';
+		key: 43;
+		value: (SoilObjectId segment: 1 index: 8);
+		yourself.
+	stream := ByteArray new writeStream.
+	old writeOn: stream.
+	next writeOn: stream.
+	stream := stream contents readStream.
+	first := SoilJournalEntry readFrom: stream.
+	second := SoilJournalEntry readFrom: stream.
+	self assert: first oldValue isNil.
+	self assert: first key equals: 42.
+	self assert: second key equals: 43.
+	self assert: stream atEnd
+]
+
+{ #category : #tests }
+SoilDatabaseJournalTest >> testAnAddKeyEntryOfVersionOneWithAnOldValueReadsIt [
+	"for a while an add key entry wrote the old value and still said version 1. A
+	fragment file written then holds entries of version 1 with and without an old
+	value, and each is read the way it was written"
+	| entries bytes stream readBack |
+	entries := {
+		(SoilObjectId segment: 1 index: 5).
+		nil.
+		#none } collectWithIndex: [ :old :index |
+			SoilAddKeyEntry new
+				transactionId: 3;
+				segment: 1;
+				id: 'index';
+				key: 41 + index;
+				value: (SoilObjectId segment: 1 index: 7 + index);
+				oldValue: (old = #none ifFalse: [ old ]);
+				yourself ].
+	stream := ByteArray new writeStream.
+	entries allButLast do: [ :each |
+		"written as version 2, then marked as version 1 the way it was written then"
+		bytes := ByteArray streamContents: [ :s | each writeOn: s ].
+		bytes at: 2 put: 1.
+		stream nextPutAll: bytes ].
+	entries last instVarNamed: #version put: 1.
+	entries last writeOn: stream.
+	stream nextPutAll: (ByteArray streamContents: [ :s |
+		(SoilCommitTransactionEntry new transactionId: 3; committedAt: DateAndTime now; yourself) writeOn: s ]).
+	stream := stream contents readStream.
+	readBack := (1 to: 4) collect: [ :each | SoilJournalEntry readFrom: stream ].
+	self assert: stream atEnd.
+	self assert: ((readBack first: 3) collect: #key) asArray equals: #(42 43 44).
+	self assert: readBack first oldValue equals: (SoilObjectId segment: 1 index: 5).
+	self assert: readBack second oldValue isNil.
+	self assert: readBack third oldValue isNil.
+	self assert: readBack last class equals: SoilCommitTransactionEntry
+]
+
+{ #category : #tests }
 SoilDatabaseJournalTest >> testAnAddKeyEntryWritesTheValueTheKeyHeldBefore [
 	| entry stream readBack |
 	entry := SoilAddKeyEntry new
