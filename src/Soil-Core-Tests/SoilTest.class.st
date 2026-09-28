@@ -277,6 +277,25 @@ SoilTest >> testIsOpen [
 ]
 
 { #category : #tests }
+SoilTest >> testMetricsOldestReaderLag [
+	| tx reader metrics |
+	soil notificationHandler: SoilMetrics new.
+	metrics := soil notificationHandler.
+	tx := soil newTransaction.
+	tx root: self simpleGraph.
+	tx commit.
+	self assert: metrics oldestReaderLag equals: 0.
+	reader := soil newTransaction.
+	1 to: 2 do: [ :n |
+		tx := soil newTransaction.
+		tx root nested: 'changed ', n printString.
+		tx commit ].
+	self assert: metrics oldestReaderLag equals: 2.
+	reader abort.
+	self assert: metrics oldestReaderLag equals: 0
+]
+
+{ #category : #tests }
 SoilTest >> testMetricsUncached [
 	| tx metrics txn2 |
 	soil notificationHandler: SoilMetrics new.
