@@ -54,7 +54,28 @@ SoilTransactionJournal >> commitIn: soil [
 
 { #category : #committing }
 SoilTransactionJournal >> commitIn: soil recovery: aBoolean [
-	entries do: [ :each | each commitIn: soil recovery: aBoolean ]
+	"entries that write the bytes of an object and follow each other are written together,
+	per segment in one go, and in the order they have here relative to the entries around
+	them. Written one by one, each moved the file position and flushed twice, and where
+	that is not cheap a commit of many records spent its time on it"
+	| objectEntries |
+	objectEntries := OrderedCollection new.
+	entries do: [ :each |
+		each writesObjectBytes
+			ifTrue: [ objectEntries add: each ]
+			ifFalse: [
+				self commitObjectEntries: objectEntries in: soil.
+				objectEntries := OrderedCollection new.
+				each commitIn: soil recovery: aBoolean ] ].
+	self commitObjectEntries: objectEntries in: soil
+]
+
+{ #category : #committing }
+SoilTransactionJournal >> commitObjectEntries: aCollection in: soil [
+	aCollection ifEmpty: [ ^ self ].
+	(soil objectRepository putAll: (aCollection collect: [ :each | each objectId -> each bytes ]))
+		with: aCollection
+		do: [ :position :each | each wasWrittenAt: position ]
 ]
 
 { #category : #committing }

@@ -33,12 +33,9 @@ SoilNewObjectEntry >> bytes: aCollection [
 
 { #category : #committing }
 SoilNewObjectEntry >> commitIn: soil recovery: aBoolean [
-	position := soil objectRepository  
+	self wasWrittenAt: (soil objectRepository  
 		at: objectId 
-		putBytes: bytes.
-	record ifNotNil: [ 
-		record position: position.
-		record := nil ]
+		putBytes: bytes)
 ]
 
 { #category : #accessing }
@@ -113,4 +110,17 @@ SoilNewObjectEntry >> writeOn: aStream [
 		nextPutLengthEncodedInteger: bytes size;
 		nextPutAll: bytes
 	
+]
+
+{ #category : #committing }
+SoilNewObjectEntry >> wasWrittenAt: anInteger [
+	position := anInteger.
+	record ifNotNil: [ 
+		record position: position.
+		record := nil ]
+]
+
+{ #category : #testing }
+SoilNewObjectEntry >> writesObjectBytes [
+	^ true
 ]

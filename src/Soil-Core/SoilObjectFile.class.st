@@ -20,8 +20,8 @@ SoilObjectFile >> allRecords [
 SoilObjectFile >> appendAllBytes: aCollection [
 	"append each of aCollection of byte arrays and answer where each of them starts. One
 	position, one write per record into the buffer and one flush for all of them: where
-	moving the file position is not cheap, #appendBytes: per record was what an import of
-	many records spent its time on"
+	moving the file position is not cheap, #appendBytes: per record was what a commit or
+	an import of many records spent its time on"
 	| position positions |
 	^ mutex critical: [
 		position := stream size.

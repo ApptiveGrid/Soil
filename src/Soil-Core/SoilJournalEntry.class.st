@@ -56,6 +56,13 @@ SoilJournalEntry >> initialize [
 ]
 
 { #category : #testing }
+SoilJournalEntry >> writesObjectBytes [
+	"whether committing me writes the bytes of an object - those are written together,
+	see SoilTransactionJournal>>commitIn:recovery:"
+	^ false
+]
+
+{ #category : #testing }
 SoilJournalEntry >> isTransactionEntry [ 
 	^ false
 ]
