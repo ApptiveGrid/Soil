@@ -3,7 +3,6 @@ Class {
 	#superclass : #SoilVisitor,
 	#instVars : [
 		'stream',
-		'transaction',
 		'lastIndex',
 		'idMap',
 		'clusters',
@@ -451,7 +450,7 @@ SoilGraphImporter >> stream: aReadStream [
 
 { #category : #accessing }
 SoilGraphImporter >> transaction: anAGBaseTransaction [ 
-	transaction := anAGBaseTransaction.
+	super transaction: anAGBaseTransaction.
 	soil := anAGBaseTransaction soil 
 ]
 

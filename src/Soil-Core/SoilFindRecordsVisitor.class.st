@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilFindRecordsVisitor,
-	#superclass : #SoilTransactionalVisitor,
+	#superclass : #SoilVisitor,
 	#instVars : [
 		'condition',
 		'records',
@@ -17,7 +17,7 @@ SoilFindRecordsVisitor >> errors [
 
 { #category : #api }
 SoilFindRecordsVisitor >> find: aBlock in: aSoilTransaction [ 
-	transaction := aSoilTransaction. 
+	self transaction: aSoilTransaction.
 	soil := aSoilTransaction soil.
 	condition := aBlock.
 	self visit: soil

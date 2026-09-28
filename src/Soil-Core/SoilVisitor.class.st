@@ -6,7 +6,8 @@ Class {
 		'seen',
 		'depthFirst',
 		'databaseVersion',
-		'soil'
+		'soil',
+		'transaction'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -72,6 +73,22 @@ SoilVisitor >> soil: anObject [
 	soil := anObject
 ]
 
+{ #category : #accessing }
+SoilVisitor >> transaction [
+
+	^ transaction
+]
+
+{ #category : #accessing }
+SoilVisitor >> transaction: aTransaction [
+	"A visitor does not need a transaction to read - its databaseVersion is enough. It
+	may be handed one, or open one itself, when something it checks has to go through
+	one. Then the records it reads have to be those the transaction sees, so taking
+	the transaction takes its read version as well"
+	transaction := aTransaction.
+	databaseVersion := aTransaction readVersion
+]
+
 { #category : #visiting }
 SoilVisitor >> visitFirstSegment: aSoilObjectSegment [ 
 	depthFirst 
@@ -95,4 +112,11 @@ SoilVisitor >> visitSoil: aSoil [
 	super visitSoil: aSoil.
 	depthFirst ifFalse: [  
 		self processLoop ]
+]
+
+{ #category : #visiting }
+SoilVisitor >> visitWithTransaction: aSoil [
+	self transaction: aSoil newTransaction.
+	[ self visit: aSoil ]
+		ensure: [ transaction abort ]
 ]
