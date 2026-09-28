@@ -3,7 +3,6 @@ Class {
 	#superclass : #SoilVisitor,
 	#instVars : [
 		'stream',
-		'transaction',
 		'migrationMap',
 		'metaSegment',
 		'versionMap',
@@ -278,7 +277,7 @@ SoilGraphExporter >> stream: anObject [
 
 { #category : #accessing }
 SoilGraphExporter >> transaction: aTransaction [ 
-	transaction := aTransaction.
+	super transaction: aTransaction.
 	soil := aTransaction soil 
 ]
 

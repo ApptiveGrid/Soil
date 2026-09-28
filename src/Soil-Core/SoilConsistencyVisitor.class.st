@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilConsistencyVisitor,
-	#superclass : #SoilTransactionalVisitor,
+	#superclass : #SoilVisitor,
 	#instVars : [
 		'lastIndexes',
 		'errors',

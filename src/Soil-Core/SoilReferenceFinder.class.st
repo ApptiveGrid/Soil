@@ -1,6 +1,6 @@
 Class {
 	#name : #SoilReferenceFinder,
-	#superclass : #SoilTransactionalVisitor,
+	#superclass : #SoilVisitor,
 	#instVars : [
 		'objectId',
 		'references',

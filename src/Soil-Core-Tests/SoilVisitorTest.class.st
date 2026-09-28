@@ -40,6 +40,27 @@ SoilVisitorTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilVisitorTest >> testAVisitorHandedATransactionReadsAtItsVersion [
+	"A visitor read at the database version it found on its first read, whatever
+	transaction it had been handed. A commit between opening that transaction and the
+	visit gave it records the transaction does not see"
+	| tx reader writer root |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: 'before'; yourself).
+	tx commit.
+	reader := soil newTransaction.
+	writer := soil newTransaction.
+	writer root nested: 'after'.
+	writer commit.
+
+	root := (reader findRecords: [ :each | each objectId = SoilObjectId root ]) first.
+	self assert: root version equals: reader readVersion.
+	root materializeObject.
+	self assert: root object nested equals: 'before'.
+	reader abort
+]
+
+{ #category : #tests }
 SoilVisitorTest >> testBreadthFirstIsDefault [
 	self deny: (SoilVisitor new instVarNamed: #depthFirst)
 ]
