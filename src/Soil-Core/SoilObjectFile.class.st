@@ -64,6 +64,17 @@ SoilObjectFile >> basicAtPosition: anInteger length: length [
 		stream next: length ]
 ]
 
+{ #category : #accessing }
+SoilObjectFile >> headAtPosition: anInteger [
+	"The record at anInteger without its payload: its version, its previous version and
+	how long it is, for walking a chain without reading what the versions hold"
+	^ mutex critical: [ 
+		stream position: anInteger.
+		SoilPersistentClusterVersion new
+			readWithoutPayloadFrom: stream;
+			yourself ]
+]
+
 { #category : #initialization }
 SoilObjectFile >> initialize [
 	super initialize.

@@ -210,6 +210,14 @@ SoilObjectRepository >> loadSegments [
 ]
 
 { #category : #accessing }
+SoilObjectRepository >> locationsOf: anObjectId upToReadVersion: aNumberOrNil [
+	"see SoilObjectSegment>>locationsAt:upToReadVersion:"
+	^ (self segmentAt: anObjectId segment)
+		locationsAt: anObjectId index
+		upToReadVersion: aNumberOrNil
+]
+
+{ #category : #accessing }
 SoilObjectRepository >> lockObjectId: aSOObjectId for: lockContext [
 	^ (self segmentAt: aSOObjectId segment)
 		lockObjectId: aSOObjectId for: lockContext

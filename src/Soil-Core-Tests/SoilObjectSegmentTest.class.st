@@ -20,6 +20,45 @@ SoilObjectSegmentTest >> newMemorySegment [
 ]
 
 { #category : #tests }
+SoilObjectSegmentTest >> testALocationSaysWhereARecordLiesAndHowLongItIs [ 
+	"the versions a reader still needs, found by their heads alone: where each lies and
+	how many bytes it takes, which is what a record was written with. The same versions
+	a copy would keep - none but the current one without a reader"
+	| path soil segment index first second firstPosition secondPosition locations |
+	path := ('soil-record-locations-' , UUID new asString) asFileReference.
+	soil := Soil path: path.
+	[ soil initializeFilesystem.
+	segment := soil objectRepository segmentAt: 1.
+	index := segment lastObjectIndex + 2.
+	first := SoilPersistentClusterVersion new 
+		version: 1;
+		bytes: #[ 1 2 3 ];
+		yourself.
+	firstPosition := segment at: index putBytes: first serialize.
+	second := SoilPersistentClusterVersion new 
+		version: 2;
+		bytes: #[ 4 5 6 7 ];
+		yourself.
+	second previousVersionPosition: firstPosition.
+	secondPosition := segment at: index putBytes: second serialize.
+
+	locations := segment locationsAt: index upToReadVersion: 1.
+	self assert: locations asArray equals: { 
+		SoilRecordLocation position: secondPosition length: second serialize size.
+		SoilRecordLocation position: firstPosition length: first serialize size }.
+	self 
+		assert: ((segment allVersionsAt: index) collect: [ :each | each length ]) asArray
+		equals: { second serialize size. first serialize size }.
+	self 
+		assert: (segment locationsAt: index upToReadVersion: nil) asArray 
+		equals: { locations first }.
+	self assert: (segment locationsAt: index - 1 upToReadVersion: nil) isEmpty ]
+		ensure: [ 
+			soil close.
+			path exists ifTrue: [ path deleteAll ] ]
+]
+
+{ #category : #tests }
 SoilObjectSegmentTest >> testAVersionChainThatCirclesIsRefused [ 
 	"a record whose previous version is the record itself: the loop that collects a
 	chain would never reach zero, and would keep every version it passed on the way.

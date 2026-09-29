@@ -18,7 +18,8 @@ SoilClusterVersionTest >> testPersistentClusterVersionMemory [
 		references: ({ 4 . 5 . 6 } collect: #asSoilObjectId).
 		
 
-	self assert: record soilSizeInMemory equals: 1120
+	"1128 since a record keeps its length in the file (8 bytes for the slot)"
+	self assert: record soilSizeInMemory equals: 1128
 ]
 
 { #category : #tests }

@@ -26,30 +26,9 @@ SoilObjectSegment >> allRecords [
 
 { #category : #accessing }
 SoilObjectSegment >> allVersionsAt: index [ 
-	"a chain that leads back to a position it has already been at is not a long
-	history, it is a broken one - and followed to its end it never ends, because the
-	zero that stops this loop is never reached. Every version passed on the way is
-	kept, so what a damaged chain costs is not a slow backup but the process doing it.
-
-	Guarded here and not in every walker: #basicAt:version: and #at:version: follow
-	the same links but stop at the first version they can use, so they only circle
-	when asked for a version the cycle does not contain. This one follows the chain to
-	its end unconditionally."
-	| obj versions objectId positions |
-	obj := self at: index.
-	versions := OrderedCollection new.
-	versions add: obj.
-	objectId := obj objectId.
-	positions := Set with: obj position.
-	[ obj previousVersionPosition == 0 ] whileFalse: [ 
-		(positions includes: obj previousVersionPosition) ifTrue: [ 
-			SoilDatabaseIsInconsistent signal: 'version chain of ' , objectId printString 
-				, ' returns to position ' , obj previousVersionPosition printString ].
-		positions add: obj previousVersionPosition.
-		obj := objectFile atPosition: obj previousVersionPosition.
-		obj objectId: objectId.
-		versions add: obj ].
-	^ versions
+	^ self 
+		chainFrom: (self at: index) 
+		reading: [ :position | objectFile atPosition: position ]
 ]
 
 { #category : #converting }
@@ -131,6 +110,36 @@ SoilObjectSegment >> basicAt: index version: version [
 		record hasPreviousVersion ifFalse: [ ^ nil ].
 		record := objectFile atPosition: record previousVersionPosition ].
 	^ record
+]
+
+{ #category : #accessing }
+SoilObjectSegment >> chainFrom: aRecord reading: aBlock [
+	"aRecord and every version before it, each read by aBlock from its position.
+
+	A chain that leads back to a position it has already been at is not a long
+	history, it is a broken one - and followed to its end it never ends, because the
+	zero that stops this loop is never reached. Every version passed on the way is
+	kept, so what a damaged chain costs is not a slow backup but the process doing it.
+
+	Guarded here and not in every walker: #basicAt:version: and #at:version: follow
+	the same links but stop at the first version they can use, so they only circle
+	when asked for a version the cycle does not contain. This one follows the chain to
+	its end unconditionally."
+	| obj versions objectId positions |
+	obj := aRecord.
+	versions := OrderedCollection new.
+	versions add: obj.
+	objectId := obj objectId.
+	positions := Set with: obj position.
+	[ obj previousVersionPosition == 0 ] whileFalse: [ 
+		(positions includes: obj previousVersionPosition) ifTrue: [ 
+			SoilDatabaseIsInconsistent signal: 'version chain of ' , objectId printString 
+				, ' returns to position ' , obj previousVersionPosition printString ].
+		positions add: obj previousVersionPosition.
+		obj := aBlock value: obj previousVersionPosition.
+		obj objectId: objectId.
+		versions add: obj ].
+	^ versions
 ]
 
 { #category : #'open/close' }
@@ -271,6 +280,26 @@ SoilObjectSegment >> lastObjectIndex [
 { #category : #accessing }
 SoilObjectSegment >> lastObjectIndex: anInteger [ 
 	^ indexFile lastObjectIndex: anInteger 
+]
+
+{ #category : #accessing }
+SoilObjectSegment >> locationsAt: index upToReadVersion: aNumberOrNil [
+	"Where in the file the versions of the object at index lie that a reader at
+	aNumberOrNil still needs, newest first - the same versions a copy keeps, see
+	#keptVersionsOf:upToReadVersion:. Found by reading the head of each record and
+	stepping over its payload. With the length in the index slot the current version
+	would need no read at all; this method is the place that would change"
+	| position head |
+	position := indexFile positionAt: index.
+	position == 0 ifTrue: [ ^ OrderedCollection new ].
+	head := (objectFile headAtPosition: position)
+		objectId: (SoilObjectId segment: id index: index);
+		yourself.
+	^ (self 
+		keptVersionsOf: (self 
+			chainFrom: head 
+			reading: [ :each | objectFile headAtPosition: each ])
+		upToReadVersion: aNumberOrNil) collect: [ :each | each location ]
 ]
 
 { #category : #locking }
