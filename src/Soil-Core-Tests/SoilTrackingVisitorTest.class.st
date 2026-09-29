@@ -64,6 +64,26 @@ SoilTrackingVisitorTest >> testAnObjectIdBeyondItsSegmentIsCollected [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testAnIndexWhoseSizeHasDriftedIsNamed [
+	"the database check reports it and repairs nothing - recomputeSize does that"
+	| tx index visitor tracker error |
+	self commitSampleGraph.
+	tx := soil newTransaction.
+	"the index as the segment holds it; a transaction works on a copy-on-write layer
+	over it"
+	index := (soil objectRepository segmentAt: 1) indexAt: tx root nested reference id.
+	tx abort.
+	index headerPage size: 5.
+	visitor := SoilTrackingVisitor new.
+	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
+	visitor track: soil.
+	self assert: tracker errors size equals: 1.
+	error := tracker errors values first.
+	self assert: (error messageText includesSubstring: 'says it holds 5 entries and holds 2').
+	self assert: index headerPage size equals: 5
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testEveryTrackerSeesEveryClusterOnce [
 	| visitor first second tx expected |
 	self commitSampleGraph.
