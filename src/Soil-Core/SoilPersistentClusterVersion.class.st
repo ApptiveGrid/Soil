@@ -2,7 +2,8 @@ Class {
 	#name : #SoilPersistentClusterVersion,
 	#superclass : #SoilClusterRecord,
 	#instVars : [
-		'fingerprint'
+		'fingerprint',
+		'length'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -31,6 +32,17 @@ SoilPersistentClusterVersion >> ensureFingerprint [
 { #category : #testing }
 SoilPersistentClusterVersion >> hasChanged [
 	^ fingerprint ~= object soilRecursiveHash 
+]
+
+{ #category : #accessing }
+SoilPersistentClusterVersion >> length [
+	"how many bytes the record takes in the file, head and payload"
+	^ length
+]
+
+{ #category : #accessing }
+SoilPersistentClusterVersion >> location [
+	^ SoilRecordLocation position: position length: length
 ]
 
 { #category : #accessing }
@@ -75,7 +87,16 @@ SoilPersistentClusterVersion >> printOn: aStream [
 
 { #category : #'instance creation' }
 SoilPersistentClusterVersion >> readFrom: stream [ 
-	| numberOfReferences objectSize numberOfBehaviorDescriptions numberOfIndexIds |
+	| objectSize |
+	objectSize := self readHeadFrom: stream.
+	bytes := stream next: objectSize.
+	length := stream position - position
+]
+
+{ #category : #'instance creation' }
+SoilPersistentClusterVersion >> readHeadFrom: stream [
+	"everything before the payload; answers how many bytes of payload follow"
+	| numberOfReferences numberOfBehaviorDescriptions numberOfIndexIds |
 	position := stream position.
 	version := stream nextLengthEncodedInteger.
 	previousVersionPosition := stream nextLengthEncodedInteger.
@@ -98,10 +119,15 @@ SoilPersistentClusterVersion >> readFrom: stream [
 	1 to: numberOfIndexIds do: [:n | | idSize |
 		idSize := stream next.
 		indexIds add: (stream next: idSize) asString ]. 
-	"object in bytes"
-	objectSize := stream nextLengthEncodedInteger.
-	bytes := stream next: objectSize.
-		
+	"the size of the object in bytes that follow"
+	^ stream nextLengthEncodedInteger
+]
+
+{ #category : #'instance creation' }
+SoilPersistentClusterVersion >> readWithoutPayloadFrom: stream [
+	"The record up to its payload, which is not read: enough to know its version, its
+	previous version and how long it is"
+	length := (self readHeadFrom: stream) + stream position - position
 ]
 
 { #category : #initialization }
