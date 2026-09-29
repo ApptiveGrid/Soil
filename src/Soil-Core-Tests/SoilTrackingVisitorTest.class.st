@@ -120,6 +120,32 @@ SoilTrackingVisitorTest >> testAnIndexWhoseSizeHasDriftedIsNamed [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testAnIndexSizeThatSettlesOnTheSecondReadIsNotNamed [
+	"a commit between reading the header and counting shows a difference that is gone
+	the next moment"
+	| tracker |
+	tracker := SoilTestSettlingSizeTracker new
+		reads: { 5 -> 2. 2 -> 2 };
+		yourself.
+	tracker checkSizeOf: nil segment: nil.
+	self assert: tracker findings isEmpty
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAnIndexSizeThatStaysOffIsNamedWithTheSecondRead [
+	| tracker segment |
+	self commitSampleGraph.
+	segment := soil objectRepository segmentAt: 1.
+	tracker := SoilTestSettlingSizeTracker new
+		reads: { 6 -> 2. 5 -> 2 };
+		yourself.
+	tracker checkSizeOf: (SoilSkipList new id: 'abc'; yourself) segment: segment.
+	self assert: tracker findings size equals: 1.
+	self assert: tracker findings first stored equals: 5.
+	self assert: tracker findings first counted equals: 2
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAnObjectIdBeyondItsSegmentIsCollected [
 	"the old visitor ended the whole check on the first such id; a tracker collects it"
 	| visitor tracker beyond |
