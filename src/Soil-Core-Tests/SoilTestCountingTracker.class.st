@@ -34,6 +34,6 @@ SoilTestCountingTracker >> trackCluster: aSoilPersistentClusterVersion in: aVisi
 ]
 
 { #category : #tracking }
-SoilTestCountingTracker >> trackIndex: anIndex in: aVisitor [
+SoilTestCountingTracker >> trackIndex: anIndex segment: aSoilObjectSegment in: aVisitor [
 	indexes add: anIndex
 ]

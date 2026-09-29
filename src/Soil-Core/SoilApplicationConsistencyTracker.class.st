@@ -16,7 +16,10 @@ SoilApplicationConsistencyTracker >> checkBehaviorDescription: aSoilObjectId in:
 		description := aVisitor transaction objectWithId: aSoilObjectId.
 		aVisitor soil behaviorRegistry 
 			nameAt: description behaviorIdentifier 
-			ifAbsent: [ Error signal: 'description for ', description behaviorIdentifier asString , ' cannot be found in the identifier index' ] ]
+			ifAbsent: [ 
+				self report: (SoilUnknownBehaviorDescription 
+					descriptionId: aSoilObjectId 
+					behaviorIdentifier: description behaviorIdentifier) ] ]
 ]
 
 { #category : #initialization }
@@ -40,7 +43,10 @@ SoilApplicationConsistencyTracker >> trackCluster: aSoilPersistentClusterVersion
 	aSoilPersistentClusterVersion behaviorDescriptions do: [ :description |
 		self checkBehaviorDescription: description in: aVisitor ].
 	shouldMaterializeObjects ifTrue: [  
-		self 
-			check: aSoilPersistentClusterVersion 
-			using: [ (aSoilPersistentClusterVersion transaction: aVisitor transaction) materializeObject ] ]
+		[ (aSoilPersistentClusterVersion transaction: aVisitor transaction) materializeObject ]
+			on: Error 
+			do: [ :error | 
+				self report: (SoilUnmaterializableCluster 
+					objectId: aSoilPersistentClusterVersion objectId 
+					reason: error messageText asString) ] ]
 ]

@@ -19,7 +19,8 @@ SoilTracker >> trackCluster: aSoilPersistentClusterVersion in: aVisitor [
 ]
 
 { #category : #tracking }
-SoilTracker >> trackIndex: anIndex in: aVisitor [
+SoilTracker >> trackIndex: anIndex segment: aSoilObjectSegment in: aVisitor [
+	"an index does not know its segment; the visitor passes it along"
 ]
 
 { #category : #tracking }

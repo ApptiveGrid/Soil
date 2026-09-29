@@ -29,6 +29,16 @@ SoilTrackingVisitor >> needsTransaction [
 ]
 
 { #category : #visiting }
+SoilTrackingVisitor >> processIndexId: indexId segment: aSoilObjectSegment [
+	"the one place that knows which segment an index belongs to - the index itself does
+	not, so the trackers are told here"
+	| index |
+	index := aSoilObjectSegment indexAt: indexId.
+	trackers do: [ :each | each trackIndex: index segment: aSoilObjectSegment in: self ].
+	self visit: index
+]
+
+{ #category : #visiting }
 SoilTrackingVisitor >> processObjectId: aSoilObjectId [ 
 	trackers do: [ :each | each trackObjectId: aSoilObjectId in: self ].
 	^ super processObjectId: aSoilObjectId 
@@ -52,12 +62,6 @@ SoilTrackingVisitor >> trackers [
 SoilTrackingVisitor >> visitDatabaseJournal: aJournal [
 	"the journal has a check of its own, SoilJournalConsistencyVisitor"
 	^ aJournal
-]
-
-{ #category : #visiting }
-SoilTrackingVisitor >> visitIndex: anIndex [ 
-	trackers do: [ :each | each trackIndex: anIndex in: self ].
-	^ super visitIndex: anIndex 
 ]
 
 { #category : #visiting }
