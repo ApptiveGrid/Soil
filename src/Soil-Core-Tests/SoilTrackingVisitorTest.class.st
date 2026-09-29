@@ -49,6 +49,73 @@ SoilTrackingVisitorTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testARepairRecomputesADriftedIndexSize [
+	| tx indexId index visitor repair |
+	self commitSampleGraph.
+	tx := soil newTransaction.
+	indexId := tx root nested reference id.
+	tx abort.
+	index := (soil objectRepository segmentAt: 1) indexAt: indexId.
+	index headerPage size: 5.
+	visitor := SoilTrackingVisitor new.
+	visitor addTracker: SoilDatabaseConsistencyTracker new.
+	visitor track: soil.
+
+	repair := (SoilRepair on: soil) repair: visitor report; yourself.
+	self assert: repair repaired size equals: 1.
+	self assert: repair notRepairable isEmpty.
+	soil close; open.
+	tx := soil newTransaction.
+	self assert: tx root nested reference size equals: 2.
+	tx abort.
+	visitor := SoilTrackingVisitor new.
+	visitor addTracker: SoilDatabaseConsistencyTracker new.
+	visitor track: soil.
+	self assert: visitor report isEmpty
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAReportIsPlainValues [
+	"what the metabase stores or sends: a dictionary of numbers, strings and symbols"
+	| report dictionary |
+	report := SoilConsistencyReport 
+		databaseVersion: 7 
+		findings: { SoilIndexSizeDrift segment: 1 indexId: 'abc' stored: 5 counted: 2 }.
+	dictionary := report asDictionary.
+	self assert: (dictionary at: #databaseVersion) equals: 7.
+	self assert: ((dictionary at: #findings) first at: #kind) equals: #indexSizeDrift.
+	self assert: ((dictionary at: #findings) first at: #stored) equals: 5.
+	self assert: ((dictionary at: #findings) first at: #counted) equals: 2.
+	self assert: ((dictionary at: #findings) first at: #indexId) equals: 'abc'
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAnIndexWhoseSizeHasDriftedIsNamed [
+	"named with what a repair needs to find it again: the segment and the index id"
+	| tx indexId index visitor finding |
+	self commitSampleGraph.
+	tx := soil newTransaction.
+	indexId := tx root nested reference id.
+	tx abort.
+	"the index as the segment holds it; a transaction works on a copy-on-write layer
+	over it"
+	index := (soil objectRepository segmentAt: 1) indexAt: indexId.
+	index headerPage size: 5.
+	visitor := SoilTrackingVisitor new.
+	visitor addTracker: SoilDatabaseConsistencyTracker new.
+	visitor track: soil.
+	self assert: visitor report findings size equals: 1.
+	finding := visitor report findings first.
+	self assert: finding class equals: SoilIndexSizeDrift.
+	self assert: finding segment equals: 1.
+	self assert: finding indexId equals: indexId.
+	self assert: finding stored equals: 5.
+	self assert: finding counted equals: 2.
+	self assert: finding isRepairable.
+	self assert: index headerPage size equals: 5
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAnObjectIdBeyondItsSegmentIsCollected [
 	"the old visitor ended the whole check on the first such id; a tracker collects it"
 	| visitor tracker beyond |
@@ -59,28 +126,19 @@ SoilTrackingVisitorTest >> testAnObjectIdBeyondItsSegmentIsCollected [
 	tracker trackObjectId: beyond in: visitor.
 	tracker trackObjectId: (SoilObjectId segment: 2 index: 1) in: visitor.
 	tracker trackObjectId: SoilObjectId root in: visitor.
-	self assert: tracker errors size equals: 2.
-	self assert: (tracker errors includesKey: beyond)
+	self assert: tracker findings size equals: 2.
+	self assert: (tracker findings collect: [ :each | each kind ]) asSet equals: #(objectIdOutsideSegment) asSet.
+	self assert: tracker findings first objectId equals: beyond
 ]
 
 { #category : #tests }
-SoilTrackingVisitorTest >> testAnIndexWhoseSizeHasDriftedIsNamed [
-	"the database check reports it and repairs nothing - recomputeSize does that"
-	| tx index visitor tracker error |
-	self commitSampleGraph.
-	tx := soil newTransaction.
-	"the index as the segment holds it; a transaction works on a copy-on-write layer
-	over it"
-	index := (soil objectRepository segmentAt: 1) indexAt: tx root nested reference id.
-	tx abort.
-	index headerPage size: 5.
-	visitor := SoilTrackingVisitor new.
-	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
-	visitor track: soil.
-	self assert: tracker errors size equals: 1.
-	error := tracker errors values first.
-	self assert: (error messageText includesSubstring: 'says it holds 5 entries and holds 2').
-	self assert: index headerPage size equals: 5
+SoilTrackingVisitorTest >> testAnUnexpectedErrorBecomesAFinding [
+	| tracker |
+	tracker := SoilDatabaseConsistencyTracker new.
+	tracker check: #something using: [ Error signal: 'nobody expected this' ].
+	self assert: tracker findings size equals: 1.
+	self assert: tracker findings first kind equals: #unexpected.
+	self assert: (tracker findings first description includesSubstring: 'nobody expected this')
 ]
 
 { #category : #tests }
@@ -110,7 +168,7 @@ SoilTrackingVisitorTest >> testOnlyTheDatabaseLevelRunsWithoutATransaction [
 	visitor track: soil.
 	self assert: visitor transaction isNil.
 	self assert: soil notificationHandler transactionsCreated equals: 0.
-	self assert: tracker errors isEmpty
+	self assert: tracker findings isEmpty
 ]
 
 { #category : #tests }
@@ -136,6 +194,16 @@ SoilTrackingVisitorTest >> testTheConsistencyTrackersFindNothingOnAHealthyDataba
 	application := visitor addTracker: SoilApplicationConsistencyTracker new.
 	application materializeObjects.
 	visitor track: soil.
-	self assert: database errors isEmpty.
-	self assert: application errors isEmpty
+	self assert: database findings isEmpty.
+	self assert: application findings isEmpty.
+	self assert: visitor report isEmpty
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testWhatHasNoRepairIsKeptAsNotRepairable [
+	| repair finding |
+	finding := SoilObjectIdOutsideSegment objectId: (SoilObjectId segment: 2 index: 1) reason: 'test'.
+	repair := (SoilRepair on: soil) repairFindings: { finding }; yourself.
+	self assert: repair repaired isEmpty.
+	self assert: repair notRepairable asArray equals: { finding }
 ]

@@ -1,5 +1,5 @@
 "
-One walk over a database for a list of trackers (SoilTracker), each of which is shown every object id reached, every index and every cluster read, and collects what concerns it.
+One walk over a database for a list of trackers (SoilTracker), each of which is shown every object id reached, every index and every cluster read, and collects what concerns it. What the consistency trackers found comes back as one SoilConsistencyReport (#report).
 
 It opens a transaction only when one of its trackers asks for one, and then one for all of them: what the trackers find has to have been read at one version to fit together. Without such a tracker it reads at its databaseVersion alone, so trackers that only look at the structure on disk run on a copy or in an image without the application's classes as well.
 "
@@ -29,9 +29,27 @@ SoilTrackingVisitor >> needsTransaction [
 ]
 
 { #category : #visiting }
+SoilTrackingVisitor >> processIndexId: indexId segment: aSoilObjectSegment [
+	"the one place that knows which segment an index belongs to - the index itself does
+	not, and a finding about it has to say where it is to be repaired"
+	| index |
+	index := aSoilObjectSegment indexAt: indexId.
+	trackers do: [ :each | each trackIndex: index segment: aSoilObjectSegment in: self ].
+	self visit: index
+]
+
+{ #category : #visiting }
 SoilTrackingVisitor >> processObjectId: aSoilObjectId [ 
 	trackers do: [ :each | each trackObjectId: aSoilObjectId in: self ].
 	^ super processObjectId: aSoilObjectId 
+]
+
+{ #category : #accessing }
+SoilTrackingVisitor >> report [
+	"what the trackers found, at the version the walk read"
+	^ SoilConsistencyReport 
+		databaseVersion: self databaseVersion 
+		findings: (trackers flatCollect: [ :each | each findings ])
 ]
 
 { #category : #api }
@@ -52,12 +70,6 @@ SoilTrackingVisitor >> trackers [
 SoilTrackingVisitor >> visitDatabaseJournal: aJournal [
 	"the journal has a check of its own, SoilJournalConsistencyVisitor"
 	^ aJournal
-]
-
-{ #category : #visiting }
-SoilTrackingVisitor >> visitIndex: anIndex [ 
-	trackers do: [ :each | each trackIndex: anIndex in: self ].
-	^ super visitIndex: anIndex 
 ]
 
 { #category : #visiting }
