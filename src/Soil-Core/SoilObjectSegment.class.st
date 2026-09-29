@@ -288,7 +288,13 @@ SoilObjectSegment >> locationsAt: index upToReadVersion: aNumberOrNil [
 	aNumberOrNil still needs, newest first - the same versions a copy keeps, see
 	#keptVersionsOf:upToReadVersion:. Found by reading the head of each record and
 	stepping over its payload. With the length in the index slot the current version
-	would need no read at all; this method is the place that would change"
+	would need no read at all; this method is the place that would change.
+
+	It goes past the record cache on purpose, for the current version too. It is asked
+	for every live object when the space in use is measured, and going through #at:
+	would pull each of them into the cache and push out what the running database is
+	working with. And what counts for where a record lies is the index and the file,
+	not a cache that may not have caught up yet"
 	| position head |
 	position := indexFile positionAt: index.
 	position == 0 ifTrue: [ ^ OrderedCollection new ].
