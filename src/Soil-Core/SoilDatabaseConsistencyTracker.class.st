@@ -14,7 +14,7 @@ Class {
 SoilDatabaseConsistencyTracker >> checkSizeOf: anIndex segment: aSoilObjectSegment [
 	"The size in the header page is kept counting up and down and can drift from the
 	entries that are really there - which hid entries from a list that took its limit
-	from it. This names the drift; SoilRepair recomputes it.
+	from it. This names the drift; its repair action recomputes it.
 
 	Header and count are two reads. A commit landing between them on a database in use
 	can show a difference that is gone the next moment; on a copy, or a database

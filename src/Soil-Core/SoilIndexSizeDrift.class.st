@@ -1,5 +1,5 @@
 "
-The size in an index's header page is not what the index holds. The size is kept counting up and down and can drift; SoilIndex>>recomputeSize makes it what is there.
+The size in an index's header page is not what the index holds. The size is kept counting up and down and can drift; SoilRecomputeIndexSize makes it what is there (SoilIndex>>recomputeSize).
 "
 Class {
 	#name : #SoilIndexSizeDrift,
@@ -37,19 +37,14 @@ SoilIndexSizeDrift >> description [
 	^ 'index ', indexId printString, ' of segment ', segment printString, ' says it holds ', stored printString, ' entries and holds ', counted printString
 ]
 
-{ #category : #testing }
-SoilIndexSizeDrift >> isRepairable [
-	^ true
-]
-
 { #category : #accessing }
 SoilIndexSizeDrift >> kind [
 	^ #indexSizeDrift
 ]
 
 { #category : #repairing }
-SoilIndexSizeDrift >> repairWith: aRepair [
-	^ aRepair repairIndexSizeDrift: self
+SoilIndexSizeDrift >> repairActions [
+	^ { SoilRecomputeIndexSize segment: segment indexId: indexId }
 ]
 
 { #category : #accessing }
