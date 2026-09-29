@@ -17,17 +17,19 @@ SoilDatabaseConsistencyTracker >> checkSizeOf: anIndex segment: aSoilObjectSegme
 	from it. This names the drift; its repair action recomputes it.
 
 	Header and count are two reads. A commit landing between them on a database in use
-	can show a difference that is gone the next moment; on a copy, or a database
-	nobody writes to, the result is exact"
-	| stored counted |
-	stored := anIndex headerPage size.
-	counted := anIndex newIterator sizeViaIteration.
-	stored = counted ifFalse: [ 
-		self report: (SoilIndexSizeDrift 
-			segment: aSoilObjectSegment id 
-			indexId: anIndex id 
-			stored: stored 
-			counted: counted) ]
+	can show a difference that is gone the next moment, so a difference is read a
+	second time and named only if it is still there. On a copy, or a database nobody
+	writes to, the second read finds the same"
+	| sizes |
+	sizes := self sizesOf: anIndex.
+	sizes key = sizes value ifTrue: [ ^ self ].
+	sizes := self sizesOf: anIndex.
+	sizes key = sizes value ifTrue: [ ^ self ].
+	self report: (SoilIndexSizeDrift
+		segment: aSoilObjectSegment id
+		indexId: anIndex id
+		stored: sizes key
+		counted: sizes value)
 ]
 
 { #category : #initialization }
@@ -41,6 +43,12 @@ SoilDatabaseConsistencyTracker >> lastIndexOfSegment: anInteger in: aVisitor [
 	^ lastIndexes 
 		at: anInteger 
 		ifAbsentPut: [ (aVisitor soil objectRepository segmentAt: anInteger) lastObjectIndex ]
+]
+
+{ #category : #checking }
+SoilDatabaseConsistencyTracker >> sizesOf: anIndex [
+	"the size the header page stores -> the entries the index holds"
+	^ anIndex headerPage size -> anIndex newIterator sizeViaIteration
 ]
 
 { #category : #tracking }
