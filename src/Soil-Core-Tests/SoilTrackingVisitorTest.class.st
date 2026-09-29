@@ -61,11 +61,11 @@ SoilTrackingVisitorTest >> testARepairRecomputesADriftedIndexSize [
 	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
 	visitor track: soil.
 
-	repair := (SoilRepair on: soil) 
-		repair: (SoilConsistencyReport of: { tracker } readAt: visitor databaseVersion); 
+	repair := (SoilRepairVisitor on: soil)
+		repair: (tracker findings collect: [ :each | each defaultRepairAction ]);
 		yourself.
 	self assert: repair repaired size equals: 1.
-	self assert: repair notRepairable isEmpty.
+	self assert: repair failed isEmpty.
 	soil close; open.
 	tx := soil newTransaction.
 	self assert: tx root nested reference size equals: 2.
@@ -88,7 +88,9 @@ SoilTrackingVisitorTest >> testAReportIsPlainValues [
 	self assert: ((dictionary at: #findings) first at: #kind) equals: #indexSizeDrift.
 	self assert: ((dictionary at: #findings) first at: #stored) equals: 5.
 	self assert: ((dictionary at: #findings) first at: #counted) equals: 2.
-	self assert: ((dictionary at: #findings) first at: #indexId) equals: 'abc'
+	self assert: ((dictionary at: #findings) first at: #indexId) equals: 'abc'.
+	self assert: (((dictionary at: #findings) first at: #repairActions) first at: #action) equals: #recomputeIndexSize.
+	self assert: (((dictionary at: #findings) first at: #repairActions) first at: #default)
 ]
 
 { #category : #tests }
@@ -202,10 +204,51 @@ SoilTrackingVisitorTest >> testTheConsistencyTrackersFindNothingOnAHealthyDataba
 ]
 
 { #category : #tests }
-SoilTrackingVisitorTest >> testWhatHasNoRepairIsKeptAsNotRepairable [
-	| repair finding |
+SoilTrackingVisitorTest >> testAFailingRepairActionIsKeptAndTheOthersGoOn [
+	| tx indexId index missing repair |
+	self commitSampleGraph.
+	tx := soil newTransaction.
+	indexId := tx root nested reference id.
+	tx abort.
+	index := (soil objectRepository segmentAt: 1) indexAt: indexId.
+	index headerPage size: 5.
+	missing := SoilRecomputeIndexSize segment: 1 indexId: 'noSuchIndex'.
+	repair := (SoilRepairVisitor on: soil)
+		repair: { missing. SoilRecomputeIndexSize segment: 1 indexId: indexId };
+		yourself.
+	self assert: repair failed size equals: 1.
+	self assert: repair failed first key equals: missing.
+	self assert: repair repaired size equals: 1.
+	self assert: index headerPage size equals: 2
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAFindingWithoutRepairOffersNoAction [
+	| finding |
 	finding := SoilObjectIdOutsideSegment objectId: (SoilObjectId segment: 2 index: 1) reason: 'test'.
-	repair := (SoilRepair on: soil) repairFindings: { finding }; yourself.
-	self assert: repair repaired isEmpty.
-	self assert: repair notRepairable asArray equals: { finding }
+	self assert: finding repairActions isEmpty.
+	self deny: finding isRepairable.
+	self assert: finding defaultRepairAction isNil
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testARepairActionIsMadeAgainFromItsDictionary [
+	"a script and a route start from the same form: the dictionary a finding offers"
+	| action again |
+	action := (SoilIndexSizeDrift segment: 1 indexId: 'abc' stored: 5 counted: 2) defaultRepairAction.
+	again := SoilRepairAction fromDictionary: action asDictionary.
+	self assert: again class equals: SoilRecomputeIndexSize.
+	self assert: again segment equals: 1.
+	self assert: again indexId equals: 'abc'.
+	self assert: again isDefault
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAnUnknownRepairActionIsRefused [
+	self
+		should: [ SoilRepairAction fromDictionary: { #action -> #formatTheDisk } asDictionary ]
+		raise: SoilUnknownRepairAction.
+	self
+		should: [ SoilRepairAction fromDictionary: Dictionary new ]
+		raise: SoilUnknownRepairAction
 ]

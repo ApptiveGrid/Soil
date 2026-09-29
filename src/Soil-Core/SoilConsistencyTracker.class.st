@@ -1,5 +1,5 @@
 "
-A tracker that checks what it is shown and collects what fails as findings (SoilFinding) - it reports, it does not repair. Checking and repairing are two calls; SoilRepair takes the findings collected here.
+A tracker that checks what it is shown and collects what fails as findings (SoilFinding) - it reports, it does not repair. Checking and repairing are two calls; each finding offers its repair actions, and SoilRepairVisitor carries out the ones a person chose.
 
 Two levels, one subclass each: SoilDatabaseConsistencyTracker checks the structure on disk and needs no transaction, SoilApplicationConsistencyTracker checks that the stored objects fit the classes of this image and needs one.
 "
