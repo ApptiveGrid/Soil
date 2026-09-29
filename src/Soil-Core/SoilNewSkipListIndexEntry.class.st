@@ -23,6 +23,7 @@ SoilNewSkipListIndexEntry >> commitIn: soil recovery: aBoolean [
 	(indexManager indexes at: id ifAbsent: [ nil ]) ifNotNil: [ :existing | ^ existing ].
 	index := SoilSkipList new
 		path: (indexManager pathFor: id);
+		segment: indexManager segment;
 		initializeFilesystem;
 		initializeHeaderPage;
 		maxLevel: maxLevel;

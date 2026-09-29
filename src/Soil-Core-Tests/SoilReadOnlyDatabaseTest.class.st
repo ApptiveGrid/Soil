@@ -44,6 +44,20 @@ SoilReadOnlyDatabaseTest >> fileSizesIn: aFileReference [
 ]
 
 { #category : #running }
+SoilReadOnlyDatabaseTest >> makeFilesReadOnly [
+	"what a copy owned by another user looks like to this one: every file may be read,
+	none may be written"
+
+	self setPermissionsOfFilesTo: 8r444
+]
+
+{ #category : #running }
+SoilReadOnlyDatabaseTest >> makeFilesWritable [
+
+	self setPermissionsOfFilesTo: 8r644
+]
+
+{ #category : #running }
 SoilReadOnlyDatabaseTest >> openReadOnly [
 	"open the same database again, this time for reading only. #basicOpen and not
 	#open: recovery is a separate decision and would write."
@@ -52,6 +66,13 @@ SoilReadOnlyDatabaseTest >> openReadOnly [
 	readOnly readOnly: true.
 	readOnly basicOpen.
 	^ readOnly
+]
+
+{ #category : #running }
+SoilReadOnlyDatabaseTest >> setPermissionsOfFilesTo: anInteger [
+
+	(soil path allChildren select: [ :each | each isFile ]) do: [ :each |
+		each permissions: (FileSystemPermission posixPermissions: anInteger) ]
 ]
 
 { #category : #running }
@@ -200,12 +221,48 @@ SoilReadOnlyDatabaseTest >> testHealthyDatabaseOpensThroughFullOpen [
 ]
 
 { #category : #tests }
+SoilReadOnlyDatabaseTest >> testIndexFilesOpenNonWritable [
+	"an index file gets its stream where every other file of the database gets it, the
+	behavior index when the database opens and a segment index when it is first read"
+
+	| txn |
+	self writeIndex.
+	soil close.
+	self openReadOnly.
+	txn := readOnly newReadOnlyTransaction.
+	(txn root at: #rows) at: 1.
+	txn abort.
+	self deny: readOnly behaviorRegistry index store stream class equals: SoilLockableStream.
+	self deny: ((readOnly objectRepository segmentAt: 1) indexManager indexes anyOne store stream class) equals: SoilLockableStream
+]
+
+{ #category : #tests }
 SoilReadOnlyDatabaseTest >> testNormalDatabaseStillUsesLockableStreams [
 	"guard for the ordinary case: the flag defaults to false and changes nothing"
 
 	self deny: soil readOnly.
 	self assert: soil control stream class equals: SoilLockableStream.
-	self assert: soil metadata stream class equals: SoilLockableStream
+	self assert: soil metadata stream class equals: SoilLockableStream.
+	self assert: soil behaviorRegistry index store stream class equals: SoilLockableStream
+]
+
+{ #category : #tests }
+SoilReadOnlyDatabaseTest >> testReadsAnIndexFromFilesNobodyMayWrite [
+	"a copy or a backup whose files may not be written can still be read. The index
+	files used to open read-write whatever the flag said, and the behavior index,
+	opened with the database, stopped it before anything was read"
+
+	| txn |
+	self writeIndex.
+	soil close.
+	self makeFilesReadOnly.
+	[
+	self openReadOnly.
+	txn := readOnly newReadOnlyTransaction.
+	self assert: ((txn root at: #rows) at: 1) equals: 'first'.
+	self assert: ((txn root at: #rows) at: 2) equals: 'second'.
+	txn abort ]
+		ensure: [ self makeFilesWritable ]
 ]
 
 { #category : #tests }
@@ -263,6 +320,23 @@ SoilReadOnlyDatabaseTest >> testWriteOnAReadOnlyFileFails [
 	soil close.
 	self openReadOnly.
 	self should: [ readOnly control stream nextPutAll: #[ 1 2 3 ] ] raise: Error
+]
+
+{ #category : #running }
+SoilReadOnlyDatabaseTest >> writeIndex [
+	"a root that keeps its entries in an index of its own, in a file of its own"
+
+	| txn |
+	txn := soil newTransaction.
+	txn root: SoilPersistentDictionary new.
+	txn root at: #rows put: (SoilSkipListDictionary new
+		keySize: 10;
+		maxLevel: 8;
+		yourself).
+	(txn root at: #rows)
+		at: 1 put: 'first';
+		at: 2 put: 'second'.
+	txn commit
 ]
 
 { #category : #running }

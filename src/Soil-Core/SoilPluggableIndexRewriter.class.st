@@ -56,6 +56,7 @@ SoilPluggableIndexRewriter >> prepareNewIndex [
 	| indexCopy headerPage |
 	indexCopy := index class new 
 		path: rewritePath;
+		segment: index segment;
 		initializeFilesystem.
 	newIndex := indexBlock cull: indexCopy cull: index.
 	newIndex hasHeaderPage ifFalse: [  

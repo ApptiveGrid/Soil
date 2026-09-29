@@ -182,6 +182,7 @@ SoilBehaviorRegistry >> initialize [
 SoilBehaviorRegistry >> initializeFilesystem [
 	index := SoilSkipList new 
 		path: self path;
+		segment: self segment;
 		initializeFilesystem;
 		initializeHeaderPage;
 		maxLevel: 10;
@@ -224,6 +225,7 @@ SoilBehaviorRegistry >> open [
 	index ifNotNil: [ index close ].
 	index :=  SoilSkipList new 
 		path: self path;
+		segment: self segment;
 		open
 ]
 

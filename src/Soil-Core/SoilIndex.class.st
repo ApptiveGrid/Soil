@@ -17,7 +17,8 @@ Class {
 	#instVars : [
 		'id',
 		'store',
-		'dirtyPages'
+		'dirtyPages',
+		'segment'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -582,6 +583,17 @@ SoilIndex >> rewriteUsing: aBlock [
 		itemBlock: aBlock;
 		cleanRemoved;
 		run
+]
+
+{ #category : #accessing }
+SoilIndex >> segment [
+	"the segment this index file belongs to, nil for an index used stand alone"
+	^ segment
+]
+
+{ #category : #accessing }
+SoilIndex >> segment: aSoilObjectSegment [
+	segment := aSoilObjectSegment
 ]
 
 { #category : #accessing }
