@@ -50,7 +50,7 @@ SoilTrackingVisitorTest >> tearDown [
 
 { #category : #tests }
 SoilTrackingVisitorTest >> testARepairRecomputesADriftedIndexSize [
-	| tx indexId index visitor repair |
+	| tx indexId index visitor tracker repair |
 	self commitSampleGraph.
 	tx := soil newTransaction.
 	indexId := tx root nested reference id.
@@ -58,10 +58,12 @@ SoilTrackingVisitorTest >> testARepairRecomputesADriftedIndexSize [
 	index := (soil objectRepository segmentAt: 1) indexAt: indexId.
 	index headerPage size: 5.
 	visitor := SoilTrackingVisitor new.
-	visitor addTracker: SoilDatabaseConsistencyTracker new.
+	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
 	visitor track: soil.
 
-	repair := (SoilRepair on: soil) repair: visitor report; yourself.
+	repair := (SoilRepair on: soil) 
+		repair: (SoilConsistencyReport of: { tracker } readAt: visitor databaseVersion); 
+		yourself.
 	self assert: repair repaired size equals: 1.
 	self assert: repair notRepairable isEmpty.
 	soil close; open.
@@ -69,9 +71,9 @@ SoilTrackingVisitorTest >> testARepairRecomputesADriftedIndexSize [
 	self assert: tx root nested reference size equals: 2.
 	tx abort.
 	visitor := SoilTrackingVisitor new.
-	visitor addTracker: SoilDatabaseConsistencyTracker new.
+	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
 	visitor track: soil.
-	self assert: visitor report isEmpty
+	self assert: tracker findings isEmpty
 ]
 
 { #category : #tests }
@@ -92,7 +94,7 @@ SoilTrackingVisitorTest >> testAReportIsPlainValues [
 { #category : #tests }
 SoilTrackingVisitorTest >> testAnIndexWhoseSizeHasDriftedIsNamed [
 	"named with what a repair needs to find it again: the segment and the index id"
-	| tx indexId index visitor finding |
+	| tx indexId index visitor tracker finding |
 	self commitSampleGraph.
 	tx := soil newTransaction.
 	indexId := tx root nested reference id.
@@ -102,10 +104,10 @@ SoilTrackingVisitorTest >> testAnIndexWhoseSizeHasDriftedIsNamed [
 	index := (soil objectRepository segmentAt: 1) indexAt: indexId.
 	index headerPage size: 5.
 	visitor := SoilTrackingVisitor new.
-	visitor addTracker: SoilDatabaseConsistencyTracker new.
+	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
 	visitor track: soil.
-	self assert: visitor report findings size equals: 1.
-	finding := visitor report findings first.
+	self assert: tracker findings size equals: 1.
+	finding := tracker findings first.
 	self assert: finding class equals: SoilIndexSizeDrift.
 	self assert: finding segment equals: 1.
 	self assert: finding indexId equals: indexId.
@@ -196,7 +198,7 @@ SoilTrackingVisitorTest >> testTheConsistencyTrackersFindNothingOnAHealthyDataba
 	visitor track: soil.
 	self assert: database findings isEmpty.
 	self assert: application findings isEmpty.
-	self assert: visitor report isEmpty
+	self assert: (SoilConsistencyReport of: { database. application } readAt: visitor databaseVersion) isEmpty
 ]
 
 { #category : #tests }

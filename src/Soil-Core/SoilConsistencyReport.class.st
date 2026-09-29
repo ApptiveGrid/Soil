@@ -1,5 +1,5 @@
 "
-What one walk over a database found, and the version it was read at. It is what gets stored or sent, and what a repair is started from - by a person, not by itself.
+What the consistency trackers of one walk over a database found, and the version it was read at (#of:readAt:). It is what gets stored or sent, and what a repair is started from - by a person, not by itself.
 "
 Class {
 	#name : #SoilConsistencyReport,
@@ -16,6 +16,15 @@ SoilConsistencyReport class >> databaseVersion: anInteger findings: aCollection 
 	^ self new
 		databaseVersion: anInteger findings: aCollection;
 		yourself
+]
+
+{ #category : #'instance creation' }
+SoilConsistencyReport class >> of: aCollectionOfConsistencyTrackers readAt: anInteger [
+	"the findings of the consistency trackers of one walk; the visitor that carried them
+	does not know what they collect"
+	^ self 
+		databaseVersion: anInteger 
+		findings: (aCollectionOfConsistencyTrackers flatCollect: [ :each | each findings ])
 ]
 
 { #category : #accessing }
