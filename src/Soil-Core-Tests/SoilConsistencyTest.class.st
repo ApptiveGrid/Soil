@@ -50,6 +50,23 @@ SoilConsistencyTest >> testCheckConsistencyPassesOnHealthyDatabase [
 ]
 
 { #category : #tests }
+SoilConsistencyTest >> testCheckConsistencyPassesWithAnIndex [
+	"an index page of the latest version is not bogus. The check still stopped at
+	version 2, and every index written since the pages got their back links was
+	reported as broken"
+	| tx dict |
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: 1 put: (SoilTestNestedObject new label: #one).
+	tx commit.
+	self shouldnt: [ soil checkConsistency ] raise: Error
+]
+
+{ #category : #tests }
 SoilConsistencyTest >> testCheckConsistencyRaisesOnVersionMismatch [
 	"I6: a divergence between scanned max version and control databaseVersion is caught."
 	self commitSampleGraph.
