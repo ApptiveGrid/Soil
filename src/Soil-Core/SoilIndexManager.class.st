@@ -77,6 +77,7 @@ SoilIndexManager >> createIndexWithId: indexId class: aClass [
 		at: indexId
 		put: (aClass new
 			path: (self pathFor: indexId);
+			soil: self soil;
 			initializeFilesystem;
 			initializeHeaderPage)
 ]
@@ -131,6 +132,7 @@ SoilIndexManager >> loadIndexWithId: indexId ifNone: aBlock [
 		ifTrue: [ 
 			(self class indexClassFromFile: path) new 
 				path: path;
+				soil: self soil;
 				id: indexId;
 				yourself ]
 		ifFalse: [ aBlock value ]

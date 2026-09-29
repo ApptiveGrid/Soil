@@ -20,6 +20,7 @@ SoilNewBTreeListIndexEntry >> commitIn: soil recovery: aBoolean [
 	(indexManager indexes at: id ifAbsent: [ nil ]) ifNotNil: [ :existing | ^ existing ].
 	index := SoilBTree new
 		path: (indexManager pathFor: id);
+		soil: soil;
 		initializeFilesystem;
 		initializeHeaderPage;
 		keySize: keySize;

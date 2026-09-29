@@ -17,7 +17,8 @@ Class {
 	#instVars : [
 		'id',
 		'store',
-		'dirtyPages'
+		'dirtyPages',
+		'soil'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -587,6 +588,17 @@ SoilIndex >> rewriteUsing: aBlock [
 { #category : #accessing }
 SoilIndex >> size [
 	^ self headerPage size
+]
+
+{ #category : #accessing }
+SoilIndex >> soil [
+	"the database this index belongs to, nil for an index used stand alone"
+	^ soil
+]
+
+{ #category : #accessing }
+SoilIndex >> soil: aSoil [
+	soil := aSoil
 ]
 
 { #category : #accessing }
