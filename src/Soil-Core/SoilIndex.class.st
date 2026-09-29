@@ -18,7 +18,7 @@ Class {
 		'id',
 		'store',
 		'dirtyPages',
-		'soil'
+		'segment'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -586,19 +586,19 @@ SoilIndex >> rewriteUsing: aBlock [
 ]
 
 { #category : #accessing }
+SoilIndex >> segment [
+	"the segment this index file belongs to, nil for an index used stand alone"
+	^ segment
+]
+
+{ #category : #accessing }
+SoilIndex >> segment: aSoilObjectSegment [
+	segment := aSoilObjectSegment
+]
+
+{ #category : #accessing }
 SoilIndex >> size [
 	^ self headerPage size
-]
-
-{ #category : #accessing }
-SoilIndex >> soil [
-	"the database this index belongs to, nil for an index used stand alone"
-	^ soil
-]
-
-{ #category : #accessing }
-SoilIndex >> soil: aSoil [
-	soil := aSoil
 ]
 
 { #category : #accessing }

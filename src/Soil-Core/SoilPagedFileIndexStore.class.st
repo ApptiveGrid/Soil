@@ -92,13 +92,13 @@ SoilPagedFileIndexStore >> open [
 
 { #category : #'open/close' }
 SoilPagedFileIndexStore >> openStream [
-	"an index of a database gets its stream where every file of the database gets it,
+	"an index in a segment gets its stream where every file of the database gets it,
 	so a read-only database opens its index files non-writable. An index used stand
-	alone has no database and opens its file read-write as before"
+	alone has no segment and opens its file read-write as before"
 	streamSemaphore critical: [  
-		stream := index soil
+		stream := index segment
 			ifNil: [ SoilLockableStream path: index path ]
-			ifNotNil: [ :db | db streamOnPath: index path ] ]
+			ifNotNil: [ :seg | seg soil streamOnPath: index path ] ]
 ]
 
 { #category : #accessing }
