@@ -51,3 +51,8 @@ SoilUnmaterializableCluster >> objectId: aSoilObjectId reason: aString [
 SoilUnmaterializableCluster >> reason [
 	^ reason
 ]
+
+{ #category : #accessing }
+SoilUnmaterializableCluster >> nodeIn: aSoilGraphTracker [
+	^ aSoilGraphTracker nodeAt: objectId ifAbsent: [ nil ]
+]

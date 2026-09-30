@@ -1,9 +1,12 @@
+"
+A node of the object graph a SoilGraphTracker collects: a cluster by its object id, the object ids it points to (#outgoing), the nodes that point to it (#incoming), whether the walk read it, and the findings a view of the graph puts on it.
+"
 Class {
 	#name : #SoilModelGraphNode,
 	#superclass : #Object,
 	#instVars : [
 		'objectId',
-		'errors',
+		'findings',
 		'outgoing',
 		'incoming',
 		'isRead'
@@ -12,8 +15,13 @@ Class {
 }
 
 { #category : #adding }
-SoilModelGraphNode >> addError: anError [ 
-	errors add: anError 
+SoilModelGraphNode >> addFinding: aSoilFinding [
+	findings add: aSoilFinding
+]
+
+{ #category : #accessing }
+SoilModelGraphNode >> findings [
+	^ findings
 ]
 
 { #category : #adding }
@@ -26,14 +34,9 @@ SoilModelGraphNode >> addOutgoing: aSoilObjectId [
 	outgoing add: aSoilObjectId 
 ]
 
-{ #category : #adding }
-SoilModelGraphNode >> addReference: aSoilObjectId [ 
-	outgoing add: aSoilObjectId 
-]
-
 { #category : #accessing }
 SoilModelGraphNode >> extent [
-	^ self hasErrors 
+	^ self hasFindings 
 		ifTrue: [ 100 ]
 		ifFalse: [ 1 ]
 ]
@@ -60,14 +63,14 @@ SoilModelGraphNode >> findRootPath [
 
 { #category : #api }
 SoilModelGraphNode >> graphColor [
-	^ self hasErrors 
+	^ self hasFindings 
 		ifTrue: [  Color lightRed ] 
 		ifFalse: [ Color lightBlue ] 
 ]
 
-{ #category : #private }
-SoilModelGraphNode >> hasErrors [ 
-	^ errors notEmpty 
+{ #category : #testing }
+SoilModelGraphNode >> hasFindings [
+	^ findings notEmpty
 ]
 
 { #category : #accessing }
@@ -86,7 +89,7 @@ SoilModelGraphNode >> initialize [
 	isRead := false.
 	outgoing := Set new.
 	incoming := Set new.
-	errors := OrderedCollection new 
+	findings := OrderedCollection new
 ]
 
 { #category : #testing }
@@ -116,13 +119,3 @@ SoilModelGraphNode >> printOn: aStream [
 	aStream << 'node: ' << objectId asString 
 ]
 
-{ #category : #accessing }
-SoilModelGraphNode >> references [
-	^ outgoing
-]
-
-{ #category : #private }
-SoilModelGraphNode >> resolveObjectIdsIn: anObject [ 
-	outgoing := outgoing collect: [ :each |
-		anObject nodeAt: each  ]
-]

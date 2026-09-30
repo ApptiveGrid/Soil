@@ -224,6 +224,23 @@ SoilTrackingVisitorTest >> testAGraphTrackerKeepsWhatLeadsNowhere [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testTheGraphViewPutsAFindingOnTheClusterItIsAbout [
+	"a drifted index size is about the cluster that holds the index"
+	| tx indexId dictId view |
+	self commitSampleGraph.
+	tx := soil newTransaction.
+	indexId := tx root nested reference id.
+	dictId := tx objectIdOf: tx root nested reference.
+	tx abort.
+	((soil objectRepository segmentAt: 1) indexAt: indexId) headerPage size: 5.
+	view := SoilGraphView of: soil.
+	self assert: view findings size equals: 1.
+	self assert: view nodesWithFindings size equals: 1.
+	self assert: view nodesWithFindings first objectId equals: dictId.
+	self assert: view nodesWithFindings first findings first class equals: SoilIndexSizeDrift
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testATrackerIsToldTheIndexAValueCameFrom [
 	| visitor counting tx dictId |
 	self commitSampleGraph.
