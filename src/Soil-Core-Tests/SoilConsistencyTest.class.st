@@ -8,6 +8,20 @@ Class {
 }
 
 { #category : #helpers }
+SoilConsistencyTest >> assertConsistent [
+	"what Soil>>checkConsistency used to ask, now that consistency is not one check
+	any more: index against heap on both levels, as findings of the trackers of one
+	walk (I3), and the versions against the control file (I6)"
+	| visitor database application |
+	visitor := SoilTrackingVisitor new.
+	database := visitor addTracker: SoilDatabaseConsistencyTracker new.
+	application := visitor addTracker: SoilApplicationConsistencyTracker new.
+	visitor track: soil.
+	self assert: (SoilConsistencyReport of: { database. application } readAt: visitor databaseVersion) isEmpty.
+	self shouldnt: [ SoilCompareVersionsVisitor new validate: soil ] raise: Error
+]
+
+{ #category : #helpers }
 SoilConsistencyTest >> commitSampleGraph [
 	| tx |
 	tx := soil newTransaction.
@@ -36,21 +50,21 @@ SoilConsistencyTest >> tearDown [
 ]
 
 { #category : #tests }
-SoilConsistencyTest >> testCheckConsistencyPassesAfterGarbageCollect [
+SoilConsistencyTest >> testAGarbageCollectLeavesTheDatabaseConsistent [
 	"the GC must leave the database I3/I6-consistent."
 	self commitSampleGraph.
 	soil garbageCollect.
-	self shouldnt: [ soil checkConsistency ] raise: Error
+	self assertConsistent
 ]
 
 { #category : #tests }
-SoilConsistencyTest >> testCheckConsistencyPassesOnHealthyDatabase [
+SoilConsistencyTest >> testAHealthyDatabaseIsConsistent [
 	self commitSampleGraph.
-	self shouldnt: [ soil checkConsistency ] raise: Error
+	self assertConsistent
 ]
 
 { #category : #tests }
-SoilConsistencyTest >> testCheckConsistencyPassesWithAnIndex [
+SoilConsistencyTest >> testADatabaseWithAnIndexIsConsistent [
 	"an index page of the latest version is not bogus. The check still stopped at
 	version 2, and every index written since the pages got their back links was
 	reported as broken"
@@ -63,15 +77,15 @@ SoilConsistencyTest >> testCheckConsistencyPassesWithAnIndex [
 	tx root: dict.
 	dict at: 1 put: (SoilTestNestedObject new label: #one).
 	tx commit.
-	self shouldnt: [ soil checkConsistency ] raise: Error
+	self assertConsistent
 ]
 
 { #category : #tests }
-SoilConsistencyTest >> testCheckConsistencyRaisesOnVersionMismatch [
+SoilConsistencyTest >> testAVersionMismatchIsCaught [
 	"I6: a divergence between scanned max version and control databaseVersion is caught."
 	self commitSampleGraph.
 	soil control databaseVersion: 999.
-	self should: [ soil checkConsistency ] raise: Error
+	self should: [ SoilCompareVersionsVisitor new validate: soil ] raise: Error
 ]
 
 { #category : #tests }

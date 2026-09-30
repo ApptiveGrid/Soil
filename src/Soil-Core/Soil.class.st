@@ -173,15 +173,6 @@ Soil >> canRecover [
 	^ self readOnly not and: [ self path isWritable ]
 ]
 
-{ #category : #checking }
-Soil >> checkConsistency [
-	"Opt-in structural check of this database: index<->heap consistency (I3) and version
-	consistency (I6). Raises on the first violation, otherwise returns self. Not part of
-	garbageCollect - call it explicitly (e.g. after a GC or in CI)."
-	SoilConsistencyVisitor new validate: self.
-	SoilCompareVersionsVisitor new validate: self
-]
-
 { #category : #accessing }
 Soil >> checkpoint [
 	| entry checkpointLSN |
