@@ -11,7 +11,7 @@ Class {
 		'incoming',
 		'isRead'
 	],
-	#category : #'Soil-Core-Visitor'
+	#category : #'Soil-Roassal'
 }
 
 { #category : #adding }

@@ -2,16 +2,39 @@
 Collects the object graph of a walk: a node (SoilModelGraphNode) for every cluster the walk reads, with what it points to - its references and the values of its indexes - and what points to it. It collects, it does not judge; the consistency trackers of the same walk say what is wrong, and a client shows both (the graph view of the development image).
 
 A target that is pointed at but never read stays as a node of its own (#unreadNodes): an object id that leads nowhere, with the nodes that lead to it. Needs no transaction and no classes of the application.
+
+#of: walks a database once with the graph tracker and both consistency trackers and puts each finding on the node it is about (#placeFindings:, SoilFinding>>nodeIn:). The drawing of the result is SoilGraphView's. Both live in Soil-Roassal, outside the core and outside BaselineOfSoil - the view needs Roassal - until the tracker is split off on its own.
 "
 Class {
 	#name : #SoilGraphTracker,
 	#superclass : #SoilTracker,
 	#instVars : [
 		'nodes',
-		'indexOwners'
+		'indexOwners',
+		'findings'
 	],
-	#category : #'Soil-Core-Visitor'
+	#category : #'Soil-Roassal'
 }
+
+{ #category : #'instance creation' }
+SoilGraphTracker class >> of: aSoil [
+	"one walk: the graph, and the findings of both levels, read at one version and put
+	on their nodes"
+	| visitor graph database application |
+	visitor := SoilTrackingVisitor new.
+	graph := visitor addTracker: self new.
+	database := visitor addTracker: SoilDatabaseConsistencyTracker new.
+	application := visitor addTracker: SoilApplicationConsistencyTracker new.
+	visitor track: aSoil.
+	^ graph
+		placeFindings: database findings , application findings;
+		yourself
+]
+
+{ #category : #accessing }
+SoilGraphTracker >> findings [
+	^ findings
+]
 
 { #category : #adding }
 SoilGraphTracker >> from: aNode to: aSoilObjectId [
@@ -23,7 +46,8 @@ SoilGraphTracker >> from: aNode to: aSoilObjectId [
 SoilGraphTracker >> initialize [
 	super initialize.
 	nodes := Dictionary new.
-	indexOwners := Dictionary new
+	indexOwners := Dictionary new.
+	findings := OrderedCollection new
 ]
 
 { #category : #accessing }
@@ -46,10 +70,24 @@ SoilGraphTracker >> nodes [
 ]
 
 { #category : #accessing }
+SoilGraphTracker >> nodesWithFindings [
+	^ self nodes select: [ :each | each hasFindings ]
+]
+
+{ #category : #accessing }
 SoilGraphTracker >> ownerOfIndex: anIndexId segment: anInteger [
 	"the node of the cluster that holds the index, nil where none of the walk does -
 	how a finding about an index is put on the graph"
 	^ indexOwners at: anInteger -> anIndexId ifAbsent: [ nil ]
+]
+
+{ #category : #adding }
+SoilGraphTracker >> placeFindings: aCollectionOfFindings [
+	"the findings of the consistency trackers of the same walk, each on the node it is
+	about; one that names no node is kept all the same"
+	aCollectionOfFindings do: [ :each |
+		findings add: each.
+		(each nodeIn: self) ifNotNil: [ :node | node addFinding: each ] ]
 ]
 
 { #category : #tracking }

@@ -39,9 +39,3 @@ SoilIndexFinding >> segment: anInteger indexId: anIndexId [
 	segment := anInteger.
 	indexId := anIndexId
 ]
-
-{ #category : #accessing }
-SoilIndexFinding >> nodeIn: aSoilGraphTracker [
-	"the cluster that holds the index"
-	^ aSoilGraphTracker ownerOfIndex: indexId segment: segment
-]
