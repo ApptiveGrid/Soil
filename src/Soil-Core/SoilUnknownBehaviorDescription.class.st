@@ -51,8 +51,3 @@ SoilUnknownBehaviorDescription >> descriptionId: aSoilObjectId behaviorIdentifie
 SoilUnknownBehaviorDescription >> kind [
 	^ #unknownBehaviorDescription
 ]
-
-{ #category : #accessing }
-SoilUnknownBehaviorDescription >> nodeIn: aSoilGraphTracker [
-	^ aSoilGraphTracker nodeAt: descriptionId ifAbsent: [ nil ]
-]
