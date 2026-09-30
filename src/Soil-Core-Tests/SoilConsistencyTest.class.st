@@ -89,19 +89,12 @@ SoilConsistencyTest >> testAVersionMismatchIsCaught [
 ]
 
 { #category : #tests }
-SoilConsistencyTest >> testConsistencyVisitorValidateRaisesOnInconsistency [
-	"I3: validate: raises when the check finds any error."
-	self commitSampleGraph.
-	self should: [ SoilConsistencyFailingVisitor new validate: soil ] raise: Error
-]
-
-{ #category : #tests }
-SoilConsistencyTest >> testTheConsistencyVisitorChecksAtTheVersionOfItsTransaction [
-	"The consistency visitor reads records and indexes at the version of the transaction
-	it runs with. An index entry committed after that version points to an object that
-	has no version there, and reading the index as it is now ended the check in
-	'nil objectId:'"
-	| tx dict reader writer visitor |
+SoilConsistencyTest >> testTheTrackersCheckAtTheVersionOfTheirTransaction [
+	"The consistency trackers read records and indexes at the version of the
+	transaction the walk runs with. An index entry committed after that version points
+	to an object that has no version there, and reading the index as it is now ended
+	the check in 'nil objectId:'"
+	| tx dict reader writer visitor database application |
 	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
 		keySize: 10;
 		maxLevel: 8;
@@ -115,10 +108,11 @@ SoilConsistencyTest >> testTheConsistencyVisitorChecksAtTheVersionOfItsTransacti
 	writer root at: 4 put: (SoilTestNestedObject new label: 'late').
 	writer commit.
 
-	visitor := SoilConsistencyVisitor new.
-	visitor
-		soil: soil;
-		transaction: reader.
-	[ self shouldnt: [ visitor visit: soil ] raise: Error ]
-		ensure: [ reader abort ]
+	visitor := SoilTrackingVisitor new.
+	visitor transaction: reader.
+	database := visitor addTracker: SoilDatabaseConsistencyTracker new.
+	application := visitor addTracker: SoilApplicationConsistencyTracker new.
+	[ self shouldnt: [ visitor track: soil ] raise: Error ]
+		ensure: [ reader abort ].
+	self assert: (SoilConsistencyReport of: { database. application } readAt: visitor databaseVersion) isEmpty
 ]

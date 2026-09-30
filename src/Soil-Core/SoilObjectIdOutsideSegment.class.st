@@ -51,3 +51,8 @@ SoilObjectIdOutsideSegment >> objectId: aSoilObjectId reason: aString [
 SoilObjectIdOutsideSegment >> reason [
 	^ reason
 ]
+
+{ #category : #accessing }
+SoilObjectIdOutsideSegment >> nodeIn: aSoilGraphTracker [
+	^ aSoilGraphTracker nodeAt: objectId ifAbsent: [ nil ]
+]
