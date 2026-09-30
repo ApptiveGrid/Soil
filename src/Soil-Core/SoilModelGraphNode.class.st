@@ -5,7 +5,8 @@ Class {
 		'objectId',
 		'errors',
 		'outgoing',
-		'incoming'
+		'incoming',
+		'isRead'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -69,12 +70,30 @@ SoilModelGraphNode >> hasErrors [
 	^ errors notEmpty 
 ]
 
+{ #category : #accessing }
+SoilModelGraphNode >> beRead [
+	isRead := true
+]
+
+{ #category : #accessing }
+SoilModelGraphNode >> incoming [
+	^ incoming
+]
+
 { #category : #initialization }
 SoilModelGraphNode >> initialize [ 
 	super initialize.
+	isRead := false.
 	outgoing := Set new.
 	incoming := Set new.
 	errors := OrderedCollection new 
+]
+
+{ #category : #testing }
+SoilModelGraphNode >> isRead [
+	"whether the walk read a cluster under my object id. A node that is only pointed
+	at was never read - the object id leads nowhere"
+	^ isRead
 ]
 
 { #category : #accessing }

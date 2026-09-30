@@ -7,7 +7,9 @@ Class {
 	#name : #SoilTrackingVisitor,
 	#superclass : #SoilVisitor,
 	#instVars : [
-		'trackers'
+		'trackers',
+		'currentIndex',
+		'currentSegment'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -32,10 +34,28 @@ SoilTrackingVisitor >> needsTransaction [
 SoilTrackingVisitor >> processIndexId: indexId segment: aSoilObjectSegment [
 	"the one place that knows which segment an index belongs to - the index itself does
 	not, so the trackers are told here"
-	| index |
+	| index previousIndex previousSegment |
 	index := aSoilObjectSegment indexAt: indexId.
 	trackers do: [ :each | each trackIndex: index segment: aSoilObjectSegment in: self ].
-	self visit: index
+	previousIndex := currentIndex.
+	previousSegment := currentSegment.
+	currentIndex := index.
+	currentSegment := aSoilObjectSegment.
+	[ self visit: index ] ensure: [
+		currentIndex := previousIndex.
+		currentSegment := previousSegment ]
+]
+
+{ #category : #visiting }
+SoilTrackingVisitor >> processIndexValue: aSoilObjectId [
+	"a value of the index being read, told with that index - #processObjectId: comes
+	after and does not know where the id came from. The behavior registry is read
+	outside #processIndexId:segment:, so its values arrive without an index and are
+	not told"
+	currentIndex ifNotNil: [ :index |
+		trackers do: [ :each |
+			each trackValue: aSoilObjectId ofIndex: index segment: currentSegment in: self ] ].
+	^ super processIndexValue: aSoilObjectId
 ]
 
 { #category : #visiting }
