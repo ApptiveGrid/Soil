@@ -6,7 +6,8 @@ Class {
 	#superclass : #SoilTracker,
 	#instVars : [
 		'clusters',
-		'indexes'
+		'indexes',
+		'values'
 	],
 	#category : #'Soil-Core-Tests-Visitor'
 }
@@ -25,7 +26,8 @@ SoilTestCountingTracker >> indexes [
 SoilTestCountingTracker >> initialize [ 
 	super initialize.
 	clusters := OrderedCollection new.
-	indexes := OrderedCollection new
+	indexes := OrderedCollection new.
+	values := Dictionary new
 ]
 
 { #category : #tracking }
@@ -36,4 +38,14 @@ SoilTestCountingTracker >> trackCluster: aSoilPersistentClusterVersion in: aVisi
 { #category : #tracking }
 SoilTestCountingTracker >> trackIndex: anIndex segment: aSoilObjectSegment in: aVisitor [
 	indexes add: anIndex
+]
+
+{ #category : #tracking }
+SoilTestCountingTracker >> trackValue: aSoilObjectId ofIndex: anIndex segment: aSoilObjectSegment in: aVisitor [
+	(values at: anIndex id ifAbsentPut: [ OrderedCollection new ]) add: aSoilObjectId
+]
+
+{ #category : #accessing }
+SoilTestCountingTracker >> valuesOfIndex: anIndexId [
+	^ values at: anIndexId ifAbsent: [ #() ]
 ]

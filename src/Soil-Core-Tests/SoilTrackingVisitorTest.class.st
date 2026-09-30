@@ -172,6 +172,71 @@ SoilTrackingVisitorTest >> testAnUnexpectedErrorBecomesAFinding [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testAGraphTrackerLeadsFromAnIndexValueBackToTheRoot [
+	"references and index values are both edges, and what points to a node is known
+	without a second pass"
+	| tx dictId valueId visitor graph valueNode |
+	self commitSampleGraph.
+	tx := soil newTransaction.
+	dictId := tx objectIdOf: tx root nested reference.
+	valueId := tx objectIdOf: (tx root nested reference at: 1).
+	tx abort.
+	visitor := SoilTrackingVisitor new.
+	graph := visitor addTracker: SoilGraphTracker new.
+	visitor track: soil.
+	valueNode := graph nodeAt: valueId ifAbsent: [ nil ].
+	self assert: valueNode notNil.
+	self assert: valueNode isRead.
+	self assert: ((valueNode incoming collect: [ :each | each objectId ]) includes: dictId).
+	self assert: ((graph nodeAt: dictId ifAbsent: [ nil ]) outgoing includes: valueId).
+	self assert: valueNode findRootPath last index equals: 1.
+	self assert: graph unreadNodes isEmpty
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAGraphTrackerKnowsWhichClusterHoldsAnIndex [
+	| tx dict visitor graph |
+	self commitSampleGraph.
+	tx := soil newTransaction.
+	dict := tx root nested reference.
+	visitor := SoilTrackingVisitor new.
+	graph := visitor addTracker: SoilGraphTracker new.
+	visitor track: soil.
+	self
+		assert: (graph ownerOfIndex: dict id segment: 1) objectId
+		equals: (tx objectIdOf: dict).
+	tx abort
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAGraphTrackerKeepsWhatLeadsNowhere [
+	"a target that is pointed at and never read: the object id leads nowhere, and
+	the node says who points to it"
+	| graph from nowhere |
+	graph := SoilGraphTracker new.
+	from := graph nodeAt: (SoilObjectId segment: 1 index: 1).
+	from beRead.
+	nowhere := SoilObjectId segment: 1 index: 99.
+	graph from: from to: nowhere.
+	self assert: graph unreadNodes size equals: 1.
+	self assert: graph unreadNodes first objectId equals: nowhere.
+	self assert: (graph unreadNodes first incoming includes: from)
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testATrackerIsToldTheIndexAValueCameFrom [
+	| visitor counting tx dictId |
+	self commitSampleGraph.
+	tx := soil newTransaction.
+	dictId := tx root nested reference id.
+	tx abort.
+	visitor := SoilTrackingVisitor new.
+	counting := visitor addTracker: SoilTestCountingTracker new.
+	visitor track: soil.
+	self assert: (counting valuesOfIndex: dictId) size equals: 2
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testEveryTrackerSeesEveryClusterOnce [
 	| visitor first second tx expected |
 	self commitSampleGraph.
