@@ -69,6 +69,13 @@ SoilDatabaseConsistencyTracker >> checkSizeOf: anIndex segment: aSoilObjectSegme
 		counted: sizes value)
 ]
 
+{ #category : #testing }
+SoilDatabaseConsistencyTracker >> hasBrokenChainIn: anIndex segment: aSoilObjectSegment [
+	^ findings anySatisfy: [ :each | 
+		each class = SoilBrokenPageLink and: [ 
+			each segment = aSoilObjectSegment id and: [ each indexId = anIndex id ] ] ]
+]
+
 { #category : #initialization }
 SoilDatabaseConsistencyTracker >> initialize [ 
 	super initialize.
