@@ -158,14 +158,14 @@ SoilTrackingVisitorTest >> testALeftPointerThatDoesNotLeadBackIsNamedAtItsPage [
 
 { #category : #tests }
 SoilTrackingVisitorTest >> testALoopInTheRightPointersIsNamedAndEnds [
+	"the tracker is asked directly: the visitor reads the values of an index by its next
+	pointers after the trackers and would not end on a loop either"
 	| index second tracker |
 	index := self commitIndexOfManyPages.
 	second := index store pageAt: (index headerPage rightAt: 1).
 	second rightAt: 1 put: second offset.
 	tracker := SoilDatabaseConsistencyTracker new.
-	SoilTrackingVisitor new
-		addTracker: tracker;
-		track: soil.
+	tracker trackIndex: index segment: (soil objectRepository segmentAt: 1) in: nil.
 	self assert: (tracker findings anySatisfy: [ :each | 
 		each class = SoilBrokenPageLink and: [ each pageOffset = second offset ] ]).
 	"the pages are not iterated on a broken chain"
