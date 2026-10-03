@@ -8,6 +8,33 @@ Class {
 }
 
 { #category : #helpers }
+SoilTrackingVisitorTest >> commitIndexOfManyPages [
+	"an index with enough values to be several pages long; answers the index as the segment holds it"
+	| tx dict indexId index |
+	tx := soil newTransaction.
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
+		keySize: 10;
+		maxLevel: 8;
+		yourself.
+	tx root: (SoilTestGraphRoot new 
+		nested: (SoilTestNestedObject new 
+			label: #v1;
+			reference: dict;
+			yourself);
+		yourself).
+	tx makeRoot: tx root nested.
+	tx makeRoot: dict.
+	1 to: 600 do: [ :each | dict at: each put: each ].
+	tx commit.
+	tx := soil newTransaction.
+	indexId := tx root nested reference id.
+	tx abort.
+	index := (soil objectRepository segmentAt: 1) indexAt: indexId.
+	self assert: (index headerPage rightAt: 1) > 0.
+	^ index
+]
+
+{ #category : #helpers }
 SoilTrackingVisitorTest >> commitSampleGraph [
 	"two clusters, the second in two versions, and an index with two values"
 	| tx dict |
@@ -91,6 +118,58 @@ SoilTrackingVisitorTest >> testAReportIsPlainValues [
 	self assert: ((dictionary at: #findings) first at: #indexId) equals: 'abc'.
 	self assert: (((dictionary at: #findings) first at: #repairActions) first at: #action) equals: #recomputeIndexSize.
 	self assert: (((dictionary at: #findings) first at: #repairActions) first at: #default)
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAHeaderThatDoesNotKnowTheTailIsNamed [
+	| index tracker finding |
+	index := self commitIndexOfManyPages.
+	index headerPage leftAt: 1 put: 1.
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	self assert: tracker findings size equals: 1.
+	finding := tracker findings first.
+	self assert: finding class equals: SoilBrokenPageLink.
+	self assert: finding indexId equals: index id.
+	self assert: finding pageOffset equals: index headerPage offset.
+	self assert: finding level equals: 1
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testALeftPointerThatDoesNotLeadBackIsNamedAtItsPage [
+	| index second tracker finding |
+	index := self commitIndexOfManyPages.
+	second := index store pageAt: (index headerPage rightAt: 1).
+	second leftAt: 1 put: 99.
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	self assert: tracker findings size equals: 1.
+	finding := tracker findings first.
+	self assert: finding class equals: SoilBrokenPageLink.
+	self assert: finding pageOffset equals: second offset.
+	self assert: finding level equals: 1.
+	self assert: finding segment equals: 1.
+	self assert: finding isRepairable not
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testALoopInTheRightPointersIsNamedAndEnds [
+	"the tracker is asked directly: the visitor reads the values of an index by its next
+	pointers after the trackers and would not end on a loop either"
+	| index second tracker |
+	index := self commitIndexOfManyPages.
+	second := index store pageAt: (index headerPage rightAt: 1).
+	second rightAt: 1 put: second offset.
+	tracker := SoilDatabaseConsistencyTracker new.
+	tracker trackIndex: index segment: (soil objectRepository segmentAt: 1) in: nil.
+	self assert: (tracker findings anySatisfy: [ :each | 
+		each class = SoilBrokenPageLink and: [ each pageOffset = second offset ] ]).
+	"the pages are not iterated on a broken chain"
+	self assert: (tracker findings noneSatisfy: [ :each | each class = SoilIndexSizeDrift ])
 ]
 
 { #category : #tests }
