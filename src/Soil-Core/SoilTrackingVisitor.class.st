@@ -41,7 +41,12 @@ SoilTrackingVisitor >> processIndexId: indexId segment: aSoilObjectSegment [
 	previousSegment := currentSegment.
 	currentIndex := index.
 	currentSegment := aSoilObjectSegment.
-	[ self visit: index ] ensure: [
+	[ "the values are read by following the next pointers of the pages. On a chain a
+	tracker found broken that can skip pages or never end, so the values are left
+	alone - the tracker has named the chain. This is the one place that knows which
+	trackers there are; the visitors that do not track have no one to ask"
+	(trackers anySatisfy: [ :each | each hasBrokenChainIn: index segment: aSoilObjectSegment ])
+		ifFalse: [ self visit: index ] ] ensure: [
 		currentIndex := previousIndex.
 		currentSegment := previousSegment ]
 ]

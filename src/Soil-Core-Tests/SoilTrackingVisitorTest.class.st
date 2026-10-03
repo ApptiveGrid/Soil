@@ -173,6 +173,26 @@ SoilTrackingVisitorTest >> testALoopInTheRightPointersIsNamedAndEnds [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testALoopInTheRightPointersDoesNotHangTheVisitor [
+	"the visitor reads the values of an index by the next pointers too, so it has to leave
+	an index alone whose chain a tracker named. Without that this test never ends and is
+	stopped by the time limit of the test case"
+	| index second tracker counting |
+	index := self commitIndexOfManyPages.
+	second := index store pageAt: (index headerPage rightAt: 1).
+	second rightAt: 1 put: second offset.
+	tracker := SoilDatabaseConsistencyTracker new.
+	counting := SoilTestCountingTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		addTracker: counting;
+		track: soil.
+	self assert: (tracker findings anySatisfy: [ :each | 
+		each class = SoilBrokenPageLink and: [ each pageOffset = second offset ] ]).
+	self assert: (counting valuesOfIndex: index id) isEmpty
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAnIndexWhoseSizeHasDriftedIsNamed [
 	"named with what a repair needs to find it again: the segment and the index id"
 	| tx indexId index visitor tracker finding |

@@ -10,6 +10,14 @@ Class {
 }
 
 { #category : #testing }
+SoilTracker >> hasBrokenChainIn: anIndex segment: aSoilObjectSegment [
+	"whether the pages of anIndex do not chain, so that reading its values would skip
+	pages or never end. The visitor asks after #trackIndex:segment:in: and does not read
+	the values of such an index"
+	^ false
+]
+
+{ #category : #testing }
 SoilTracker >> needsTransaction [
 	^ false
 ]
