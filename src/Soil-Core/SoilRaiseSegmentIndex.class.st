@@ -1,5 +1,5 @@
 "
-Raises the last object index a segment has handed out to an index that ids already point to (SoilObjectSegment>>updateLastObjectIndex:), which never lowers it. The ids between are not handed out again, so what refers to them is not taken for new objects. It is the repair of SoilObjectIdOutsideSegment for an id beyond the segment's last index.
+Raises the last object index a segment has handed out to an index that ids already point to, or to the highest index the segment has a record for (SoilObjectSegment>>highestUsedObjectIndex) if that is higher, so that it never lands on an index that exists. SoilObjectSegment>>updateLastObjectIndex: never lowers it. The ids between are not handed out again, so what refers to them is not taken for new objects. It is the repair of SoilObjectIdOutsideSegment for an id beyond the segment's last index.
 
 It is not a default: it makes the segment trust the id it names, and the next object is stored after it. For an id that is far off - a damaged pointer rather than a counter that was not written - that is not what is wanted, so a person looks at the number first.
 "
@@ -47,7 +47,7 @@ SoilRaiseSegmentIndex >> asDictionary [
 
 { #category : #accessing }
 SoilRaiseSegmentIndex >> description [
-	^ 'raise the last object index of segment ', segment printString, ' to ', index printString
+	^ 'raise the last object index of segment ', segment printString, ' to ', index printString, ', or to the highest index the segment has a record for if that is higher'
 ]
 
 { #category : #accessing }
