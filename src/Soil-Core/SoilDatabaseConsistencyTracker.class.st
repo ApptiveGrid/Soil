@@ -24,7 +24,7 @@ SoilDatabaseConsistencyTracker >> checkLinksOf: anIndex segment: aSoilObjectSegm
 
 { #category : #checking }
 SoilDatabaseConsistencyTracker >> checkLinksOf: anIndex segment: aSoilObjectSegment level: anInteger [
-	| current visited |
+	| current visited tail |
 	current := anIndex headerPage.
 	visited := Set with: current offset.
 	[ (current rightAt: anInteger) = 0 ] whileFalse: [ | nextOffset next |
@@ -41,10 +41,17 @@ SoilDatabaseConsistencyTracker >> checkLinksOf: anIndex segment: aSoilObjectSegm
 			^ self reportLink: nextOffset of: anIndex segment: aSoilObjectSegment level: anInteger 
 				reason: 'left pointer is ', (next leftAt: anInteger) printString, ' but the page to its left is ', current offset printString ].
 		current := next ].
-	"the tail sentinel: the header page holds the last page of the level, or 0 where the level is empty"
-	(anIndex headerPage leftAt: anInteger) = (current offset = anIndex headerPage offset ifTrue: [ 0 ] ifFalse: [ current offset ]) ifFalse: [ 
+	"the tail sentinel: the header page holds the last page of the level. Where the level has
+	no page but the header, it holds 0 if the level was never used, and the header page
+	itself if it was and the last page of it has been removed (SoilBasicSkipList>>removePage:
+	hands the left pointer of the removed page, which is the header, on to the tail). Both
+	are right"
+	tail := anIndex headerPage leftAt: anInteger.
+	(current offset = anIndex headerPage offset
+		ifTrue: [ tail = 0 or: [ tail = anIndex headerPage offset ] ]
+		ifFalse: [ tail = current offset ]) ifFalse: [ 
 		self reportLink: anIndex headerPage offset of: anIndex segment: aSoilObjectSegment level: anInteger 
-			reason: 'tail is ', (anIndex headerPage leftAt: anInteger) printString, ' but the last page of the level is ', current offset printString ]
+			reason: 'tail is ', tail printString, ' but the last page of the level is ', current offset printString ]
 ]
 
 { #category : #checking }

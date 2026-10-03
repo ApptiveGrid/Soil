@@ -138,6 +138,29 @@ SoilTrackingVisitorTest >> testAHeaderThatDoesNotKnowTheTailIsNamed [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testALevelThatHasNoPageButTheHeaderMayHoldTheHeaderAsItsTail [
+	"a level emptied by removing its last page has the header as its tail, a level never
+	used has 0: both are what the skip list itself leaves behind"
+	| index tracker top |
+	index := self commitIndexOfManyPages.
+	"the highest level that has no page but the header; the pages are given their levels by chance"
+	top := (index headerPage level to: 1 by: -1) 
+		detect: [ :each | (index headerPage rightAt: each) = 0 ] 
+		ifNone: [ ^ self skip ].
+	index headerPage leftAt: top put: 0.
+	tracker := SoilDatabaseConsistencyTracker new.
+	tracker checkLinksOf: index segment: (soil objectRepository segmentAt: 1) level: top.
+	self assert: tracker findings isEmpty.
+	index headerPage leftAt: top put: index headerPage offset.
+	tracker checkLinksOf: index segment: (soil objectRepository segmentAt: 1) level: top.
+	self assert: tracker findings isEmpty.
+	"neither is a tail that is another page"
+	index headerPage leftAt: top put: index headerPage offset + 1.
+	tracker checkLinksOf: index segment: (soil objectRepository segmentAt: 1) level: top.
+	self assert: tracker findings size equals: 1
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testALeftPointerThatDoesNotLeadBackIsNamedAtItsPage [
 	| index second tracker finding |
 	index := self commitIndexOfManyPages.
