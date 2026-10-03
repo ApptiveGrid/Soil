@@ -60,6 +60,18 @@ SoilTrackingVisitorTest >> commitSampleGraph [
 	tx commit
 ]
 
+{ #category : #helpers }
+SoilTrackingVisitorTest >> recordWithTwoVersions [
+	"the current record of an object of the sample graph that has a previous version, as
+	the segment holds it"
+	| segment |
+	segment := soil objectRepository segmentAt: 1.
+	1 to: segment lastObjectIndex do: [ :index |
+		(segment basicAt: index ifAbsent: [ nil ]) ifNotNil: [ :record |
+			record hasPreviousVersion ifTrue: [ ^ record ] ] ].
+	^ self fail: 'no object with two versions'
+]
+
 { #category : #running }
 SoilTrackingVisitorTest >> setUp [
 	super setUp.
@@ -190,6 +202,78 @@ SoilTrackingVisitorTest >> testALoopInTheRightPointersDoesNotHangTheVisitor [
 	self assert: (tracker findings anySatisfy: [ :each | 
 		each class = SoilBrokenPageLink and: [ each pageOffset = second offset ] ]).
 	self assert: (counting valuesOfIndex: index id) isEmpty
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testADescriptionThatIsNotThereIsNamedOnceWithTheObjectThatReferredToIt [
+	| record tracker visitor |
+	self commitSampleGraph.
+	record := self recordWithTwoVersions copy.
+	record behaviorDescriptions: { (SoilVersionedObjectId segment: 0 index: 9999) version: 1; yourself }.
+	tracker := SoilDatabaseConsistencyTracker new.
+	visitor := SoilTrackingVisitor new soil: soil; yourself.
+	tracker trackCluster: record in: visitor.
+	tracker trackCluster: record in: visitor.
+	self assert: tracker findings size equals: 1.
+	self assert: tracker findings first class equals: SoilMissingBehaviorDescription.
+	self assert: tracker findings first descriptionId index equals: 9999
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testADescriptionVersionThatIsNotInItsChainIsNamed [
+	| record tracker visitor versioned |
+	self commitSampleGraph.
+	record := self recordWithTwoVersions.
+	versioned := record behaviorDescriptions first.
+	record := record copy.
+	record behaviorDescriptions: { (SoilVersionedObjectId segment: 0 index: versioned index) version: 99; yourself }.
+	tracker := SoilApplicationConsistencyTracker new.
+	visitor := SoilTrackingVisitor new soil: soil; transaction: soil newTransaction; yourself.
+	[ tracker trackCluster: record in: visitor ] ensure: [ visitor transaction abort ].
+	self assert: (tracker findings anySatisfy: [ :each | 
+		each class = SoilMissingBehaviorDescription and: [ each version = 99 ] ])
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAPreviousVersionBeyondTheFileIsNamed [
+	| record tracker finding |
+	self commitSampleGraph.
+	record := self recordWithTwoVersions copy.
+	record previousVersionPosition: 100000000.
+	tracker := SoilDatabaseConsistencyTracker new.
+	tracker trackCluster: record in: (SoilTrackingVisitor new soil: soil; yourself).
+	self assert: tracker findings size equals: 1.
+	finding := tracker findings first.
+	self assert: finding class equals: SoilBrokenVersionChain.
+	self assert: finding objectId equals: record objectId.
+	self assert: finding position equals: record position
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAVersionChainThatReturnsToAPositionIsNamedAndEnds [
+	| record tracker |
+	self commitSampleGraph.
+	record := self recordWithTwoVersions copy.
+	record previousVersionPosition: record position.
+	tracker := SoilDatabaseConsistencyTracker new.
+	tracker trackCluster: record in: (SoilTrackingVisitor new soil: soil; yourself).
+	self assert: tracker findings size equals: 1.
+	self assert: tracker findings first class equals: SoilBrokenVersionChain
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAVersionThatDoesNotComeBeforeTheNextIsNamed [
+	| current older tracker |
+	self commitSampleGraph.
+	current := self recordWithTwoVersions.
+	older := (soil objectRepository segmentAt: 1) headAtPosition: current previousVersionPosition.
+	older objectId: current objectId.
+	"the older record made to point to the newer one"
+	older previousVersionPosition: current position.
+	tracker := SoilDatabaseConsistencyTracker new.
+	tracker trackCluster: older in: (SoilTrackingVisitor new soil: soil; yourself).
+	self assert: tracker findings size equals: 1.
+	self assert: (tracker findings first reason includesSubstring: 'does not come before')
 ]
 
 { #category : #tests }

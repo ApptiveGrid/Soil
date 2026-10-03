@@ -5,10 +5,32 @@ Class {
 	#name : #SoilDatabaseConsistencyTracker,
 	#superclass : #SoilConsistencyTracker,
 	#instVars : [
-		'lastIndexes'
+		'lastIndexes',
+		'missingDescriptions'
 	],
 	#category : #'Soil-Core-Visitor'
 }
+
+{ #category : #checking }
+SoilDatabaseConsistencyTracker >> checkDescriptionsOf: someVersions referencedBy: aSoilObjectId in: aVisitor [
+	"every behavior description a version refers to is an object in the meta segment.
+	Whether it has the version asked for takes the classes to read, and is the application
+	tracker's. Named once for each description: a missing one is referred to by every
+	object of its class"
+	someVersions do: [ :version |
+		version behaviorDescriptions do: [ :versioned | | missing |
+			(versioned index = 2 or: [ missingDescriptions includes: versioned index ]) ifFalse: [
+				missing := ([ (aVisitor soil objectRepository segmentAt: 0) 
+					basicAt: versioned index 
+					ifAbsent: [ nil ] ] on: Error do: [ nil ]) isNil.
+				missing ifTrue: [ 
+					missingDescriptions add: versioned index.
+					self report: (SoilMissingBehaviorDescription 
+						objectId: aSoilObjectId 
+						descriptionId: versioned asSoilObjectId
+						version: versioned version 
+						reason: 'there is no such object in the meta segment') ] ] ] ]
+]
 
 { #category : #checking }
 SoilDatabaseConsistencyTracker >> checkLinksOf: anIndex segment: aSoilObjectSegment [
@@ -79,7 +101,8 @@ SoilDatabaseConsistencyTracker >> hasBrokenChainIn: anIndex segment: aSoilObject
 { #category : #initialization }
 SoilDatabaseConsistencyTracker >> initialize [ 
 	super initialize.
-	lastIndexes := Dictionary new
+	lastIndexes := Dictionary new.
+	missingDescriptions := Set new
 ]
 
 { #category : #accessing }
@@ -103,6 +126,25 @@ SoilDatabaseConsistencyTracker >> reportLink: anOffset of: anIndex segment: aSoi
 SoilDatabaseConsistencyTracker >> sizesOf: anIndex [
 	"the size the header page stores -> the entries the index holds"
 	^ anIndex headerPage size -> anIndex newIterator sizeViaIteration
+]
+
+{ #category : #tracking }
+SoilDatabaseConsistencyTracker >> trackCluster: aSoilPersistentClusterVersion in: aVisitor [
+	"the chain of versions of the object, and the behavior descriptions of every version
+	in it - the current one is not the only one a reader can meet"
+	self check: aSoilPersistentClusterVersion objectId using: [ | versions |
+		versions := self 
+			chainOf: aSoilPersistentClusterVersion 
+			in: aVisitor 
+			onFault: [ :position :reason |
+				self report: (SoilBrokenVersionChain 
+					objectId: aSoilPersistentClusterVersion objectId 
+					position: position 
+					reason: reason) ].
+		self 
+			checkDescriptionsOf: versions 
+			referencedBy: aSoilPersistentClusterVersion objectId 
+			in: aVisitor ]
 ]
 
 { #category : #tracking }
