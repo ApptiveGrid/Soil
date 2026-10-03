@@ -55,6 +55,13 @@ SoilRepairVisitor >> soil: aSoil [
 ]
 
 { #category : #visiting }
+SoilRepairVisitor >> visitRaiseSegmentIndex: aRepairAction [
+	"never lowers it, so the actions of several ids can come in any order"
+	(soil objectRepository segmentAt: aRepairAction segment) 
+		updateLastObjectIndex: aRepairAction index
+]
+
+{ #category : #visiting }
 SoilRepairVisitor >> visitRecomputeIndexSize: aRepairAction [
 	"on the index as its segment holds it, never on the copy-on-write layer a
 	transaction sees, whose pages would never reach the disk"
