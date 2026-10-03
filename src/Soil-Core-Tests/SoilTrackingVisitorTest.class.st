@@ -277,6 +277,39 @@ SoilTrackingVisitorTest >> testAVersionThatDoesNotComeBeforeTheNextIsNamed [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testACutOfABrokenVersionChainMakesTheObjectReadableAgain [
+	| segment broken tracker finding repair index versionsBefore |
+	self commitSampleGraph.
+	segment := soil objectRepository segmentAt: 1.
+	broken := self recordWithTwoVersions.
+	index := broken objectId index.
+	versionsBefore := (segment allVersionsAt: index) size.
+	"the current version written again with a link to the previous one that leads beyond
+	the file. It keeps its version number: a newer one would send the visitor itself into
+	the chain, to find the version it is asked for"
+	segment at: index putBytes: (broken copy
+		previousVersionPosition: 100000000;
+		serialize).
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	finding := tracker findings detect: [ :each | each class = SoilBrokenVersionChain ].
+	self assert: finding repairActions size equals: 1.
+	self deny: finding defaultRepairAction notNil.
+	repair := (SoilRepairVisitor on: soil)
+		repair: { SoilRepairAction fromDictionary: finding repairActions first asDictionary };
+		yourself.
+	self assert: repair failed isEmpty.
+	self assert: (segment allVersionsAt: index) size equals: 1.
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	self assert: (tracker findings noneSatisfy: [ :each | each class = SoilBrokenVersionChain ])
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAnIndexWhoseSizeHasDriftedIsNamed [
 	"named with what a repair needs to find it again: the segment and the index id"
 	| tx indexId index visitor tracker finding |

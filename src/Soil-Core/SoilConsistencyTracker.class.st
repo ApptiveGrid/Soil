@@ -25,7 +25,8 @@ SoilConsistencyTracker >> chainOf: aCluster in: aVisitor onFault: aBlock [
 	"aCluster and every version before it, newest first, each without its payload. Where
 	the chain cannot be followed on - a previous version that cannot be read, a version
 	that does not come before the one after it, a position it has already been at - the
-	fault is handed to aBlock with the position it is at, and what was found up to there
+	fault is handed to aBlock with the position of the last record that is fine - the one
+	whose link to its previous version cannot be followed - and what was found up to there
 	is answered. Without the guard on positions a loop never ends"
 	| segment current versions positions |
 	segment := aVisitor soil objectRepository segmentAt: aCluster segment.
@@ -44,7 +45,7 @@ SoilConsistencyTracker >> chainOf: aCluster in: aVisitor onFault: aBlock [
 				aBlock value: current position value: 'previous version at position ', position printString, ' cannot be read: ', error messageText asString.
 				^ versions ].
 		previous version < current version ifFalse: [ 
-			aBlock value: position value: 'version ', previous version printString, ' does not come before version ', current version printString.
+			aBlock value: current position value: 'previous version ', previous version printString, ' at position ', position printString, ' does not come before version ', current version printString.
 			^ versions ].
 		versions add: previous.
 		current := previous ].
