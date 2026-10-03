@@ -57,6 +57,19 @@ SoilObjectIndexFile >> basicLastObjectIndex: anInteger [
 ]
 
 { #category : #accessing }
+SoilObjectIndexFile >> highestUsedIndex [
+	"the highest object index whose slot holds a position, found from the end of the
+	file - what the segment has stored, whatever its last object index says. 0 where
+	there is none"
+	| slots |
+	slots := mutex critical: [ 
+		stream size - self headerSize - self objectIndexSize // self objectIndexSize ].
+	slots to: 1 by: -1 do: [ :each | 
+		(self positionAt: each) > 0 ifTrue: [ ^ each ] ].
+	^ 0
+]
+
+{ #category : #accessing }
 SoilObjectIndexFile >> indexPositionAt: anInteger [ 
 	(anInteger > 0) ifFalse: [ SoilIndexOutOfRange signal: 'object index needs to be larger than zero' ].
 	^ self headerSize + self objectIndexSize + (anInteger - 1 * self objectIndexSize)

@@ -261,6 +261,39 @@ SoilTrackingVisitorTest >> testAnObjectIdBeyondItsSegmentIsCollected [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testAnObjectIdBeyondItsSegmentIsRepairedByRaisingTheIndex [
+	"ids that point beyond what the segment handed out would be handed out again, to new
+	objects. Raising the index to the highest of them stops that; the actions of the
+	single ids come in any order"
+	| visitor tracker last repair tx new |
+	self commitSampleGraph.
+	last := (soil objectRepository segmentAt: 1) lastObjectIndex.
+	visitor := SoilTrackingVisitor new soil: soil; yourself.
+	tracker := SoilDatabaseConsistencyTracker new.
+	#(3 1 2) do: [ :each | 
+		tracker trackObjectId: (SoilObjectId segment: 1 index: last + each) in: visitor ].
+	self assert: tracker findings size equals: 3.
+	self assert: (tracker findings allSatisfy: [ :each | each isRepairable ]).
+	self assert: (tracker findings noneSatisfy: [ :each | each defaultRepairAction notNil ]).
+	repair := (SoilRepairVisitor on: soil)
+		repair: (tracker findings collect: [ :each | each repairActions first ]);
+		yourself.
+	self assert: repair failed isEmpty.
+	self assert: repair repaired size equals: 3.
+	self assert: (soil objectRepository segmentAt: 1) lastObjectIndex equals: last + 3.
+	soil close; open.
+	self assert: (soil objectRepository segmentAt: 1) lastObjectIndex equals: last + 3.
+	"the next object is stored after them"
+	tx := soil newTransaction.
+	new := SoilTestNestedObject new label: #three; yourself.
+	tx root nested reference at: 3 put: new.
+	tx commit.
+	tx := soil newTransaction.
+	self assert: (tx objectIdOf: (tx root nested reference at: 3)) index equals: last + 4.
+	tx abort
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAnUnexpectedErrorBecomesAFinding [
 	| tracker |
 	tracker := SoilDatabaseConsistencyTracker new.
@@ -389,4 +422,36 @@ SoilTrackingVisitorTest >> testAnUnknownRepairActionIsRefused [
 	self
 		should: [ SoilRepairAction fromDictionary: Dictionary new ]
 		raise: SoilUnknownRepairAction
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testRaisingTheSegmentIndexStaysBeyondTheHighestRecord [
+	"a record beyond the id the finding names: raised to that id alone, the next object
+	would be stored on top of the record"
+	| segment last visitor tracker repair |
+	self commitSampleGraph.
+	segment := soil objectRepository segmentAt: 1.
+	last := segment lastObjectIndex.
+	self assert: segment highestUsedObjectIndex equals: last.
+	(segment instVarNamed: #indexFile) at: last + 6 putPosition: 1.
+	self assert: segment highestUsedObjectIndex equals: last + 6.
+	visitor := SoilTrackingVisitor new soil: soil; yourself.
+	tracker := SoilDatabaseConsistencyTracker new.
+	tracker trackObjectId: (SoilObjectId segment: 1 index: last + 2) in: visitor.
+	repair := (SoilRepairVisitor on: soil)
+		repair: (tracker findings collect: [ :each | each repairActions first ]);
+		yourself.
+	self assert: repair failed isEmpty.
+	self assert: segment lastObjectIndex equals: last + 6
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testRaisingTheSegmentIndexIsMadeAgainFromItsDictionary [
+	| action again |
+	action := (SoilObjectIdOutsideSegment objectId: (SoilObjectId segment: 1 index: 20) beyond: 10) repairActions first.
+	again := SoilRepairAction fromDictionary: action asDictionary.
+	self assert: again class equals: SoilRaiseSegmentIndex.
+	self assert: again segment equals: 1.
+	self assert: again index equals: 20.
+	self deny: again isDefault
 ]

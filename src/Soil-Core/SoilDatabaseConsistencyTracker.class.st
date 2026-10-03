@@ -138,7 +138,5 @@ SoilDatabaseConsistencyTracker >> trackObjectId: aSoilObjectId in: aVisitor [
 				reason: 'segment cannot be greater than 1') ].
 		lastIndex := self lastIndexOfSegment: aSoilObjectId segment in: aVisitor.
 		(aSoilObjectId index > lastIndex) ifTrue: [ 
-			self report: (SoilObjectIdOutsideSegment 
-				objectId: aSoilObjectId 
-				reason: 'index is greater than the last index ', lastIndex printString, ' of its segment') ] ]
+			self report: (SoilObjectIdOutsideSegment objectId: aSoilObjectId beyond: lastIndex) ] ]
 ]

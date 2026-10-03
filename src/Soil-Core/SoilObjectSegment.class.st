@@ -189,6 +189,13 @@ SoilObjectSegment >> heapPositionAt: anInteger [
 ]
 
 { #category : #accessing }
+SoilObjectSegment >> highestUsedObjectIndex [
+	"the highest object index that has a record, which is not what #lastObjectIndex says
+	where that one is behind"
+	^ indexFile highestUsedIndex
+]
+
+{ #category : #accessing }
 SoilObjectSegment >> id [
 
 	^ id ifNil: [ 1 ]

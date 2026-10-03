@@ -55,6 +55,16 @@ SoilRepairVisitor >> soil: aSoil [
 ]
 
 { #category : #visiting }
+SoilRepairVisitor >> visitRaiseSegmentIndex: aRepairAction [
+	"the id the action names, or the highest the segment has records for if that is
+	higher - raised to the id alone it would hand out indexes that exist. It never
+	lowers the index, so the actions of several ids can come in any order"
+	| segment |
+	segment := soil objectRepository segmentAt: aRepairAction segment.
+	segment updateLastObjectIndex: (aRepairAction index max: segment highestUsedObjectIndex)
+]
+
+{ #category : #visiting }
 SoilRepairVisitor >> visitRecomputeIndexSize: aRepairAction [
 	"on the index as its segment holds it, never on the copy-on-write layer a
 	transaction sees, whose pages would never reach the disk"
