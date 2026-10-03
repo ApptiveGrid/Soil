@@ -184,6 +184,13 @@ SoilObjectSegment >> flushIndexes [
 ]
 
 { #category : #accessing }
+SoilObjectSegment >> headAtPosition: anInteger [
+	"the record at anInteger without its payload, for following a chain of versions
+	without reading what the versions hold"
+	^ objectFile headAtPosition: anInteger
+]
+
+{ #category : #accessing }
 SoilObjectSegment >> heapPositionAt: anInteger [ 
 	^ indexFile positionAt: anInteger
 ]
@@ -382,6 +389,12 @@ SoilObjectSegment >> path: anObject [
 { #category : #printing }
 SoilObjectSegment >> printOn: aStream [
 	aStream << 'segment #' << id asString
+]
+
+{ #category : #accessing }
+SoilObjectSegment >> recordAtPosition: anInteger [
+	"the whole record at anInteger, as the version chain of an object points to it"
+	^ objectFile atPosition: anInteger
 ]
 
 { #category : #gc }
