@@ -173,6 +173,50 @@ SoilTrackingVisitorTest >> testALevelThatHasNoPageButTheHeaderMayHoldTheHeaderAs
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testBrokenLinksAreMadeAgainFromTheFirstLevel [
+	| index second higher tracker repair |
+	index := self commitIndexOfManyPages.
+	second := index store pageAt: (index headerPage rightAt: 1).
+	second leftAt: 1 put: 99.
+	higher := (2 to: index headerPage level) 
+		detect: [ :each | (index headerPage rightAt: each) > 0 ] 
+		ifNone: [ nil ].
+	higher ifNotNil: [ (index store pageAt: (index headerPage rightAt: higher)) leftAt: higher put: 99 ].
+	index headerPage leftAt: 1 put: 98.
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	self assert: tracker findings notEmpty.
+	self assert: (tracker findings allSatisfy: [ :each | each class = SoilBrokenPageLink and: [ each rightChainIntact ] ]).
+	self assert: (tracker findings allSatisfy: [ :each | each repairActions size = 1 ]).
+	self assert: tracker findings first isRepairable.
+	self deny: tracker findings first defaultRepairAction notNil.
+	repair := (SoilRepairVisitor on: soil)
+		repair: (tracker findings collect: [ :each | SoilRepairAction fromDictionary: each repairActions first asDictionary ]);
+		yourself.
+	self assert: repair failed isEmpty.
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	self assert: tracker findings isEmpty.
+	self assert: index newIterator sizeViaIteration equals: 600
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testALoopInTheFirstLevelOffersNoRepair [
+	| index second tracker |
+	index := self commitIndexOfManyPages.
+	second := index store pageAt: (index headerPage rightAt: 1).
+	second rightAt: 1 put: second offset.
+	tracker := SoilDatabaseConsistencyTracker new.
+	tracker trackIndex: index segment: (soil objectRepository segmentAt: 1) in: nil.
+	self assert: tracker findings notEmpty.
+	self assert: (tracker findings allSatisfy: [ :each | each repairActions isEmpty ])
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testALeftPointerThatDoesNotLeadBackIsNamedAtItsPage [
 	| index second tracker finding |
 	index := self commitIndexOfManyPages.
@@ -188,7 +232,10 @@ SoilTrackingVisitorTest >> testALeftPointerThatDoesNotLeadBackIsNamedAtItsPage [
 	self assert: finding pageOffset equals: second offset.
 	self assert: finding level equals: 1.
 	self assert: finding segment equals: 1.
-	self assert: finding isRepairable not
+	"the first level is intact, so the links can be made again from it - and not as a default"
+	self assert: finding isRepairable.
+	self assert: finding repairActions first class equals: SoilRebuildSkipListLinks.
+	self assert: finding defaultRepairAction isNil
 ]
 
 { #category : #tests }

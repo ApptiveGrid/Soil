@@ -38,42 +38,39 @@ SoilDatabaseConsistencyTracker >> checkLinksOf: anIndex segment: aSoilObjectSegm
 	page leads to a page whose left pointer leads back, and the left pointer of the
 	header page holds the last page of the level, as the tail sentinel. Every level is
 	walked from the header page to the right, so a pointer that is off, a loop or a
-	page too low for its level is named at the page where it shows"
+	page too low for its level is named at the page where it shows.
+
+	The first level is walked first: the order of all pages is that of its right pointers,
+	and whether it can be walked to its end says whether every other link can be made
+	again from it - which each finding tells, so that it is offered a repair only then"
+	| first |
 	(anIndex isKindOf: SoilBasicSkipList) ifFalse: [ ^ self ].
-	1 to: anIndex headerPage level do: [ :level | 
-		self checkLinksOf: anIndex segment: aSoilObjectSegment level: level ]
+	first := self faultsOfLinksOf: anIndex level: 1.
+	self 
+		reportFaults: first value 
+		of: anIndex 
+		segment: aSoilObjectSegment 
+		level: 1 
+		rightChainIntact: first key.
+	2 to: anIndex headerPage level do: [ :level | 
+		self 
+			reportFaults: (self faultsOfLinksOf: anIndex level: level) value 
+			of: anIndex 
+			segment: aSoilObjectSegment 
+			level: level 
+			rightChainIntact: first key ]
 ]
 
 { #category : #checking }
 SoilDatabaseConsistencyTracker >> checkLinksOf: anIndex segment: aSoilObjectSegment level: anInteger [
-	| current visited tail |
-	current := anIndex headerPage.
-	visited := Set with: current offset.
-	[ (current rightAt: anInteger) = 0 ] whileFalse: [ | nextOffset next |
-		nextOffset := current rightAt: anInteger.
-		(visited includes: nextOffset) ifTrue: [ 
-			^ self reportLink: current offset of: anIndex segment: aSoilObjectSegment level: anInteger 
-				reason: 'right pointer leads to page ', nextOffset printString, ' again, the chain is a loop' ].
-		visited add: nextOffset.
-		next := anIndex store pageAt: nextOffset.
-		next level < anInteger ifTrue: [ 
-			^ self reportLink: current offset of: anIndex segment: aSoilObjectSegment level: anInteger 
-				reason: 'right pointer leads to page ', nextOffset printString, ' which has only ', next level printString, ' levels' ].
-		(next leftAt: anInteger) = current offset ifFalse: [ 
-			^ self reportLink: nextOffset of: anIndex segment: aSoilObjectSegment level: anInteger 
-				reason: 'left pointer is ', (next leftAt: anInteger) printString, ' but the page to its left is ', current offset printString ].
-		current := next ].
-	"the tail sentinel: the header page holds the last page of the level. Where the level has
-	no page but the header, it holds 0 if the level was never used, and the header page
-	itself if it was and the last page of it has been removed (SoilBasicSkipList>>removePage:
-	hands the left pointer of the removed page, which is the header, on to the tail). Both
-	are right"
-	tail := anIndex headerPage leftAt: anInteger.
-	(current offset = anIndex headerPage offset
-		ifTrue: [ tail = 0 or: [ tail = anIndex headerPage offset ] ]
-		ifFalse: [ tail = current offset ]) ifFalse: [ 
-		self reportLink: anIndex headerPage offset of: anIndex segment: aSoilObjectSegment level: anInteger 
-			reason: 'tail is ', tail printString, ' but the last page of the level is ', current offset printString ]
+	| faults |
+	faults := self faultsOfLinksOf: anIndex level: anInteger.
+	self 
+		reportFaults: faults value 
+		of: anIndex 
+		segment: aSoilObjectSegment 
+		level: anInteger 
+		rightChainIntact: faults key
 ]
 
 { #category : #checking }
@@ -98,6 +95,47 @@ SoilDatabaseConsistencyTracker >> checkSizeOf: anIndex segment: aSoilObjectSegme
 		counted: sizes value)
 ]
 
+{ #category : #checking }
+SoilDatabaseConsistencyTracker >> faultsOfLinksOf: anIndex level: anInteger [
+	"whether the right pointers of the level can be walked from the header page to their
+	end, -> the faults found on the way, each the offset of the page it shows at -> what is
+	wrong. A left pointer that does not lead back is named at the first page where it does
+	not, and the walk goes on; a loop, a page that cannot be read and a page too low for the
+	level end it"
+	| current visited faults tail |
+	faults := OrderedCollection new.
+	current := anIndex headerPage.
+	visited := Set with: current offset.
+	[ (current rightAt: anInteger) = 0 ] whileFalse: [ | nextOffset next |
+		nextOffset := current rightAt: anInteger.
+		(visited includes: nextOffset) ifTrue: [ 
+			faults add: current offset -> ('right pointer leads to page ', nextOffset printString, ' again, the chain is a loop').
+			^ false -> faults ].
+		visited add: nextOffset.
+		next := [ anIndex store pageAt: nextOffset ] 
+			on: Error 
+			do: [ :error | 
+				faults add: current offset -> ('right pointer leads to page ', nextOffset printString, ' which cannot be read: ', error messageText asString).
+				^ false -> faults ].
+		next level < anInteger ifTrue: [ 
+			faults add: current offset -> ('right pointer leads to page ', nextOffset printString, ' which has only ', next level printString, ' levels').
+			^ false -> faults ].
+		((next leftAt: anInteger) = current offset or: [ faults notEmpty ]) ifFalse: [ 
+			faults add: nextOffset -> ('left pointer is ', (next leftAt: anInteger) printString, ' but the page to its left is ', current offset printString) ].
+		current := next ].
+	"the tail sentinel: the header page holds the last page of the level. Where the level has
+	no page but the header, it holds 0 if the level was never used, and the header page
+	itself if it was and the last page of it has been removed (SoilBasicSkipList>>removePage:
+	hands the left pointer of the removed page, which is the header, on to the tail). Both
+	are right"
+	tail := anIndex headerPage leftAt: anInteger.
+	(current offset = anIndex headerPage offset
+		ifTrue: [ tail = 0 or: [ tail = anIndex headerPage offset ] ]
+		ifFalse: [ tail = current offset ]) ifFalse: [ 
+		faults add: anIndex headerPage offset -> ('tail is ', tail printString, ' but the last page of the level is ', current offset printString) ].
+	^ true -> faults
+]
+
 { #category : #testing }
 SoilDatabaseConsistencyTracker >> hasBrokenChainIn: anIndex segment: aSoilObjectSegment [
 	^ findings anySatisfy: [ :each | 
@@ -120,13 +158,16 @@ SoilDatabaseConsistencyTracker >> lastIndexOfSegment: anInteger in: aVisitor [
 ]
 
 { #category : #reporting }
-SoilDatabaseConsistencyTracker >> reportLink: anOffset of: anIndex segment: aSoilObjectSegment level: anInteger reason: aString [
-	self report: (SoilBrokenPageLink 
-		segment: aSoilObjectSegment id 
-		indexId: anIndex id 
-		pageOffset: anOffset 
-		level: anInteger 
-		reason: aString)
+SoilDatabaseConsistencyTracker >> reportFaults: someFaults of: anIndex segment: aSoilObjectSegment level: anInteger rightChainIntact: aBoolean [
+	someFaults do: [ :each |
+		self report: ((SoilBrokenPageLink 
+			segment: aSoilObjectSegment id 
+			indexId: anIndex id 
+			pageOffset: each key 
+			level: anInteger 
+			reason: each value)
+				rightChainIntact: aBoolean;
+				yourself) ]
 ]
 
 { #category : #checking }
