@@ -55,8 +55,14 @@ SoilAddKeyEntry >> initialize [
 
 { #category : #testing }
 SoilAddKeyEntry >> isForItem: anItem index: indexId [
+	"the value of an item on a page is the byte array the page holds. The value of
+	this entry is one only while the transaction journal is in memory, as it was
+	committed - one that is read back from its fragment file holds a SoilObjectId
+	(#readFrom:), and a SoilObjectId is never equal to a byte array. Compared as
+	they are, a reader pinned to an older version found no entry for the key it was
+	to take back, and handed out an entry committed after its version"
 	id = indexId ifFalse: [ ^false ].
-	^ 	key = anItem key and: [value = anItem value]
+	^ 	key = anItem key and: [ value asByteArray = anItem value asByteArray ]
 ]
 
 { #category : #accessing }
