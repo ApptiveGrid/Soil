@@ -444,6 +444,45 @@ SoilBackupTest >> testBackupTheBackup [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testAnIndexEntryCommittedAfterThePinIsLeftOutOfADatabaseOpenedFromDisk [
+	"the same as above, on a database that is opened again, as the metabase opens one
+	to copy it. The pages are read back from the files, where a value is a byte array,
+	and so are the transaction journals, where the value of an add key entry is a
+	SoilObjectId. The two were never equal, so the entry was not taken back from the
+	index, and the backup ended in 'nil objectId:' just the same"
+	| tx tx2 tx3 visitor dict |
+	tx := soil newTransaction.
+	dict := (SoilIndexedDictionary newWithBackend: SoilSkipList)
+		keySize: 8;
+		maxLevel: 16.
+	tx root: dict.
+	dict at: #foo put: (SoilTestNestedObject new label: #beforeThePin).
+	tx commit.
+	tx2 := soil newTransaction.
+	tx2 root at: #bar put: (SoilTestNestedObject new label: #afterThePin).
+	tx2 commit.
+	soil close.
+	soil := Soil new
+		path: self path;
+		readOnly: true;
+		open.
+	backupSoil := Soil createOnPath: self path , #backup.
+	visitor := SoilBackupVisitor new
+		target: backupSoil;
+		version: 1;
+		yourself.
+	visitor backup: soil.
+	backupSoil := Soil new
+		path: self path , #backup;
+		readOnly: true;
+		open.
+	tx3 := backupSoil newTransaction.
+	[ self assert: (tx3 root at: #foo) label equals: #beforeThePin.
+	self assert: (tx3 root at: #bar ifAbsent: [ nil ]) isNil ]
+		ensure: [ tx3 abort ]
+]
+
+{ #category : #tests }
 SoilBackupTest >> testAnIndexEntryCommittedAfterThePinIsLeftOut [
 	"the records are read at the pinned version, the index as it is now. A commit
 	that lands while the backup runs puts an entry into the index whose object has
