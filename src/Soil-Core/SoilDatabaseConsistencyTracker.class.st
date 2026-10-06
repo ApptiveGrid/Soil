@@ -13,23 +13,32 @@ Class {
 
 { #category : #checking }
 SoilDatabaseConsistencyTracker >> checkDescriptionsOf: someVersions referencedBy: aSoilObjectId in: aVisitor [
-	"every behavior description a version refers to is an object in the meta segment.
+	"every behavior description a version refers to is an object in the meta segment"
+	someVersions do: [ :version |
+		self 
+			checkDescriptionsOfVersion: version 
+			referencedBy: aSoilObjectId 
+			in: aVisitor ]
+]
+
+{ #category : #checking }
+SoilDatabaseConsistencyTracker >> checkDescriptionsOfVersion: aVersion referencedBy: aSoilObjectId in: aVisitor [
+	"every behavior description the version refers to is an object in the meta segment.
 	Whether it has the version asked for takes the classes to read, and is the application
 	tracker's. Named once for each description: a missing one is referred to by every
 	object of its class"
-	someVersions do: [ :version |
-		version behaviorDescriptions do: [ :versioned | | missing |
-			(versioned index = 2 or: [ missingDescriptions includes: versioned index ]) ifFalse: [
-				missing := ([ (aVisitor soil objectRepository segmentAt: 0) 
-					basicAt: versioned index 
-					ifAbsent: [ nil ] ] on: Error do: [ nil ]) isNil.
-				missing ifTrue: [ 
-					missingDescriptions add: versioned index.
-					self report: (SoilMissingBehaviorDescription 
-						objectId: aSoilObjectId 
-						descriptionId: versioned asSoilObjectId
-						version: versioned version 
-						reason: 'there is no such object in the meta segment') ] ] ] ]
+	aVersion behaviorDescriptions do: [ :versioned | | missing |
+		(versioned index = 2 or: [ missingDescriptions includes: versioned index ]) ifFalse: [
+			missing := ([ (aVisitor soil objectRepository segmentAt: 0) 
+				basicAt: versioned index 
+				ifAbsent: [ nil ] ] on: Error do: [ nil ]) isNil.
+			missing ifTrue: [ 
+				missingDescriptions add: versioned index.
+				self report: (SoilMissingBehaviorDescription 
+					objectId: aSoilObjectId 
+					descriptionId: versioned asSoilObjectId
+					version: versioned version 
+					reason: 'there is no such object in the meta segment') ] ] ]
 ]
 
 { #category : #checking }
@@ -179,20 +188,23 @@ SoilDatabaseConsistencyTracker >> sizesOf: anIndex [
 { #category : #tracking }
 SoilDatabaseConsistencyTracker >> trackCluster: aSoilPersistentClusterVersion in: aVisitor [
 	"the chain of versions of the object, and the behavior descriptions of every version
-	in it - the current one is not the only one a reader can meet"
-	self check: aSoilPersistentClusterVersion objectId using: [ | versions |
-		versions := self 
-			chainOf: aSoilPersistentClusterVersion 
+	in it - the current one is not the only one a reader can meet. One version at a time:
+	an object written at every commit has a chain of a million records, which as a
+	collection took more than the two gigabytes the scheduler runs in"
+	self check: aSoilPersistentClusterVersion objectId using: [
+		self 
+			versionsOf: aSoilPersistentClusterVersion 
 			in: aVisitor 
 			onFault: [ :position :reason |
 				self report: (SoilBrokenVersionChain 
 					objectId: aSoilPersistentClusterVersion objectId 
 					position: position 
-					reason: reason) ].
-		self 
-			checkDescriptionsOf: versions 
-			referencedBy: aSoilPersistentClusterVersion objectId 
-			in: aVisitor ]
+					reason: reason) ]
+			do: [ :version |
+				self 
+					checkDescriptionsOfVersion: version 
+					referencedBy: aSoilPersistentClusterVersion objectId 
+					in: aVisitor ] ]
 ]
 
 { #category : #tracking }
