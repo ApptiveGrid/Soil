@@ -349,8 +349,8 @@ SoilActiveResident >> statusLine [
 	line := super statusLine, ', ', (self count: stepCount of: 'step'),
 		', ', (self count: stepErrorCount of: 'error').
 	self isWorking ifTrue: [
-		line := line, ', in step ', stepCount printString, ' for ',
-			(self durationString: self currentStepDuration) ].
+		line := line, ', in ', self currentStepName, ' for ',
+			self currentStepDurationString ].
 	^ line
 ]
 
@@ -361,6 +361,35 @@ SoilActiveResident >> currentStepDuration [
 	that is set on the way in and cleared on the way out has a window in which a
 	reader finds nothing while #working already says yes"
 	^ DateAndTime now - stepStartedAt
+]
+
+{ #category : #logging }
+SoilActiveResident >> currentStepDurationString [
+	"whole seconds. A step lasts seconds to hours when somebody is looking for it,
+	and the milliseconds and microseconds of '20 minutes 4 seconds 781 milliseconds
+	311 microseconds' only make the line harder to read"
+	^ self durationString: (Duration seconds: self currentStepDuration asSeconds)
+]
+
+{ #category : #logging }
+SoilActiveResident >> currentStepName [
+	"'step 4', or 'step 4 (backup 62398e23)' where the resident says what the step is
+	busy with, see #currentWork. A number alone tells that a step does not return and
+	not which one - and the one who reads the line is looking for exactly that"
+	^ String streamContents: [ :out |
+		out << 'step ' << stepCount printString.
+		self currentWork ifNotNil: [ :work |
+			out << ' (' << work << ')' ] ]
+]
+
+{ #category : #logging }
+SoilActiveResident >> currentWork [
+	"a few words about what the step I am in is busy with, or nil. Nothing to say here:
+	a step is a block of work to this class and it does not know what the work is. A
+	resident whose steps are of different kinds says so in its own subclass - the lines
+	that name a step ask for it. Read from another process while the step runs, so it
+	answers what was noted, not something worked out"
+	^ nil
 ]
 
 { #category : #logging }
@@ -387,8 +416,8 @@ SoilActiveResident >> reportWorkSinceLastTick [
 	done := stepCount - reportedStepCount.
 	done = 0 ifTrue: [
 		self isWorking ifTrue: [
-			self emit: 'still in step ', stepCount printString, ', started ',
-				(self durationString: self currentStepDuration), ' ago' ].
+			self emit: 'still in ', self currentStepName, ', started ',
+				self currentStepDurationString, ' ago' ].
 		^ self ].
 	reportedStepCount := stepCount.
 	self emit: (self count: done of: 'step'), ' since the last report, ',

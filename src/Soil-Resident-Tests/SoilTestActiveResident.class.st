@@ -22,7 +22,8 @@ Class {
 		'maxRestarts',
 		'hangOnStep',
 		'inHangingStep',
-		'leaveHangingStep'
+		'leaveHangingStep',
+		'currentWork'
 	],
 	#category : #'Soil-Resident-Tests'
 }
@@ -105,6 +106,17 @@ SoilTestActiveResident >> runStep [
 		leaveHangingStep wait ].
 	throwOnStep ifTrue: [ Error signal: 'the step was told to throw' ] ]
 		ensure: [ stepSignal signal ]
+]
+
+{ #category : #accessing }
+SoilTestActiveResident >> currentWork [
+	^ currentWork
+]
+
+{ #category : #accessing }
+SoilTestActiveResident >> currentWork: aStringOrNil [
+	"what a resident with steps of different kinds would say about the step it is in"
+	currentWork := aStringOrNil
 ]
 
 { #category : #accessing }
