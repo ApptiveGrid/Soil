@@ -251,6 +251,38 @@ SoilResidentReportingTest >> testAResidentHangingInAStepSaysSoOnTheTick [
 ]
 
 { #category : #tests }
+SoilResidentReportingTest >> testAHangingStepNamesWhatItIsBusyWith [
+	"a number says that a step does not come back and not which one: the line is read
+	by somebody who has a database in mind"
+	| resident |
+	resident := self residentWith: [ :d | d ].
+	resident currentWork: 'backup 62398e23'.
+	resident hangOnStep: true.
+	resident noteWork.
+	self assert: (resident waitForHangingStepWithin: 2 seconds).
+	resident tick.
+	resident tick.
+
+	self assert: (soil reportedMatching: 'still in step 1 (backup 62398e23), started') size equals: 1.
+	self assert: (resident statusLine includesSubstring: 'in step 1 (backup 62398e23) for ').
+	resident releaseHangingStep
+]
+
+{ #category : #tests }
+SoilResidentReportingTest >> testTheDurationOfAHangingStepIsInWholeSeconds [
+	| resident line |
+	resident := self residentWith: [ :d | d ].
+	resident hangOnStep: true.
+	resident noteWork.
+	self assert: (resident waitForHangingStepWithin: 2 seconds).
+	line := resident statusLine.
+	resident releaseHangingStep.
+
+	self deny: (line includesSubstring: 'millisecond').
+	self deny: (line includesSubstring: 'microsecond')
+]
+
+{ #category : #tests }
 SoilResidentReportingTest >> testATickAfterAFinishedStepSaysNothingAboutHanging [
 	"the line belongs to a step that did not come back, not to every quiet tick -
 	otherwise it would be the noise that testATickWithoutWorkSaysNothing rules out"
