@@ -368,7 +368,7 @@ SoilActiveResident >> currentStepDurationString [
 	"whole seconds. A step lasts seconds to hours when somebody is looking for it,
 	and the milliseconds and microseconds of '20 minutes 4 seconds 781 milliseconds
 	311 microseconds' only make the line harder to read"
-	^ self durationString: (Duration seconds: self currentStepDuration asSeconds)
+	^ self durationString: self currentStepDuration asSeconds seconds
 ]
 
 { #category : #logging }
