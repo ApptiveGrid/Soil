@@ -342,6 +342,24 @@ SoilTrackingVisitorTest >> testADescriptionThatIsThereIsLookedUpOnce [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testARecordBeyondTheEndOfTheFileNamesItsObject [
+	"a read that ran off the end of the file answered 'receiver of < is nil' and the
+	check that walked a database for hours ended with it"
+	| segment visitor id error |
+	self commitSampleGraph.
+	segment := soil objectRepository segmentAt: 1.
+	id := SoilObjectId segment: 1 index: 2.
+	(segment instVarNamed: #indexFile) at: 2 putPosition: 100000000000.
+	visitor := SoilTrackingVisitor new soil: soil; yourself.
+	error := [ visitor recordAt: id. nil ] on: SoilUnreadableRecord do: [ :each | each ].
+	self assert: error notNil.
+	self assert: error objectId equals: id.
+	self assert: error position equals: 100000000000.
+	self assert: error fileSize notNil.
+	self assert: (error messageText includesSubstring: 'cannot be read')
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAPreviousVersionBeyondTheFileIsNamed [
 	| record tracker finding |
 	self commitSampleGraph.

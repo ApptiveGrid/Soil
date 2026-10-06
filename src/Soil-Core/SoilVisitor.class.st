@@ -63,10 +63,29 @@ SoilVisitor >> processObjectId: aSoilObjectId [
 SoilVisitor >> recordAt: aSoilObjectId [
 	"Every record is read at the databaseVersion, in whichever order the graph is
 	walked. The depth-first walk used to read the current version, past the cache and
-	past any transaction the visitor had been handed"
-	^ ((soil objectRepository segmentAt: aSoilObjectId segment)
+	past any transaction the visitor had been handed.
+
+	A record that cannot be read says which one it is. What came out of the read was a
+	'receiver of < is nil', out of the length of a record that began at the end of the
+	file, and the check that read a database for hours ended with it - without the
+	object, the position or the size of the file, which is what tells a record that is
+	not there from one that is damaged. What Soil itself says about a missing object
+	is left as it is"
+	| segment |
+	segment := soil objectRepository segmentAt: aSoilObjectId segment.
+	^ [ (segment
 		basicAt: aSoilObjectId index
-		version: self databaseVersion) objectId: aSoilObjectId
+		version: self databaseVersion) objectId: aSoilObjectId ]
+		on: Error
+		do: [ :error |
+			(error isKindOf: SoilError) ifTrue: [ error pass ].
+			SoilUnreadableRecord new
+				objectId: aSoilObjectId;
+				version: self databaseVersion;
+				position: ([ segment heapPositionAt: aSoilObjectId index ] on: Error do: [ nil ]);
+				fileSize: ([ (segment instVarNamed: #objectFile) size ] on: Error do: [ nil ]);
+				reason: (error messageText ifNil: [ error class name ]);
+				signal ]
 ]
 
 { #category : #accessing }
