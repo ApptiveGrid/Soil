@@ -328,6 +328,20 @@ SoilTrackingVisitorTest >> testTheChainIsHandedOnOneVersionAtATime [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testADescriptionThatIsThereIsLookedUpOnce [
+	"a chain of a million versions refers to a handful of descriptions a million times"
+	| record tracker visitor |
+	self commitSampleGraph.
+	record := self recordWithTwoVersions.
+	tracker := SoilDatabaseConsistencyTracker new.
+	visitor := SoilTrackingVisitor new soil: soil; yourself.
+	tracker trackCluster: record in: visitor.
+	self assert: tracker findings isEmpty.
+	self assert: (record behaviorDescriptions allSatisfy: [ :each | 
+		each index = 2 or: [ tracker presentDescriptions includes: each index ] ])
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAPreviousVersionBeyondTheFileIsNamed [
 	| record tracker finding |
 	self commitSampleGraph.

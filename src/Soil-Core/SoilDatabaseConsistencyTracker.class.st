@@ -6,10 +6,17 @@ Class {
 	#superclass : #SoilConsistencyTracker,
 	#instVars : [
 		'lastIndexes',
-		'missingDescriptions'
+		'missingDescriptions',
+		'presentDescriptions'
 	],
 	#category : #'Soil-Core-Visitor'
 }
+
+{ #category : #accessing }
+SoilDatabaseConsistencyTracker >> presentDescriptions [
+	"the indexes of the behavior descriptions that were looked up and are there"
+	^ presentDescriptions
+]
 
 { #category : #checking }
 SoilDatabaseConsistencyTracker >> checkDescriptionsOf: someVersions referencedBy: aSoilObjectId in: aVisitor [
@@ -26,19 +33,27 @@ SoilDatabaseConsistencyTracker >> checkDescriptionsOfVersion: aVersion reference
 	"every behavior description the version refers to is an object in the meta segment.
 	Whether it has the version asked for takes the classes to read, and is the application
 	tracker's. Named once for each description: a missing one is referred to by every
-	object of its class"
+	object of its class.
+
+	Looked up once for each description, found or not. A chain of a million versions
+	refers to a handful of descriptions a million times, and every look-up is a read in the
+	index file of the meta segment: that was the better part of an hour for one object"
 	aVersion behaviorDescriptions do: [ :versioned | | missing |
-		(versioned index = 2 or: [ missingDescriptions includes: versioned index ]) ifFalse: [
+		(versioned index = 2 or: [ 
+			(presentDescriptions includes: versioned index) or: [ 
+				missingDescriptions includes: versioned index ] ]) ifFalse: [
 			missing := ([ (aVisitor soil objectRepository segmentAt: 0) 
 				basicAt: versioned index 
 				ifAbsent: [ nil ] ] on: Error do: [ nil ]) isNil.
-			missing ifTrue: [ 
-				missingDescriptions add: versioned index.
-				self report: (SoilMissingBehaviorDescription 
-					objectId: aSoilObjectId 
-					descriptionId: versioned asSoilObjectId
-					version: versioned version 
-					reason: 'there is no such object in the meta segment') ] ] ]
+			missing 
+				ifTrue: [ 
+					missingDescriptions add: versioned index.
+					self report: (SoilMissingBehaviorDescription 
+						objectId: aSoilObjectId 
+						descriptionId: versioned asSoilObjectId
+						version: versioned version 
+						reason: 'there is no such object in the meta segment') ]
+				ifFalse: [ presentDescriptions add: versioned index ] ] ]
 ]
 
 { #category : #checking }
@@ -156,7 +171,8 @@ SoilDatabaseConsistencyTracker >> hasBrokenChainIn: anIndex segment: aSoilObject
 SoilDatabaseConsistencyTracker >> initialize [ 
 	super initialize.
 	lastIndexes := Dictionary new.
-	missingDescriptions := Set new
+	missingDescriptions := Set new.
+	presentDescriptions := Set new
 ]
 
 { #category : #accessing }
