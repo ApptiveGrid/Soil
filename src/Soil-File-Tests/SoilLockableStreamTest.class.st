@@ -46,6 +46,23 @@ SoilLockableStreamTest >> testMemoryLock [
 ]
 
 { #category : #tests }
+SoilLockableStreamTest >> testALockTheFileRefusesIsNotKeptInMemory [
+	"the file is locked by somebody else, so the lock is not taken - and it was put
+	into the registry before the file was asked, where it would stay for good and
+	refuse everybody who asks for that range"
+	| registry lock |
+	stream := SoilLockableStream path: self path.
+	stream nextPutAll: 'hello world'; flush.
+	registry := SoilFileLockRegistry forPath: self path.
+	lock := SoilRangeLock from: 7 length: 5 context: Object new.
+	lock lockInMemory: registry.
+	self assert: registry numberOfLocks equals: 1.
+	lock withdraw.
+	self assert: registry numberOfLocks equals: 0.
+	self assert: stream locks isEmpty
+]
+
+{ #category : #tests }
 SoilLockableStreamTest >> testMemoryLockConflict [
 	| objA objB |
 	objA := Object new.

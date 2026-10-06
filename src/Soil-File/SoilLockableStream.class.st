@@ -208,7 +208,13 @@ SoilLockableStream >> registerLock: lock [
 		lock lockInMemory: lockRegistry ].
 	
 	self fileLocked ifTrue: [ 
-		lock lockOn: self  ].
+		"a lock that the file refuses is not kept in memory either: it would stay in
+		the registry for good and refuse everybody else who asks for that range"
+		[ lock lockOn: self ]
+			on: SoilAlreadyLocked
+			do: [ :error |
+				lock withdraw.
+				error pass ] ].
 	
 	^ locks add: lock
 	

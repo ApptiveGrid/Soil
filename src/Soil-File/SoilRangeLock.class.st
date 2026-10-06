@@ -126,6 +126,16 @@ SoilRangeLock >> release [
 		registry := nil ]
 ]
 
+{ #category : #initialization }
+SoilRangeLock >> withdraw [
+	"let go of what was only taken in memory: the file did not lock, so there is
+	nothing to unlock there, and the stream does not know this lock"
+	stream := nil.
+	registry ifNotNil: [ 
+		registry removeLock: self.
+		registry := nil ]
+]
+
 { #category : #accessing }
 SoilRangeLock >> stream [
 
