@@ -253,6 +253,8 @@ SoilReadOnlyDatabaseTest >> testReadsAnIndexFromFilesNobodyMayWrite [
 	opened with the database, stopped it before anything was read"
 
 	| txn |
+	"files without write permission are a POSIX notion, Windows has no such permissions"
+	OSPlatform current isWindows ifTrue: [ ^ self skip ].
 	self writeIndex.
 	soil close.
 	self makeFilesReadOnly.

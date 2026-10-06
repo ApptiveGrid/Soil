@@ -39,6 +39,20 @@ SoilMigrationTest >> createMigrationClassVariableLayout [
 		package: self class package name) install
 ]
 
+{ #category : #helpers }
+SoilMigrationTest >> replaceMigrationClassWith: aBlock [
+	"Changing a class between a pointer and a bits layout while it has instances
+	is not reliably done in place (Pharo 14 keeps the old layout). Removing the
+	class and building it anew gives the layout we ask for, and reopening the
+	database drops the behavior descriptions that still point to the old class."
+
+	soil close.
+	migrationClass removeFromSystem.
+	migrationClass := aBlock value.
+	soil := Soil path: self path.
+	soil open
+]
+
 { #category : #accessing }
 SoilMigrationTest >> path [ 
 	^ 'soil-tests'
@@ -80,8 +94,8 @@ SoilMigrationTest >> testMaterializingObjectByteLayputFromFixedLayout [
 	tx root: object.
 	tx commit.
 
-	"now we change the class to be a variable class with the same ivars"
-	migrationClass := self createMigrationClassByteLayout.
+	"now we change the class to be a byte class"
+	self replaceMigrationClassWith: [ self createMigrationClassByteLayout ].
 	tx2 := soil newTransaction.
 
 	self should: [materializedRoot := tx2 root] raise: SoilLayoutMigrationError
@@ -101,7 +115,7 @@ SoilMigrationTest >> testMaterializingObjectFixedLayputFromByteLayout [
 	tx commit.
 
 	"now we change the class to be a fixed class with the same ivars"
-	migrationClass := self createMigrationClassFixedLayout.
+	self replaceMigrationClassWith: [ self createMigrationClassFixedLayout ].
 	tx2 := soil newTransaction.
 
 	self should: [materializedRoot := tx2 root] raise: SoilLayoutMigrationError
