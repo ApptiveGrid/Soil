@@ -305,6 +305,29 @@ SoilTrackingVisitorTest >> testADescriptionVersionThatIsNotInItsChainIsNamed [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testTheChainIsHandedOnOneVersionAtATime [
+	"an object that is written at every commit has a chain of a million records, and
+	held as a collection they were more than the two gigabytes a scheduler runs in. The
+	same versions, newest first, without being kept"
+	| record tracker visitor handed |
+	self commitSampleGraph.
+	record := self recordWithTwoVersions.
+	tracker := SoilDatabaseConsistencyTracker new.
+	visitor := SoilTrackingVisitor new soil: soil; yourself.
+	handed := OrderedCollection new.
+	tracker 
+		versionsOf: record 
+		in: visitor 
+		onFault: [ :position :reason | self fail: reason ]
+		do: [ :each | handed add: each version ].
+	self assert: handed size equals: 2.
+	self assert: handed asArray equals: ((tracker 
+		chainOf: record 
+		in: visitor 
+		onFault: [ :position :reason | self fail: reason ]) collect: #version) asArray
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAPreviousVersionBeyondTheFileIsNamed [
 	| record tracker finding |
 	self commitSampleGraph.
