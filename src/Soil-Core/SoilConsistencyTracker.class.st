@@ -25,11 +25,15 @@ SoilConsistencyTracker >> versionsOf: aCluster in: aVisitor onFault: aBlock do: 
 	"aCluster and every version before it, newest first, each without its payload, handed
 	to eachBlock as the chain is followed and not kept: what is held is the set of
 	positions the walk has been at, and nothing else.
-	Where the chain cannot be followed on - a previous version that cannot be read, a
-	version that does not come before the one after it, a position it has already been at
-	- the fault is handed to aBlock with the position of the last record that is fine - the
+	Where the chain cannot be followed on - a previous version that cannot be read, one
+	that runs into the record after it, a version that does not come before the one after
+	it, a position it has already been at - the fault is handed to aBlock with the position of the last record that is fine - the
 	one whose link to its previous version cannot be followed - and the walk ends there.
-	Without the guard on positions a loop never ends"
+	Without the guard on positions a loop never ends.
+	A record is written behind the ones before it, so a previous version ends where the
+	record after it starts at the latest. One that runs on into it is not a record but
+	bytes that read as one - a link into the middle of a record, say - and what such a
+	head names, its descriptions above all, is noise"
 	| segment current positions |
 	segment := aVisitor soil objectRepository segmentAt: aCluster segment.
 	positions := Set with: aCluster position.
@@ -44,6 +48,8 @@ SoilConsistencyTracker >> versionsOf: aCluster in: aVisitor onFault: aBlock do: 
 			on: Error 
 			do: [ :error | 
 				^ aBlock value: current position value: 'previous version at position ', position printString, ' cannot be read: ', error messageText asString ].
+		position + previous length > current position ifTrue: [ 
+			^ aBlock value: current position value: 'previous version ', previous version printString, ' at position ', position printString, ' overlaps the record at ', current position printString ].
 		previous version < current version ifFalse: [ 
 			^ aBlock value: current position value: 'previous version ', previous version printString, ' at position ', position printString, ' does not come before version ', current version printString ].
 		eachBlock value: previous.

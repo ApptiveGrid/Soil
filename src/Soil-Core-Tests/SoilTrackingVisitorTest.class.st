@@ -375,6 +375,42 @@ SoilTrackingVisitorTest >> testAPreviousVersionBeyondTheFileIsNamed [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testAPreviousVersionThatRunsIntoTheRecordAfterItIsNamedOnce [
+	"in the accounts database a record's previous version pointed 23 bytes into a record
+	a second writer had written over. The bytes there read as a head with a small version
+	and descriptions that are not there, and the check named nineteen missing
+	descriptions instead of one broken chain"
+	| segment current index fakeHead carrier carrierPosition fakePosition position record tracker |
+	self commitSampleGraph.
+	segment := soil objectRepository segmentAt: 1.
+	current := self recordWithTwoVersions.
+	index := current objectId index.
+	"a head that names a description that is not there and claims more payload than
+	follows it"
+	fakeHead := (SoilPersistentClusterVersion new
+		version: 1;
+		behaviorDescriptions: { (SoilVersionedObjectId segment: 0 index: 9999) version: 1; yourself };
+		bytes: (ByteArray new: 100000);
+		serialize) allButLast: 100000.
+	"a record that carries the head in its payload, and behind it the current version
+	written again with its link into the middle of that record"
+	carrier := current copy bytes: (ByteArray new: 23), fakeHead; yourself.
+	carrierPosition := segment at: index putBytes: carrier serialize.
+	fakePosition := carrierPosition + carrier serialize size - fakeHead size.
+	position := segment at: index putBytes: (current copy
+		previousVersionPosition: fakePosition;
+		serialize).
+	record := (segment headAtPosition: position) objectId: current objectId; yourself.
+	tracker := SoilDatabaseConsistencyTracker new.
+	tracker trackCluster: record in: (SoilTrackingVisitor new soil: soil; yourself).
+	self assert: tracker findings size equals: 1.
+	self assert: tracker findings first class equals: SoilBrokenVersionChain.
+	self assert: tracker findings first position equals: position.
+	self assert: (tracker findings first reason includesSubstring: 'overlaps the record at').
+	self assert: (tracker findings noneSatisfy: [ :each | each class = SoilMissingBehaviorDescription ])
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAVersionChainThatReturnsToAPositionIsNamedAndEnds [
 	| record tracker |
 	self commitSampleGraph.
