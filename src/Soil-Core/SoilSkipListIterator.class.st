@@ -82,7 +82,7 @@ SoilSkipListIterator >> findPageFor: indexKey value: anObject [
 	| page |
 	page := self findPageFor: indexKey.
 	
-	[(page items includes: indexKey->anObject) or: [page isHeaderPage] ] 
+	[ (page itemIndexForKey: indexKey value: anObject) > 0 or: [ page isHeaderPage ] ] 
 		whileFalse: [ page := page previousPageIn: index].
 	
 	^currentPage := page

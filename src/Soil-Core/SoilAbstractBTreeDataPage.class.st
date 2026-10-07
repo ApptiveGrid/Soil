@@ -30,8 +30,10 @@ SoilAbstractBTreeDataPage >> find: aKey with: aBTree [
 
 { #category : #private }
 SoilAbstractBTreeDataPage >> findItem: anItem with: aBTree [
-	"we found a data page, it is here or in a previous page"
-	^(items includes: anItem)
+	"we found a data page, it is here or in a previous page. The header page is the
+	first one, the walk ends there whether the item is found or not - asking it for
+	its previous page reads page 0, which fails on the stream position"
+	^ ((self itemIndexForKey: anItem key value: anItem value) > 0 or: [ self isHeaderPage ])
 		ifTrue: [ self ]
 		ifFalse: [ (self previousPageIn: aBTree) findItem: anItem with: aBTree]
 ]

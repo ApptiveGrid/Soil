@@ -123,6 +123,125 @@ SoilIndexedDictionaryTest >> testAKeyOverwrittenTwiceKeepsItsValueForAnOlderRead
 		ensure: [ reader abort ]
 ]
 
+{ #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testARemovalAfterAReopenIsTakenBackForAnOlderReader [
+	"a reader older than a removal still sees the key: SoilRemoveKeyEntry>>#isForItem:index:
+	finds the removal in the journal and takes it back. The removed id on the page is
+	the value the page held - after a reopen a byte array - and the entry holds a
+	SoilObjectId, so the removal was not found and the older reader lost the key. This
+	is a unique-key index, the value comparison is not only one of duplicate keys"
+	| tx reader |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict 
+		at: #one put: #onevalue;
+		at: #two put: #twovalue.
+	tx commit.
+	self reopen.
+
+	reader := soil newTransaction.
+	tx := soil newTransaction.
+	tx root removeKey: #one.
+	tx commit.
+
+	[ self assert: (reader root at: #one ifAbsent: [ nil ]) equals: #onevalue.
+	  self assert: (reader root at: #two) equals: #twovalue ]
+		ensure: [ reader abort ]
+]
+
+{ #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testARemovalOfADuplicateKeyAfterAReopenIsTakenBackForAnOlderReader [
+	"the duplicate-key side of #testARemovalAfterAReopenIsTakenBackForAnOlderReader: the
+	removal is found in the journal by key and value, and the value was compared as a
+	byte array against a SoilObjectId"
+	| tx reader values |
+	tx := soil newTransaction.
+	dict index allowDuplicateKeys.
+	tx root: dict.
+	dict
+		at: #testkey put: 'one';
+		at: #testkey put: 'two'.
+	tx commit.
+	self reopen.
+
+	reader := soil newTransaction.
+	tx := soil newTransaction.
+	values := tx root at: #testkey.
+	tx root removeKey: #testkey value: values first.
+	tx commit.
+
+	[ values := reader root at: #testkey.
+	  self assert: values size equals: 2.
+	  self assert: values first equals: 'one'.
+	  self assert: values last equals: 'two' ]
+		ensure: [ reader abort ]
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testAReplayDoesNotAddAValueTheIndexHoldsAgain [
+	"a replay applies journals whose changes are already on disk, so an add finds its
+	pair on a page read back from disk - as a byte array, while the journal hands it a
+	SoilObjectId. Compared as they were, every replayed add appended a second entry
+	for its pair, and the index answered a value twice and a size too large.
+
+	Skipped on BTree: SoilBTreePage>>#cleanRemovedIn: drops a removed entry by its key,
+	and with duplicate keys that can be the live entry next to it. After the replay the
+	removed entry sits behind the live one, so cleaning takes the live one. That is a
+	fault of the BTree on its own, not of the value comparison"
+	| tx checkpoint values |
+	backend = SoilBTree ifTrue: [ ^ self skip ].
+	tx := soil newTransaction.
+	dict index allowDuplicateKeys.
+	tx root: dict.
+	tx commit.
+	checkpoint := soil control lastCheckpoint.
+
+	tx := soil newTransaction.
+	tx root
+		at: #testkey put: 'one';
+		at: #testkey put: 'two'.
+	tx commit.
+	tx := soil newTransaction.
+	values := tx root at: #testkey.
+	tx root removeKey: #testkey value: values first.
+	tx commit.
+	"back to a checkpoint before both commits - what a crash after them would have left"
+	soil control checkpoint: checkpoint.
+	self reopen.
+
+	tx := soil newTransaction.
+	values := tx root at: #testkey.
+	self assert: values size equals: 1.
+	self assert: values first equals: 'two'.
+	self assert: tx root size equals: 1.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testAValueAddedAgainAfterAReopenIsNotDuplicated [
+	"adding a key with a value it already holds overwrites the entry. After a reopen
+	the page holds the value as a byte array and the add looks for a SoilObjectId, so
+	it did not find the entry and added a second one for the same pair"
+	| tx value |
+	tx := soil newTransaction.
+	dict index allowDuplicateKeys.
+	tx root: dict.
+	dict at: #testkey put: 'one'.
+	tx commit.
+	self reopen.
+
+	tx := soil newTransaction.
+	value := (tx root at: #testkey) first.
+	tx root at: #testkey put: value.
+	tx commit.
+	self reopen.
+
+	tx := soil newTransaction.
+	self assert: (tx root at: #testkey) size equals: 1.
+	self assert: tx root size equals: 1.
+	tx abort
+]
+
 { #category : #tests }
 SoilIndexedDictionaryTest >> testAddAndRemoveExistingList [
 	| tx tx2 tx3 |
@@ -1230,6 +1349,38 @@ SoilIndexedDictionaryTest >> testRemoveKeySurvivesReopenWhileAnotherTransactionI
 	tx abort
 ]
 
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testRemoveKeyValueSurvivesReopen [
+	"after a reopen the index pages carry their values as byte arrays, while
+	#removeKey:value: looks for a SoilObjectId, and the two are never equal. On SkipList
+	SoilIndexItemsPage>>#itemIndexForKey:value: answered 0 and the removal went into
+	the absent block - KeyNotFound for an entry that is there. On BTree the walk back
+	from the data page did not find it either and went past the first page, failing on
+	the stream position of page 0. The existing duplicate-key tests remove within the
+	same open database, where the pages still hold SoilObjectIds"
+	| tx values |
+	tx := soil newTransaction.
+	dict index allowDuplicateKeys.
+	tx root: dict.
+	dict
+		at: #testkey put: 'one';
+		at: #testkey put: 'two'.
+	tx commit.
+	self reopen.
+
+	tx := soil newTransaction.
+	values := tx root at: #testkey.
+	tx root removeKey: #testkey value: values first ifAbsent: [ nil ].
+	tx commit.
+	self reopen.
+
+	tx := soil newTransaction.
+	values := tx root at: #testkey.
+	self assert: values size equals: 1.
+	self assert: values first equals: 'two'.
+	tx abort
+]
+
 { #category : #'tests - concurrent' }
 SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 
@@ -1314,6 +1465,28 @@ SoilIndexedDictionaryTest >> testRemovePagesSequential [
 	self assert: (index pages select: #needsWrite) size equals: ((backend = SoilBTree) ifTrue: [1] ifFalse: [0])
 	
 
+]
+
+{ #category : #tests }
+SoilIndexedDictionaryTest >> testRemovingAValueTheKeyDoesNotHoldAnswersTheBlock [
+	"looking for a key and value, the walk goes back from the page of the key to the
+	pages before it. On BTree it did not stop at the first page and asked for page 0,
+	which fails on the stream position instead of answering that the value is not there"
+	| tx other |
+	tx := soil newTransaction.
+	dict index allowDuplicateKeys.
+	tx root: dict.
+	dict 
+		at: #testkey put: 'one';
+		at: #other put: 'two'.
+	tx commit.
+
+	tx := soil newTransaction.
+	other := (tx root at: #other) first.
+	self 
+		assert: (tx root removeKey: #testkey value: other ifAbsent: [ #absent ]) 
+		equals: #absent.
+	tx abort
 ]
 
 { #category : #tests }

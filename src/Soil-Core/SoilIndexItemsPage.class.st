@@ -23,6 +23,20 @@ SoilIndexItemsPage class >> isAbstract [
 	^ self == SoilIndexItemsPage
 ]
 
+{ #category : #testing }
+SoilIndexItemsPage class >> value: aValue matches: anotherValue [
+	"the one place where an index value is compared with another. A page read back
+	from disk holds its values as byte arrays, a page written in this image and a
+	journal entry hold SoilObjectIds, and the two are never equal. So across
+	representations the bytes decide. Within one representation its own #= does,
+	because an object id that has no index yet (a new object before commit) has no
+	bytes of its own - it only matches itself, and as bytes every such id of a
+	segment would look the same"
+	aValue = anotherValue ifTrue: [ ^ true ].
+	^ aValue class ~= anotherValue class
+		and: [ aValue asByteArray = anotherValue asByteArray ]
+]
+
 { #category : #adding }
 SoilIndexItemsPage >> addItem: anAssociation [
 	"If the key is already there, it will be replaced"
@@ -269,7 +283,7 @@ SoilIndexItemsPage >> itemIndexForKey: key value: anObject [
 		do: [ :idx | 
 			"now that we've found the key let's check if the value does
 			match as well"
-			((items at: idx) value = anObject) 
+			(self class value: (items at: idx) value matches: anObject) 
 				ifTrue: [ ^ idx ].
 			idx] 
 		ifNone: [ ^ 0 ].
@@ -278,13 +292,13 @@ SoilIndexItemsPage >> itemIndexForKey: key value: anObject [
 	prevIndex := index.
 	[ prevIndex > 1 and: [ (items at: prevIndex - 1) key = key] ] whileTrue: [ 
 		prevIndex := prevIndex - 1.
-		((items at: prevIndex) value = anObject) ifTrue: [ 
+		(self class value: (items at: prevIndex) value matches: anObject) ifTrue: [ 
 			^ prevIndex ] ].
 	"backward scanning didn't help so we scan forward to find the same key in 
 	the other direction still looking for anObject"
 	nextIndex := index.
 	[ nextIndex <= items size and: [ (items at: nextIndex) key = key] ] whileTrue: [ 
-		((items at: nextIndex) value = anObject) ifTrue: [ 
+		(self class value: (items at: nextIndex) value matches: anObject) ifTrue: [ 
 			^ nextIndex ] .
 		nextIndex := nextIndex + 1 ].
 		
