@@ -470,6 +470,40 @@ SoilResidentTest >> testLoadingTwiceIsRefused [
 ]
 
 { #category : #tests }
+SoilResidentTest >> testALoadOfNoResidentsIsStillALoad [
+	"a database whose registry describes nothing is loaded, and nobody is in the supervisor.
+	Asking whether there are residents instead of whether they were loaded let it be loaded
+	again and again, and told an embedder that wanted to add one to a running database that
+	the others were not loaded yet"
+	| supervisor txn |
+	supervisor := soil newResidentSupervisor.
+	self deny: supervisor isLoaded.
+	txn := soil newTransaction.
+	[ supervisor loadFrom: txn.
+	self assert: supervisor isLoaded.
+	self deny: supervisor hasResidents.
+	self
+		should: [ supervisor loadFrom: txn ]
+		raise: SoilResidentsAlreadyLoaded ]
+		ensure: [ txn abort ]
+]
+
+{ #category : #tests }
+SoilResidentTest >> testASupervisorWithAResidentAddedButNotLoadedIsNotLoaded [
+	"what an embedder does when it adds an instance to a database whose residents are not
+	loaded yet: it is in the supervisor, and the others still have to be loaded"
+	| supervisor txn |
+	supervisor := soil newResidentSupervisor.
+	self addResident: SoilTestResidentDescription new.
+	txn := soil newTransaction.
+	[ (soil residentRegistryIn: txn) descriptionsDo: [ :each |
+		supervisor addResident: (each newInstanceIn: txn) ] ]
+		ensure: [ txn abort ].
+	self assert: supervisor hasResidents.
+	self deny: supervisor isLoaded
+]
+
+{ #category : #tests }
 SoilResidentTest >> testNoTickForAFailedResident [
 	"an active resident revives its own process in its tick without asking what
 	state it is in, so a resident whose #startIn: threw used to get its run loop

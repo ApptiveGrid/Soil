@@ -30,7 +30,8 @@ Class {
 		'reportInterval',
 		'nextReportAt',
 		'emitsEveryStep',
-		'workGate'
+		'workGate',
+		'loaded'
 	],
 	#category : #'Soil-Resident'
 }
@@ -107,6 +108,8 @@ SoilResidentSupervisor >> hasPendingWork [
 
 { #category : #testing }
 SoilResidentSupervisor >> hasResidents [
+	"whether there is an instance in here. Not whether the residents were loaded: a database
+	whose registry holds no description is loaded and has none, see #isLoaded"
 	^ self residents notEmpty
 ]
 
@@ -128,7 +131,8 @@ SoilResidentSupervisor >> initialize [
 	residents := Dictionary new.
 	mutex := Mutex new.
 	tickRestartCount := 0.
-	emitsEveryStep := true
+	emitsEveryStep := true.
+	loaded := false
 ]
 
 { #category : #testing }
@@ -138,6 +142,16 @@ SoilResidentSupervisor >> isIdle [
 	^ self residents allSatisfy: [ :each | self idleStateOf: each ]
 ]
 
+{ #category : #testing }
+SoilResidentSupervisor >> isLoaded [
+	"whether #loadFrom: ran: every instance that the registry describes exists, started or
+	not. That is a different question from #hasResidents, and the two come apart for a
+	database whose registry holds no description: loaded, and nobody in here. An embedder
+	that wants to know if it may still load -- or if a resident it adds now would keep the
+	others from being loaded -- asks this one"
+	^ loaded
+]
+
 { #category : #running }
 SoilResidentSupervisor >> loadFrom: aTransaction [
 	"phase one of the two-phase start: create every instance, start none. That
@@ -145,11 +159,18 @@ SoilResidentSupervisor >> loadFrom: aTransaction [
 	dependencies.
 
 	Refuses to run twice: a second load would build a second set of instances
-	while the first set is started and holding processes."
-	self hasResidents ifTrue: [ SoilResidentsAlreadyLoaded new signal ].
+	while the first set is started and holding processes. That holds for a database whose
+	registry describes nothing as well -- it is loaded all the same, and asking #hasResidents
+	instead of #isLoaded let it be loaded again and again.
+
+	Loaded only when every instance exists. A load that throws halfway leaves the instances
+	it built, and #addResident: refuses their names on the next try rather than building
+	them twice."
+	self isLoaded ifTrue: [ SoilResidentsAlreadyLoaded new signal ].
 	(self registryIn: aTransaction) ifNotNil: [ :registry |
 		registry descriptionsDo: [ :description |
-			self addResident: (description newInstanceIn: aTransaction) ] ]
+			self addResident: (description newInstanceIn: aTransaction) ] ].
+	loaded := true
 ]
 
 { #category : #logging }
