@@ -55,7 +55,7 @@ SoilRemoveKeyEntry >> isForItem: anItem index: indexId [
 	^ key = anItem key and: [
 		anItem value isRemoved and: [
 			anItem value isRestorable and: [
-				anItem value removedId = oldValue]]]
+				SoilIndexItemsPage value: anItem value removedId matches: oldValue ] ] ]
 
 ]
 
