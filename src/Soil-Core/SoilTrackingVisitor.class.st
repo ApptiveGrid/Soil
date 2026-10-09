@@ -9,7 +9,8 @@ Class {
 	#instVars : [
 		'trackers',
 		'currentIndex',
-		'currentSegment'
+		'currentSegment',
+		'rereadDelays'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -23,6 +24,22 @@ SoilTrackingVisitor >> addTracker: aTracker [
 SoilTrackingVisitor >> initialize [ 
 	super initialize.
 	trackers := OrderedCollection new
+]
+
+{ #category : #testing }
+SoilTrackingVisitor >> isLate: aSoilUnreadableRecord [
+	"whether the record may still be on its way: the index of a database another
+	process writes to sends the reader past the end of the objects file it sees. Over
+	NFS that happens in two ways, and the metabase check of 674726be met both. The
+	stream knows the file as long as the client last cached it - 1:2199 was 174 KB past
+	that size, and there, intact; opening the file anew asks the server. And the
+	writer's index can reach the server before its records, as writeback keeps no order
+	between files - 1:2168 was 340 KB past the end of the file opened anew; only time
+	helps there. A record inside the file is damaged, not late, and a writable
+	database is the only one writing to its files"
+	soil readOnly ifFalse: [ ^ false ].
+	(aSoilUnreadableRecord position isNil or: [ aSoilUnreadableRecord fileSize isNil ]) ifTrue: [ ^ false ].
+	^ aSoilUnreadableRecord position >= aSoilUnreadableRecord fileSize
 ]
 
 { #category : #testing }
@@ -69,6 +86,29 @@ SoilTrackingVisitor >> processObjectId: aSoilObjectId [
 	^ super processObjectId: aSoilObjectId 
 ]
 
+{ #category : #visiting }
+SoilTrackingVisitor >> reopenObjectFileOf: aSoilObjectSegment [
+	"on NFS opening a file is what makes the client ask the server for its size, see
+	#isLate:. Only for a read-only database, which is the only one that is late"
+	| objectFile |
+	objectFile := aSoilObjectSegment instVarNamed: #objectFile.
+	objectFile close.
+	objectFile stream: (soil streamOnPath: objectFile path)
+]
+
+{ #category : #accessing }
+SoilTrackingVisitor >> rereadDelays [
+	"the pauses in milliseconds before each further read of a record that is late, see
+	#isLate:. The first read again follows at once; half a minute in all, more than a
+	client's writeback usually keeps a page"
+	^ rereadDelays ifNil: [ #( 0 1000 2000 4000 8000 15000 ) ]
+]
+
+{ #category : #accessing }
+SoilTrackingVisitor >> rereadDelays: aCollection [
+	rereadDelays := aCollection
+]
+
 { #category : #api }
 SoilTrackingVisitor >> track: aSoil [
 	"walk aSoil once for all trackers. A transaction handed in before is used as it is"
@@ -107,11 +147,18 @@ SoilTrackingVisitor >> visitRecordAt: aSoilObjectId [
 	"a record that cannot be read is something for the trackers to name, not the end of
 	the walk: one record the check could not read ended a walk of hours over a database
 	of a million objects, and every object after it went unchecked. What only that
-	record refers to is not reached"
-	| record |
+	record refers to is not reached.
+
+	One that may still be on its way is read again first, see #isLate:"
+	| record delays |
+	delays := self rereadDelays readStream.
 	record := [ self recordAt: aSoilObjectId ]
 		on: SoilUnreadableRecord
 		do: [ :error |
+			(delays atEnd not and: [ self isLate: error ]) ifTrue: [ 
+				(Delay forMilliseconds: delays next) wait.
+				self reopenObjectFileOf: (soil objectRepository segmentAt: aSoilObjectId segment).
+				error retry ].
 			trackers do: [ :each | each trackUnreadableRecord: error in: self ].
 			^ nil ].
 	^ self visit: record
