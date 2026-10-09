@@ -90,6 +90,13 @@ SoilTrackingVisitor >> visitDatabaseJournal: aJournal [
 ]
 
 { #category : #visiting }
+SoilTrackingVisitor >> visitMetaSegment: aSoilMetaSegment [
+	"the behavior registry belongs to the meta segment, its values point into it"
+	trackers do: [ :each | each trackBehaviorRegistry: soil behaviorRegistry in: self ].
+	^ super visitMetaSegment: aSoilMetaSegment
+]
+
+{ #category : #visiting }
 SoilTrackingVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [ 
 	trackers do: [ :each | each trackCluster: aSoilPersistentClusterVersion in: self ].
 	^ super visitPersistentClusterVersion: aSoilPersistentClusterVersion 

@@ -108,6 +108,31 @@ SoilBackupTest >> testABackupKeepsTheIndexAsItWasWhileCommitsGoOn [
 ]
 
 { #category : #tests }
+SoilBackupTest >> testABackupLeavesOutARegistryEntryThatPointsOutsideTheSegment [
+	"the backup of 65bba342 ended with 'no entry for object at 0:68719476736': a name
+	with four zero bytes too many and its id shifted by as many. The class had its
+	right entry besides"
+	| tx tx2 brokenName |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new nested: (SoilTestNestedObject new label: #one)).
+	tx commit.
+	brokenName := 'SoilTestNestedObject', (String new: 4).
+	soil behaviorRegistry 
+		nameAt: brokenName 
+		put: (SoilObjectId segment: 0 index: 68719476736).
+	backupSoil := Soil createOnPath: self path, #backup.
+	SoilBackupVisitor new
+		target: backupSoil;
+		backup: soil.
+	backupSoil close; open.
+	self assert: (backupSoil behaviorRegistry nameAt: brokenName ifAbsent: [ nil ]) isNil.
+	self assert: (backupSoil behaviorRegistry nameAt: #SoilTestNestedObject ifAbsent: [ nil ]) notNil.
+	tx2 := backupSoil newTransaction.
+	[ self assert: tx2 root nested label equals: #one ]
+		ensure: [ tx2 abort ]
+]
+
+{ #category : #tests }
 SoilBackupTest >> testABackupLeavesOutAClassFirstStoredAfterItsVersion [
 	"the behavior registry is read as it is now. A class stored for the first time
 	after the backup's version has an entry there whose description did not exist at

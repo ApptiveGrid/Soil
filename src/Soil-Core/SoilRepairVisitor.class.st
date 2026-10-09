@@ -130,3 +130,22 @@ SoilRepairVisitor >> visitRecomputeIndexSize: aRepairAction [
 	transaction sees, whose pages would never reach the disk"
 	(aRepairAction indexIn: soil) recomputeSize
 ]
+
+{ #category : #visiting }
+SoilRepairVisitor >> visitRemoveRegistryEntry: aRepairAction [
+	"the name is taken out only while it still points where the check found it, and
+	that is still nowhere. The journal knows a name only when it is added
+	(SoilNewBehaviorEntry) and has no entry for taking one out; the checkpoint at the
+	end of #repair: writes the registry to disk, and a replay starts after it"
+	| registry current |
+	registry := soil behaviorRegistry.
+	current := registry 
+		nameAt: aRepairAction key 
+		ifAbsent: [ ^ Error signal: 'the registry has no entry for key ', aRepairAction keyString ].
+	current = aRepairAction objectId ifFalse: [ 
+		^ Error signal: 'the entry for key ', aRepairAction keyString, ' points at ', current printString, ' now' ].
+	(SoilBrokenRegistryEntry isBroken: current in: soil) ifFalse: [ 
+		^ Error signal: 'the entry for key ', aRepairAction keyString, ' points at a description now' ].
+	registry removeNameAt: aRepairAction key ifAbsent: [ 
+		^ Error signal: 'the entry for key ', aRepairAction keyString, ' could not be removed' ]
+]

@@ -125,9 +125,15 @@ SoilBackupVisitor >> existsAtPinnedVersion: aSoilObjectId [
 	behavior registry points at it from the first commit on - #processObjectId:
 	skips it for the same reason"
 	aSoilObjectId = SoilBehaviorDescription metaId ifTrue: [ ^ true ].
-	^ ((soil objectRepository segmentAt: aSoilObjectId segment)
+	"an entry that points outside the segment points at no object either, and is left
+	out like one. The backup of 65bba342 ended with 'no entry for object at
+	0:68719476736': a name with four zero bytes too many, its id shifted by as many.
+	SoilBrokenRegistryEntry names such an entry"
+	^ [ ((soil objectRepository segmentAt: aSoilObjectId segment)
 		basicAt: aSoilObjectId index
-		version: self databaseVersion) notNil
+		version: self databaseVersion) notNil ]
+		on: SoilIndexOutOfRange, SoilInvalidSegmentIndex
+		do: [ false ]
 ]
 
 { #category : #visiting }
