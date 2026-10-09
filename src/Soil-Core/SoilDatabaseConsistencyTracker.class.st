@@ -258,3 +258,8 @@ SoilDatabaseConsistencyTracker >> trackObjectId: aSoilObjectId in: aVisitor [
 		(aSoilObjectId index > lastIndex) ifTrue: [ 
 			self report: (SoilObjectIdOutsideSegment objectId: aSoilObjectId beyond: lastIndex) ] ]
 ]
+
+{ #category : #tracking }
+SoilDatabaseConsistencyTracker >> trackUnreadableRecord: aSoilUnreadableRecord in: aVisitor [
+	self report: (SoilUnreadableRecordFinding of: aSoilUnreadableRecord)
+]

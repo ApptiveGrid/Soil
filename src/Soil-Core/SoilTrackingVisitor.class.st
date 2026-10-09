@@ -94,3 +94,18 @@ SoilTrackingVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVers
 	trackers do: [ :each | each trackCluster: aSoilPersistentClusterVersion in: self ].
 	^ super visitPersistentClusterVersion: aSoilPersistentClusterVersion 
 ]
+
+{ #category : #visiting }
+SoilTrackingVisitor >> visitRecordAt: aSoilObjectId [
+	"a record that cannot be read is something for the trackers to name, not the end of
+	the walk: one record the check could not read ended a walk of hours over a database
+	of a million objects, and every object after it went unchecked. What only that
+	record refers to is not reached"
+	| record |
+	record := [ self recordAt: aSoilObjectId ]
+		on: SoilUnreadableRecord
+		do: [ :error |
+			trackers do: [ :each | each trackUnreadableRecord: error in: self ].
+			^ nil ].
+	^ self visit: record
+]

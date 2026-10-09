@@ -42,3 +42,9 @@ SoilTracker >> trackObjectId: aSoilObjectId in: aVisitor [
 	"every time the walk reaches aSoilObjectId, through a reference, an index value or
 	a behavior description - not only the first time"
 ]
+
+{ #category : #tracking }
+SoilTracker >> trackUnreadableRecord: aSoilUnreadableRecord in: aVisitor [
+	"a record the walk could not read, the error that says which one and why. The walk
+	goes on without it"
+]

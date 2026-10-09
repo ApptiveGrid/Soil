@@ -43,7 +43,7 @@ SoilVisitor >> processLoop [
 	| objectId |
 	[ toBeProcessed isEmpty ] whileFalse: [  
 		objectId := toBeProcessed  removeFirst.
-		self visit: (self recordAt: objectId) ]
+		self visitRecordAt: objectId ]
 ]
 
 { #category : #accessing }
@@ -53,7 +53,7 @@ SoilVisitor >> processObjectId: aSoilObjectId [
 	seen add: aSoilObjectId.
 	^ depthFirst 
 		ifTrue: [
-			self visit: (self recordAt: aSoilObjectId).
+			self visitRecordAt: aSoilObjectId.
 			aSoilObjectId ]
 		ifFalse: [  
 			toBeProcessed add: aSoilObjectId ]
@@ -65,27 +65,55 @@ SoilVisitor >> recordAt: aSoilObjectId [
 	walked. The depth-first walk used to read the current version, past the cache and
 	past any transaction the visitor had been handed.
 
-	A record that cannot be read says which one it is. What came out of the read was a
-	'receiver of < is nil', out of the length of a record that began at the end of the
-	file, and the check that read a database for hours ended with it - without the
-	object, the position or the size of the file, which is what tells a record that is
-	not there from one that is damaged. What Soil itself says about a missing object
-	is left as it is"
-	| segment |
+	A reader of a database another process appends to can be sent by the index to a
+	record its stream does not reach yet: over NFS the stream knows the objects file as
+	long as the client last cached it. The metabase check of 674726be read 'receiver of
+	< is nil' at a position 174 KB past the size its stream knew, and the record was
+	there, intact. So before a record is given up, the objects file is seen as it is
+	now and the record read once more - here, where a read has failed already, and not
+	on every read.
+
+	A record that cannot be read then either says which one it is. What came out of the
+	read was a 'receiver of < is nil', out of the length of a record that began at the
+	end of the file, and the check that read a database for hours ended with it -
+	without the object, the position or the size of the file, which is what tells a
+	record that is not there from one that is damaged. What Soil itself says about a
+	missing object is left as it is"
+	| segment read |
 	segment := soil objectRepository segmentAt: aSoilObjectId segment.
-	^ [ (segment
+	read := [ (segment
 		basicAt: aSoilObjectId index
-		version: self databaseVersion) objectId: aSoilObjectId ]
+		version: self databaseVersion) objectId: aSoilObjectId ].
+	^ read
 		on: Error
 		do: [ :error |
 			(error isKindOf: SoilError) ifTrue: [ error pass ].
-			SoilUnreadableRecord new
-				objectId: aSoilObjectId;
-				version: self databaseVersion;
-				position: ([ segment heapPositionAt: aSoilObjectId index ] on: Error do: [ nil ]);
-				fileSize: ([ (segment instVarNamed: #objectFile) size ] on: Error do: [ nil ]);
-				reason: (error messageText ifNil: [ error class name ]);
-				signal ]
+			self reopenObjectFileOf: segment.
+			read
+				on: Error
+				do: [ :again |
+					(again isKindOf: SoilError) ifTrue: [ again pass ].
+					SoilUnreadableRecord new
+						objectId: aSoilObjectId;
+						version: self databaseVersion;
+						position: ([ segment heapPositionAt: aSoilObjectId index ] on: Error do: [ nil ]);
+						fileSize: ([ (segment instVarNamed: #objectFile) size ] on: Error do: [ nil ]);
+						reason: (again messageText ifNil: [ again class name ]);
+						signal ] ]
+]
+
+{ #category : #accessing }
+SoilVisitor >> reopenObjectFileOf: aSoilObjectSegment [
+	"the objects file of aSoilObjectSegment, for a reader whose stream may know it
+	shorter than it has grown since, see #recordAt:. A read-only database opens it
+	anew: on NFS opening a file is what makes the client ask the server for its size.
+	A writable one keeps its stream - the only one appending to its files is this
+	database, and closing a file gives up every lock this process holds on it"
+	| objectFile |
+	soil readOnly ifFalse: [ ^ self ].
+	objectFile := aSoilObjectSegment instVarNamed: #objectFile.
+	objectFile close.
+	objectFile stream: (soil streamOnPath: objectFile path)
 ]
 
 { #category : #accessing }
@@ -119,7 +147,7 @@ SoilVisitor >> transaction: aTransaction [
 { #category : #visiting }
 SoilVisitor >> visitFirstSegment: aSoilObjectSegment [ 
 	depthFirst 
-		ifTrue: [ self visit: (self recordAt: SoilObjectId root) ] 
+		ifTrue: [ self visitRecordAt: SoilObjectId root ] 
 		ifFalse: [ self processObjectId: SoilObjectId root ].			
 	self visitObjectSegment: aSoilObjectSegment 
 ]
@@ -150,6 +178,11 @@ SoilVisitor >> visitPersistentClusterVersion: aSoilPersistentClusterVersion [
 			processIndexId: indexId 
 			segment: (soil objectRepository segmentAt: aSoilPersistentClusterVersion segment) ].
 	^ aSoilPersistentClusterVersion 
+]
+
+{ #category : #visiting }
+SoilVisitor >> visitRecordAt: aSoilObjectId [
+	^ self visit: (self recordAt: aSoilObjectId)
 ]
 
 { #category : #visiting }
