@@ -96,6 +96,38 @@ SoilReadOnlyDatabaseTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilReadOnlyDatabaseTest >> testAReaderReadsARecordAppendedAfterItsStreamKnewTheFile [
+	"the metabase check reads a database the base keeps appending to. Over NFS the
+	stream of its objects file knows the file as long as the client last cached it.
+	The index already pointed to a newer version of 1:2199, 174 KB past that size, and
+	the read ended the check with 'receiver of < is nil'. Here the stream of the
+	reader is one on the objects file as it was before the other instance committed:
+	a stream that has not seen the file grow. Its index is opened anew after the
+	commit, as the index pages of a large database are read from disk when they are
+	needed - a small one is held in the buffer of the stream from the start"
+
+	| objectFile indexFile stale visitor version record |
+	self openReadOnly.
+	objectFile := readOnly objectRepository firstSegment instVarNamed: #objectFile.
+	indexFile := readOnly objectRepository firstSegment instVarNamed: #indexFile.
+	stale := soil path asFileReference parent / 'soil-tests-stale-objects'.
+	stale ensureDelete.
+	objectFile path copyTo: stale.
+	[ objectFile stream close.
+	objectFile stream: stale binaryReadStream.
+	visitor := SoilTrackingVisitor new soil: readOnly; yourself.
+	version := visitor databaseVersion.
+	self writeSecondTransaction.
+	indexFile stream close.
+	indexFile stream: indexFile path binaryReadStream.
+	self assert: (readOnly objectRepository firstSegment heapPositionAt: 1) >= objectFile size.
+	record := visitor recordAt: SoilObjectId root.
+	self assert: record version equals: version.
+	self assert: record hasPreviousVersion not ]
+		ensure: [ stale ensureDelete ]
+]
+
+{ #category : #tests }
 SoilReadOnlyDatabaseTest >> testCanRecoverIsFalseWhenReadOnly [
 	"the two reasons not to recover are independent: the flag, and the medium"
 

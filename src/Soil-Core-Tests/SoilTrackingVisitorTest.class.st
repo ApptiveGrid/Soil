@@ -342,6 +342,32 @@ SoilTrackingVisitorTest >> testADescriptionThatIsThereIsLookedUpOnce [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testARecordBeyondTheEndOfTheFileIsAFindingAndTheWalkGoesOn [
+	"one record the check could not read ended the walk over a database of a million
+	objects, and every object after it went unchecked. It is named, the others are read"
+	| segment id visitor tracker counter finding |
+	self commitSampleGraph.
+	segment := soil objectRepository segmentAt: 1.
+	id := SoilObjectId segment: 1 index: segment lastObjectIndex.
+	(segment instVarNamed: #indexFile) at: id index putPosition: 100000000000.
+	visitor := SoilTrackingVisitor new.
+	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
+	counter := visitor addTracker: SoilTestCountingTracker new.
+	visitor track: soil.
+	self assert: tracker findings size equals: 1.
+	finding := tracker findings first.
+	self assert: finding kind equals: #unreadableRecord.
+	self assert: finding objectId equals: id.
+	self assert: finding position equals: 100000000000.
+	self assert: finding fileSize < finding position.
+	self assert: (finding asDictionary at: #objectId) equals: id printString.
+	self deny: (counter clusters includes: id).
+	self 
+		assert: (counter clusters select: [ :each | each segment = 1 ]) asSet size 
+		equals: segment lastObjectIndex - 1
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testARecordBeyondTheEndOfTheFileNamesItsObject [
 	"a read that ran off the end of the file answered 'receiver of < is nil' and the
 	check that walked a database for hours ended with it"
