@@ -69,6 +69,41 @@ SoilReadOnlyDatabaseTest >> openReadOnly [
 ]
 
 { #category : #running }
+SoilReadOnlyDatabaseTest >> readerWithItsRecordNotWrittenYet [
+	"a reader whose index already points at the record of a commit whose bytes are not
+	in the objects file yet: the file cut back to its size before the commit. What the
+	reader of a database on NFS sees when the writer's index pages reached the server
+	before its records. Answers the bytes the file should have"
+	| objectFile indexFile objectsPath before full |
+	self openReadOnly.
+	objectFile := readOnly objectRepository firstSegment instVarNamed: #objectFile.
+	indexFile := readOnly objectRepository firstSegment instVarNamed: #indexFile.
+	objectsPath := objectFile path.
+	before := objectsPath size.
+	self writeSecondTransaction.
+	soil close.
+	full := objectsPath binaryReadStreamDo: [ :in | in upToEnd ].
+	self replace: objectsPath with: (full first: before).
+	objectFile stream close.
+	objectFile stream: objectsPath binaryReadStream.
+	indexFile stream close.
+	indexFile stream: indexFile path binaryReadStream.
+	^ full
+]
+
+{ #category : #running }
+SoilReadOnlyDatabaseTest >> replace: aFileReference with: aByteArray [
+	"in one step, as a reader opening the file in between must not find it missing or
+	half written"
+	| next |
+	next := aFileReference parent / (aFileReference basename, '-next').
+	next ensureDelete.
+	next binaryWriteStreamDo: [ :out | out nextPutAll: aByteArray ].
+	aFileReference ensureDelete.
+	next renameTo: aFileReference basename
+]
+
+{ #category : #running }
 SoilReadOnlyDatabaseTest >> setPermissionsOfFilesTo: anInteger [
 
 	(soil path allChildren select: [ :each | each isFile ]) do: [ :each |
@@ -106,7 +141,7 @@ SoilReadOnlyDatabaseTest >> testAReaderReadsARecordAppendedAfterItsStreamKnewThe
 	commit, as the index pages of a large database are read from disk when they are
 	needed - a small one is held in the buffer of the stream from the start"
 
-	| objectFile indexFile stale visitor version record |
+	| objectFile indexFile stale visitor tracker counter |
 	self openReadOnly.
 	objectFile := readOnly objectRepository firstSegment instVarNamed: #objectFile.
 	indexFile := readOnly objectRepository firstSegment instVarNamed: #indexFile.
@@ -116,15 +151,55 @@ SoilReadOnlyDatabaseTest >> testAReaderReadsARecordAppendedAfterItsStreamKnewThe
 	[ objectFile stream close.
 	objectFile stream: stale binaryReadStream.
 	visitor := SoilTrackingVisitor new soil: readOnly; yourself.
-	version := visitor databaseVersion.
+	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
+	counter := visitor addTracker: SoilTestCountingTracker new.
 	self writeSecondTransaction.
 	indexFile stream close.
 	indexFile stream: indexFile path binaryReadStream.
 	self assert: (readOnly objectRepository firstSegment heapPositionAt: 1) >= objectFile size.
-	record := visitor recordAt: SoilObjectId root.
-	self assert: record version equals: version.
-	self assert: record hasPreviousVersion not ]
+	visitor visitRecordAt: SoilObjectId root.
+	self assert: tracker findings isEmpty.
+	self assert: (counter clusters includes: SoilObjectId root) ]
 		ensure: [ stale ensureDelete ]
+]
+
+{ #category : #tests }
+SoilReadOnlyDatabaseTest >> testAReaderWaitsForARecordWhoseBytesAreNotWrittenYet [
+	"the writer's index can reach the NFS server before its records: the check of
+	674726be, with the objects file opened anew, found 1:2168 340 KB past its end.
+	Here the record arrives while the check waits"
+
+	| visitor tracker counter full objectsPath |
+	full := self readerWithItsRecordNotWrittenYet.
+	visitor := SoilTrackingVisitor new
+		soil: readOnly;
+		rereadDelays: #( 0 50 100 200 400 800 );
+		yourself.
+	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
+	counter := visitor addTracker: SoilTestCountingTracker new.
+	objectsPath := (readOnly objectRepository firstSegment instVarNamed: #objectFile) path.
+	[ (Delay forMilliseconds: 120) wait.
+	self replace: objectsPath with: full ] fork.
+	visitor visitRecordAt: SoilObjectId root.
+	self assert: tracker findings isEmpty.
+	self assert: (counter clusters includes: SoilObjectId root)
+]
+
+{ #category : #tests }
+SoilReadOnlyDatabaseTest >> testARecordThatDoesNotArriveIsUnreadableAfterTheWait [
+
+	| visitor tracker finding |
+	self readerWithItsRecordNotWrittenYet.
+	visitor := SoilTrackingVisitor new
+		soil: readOnly;
+		rereadDelays: #( 0 10 20 );
+		yourself.
+	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
+	visitor visitRecordAt: SoilObjectId root.
+	self assert: tracker findings size equals: 1.
+	finding := tracker findings first.
+	self assert: finding kind equals: #unreadableRecord.
+	self assert: finding position >= finding fileSize
 ]
 
 { #category : #tests }
