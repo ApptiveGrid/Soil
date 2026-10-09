@@ -202,6 +202,16 @@ SoilDatabaseConsistencyTracker >> sizesOf: anIndex [
 ]
 
 { #category : #tracking }
+SoilDatabaseConsistencyTracker >> trackBehaviorRegistry: aSoilBehaviorRegistry in: aVisitor [
+	"every name has to point at a description in the meta segment. Read as the registry
+	is now, like every reader of it does"
+	self check: aSoilBehaviorRegistry using: [
+		aSoilBehaviorRegistry newIterator associationsDo: [ :each |
+			(SoilBrokenRegistryEntry isBroken: each value in: aVisitor soil) ifTrue: [
+				self report: (SoilBrokenRegistryEntry key: each key objectId: each value) ] ] ]
+]
+
+{ #category : #tracking }
 SoilDatabaseConsistencyTracker >> trackCluster: aSoilPersistentClusterVersion in: aVisitor [
 	"the chain of versions of the object, and the behavior descriptions of every version
 	in it - the current one is not the only one a reader can meet. One version at a time:

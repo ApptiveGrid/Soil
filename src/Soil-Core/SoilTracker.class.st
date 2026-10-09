@@ -23,6 +23,12 @@ SoilTracker >> needsTransaction [
 ]
 
 { #category : #tracking }
+SoilTracker >> trackBehaviorRegistry: aSoilBehaviorRegistry in: aVisitor [
+	"the names of the behavior registry, once per walk. They are not an index of a
+	segment the walk reads, so they are shown here"
+]
+
+{ #category : #tracking }
 SoilTracker >> trackCluster: aSoilPersistentClusterVersion in: aVisitor [
 ]
 

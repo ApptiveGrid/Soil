@@ -88,6 +88,58 @@ SoilTrackingVisitorTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testARegistryEntryThatPointsNowhereIsFoundAndRemoved [
+	"65bba342 had sixteen names with four zero bytes too many, each with an id shifted
+	by as many. Lookups by name were not affected, the backup was"
+	| brokenName brokenId visitor tracker finding action repair tx |
+	self commitSampleGraph.
+	brokenName := 'SoilTestNestedObject', (String new: 4).
+	brokenId := SoilObjectId segment: 0 index: 68719476736.
+	soil behaviorRegistry nameAt: brokenName put: brokenId.
+	visitor := SoilTrackingVisitor new.
+	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
+	visitor track: soil.
+	self assert: tracker findings size equals: 1.
+	finding := tracker findings first.
+	self assert: finding kind equals: #brokenRegistryEntry.
+	self assert: finding objectId equals: brokenId.
+	"the way production repairs: the action as the dictionary it was sent as"
+	action := SoilRepairAction fromDictionary: finding defaultRepairAction asDictionary.
+	repair := (SoilRepairVisitor on: soil)
+		repair: { action };
+		yourself.
+	self assert: repair failed isEmpty.
+	soil close; open.
+	self assert: (soil behaviorRegistry nameAt: brokenName ifAbsent: [ nil ]) isNil.
+	self assert: (soil behaviorRegistry nameAt: #SoilTestNestedObject ifAbsent: [ nil ]) notNil.
+	visitor := SoilTrackingVisitor new.
+	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
+	visitor track: soil.
+	self assert: tracker findings isEmpty.
+	tx := soil newTransaction.
+	[ self assert: tx root nested label equals: #v2 ] ensure: [ tx abort ]
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testARegistryEntryThatPointsAtADescriptionAgainIsNotRemoved [
+	"the repair takes a name out only while it still points where the check found it,
+	and that is still nowhere"
+	| brokenName realId action repair |
+	self commitSampleGraph.
+	brokenName := 'SoilTestNestedObject', (String new: 4).
+	realId := soil behaviorRegistry nameAt: #SoilTestNestedObject ifAbsent: [ nil ].
+	soil behaviorRegistry nameAt: brokenName put: realId.
+	action := SoilRemoveRegistryEntry 
+		key: (brokenName asIndexKeyOfSize: 64) 
+		objectId: (SoilObjectId segment: 0 index: 68719476736).
+	repair := (SoilRepairVisitor on: soil)
+		repair: { action };
+		yourself.
+	self assert: repair failed size equals: 1.
+	self assert: (soil behaviorRegistry nameAt: brokenName ifAbsent: [ nil ]) equals: realId
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testARepairRecomputesADriftedIndexSize [
 	| tx indexId index visitor tracker repair |
 	self commitSampleGraph.
