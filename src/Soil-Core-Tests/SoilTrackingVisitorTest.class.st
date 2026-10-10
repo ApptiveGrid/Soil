@@ -657,6 +657,40 @@ SoilTrackingVisitorTest >> testAnIndexWhoseSizeHasDriftedIsNamed [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testAnIndexWithAnOutdatedHeaderIsNamedAndTheWalkGoesOn [
+	"a header page as it was written before 2024-07-29: version 1, and neither the unique
+	keys flag nor the size. Read in the format of today the level comes out as 0, and
+	following the pages fails. 65bba342 had 43 of these and 36 of version 2, none of them
+	reachable"
+	| tx indexId path bytes old tracker |
+	self commitSampleGraph.
+	tx := soil newTransaction.
+	indexId := tx root nested reference id.
+	tx abort.
+	path := ((soil objectRepository segmentAt: 1) indexAt: indexId) path.
+	soil close.
+	bytes := path binaryReadStreamDo: [ :stream | stream upToEnd ].
+	"the index has two values and is one page, the header page, which is not padded to
+	its full size. Behind byte 24 the header of today has the unique keys flag and the
+	size, seven bytes version 1 did not have"
+	self assert: bytes size < 4096.
+	old := (bytes first: 24), (bytes allButFirst: 31).
+	old at: 2 put: 1.
+	path ensureDelete.
+	path binaryWriteStreamDo: [ :stream | stream nextPutAll: old ].
+	soil open.
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	self assert: tracker findings size equals: 1.
+	self assert: tracker findings first class equals: SoilOutdatedIndexHeader.
+	self assert: tracker findings first indexId equals: indexId.
+	self assert: tracker findings first version equals: 1.
+	self assert: tracker findings first repairActions isEmpty
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAnIndexSizeThatSettlesOnTheSecondReadIsNotNamed [
 	"a commit between reading the header and counting shows a difference that is gone
 	the next moment"
