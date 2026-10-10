@@ -50,10 +50,16 @@ SoilTrackingVisitor >> needsTransaction [
 { #category : #visiting }
 SoilTrackingVisitor >> processIndexId: indexId segment: aSoilObjectSegment [
 	"the one place that knows which segment an index belongs to - the index itself does
-	not, so the trackers are told here"
-	| index previousIndex previousSegment |
+	not, so the trackers are told here.
+
+	An index the walk opened is let go of once it has been read. The index manager keeps
+	every index it is asked for open, file and all, and 62398e23 has 3319 of them against
+	the 1024 files the scheduler may hold open: the check ended on the next index it
+	opened. One that was open before stays open - it is not the walk's"
+	| index previousIndex previousSegment wasOpen |
+	wasOpen := aSoilObjectSegment indexManager indexes includesKey: indexId.
 	index := aSoilObjectSegment indexAt: indexId.
-	trackers do: [ :each | each trackIndex: index segment: aSoilObjectSegment in: self ].
+	[ trackers do: [ :each | each trackIndex: index segment: aSoilObjectSegment in: self ].
 	previousIndex := currentIndex.
 	previousSegment := currentSegment.
 	currentIndex := index.
@@ -65,7 +71,9 @@ SoilTrackingVisitor >> processIndexId: indexId segment: aSoilObjectSegment [
 	(trackers anySatisfy: [ :each | each hasBrokenChainIn: index segment: aSoilObjectSegment ])
 		ifFalse: [ self visit: index ] ] ensure: [
 		currentIndex := previousIndex.
-		currentSegment := previousSegment ]
+		currentSegment := previousSegment ] ]
+			ensure: [
+				wasOpen ifFalse: [ aSoilObjectSegment indexManager removeIndexWithId: indexId ] ]
 ]
 
 { #category : #visiting }

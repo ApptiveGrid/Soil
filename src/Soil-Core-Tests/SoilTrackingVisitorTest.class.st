@@ -803,6 +803,39 @@ SoilTrackingVisitorTest >> testAnUnexpectedErrorBecomesAFinding [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testAnIndexTheWalkOpenedIsLetGoOf [
+	"62398e23 has 3319 indexes and the scheduler may hold 1024 files open; the check
+	ended on the next index it opened"
+	| counting visitor manager |
+	self commitSampleGraph.
+	soil close.
+	soil := (Soil new path: 'soil-tracking-tests') open; yourself.
+	manager := (soil objectRepository segmentAt: 1) indexManager.
+	self assert: manager indexes isEmpty.
+	visitor := SoilTrackingVisitor new.
+	counting := visitor addTracker: SoilTestCountingTracker new.
+	visitor addTracker: SoilDatabaseConsistencyTracker new.
+	visitor track: soil.
+	self deny: counting indexes isEmpty.
+	self assert: manager indexes isEmpty
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testAnIndexThatWasOpenBeforeTheWalkStaysOpen [
+	| visitor manager tx dictId index |
+	self commitSampleGraph.
+	tx := soil newTransaction.
+	dictId := tx root nested reference id.
+	tx abort.
+	index := (soil objectRepository segmentAt: 1) indexAt: dictId.
+	manager := (soil objectRepository segmentAt: 1) indexManager.
+	visitor := SoilTrackingVisitor new.
+	visitor addTracker: SoilDatabaseConsistencyTracker new.
+	visitor track: soil.
+	self assert: (manager indexes at: dictId ifAbsent: [ nil ]) identicalTo: index
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testATrackerIsToldTheIndexAValueCameFrom [
 	| visitor counting tx dictId |
 	self commitSampleGraph.
