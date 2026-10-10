@@ -453,6 +453,33 @@ SoilTrackingVisitorTest >> testAPreviousVersionBeyondTheFileIsNamed [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testAPreviousVersionInForeignBytesWithAHugeCountEndsTheChain [
+	"62398e23: the previous version of 1:30197 pointed into the bytes of another record,
+	whose head read 530 million behavior descriptions, and the check asked for a
+	collection of four gigabytes. Here the head reads version 1, previous 5 and 100000
+	behavior descriptions, which cannot be in the bytes before the record after it"
+	| marker tx objectsPath bytes position record tracker finding |
+	marker := 'SOILNOISE' asByteArray.
+	tx := soil newTransaction.
+	tx root: (SoilTestNestedObject new label: marker, #[ 1 5 160 141 6 ], (ByteArray new: 16)).
+	tx commit.
+	self commitSampleGraph.
+	objectsPath := ((soil objectRepository segmentAt: 1) instVarNamed: #objectFile) path.
+	bytes := objectsPath binaryReadStreamDo: [ :in | in upToEnd ].
+	position := (bytes indexOfSubCollection: marker startingAt: 1) - 1 + marker size.
+	record := self recordWithTwoVersions copy.
+	self assert: position < record position.
+	record previousVersionPosition: position.
+	tracker := SoilDatabaseConsistencyTracker new.
+	tracker trackCluster: record in: (SoilTrackingVisitor new soil: soil; yourself).
+	self assert: tracker findings size equals: 1.
+	finding := tracker findings first.
+	self assert: finding class equals: SoilBrokenVersionChain.
+	self assert: finding position equals: record position.
+	self assert: (finding reason includesSubstring: '100000 behavior descriptions cannot be in')
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAPreviousVersionThatRunsIntoTheRecordAfterItIsNamedOnce [
 	"in the accounts database a record's previous version pointed 23 bytes into a record
 	a second writer had written over. The bytes there read as a head with a small version
