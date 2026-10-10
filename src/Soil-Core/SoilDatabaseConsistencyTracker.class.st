@@ -5,6 +5,7 @@ Class {
 	#name : #SoilDatabaseConsistencyTracker,
 	#superclass : #SoilConsistencyTracker,
 	#instVars : [
+		'absentDescriptions',
 		'lastIndexes',
 		'missingDescriptions',
 		'presentDescriptions'
@@ -16,6 +17,13 @@ Class {
 SoilDatabaseConsistencyTracker >> presentDescriptions [
 	"the indexes of the behavior descriptions that were looked up and are there"
 	^ presentDescriptions
+]
+
+{ #category : #checking }
+SoilDatabaseConsistencyTracker >> absentDescriptionsOf: aVersion in: aVisitor [
+	"the behavior descriptions aVersion refers to that are not an object in the meta segment"
+	^ aVersion behaviorDescriptions reject: [ :versioned | 
+		self hasDescription: versioned in: aVisitor ]
 ]
 
 { #category : #checking }
@@ -38,22 +46,14 @@ SoilDatabaseConsistencyTracker >> checkDescriptionsOfVersion: aVersion reference
 	Looked up once for each description, found or not. A chain of a million versions
 	refers to a handful of descriptions a million times, and every look-up is a read in the
 	index file of the meta segment: that was the better part of an hour for one object"
-	aVersion behaviorDescriptions do: [ :versioned | | missing |
-		(versioned index = 2 or: [ 
-			(presentDescriptions includes: versioned index) or: [ 
-				missingDescriptions includes: versioned index ] ]) ifFalse: [
-			missing := ([ (aVisitor soil objectRepository segmentAt: 0) 
-				basicAt: versioned index 
-				ifAbsent: [ nil ] ] on: Error do: [ nil ]) isNil.
-			missing 
-				ifTrue: [ 
-					missingDescriptions add: versioned index.
-					self report: (SoilMissingBehaviorDescription 
-						objectId: aSoilObjectId 
-						descriptionId: versioned asSoilObjectId
-						version: versioned version 
-						reason: 'there is no such object in the meta segment') ]
-				ifFalse: [ presentDescriptions add: versioned index ] ] ]
+	(self absentDescriptionsOf: aVersion in: aVisitor) do: [ :versioned |
+		(missingDescriptions includes: versioned index) ifFalse: [ 
+			missingDescriptions add: versioned index.
+			self report: (SoilMissingBehaviorDescription 
+				objectId: aSoilObjectId 
+				descriptionId: versioned asSoilObjectId
+				version: versioned version 
+				reason: 'there is no such object in the meta segment') ] ]
 ]
 
 { #category : #checking }
@@ -167,10 +167,29 @@ SoilDatabaseConsistencyTracker >> hasBrokenChainIn: anIndex segment: aSoilObject
 			each segment = aSoilObjectSegment id and: [ each indexId = anIndex id ] ] ]
 ]
 
+{ #category : #testing }
+SoilDatabaseConsistencyTracker >> hasDescription: aVersionedId in: aVisitor [
+	"whether the meta segment has the object, looked up once for each description whether
+	it is there or not"
+	aVersionedId index = 2 ifTrue: [ ^ true ].
+	(presentDescriptions includes: aVersionedId index) ifTrue: [ ^ true ].
+	(absentDescriptions includes: aVersionedId index) ifTrue: [ ^ false ].
+	([ (aVisitor soil objectRepository segmentAt: 0) 
+		basicAt: aVersionedId index 
+		ifAbsent: [ nil ] ] on: Error do: [ nil ])
+			ifNil: [ 
+				absentDescriptions add: aVersionedId index.
+				^ false ]
+			ifNotNil: [ 
+				presentDescriptions add: aVersionedId index.
+				^ true ]
+]
+
 { #category : #initialization }
 SoilDatabaseConsistencyTracker >> initialize [ 
 	super initialize.
 	lastIndexes := Dictionary new.
+	absentDescriptions := Set new.
 	missingDescriptions := Set new.
 	presentDescriptions := Set new
 ]
@@ -216,8 +235,17 @@ SoilDatabaseConsistencyTracker >> trackCluster: aSoilPersistentClusterVersion in
 	"the chain of versions of the object, and the behavior descriptions of every version
 	in it - the current one is not the only one a reader can meet. One version at a time:
 	an object written at every commit has a chain of a million records, which as a
-	collection took more than the two gigabytes the scheduler runs in"
-	self check: aSoilPersistentClusterVersion objectId using: [
+	collection took more than the two gigabytes the scheduler runs in.
+
+	A record is written after the descriptions it refers to. A previous version that refers
+	to one that is not there is what is left of a record another one was written over: in
+	65bba342 a record of 1:78052 lay over the first versions of 1:78057 and 1:78059, and
+	their chains led into it, to heads with small versions that passed the order check. Taken
+	as versions, their descriptions were named as missing and the chain was cut behind them,
+	so that they stayed. They end the chain instead, and the cut is at the last record that
+	is one. The current version has nothing after it to be cut at, and what it refers to is
+	named as it is"
+	self check: aSoilPersistentClusterVersion objectId using: [ | later |
 		self 
 			versionsOf: aSoilPersistentClusterVersion 
 			in: aVisitor 
@@ -227,10 +255,17 @@ SoilDatabaseConsistencyTracker >> trackCluster: aSoilPersistentClusterVersion in
 					position: position 
 					reason: reason) ]
 			do: [ :version |
+				later ifNotNil: [ 
+					(self absentDescriptionsOf: version in: aVisitor) ifNotEmpty: [ :absent |
+						^ self report: (SoilBrokenVersionChain 
+							objectId: aSoilPersistentClusterVersion objectId 
+							position: later position 
+							reason: 'previous version ', version version printString, ' at position ', version position printString, ' refers to behavior descriptions that are not there: ', (absent collect: [ :each | each index printString ]) asArray printString) ] ].
 				self 
 					checkDescriptionsOfVersion: version 
 					referencedBy: aSoilPersistentClusterVersion objectId 
-					in: aVisitor ] ]
+					in: aVisitor.
+				later := version ] ]
 ]
 
 { #category : #tracking }
