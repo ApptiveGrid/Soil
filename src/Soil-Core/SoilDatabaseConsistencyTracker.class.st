@@ -57,6 +57,19 @@ SoilDatabaseConsistencyTracker >> checkDescriptionsOfVersion: aVersion reference
 ]
 
 { #category : #checking }
+SoilDatabaseConsistencyTracker >> checkHeaderOf: anIndex segment: aSoilObjectSegment [
+	"the version of the header page is read before anything else in it, so it is right
+	where the rest is not"
+	| header |
+	header := anIndex headerPage.
+	header version < header latestVersion ifTrue: [ 
+		self report: (SoilOutdatedIndexHeader 
+			segment: aSoilObjectSegment id 
+			indexId: anIndex id 
+			version: header version) ]
+]
+
+{ #category : #checking }
 SoilDatabaseConsistencyTracker >> checkLinksOf: anIndex segment: aSoilObjectSegment [
 	"The data pages of a skip list are chained on every level: the right pointer of a
 	page leads to a page whose left pointer leads back, and the left pointer of the
@@ -162,8 +175,10 @@ SoilDatabaseConsistencyTracker >> faultsOfLinksOf: anIndex level: anInteger [
 
 { #category : #testing }
 SoilDatabaseConsistencyTracker >> hasBrokenChainIn: anIndex segment: aSoilObjectSegment [
+	"a header in a format that is no longer read leaves the pages as unreadable as a broken
+	chain: its level is read from the wrong bytes"
 	^ findings anySatisfy: [ :each | 
-		each class = SoilBrokenPageLink and: [ 
+		(each class = SoilBrokenPageLink or: [ each class = SoilOutdatedIndexHeader ]) and: [ 
 			each segment = aSoilObjectSegment id and: [ each indexId = anIndex id ] ] ]
 ]
 
@@ -270,8 +285,14 @@ SoilDatabaseConsistencyTracker >> trackCluster: aSoilPersistentClusterVersion in
 
 { #category : #tracking }
 SoilDatabaseConsistencyTracker >> trackIndex: anIndex segment: aSoilObjectSegment in: aVisitor [
+	"a header that is no longer read says nothing about the links, the pages or the size
+	that could be believed, so it is the one finding about the index"
 	| before |
 	before := findings size.
+	self 
+		check: anIndex 
+		using: [ self checkHeaderOf: anIndex segment: aSoilObjectSegment ].
+	findings size > before ifTrue: [ ^ self ].
 	self 
 		check: anIndex 
 		using: [ self checkLinksOf: anIndex segment: aSoilObjectSegment ].
