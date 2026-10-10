@@ -549,6 +549,88 @@ SoilTrackingVisitorTest >> testACutOfABrokenVersionChainMakesTheObjectReadableAg
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testAChainThatLeadsIntoARecordWrittenOverItIsCutAtItsLastRecord [
+	"in 65bba342 a commit that overlapped three others wrote a record of 1:78052 over the
+	first versions of 1:78057, 1:78058 and 1:78059. Two of their chains led into it, to
+	heads with small versions that passed the order check and descriptions that are not
+	there: the check offered the cut behind them, and what they named stayed"
+	| tx ids segment clusters leftover carrier carrierPosition payloadStart leftoverPositions lastRecords tracker brokenChains repair |
+	"two objects with three versions each"
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new 
+		nested: (SoilTestNestedObject new 
+			label: #one;
+			reference: (SoilTestNestedObject new label: #one; yourself);
+			yourself);
+		yourself).
+	tx makeRoot: tx root nested.
+	tx makeRoot: tx root nested reference.
+	tx commit.
+	#( #two #three ) do: [ :label |
+		tx := soil newTransaction.
+		tx root nested label: label.
+		tx root nested reference label: label.
+		tx markDirty: tx root nested.
+		tx markDirty: tx root nested reference.
+		tx commit ].
+	tx := soil newTransaction.
+	ids := { 
+		(tx objectIdOf: tx root) index.
+		(tx objectIdOf: tx root nested) index. 
+		(tx objectIdOf: tx root nested reference) index }.
+	tx abort.
+	segment := soil objectRepository segmentAt: 1.
+	clusters := ids allButFirst collect: [ :index | segment basicAt: index ifAbsent: [ nil ] ].
+	"what is left of a first version under the record written over it: a head of version 1
+	that names a description that is not there and leads on beyond the file"
+	leftover := [ :descriptionIndex | 
+		SoilPersistentClusterVersion new
+			version: 1;
+			previousVersionPosition: 100000000;
+			behaviorDescriptions: { (SoilVersionedObjectId segment: 0 index: descriptionIndex) version: 1; yourself };
+			bytes: (ByteArray new: 8);
+			serialize ].
+	"the record of a third object, the root, with the two heads in its payload"
+	carrier := (segment basicAt: ids first ifAbsent: [ nil ]) copy
+		bytes: (ByteArray new: 16), (leftover value: 9998), (ByteArray new: 16), (leftover value: 9999);
+		yourself.
+	carrierPosition := segment at: ids first putBytes: carrier serialize.
+	payloadStart := carrierPosition + carrier serialize size - carrier bytes size.
+	leftoverPositions := { 
+		payloadStart + 16. 
+		payloadStart + 16 + (leftover value: 9998) size + 16 }.
+	"each object: its current version, and before it a real record whose link leads into
+	the record of the third object"
+	lastRecords := clusters withIndexCollect: [ :cluster :n | | previous position |
+		previous := segment recordAtPosition: cluster previousVersionPosition.
+		position := segment at: cluster objectId index putBytes: (previous copy
+			previousVersionPosition: (leftoverPositions at: n);
+			serialize).
+		segment at: cluster objectId index putBytes: (cluster copy
+			previousVersionPosition: position;
+			serialize).
+		position ].
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	brokenChains := tracker findings select: [ :each | each class = SoilBrokenVersionChain ].
+	self 
+		assert: (brokenChains collect: [ :each | each position ]) asSet 
+		equals: lastRecords asSet.
+	self assert: (tracker findings noneSatisfy: [ :each | each class = SoilMissingBehaviorDescription ]).
+	repair := (SoilRepairVisitor on: soil)
+		repair: (brokenChains collect: [ :each | SoilRepairAction fromDictionary: each repairActions first asDictionary ]);
+		yourself.
+	self assert: repair failed isEmpty.
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	self assert: tracker findings isEmpty
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAnIndexWhoseSizeHasDriftedIsNamed [
 	"named with what a repair needs to find it again: the segment and the index id"
 	| tx indexId index visitor tracker finding |

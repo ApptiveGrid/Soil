@@ -1,5 +1,5 @@
 "
-The chain of versions of an object that cannot be followed to its end: a previous version that cannot be read, versions that do not go down, or a chain that returns to a position it has been at. The position is that of the last record that is fine, the one whose link to its previous version cannot be followed. The one repair there is cuts the chain there (SoilCutVersionChain): the older versions are given up, and that is why it is not a default.
+The chain of versions of an object that cannot be followed to its end: a previous version that cannot be read, versions that do not go down, a chain that returns to a position it has been at, or a previous version that is what is left of a record another one was written over. The position is that of the last record that is fine, the one whose link to its previous version cannot be followed. The one repair there is cuts the chain there (SoilCutVersionChain): the older versions are given up, and that is why it is not a default.
 "
 Class {
 	#name : #SoilBrokenVersionChain,
