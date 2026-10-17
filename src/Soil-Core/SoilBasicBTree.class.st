@@ -128,6 +128,7 @@ SoilBasicBTree >> newIndexPageFromRoot: rootIndexPage [
 	| newPage |
 	newPage := self newIndexPage.
 	self store pageAt: newPage offset put: newPage.
+	self addDirtyPage: newPage.
 	"now move over all items"
 	newPage setItems: rootIndexPage items.
 	rootIndexPage setItems: OrderedCollection new.

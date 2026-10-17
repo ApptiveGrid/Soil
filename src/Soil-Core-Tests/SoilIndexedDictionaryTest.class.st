@@ -1554,6 +1554,28 @@ SoilIndexedDictionaryTest >> testSize [
 ]
 
 { #category : #tests }
+SoilIndexedDictionaryTest >> testTheEntriesAreStillThereAfterAReopenOnceTheRootIndexPageHasSplit [
+	"once the root index page of a BTree is full, SoilBasicBTree>>#newIndexPageFromRoot:
+	moves its entries to a new page that it never marked for writing. A commit writes
+	the dirty pages only, so the new page stayed a page of zeros on disk, and after a
+	reopen the root led to a page without a class. In the same image the page was
+	served from the cache, which is why nothing noticed. A key of 1016 bytes fills the
+	root index page after a dozen entries; the skip list has no index pages"
+	| tx |
+	dict keySize: 1016.
+	tx := soil newTransaction.
+	tx root: dict.
+	1 to: 12 do: [ :i | dict at: i printString put: i ].
+	tx commit.
+	self reopen.
+
+	tx := soil newTransaction.
+	[ 1 to: 12 do: [ :i | self assert: (tx root at: i printString) equals: i ].
+	  self assert: tx root size equals: 12 ]
+		ensure: [ tx abort ]
+]
+
+{ #category : #tests }
 SoilIndexedDictionaryTest >> testValues [
 	| tx tx2 |
 	tx := soil newTransaction.
