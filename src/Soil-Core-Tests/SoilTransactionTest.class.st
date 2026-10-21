@@ -30,6 +30,53 @@ SoilTransactionTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilTransactionTest >> testARecordThatCannotBeReadIsSaidAsSoils [
+	"a read that runs off the end of its file used to answer 'receiver of < is nil' to
+	whoever touched the proxy. Now it says which record, and that it was the store"
+
+	| tx id error |
+	tx := soil newTransaction.
+	tx root: (SoilTestGraphRoot new
+		nested: (SoilTestNestedObject new label: #gone; yourself);
+		yourself).
+	tx makeRoot: tx root nested.
+	tx commit.
+	id := SoilObjectId segment: 1 index: 2.
+	((soil objectRepository segmentAt: 1) instVarNamed: #indexFile)
+		at: 2
+		putPosition: 100000000000.
+
+	tx := soil newTransaction.
+	error := [ tx objectWithId: id. nil ]
+		on: SoilUnreadableRecord
+		do: [ :each | each ].
+	tx abort.
+	self assert: error notNil.
+	self assert: error objectId equals: id.
+	self assert: error position equals: 100000000000.
+	self assert: (error messageText includesSubstring: 'cannot be read')
+]
+
+{ #category : #tests }
+SoilTransactionTest >> testWhatSoilSaysOnAReadPassesAsItIs [
+	"an object id that was never handed out is answered by Soil itself, and that answer
+	is not turned into an unreadable record. Nor is a layout that cannot be migrated: see
+	SoilMigrationTest, which waits for SoilLayoutMigrationError"
+
+	| tx error |
+	tx := soil newTransaction.
+	tx root: Object new.
+	tx commit.
+
+	tx := soil newTransaction.
+	error := [ tx objectWithId: (SoilObjectId segment: 1 index: 0). nil ]
+		on: SoilError
+		do: [ :each | each ].
+	tx abort.
+	self assert: error class equals: SoilIndexOutOfRange
+]
+
+{ #category : #tests }
 SoilTransactionTest >> testAddSameObjectIdTwice [
 	| tx |
 	tx := SoilTransaction new.

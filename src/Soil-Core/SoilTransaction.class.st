@@ -707,9 +707,8 @@ SoilTransaction >> objectWithId: objectId [
 		at: objectId
 		ifPresent: [ :record | ^ record object ].
 
-	^ (self recordWithId: objectId)
+	^ (self readRecordWithId: objectId)
 		ifNotNil: [ :record |
-			self materializeRecord: record.
 			idMap at: objectId put: record.
 			objectMap at: record object put: record.
 			record object
@@ -736,6 +735,33 @@ SoilTransaction >> readVersion [
 { #category : #accessing }
 SoilTransaction >> readVersion: anInteger [ 
 	readVersion := anInteger
+]
+
+{ #category : #private }
+SoilTransaction >> readRecordWithId: objectId [
+	"the record of objectId at my read version, materialized, or nil when there is none.
+
+	A read or a materialization that fails with an error that is not Soil's is said as
+	Soil's: SoilUnreadableRecord, naming the object, the position and the size of the
+	file. Without that, a record that runs off the end of its file says 'receiver of < is
+	nil' to whoever touched a proxy, and nothing tells them it was the store and not
+	their own code -- a queue gives work up on the one and comes back for the other.
+
+	What Soil says itself passes as it is: a SoilError, and a SoilSerializerError of the
+	serializer below -- a layout that cannot be migrated is that, and whoever reads may be
+	waiting for exactly it"
+
+	^ [ (self recordWithId: objectId)
+		ifNotNil: [ :record | self materializeRecord: record ] ]
+		on: Error - SoilError - SoilSerializerError
+		do: [ :error |
+			(SoilUnreadableRecord
+				objectId: objectId
+				version: readVersion
+				in: ([ self objectRepository segmentAt: objectId segment ]
+					on: Error
+					do: [ nil ])
+				reason: error) signal ]
 ]
 
 { #category : #api }

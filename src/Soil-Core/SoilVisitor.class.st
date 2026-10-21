@@ -79,13 +79,11 @@ SoilVisitor >> recordAt: aSoilObjectId [
 		on: Error
 		do: [ :error |
 			(error isKindOf: SoilError) ifTrue: [ error pass ].
-			SoilUnreadableRecord new
-				objectId: aSoilObjectId;
-				version: self databaseVersion;
-				position: ([ segment heapPositionAt: aSoilObjectId index ] on: Error do: [ nil ]);
-				fileSize: ([ (segment instVarNamed: #objectFile) size ] on: Error do: [ nil ]);
-				reason: (error messageText ifNil: [ error class name ]);
-				signal ]
+			(SoilUnreadableRecord
+				objectId: aSoilObjectId
+				version: self databaseVersion
+				in: segment
+				reason: error) signal ]
 ]
 
 { #category : #accessing }

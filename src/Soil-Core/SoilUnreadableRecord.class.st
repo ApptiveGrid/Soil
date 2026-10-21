@@ -1,3 +1,16 @@
+"
+A record that cannot be read, with what tells one that is not there from one that is
+damaged: the object, the version it was read at, where it was looked for and how long
+the file was.
+
+Soil says this whenever reading or materializing a record fails with an error that is
+not its own -- a read that ran off the end of its file and answered 'receiver of < is
+nil', a record whose position does not match, a class that is gone. Whoever reads through
+a transaction can then tell a failure of the store from a failure of their own. What
+Soil says itself it keeps saying: a SoilError, and a SoilSerializerError of the
+serializer, which lies below the core and so cannot be a SoilError -- a layout that
+cannot be migrated, say.
+"
 Class {
 	#name : #SoilUnreadableRecord,
 	#superclass : #SoilError,
@@ -10,6 +23,21 @@ Class {
 	],
 	#category : #'Soil-Core-Error'
 }
+
+{ #category : #'instance creation' }
+SoilUnreadableRecord class >> objectId: aSoilObjectId version: anInteger in: aSegment reason: anError [
+	"the record of aSoilObjectId could not be read at version anInteger from aSegment, and
+	anError is what the read said. Position and file size are asked guardedly: the segment
+	that could not be read may not answer them either, and nil is an answer too"
+
+	^ self new
+		objectId: aSoilObjectId;
+		version: anInteger;
+		position: ([ aSegment heapPositionAt: aSoilObjectId index ] on: Error do: [ nil ]);
+		fileSize: ([ (aSegment instVarNamed: #objectFile) size ] on: Error do: [ nil ]);
+		reason: (anError messageText ifNil: [ anError class name ]);
+		yourself
+]
 
 { #category : #accessing }
 SoilUnreadableRecord >> fileSize [
