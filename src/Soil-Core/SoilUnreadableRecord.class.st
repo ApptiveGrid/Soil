@@ -1,13 +1,18 @@
 "
-A record that cannot be read, with what tells one that is not there from one that is
-damaged: the object, the version it was read at, where it was looked for and how long
-the file was.
+A record that cannot be read: the object, the version it was read at, where it was
+looked for and how long the file was -- which tells one that is not there from one that
+is there and cannot be read.
 
-Soil says this whenever reading or materializing a record fails with an error that is
-not its own -- a read that ran off the end of its file and answered 'receiver of < is
-nil', a record whose position does not match, a class that is gone. Whoever reads through
-a transaction can then tell a failure of the store from a failure of their own. What
-Soil says itself it keeps saying: a SoilError, and a SoilSerializerError of the
+Said when a transaction reads an object (SoilTransaction>>#objectWithId:, the read every
+proxy goes through) or a visitor reads a record, and that fails with an error that is
+not Soil's own -- a read that ran off the end of its file and answered 'receiver of < is
+nil', a record whose position does not match, a class that is gone. Whoever reads an
+object can then tell a failure of the store from a failure of their own code. Their own
+materialization hooks (#soilMaterialized: and the like) run inside the read, so an error
+in one of those is said as the store's too. Other reads -- #latestObjectWithId: for
+behavior descriptions, the read before a new version is written -- are not covered.
+
+What Soil says itself it keeps saying: a SoilError, and a SoilSerializerError of the
 serializer, which lies below the core and so cannot be a SoilError -- a layout that
 cannot be migrated, say.
 "
@@ -43,7 +48,8 @@ SoilUnreadableRecord class >> objectId: aSoilObjectId version: anInteger in: aSe
 SoilUnreadableRecord >> fileSize [
 	"how long the file of the segment was when the record could not be read, nil where
 	that could not be asked: a position at or beyond it is a record that is not there,
-	and one inside it is a record that is damaged"
+	and one inside it is a record that is there and could not be read or materialized --
+	damaged, or written by code that is not loaded"
 	^ fileSize
 ]
 

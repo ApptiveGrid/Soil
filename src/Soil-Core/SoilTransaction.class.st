@@ -745,7 +745,9 @@ SoilTransaction >> readRecordWithId: objectId [
 	Soil's: SoilUnreadableRecord, naming the object, the position and the size of the
 	file. Without that, a record that runs off the end of its file says 'receiver of < is
 	nil' to whoever touched a proxy, and nothing tells them it was the store and not
-	their own code -- a queue gives work up on the one and comes back for the other.
+	their own code -- a queue gives work up on a failure of its own code and comes back
+	for one of the store. The record named is the one asked for: a failure deeper in its
+	materialization, in the behavior description of its class, say, is said under it.
 
 	What Soil says itself passes as it is: a SoilError, and a SoilSerializerError of the
 	serializer below -- a layout that cannot be migrated is that, and whoever reads may be
