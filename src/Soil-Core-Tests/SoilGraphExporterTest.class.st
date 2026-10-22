@@ -1460,6 +1460,100 @@ SoilGraphExporterTest >> testImportOfALiveShapeBecomesTheNextVersionInTheTarget 
 	targetTx abort
 ]
 
+{ #category : #private }
+SoilGraphExporterTest >> importTheNextShapeOverALaterCommit [
+	"what a space import did to 69fdb5e3: the target wrote the first shape of a class at a
+	commit after others, the class moved on in the image, and the import brought the new
+	shape. The importer writes it as the next version of the description under its own
+	number, 2, and the version before it carries the number of its commit, which is
+	higher. Answers the id of the description"
+	| tx bytes exportTx targetTx descriptionId chain |
+	targetSoil := Soil createOnPath: self targetPath.
+	#( #first #second ) do: [ :label |
+		tx := targetSoil newTransaction.
+		tx root: (SoilTestNestedObject new label: label; yourself).
+		tx commit ].
+	tx := targetSoil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 'native-one';
+		instVarNamed: #two put: 'native-two';
+		instVarNamed: #three put: 'native-three';
+		yourself).
+	tx commit.
+
+	migrationClass := (SoilBaseTestObject << #SOGraphExportMigrationObject
+		layout: FixedLayout;
+		slots: { #one. #three. #two };
+		package: self class package name) install.
+	tx := soil newTransaction.
+	tx root: (migrationClass new
+		instVarNamed: #one put: 1;
+		instVarNamed: #two put: 2;
+		instVarNamed: #three put: 3;
+		yourself).
+	tx commit.
+	exportTx := soil newTransaction.
+	bytes := ByteArray streamContents: [ :stream |
+		(SoilGraphExporter new
+			transaction: exportTx;
+			addObject: exportTx root;
+			yourself)
+				stream: stream;
+				export ].
+	exportTx abort.
+
+	targetTx := targetSoil newTransaction.
+	(SoilGraphImporter new
+		transaction: targetTx;
+		stream: bytes readStream;
+		yourself) import.
+	targetTx commit.
+
+	descriptionId := targetSoil behaviorRegistry
+		nameAt: migrationClass soilBehaviorIdentifier
+		ifAbsent: [ nil ].
+	chain := targetSoil objectRepository metaSegment allVersionsAt: descriptionId index.
+	self assert: chain size equals: 2.
+	self assert: chain first version < chain last version.
+	^ descriptionId
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testAnImportedNextShapeIsNoBrokenVersionChain [
+	"in 69fdb5e3 the check took the chain of a description an import had extended for
+	broken, because the version before it carries the higher record version, and offered
+	to cut it. In the meta segment the record version does not order a chain"
+	| tracker |
+	self importTheNextShapeOverALaterCommit.
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: targetSoil.
+	self assert: (tracker findings noneSatisfy: [ :each | each class = SoilBrokenVersionChain ])
+]
+
+{ #category : #tests }
+SoilGraphExporterTest >> testACutOfAnImportedDescriptionChainIsRefused [
+	"the cut the check offered for 69fdb5e3, chosen after all - a finding keeps the actions
+	it offered, in the metabase for one. Objects name a version of a description by its
+	number: cut after version 2, the object written with version 1 could not be read"
+	| descriptionId segment repair tx |
+	descriptionId := self importTheNextShapeOverALaterCommit.
+	segment := targetSoil objectRepository metaSegment.
+	repair := (SoilRepairVisitor on: targetSoil)
+		repair: { SoilCutVersionChain
+			segment: 0
+			index: descriptionId index
+			position: (segment allVersionsAt: descriptionId index) first position };
+		yourself.
+	self assert: repair repaired isEmpty.
+	self assert: repair failed size equals: 1.
+	self assert: (segment allVersionsAt: descriptionId index) size equals: 2.
+	tx := targetSoil newTransaction.
+	self assert: (tx root instVarNamed: #two) equals: 'native-two'.
+	tx abort
+]
+
 { #category : #tests }
 SoilGraphExporterTest >> testImportedBehaviorSurvivesCloseAndReopenEvenWithoutOtherChanges [
 	"SoilGraphImporter writes behavior descriptions and object data directly to the

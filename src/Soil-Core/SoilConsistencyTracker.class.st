@@ -34,7 +34,13 @@ SoilConsistencyTracker >> versionsOf: aCluster in: aVisitor onFault: aBlock do: 
 	A record is written behind the ones before it, so a previous version ends where the
 	record after it starts at the latest. One that starts before it and runs on into it
 	is not a record but bytes that read as one - a link into the middle of a record, say -
-	and what such a head names, its descriptions above all, is noise"
+	and what such a head names, its descriptions above all, is noise.
+	The meta segment is the exception to the order: there the record version says from
+	which version of the database on a behavior description is seen, not where it stands
+	in its chain. An import writes the next version of a description under its own
+	number (SoilBehaviorRegistry>>addNewVersion:withId:transaction:), and the version
+	before it carries the number of the commit that wrote it - in 69fdb5e3 version 2 lay
+	on version 5. A chain there is ordered by the versions of the descriptions"
 	| segment current positions |
 	segment := aVisitor soil objectRepository segmentAt: aCluster segment.
 	positions := Set with: aCluster position.
@@ -56,7 +62,7 @@ SoilConsistencyTracker >> versionsOf: aCluster in: aVisitor onFault: aBlock do: 
 				^ aBlock value: current position value: 'previous version at position ', position printString, ' cannot be read: ', error messageText asString ].
 		(position < current position and: [ position + previous length > current position ]) ifTrue: [ 
 			^ aBlock value: current position value: 'previous version ', previous version printString, ' at position ', position printString, ' overlaps the record at ', current position printString ].
-		previous version < current version ifFalse: [ 
+		(segment isMeta or: [ previous version < current version ]) ifFalse: [
 			^ aBlock value: current position value: 'previous version ', previous version printString, ' at position ', position printString, ' does not come before version ', current version printString ].
 		eachBlock value: previous.
 		current := previous ]
