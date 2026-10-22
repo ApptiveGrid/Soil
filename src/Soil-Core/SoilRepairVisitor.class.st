@@ -58,9 +58,14 @@ SoilRepairVisitor >> soil: aSoil [
 SoilRepairVisitor >> visitCutVersionChain: aRepairAction [
 	"the versions from the newest down to the record the action names, as they lie in
 	the file, written again as a chain that ends there. A chain that does not lead to
-	that record any more - it was cut or changed since the check - is not touched"
+	that record any more - it was cut or changed since the check - is not touched.
+	Nor is a chain of the meta segment: a finding there offers no cut (see
+	SoilBrokenVersionChain>>repairActions), but one offered before that is kept with its
+	finding, in the metabase for one, and can still be chosen"
 	| segment record kept positions |
 	segment := soil objectRepository segmentAt: aRepairAction segment.
+	segment isMeta ifTrue: [
+		^ Error signal: 'the version chain of a behavior description is not cut: objects name its versions by number' ].
 	record := (segment basicAt: aRepairAction index) objectId: (SoilObjectId segment: aRepairAction segment index: aRepairAction index); yourself.
 	kept := OrderedCollection with: record.
 	positions := Set with: record position.

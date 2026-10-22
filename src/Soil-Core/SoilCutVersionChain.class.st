@@ -2,6 +2,8 @@
 Cuts the chain of versions of an object after a record, so that the versions before it are no longer reached: the record that is fine is made the oldest version the object has. It is the way out of a chain that cannot be followed (SoilBrokenVersionChain), and it gives the older versions up - a reader at a version that only they can answer finds no version at all. That is why it is not a default.
 
 The records that stay are written again as a chain of their own, newest last, and the index points at the new newest one; the old records are left where they are for the garbage collection to take.
+
+Never in the meta segment (SoilRepairVisitor>>visitCutVersionChain:): objects name a version of a behavior description by its number, so a cut there takes versions away that objects are written with.
 "
 Class {
 	#name : #SoilCutVersionChain,

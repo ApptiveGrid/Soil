@@ -543,6 +543,31 @@ SoilTrackingVisitorTest >> testAVersionThatDoesNotComeBeforeTheNextIsNamed [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testABrokenChainOfABehaviorDescriptionOffersNoCut [
+	"a link from a description to its previous version that cannot be followed is named as
+	in any other segment, but no cut is offered: objects name a version of a description
+	by its number, and what a cut gives up are versions they may be written with"
+	| segment descriptionId record tracker finding |
+	self commitSampleGraph.
+	segment := soil objectRepository metaSegment.
+	descriptionId := soil behaviorRegistry
+		nameAt: SoilTestNestedObject soilBehaviorIdentifier
+		ifAbsent: [ nil ].
+	record := segment basicAt: descriptionId index ifAbsent: [ nil ].
+	segment at: descriptionId index putBytes: (record copy
+		previousVersionPosition: 100000000;
+		serialize).
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	finding := tracker findings detect: [ :each | each class = SoilBrokenVersionChain ].
+	self assert: finding objectId segment equals: 0.
+	self assert: finding objectId index equals: descriptionId index.
+	self assert: finding repairActions isEmpty
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testACutOfABrokenVersionChainMakesTheObjectReadableAgain [
 	| segment broken tracker finding repair index versionsBefore |
 	self commitSampleGraph.

@@ -1,5 +1,5 @@
 "
-The chain of versions of an object that cannot be followed to its end: a previous version that cannot be read, versions that do not go down, a chain that returns to a position it has been at, or a previous version that is what is left of a record another one was written over. The position is that of the last record that is fine, the one whose link to its previous version cannot be followed. The one repair there is cuts the chain there (SoilCutVersionChain): the older versions are given up, and that is why it is not a default.
+The chain of versions of an object that cannot be followed to its end: a previous version that cannot be read, versions that do not go down, a chain that returns to a position it has been at, or a previous version that is what is left of a record another one was written over. The position is that of the last record that is fine, the one whose link to its previous version cannot be followed. The one repair there is cuts the chain there (SoilCutVersionChain): the older versions are given up, and that is why it is not a default. In the meta segment there is none, see #repairActions.
 "
 Class {
 	#name : #SoilBrokenVersionChain,
@@ -62,5 +62,11 @@ SoilBrokenVersionChain >> reason [
 
 { #category : #repairing }
 SoilBrokenVersionChain >> repairActions [
+	"none in the meta segment. Objects name a version of a behavior description by its
+	number, not by where it lies, so what a cut gives up there are versions objects are
+	written with - after the cut in 69fdb5e3 nineteen objects could not be read. And it
+	makes nothing readable that was not before: a version that cannot be reached is not
+	reached after the cut either"
+	objectId isMeta ifTrue: [ ^ #() ].
 	^ { SoilCutVersionChain segment: objectId segment index: objectId index position: position }
 ]
