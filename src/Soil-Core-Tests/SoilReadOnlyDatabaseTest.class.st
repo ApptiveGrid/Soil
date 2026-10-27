@@ -253,11 +253,60 @@ SoilReadOnlyDatabaseTest >> testDamagedDatabaseSignalsRatherThanWriting [
 ]
 
 { #category : #tests }
+SoilReadOnlyDatabaseTest >> testAReaderOpensPastACommitThatIsNotCheckpointed [
+	"entries past the last checkpoint are what a writer leaves between its journal and its
+	checkpoint, on every commit. A reader cannot tell that from a writer that broke off, and
+	refusing them failed the open of a database being written whenever it came in between.
+	The reader opens, writes nothing, and reads the database as it is on disk"
+
+	| before txn |
+	self writeSecondTransactionWithoutItsCheckpoint.
+	soil close.
+	before := self fileSizes.
+	readOnly := Soil path: 'soil-tests'.
+	readOnly readOnly: true.
+	readOnly open.
+	txn := readOnly newReadOnlyTransaction.
+	self assert: txn root equals: (OrderedCollection with: #first with: #second with: #third).
+	txn abort.
+	self assert: self fileSizes equals: before
+]
+
+{ #category : #tests }
+SoilReadOnlyDatabaseTest >> testTheCheckLetsAHealthyDatabasePass [
+
+	soil close.
+	readOnly := Soil path: 'soil-tests'.
+	readOnly readOnly: true.
+	readOnly open.
+	self shouldnt: [ readOnly checkForRecovery ] raise: SoilDatabaseNeedsRecovery
+]
+
+{ #category : #tests }
+SoilReadOnlyDatabaseTest >> testTheCheckRefusesWhatTheOpenReadPast [
+	"a reader that must not take an unreplayed journal for the database - a backup would
+	preserve it - asks after the open, and is refused the way the open used to refuse"
+
+	| error |
+	self writeSecondTransactionWithoutItsCheckpoint.
+	soil close.
+	readOnly := Soil path: 'soil-tests'.
+	readOnly readOnly: true.
+	readOnly open.
+	error := [ readOnly checkForRecovery. nil ]
+		on: SoilDatabaseNeedsRecovery
+		do: [ :each | each ].
+	self assert: error notNil.
+	self assert: (error reason includesSubstring: 'past the last checkpoint')
+]
+
+{ #category : #tests }
 SoilReadOnlyDatabaseTest >> testTheRefusalSaysWhyRecoveryIsNeeded [
 	"'needs recovery' alone does not say enough to decide anything. Three different
 	states answer yes - the journal runs past the checkpoint, the checkpoint does not
 	read back, its fragment file is gone - and they call for different repairs, so the
-	one that was found is in the message."
+	one that was found is in the message. #open refuses the last two; the first is
+	refused by Soil>>checkForRecovery"
 
 	| error |
 	self writeSecondTransaction.
@@ -466,4 +515,17 @@ SoilReadOnlyDatabaseTest >> writeSecondTransaction [
 	txn root add: #third.
 	txn markDirty: txn root.
 	txn commit
+]
+
+{ #category : #running }
+SoilReadOnlyDatabaseTest >> writeSecondTransactionWithoutItsCheckpoint [
+	"a second commit that stops where every commit is for a moment, and where a writer
+	that broke off stays: its journal and its heap written, its checkpoint not"
+
+	| txn |
+	txn := soil newTransaction.
+	txn root add: #third.
+	txn markDirty: txn root.
+	txn basicCommit.
+	txn abort
 ]

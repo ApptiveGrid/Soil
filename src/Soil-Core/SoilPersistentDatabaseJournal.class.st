@@ -29,6 +29,14 @@ SoilPersistentDatabaseJournal >> appendEntry: aSoilJournalEntry [
 		
 ]
 
+{ #category : #recover }
+SoilPersistentDatabaseJournal >> checkForRecovery [
+	SoilDatabaseRecovery new
+		soil: soil;
+		journal: self;
+		check
+]
+
 { #category : #'open/close' }
 SoilPersistentDatabaseJournal >> close [
 	currentFragmentFile ifNotNil: [

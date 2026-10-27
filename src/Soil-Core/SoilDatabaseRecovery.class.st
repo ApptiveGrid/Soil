@@ -6,15 +6,36 @@ Class {
 		'journal',
 		'lsn',
 		'replayedTransactions',
-		'reason'
+		'reason',
+		'damaged'
 	],
 	#category : #'Soil-Core-Journal'
 }
+
+{ #category : #api }
+SoilDatabaseRecovery >> check [
+	"what #recover refuses on a database it may not write, asked of any database:
+	signal SoilDatabaseNeedsRecovery when anything is past the last checkpoint. For the
+	reader that must not take an unreplayed journal for the database, see Soil>>checkForRecovery"
+
+	self isNeeded ifTrue: [ self refuse ]
+]
 
 { #category : #private }
 SoilDatabaseRecovery >> count: anInteger of: aNoun [
 	"so that a report says '1 transaction' and not '1 transactions'"
 	^ anInteger printString, ' ', (anInteger = 1 ifTrue: [ aNoun ] ifFalse: [ aNoun, 's' ])
+]
+
+{ #category : #testing }
+SoilDatabaseRecovery >> isDamaged [
+	"whether what #isNeeded found is damage: the fragment file of the last checkpoint is
+	gone, or the checkpoint does not read back. Neither happens in the course of a commit -
+	the checkpoint entry is in the journal before the control file points at it. The third
+	state, entries past the last checkpoint, is what every commit leaves between writing its
+	journal and checkpointing it"
+
+	^ damaged == true
 ]
 
 { #category : #testing }
@@ -25,14 +46,16 @@ SoilDatabaseRecovery >> isNeeded [
 
 	Three different states answer yes, and #reason keeps which one it was - the caller
 	that may not write has to decide what to do about it, and 'needs recovery' alone
-	does not say enough to decide anything."
+	does not say enough to decide anything. Two of them are damage, see #isDamaged."
 
 	| lastCheckpoint fragmentFile |
 	reason := nil.
+	damaged := false.
 	lastCheckpoint := soil control lastCheckpoint.
 	(journal existsFragmentFileForLSN: lastCheckpoint) ifFalse: [
 		reason := 'the fragment file for the last checkpoint ' , lastCheckpoint printString
 			, ' is missing'.
+		damaged := true.
 		^ true ].
 	fragmentFile := journal openFragmentForLSN: lastCheckpoint.
 	^ [ [ SoilJournalEntry readFrom: fragmentFile stream ]
@@ -40,6 +63,7 @@ SoilDatabaseRecovery >> isNeeded [
 			do: [ :error |
 				reason := 'the last checkpoint ' , lastCheckpoint printString
 					, ' does not read back (' , error messageText , ')'.
+				damaged := true.
 				^ true ].
 		fragmentFile atEnd
 			ifTrue: [ false ]
@@ -136,13 +160,21 @@ SoilDatabaseRecovery >> recover [
 	"from here on recovery writes - the heap, the control file, sometimes a fresh
 	fragment file. Refusing here rather than failing inside one of those writes is
 	what lets a database on read-only media be opened at all: the reader learns that
-	the state is not readable as it stands, and can repair a copy it may write to."
+	the state is not readable as it stands, and can repair a copy it may write to.
+
+	Refused is damage only. Entries past the last checkpoint are there for a moment on
+	every commit, between its journal and its checkpoint, and for good when a writer
+	broke off in between; a reader cannot tell the two apart. Refusing them made every
+	read-only open of a database that is being written a bet on the writer's timing.
+	So the reader reads the database as it is on disk - which it does anyway for every
+	commit that comes after its open - and a reader that must not take an unreplayed
+	journal for the database asks with Soil>>checkForRecovery"
 	soil canRecover ifFalse: [
+		self isDamaged ifFalse: [
+			soil emit: 'recovery: ', self reason, ' - read-only, so they are left to a writer'.
+			^ self ].
 		soil emit: 'recovery: needed, but this image may not write to the database'.
-		SoilDatabaseNeedsRecovery new
-			soil: soil;
-			reason: self reason;
-			signal ].
+		self refuse ].
 	"read the log sequence number of the last successful checkpoint from the control 
 	file. A successful checkpoint includes writing the transaction logs to disk, 
 	commit the contents to the heap, write the checkpoint entry"
@@ -210,7 +242,17 @@ SoilDatabaseRecovery >> recover [
 		', checkpointed'
 ]
 
+{ #category : #private }
+SoilDatabaseRecovery >> refuse [
+	"what #isNeeded found, said to a reader that may not have it repaired"
+
+	SoilDatabaseNeedsRecovery new
+		soil: soil;
+		reason: self reason;
+		signal
+]
+
 { #category : #accessing }
-SoilDatabaseRecovery >> soil: aSoil [ 
+SoilDatabaseRecovery >> soil: aSoil [
 	soil := aSoil
 ]
