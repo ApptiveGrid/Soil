@@ -173,6 +173,18 @@ Soil >> canRecover [
 	^ self readOnly not and: [ self path isWritable ]
 ]
 
+{ #category : #testing }
+Soil >> checkForRecovery [
+	"signal SoilDatabaseNeedsRecovery when the journal holds anything a recovery would
+	replay, with what it found as the reason. Opened read-only, #open refuses damage only:
+	entries past the last checkpoint are read past, because a writer leaves them there for
+	a moment on every commit. A reader that must not take such a state for the database -
+	a backup that would preserve it is one - asks here, after #open. Reads only, so it can
+	be asked of a database on read-only media"
+
+	journal checkForRecovery
+]
+
 { #category : #accessing }
 Soil >> checkpoint [
 	| entry checkpointLSN |

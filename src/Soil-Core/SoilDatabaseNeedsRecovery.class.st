@@ -1,13 +1,20 @@
 "
-The database has journal entries past its last checkpoint, so it has to be
-recovered before it can be read - but this image may not write to it, either
-because the Soil instance was opened read-only or because the filesystem
-refuses.
+The database's journal needs recovery before what it says is in the database -
+but this image may not write to it, either because the Soil instance was opened
+read-only or because the filesystem refuses.
 
-Recovery is not optional for a reader. A commit writes the heap and then
-checkpoints, and the two do not become visible atomically, so a database that
-needs recovery can hold half-written object data. Reading it without replaying
-the journal would read that halfway state.
+#open signals me for damage only: the fragment file of the last checkpoint is
+gone, or the checkpoint does not read back. Entries past the last checkpoint are
+not damage. A commit writes its journal, then the heap, then the checkpoint, so
+every commit leaves them for a moment, and a writer that broke off in between
+leaves them for good. A reader cannot tell the two apart, and a reader of a
+database that is being written meets the first all the time - refusing them made
+its open a bet on the writer's timing. Opened read-only, the database is read as
+it is on disk, which may hold the heap of a commit halfway written.
+
+A reader that must not take that for the database asks Soil>>checkForRecovery
+after #open, and gets me for entries past the last checkpoint as well. A backup
+is such a reader: it would preserve the halfway state.
 
 The repair needs write access, and it is the caller's to make - not something
 #open performs behind your back, and not something worth wrapping in a method
