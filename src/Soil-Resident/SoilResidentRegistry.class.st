@@ -41,11 +41,6 @@ SoilResidentRegistry >> descriptionNamed: aSymbol ifAbsent: aBlock [
 ]
 
 { #category : #enumerating }
-SoilResidentRegistry >> descriptions [
-	^ descriptions values asArray
-]
-
-{ #category : #enumerating }
 SoilResidentRegistry >> descriptionsDo: aBlock [
 	descriptions valuesDo: aBlock
 ]
