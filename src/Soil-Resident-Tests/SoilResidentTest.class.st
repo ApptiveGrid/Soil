@@ -191,6 +191,19 @@ SoilResidentTest >> testAWorkspaceWithoutAnIdOfItsOwnIsReachedThroughTheDescript
 ]
 
 { #category : #tests }
+SoilResidentTest >> testADescriptionHasAWorkspaceOnceItIsInitialized [
+	"an embedder that adds a resident to a database that already exists initializes
+	the description on its migration path, and asks this to do it only once"
+	| description txn |
+	description := SoilTestResidentDescription new.
+	self deny: description hasWorkspace.
+	self addResident: description.
+	txn := soil newTransaction.
+	[ self assert: ((soil residentRegistryIn: txn) descriptionNamed: #dummy) hasWorkspace ]
+		ensure: [ txn abort ]
+]
+
+{ #category : #tests }
 SoilResidentTest >> testAddingATakenNameIsRefused [
 	"the resident already here may be started and holding a process; replacing it
 	silently would leave it running and unreachable"
@@ -782,6 +795,18 @@ SoilResidentTest >> testStopAcknowledgedByCooperativeResident [
 	pending := self stop: supervisor within: 5 seconds.
 	self assert: pending isEmpty.
 	self assert: resident isStopped
+]
+
+{ #category : #tests }
+SoilResidentTest >> testStartingTheTickKeepsTheReportInterval [
+	"the embedder that handed the interval in is entitled to check that it arrived"
+	| supervisor |
+	self addResident: SoilTestResidentDescription new.
+	supervisor := self loadedSupervisor.
+	self assert: supervisor reportInterval isNil.
+	supervisor startTickEvery: 10 seconds reportEvery: 1 hour.
+	self assert: supervisor reportInterval equals: 1 hour.
+	supervisor stopTick
 ]
 
 { #category : #tests }

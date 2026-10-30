@@ -3,12 +3,13 @@ The lint rules SoilCleanCodeTest applies to Soil-Core, applied to Soil-Resident:
 its #packageToCheck answers `Soil package`, which is Soil-Core alone, so without
 this the new package would be outside every structural check.
 
-Three of the rules I bring myself. Two because the inherited versions are
+Four of the rules I bring myself. Two because the inherited versions were
 `self skip` -- they carry known violations in Soil-Core that the new package does
-not have, and skipping them here would give up a property that currently holds.
-The third is the one a development image cannot show by itself: everything is
-loaded, so a reference upwards into an embedder resolves here and fails only in
-the build.
+not have, and skipping them here would give up a property that currently holds:
+#testNoUncategorizedMethods and #testNoUnsentMessages. One, that every class has
+a comment, Soil-Core does not ask at all. The fourth is the one a development
+image cannot show by itself: everything is loaded, so a reference upwards into an
+embedder resolves here and fails only in the build.
 "
 Class {
 	#name : #SoilResidentCleanCodeTest,
@@ -133,4 +134,20 @@ SoilResidentCleanCodeTest >> testNoUncategorizedMethods [
 	self
 		assert: uncategorized isEmpty
 		description: 'the following methods are uncategorized: ' , uncategorized asString
+]
+
+{ #category : #tests }
+SoilResidentCleanCodeTest >> testNoUnsentMessages [
+	"inherited as skipped because Soil-Core carries selectors nobody sends; this
+	package has none and should keep it that way. A selector that only an embedder
+	sends counts as unsent here -- Soil's own build loads no embedder -- so the way
+	to keep one is a test in this package that sends it, not an exception: the test
+	also says what the embedder may rely on"
+	| found methods |
+	found := self packageToCheck allUnsentMessages.
+	methods := self packageToCheck methods select: [ :method | found includes: method selector ].
+	methods := methods reject: [ :method | method hasPragmaNamed: #inspectorPresentationOrder:title: ].
+	self
+		assert: methods isEmpty
+		description: 'the following selectors are implemented, but never sent: ' , methods asString
 ]
