@@ -474,6 +474,26 @@ SoilSkipListTest >> testFreePageReuseAtEndAppend [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testHeaderReadWaitsForTheStream [
+	"every process reading the index shares one stream. A process reading the header
+	waits while another one holds the stream instead of moving it under that read"
+
+	| store read |
+	1 to: 10 do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
+	index writePages.
+	index flushCachedPages.
+	store := index store.
+	read := Semaphore new.
+	(store instVarNamed: #streamSemaphore) critical: [
+		[ [ store headerPage ] ensure: [ read signal ] ] fork.
+		self
+			assert: (read waitTimeoutMSecs: 300)
+			description: 'the header was read while another process held the stream' ].
+	self deny: (read waitTimeoutMSecs: 5000) description: 'the header was not read'.
+	self assert: (store pages at: 1) isHeaderPage
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testIndexRewriting [
 
 	| capacity fileSizeBefore |
@@ -630,7 +650,23 @@ SoilSkipListTest >> testPageAddFirst [
 SoilSkipListTest >> testPageCodeNoDuplicates [ 
 	| pageCodes |
 	pageCodes := (SoilIndexPage allSubclasses collect: #pageCode) reject: [:each | each == 0 ].
-	self assert: pageCodes size equals: pageCodes asSet size 
+	self assert: pageCodes size equals: pageCodes asSet size
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testPageReadWithoutCachedHeader [
+	"reading a page asks the index for its version, which is in the header. With no page
+	cached the header is read after the page code of the other page and before its
+	items, from the same stream"
+
+	| capacity page |
+	capacity := index firstPage itemCapacity.
+	1 to: capacity + 1 do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
+	index writePages.
+	index flushCachedPages.
+	page := index pageAt: 2.
+	self assert: page numberOfItems equals: 1.
+	self assert: page items first key equals: capacity + 1
 ]
 
 { #category : #tests }
