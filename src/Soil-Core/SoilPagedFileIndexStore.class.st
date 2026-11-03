@@ -63,7 +63,8 @@ SoilPagedFileIndexStore >> headerPage [
 { #category : #initialization }
 SoilPagedFileIndexStore >> initialize [ 
 	super initialize.
-	streamSemaphore := Semaphore forMutualExclusion 
+	"reentrant, because reading a page can read the header, see #readHeaderPage"
+	streamSemaphore := Mutex new
 ]
 
 { #category : #initialization }
@@ -123,12 +124,22 @@ SoilPagedFileIndexStore >> positionOfPageIndex: anInteger [
 
 { #category : #writing }
 SoilPagedFileIndexStore >> readHeaderPage [
+	"the stream is shared by every process reading this index, so the header is read
+	under the stream lock like any other page. The same process can already hold it:
+	reading a page asks the index for its version, which is in the header, between
+	reading the page code and the rest of the page. So the stream is left where it was
+	found. A header another process has put in the meantime stays, it may be changed
+	already"
 	| headerPage |
-	stream position: 0.
-	stream next. "pageCode"
-	headerPage :=  index newHeaderPage readFrom: stream.
-	pagesMutex critical: [  
-		pages at: 1 put: headerPage ]
+	headerPage := streamSemaphore critical: [ | position |
+		position := stream position.
+		[
+			stream position: 0.
+			stream next. "pageCode"
+			index newHeaderPage readFrom: stream ]
+				ensure: [ stream position: position ] ].
+	pagesMutex critical: [
+		pages at: 1 ifAbsentPut: [ headerPage ] ]
 ]
 
 { #category : #accessing }
