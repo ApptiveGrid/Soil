@@ -337,6 +337,25 @@ SoilSkipListTest >> testFirstArgLargerThenSize [
 ]
 
 { #category : #tests }
+SoilSkipListTest >> testFlushingCachedPagesWaitsForThePages [
+	"emptying the cache takes the lock a page fault takes, so a page faulted in
+	meanwhile cannot land in the cache after the header is gone"
+
+	| store flushed |
+	1 to: 10 do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
+	index writePages.
+	store := index store.
+	flushed := Semaphore new.
+	(store instVarNamed: #pagesMutex) critical: [
+		[ [ index flushCachedPages ] ensure: [ flushed signal ] ] fork.
+		self
+			assert: (flushed waitTimeoutMSecs: 300)
+			description: 'the cache was emptied while another process held the pages' ].
+	self deny: (flushed waitTimeoutMSecs: 5000) description: 'the cache was not emptied'.
+	self assert: store pages isEmpty
+]
+
+{ #category : #tests }
 SoilSkipListTest >> testFreePageAdd [
 
 	| iterator |
@@ -491,6 +510,22 @@ SoilSkipListTest >> testHeaderReadWaitsForTheStream [
 			description: 'the header was read while another process held the stream' ].
 	self deny: (read waitTimeoutMSecs: 5000) description: 'the header was not read'.
 	self assert: (store pages at: 1) isHeaderPage
+]
+
+{ #category : #tests }
+SoilSkipListTest >> testHeaderReadWhenOnlyOtherPagesAreCached [
+	"a cache that lost its header while another page stayed, as an unlocked flush could
+	leave it. The header is read from disk, not as a page fault: that one asks the index
+	for its version, which is the header again"
+
+	| capacity lastPageOffset |
+	capacity := index firstPage itemCapacity.
+	1 to: capacity + 1 do: [ :n | index at: n add: (n asByteArrayOfSize: 8) ].
+	index writePages.
+	lastPageOffset := index headerPage lastPageOffset.
+	index store removePageAt: 1.
+	self assert: (index store includesPageAt: 2).
+	self assert: index headerPage lastPageOffset equals: lastPageOffset
 ]
 
 { #category : #tests }

@@ -27,7 +27,10 @@ SoilPagedIndexStore >> flush [
 
 { #category : #accessing }
 SoilPagedIndexStore >> flushCachedPages [
-	pages removeAll
+	"under the lock every page fault takes: a page faulted in while the cache is
+	emptied would otherwise land in it after the header was gone"
+	pagesMutex critical: [
+		pages removeAll ]
 ]
 
 { #category : #testing }

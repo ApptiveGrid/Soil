@@ -53,8 +53,11 @@ SoilPagedFileIndexStore >> flushPages [
 ]
 
 { #category : #accessing }
-SoilPagedFileIndexStore >> headerPage [ 
-	pages ifEmpty: [ 
+SoilPagedFileIndexStore >> headerPage [
+	"read directly whenever it is missing, not only from an empty cache. As a page
+	fault it would ask the index for its version (#readPageAt:), which is this
+	header again"
+	self hasHeaderPage ifFalse: [
 		self ensureStreamIsOpen.
 		self readHeaderPage ].
 	^ super headerPage
