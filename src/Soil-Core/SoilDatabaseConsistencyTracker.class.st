@@ -1,5 +1,5 @@
 "
-Does the file hold what its format promises: object ids within their segment, index pages that validate, an index size that matches what the index holds. Needs no classes of the application, no materializing and no transaction - it is the check to run on a copy or on a database one does not want to open for work.
+Does the file hold what its format promises: object ids within their segment, records that hold an object, index pages that validate, an index size that matches what the index holds. Needs no classes of the application, no materializing and no transaction - it is the check to run on a copy or on a database one does not want to open for work.
 "
 Class {
 	#name : #SoilDatabaseConsistencyTracker,
@@ -259,10 +259,16 @@ SoilDatabaseConsistencyTracker >> trackCluster: aSoilPersistentClusterVersion in
 	as versions, their descriptions were named as missing and the chain was cut behind them,
 	so that they stayed. They end the chain instead, and the cut is at the last record that
 	is one. The current version has nothing after it to be cut at, and what it refers to is
-	named as it is"
+	named as it is.
+
+	The current version is the one read with its payload, and an empty payload is no object
+	(SoilEmptyRecord). It passes everything else here: six zero bytes read as a record of
+	version 0 with nothing in it"
 	self check: aSoilPersistentClusterVersion objectId using: [ | later |
-		self 
-			versionsOf: aSoilPersistentClusterVersion 
+		aSoilPersistentClusterVersion bytes ifNotNil: [ :bytes |
+			bytes ifEmpty: [ self report: (SoilEmptyRecord of: aSoilPersistentClusterVersion) ] ].
+		self
+			versionsOf: aSoilPersistentClusterVersion
 			in: aVisitor 
 			onFault: [ :position :reason |
 				self report: (SoilBrokenVersionChain 

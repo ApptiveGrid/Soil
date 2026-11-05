@@ -438,6 +438,49 @@ SoilTrackingVisitorTest >> testARecordBeyondTheEndOfTheFileNamesItsObject [
 ]
 
 { #category : #tests }
+SoilTrackingVisitorTest >> testARecordWithoutAnObjectCannotBeMaterialized [
+	"what the finding below is about: the record reads, the object it should hold does not"
+	| segment id position tx |
+	self commitSampleGraph.
+	segment := soil objectRepository segmentAt: 1.
+	id := SoilObjectId segment: 1 index: segment lastObjectIndex.
+	position := (segment instVarNamed: #objectFile) appendBytes: (ByteArray new: 6).
+	(segment instVarNamed: #indexFile) at: id index putPosition: position.
+	self assert: (segment basicAt: id index) bytes isEmpty.
+	tx := soil newTransaction.
+	[ self should: [ tx objectWithId: id ] raise: SoilUnreadableRecord ] ensure: [ tx abort ]
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testARecordWithoutAnObjectIsNamedAndTheWalkGoesOn [
+	"six zero bytes read as a record of version 0 with an empty payload, and everything else
+	the database level looks at passes them. A reader that touched the object failed with
+	'receiver of between:and: is nil' - in 62399ede on alpha, deleting a flow did"
+	| segment id position visitor tracker counter finding |
+	self commitSampleGraph.
+	segment := soil objectRepository segmentAt: 1.
+	id := SoilObjectId segment: 1 index: segment lastObjectIndex.
+	position := (segment instVarNamed: #objectFile) appendBytes: (ByteArray new: 6).
+	(segment instVarNamed: #indexFile) at: id index putPosition: position.
+	visitor := SoilTrackingVisitor new.
+	tracker := visitor addTracker: SoilDatabaseConsistencyTracker new.
+	counter := visitor addTracker: SoilTestCountingTracker new.
+	visitor track: soil.
+	self assert: tracker findings size equals: 1.
+	finding := tracker findings first.
+	self assert: finding class equals: SoilEmptyRecord.
+	self assert: finding kind equals: #emptyRecord.
+	self assert: finding objectId equals: id.
+	self assert: finding position equals: position.
+	self assert: finding version equals: 0.
+	self deny: finding isRepairable.
+	self assert: (finding asDictionary at: #objectId) equals: id printString.
+	self
+		assert: (counter clusters select: [ :each | each segment = 1 ]) asSet size
+		equals: segment lastObjectIndex
+]
+
+{ #category : #tests }
 SoilTrackingVisitorTest >> testAPreviousVersionBeyondTheFileIsNamed [
 	| record tracker finding |
 	self commitSampleGraph.
