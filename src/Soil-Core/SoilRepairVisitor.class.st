@@ -151,6 +151,33 @@ SoilRepairVisitor >> visitRemoveRegistryEntry: aRepairAction [
 		^ Error signal: 'the entry for key ', aRepairAction keyString, ' points at ', current printString, ' now' ].
 	(SoilBrokenRegistryEntry isBroken: current in: soil) ifFalse: [ 
 		^ Error signal: 'the entry for key ', aRepairAction keyString, ' points at a description now' ].
-	registry removeNameAt: aRepairAction key ifAbsent: [ 
+	registry removeNameAt: aRepairAction key ifAbsent: [
 		^ Error signal: 'the entry for key ', aRepairAction keyString, ' could not be removed' ]
+]
+
+{ #category : #visiting }
+SoilRepairVisitor >> visitWriteNil: aRepairAction [
+	"the empty record written again with nil as its object, under the version and the
+	previous version it had. Only while the index still points at the record the check
+	found and that record is still empty - one written since holds an object of its own.
+	Never in the meta segment: a finding there offers no action (SoilEmptyRecord>>
+	repairActions), but one offered before could still be chosen"
+	| segment record |
+	segment := soil objectRepository segmentAt: aRepairAction segment.
+	segment isMeta ifTrue: [
+		^ Error signal: 'a behavior description is not written as nil: every object of its class depends on it' ].
+	record := segment basicAt: aRepairAction index.
+	record position = aRepairAction position ifFalse: [
+		^ Error signal: 'object ', aRepairAction index printString, ' of segment ', aRepairAction segment printString, ' is at position ', record position printString, ' now' ].
+	record bytes isEmpty ifFalse: [
+		^ Error signal: 'the record at position ', record position printString, ' holds an object now' ].
+	segment
+		at: aRepairAction index
+		putBytes: (SoilPersistentClusterVersion new
+			version: record version;
+			previousVersionPosition: record previousVersionPosition;
+			bytes: (ByteArray streamContents: [ :stream |
+				nil soilBasicSerialize: (SoilBasicSerializer new stream: stream) ]);
+			serialize).
+	segment flushCachedObjectRecords
 ]
