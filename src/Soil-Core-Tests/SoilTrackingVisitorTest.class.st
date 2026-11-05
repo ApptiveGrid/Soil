@@ -473,11 +473,77 @@ SoilTrackingVisitorTest >> testARecordWithoutAnObjectIsNamedAndTheWalkGoesOn [
 	self assert: finding objectId equals: id.
 	self assert: finding position equals: position.
 	self assert: finding version equals: 0.
-	self deny: finding isRepairable.
+	self assert: finding isRepairable.
+	self assert: finding defaultRepairAction isNil.
 	self assert: (finding asDictionary at: #objectId) equals: id printString.
 	self
 		assert: (counter clusters select: [ :each | each segment = 1 ]) asSet size
 		equals: segment lastObjectIndex
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testARecordWithoutAnObjectReadsAsNilOnceRepaired [
+	"nil is the one object Soil can write without knowing what the object was, and the
+	record held nothing to give up. The object reads afterwards, and the check is clean"
+	| segment id position tracker finding repair tx |
+	self commitSampleGraph.
+	segment := soil objectRepository segmentAt: 1.
+	id := SoilObjectId segment: 1 index: segment lastObjectIndex.
+	position := (segment instVarNamed: #objectFile) appendBytes: (ByteArray new: 6).
+	(segment instVarNamed: #indexFile) at: id index putPosition: position.
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	finding := tracker findings detect: [ :each | each class = SoilEmptyRecord ].
+	self assert: finding repairActions size equals: 1.
+	repair := (SoilRepairVisitor on: soil)
+		repair: { SoilRepairAction fromDictionary: finding repairActions first asDictionary };
+		yourself.
+	self assert: repair failed isEmpty.
+	self deny: (segment basicAt: id index) position equals: position.
+	self assert: (segment basicAt: id index) version equals: 0.
+	tx := soil newTransaction.
+	[ self assert: (tx objectWithId: id) isNil ] ensure: [ tx abort ].
+	tracker := SoilDatabaseConsistencyTracker new.
+	SoilTrackingVisitor new
+		addTracker: tracker;
+		track: soil.
+	self assert: tracker findings isEmpty
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testWritingNilLeavesARecordAloneThatHoldsAnObject [
+	"the action names the empty record the check found; a record written since holds an
+	object of its own and is not overwritten"
+	| segment index current repair |
+	self commitSampleGraph.
+	segment := soil objectRepository segmentAt: 1.
+	index := segment lastObjectIndex.
+	current := segment basicAt: index.
+	repair := (SoilRepairVisitor on: soil)
+		repair: { SoilWriteNil segment: 1 index: index position: current position };
+		yourself.
+	self assert: repair failed size equals: 1.
+	self assert: (segment basicAt: index) position equals: current position.
+	self deny: (segment basicAt: index) bytes isEmpty
+]
+
+{ #category : #tests }
+SoilTrackingVisitorTest >> testWritingNilIsNeverOfferedNorDoneInTheMetaSegment [
+	"a behavior description that is nil is no description, and every object of its class
+	depends on it"
+	| finding repair |
+	finding := SoilEmptyRecord new
+		objectId: (SoilObjectId segment: 0 index: 2) version: 0 position: 100;
+		yourself.
+	self deny: finding isRepairable.
+	self commitSampleGraph.
+	repair := (SoilRepairVisitor on: soil)
+		repair: { SoilWriteNil segment: 0 index: 2 position: 100 };
+		yourself.
+	self assert: repair failed size equals: 1.
+	self assert: (repair failed first value includesSubstring: 'behavior description')
 ]
 
 { #category : #tests }
