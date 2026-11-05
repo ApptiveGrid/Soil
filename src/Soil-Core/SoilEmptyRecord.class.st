@@ -1,7 +1,7 @@
 "
 A record that holds no object: its payload is empty. Every object Soil serializes begins with the type code of its class, nil as well, so the serializer does not write such a record. It reads all the same - six zero bytes are a record of version 0 with no previous version, no behavior descriptions, no references, no indexes and an empty payload - and only materializing it fails, which the database level does not do. The application level does, but only when asked to, so without this finding the record goes unnamed until a reader touches the object.
 
-In 62399ede on alpha two objects had such records after their objects file had been written anew, and deleting a flow failed on one of them with 'receiver of between:and: is nil'. What the object was, the record no longer says; that is for a person to find out.
+In 62399ede on alpha two objects had such records after their objects file had been written anew, and deleting a flow failed on one of them with 'receiver of between:and: is nil'. What the object was, the record no longer says. It offers to write nil in its place (SoilWriteNil), not as a default: whether the application can do with nil is for a person to say. None in the meta segment, where a description that is nil is no description.
 "
 Class {
 	#name : #SoilEmptyRecord,
@@ -57,6 +57,12 @@ SoilEmptyRecord >> objectId: aSoilObjectId version: anInteger position: aPositio
 { #category : #accessing }
 SoilEmptyRecord >> position [
 	^ position
+]
+
+{ #category : #repairing }
+SoilEmptyRecord >> repairActions [
+	objectId isMeta ifTrue: [ ^ #() ].
+	^ { SoilWriteNil segment: objectId segment index: objectId index position: position }
 ]
 
 { #category : #accessing }
