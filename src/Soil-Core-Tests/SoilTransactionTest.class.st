@@ -214,6 +214,26 @@ SoilTransactionTest >> testRootObject [
 ]
 
 { #category : #tests }
+SoilTransactionTest >> testSmallestReadVersionFollowsTheOpenTransactions [
+	| older writer newer |
+	older := soil newTransaction.
+	writer := soil newTransaction.
+	writer root: SoilTestGraphRoot new.
+	writer commit.
+	newer := soil newTransaction.
+	self assert: older readVersion < newer readVersion.
+	self
+		assert: soil transactionManager smallestReadVersion
+		equals: older readVersion.
+	older abort.
+	self
+		assert: soil transactionManager smallestReadVersion
+		equals: newer readVersion.
+	newer abort.
+	self assert: soil transactionManager smallestReadVersion isNil
+]
+
+{ #category : #tests }
 SoilTransactionTest >> testTwoRootsWithAlwaysRoot [
 	| tx obj1 obj2 |
 	tx := soil newTransaction.

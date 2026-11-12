@@ -78,10 +78,16 @@ SoilTransactionManager >> removeTransaction: aSoilTransaction [
 
 { #category : #versions }
 SoilTransactionManager >> smallestReadVersion [ 
-	"detect the smallest read version currently in use"
-	^ transactions
-		ifNotEmpty: [ transactions min: #readVersion ]
-		ifEmpty: [ nil  ]
+	"detect the smallest read version currently in use. The versions are taken under
+	the semaphore that guards adding and removing: read without it, the last transaction
+	can be removed between the test for emptiness and #min:, which then fails on an
+	empty collection"
+	| readVersions |
+	readVersions := semaphore critical: [
+		transactions collect: [ :each | each readVersion ] ].
+	^ readVersions
+		ifNotEmpty: [ readVersions min ]
+		ifEmpty: [ nil ]
 ]
 
 { #category : #accessing }
