@@ -378,17 +378,15 @@ SoilTransaction >> detectIndexConflicts [
 	transactions committed since I read. Most of the time there is none, and that is all
 	there is to see. With duplicate keys the same key is no conflict, the same key and
 	value is"
-	| ours isKeyEntry valueOf |
+	| ours valueOf |
 	writeVersion - 1 > readVersion ifFalse: [ ^ self ].
-	isKeyEntry := [ :entry |
-		(entry isKindOf: SoilAddKeyEntry) or: [ entry isKindOf: SoilRemoveKeyEntry ] ].
 	valueOf := [ :entry |
 		(entry isKindOf: SoilAddKeyEntry)
 			ifTrue: [ entry value ]
 			ifFalse: [ entry oldValue ] ].
 	ours := Dictionary new.
 	journal entries do: [ :each |
-		(isKeyEntry value: each) ifTrue: [
+		each modifiesIndex ifTrue: [
 			(ours at: each id -> each key ifAbsentPut: [ OrderedCollection new ]) add: each ] ].
 	ours ifEmpty: [ ^ self ].
 	readVersion + 1 to: writeVersion - 1 do: [ :version | | committed |
@@ -400,7 +398,7 @@ SoilTransaction >> detectIndexConflicts [
 					indexId: ours keys anyOne key;
 					signal ].
 		committed entries do: [ :theirs |
-			(isKeyEntry value: theirs) ifTrue: [
+			theirs modifiesIndex ifTrue: [
 				(ours at: theirs id -> theirs key ifAbsent: [ #() ]) do: [ :mine |
 					(((soil objectRepository segmentAt: mine segment) indexAt: mine id) hasUniqueKeys or: [
 						SoilIndexItemsPage value: (valueOf value: mine) matches: (valueOf value: theirs) ])

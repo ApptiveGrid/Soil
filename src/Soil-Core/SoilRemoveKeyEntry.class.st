@@ -70,6 +70,11 @@ SoilRemoveKeyEntry >> key: aString [
 	key := aString 
 ]
 
+{ #category : #testing }
+SoilRemoveKeyEntry >> modifiesIndex [
+	^ true
+]
+
 { #category : #accessing }
 SoilRemoveKeyEntry >> objectIds [
 	^ { oldValue }
