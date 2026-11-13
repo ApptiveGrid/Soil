@@ -149,7 +149,7 @@ SoilRemoveKeyEntry >> validateIn: aSoilTransaction [
 ]
 
 { #category : #writing }
-SoilRemoveKeyEntry >> writeOn: aStream [
+SoilRemoveKeyEntry >> writeOn: aStream [ 
 	| keyByteArray oldValueByteArray |
 	keyByteArray := key asByteArray.
 	oldValueByteArray := oldValue asByteArray.
