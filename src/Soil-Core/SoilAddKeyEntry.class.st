@@ -73,6 +73,11 @@ SoilAddKeyEntry >> key: aString [
 	key := aString 
 ]
 
+{ #category : #testing }
+SoilAddKeyEntry >> modifiesIndex [
+	^ true
+]
+
 { #category : #accessing }
 SoilAddKeyEntry >> objectIds [
 	^ { value }

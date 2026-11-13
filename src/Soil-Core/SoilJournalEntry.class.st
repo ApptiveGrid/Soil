@@ -67,6 +67,12 @@ SoilJournalEntry >> isTransactionEntry [
 	^ false
 ]
 
+{ #category : #testing }
+SoilJournalEntry >> modifiesIndex [
+	"whether I put, move or remove a key of an index"
+	^ false
+]
+
 { #category : #accessing }
 SoilJournalEntry >> journal: anObject [
 
