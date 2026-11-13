@@ -314,9 +314,7 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 { #category : #accessing }
 SoilTransaction >> buildJournal [
 	self journal index: writeVersion.
-	"key entries that cancel each other out are dropped before anything is validated or
-	written"
-	journal dropKeysAddedAndRemovedAgain.
+	self normalizeJournal.
 	"add entries for updating the last index of each modified 
 	segment"
 	lastObjectIndexes keysAndValuesDo: [ :segment :index |
@@ -613,8 +611,15 @@ SoilTransaction >> materializeRecord: record [
 	^ record 
 ]
 
+{ #category : #committing }
+SoilTransaction >> normalizeJournal [
+	"the journal holds the changes in the order they were made. Before anything is validated
+	or written it is brought into the form that is applied"
+	journal dropKeysAddedAndRemovedAgain
+]
+
 { #category : #testing }
-SoilTransaction >> needsCommit [ 
+SoilTransaction >> needsCommit [
 
 	^ self isWritable and: [ self hasChanges ]
 ]
