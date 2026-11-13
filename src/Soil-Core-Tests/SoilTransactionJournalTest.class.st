@@ -59,6 +59,39 @@ SoilTransactionJournalTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilTransactionJournalTest >> testAKeyAddedAndRemovedAgainLeavesNoKeyEntry [
+	| journal value other |
+	value := SoilObjectId segment: 1 index: 5.
+	other := SoilObjectId segment: 1 index: 6.
+	journal := SoilTransactionJournal new.
+	journal
+		addEntry: (SoilAddKeyEntry new id: 'idx'; key: 1; value: value; oldValue: nil; yourself);
+		addEntry: (SoilAddKeyEntry new id: 'idx'; key: 2; value: other; oldValue: nil; yourself);
+		addEntry: (SoilRemoveKeyEntry new id: 'idx'; key: 1; oldValue: value; yourself).
+	journal dropKeysAddedAndRemovedAgain.
+	self assert: journal entries size equals: 1.
+	self assert: journal entries first key equals: 2
+]
+
+{ #category : #tests }
+SoilTransactionJournalTest >> testAKeyOverwrittenAndRemovedLeavesTheRemovalOfItsFormerValue [
+	| journal before first second removal |
+	before := SoilObjectId segment: 1 index: 5.
+	first := SoilObjectId segment: 1 index: 6.
+	second := SoilObjectId segment: 1 index: 7.
+	journal := SoilTransactionJournal new.
+	journal
+		addEntry: (SoilAddKeyEntry new id: 'idx'; key: 1; value: first; oldValue: before; yourself);
+		addEntry: (SoilAddKeyEntry new id: 'idx'; key: 1; value: second; oldValue: first; yourself);
+		addEntry: (SoilRemoveKeyEntry new id: 'idx'; key: 1; oldValue: second; yourself).
+	journal dropKeysAddedAndRemovedAgain.
+	self assert: journal entries size equals: 1.
+	removal := journal entries first.
+	self assert: (removal isKindOf: SoilRemoveKeyEntry).
+	self assert: removal oldValue equals: before
+]
+
+{ #category : #tests }
 SoilTransactionJournalTest >> testConsistency [
 	| txn |
 	10 timesRepeat: [ 

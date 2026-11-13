@@ -93,6 +93,36 @@ SoilTransactionJournal >> duration [
 	^ (self committedAt - self createdAt) asMilliSeconds  
 ]
 
+{ #category : #committing }
+SoilTransactionJournal >> dropKeysAddedAndRemovedAgain [
+	"a key this transaction added and removed again never has to reach the index, so both
+	entries go. If the add overwrote a value the key had before, the removal stays and
+	removes that value. The entries are in the order they were made: a removal pairs with
+	the last add before it of its key and of the value it removes, and again with the add
+	before that one if the value it removes now was added in this transaction as well"
+	| adds dropped |
+	adds := Dictionary new.
+	dropped := IdentitySet new.
+	entries do: [ :each |
+		(each isKindOf: SoilAddKeyEntry) ifTrue: [
+			(adds at: each id -> each key ifAbsentPut: [ OrderedCollection new ]) add: each ].
+		(each isKindOf: SoilRemoveKeyEntry) ifTrue: [ | candidates add pairing |
+			candidates := adds at: each id -> each key ifAbsent: [ OrderedCollection new ].
+			pairing := true.
+			[ pairing and: [
+				(add := candidates reversed
+					detect: [ :candidate | SoilIndexItemsPage value: candidate value matches: each oldValue ]
+					ifNone: [ nil ]) notNil ] ] whileTrue: [
+				candidates remove: add.
+				dropped add: add.
+				(add oldValue isNil or: [ add oldValue isRemoved ])
+					ifTrue: [
+						dropped add: each.
+						pairing := false ]
+					ifFalse: [ each oldValue: add oldValue ] ] ] ].
+	entries := entries reject: [ :each | dropped includes: each ]
+]
+
 { #category : #accessing }
 SoilTransactionJournal >> entries [
 	^ entries

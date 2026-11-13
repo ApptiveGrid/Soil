@@ -1428,8 +1428,8 @@ SoilIndexedDictionaryTest >> testMovingAKeyAnotherTransactionMovedIsAConflict [
 
 { #category : #'tests - concurrent' }
 SoilIndexedDictionaryTest >> testRemovingAKeyAddedInTheSameTransactionCommits [
-	"the key is not in the persistent index when the removal is validated, because the
-	transaction added it itself. That is no conflict"
+	"the add and the removal of #two cancel each other out and are dropped from the journal.
+	Otherwise the removal would be validated against an index that does not have the key yet"
 	| tx |
 	tx := soil newTransaction.
 	tx root: dict.
@@ -1442,6 +1442,24 @@ SoilIndexedDictionaryTest >> testRemovingAKeyAddedInTheSameTransactionCommits [
 	tx := soil newTransaction.
 	self assert: (tx root at: #one) equals: #onevalue.
 	self assert: (tx root at: #two ifAbsent: [ nil ]) isNil.
+	tx abort
+]
+
+{ #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testOverwritingAndRemovingAKeyInOneTransactionRemovesIt [
+	"the add overwrote the value #one had, so dropping both entries would bring that value
+	back. What is left is the removal of the value #one had before"
+	| tx |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	tx commit.
+	tx := soil newTransaction.
+	tx root at: #one put: #othervalue.
+	tx root removeKey: #one.
+	tx commit.
+	tx := soil newTransaction.
+	self assert: (tx root at: #one ifAbsent: [ nil ]) isNil.
 	tx abort
 ]
 

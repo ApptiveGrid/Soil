@@ -314,6 +314,9 @@ SoilTransaction >> behaviorVersionsUpTo: aSOBehaviorDescription [
 { #category : #accessing }
 SoilTransaction >> buildJournal [
 	self journal index: writeVersion.
+	"key entries that cancel each other out are dropped before anything is validated or
+	written"
+	journal dropKeysAddedAndRemovedAgain.
 	"add entries for updating the last index of each modified 
 	segment"
 	lastObjectIndexes keysAndValuesDo: [ :segment :index |
