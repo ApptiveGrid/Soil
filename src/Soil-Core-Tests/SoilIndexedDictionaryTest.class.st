@@ -1382,6 +1382,92 @@ SoilIndexedDictionaryTest >> testRemoveKeyValueSurvivesReopen [
 ]
 
 { #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testAnIndexOnlyCommitAndContinueDoesNotRepeatItsKeyEntries [
+	"a commit that changes only the index has no records. Its journal used to stay after
+	#commitAndContinue, and the next commit wrote the removal of #one a second time, which
+	is now a concurrent change"
+	| tx |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
+	tx commit.
+	tx := soil newTransaction.
+	tx root removeKey: #one.
+	tx commitAndContinue.
+	tx root removeKey: #two.
+	tx commit.
+	tx := soil newTransaction.
+	self assert: (tx root at: #one ifAbsent: [ nil ]) isNil.
+	self assert: (tx root at: #two ifAbsent: [ nil ]) isNil.
+	tx abort
+]
+
+{ #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testMovingAKeyAnotherTransactionMovedIsAConflict [
+	"two transactions push out the same entry, as two workers of a queue may. The second
+	commit finds the key gone. It used to fail with KeyNotFound after its journal was
+	written; now it is a concurrent change before that, and the first move stands"
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	tx commit.
+	tx := soil newTransaction.
+	tx2 := soil newTransaction.
+	tx2 root moveKey: #one to: #two.
+	tx2 commit.
+	tx root moveKey: #one to: #three.
+	self should: [ tx commit ] raise: SoilIndexHasConcurrentChange.
+	tx := soil newTransaction.
+	self assert: (tx root at: #two) equals: #onevalue.
+	self assert: (tx root at: #one ifAbsent: [ nil ]) isNil.
+	self assert: (tx root at: #three ifAbsent: [ nil ]) isNil.
+	tx abort
+]
+
+{ #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testRemovingAKeyAddedInTheSameTransactionCommits [
+	"the key is not in the persistent index when the removal is validated, because the
+	transaction added it itself. That is no conflict"
+	| tx |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	tx commit.
+	tx := soil newTransaction.
+	tx root at: #two put: #twovalue.
+	tx root removeKey: #two.
+	tx commit.
+	tx := soil newTransaction.
+	self assert: (tx root at: #one) equals: #onevalue.
+	self assert: (tx root at: #two ifAbsent: [ nil ]) isNil.
+	tx abort
+]
+
+{ #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testRemovingAKeyAnotherTransactionRemovedIsAConflict [
+	"the key is still in the page, with a removed id as its value. Committing the second
+	removal used to bury it again without a word"
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	dict at: #two put: #twovalue.
+	tx commit.
+	tx := soil newTransaction.
+	tx2 := soil newTransaction.
+	tx2 root removeKey: #two.
+	tx2 commit.
+	tx root removeKey: #two.
+	self should: [ tx commit ] raise: SoilIndexHasConcurrentChange.
+	tx := soil newTransaction.
+	self assert: (tx root at: #one) equals: #onevalue.
+	self assert: (tx root at: #two ifAbsent: [ nil ]) isNil.
+	tx abort
+]
+
+{ #category : #'tests - concurrent' }
 SoilIndexedDictionaryTest >> testRemoveKeyWithTwoTransactions [
 
 	| tx tx2 |

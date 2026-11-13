@@ -367,6 +367,10 @@ SoilTransaction >> commitStrategy [
 
 { #category : #actions }
 SoilTransaction >> continue [
+	"the journal is committed, whether or not there were records. A commit that only
+	changed indexes has none, and its journal used to stay: the next commit wrote its
+	key entries a second time"
+	journal := nil.
 	commitStrategy hasRecords ifFalse: [ ^ self ].
 	commitStrategy records do: [ :record | | persistentRecord |
 		persistentRecord := record asPersistentClusterVersion.
