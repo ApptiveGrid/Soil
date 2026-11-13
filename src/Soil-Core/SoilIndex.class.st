@@ -251,14 +251,6 @@ SoilIndex >> hasHeaderPage [
 	^ self subclassResponsibility
 ]
 
-{ #category : #testing }
-SoilIndex >> hasWrittenPagesChangedSince: aVersion [
-	"only the copy a transaction works on keeps the pages it wrote to, see
-	SoilCopyOnWriteSkipList and SoilCopyOnWriteBTree. An index that is new in its
-	transaction is not one of those, and nobody else can have written to it"
-	^ false
-]
-
 { #category : #accessing }
 SoilIndex >> hasUniqueKeys [
 	^ self headerPage uniqueKeys

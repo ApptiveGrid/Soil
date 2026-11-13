@@ -6,8 +6,7 @@ Class {
 		'currentPage',
 		'currentKey',
 		'itemStrategy',
-		'currentPageIndex',
-		'transactionId'
+		'currentPageIndex'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -680,21 +679,6 @@ SoilIndexIterator >> sizeViaIteration [
 ]
 
 { #category : #transactions }
-SoilIndexIterator >> pageWasSplit: aPage [
-	"aPage has given half of its items to a new page. None of their values changed, but
-	whoever wrote to aPage before and looks at it again has to see that it is not the
-	page it was: a key may have left it, and later changes to that key stamp the other
-	page. Only a commit knows its transaction; a split in the copy of a transaction
-	stamps nothing"
-	transactionId ifNotNil: [ aPage lastTransaction: transactionId ]
-]
-
-{ #category : #accessing }
-SoilIndexIterator >> transactionId: anInteger [
-	transactionId := anInteger
-]
-
-{ #category : #accessing }
 SoilIndexIterator >> updateCurrentTransaction: anInteger [ 
 	currentPage lastTransaction: anInteger
 ]

@@ -128,17 +128,6 @@ SoilIndexedDictionary >> first: anInteger [
 	^ self newIterator first: anInteger
 ]
 
-{ #category : #testing }
-SoilIndexedDictionary >> hasIndexChangedSince: aVersion [
-	"whether a transaction after aVersion wrote to a page of the index I wrote to"
-	^ index notNil and: [ index hasWrittenPagesChangedSince: aVersion ]
-]
-
-{ #category : #testing }
-SoilIndexedDictionary >> hasUniqueKeys [
-	^ self index hasUniqueKeys
-]
-
 { #category : #accessing }
 SoilIndexedDictionary >> id [
 	^ id
@@ -172,13 +161,19 @@ SoilIndexedDictionary >> index [
 
 { #category : #accessing }
 SoilIndexedDictionary >> indexUpdated [ 
-	"every write to the index comes through here, once per transaction. The transaction
-	keeps the dictionaries that wrote, and at commit asks each whether somebody else wrote
-	to the same pages meanwhile, see SoilTransaction>>#detectIndexConflicts and
-	#hasIndexChangedSince:.
+	"This marker is idle and is kept anyway. Nothing reads #dirty but the guard below, and
+	nothing reads the transaction's indexUpdatesToCommit at all: b249af9 gave that collection
+	two readers in 2023, the cleanups around ce89216 took both away in June 2025, and d854cf9
+	brought #addIndexUpdate: back from the v3 branch in January 2026 without them.
 
-	It is not what makes a transaction count as changed, and not what brings the index to
-	disk: that is #hasJournalEntries, and SoilIndexManager>>#dirtyIndexes at the checkpoint"
+	Its old job is done elsewhere now. A transaction counts as changed through
+	#hasJournalEntries, and the checkpoint reaches the indexes through
+	SoilIndexManager>>#dirtyIndexes, which asks each SoilIndex for its own #dirtyPages -
+	a different dirtiness than this one.
+
+	That is why #removeKey:ifAbsent: does not call this and does not need to: a removal-only
+	transaction commits and survives a reopen, which
+	SoilIndexedDictionaryTest>>#testRemoveKeySurvivesReopen holds to."
 	dirty ifFalse: [  
 		dirty := true.
 		transaction addIndexUpdate: self ].
@@ -317,7 +312,6 @@ SoilIndexedDictionary >> removeKey: key ifAbsent: aBlock [
 			key: (self index indexKey: key); 
 			oldValue: oldValue asSoilObjectId ) .
 
-	self indexUpdated.
 	^ oldValue
 ]
 
@@ -343,7 +337,6 @@ SoilIndexedDictionary >> removeKey: key value: value ifAbsent: aBlock [
 			key: (self index indexKey: key); 
 			oldValue: oldValue asSoilObjectId ) .
 
-	self indexUpdated.
 	^ oldValue
 ]
 

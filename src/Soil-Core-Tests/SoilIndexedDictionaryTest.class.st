@@ -1446,9 +1446,9 @@ SoilIndexedDictionaryTest >> testPuttingAKeyAnotherTransactionPutIsAConflict [
 ]
 
 { #category : #'tests - concurrent' }
-SoilIndexedDictionaryTest >> testPuttingAnotherKeyOnTheSamePageIsNoConflict [
-	"the page both wrote to is newer than what the second transaction read, so the journal
-	of the first is looked at. It holds no key of the second, and both commits stand"
+SoilIndexedDictionaryTest >> testPuttingAnotherKeyIsNoConflict [
+	"a transaction committed since the second one read, so its journal is looked at. It
+	holds no key of the second, and both commits stand"
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: dict.

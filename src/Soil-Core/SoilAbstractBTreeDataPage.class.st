@@ -79,7 +79,6 @@ SoilAbstractBTreeDataPage >> insertItem: anItem for: iterator [
 	self hasRoom ifTrue: [  iterator currentPage: self. ^ return ].
 	"We have to split"
 	newPage := iterator index splitPage: self.
-	iterator pageWasSplit: self.
 	"newPage is the one with the small values"
 	pageWithItem := ((self smallestKey <= anItem key)
 						ifTrue: [ newPage ]

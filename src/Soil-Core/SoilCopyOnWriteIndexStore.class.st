@@ -2,8 +2,7 @@ Class {
 	#name : #SoilCopyOnWriteIndexStore,
 	#superclass : #SoilPagedIndexStore,
 	#instVars : [
-		'wrappedStore',
-		'copiedOffsets'
+		'wrappedStore'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -17,19 +16,6 @@ SoilCopyOnWriteIndexStore >> flush [
 SoilCopyOnWriteIndexStore >> flushCachedPages [ 
 	super flushCachedPages.
 	wrappedStore flushCachedPages 
-]
-
-{ #category : #initialization }
-SoilCopyOnWriteIndexStore >> initialize [
-	super initialize.
-	copiedOffsets := Set new
-]
-
-{ #category : #testing }
-SoilCopyOnWriteIndexStore >> isCopyAt: anInteger [
-	"whether the page at this offset is a copy of a page of the wrapped store, and not one
-	that was allocated here"
-	^ copiedOffsets includes: anInteger
 ]
 
 { #category : #testing }
@@ -47,7 +33,6 @@ SoilCopyOnWriteIndexStore >> pageFaultAt: anInteger [
 	| page |
 	page := (wrappedStore pageAt: anInteger) copy.
 	pages at: anInteger put: page.
-	copiedOffsets add: anInteger.
 	^ page 
 ]
 
