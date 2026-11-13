@@ -101,42 +101,6 @@ SoilRemoveKeyEntry >> readFrom: aStream [
 	oldValue := (aStream next: aStream nextLengthEncodedInteger) asSoilObjectId .
 ]
 
-{ #category : #validating }
-SoilRemoveKeyEntry >> isPresentIn: anIndex [
-	"whether the persistent index still holds the entry this removal is about. A removed
-	entry stays in the page with a removed id as its value until the index cleaner drops it,
-	so both a missing key and a removed value mean it is gone"
-	| iterator |
-	iterator := anIndex newIterator.
-	^ anIndex hasUniqueKeys
-		ifTrue: [
-			(iterator at: key ifAbsent: [ nil ])
-				ifNil: [ false ]
-				ifNotNil: [ :value | value isRemoved not ] ]
-		ifFalse: [
-			(iterator at: key ifAbsent: [ #() ]) anySatisfy: [ :value |
-				value isRemoved not and: [
-					SoilIndexItemsPage value: value matches: oldValue ] ] ]
-]
-
-{ #category : #validating }
-SoilRemoveKeyEntry >> validateIn: aSoilTransaction [
-	"the transaction found the key in the index when it read it. If another transaction has
-	removed it or moved it away since, applying this entry would fail with KeyNotFound
-	after the journal is written (unique keys), or bury the entry a second time without a
-	word. Both are a concurrent change, and here, before the journal is written, it can
-	still be said as one. A key the transaction added itself is not in the index yet, but
-	such a pair is gone by now, see SoilTransactionJournal>>#dropKeysAddedAndRemovedAgain"
-	| index |
-	index := (aSoilTransaction soil objectRepository segmentAt: self segment) indexAt: id.
-	(self isPresentIn: index) ifTrue: [ ^ self ].
-	SoilIndexHasConcurrentChange new
-		objectId: oldValue;
-		indexId: id;
-		key: key;
-		signal
-]
-
 { #category : #writing }
 SoilRemoveKeyEntry >> writeOn: aStream [ 
 	| keyByteArray oldValueByteArray |

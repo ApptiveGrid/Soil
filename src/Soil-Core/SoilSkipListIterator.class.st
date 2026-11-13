@@ -41,6 +41,7 @@ SoilSkipListIterator >> basicAt: indexKey add: anObject [
 			currentPage hasRoom ifFalse: [  | newPage |
 				newPage := index splitPage: self forKey: indexKey.
 				index addDirtyPage: newPage.	
+				self pageWasSplit: currentPage.
 				self flag: #todo.
 				"another <= case"
 				currentPage := currentPage biggestKey <= indexKey

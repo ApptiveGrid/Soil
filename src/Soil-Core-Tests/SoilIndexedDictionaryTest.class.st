@@ -1383,9 +1383,9 @@ SoilIndexedDictionaryTest >> testRemoveKeyValueSurvivesReopen [
 
 { #category : #'tests - concurrent' }
 SoilIndexedDictionaryTest >> testAnIndexOnlyCommitAndContinueDoesNotRepeatItsKeyEntries [
-	"a commit that changes only the index has no records. Its journal used to stay after
-	#commitAndContinue, and the next commit wrote the removal of #one a second time, which
-	is now a concurrent change"
+	"a commit that changes only the index has no records. Its journal and its read version
+	used to stay after #commitAndContinue: the next commit wrote the removal of #one a
+	second time, and would find its own first commit among the transactions since it read"
 	| tx |
 	tx := soil newTransaction.
 	tx root: dict.
@@ -1427,9 +1427,49 @@ SoilIndexedDictionaryTest >> testMovingAKeyAnotherTransactionMovedIsAConflict [
 ]
 
 { #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testPuttingAKeyAnotherTransactionPutIsAConflict [
+	"both transactions put #two. The second one used to overwrite the first without a word"
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	tx commit.
+	tx := soil newTransaction.
+	tx2 := soil newTransaction.
+	tx2 root at: #two put: #theirs.
+	tx2 commit.
+	tx root at: #two put: #ours.
+	self should: [ tx commit ] raise: SoilIndexHasConcurrentChange.
+	tx := soil newTransaction.
+	self assert: (tx root at: #two) equals: #theirs.
+	tx abort
+]
+
+{ #category : #'tests - concurrent' }
+SoilIndexedDictionaryTest >> testPuttingAnotherKeyOnTheSamePageIsNoConflict [
+	"the page both wrote to is newer than what the second transaction read, so the journal
+	of the first is looked at. It holds no key of the second, and both commits stand"
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: dict.
+	dict at: #one put: #onevalue.
+	tx commit.
+	tx := soil newTransaction.
+	tx2 := soil newTransaction.
+	tx2 root at: #two put: #twovalue.
+	tx2 commit.
+	tx root at: #three put: #threevalue.
+	tx commit.
+	tx := soil newTransaction.
+	self assert: (tx root at: #two) equals: #twovalue.
+	self assert: (tx root at: #three) equals: #threevalue.
+	tx abort
+]
+
+{ #category : #'tests - concurrent' }
 SoilIndexedDictionaryTest >> testRemovingAKeyAddedInTheSameTransactionCommits [
-	"the add and the removal of #two cancel each other out and are dropped from the journal.
-	Otherwise the removal would be validated against an index that does not have the key yet"
+	"the add and the removal of #two cancel each other out and are dropped from the journal,
+	so nothing of them reaches the index"
 	| tx |
 	tx := soil newTransaction.
 	tx root: dict.

@@ -191,6 +191,7 @@ SoilTransaction >> basicCommit [
 		"convert the records into journal entries, write the journal to disk and then
 		execute the journal on the database"
 		journal := self buildJournal.
+		self detectIndexConflicts.
 		journal validateIn: self.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
@@ -366,13 +367,61 @@ SoilTransaction >> commitStrategy [
 	^ commitStrategy
 ]
 
+{ #category : #committing }
+SoilTransaction >> detectIndexConflicts [
+	"the commit applies the key entries of the journal to the persistent indexes. Before
+	the journal is written, see whether another transaction changed a key this one changes.
+	Applied anyway, a removal of a key that is gone fails after the journal is written, and
+	two transactions that move or put the same key overwrite each other without a word.
+
+	Only the dictionaries this transaction wrote to are asked, and they answer from the
+	pages they wrote to: a page whose last transaction is not after readVersion cannot
+	hold a conflict. Only if one is newer the journals of the transactions since
+	readVersion are read, and a key entry of theirs for a key of ours is the conflict.
+	With duplicate keys the same key is no conflict, the same key and value is"
+	| changed ours valueOf |
+	changed := Dictionary new.
+	indexUpdatesToCommit do: [ :each |
+		(each hasIndexChangedSince: readVersion) ifTrue: [ changed at: each id put: each ] ].
+	changed ifEmpty: [ ^ self ].
+	valueOf := [ :entry |
+		(entry isKindOf: SoilAddKeyEntry)
+			ifTrue: [ entry value ]
+			ifFalse: [ entry oldValue ] ].
+	ours := Dictionary new.
+	journal entries do: [ :each |
+		(((each isKindOf: SoilAddKeyEntry) or: [ each isKindOf: SoilRemoveKeyEntry ])
+			and: [ changed includesKey: each id ]) ifTrue: [
+				(ours at: each id -> each key ifAbsentPut: [ OrderedCollection new ]) add: each ] ].
+	ours ifEmpty: [ ^ self ].
+	readVersion + 1 to: writeVersion - 1 do: [ :version | | committed |
+		committed := soil journal
+			transactionJournalAt: version
+			ifAbsent: [
+				"what the transaction did is not known any more, so it cannot be ruled out"
+				^ SoilIndexHasConcurrentChange new
+					indexId: changed keys anyOne;
+					signal ].
+		committed entries do: [ :theirs |
+			((theirs isKindOf: SoilAddKeyEntry) or: [ theirs isKindOf: SoilRemoveKeyEntry ]) ifTrue: [
+				(ours at: theirs id -> theirs key ifAbsent: [ #() ]) do: [ :mine |
+					((changed at: mine id) hasUniqueKeys or: [
+						SoilIndexItemsPage value: (valueOf value: mine) matches: (valueOf value: theirs) ])
+							ifTrue: [
+								^ SoilIndexHasConcurrentChange new
+									objectId: (valueOf value: mine);
+									indexId: mine id;
+									key: mine key;
+									signal ] ] ] ] ]
+]
+
 { #category : #actions }
 SoilTransaction >> continue [
-	"the journal is committed, whether or not there were records. A commit that only
-	changed indexes has none, and its journal used to stay: the next commit wrote its
-	key entries a second time"
-	journal := nil.
-	commitStrategy hasRecords ifFalse: [ ^ self ].
+	"what was committed is now what I read: the records, the read version and an empty
+	journal. That holds for a commit without records as well. One that only changed
+	indexes used to keep its journal and its read version: the next commit wrote its key
+	entries a second time, and found its own commit among the transactions since it read"
+	writeVersion ifNil: [ ^ self ].
 	commitStrategy records do: [ :record | | persistentRecord |
 		persistentRecord := record asPersistentClusterVersion.
 		objectMap at: record object put: persistentRecord.

@@ -1,7 +1,7 @@
 "
-A transaction removes a key that another transaction has removed or moved away since it was read. Signalled at commit, before the journal is written, by SoilRemoveKeyEntry>>#validateIn:.
+Another transaction changed a key of an index that this transaction changes as well: it put, moved or removed it after this transaction had read. Signalled at commit, before the journal is written, by SoilTransaction>>#detectIndexConflicts.
 
-It is a SoilObjectHasConcurrentChange, so whoever retries a commit on a concurrent change retries this one as well. objectId is the value the transaction found under the key.
+It is a SoilObjectHasConcurrentChange, so whoever retries a commit on a concurrent change retries this one as well. objectId is the value this transaction puts or removes under the key.
 "
 Class {
 	#name : #SoilIndexHasConcurrentChange,
@@ -39,5 +39,5 @@ SoilIndexHasConcurrentChange >> key: anObject [
 
 { #category : #accessing }
 SoilIndexHasConcurrentChange >> messageText [
-	^ 'key ', key printString, ' of index ', indexId asString, ' has been removed by another transaction'
+	^ 'key ', key printString, ' of index ', indexId asString, ' has been changed by another transaction'
 ]

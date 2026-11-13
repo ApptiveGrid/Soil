@@ -25,6 +25,7 @@ SoilAddKeyEntry >> commitIn: soil recovery: aBoolean [
 	| index |
 	index := (soil objectRepository segmentAt: self segment) indexAt: id.
 	index newIterator
+		transactionId: transactionId;
 		at: key add: value;
 		updateCurrentTransaction: transactionId
 ]
