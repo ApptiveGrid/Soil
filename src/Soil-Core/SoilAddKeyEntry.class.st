@@ -16,7 +16,7 @@ SoilAddKeyEntry class >> journalTypeCode [
 
 { #category : #accessing }
 SoilAddKeyEntry >> address [
-	^ key asByteArray asString
+	^ self key asByteArray asString
 ]
 
 { #category : #committing }
@@ -25,7 +25,7 @@ SoilAddKeyEntry >> commitIn: soil recovery: aBoolean [
 	| index |
 	index := (soil objectRepository segmentAt: self segment) indexAt: id.
 	index newIterator
-		at: key add: value;
+		at: self key add: value;
 		updateCurrentTransaction: transactionId
 ]
 
@@ -60,12 +60,14 @@ SoilAddKeyEntry >> isForItem: anItem index: indexId [
 	they are, a reader pinned to an older version found no entry for the key it was
 	to take back, and handed out an entry committed after its version"
 	id = indexId ifFalse: [ ^false ].
-	^ key = anItem key and: [ SoilIndexItemsPage value: anItem value matches: value ]
+	^ self key = anItem key and: [ SoilIndexItemsPage value: anItem value matches: value ]
 ]
 
 { #category : #accessing }
 SoilAddKeyEntry >> key [
-	^ key
+	"the key may be given as a block, like the segment, for a key that depends on something
+	that is only known when the transaction commits, such as the id of a new object"
+	^ key value
 ]
 
 { #category : #accessing }
@@ -95,7 +97,7 @@ SoilAddKeyEntry >> oldValue: anObject [
 
 { #category : #printing }
 SoilAddKeyEntry >> printOn: aStream [ 
-	aStream << 'add key: ' << key printString << ' to index ' << id printString
+	aStream << 'add key: ' << self key printString << ' to index ' << id printString
 ]
 
 { #category : #testing }
@@ -140,7 +142,7 @@ SoilAddKeyEntry >> writeOn: aStream [
 	was not written up to version 1, and one of that version is still written the way
 	it was"
 	| keyByteArray valueByteArray oldValueByteArray |
-	keyByteArray := key asByteArray.
+	keyByteArray := self key asByteArray.
 	valueByteArray := value asByteArray.
 	oldValueByteArray := oldValue ifNil: [ #[] ] ifNotNil: [ :old | old asByteArray ].
 	super writeOn: aStream.
