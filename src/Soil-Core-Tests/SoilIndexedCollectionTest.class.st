@@ -10,14 +10,8 @@ Class {
 { #category : #helpers }
 SoilIndexedCollectionTest >> newCollection [
 	^ SoilIndexedCollection new
-		addIndex: (SoilObjectIndex new
-			selector: #lastName;
-			indexClass: SoilSkipList;
-			yourself);
-		addIndex: (SoilObjectIndex new
-			selector: #firstName;
-			indexClass: SoilSkipList;
-			yourself);
+		addIndex: (SoilDerivedIndex selector: #lastName);
+		addIndex: (SoilDerivedIndex selector: #firstName);
 		yourself
 ]
 
@@ -107,4 +101,49 @@ SoilIndexedCollectionTest >> testSurvivesReopeningTheDatabase [
 	self assert: tx2 root values size equals: 1.
 	self assert: tx2 root values first lastName equals: 'Doe'.
 	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testIndexIsConnectedOnFirstUse [
+	| tx tx2 derived |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	tx root add: (self newPersonNamed: 'John' surname: 'Doe').
+	tx commit.
+	soil reopen.
+
+	tx2 := soil newTransaction.
+	derived := tx2 root indexFor: #lastName.
+	self assert: (derived instVarNamed: 'index') isNil.
+	self assert: derived values size equals: 1.
+	self assert: (derived instVarNamed: 'index') isNotNil.
+	"connected, the id is fixed"
+	self should: [ derived id: 'other' ] raise: SoilUnsupportedError.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testIdCanBeSetUntilConnected [
+	| tx tx2 derived |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	tx commit.
+	soil reopen.
+
+	tx2 := soil newTransaction.
+	derived := tx2 root indexFor: #lastName.
+	derived id: 'imported-id'.
+	self assert: derived id equals: 'imported-id'.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testKeySizeIsSetPerIndex [
+	| narrow wide |
+	narrow := SoilDerivedIndex selector: #lastName keySize: 10.
+	wide := SoilDerivedIndex selector: #firstName keySize: 24.
+	self assert: narrow index keySize equals: 10.
+	self assert: wide index keySize equals: 24.
+	self assert: (SoilDerivedIndex selector: #id) index keySize equals: 16.
+	self assert: wide index valueSize equals: 8
 ]

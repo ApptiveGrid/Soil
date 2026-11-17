@@ -1,6 +1,6 @@
 "
 A SoilIndexedCollection is a collection of objects that is reachable through
-several indexes at once. Every SoilObjectIndex added with #addIndex: derives its
+several indexes at once. Every SoilDerivedIndex added with #addIndex: derives its
 own key from the objects that are added, so the same object can be looked up by
 different properties.
 
