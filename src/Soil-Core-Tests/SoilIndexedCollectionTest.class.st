@@ -64,9 +64,8 @@ SoilIndexedCollectionTest >> testAddedObjectIsFoundInAllIndexes [
 
 { #category : #tests }
 SoilIndexedCollectionTest >> testEachIndexIsKeyedByItsOwnSelector [
-	"looked up by key, not by position: index keys made from strings of different
-	length do not sort alphabetically (see String>>asIndexKeyOfSize:), so the order
-	the values come back in says nothing about which key they were stored under"
+	"looked up by value, not by position: the order the values come back in says
+	nothing about which key they were stored under"
 	| tx tx2 |
 	tx := soil newTransaction.
 	tx root: self newCollection.
@@ -77,13 +76,82 @@ SoilIndexedCollectionTest >> testEachIndexIsKeyedByItsOwnSelector [
 
 	tx2 := soil newTransaction.
 	self
-		assert: (((tx2 root indexFor: #lastName) newIterator at: 'Adams')
-			collect: [ :each | each firstName ]) asArray
-		equals: #( 'Zoe' ).
+		assert: ((tx2 root indexFor: #lastName) find: 'Adams')
+			asArray first firstName
+		equals: 'Zoe'.
 	self
-		assert: (((tx2 root indexFor: #firstName) newIterator at: 'Alice')
-			collect: [ :each | each lastName ]) asArray
-		equals: #( 'Zimmer' ).
+		assert: ((tx2 root indexFor: #firstName) find: 'Alice')
+			asArray first lastName
+		equals: 'Zimmer'.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testFindAnswersEveryObjectWithTheSameValue [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	tx root
+		add: (self newPersonNamed: 'John' surname: 'Doe');
+		add: (self newPersonNamed: 'Jane' surname: 'Doe');
+		add: (self newPersonNamed: 'Jim' surname: 'Doer').
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self
+		assert: ((tx2 root indexFor: #lastName) find: 'Doe') size
+		equals: 2.
+	self
+		assert: (((tx2 root indexFor: #lastName) find: 'Doe') collect: [ :each | each firstName ]) asSortedCollection asArray
+		equals: #( 'Jane' 'John' ).
+	self assert: ((tx2 root indexFor: #lastName) find: 'Do') isEmpty.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testFindStaysWithinTheValueAfterReopen [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	tx root
+		add: (self newPersonNamed: 'A' surname: 'aa');
+		add: (self newPersonNamed: 'B' surname: 'b').
+	tx commit.
+	soil reopen.
+
+	tx2 := soil newTransaction.
+	self assert: ((tx2 root indexFor: #lastName) find: 'aa') size equals: 1.
+	self assert: ((tx2 root indexFor: #lastName) find: 'b') size equals: 1.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testAddingAnUnindexableValueIsAnErrorThatNamesIndexAndValue [
+	| tx message |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	message := [ tx root add: (self newPersonNamed: 'John' surname: nil). nil ]
+		on: SoilUnsupportedError
+		do: [ :error | error messageText ].
+	self assert: message equals: 'derived index on #lastName: nil cannot be indexed, let the getter answer a substitute value'.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testUniqueIndexUsesTheWholeKeyForTheValue [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: (SoilIndexedCollection new
+		addIndex: (SoilDerivedIndex uniqueSelector: #id keySize: 8);
+		yourself).
+	tx root
+		add: ((self newPersonNamed: 'John' surname: 'Doe') id: 'a1'; yourself);
+		add: ((self newPersonNamed: 'Jane' surname: 'Doe') id: 'a2'; yourself).
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: ((tx2 root indexFor: #id) find: 'a2') asArray first firstName equals: 'Jane'.
+	self assert: ((tx2 root indexFor: #id) find: 'a') isEmpty.
 	tx2 abort
 ]
 
@@ -145,5 +213,8 @@ SoilIndexedCollectionTest >> testKeySizeIsSetPerIndex [
 	self assert: narrow index keySize equals: 10.
 	self assert: wide index keySize equals: 24.
 	self assert: (SoilDerivedIndex selector: #id) index keySize equals: 16.
+	self assert: (SoilDerivedIndex selector: #id) layout keySize equals: 16.
+	self assert: narrow layout attributeSize equals: 2.
+	self assert: (SoilDerivedIndex uniqueSelector: #id keySize: 10) layout attributeSize equals: 10.
 	self assert: wide index valueSize equals: 8
 ]

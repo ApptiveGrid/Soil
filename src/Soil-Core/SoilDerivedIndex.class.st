@@ -17,6 +17,7 @@ Class {
 		'selector',
 		'id',
 		'index',
+		'layout',
 		'segment',
 		'transaction'
 	],
@@ -38,6 +39,15 @@ SoilDerivedIndex class >> selector: aSymbol keySize: anInteger [
 		yourself
 ]
 
+{ #category : #'instance creation' }
+SoilDerivedIndex class >> uniqueSelector: aSymbol keySize: anInteger [
+	"an index in which every object has its own value, the attribute takes the whole key size"
+	^ (self selector: aSymbol)
+		beUnique;
+		keySize: anInteger;
+		yourself
+]
+
 { #category : #accessing }
 SoilDerivedIndex class >> soilTransientInstVars [
 	^ #( index segment transaction )
@@ -45,17 +55,27 @@ SoilDerivedIndex class >> soilTransientInstVars [
 
 { #category : #adding }
 SoilDerivedIndex >> add: anObject objectId: objectId [
-	| key oldValue |
-	key := anObject perform: selector.
-	oldValue := self newIterator at: key add: objectId.
+	| value provisionalKey oldValue |
+	value := anObject perform: selector.
+	"builds the key to find out early whether the value can be indexed. The object id of a
+	new object is not set before the transaction commits, so this key is only good for
+	this transaction's own index; the journal entry builds its key at commit"
+	provisionalKey := self keyFor: value objectId: objectId.
+	oldValue := self newIterator at: provisionalKey add: objectId.
 
 	transaction addJournalEntry: (SoilAddKeyEntry new
 			 segment: [ self segment ];
 			 id: id;
-			 key: (self index indexKey: key);
+			 key: [ self index indexKey: (self keyFor: value objectId: objectId) ];
 			 value: objectId;
-			 oldValue: oldValue).
+			 oldValue: (objectId isInitialized ifTrue: [ oldValue ])).
 	^ objectId
+]
+
+{ #category : #initialization }
+SoilDerivedIndex >> beUnique [
+	"every object has its own value: the key is the attribute alone, without the object id"
+	layout := SoilDerivedKeyLayout keySize: layout keySize unique: true
 ]
 
 { #category : #initialization }
@@ -67,8 +87,9 @@ SoilDerivedIndex >> createIndex [
 		keySize: 16;
 		valueSize: 8;
 		maxLevel: 16;
-		uniqueKeys: false;
-		yourself
+		uniqueKeys: true;
+		yourself.
+	layout := SoilDerivedKeyLayout keySize: 16 unique: false
 ]
 
 { #category : #accessing }
@@ -107,9 +128,39 @@ SoilDerivedIndex >> isPresentOnDisk [
 	^ self index isPresentOnDisk
 ]
 
+{ #category : #searching }
+SoilDerivedIndex >> find: aValue [
+	"all objects whose attribute is aValue, in the order of their object ids"
+	| range iterator found result |
+	range := self rangeFor: aValue.
+	iterator := self newIterator.
+	result := OrderedCollection new.
+	found := iterator nextKeyCloseTo: range firstIndexKey.
+	[ found notNil and: [ range includesKey: found ] ] whileTrue: [
+		result add: (iterator at: found).
+		found := iterator nextKeyCloseTo: found + 1 ].
+	^ result
+]
+
+{ #category : #private }
+SoilDerivedIndex >> keyFor: aValue objectId: anObjectId [
+	^ [ layout keyFor: aValue objectId: anObjectId ]
+		on: SoilUnsupportedError
+		do: [ :error |
+			SoilUnsupportedError signal: 'derived index on #' , selector asString , ': ' , error messageText ]
+]
+
 { #category : #accessing }
 SoilDerivedIndex >> keySize: anInteger [
-	self index keySize: anInteger
+	"before the first entry is added: the key size is part of the layout and of the header
+	of the index"
+	self index keySize: anInteger.
+	layout := SoilDerivedKeyLayout keySize: anInteger unique: layout isUnique
+]
+
+{ #category : #accessing }
+SoilDerivedIndex >> layout [
+	^ layout
 ]
 
 { #category : #'instance creation' }
@@ -124,6 +175,14 @@ SoilDerivedIndex >> newIterator [
 SoilDerivedIndex >> printOn: aStream [
 	super printOn: aStream.
 	aStream << ' on #' << selector asString
+]
+
+{ #category : #private }
+SoilDerivedIndex >> rangeFor: aValue [
+	^ [ layout rangeFor: aValue ]
+		on: SoilUnsupportedError
+		do: [ :error |
+			SoilUnsupportedError signal: 'derived index on #' , selector asString , ': ' , error messageText ]
 ]
 
 { #category : #journal }
