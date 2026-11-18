@@ -73,9 +73,9 @@ SoilMaterializer >> nextAssociation: aClass [
 SoilMaterializer >> nextBehaviorDescription [
 	| behaviorIndex behaviorDescription |
 	behaviorIndex := self nextLengthEncodedInteger.
+	(behaviorIndex == 0) ifTrue: [ ^ SoilBehaviorDescription meta ].
 	behaviorDescription := externalObjectRegistry 
 				behaviorDescriptionAt: behaviorIndex.
-	behaviorDescription isMeta ifTrue: [ ^ behaviorDescription ].
 	^ externalObjectRegistry 
 		behaviorDescriptionWithObjectId: behaviorDescription objectId 
 		andVersion: behaviorDescription version
