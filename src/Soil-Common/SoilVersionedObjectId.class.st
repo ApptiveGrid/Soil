@@ -4,7 +4,7 @@ Class {
 	#instVars : [
 		'version'
 	],
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Common-Model'
 }
 
 { #category : #converting }

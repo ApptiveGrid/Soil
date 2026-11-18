@@ -7,6 +7,11 @@ WideSymbol >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Serializer' }
+WideSymbol >> soilIsWrittenByValue [
+	^ true
+]
+
+{ #category : #'*Soil-Serializer' }
 WideSymbol class >> soilMaterialize: materializer [
 
 	^ materializer nextWideSymbol 
@@ -18,9 +23,4 @@ WideSymbol >> soilSerialize: serializer [
 	if the Symbol is larger than an inernal reference, we might waste space (most symbols are small)"
 	
 	self soilBasicSerialize: serializer
-]
-
-{ #category : #'*Soil-Serializer' }
-WideSymbol >> soilIsWrittenByValue [
-	^ true
 ]

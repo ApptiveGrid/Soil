@@ -88,11 +88,6 @@ SoilTransactionJournal >> createdAt [
 	^ entries first createdAt
 ]
 
-{ #category : #accessing }
-SoilTransactionJournal >> duration [
-	^ (self committedAt - self createdAt) asMilliSeconds  
-]
-
 { #category : #committing }
 SoilTransactionJournal >> dropKeysAddedAndRemovedAgain [
 	"a key this transaction added and removed again never has to reach the index, so both
@@ -121,6 +116,11 @@ SoilTransactionJournal >> dropKeysAddedAndRemovedAgain [
 						pairing := false ]
 					ifFalse: [ each oldValue: add oldValue ] ] ] ].
 	entries := entries reject: [ :each | dropped includes: each ]
+]
+
+{ #category : #accessing }
+SoilTransactionJournal >> duration [
+	^ (self committedAt - self createdAt) asMilliSeconds  
 ]
 
 { #category : #accessing }

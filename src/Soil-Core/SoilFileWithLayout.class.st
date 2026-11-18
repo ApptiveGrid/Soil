@@ -89,28 +89,10 @@ SoilFileWithLayout >> initializeFilesystem [
 	stream flush
 ]
 
-{ #category : #'open/close' }
-SoilFileWithLayout >> open [ 
-	| create |
-	create := self path exists.
-	stream := self soil streamOnPath: self path.
-	create ifFalse: [
-		stream
-			position: 0; 
-			nextPutAll: self prefix.
-		self initializeFields.
-		stream flush  ]
-]
-
-{ #category : #accessing }
-SoilFileWithLayout >> path [
-	^ path 
-]
-
-{ #category : #accessing }
-SoilFileWithLayout >> path: anObject [
-
-	path := anObject asFileReference 
+{ #category : #locking }
+SoilFileWithLayout >> lockAttempts [
+	"a second, ten milliseconds at a time"
+	^ 100
 ]
 
 { #category : #locking }
@@ -140,10 +122,28 @@ SoilFileWithLayout >> lockField: aField [
 			error retry ]
 ]
 
-{ #category : #locking }
-SoilFileWithLayout >> lockAttempts [
-	"a second, ten milliseconds at a time"
-	^ 100
+{ #category : #'open/close' }
+SoilFileWithLayout >> open [ 
+	| create |
+	create := self path exists.
+	stream := self soil streamOnPath: self path.
+	create ifFalse: [
+		stream
+			position: 0; 
+			nextPutAll: self prefix.
+		self initializeFields.
+		stream flush  ]
+]
+
+{ #category : #accessing }
+SoilFileWithLayout >> path [
+	^ path 
+]
+
+{ #category : #accessing }
+SoilFileWithLayout >> path: anObject [
+
+	path := anObject asFileReference 
 ]
 
 { #category : #writing }

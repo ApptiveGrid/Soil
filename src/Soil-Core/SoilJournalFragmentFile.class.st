@@ -316,21 +316,6 @@ SoilJournalFragmentFile >> stream [
 ]
 
 { #category : #journal }
-SoilJournalFragmentFile >> transactionJournals [
-	| transactionJournals entry |
-	self stream position: self dataPosition.
-	transactionJournals := OrderedDictionary new.
-	[ stream atEnd ] whileFalse: [  
-		entry := SoilJournalEntry readFrom: stream.
-		entry isTransactionEntry ifTrue: [ 
-			(transactionJournals 
-				at: entry transactionId
-				ifAbsentPut: [ SoilTransactionJournal new index: entry transactionId ])
-					addEntry: entry ] ].
-	^ transactionJournals values
-]
-
-{ #category : #journal }
 SoilJournalFragmentFile >> transactionJournalAt: anInteger ifAbsent: aBlock [
 	"read the entries of one transaction. Reading stops at its commit entry, or at the
 	first entry of a later transaction: the fragment may be the one being written to,
@@ -347,6 +332,21 @@ SoilJournalFragmentFile >> transactionJournalAt: anInteger ifAbsent: aBlock [
 						addEntry: entry.
 				entry class == SoilCommitTransactionEntry ifTrue: [ ^ transactionJournal ] ] ] ].
 	^ transactionJournal ifNil: aBlock
+]
+
+{ #category : #journal }
+SoilJournalFragmentFile >> transactionJournals [
+	| transactionJournals entry |
+	self stream position: self dataPosition.
+	transactionJournals := OrderedDictionary new.
+	[ stream atEnd ] whileFalse: [  
+		entry := SoilJournalEntry readFrom: stream.
+		entry isTransactionEntry ifTrue: [ 
+			(transactionJournals 
+				at: entry transactionId
+				ifAbsentPut: [ SoilTransactionJournal new index: entry transactionId ])
+					addEntry: entry ] ].
+	^ transactionJournals values
 ]
 
 { #category : #accessing }

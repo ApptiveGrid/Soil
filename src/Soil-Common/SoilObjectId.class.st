@@ -23,7 +23,7 @@ Class {
 	#classVars : [
 		'RootObjectId'
 	],
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Common-Model'
 }
 
 { #category : #examples }
@@ -91,20 +91,6 @@ SoilObjectId >> asObjectIdVersion: anInteger [
 { #category : #converting }
 SoilObjectId >> asSoilObjectId [
 	^ self 
-]
-
-{ #category : #converting }
-SoilObjectId >> asSoilObjectProxy [
-	^ SoilObjectProxy basicNew 
-		objectId: self
-]
-
-{ #category : #tools }
-SoilObjectId >> findReferencesIn: aDatabase [
-	^ SoilReferenceFinder new
-		soil: aDatabase;
-		find: self;
-		references 
 ]
 
 { #category : #testing }

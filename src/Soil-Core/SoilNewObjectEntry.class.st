@@ -102,6 +102,14 @@ SoilNewObjectEntry >> value [
 	^ position 
 ]
 
+{ #category : #committing }
+SoilNewObjectEntry >> wasWrittenAt: anInteger [
+	position := anInteger.
+	record ifNotNil: [ 
+		record position: position.
+		record := nil ]
+]
+
 { #category : #writing }
 SoilNewObjectEntry >> writeOn: aStream [ 
 	super writeOn: aStream.
@@ -110,14 +118,6 @@ SoilNewObjectEntry >> writeOn: aStream [
 		nextPutLengthEncodedInteger: bytes size;
 		nextPutAll: bytes
 	
-]
-
-{ #category : #committing }
-SoilNewObjectEntry >> wasWrittenAt: anInteger [
-	position := anInteger.
-	record ifNotNil: [ 
-		record position: position.
-		record := nil ]
 ]
 
 { #category : #testing }

@@ -46,7 +46,7 @@ SoilBasicSerializer >> nextPutByteArray: aByteArray [
 
 { #category : #'writing - basic' }
 SoilBasicSerializer >> nextPutBytesFrom: aByteArray [
-	stream nextBytesPutAll: aByteArray 
+	stream soilNextBytesPutAll: aByteArray 
 
 ]
 

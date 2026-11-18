@@ -7,6 +7,11 @@ ByteSymbol >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Serializer' }
+ByteSymbol >> soilIsWrittenByValue [
+	^ true
+]
+
+{ #category : #'*Soil-Serializer' }
 ByteSymbol class >> soilMaterialize: materializer [
 
 	^ materializer nextSymbol
@@ -18,9 +23,4 @@ ByteSymbol >> soilSerialize: serializer [
 	if the Symbol is larger than an inernal reference, we might waste space (most symbols are small)"
 	
 	self soilBasicSerialize: serializer
-]
-
-{ #category : #'*Soil-Serializer' }
-ByteSymbol >> soilIsWrittenByValue [
-	^ true
 ]

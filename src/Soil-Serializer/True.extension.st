@@ -6,11 +6,11 @@ True >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Serializer' }
-True >> soilSerialize: serializer [
-	self soilBasicSerialize: serializer 
+True >> soilIsWrittenByValue [
+	^ true
 ]
 
 { #category : #'*Soil-Serializer' }
-True >> soilIsWrittenByValue [
-	^ true
+True >> soilSerialize: serializer [
+	self soilBasicSerialize: serializer 
 ]
