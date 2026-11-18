@@ -93,20 +93,6 @@ SoilObjectId >> asSoilObjectId [
 	^ self 
 ]
 
-{ #category : #converting }
-SoilObjectId >> asSoilObjectProxy [
-	^ SoilObjectProxy basicNew 
-		objectId: self
-]
-
-{ #category : #tools }
-SoilObjectId >> findReferencesIn: aDatabase [
-	^ SoilReferenceFinder new
-		soil: aDatabase;
-		find: self;
-		references 
-]
-
 { #category : #testing }
 SoilObjectId >> hasSameSegment: aSegment andIndex: anIndex [ 
 	^ (segment == aSegment) and: [ index == anIndex ]
