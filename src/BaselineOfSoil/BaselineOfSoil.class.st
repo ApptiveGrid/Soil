@@ -20,6 +20,7 @@ BaselineOfSoil >> baseline: spec [
 		spec package: #'Soil-Resident-Tests' with: [ spec requires: #('Soil-Resident' 'Soil-Core-Tests') ] ].
 
 	spec 
+		group: 'serializer' with: #('Soil-Serializer');
 		group: 'tests' with: #('Soil-Core-Tests' 'Soil-File-Tests' 'Soil-Serializer-Tests' 'Soil-Resident-Tests' );
 		group: 'default' with: #( 'Soil-Core' 'Soil-Resident' 'tests' ) 
 ]
