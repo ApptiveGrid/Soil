@@ -35,13 +35,6 @@ SoilBehaviorDescription class >> isSoilClusterRoot [
 	^ true
 ]
 
-{ #category : #combining }
-SoilBehaviorDescription class >> meta [
-	^ (self for: self) 
-		beFirstVersion;
-		objectId: self metaId
-]
-
 { #category : #accessing }
 SoilBehaviorDescription class >> soilTransientInstVars [ 
 	^ #( objectId objectClass current) 
