@@ -367,6 +367,36 @@ SoilTransaction >> commitStrategy [
 	^ commitStrategy
 ]
 
+{ #category : #actions }
+SoilTransaction >> continue [
+	"what was committed is now what I read: the records, the read version and an empty
+	journal. That holds for a commit without records as well. One that only changed
+	indexes used to keep its journal and its read version: the next commit wrote its key
+	entries a second time, and found its own commit among the transactions since it read"
+	writeVersion ifNil: [ ^ self ].
+	commitStrategy records do: [ :record | | persistentRecord |
+		persistentRecord := record asPersistentClusterVersion.
+		objectMap at: record object put: persistentRecord.
+		idMap at: record objectId put: persistentRecord ].
+	commitStrategy reset.
+	self flag: #todo.
+	"we change the readVersion here so we can read back the 
+	objects we've just changed. But we do not check if all the
+	not-updated objects are still at a current state. So there 
+	can be objects that are out-of-date. Reading will read old 
+	state and writing to them will make the transaction commit 
+	fail because then there is a concurrent modification"
+	readVersion := writeVersion.
+	writeVersion := nil.
+	journal := nil.
+	lastObjectIndexes := nil
+]
+
+{ #category : #accessing }
+SoilTransaction >> database [
+	^ soil
+]
+
 { #category : #committing }
 SoilTransaction >> detectIndexConflicts [
 	"the commit applies the key entries of the journal to the persistent indexes. Before
@@ -408,36 +438,6 @@ SoilTransaction >> detectIndexConflicts [
 									indexId: mine id;
 									key: mine key;
 									signal ] ] ] ] ]
-]
-
-{ #category : #actions }
-SoilTransaction >> continue [
-	"what was committed is now what I read: the records, the read version and an empty
-	journal. That holds for a commit without records as well. One that only changed
-	indexes used to keep its journal and its read version: the next commit wrote its key
-	entries a second time, and found its own commit among the transactions since it read"
-	writeVersion ifNil: [ ^ self ].
-	commitStrategy records do: [ :record | | persistentRecord |
-		persistentRecord := record asPersistentClusterVersion.
-		objectMap at: record object put: persistentRecord.
-		idMap at: record objectId put: persistentRecord ].
-	commitStrategy reset.
-	self flag: #todo.
-	"we change the readVersion here so we can read back the 
-	objects we've just changed. But we do not check if all the
-	not-updated objects are still at a current state. So there 
-	can be objects that are out-of-date. Reading will read old 
-	state and writing to them will make the transaction commit 
-	fail because then there is a concurrent modification"
-	readVersion := writeVersion.
-	writeVersion := nil.
-	journal := nil.
-	lastObjectIndexes := nil
-]
-
-{ #category : #accessing }
-SoilTransaction >> database [
-	^ soil
 ]
 
 { #category : #accessing }
@@ -655,13 +655,6 @@ SoilTransaction >> materializeRecord: record [
 	^ record 
 ]
 
-{ #category : #committing }
-SoilTransaction >> normalizeJournal [
-	"the journal holds the changes in the order they were made. Before anything is validated
-	or written it is brought into the form that is applied"
-	journal dropKeysAddedAndRemovedAgain
-]
-
 { #category : #testing }
 SoilTransaction >> needsCommit [
 
@@ -718,6 +711,13 @@ SoilTransaction >> newSerializer: aSerializerClass [
 	^ (soil newSerializer: aSerializerClass)
 		transaction: self;
 		yourself
+]
+
+{ #category : #committing }
+SoilTransaction >> normalizeJournal [
+	"the journal holds the changes in the order they were made. Before anything is validated
+	or written it is brought into the form that is applied"
+	journal dropKeysAddedAndRemovedAgain
 ]
 
 { #category : #accessing }
@@ -783,16 +783,6 @@ SoilTransaction >> proxyForObjectId: aSOObjectId [
 		transaction: self
 ]
 
-{ #category : #accessing }
-SoilTransaction >> readVersion [
-	^ readVersion
-]
-
-{ #category : #accessing }
-SoilTransaction >> readVersion: anInteger [ 
-	readVersion := anInteger
-]
-
 { #category : #private }
 SoilTransaction >> readRecordWithId: objectId [
 	"the record of objectId at my read version, materialized, or nil when there is none.
@@ -820,6 +810,16 @@ SoilTransaction >> readRecordWithId: objectId [
 					on: Error
 					do: [ nil ])
 				reason: error) signal ]
+]
+
+{ #category : #accessing }
+SoilTransaction >> readVersion [
+	^ readVersion
+]
+
+{ #category : #accessing }
+SoilTransaction >> readVersion: anInteger [ 
+	readVersion := anInteger
 ]
 
 { #category : #api }

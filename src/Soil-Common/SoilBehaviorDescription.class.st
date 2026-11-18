@@ -21,7 +21,7 @@ Class {
 		'objectClass',
 		'current'
 	],
-	#category : #'Soil-Serializer-Base'
+	#category : #'Soil-Common-Base'
 }
 
 { #category : #'instance creation' }

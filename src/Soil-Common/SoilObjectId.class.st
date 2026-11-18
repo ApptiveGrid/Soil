@@ -23,7 +23,7 @@ Class {
 	#classVars : [
 		'RootObjectId'
 	],
-	#category : #'Soil-Core-Model'
+	#category : #'Soil-Common-Model'
 }
 
 { #category : #examples }

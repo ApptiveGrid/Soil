@@ -181,19 +181,19 @@ SoilPersistentDatabaseJournal >> importTransactionJournal: aSoilTransactionJourn
 	self addTransactionJournal: aSoilTransactionJournal
 ]
 
-{ #category : #initialization }
-SoilPersistentDatabaseJournal >> initialize [ 
-	super initialize.
-	transactionJournals := LRUCache new maximumWeight: 20.
-	semaphore := Mutex new
-]
-
 { #category : #accessing }
 SoilPersistentDatabaseJournal >> inMemoryTransactionJournalAt: anInteger ifAbsent: aBlock [
 	"the cache answers a missing key only through #at:ifAbsentPut:, which runs its block
 	inside the cache's lock. The block returns right away, so nothing slow happens
 	while commits wait for that lock"
 	^ transactionJournals at: anInteger ifAbsentPut: [ ^ aBlock value ]
+]
+
+{ #category : #initialization }
+SoilPersistentDatabaseJournal >> initialize [ 
+	super initialize.
+	transactionJournals := LRUCache new maximumWeight: 20.
+	semaphore := Mutex new
 ]
 
 { #category : #initialization }
