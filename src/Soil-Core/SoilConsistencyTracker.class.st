@@ -13,62 +13,6 @@ Class {
 }
 
 { #category : #checking }
-SoilConsistencyTracker >> check: anObject using: aBlock [
-	"a check that fails in a way no finding names is kept as one all the same"
-	aBlock 
-		on: Error 
-		do: [ :error | self report: (SoilUnexpectedFinding subject: anObject error: error) ]
-]
-
-{ #category : #checking }
-SoilConsistencyTracker >> versionsOf: aCluster in: aVisitor onFault: aBlock do: eachBlock [
-	"aCluster and every version before it, newest first, each without its payload, handed
-	to eachBlock as the chain is followed and not kept: what is held is the set of
-	positions the walk has been at, and nothing else.
-	Where the chain cannot be followed on - a previous version that cannot be read, one
-	that runs into the record after it, a version that does not come before the one after
-	it, a position it has already been at - the fault is handed to aBlock with the
-	position of the last record that is fine - the one whose link to its previous version
-	cannot be followed - and the walk ends there.
-	Without the guard on positions a loop never ends.
-	A record is written behind the ones before it, so a previous version ends where the
-	record after it starts at the latest. One that starts before it and runs on into it
-	is not a record but bytes that read as one - a link into the middle of a record, say -
-	and what such a head names, its descriptions above all, is noise.
-	The meta segment is the exception to the order: there the record version says from
-	which version of the database on a behavior description is seen, not where it stands
-	in its chain. An import writes the next version of a description under its own
-	number (SoilBehaviorRegistry>>addNewVersion:withId:transaction:), and the version
-	before it carries the number of the commit that wrote it - in 69fdb5e3 version 2 lay
-	on version 5. A chain there is ordered by the versions of the descriptions"
-	| segment current positions |
-	segment := aVisitor soil objectRepository segmentAt: aCluster segment.
-	positions := Set with: aCluster position.
-	current := aCluster.
-	eachBlock value: current.
-	[ current hasPreviousVersion ] whileTrue: [ | position previous |
-		position := current previousVersionPosition.
-		(positions includes: position) ifTrue: [ 
-			^ aBlock value: current position value: 'previous version leads back to position ', position printString ].
-		positions add: position.
-		previous := [ 
-			self 
-				countsOfHeadAt: position 
-				in: segment 
-				fitBefore: (position < current position ifTrue: [ current position ] ifFalse: [ nil ]).
-			(segment headAtPosition: position) objectId: aCluster objectId; yourself ]
-			on: Error 
-			do: [ :error | 
-				^ aBlock value: current position value: 'previous version at position ', position printString, ' cannot be read: ', error messageText asString ].
-		(position < current position and: [ position + previous length > current position ]) ifTrue: [ 
-			^ aBlock value: current position value: 'previous version ', previous version printString, ' at position ', position printString, ' overlaps the record at ', current position printString ].
-		(segment isMeta or: [ previous version < current version ]) ifFalse: [
-			^ aBlock value: current position value: 'previous version ', previous version printString, ' at position ', position printString, ' does not come before version ', current version printString ].
-		eachBlock value: previous.
-		current := previous ]
-]
-
-{ #category : #checking }
 SoilConsistencyTracker >> chainOf: aCluster in: aVisitor onFault: aBlock [
 	"aCluster and every version before it, newest first, each without its payload, as a
 	collection. Holds the whole chain: an object that is written at every commit has a
@@ -83,6 +27,14 @@ SoilConsistencyTracker >> chainOf: aCluster in: aVisitor onFault: aBlock [
 		onFault: aBlock 
 		do: [ :each | versions add: each ].
 	^ versions
+]
+
+{ #category : #checking }
+SoilConsistencyTracker >> check: anObject using: aBlock [
+	"a check that fails in a way no finding names is kept as one all the same"
+	aBlock 
+		on: Error 
+		do: [ :error | self report: (SoilUnexpectedFinding subject: anObject error: error) ]
 ]
 
 { #category : #checking }
@@ -150,4 +102,52 @@ SoilConsistencyTracker >> readCountFrom: aStream [
 { #category : #checking }
 SoilConsistencyTracker >> report: aSoilFinding [
 	findings add: aSoilFinding
+]
+
+{ #category : #checking }
+SoilConsistencyTracker >> versionsOf: aCluster in: aVisitor onFault: aBlock do: eachBlock [
+	"aCluster and every version before it, newest first, each without its payload, handed
+	to eachBlock as the chain is followed and not kept: what is held is the set of
+	positions the walk has been at, and nothing else.
+	Where the chain cannot be followed on - a previous version that cannot be read, one
+	that runs into the record after it, a version that does not come before the one after
+	it, a position it has already been at - the fault is handed to aBlock with the
+	position of the last record that is fine - the one whose link to its previous version
+	cannot be followed - and the walk ends there.
+	Without the guard on positions a loop never ends.
+	A record is written behind the ones before it, so a previous version ends where the
+	record after it starts at the latest. One that starts before it and runs on into it
+	is not a record but bytes that read as one - a link into the middle of a record, say -
+	and what such a head names, its descriptions above all, is noise.
+	The meta segment is the exception to the order: there the record version says from
+	which version of the database on a behavior description is seen, not where it stands
+	in its chain. An import writes the next version of a description under its own
+	number (SoilBehaviorRegistry>>addNewVersion:withId:transaction:), and the version
+	before it carries the number of the commit that wrote it - in 69fdb5e3 version 2 lay
+	on version 5. A chain there is ordered by the versions of the descriptions"
+	| segment current positions |
+	segment := aVisitor soil objectRepository segmentAt: aCluster segment.
+	positions := Set with: aCluster position.
+	current := aCluster.
+	eachBlock value: current.
+	[ current hasPreviousVersion ] whileTrue: [ | position previous |
+		position := current previousVersionPosition.
+		(positions includes: position) ifTrue: [ 
+			^ aBlock value: current position value: 'previous version leads back to position ', position printString ].
+		positions add: position.
+		previous := [ 
+			self 
+				countsOfHeadAt: position 
+				in: segment 
+				fitBefore: (position < current position ifTrue: [ current position ] ifFalse: [ nil ]).
+			(segment headAtPosition: position) objectId: aCluster objectId; yourself ]
+			on: Error 
+			do: [ :error | 
+				^ aBlock value: current position value: 'previous version at position ', position printString, ' cannot be read: ', error messageText asString ].
+		(position < current position and: [ position + previous length > current position ]) ifTrue: [ 
+			^ aBlock value: current position value: 'previous version ', previous version printString, ' at position ', position printString, ' overlaps the record at ', current position printString ].
+		(segment isMeta or: [ previous version < current version ]) ifFalse: [
+			^ aBlock value: current position value: 'previous version ', previous version printString, ' at position ', position printString, ' does not come before version ', current version printString ].
+		eachBlock value: previous.
+		current := previous ]
 ]

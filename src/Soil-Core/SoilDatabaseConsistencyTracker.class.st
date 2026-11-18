@@ -13,12 +13,6 @@ Class {
 	#category : #'Soil-Core-Visitor'
 }
 
-{ #category : #accessing }
-SoilDatabaseConsistencyTracker >> presentDescriptions [
-	"the indexes of the behavior descriptions that were looked up and are there"
-	^ presentDescriptions
-]
-
 { #category : #checking }
 SoilDatabaseConsistencyTracker >> absentDescriptionsOf: aVersion in: aVisitor [
 	"the behavior descriptions aVersion refers to that are not an object in the meta segment"
@@ -214,6 +208,12 @@ SoilDatabaseConsistencyTracker >> lastIndexOfSegment: anInteger in: aVisitor [
 	^ lastIndexes 
 		at: anInteger 
 		ifAbsentPut: [ (aVisitor soil objectRepository segmentAt: anInteger) lastObjectIndex ]
+]
+
+{ #category : #accessing }
+SoilDatabaseConsistencyTracker >> presentDescriptions [
+	"the indexes of the behavior descriptions that were looked up and are there"
+	^ presentDescriptions
 ]
 
 { #category : #reporting }

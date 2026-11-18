@@ -18,6 +18,11 @@ Class >> soilBehaviorIdentifier [
 ]
 
 { #category : #'*Soil-Serializer' }
+Class >> soilIsWrittenByValue [
+	^ true
+]
+
+{ #category : #'*Soil-Serializer' }
 Class class >> soilMaterialize: materializer [
 
 	^ materializer nextClass
@@ -34,9 +39,4 @@ Class >> soilTransientInstVars [
 	"transient instance vars of the hierachy.
 	Important: the array of names is for the *hierarchy*"
 	^ #()
-]
-
-{ #category : #'*Soil-Serializer' }
-Class >> soilIsWrittenByValue [
-	^ true
 ]

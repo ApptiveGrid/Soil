@@ -55,18 +55,6 @@ SoilObjectSegment >> at: anInteger putBytes: bytes [
 ]
 
 { #category : #accessing }
-SoilObjectSegment >> putAll: aCollectionOfAssociations [
-	"index -> bytes for each record, written the way #at:putBytes: writes one: the bytes
-	first, all of them, then the index slots that point at them. Answers the positions in
-	the order of aCollectionOfAssociations"
-	| positions |
-	positions := objectFile appendAllBytes: (aCollectionOfAssociations collect: [ :each | each value ]).
-	indexFile putPositions: (aCollectionOfAssociations with: positions collect: [ :each :position |
-		each key -> position ]).
-	^ positions
-]
-
-{ #category : #accessing }
 SoilObjectSegment >> at: index version: version [ 
 	| record |
 	record := self at: index.
@@ -389,6 +377,18 @@ SoilObjectSegment >> path: anObject [
 { #category : #printing }
 SoilObjectSegment >> printOn: aStream [
 	aStream << 'segment #' << id asString
+]
+
+{ #category : #accessing }
+SoilObjectSegment >> putAll: aCollectionOfAssociations [
+	"index -> bytes for each record, written the way #at:putBytes: writes one: the bytes
+	first, all of them, then the index slots that point at them. Answers the positions in
+	the order of aCollectionOfAssociations"
+	| positions |
+	positions := objectFile appendAllBytes: (aCollectionOfAssociations collect: [ :each | each value ]).
+	indexFile putPositions: (aCollectionOfAssociations with: positions collect: [ :each :position |
+		each key -> position ]).
+	^ positions
 ]
 
 { #category : #accessing }

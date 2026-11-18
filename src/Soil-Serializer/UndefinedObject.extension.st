@@ -6,6 +6,11 @@ UndefinedObject >> soilBasicSerialize: serializer [
 ]
 
 { #category : #'*Soil-Serializer' }
+UndefinedObject >> soilIsWrittenByValue [
+	^ true
+]
+
+{ #category : #'*Soil-Serializer' }
 UndefinedObject class >> soilMaterialize: materializer [
 	^ nil
 ]
@@ -13,9 +18,4 @@ UndefinedObject class >> soilMaterialize: materializer [
 { #category : #'*Soil-Serializer' }
 UndefinedObject >> soilSerialize: serializer [ 
 	self soilBasicSerialize: serializer 
-]
-
-{ #category : #'*Soil-Serializer' }
-UndefinedObject >> soilIsWrittenByValue [
-	^ true
 ]

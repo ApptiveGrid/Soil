@@ -102,22 +102,6 @@ SoilSerializer >> nextPutDictionary: aDictionary [
 ]
 
 { #category : #registry }
-SoilSerializer >> nextPutProxy: aProxy [
-	"A proxy is a reference that has not been read. Writing it as one is the whole point:
-	resolving it first reads the cluster it points at, only to throw that object away
-	again and write its id - one read per reference, every time an object is written back.
-
-	If there is no registry, or it will not take the proxy, there is nothing to write a
-	reference into and the object itself has to go in."
-	| index |
-	index := externalObjectRegistry
-		ifNil: [ 0 ]
-		ifNotNil: [ externalObjectRegistry indexOfExternalReference: aProxy ].
-	index = 0 ifTrue: [ ^ aProxy soilRealObject soilSerialize: self ].
-	self nextPutExternalReference: index
-]
-
-{ #category : #registry }
 SoilSerializer >> nextPutExternalReference: anInteger [
 	self 
 		nextPutByte: TypeCodeExternalReference; 
@@ -167,6 +151,22 @@ SoilSerializer >> nextPutPersistentDictionary: aPersistentDictionary [
 { #category : #writing }
 SoilSerializer >> nextPutProcessorScheduler: aProcessorScheduler [ 
 	self nextPutByte: TypeCodeProcessScheduler 
+]
+
+{ #category : #registry }
+SoilSerializer >> nextPutProxy: aProxy [
+	"A proxy is a reference that has not been read. Writing it as one is the whole point:
+	resolving it first reads the cluster it points at, only to throw that object away
+	again and write its id - one read per reference, every time an object is written back.
+
+	If there is no registry, or it will not take the proxy, there is nothing to write a
+	reference into and the object itself has to go in."
+	| index |
+	index := externalObjectRegistry
+		ifNil: [ 0 ]
+		ifNotNil: [ externalObjectRegistry indexOfExternalReference: aProxy ].
+	index = 0 ifTrue: [ ^ aProxy soilRealObject soilSerialize: self ].
+	self nextPutExternalReference: index
 ]
 
 { #category : #writing }

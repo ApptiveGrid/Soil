@@ -38,12 +38,6 @@ SoilTracker >> trackIndex: anIndex segment: aSoilObjectSegment in: aVisitor [
 ]
 
 { #category : #tracking }
-SoilTracker >> trackValue: aSoilObjectId ofIndex: anIndex segment: aSoilObjectSegment in: aVisitor [
-	"every value the walk reads from anIndex, with the index it came from - which
-	#trackObjectId:in: does not say"
-]
-
-{ #category : #tracking }
 SoilTracker >> trackObjectId: aSoilObjectId in: aVisitor [
 	"every time the walk reaches aSoilObjectId, through a reference, an index value or
 	a behavior description - not only the first time"
@@ -53,4 +47,10 @@ SoilTracker >> trackObjectId: aSoilObjectId in: aVisitor [
 SoilTracker >> trackUnreadableRecord: aSoilUnreadableRecord in: aVisitor [
 	"a record the walk could not read, the error that says which one and why. The walk
 	goes on without it"
+]
+
+{ #category : #tracking }
+SoilTracker >> trackValue: aSoilObjectId ofIndex: anIndex segment: aSoilObjectSegment in: aVisitor [
+	"every value the walk reads from anIndex, with the index it came from - which
+	#trackObjectId:in: does not say"
 ]

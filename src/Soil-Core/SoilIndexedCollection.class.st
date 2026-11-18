@@ -38,6 +38,13 @@ SoilIndexedCollection >> addIndex: anIndex [
 ]
 
 { #category : #accessing }
+SoilIndexedCollection >> indexFor: aSelector [
+	^ indexes
+		detect: [ :each | each selector = aSelector asSymbol ]
+		ifNone: [ nil ]
+]
+
+{ #category : #accessing }
 SoilIndexedCollection >> indexes [
 	^ indexes
 ]
@@ -46,13 +53,6 @@ SoilIndexedCollection >> indexes [
 SoilIndexedCollection >> initialize [
 	super initialize.
 	indexes := OrderedCollection new
-]
-
-{ #category : #accessing }
-SoilIndexedCollection >> indexFor: aSelector [
-	^ indexes
-		detect: [ :each | each selector = aSelector asSymbol ]
-		ifNone: [ nil ]
 ]
 
 { #category : #accessing }

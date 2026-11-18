@@ -56,20 +56,7 @@ SoilJournalEntry >> initialize [
 ]
 
 { #category : #testing }
-SoilJournalEntry >> writesObjectBytes [
-	"whether committing me writes the bytes of an object - those are written together,
-	see SoilTransactionJournal>>commitIn:recovery:"
-	^ false
-]
-
-{ #category : #testing }
 SoilJournalEntry >> isTransactionEntry [ 
-	^ false
-]
-
-{ #category : #testing }
-SoilJournalEntry >> modifiesIndex [
-	"whether I put, move or remove a key of an index"
 	^ false
 ]
 
@@ -77,6 +64,12 @@ SoilJournalEntry >> modifiesIndex [
 SoilJournalEntry >> journal: anObject [
 
 	journal := anObject
+]
+
+{ #category : #testing }
+SoilJournalEntry >> modifiesIndex [
+	"whether I put, move or remove a key of an index"
+	^ false
 ]
 
 { #category : #testing }
@@ -95,4 +88,11 @@ SoilJournalEntry >> writeOn: aStream [
 	aStream 
 		nextPut: self class journalTypeCode;
 		nextPut: version   
+]
+
+{ #category : #testing }
+SoilJournalEntry >> writesObjectBytes [
+	"whether committing me writes the bytes of an object - those are written together,
+	see SoilTransactionJournal>>commitIn:recovery:"
+	^ false
 ]

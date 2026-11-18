@@ -16,6 +16,17 @@ Object >> soilBasicSerializeWithRegistry: aRegistry [
 ]
 
 { #category : #'*Soil-Serializer' }
+Object >> soilIsWrittenByValue [
+	"whether the serializer writes the receiver where it is referenced instead of as a
+	reference to a record of its own - an immediate object, a symbol, a class, true,
+	false and nil. Made a cluster root, such an object gets a record nothing can point at.
+
+	The system objects whose #soilSerialize: does not register either - Smalltalk,
+	Smalltalk globals, Processor - are left out: nobody keeps them as a value"
+	^ self isImmediateObject
+]
+
+{ #category : #'*Soil-Serializer' }
 Object >> soilLoadedIn: aTransaction [ 
 
 ]
@@ -69,15 +80,4 @@ Object >> soilSerializeOn: aStream [
 	bytes := self soilBasicSerializeWithRegistry: registry.
 	registry writeOn: aStream.
 	aStream nextPutAll: bytes
-]
-
-{ #category : #'*Soil-Serializer' }
-Object >> soilIsWrittenByValue [
-	"whether the serializer writes the receiver where it is referenced instead of as a
-	reference to a record of its own - an immediate object, a symbol, a class, true,
-	false and nil. Made a cluster root, such an object gets a record nothing can point at.
-
-	The system objects whose #soilSerialize: does not register either - Smalltalk,
-	Smalltalk globals, Processor - are left out: nobody keeps them as a value"
-	^ self isImmediateObject
 ]
