@@ -9,11 +9,12 @@ BaselineOfSoil >> baseline: spec [
 	<baseline>
 
 	spec for: #'common' do: [
+		spec package: #'Soil-Common' with: [  ].
 		spec package: #'Soil-File' with: [  ].
 		spec package: #'Soil-File-Tests' with: [ spec requires: #('Soil-File') ].
-		spec package: #'Soil-Serializer' with: [  ].		
+		spec package: #'Soil-Serializer' with: [ spec requires: #('Soil-Common') ].		
 		spec package: #'Soil-Serializer-Tests' with: [ spec requires: #('Soil-Serializer') ].
-		spec package: #'Soil-Core' with: [ spec requires: #('Soil-Serializer' 'Soil-File')  ].
+		spec package: #'Soil-Core' with: [ spec requires: #('Soil-Common' 'Soil-Serializer' 'Soil-File')  ].
 		spec package: #'Soil-Core-Tests' with: [ spec requires: #('Soil-Core') ].
 		spec package: #'Soil-Resident' with: [ spec requires: #('Soil-Core') ].
 		spec package: #'Soil-Resident-Tests' with: [ spec requires: #('Soil-Resident' 'Soil-Core-Tests') ] ].
