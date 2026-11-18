@@ -21,11 +21,11 @@ Metacello new
 
 ## Latest release
 
-The latest release is [v5](https://github.com/ApptiveGrid/Soil/tree/v5) which you can load via
+The latest release is [v6](https://github.com/ApptiveGrid/Soil/tree/v6) which you can load via
 
 ```smalltalk
 Metacello new 
-	repository: 'github://ApptiveGrid/Soil:v5/src';
+	repository: 'github://ApptiveGrid/Soil:v6/src';
 	baseline: 'Soil';
 	load.
 ```
@@ -59,6 +59,7 @@ If you want to see Soil in action,  [ApptiveGrid](https://www.apptivegrid.de) is
 - Demo ESUG 2022: "ApptiveGrid, a collaborative Database" [Video Youtube](https://www.youtube.com/watch?v=VVkJsIIqMKM)
 
 ### NEWS
+- [ANN] Release V6 [Announcement](https://github.com/ApptiveGrid/Soil/blob/main/docs/versions/ann-v6.md) 2026-11-19
 - [ANN] Windows support has been merged in main (development) branch 2026-09-06
 - [ANN] Release V5 [Announcement](https://github.com/ApptiveGrid/Soil/blob/main/docs/versions/ann-v5.md) 2026-07-28
 - A Blog Series about Soil internals [Soil Blog](https://norbert.hartl.name/blog/series/soil.html) 2026-07-24
