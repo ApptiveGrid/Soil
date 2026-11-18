@@ -21,7 +21,7 @@ Class {
 		'objectClass',
 		'current'
 	],
-	#category : #'Soil-Common-Base'
+	#category : #'Soil-Common-Model'
 }
 
 { #category : #'instance creation' }
