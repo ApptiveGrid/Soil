@@ -2,7 +2,7 @@
 A SoilQueryPlanner turns the SoilQuery of a user into what reads, for one SoilIndexedCollection. It has one rule:
 if the collection has an index on the property of the query, the primary counts, the planner builds a
 SoilIndexQuery from it with the range of the comparison, the predicate, the position, offset and limit.
-If it has none, it answers a SoilScanQuery that reads the primary and checks comparison and predicate at
+If it has none, it answers a SoilFullScanQuery that reads the primary and checks comparison and predicate at
 every object. A query without a property reads the primary.
 
 Both answer #iterator and #count, and both give the same elements in the same order: by the property
@@ -71,6 +71,6 @@ SoilQueryPlanner >> plan: aSoilQuery [
 		ifNil: [ collection primaryIndex ]
 		ifNotNil: [ :property | collection indexFor: property ].
 	^ index
-		ifNil: [ SoilScanQuery on: aSoilQuery in: collection ]
+		ifNil: [ SoilFullScanQuery on: aSoilQuery in: collection ]
 		ifNotNil: [ self indexQueryFor: aSoilQuery on: index ]
 ]

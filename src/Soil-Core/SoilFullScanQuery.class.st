@@ -1,5 +1,5 @@
 "
-A SoilScanQuery is what a SoilQueryPlanner answers when the collection has no index on the property of the
+A SoilFullScanQuery is what a SoilQueryPlanner answers when the collection has no index on the property of the
 query: it reads the primary and checks comparison and predicate at every object. It answers #iterator and
 #count like a SoilIndexQuery and gives the same elements in the same order, by the property through its
 SoilKeyEncoding and then by the primary key.
@@ -13,7 +13,7 @@ Equality and order are those of the encoding of the query, the standard one unle
 value that the encoding refuses, nil for one, is an error, as it is when it is put into an index.
 "
 Class {
-	#name : #SoilScanQuery,
+	#name : #SoilFullScanQuery,
 	#superclass : #Object,
 	#instVars : [
 		'query',
@@ -23,14 +23,14 @@ Class {
 }
 
 { #category : #'instance creation' }
-SoilScanQuery class >> on: aSoilQuery in: aSoilIndexedCollection [
+SoilFullScanQuery class >> on: aSoilQuery in: aSoilIndexedCollection [
 	^ self new
 		setQuery: aSoilQuery collection: aSoilIndexedCollection;
 		yourself
 ]
 
 { #category : #reading }
-SoilScanQuery >> count [
+SoilFullScanQuery >> count [
 	"how many objects comparison and predicate let through, whatever position, offset and limit say"
 	^ (self primaryQuery
 		predicate: self hitBlock;
@@ -38,12 +38,12 @@ SoilScanQuery >> count [
 ]
 
 { #category : #private }
-SoilScanQuery >> encoding [
+SoilFullScanQuery >> encoding [
 	^ query encoding ifNil: [ SoilKeyEncoding standard ]
 ]
 
 { #category : #private }
-SoilScanQuery >> hitBlock [
+SoilFullScanQuery >> hitBlock [
 	"true for an object that satisfies comparison and predicate of the query"
 	| encoding comparison property predicate |
 	encoding := self encoding.
@@ -60,7 +60,7 @@ SoilScanQuery >> hitBlock [
 ]
 
 { #category : #private }
-SoilScanQuery >> isHit: anObject after: aPosition [
+SoilFullScanQuery >> isHit: anObject after: aPosition [
 	"whether anObject comes after the position: by the property, then by the primary key"
 	| order |
 	query property ifNotNil: [ :property |
@@ -74,20 +74,20 @@ SoilScanQuery >> isHit: anObject after: aPosition [
 ]
 
 { #category : #private }
-SoilScanQuery >> isOrderedByPrimaryKey [
+SoilFullScanQuery >> isOrderedByPrimaryKey [
 	"whether the primary key order is the order asked for: all hits have the one value of an equal comparison"
 	^ query comparison notNil and: [ query comparison isEqual ]
 ]
 
 { #category : #reading }
-SoilScanQuery >> iterator [
+SoilFullScanQuery >> iterator [
 	^ self isOrderedByPrimaryKey
 		ifTrue: [ self unsortedIterator ]
 		ifFalse: [ self sortedIterator ]
 ]
 
 { #category : #private }
-SoilScanQuery >> orderOf: anObject before: another [
+SoilFullScanQuery >> orderOf: anObject before: another [
 	"whether anObject comes before another: by the property through the encoding, then by the primary key"
 	| property primarySelector order |
 	property := query property.
@@ -100,19 +100,19 @@ SoilScanQuery >> orderOf: anObject before: another [
 ]
 
 { #category : #private }
-SoilScanQuery >> primaryQuery [
+SoilFullScanQuery >> primaryQuery [
 	"an index query over the whole primary"
 	^ collection primaryIndex query
 ]
 
 { #category : #private }
-SoilScanQuery >> setQuery: aSoilQuery collection: aSoilIndexedCollection [
+SoilFullScanQuery >> setQuery: aSoilQuery collection: aSoilIndexedCollection [
 	query := aSoilQuery.
 	collection := aSoilIndexedCollection
 ]
 
 { #category : #private }
-SoilScanQuery >> sortedIterator [
+SoilFullScanQuery >> sortedIterator [
 	"reads every hit, sorts, then drops what is before the position and applies offset and limit"
 	| hits sorted |
 	hits := (self primaryQuery
@@ -125,11 +125,11 @@ SoilScanQuery >> sortedIterator [
 		ifNil: [ sorted ]
 		ifNotNil: [ :offset | sorted allButFirst: (offset min: sorted size) ].
 	query limit ifNotNil: [ :limit | sorted := sorted first: (limit min: sorted size) ].
-	^ SoilScanIterator on: sorted
+	^ SoilFullScanIterator on: sorted
 ]
 
 { #category : #private }
-SoilScanQuery >> unsortedIterator [
+SoilFullScanQuery >> unsortedIterator [
 	"the primary in its own order, which is the one asked for"
 	| indexQuery |
 	indexQuery := self primaryQuery
