@@ -54,28 +54,37 @@ SoilDerivedIndex class >> soilTransientInstVars [
 ]
 
 { #category : #adding }
-SoilDerivedIndex >> add: anObject objectId: objectId [
-	| value provisionalKey oldValue |
-	value := anObject perform: selector.
-	"builds the key to find out early whether the value can be indexed. The object id of a
-	new object is not set before the transaction commits, so this key is only good for
-	this transaction's own index; the journal entry builds its key at commit"
-	provisionalKey := self keyFor: value objectId: objectId.
-	oldValue := self newIterator at: provisionalKey add: objectId.
+SoilDerivedIndex >> addKey: aKey objectId: objectId [
+	"aKey is the key built with #keyFor:primaryKey:, it does not depend on the object id, so the
+	entry of a new object is found in this transaction already"
+	| oldValue |
+	oldValue := self newIterator at: aKey add: objectId.
 
 	transaction addJournalEntry: (SoilAddKeyEntry new
 			 segment: [ self segment ];
 			 id: id;
-			 key: [ self index indexKey: (self keyFor: value objectId: objectId) ];
+			 key: (self index indexKey: aKey);
 			 value: objectId;
-			 oldValue: (objectId isInitialized ifTrue: [ oldValue ])).
+			 oldValue: oldValue).
 	^ objectId
+]
+
+{ #category : #testing }
+SoilDerivedIndex >> assertFreeKey: aKey of: anObject [
+	"only for a unique index: the value of anObject must not be held by another element"
+	(self includesKey: aKey) ifTrue: [
+		SoilUnsupportedError signal:
+			'derived index on #' , selector asString , ': another element has the value '
+			, (anObject perform: selector) printString , ' already' ]
 ]
 
 { #category : #initialization }
 SoilDerivedIndex >> beUnique [
-	"every object has its own value: the key is the attribute alone, without the object id"
-	layout := SoilDerivedKeyLayout keySize: layout keySize unique: true
+	"every object has its own value: the key is the attribute alone, without the primary key"
+	layout := SoilDerivedKeyLayout
+		keySize: layout keySize
+		unique: true
+		primaryKeySize: layout primaryKeySize
 ]
 
 { #category : #initialization }
@@ -89,7 +98,8 @@ SoilDerivedIndex >> createIndex [
 		maxLevel: 16;
 		uniqueKeys: true;
 		yourself.
-	layout := SoilDerivedKeyLayout keySize: 16 unique: false
+	"the width of the primary key is set when the index is added to a collection"
+	layout := SoilDerivedKeyLayout keySize: 16 unique: false primaryKeySize: 8
 ]
 
 { #category : #accessing }
@@ -124,13 +134,18 @@ SoilDerivedIndex >> initialize [
 ]
 
 { #category : #testing }
+SoilDerivedIndex >> includesKey: aKey [
+	^ (self newIterator at: aKey ifAbsent: [ nil ]) notNil
+]
+
+{ #category : #testing }
 SoilDerivedIndex >> isPresentOnDisk [
 	^ self index isPresentOnDisk
 ]
 
 { #category : #searching }
 SoilDerivedIndex >> find: aValue [
-	"all objects whose attribute is aValue, in the order of their object ids"
+	"all objects whose attribute is aValue, in the order of their primary keys"
 	| range iterator found result |
 	range := self rangeFor: aValue.
 	iterator := self newIterator.
@@ -142,9 +157,18 @@ SoilDerivedIndex >> find: aValue [
 	^ result
 ]
 
-{ #category : #private }
-SoilDerivedIndex >> keyFor: aValue objectId: anObjectId [
-	^ [ layout keyFor: aValue objectId: anObjectId ]
+{ #category : #testing }
+SoilDerivedIndex >> isUnique [
+	^ layout isUnique
+]
+
+{ #category : #accessing }
+SoilDerivedIndex >> keyFor: anObject primaryKey: aByteArray [
+	"the key of anObject, a ByteArray of the whole key size. The attribute may not be
+	indexable, the error says index and value"
+	| value |
+	value := anObject perform: selector.
+	^ [ layout keyFor: value primaryKey: aByteArray ]
 		on: SoilUnsupportedError
 		do: [ :error |
 			SoilUnsupportedError signal: 'derived index on #' , selector asString , ': ' , error messageText ]
@@ -155,7 +179,10 @@ SoilDerivedIndex >> keySize: anInteger [
 	"before the first entry is added: the key size is part of the layout and of the header
 	of the index"
 	self index keySize: anInteger.
-	layout := SoilDerivedKeyLayout keySize: anInteger unique: layout isUnique
+	layout := SoilDerivedKeyLayout
+		keySize: anInteger
+		unique: layout isUnique
+		primaryKeySize: layout primaryKeySize
 ]
 
 { #category : #accessing }
@@ -175,6 +202,16 @@ SoilDerivedIndex >> newIterator [
 SoilDerivedIndex >> printOn: aStream [
 	super printOn: aStream.
 	aStream << ' on #' << selector asString
+]
+
+{ #category : #accessing }
+SoilDerivedIndex >> primaryKeySize: anInteger [
+	"the width of the primary key of the collection this index belongs to, which the layout
+	puts behind the attribute"
+	layout := SoilDerivedKeyLayout
+		keySize: layout keySize
+		unique: layout isUnique
+		primaryKeySize: anInteger
 ]
 
 { #category : #private }

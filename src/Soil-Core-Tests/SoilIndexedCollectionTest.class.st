@@ -2,7 +2,8 @@ Class {
 	#name : #SoilIndexedCollectionTest,
 	#superclass : #TestCase,
 	#instVars : [
-		'soil'
+		'soil',
+		'counter'
 	],
 	#category : #'Soil-Core-Tests-Index'
 }
@@ -10,6 +11,7 @@ Class {
 { #category : #helpers }
 SoilIndexedCollectionTest >> newCollection [
 	^ SoilIndexedCollection new
+		primary: (SoilDerivedIndex uniqueSelector: #id keySize: 8);
 		addIndex: (SoilDerivedIndex selector: #lastName);
 		addIndex: (SoilDerivedIndex selector: #firstName);
 		yourself
@@ -17,9 +19,17 @@ SoilIndexedCollectionTest >> newCollection [
 
 { #category : #helpers }
 SoilIndexedCollectionTest >> newPersonNamed: firstName surname: lastName [
+	"the primary key is made up, ascending in the order the persons are made"
+	counter := (counter ifNil: [ 0 ]) + 1.
+	^ (self newPersonNamed: firstName surname: lastName id: 'p' , counter printString)
+]
+
+{ #category : #helpers }
+SoilIndexedCollectionTest >> newPersonNamed: firstName surname: lastName id: anId [
 	^ SoilPerson new
 		firstName: firstName;
 		lastName: lastName;
+		id: anId;
 		yourself
 ]
 
@@ -138,24 +148,6 @@ SoilIndexedCollectionTest >> testAddingAnUnindexableValueIsAnErrorThatNamesIndex
 ]
 
 { #category : #tests }
-SoilIndexedCollectionTest >> testUniqueIndexUsesTheWholeKeyForTheValue [
-	| tx tx2 |
-	tx := soil newTransaction.
-	tx root: (SoilIndexedCollection new
-		addIndex: (SoilDerivedIndex uniqueSelector: #id keySize: 8);
-		yourself).
-	tx root
-		add: ((self newPersonNamed: 'John' surname: 'Doe') id: 'a1'; yourself);
-		add: ((self newPersonNamed: 'Jane' surname: 'Doe') id: 'a2'; yourself).
-	tx commit.
-
-	tx2 := soil newTransaction.
-	self assert: ((tx2 root indexFor: #id) find: 'a2') asArray first firstName equals: 'Jane'.
-	self assert: ((tx2 root indexFor: #id) find: 'a') isEmpty.
-	tx2 abort
-]
-
-{ #category : #tests }
 SoilIndexedCollectionTest >> testSurvivesReopeningTheDatabase [
 	| tx tx2 |
 	tx := soil newTransaction.
@@ -217,4 +209,169 @@ SoilIndexedCollectionTest >> testKeySizeIsSetPerIndex [
 	self assert: narrow layout attributeSize equals: 2.
 	self assert: (SoilDerivedIndex uniqueSelector: #id keySize: 10) layout attributeSize equals: 10.
 	self assert: wide index valueSize equals: 8
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testPrimaryIsKeptApartFromTheDerivedIndexes [
+	| collection tx tx2 |
+	collection := self newCollection.
+	self assert: collection primaryIndex selector equals: #id.
+	self assert: (collection indexes collect: #selector) asArray equals: #( lastName firstName ).
+	tx := soil newTransaction.
+	tx root: collection.
+	tx root
+		add: (self newPersonNamed: 'John' surname: 'Doe');
+		add: (self newPersonNamed: 'Jane' surname: 'Roe').
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: tx2 root values size equals: 2.
+	self assert: (tx2 root indexFor: #id) id equals: tx2 root primaryIndex id.
+	self assert: (tx2 root indexes collect: #selector) asArray equals: #( lastName firstName ).
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testSamePrimaryKeyTwiceInATransactionIsRefusedAndWritesNothing [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	tx root add: (self newPersonNamed: 'John' surname: 'Doe' id: 'p1').
+	self
+		should: [ tx root add: (self newPersonNamed: 'Jane' surname: 'Roe' id: 'p1') ]
+		raise: SoilUnsupportedError.
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: tx2 root values size equals: 1.
+	self assert: ((tx2 root indexFor: #lastName) find: 'Roe') isEmpty.
+	self assert: ((tx2 root indexFor: #firstName) find: 'Jane') isEmpty.
+	self assert: ((tx2 root indexFor: #lastName) find: 'Doe') size equals: 1.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testSamePrimaryKeyAsACommittedElementIsRefused [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	tx root add: (self newPersonNamed: 'John' surname: 'Doe' id: 'p1').
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self
+		should: [ tx2 root add: (self newPersonNamed: 'Jane' surname: 'Roe' id: 'p1') ]
+		raise: SoilUnsupportedError.
+	self assert: ((tx2 root indexFor: #lastName) find: 'Roe') isEmpty.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testSamePrimaryKeyInTwoTransactionsFailsTheSecondCommit [
+	| tx1 tx2 |
+	tx1 := soil newTransaction.
+	tx1 root: self newCollection.
+	tx1 commit.
+
+	tx1 := soil newTransaction.
+	tx2 := soil newTransaction.
+	tx1 root add: (self newPersonNamed: 'John' surname: 'Doe' id: 'p1').
+	tx2 root add: (self newPersonNamed: 'Jane' surname: 'Roe' id: 'p1').
+	tx1 commit.
+	self should: [ tx2 commit ] raise: SoilIndexHasConcurrentChange
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testValueThatCannotBeIndexedFailsBeforeAnythingIsWritten [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	self
+		should: [ tx root add: (self newPersonNamed: 'John' surname: nil) ]
+		raise: SoilUnsupportedError.
+	self
+		should: [ tx root add: (self newPersonNamed: nil surname: 'Doe') ]
+		raise: SoilUnsupportedError.
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: tx2 root values isEmpty.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testTwoNewObjectsWithTheSameAttributeAreBothSeenInTheTransactionAfterCommitAndAfterReopen [
+	| tx tx2 tx3 |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	tx root
+		add: (self newPersonNamed: 'John' surname: 'Doe');
+		add: (self newPersonNamed: 'Jane' surname: 'Doe').
+	self assert: ((tx root indexFor: #lastName) find: 'Doe') size equals: 2.
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: ((tx2 root indexFor: #lastName) find: 'Doe') size equals: 2.
+	tx2 abort.
+	soil reopen.
+
+	tx3 := soil newTransaction.
+	self assert: ((tx3 root indexFor: #lastName) find: 'Doe') size equals: 2.
+	tx3 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testEqualAttributesAnswerInPrimaryKeyOrder [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	#( 'p3' 'p1' 'p2' ) do: [ :id |
+		tx root add: (self newPersonNamed: 'N' , id surname: 'Doe' id: id) ].
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self
+		assert: (((tx2 root indexFor: #lastName) find: 'Doe') collect: [ :each | each id ]) asArray
+		equals: #( 'p1' 'p2' 'p3' ).
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testUniqueDerivedIndexRefusesASecondElementWithTheSameValue [
+	| tx tx2 |
+	tx := soil newTransaction.
+	tx root: (SoilIndexedCollection new
+		primary: (SoilDerivedIndex uniqueSelector: #id keySize: 8);
+		addIndex: (SoilDerivedIndex uniqueSelector: #lastName keySize: 16);
+		yourself).
+	tx root add: (self newPersonNamed: 'John' surname: 'Doe').
+	self
+		should: [ tx root add: (self newPersonNamed: 'Jane' surname: 'Doe') ]
+		raise: SoilUnsupportedError.
+	tx root add: (self newPersonNamed: 'Jane' surname: 'Roe').
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: tx2 root values size equals: 2.
+	self assert: ((tx2 root indexFor: #lastName) find: 'Doe') size equals: 1.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testDerivedIndexNeedsRoomBesideThePrimaryKey [
+	| collection |
+	collection := SoilIndexedCollection new
+		primary: (SoilDerivedIndex uniqueSelector: #id keySize: 12);
+		yourself.
+	self
+		should: [ collection addIndex: (SoilDerivedIndex selector: #lastName keySize: 12) ]
+		raise: SoilUnsupportedError.
+	self shouldnt: [ collection addIndex: (SoilDerivedIndex selector: #lastName keySize: 13) ] raise: Error
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testNoDerivedIndexBeforeThePrimary [
+	self
+		should: [ SoilIndexedCollection new addIndex: (SoilDerivedIndex selector: #lastName) ]
+		raise: SoilUnsupportedError
 ]

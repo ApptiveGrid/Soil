@@ -14,25 +14,27 @@ The attribute part has a fixed width and holds the encoded value:
 Everything else is an error when the key is built: nil, a WideString, a negative number, a Float, a
 Date, a Boolean. So is a value that is too long for the attribute part. Nothing is cut off.
 
-A unique layout uses the whole key size for the attribute. A non-unique layout puts the object id
-behind the attribute, in the last 8 bytes, so the keys of two objects with the same value differ.
-The attribute part is then the key size minus 8, and the entries of one value are the range from
-the attribute with an object id of 0 to the attribute with an object id of all ones.
+A unique layout uses the whole key size for the attribute. A non-unique layout puts the primary key
+of the element behind the attribute, so the keys of two elements with the same value differ and
+sort by their primary keys, also for a new element that has no object id yet. The attribute part is
+then the key size minus the width of the primary key, and the entries of one value are the range from
+the attribute with a primary key of all zeros to the attribute with a primary key of all ones.
 "
 Class {
 	#name : #SoilDerivedKeyLayout,
 	#superclass : #Object,
 	#instVars : [
 		'keySize',
+		'primaryKeySize',
 		'unique'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
 
 { #category : #'instance creation' }
-SoilDerivedKeyLayout class >> keySize: anInteger unique: aBoolean [
+SoilDerivedKeyLayout class >> keySize: anInteger unique: aBoolean primaryKeySize: anotherInteger [
 	^ self new
-		setKeySize: anInteger unique: aBoolean;
+		setKeySize: anInteger unique: aBoolean primaryKeySize: anotherInteger;
 		yourself
 ]
 
@@ -41,7 +43,7 @@ SoilDerivedKeyLayout >> attributeSize [
 	"the width of the part of a key that holds the attribute"
 	^ unique
 		ifTrue: [ keySize ]
-		ifFalse: [ keySize - 8 ]
+		ifFalse: [ keySize - primaryKeySize ]
 ]
 
 { #category : #private }
@@ -83,16 +85,27 @@ SoilDerivedKeyLayout >> isByteString: aValue [
 ]
 
 { #category : #accessing }
-SoilDerivedKeyLayout >> keyFor: aValue objectId: anObjectId [
-	"the key of the entry of anObjectId whose attribute is aValue, a ByteArray of the whole key size"
+SoilDerivedKeyLayout >> keyFor: aValue primaryKey: aByteArray [
+	"the key of the entry of the element with primary key aByteArray whose attribute is aValue,
+	a ByteArray of the whole key size. A unique layout does not use the primary key"
 	^ unique
 		ifTrue: [ self encode: aValue ]
-		ifFalse: [ (self encode: aValue) , (anObjectId asByteArrayOfSize: 8) ]
+		ifFalse: [
+			aByteArray size = primaryKeySize ifFalse: [
+				^ SoilUnsupportedError signal:
+					'a primary key of ' , aByteArray size asString , ' bytes does not fit behind the attribute, the layout holds '
+					, primaryKeySize asString ].
+			(self encode: aValue) , aByteArray ]
 ]
 
 { #category : #accessing }
 SoilDerivedKeyLayout >> keySize [
 	^ keySize
+]
+
+{ #category : #accessing }
+SoilDerivedKeyLayout >> primaryKeySize [
+	^ primaryKeySize
 ]
 
 { #category : #printing }
@@ -107,7 +120,7 @@ SoilDerivedKeyLayout >> printOn: aStream [
 { #category : #accessing }
 SoilDerivedKeyLayout >> rangeFor: aValue [
 	"the keys of all entries whose attribute is aValue. For a non-unique layout that is
-	the attribute with an object id of 0 up to the attribute with an object id of all ones,
+	the attribute with a primary key of all zeros up to the attribute with a primary key of all ones,
 	for a unique layout the single key of aValue"
 	^ SoilPrefixRange
 		prefix: (self encode: aValue) asInteger
@@ -116,13 +129,14 @@ SoilDerivedKeyLayout >> rangeFor: aValue [
 ]
 
 { #category : #initialization }
-SoilDerivedKeyLayout >> setKeySize: anInteger unique: aBoolean [
-	(aBoolean not and: [ anInteger <= 8 ]) ifTrue: [
+SoilDerivedKeyLayout >> setKeySize: anInteger unique: aBoolean primaryKeySize: anotherInteger [
+	(aBoolean not and: [ anInteger <= anotherInteger ]) ifTrue: [
 		^ SoilUnsupportedError signal:
 			'a key size of ' , anInteger asString
-			, ' leaves no room for an attribute in front of the object id' ].
+			, ' leaves no room for an attribute in front of a primary key of ' , anotherInteger asString , ' bytes' ].
 	keySize := anInteger.
-	unique := aBoolean
+	unique := aBoolean.
+	primaryKeySize := anotherInteger
 ]
 
 { #category : #testing }
