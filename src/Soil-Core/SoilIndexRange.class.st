@@ -63,6 +63,12 @@ SoilIndexRange >> includesKey: aKey [
 	^ key >= self firstIndexKey and: [ key <= self lastIndexKey ]
 ]
 
+{ #category : #testing }
+SoilIndexRange >> includesLast [
+	"whether my last key belongs to me. A reader that starts at it, reading backwards, skips it when it does not"
+	^ true
+]
+
 { #category : #accessing }
 SoilIndexRange >> keySize [
 
