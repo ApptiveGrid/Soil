@@ -7,12 +7,9 @@ Every key a layout builds occupies the whole key size of the index, so the index
 key into one number of that size, neither pads it nor reorders it. Padding a short key on the left
 is what makes the length dominate the order for an ordinary index key, see #asIndexKeyOfSize:.
 
-The attribute part has a fixed width and holds the encoded value:
-- ByteString and Symbol, left aligned, zeros to the right: they sort by their bytes, 'aa' before 'b'
-- ByteArray, the same
-- a non-negative Integer, big endian and right aligned, zeros to the left: numeric order
-Everything else is an error when the key is built: nil, a WideString, a negative number, a Float, a
-Date, a Boolean. So is a value that is too long for the attribute part. Nothing is cut off.
+The attribute part has a fixed width and holds the value as its SoilKeyEncoding puts it into that
+many bytes. The standard encoding keeps strings and byte arrays left aligned and numbers right
+aligned, and refuses every other value and a value that is too long for the attribute part.
 
 A unique layout uses the whole key size for the attribute. A non-unique layout puts the primary key
 of the element behind the attribute, so the keys of two elements with the same value differ and
@@ -26,7 +23,8 @@ Class {
 	#instVars : [
 		'keySize',
 		'primaryKeySize',
-		'unique'
+		'unique',
+		'encoding'
 	],
 	#category : #'Soil-Core-Index-Common'
 }
@@ -49,39 +47,14 @@ SoilDerivedKeyLayout >> attributeSize [
 { #category : #private }
 SoilDerivedKeyLayout >> encode: aValue [
 	"the attribute part of a key for aValue, always #attributeSize bytes"
-	| bytes |
-	aValue isNil ifTrue: [
-		^ SoilUnsupportedError signal: 'nil cannot be indexed, let the getter answer a substitute value' ].
-	bytes := (self isByteString: aValue)
-		ifTrue: [ aValue asByteArray ]
-		ifFalse: [
-			aValue class == ByteArray
-				ifTrue: [ aValue ]
-				ifFalse: [
-					(aValue isInteger and: [ aValue >= 0 ])
-						ifTrue: [ ^ self encodeInteger: aValue ]
-						ifFalse: [
-							^ SoilUnsupportedError signal:
-								aValue printString , ' (' , aValue class name
-								, ') cannot be indexed, only byte strings, byte arrays and non-negative integers can' ] ] ].
-	bytes size > self attributeSize ifTrue: [
-		^ SoilUnsupportedError signal:
-			aValue printString , ' is ' , bytes size asString , ' bytes and does not fit in '
-			, self attributeSize asString , ' bytes' ].
-	^ bytes , (ByteArray new: self attributeSize - bytes size)
+	^ self encoding encode: aValue width: self attributeSize
 ]
 
-{ #category : #private }
-SoilDerivedKeyLayout >> encodeInteger: anInteger [
-	anInteger highBit > (self attributeSize * 8) ifTrue: [
-		^ SoilUnsupportedError signal:
-			anInteger printString , ' does not fit in ' , self attributeSize asString , ' bytes' ].
-	^ anInteger asByteArrayOfSize: self attributeSize
-]
-
-{ #category : #private }
-SoilDerivedKeyLayout >> isByteString: aValue [
-	^ aValue class == ByteString or: [ aValue class == ByteSymbol ]
+{ #category : #accessing }
+SoilDerivedKeyLayout >> encoding [
+	"how the attribute becomes bytes. The standard encoding unless another one is given. Reading it does not
+	set the variable: a layout is part of a persistent collection and a write to it would count as a change"
+	^ encoding ifNil: [ SoilKeyEncoding standard ]
 ]
 
 { #category : #accessing }
@@ -157,7 +130,7 @@ SoilDerivedKeyLayout >> rangeStartingWith: someBytes [
 	attribute is compared by its leading bytes only where it is stored left aligned, which numbers
 	are not, so a number is refused"
 	| bytes |
-	bytes := ((self isByteString: someBytes) or: [ someBytes class == ByteArray ])
+	bytes := (self encoding isBytesLike: someBytes)
 		ifTrue: [ someBytes asByteArray ]
 		ifFalse: [
 			^ SoilUnsupportedError signal:

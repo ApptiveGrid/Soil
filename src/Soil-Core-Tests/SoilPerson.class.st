@@ -11,8 +11,8 @@ Class {
 
 { #category : #accessing }
 SoilPerson >> compositeKey [
-	"an attribute made of two parts of fixed width, three bytes of the last name and two of the first name"
-	^ (lastName first: 3) asByteArray , (firstName first: 2) asByteArray
+	"an attribute made of the first three bytes of the last name and the first two of the first name"
+	^ (lastName copyFrom: 1 to: (lastName size min: 3)) asByteArray , (firstName copyFrom: 1 to: (firstName size min: 2)) asByteArray
 ]
 
 { #category : #accessing }
