@@ -9,6 +9,17 @@ Class {
 }
 
 { #category : #helpers }
+SoilQueryTest >> assertBackwardIsTheReverseFor: aBlock [
+	"forward and backward over the same query give the same elements in the reverse order, with an index
+	and without. Answers the forward ids"
+	| forward backward |
+	forward := self assertSameResultFor: aBlock.
+	backward := self assertSameResultFor: [ :query | aBlock value: query. query backwards ].
+	self assert: backward reversed equals: forward.
+	^ forward
+]
+
+{ #category : #helpers }
 SoilQueryTest >> assertSameResultFor: aBlock [
 	"the query runs against a collection with an index on #lastName and #compositeKey and against one with
 	only the primary. The elements and their order are the same. Answers the ids"
@@ -99,6 +110,19 @@ SoilQueryTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilQueryTest >> testABackwardEqualQueryWithoutAnIndexStopsAtTheLimit [
+	| tx calls query |
+	tx := plain newTransaction.
+	calls := 0.
+	query := tx root query.
+	query property: #lastName; equalTo: 'Doe'; backwards; limit: 2.
+	query predicate: [ :each | calls := calls + 1. true ].
+	self assert: (query iterator upToEnd collect: [ :each | each id ]) asArray equals: #( 'p11' 'p03' ).
+	self assert: calls equals: 2.
+	tx abort
+]
+
+{ #category : #tests }
 SoilQueryTest >> testAComparisonNeedsAProperty [
 	| tx |
 	tx := soil newTransaction.
@@ -148,6 +172,71 @@ SoilQueryTest >> testAnEqualQueryWithoutAnIndexStopsAtTheLimit [
 	self assert: query iterator upToEnd size equals: 2.
 	self assert: calls > 2.
 	tx abort
+]
+
+{ #category : #tests }
+SoilQueryTest >> testBackwardIsTheForwardOrderTurnedAroundForEveryShapeOfQuery [
+	self assertBackwardIsTheReverseFor: [ :query | ].
+	self assertBackwardIsTheReverseFor: [ :query | query property: #lastName ].
+	self assertBackwardIsTheReverseFor: [ :query | query property: #lastName; equalTo: 'Doe' ].
+	self assertBackwardIsTheReverseFor: [ :query | query property: #lastName; from: 'Moe' to: 'Roe' ].
+	self assertBackwardIsTheReverseFor: [ :query |
+		query property: #lastName; from: 'Moe' to: 'Roe' includeFirst: false includeLast: false ].
+	self assertBackwardIsTheReverseFor: [ :query | query property: #lastName; from: 'Poe' to: nil ].
+	self assertBackwardIsTheReverseFor: [ :query | query property: #lastName; startingWith: 'Do' ].
+	self assertBackwardIsTheReverseFor: [ :query | query property: #compositeKey; startingWith: 'Roe' ].
+	self assertBackwardIsTheReverseFor: [ :query | query property: #id; from: 'p03' to: 'p05' ].
+	self assertBackwardIsTheReverseFor: [ :query |
+		query property: #lastName; predicate: [ :each | each firstName first = $J ] ]
+]
+
+{ #category : #tests }
+SoilQueryTest >> testBackwardLimitAndOffsetCountInTheDirectionOfReading [
+	self
+		assert: (self assertSameResultFor: [ :query |
+			query property: #lastName; equalTo: 'Doe'; backwards; offset: 1; limit: 2 ])
+		equals: #( 'p03' 'p02' ).
+	self
+		assert: (self assertSameResultFor: [ :query |
+			query property: #lastName; backwards; offset: 2; limit: 3 ])
+		equals: #( 'p05' 'p04' 'p06' ).
+	self
+		assert: (self assertSameResultFor: [ :query | query backwards; limit: 2 ])
+		equals: #( 'p11' 'p10' )
+]
+
+{ #category : #tests }
+SoilQueryTest >> testBackwardSeesTheChangesOfTheTransactionOnBothWays [
+	| tx person |
+	{ soil. plain } do: [ :database |
+		tx := database newTransaction.
+		tx root add: (self person: #( 'p12' 'Doe' 'Dave' )).
+		person := tx root at: 'p01'.
+		person lastName: 'Zip'.
+		tx root update: person.
+		tx root remove: (tx root at: 'p02').
+		self
+			assert: ((tx root query property: #lastName; equalTo: 'Doe'; backwards; yourself) iterator upToEnd collect: [ :each | each id ]) asArray
+			equals: #( 'p12' 'p11' 'p03' ).
+		tx abort ]
+]
+
+{ #category : #tests }
+SoilQueryTest >> testBackwardStartsBeforeAPositionOnBothWays [
+	self
+		assert: (self assertSameResultFor: [ :query |
+			query property: #lastName; equalTo: 'Doe'.
+			query before: (SoilQueryPosition attribute: 'Doe' primary: 'p03') ])
+		equals: #( 'p02' 'p01' ).
+	"the position of an element that is gone: reading backwards goes on with the one before"
+	self
+		assert: (self assertSameResultFor: [ :query |
+			query property: #lastName.
+			query before: (SoilQueryPosition attribute: 'Doe' primary: 'p99') ])
+		equals: #( 'p11' 'p03' 'p02' 'p01' 'p10' ).
+	self
+		assert: (self assertSameResultFor: [ :query | query before: (SoilQueryPosition primary: 'p03') ])
+		equals: #( 'p02' 'p01' )
 ]
 
 { #category : #tests }
@@ -338,6 +427,37 @@ SoilQueryTest >> testStartingWithAStringAndAComposedAttribute [
 	self
 		assert: (self assertSameResultFor: [ :query | query property: #compositeKey; startingWith: 'RoeRo' ])
 		equals: #( 'p05' )
+]
+
+{ #category : #tests }
+SoilQueryTest >> testThePageBeforeAcrossIndexAndScan [
+	"forward pages of three over #lastName in one collection, then the page before the third page read
+	backwards from the place of its first hit in the other collection, and turned around: it is the
+	second page. The third page starts inside the run of equal values of 'Roe'"
+	| databases |
+	databases := { soil. plain }.
+	#( #( 1 2 ) #( 2 1 ) ) do: [ :ways |
+		| position second thirdFirst tx query iterator |
+		position := nil.
+		1 to: 3 do: [ :round |
+			tx := (databases at: ways first) newTransaction.
+			query := tx root query.
+			query property: #lastName; limit: 3; after: position.
+			iterator := query iterator.
+			round = 3
+				ifTrue: [ iterator next. thirdFirst := iterator position ]
+				ifFalse: [
+					round = 2 ifTrue: [ second := iterator upToEnd collect: [ :each | each id ] ].
+					round = 1 ifTrue: [ iterator upToEnd ].
+					position := iterator position ].
+			tx abort ].
+		tx := (databases at: ways second) newTransaction.
+		query := tx root query.
+		query property: #lastName; before: thirdFirst; limit: 3.
+		self
+			assert: (query iterator upToEnd collect: [ :each | each id ]) asArray reversed
+			equals: second asArray.
+		tx abort ]
 ]
 
 { #category : #tests }
