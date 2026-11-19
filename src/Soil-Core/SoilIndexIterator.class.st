@@ -49,6 +49,20 @@ SoilIndexIterator >> at: aKeyObject put: anObject [
 	^ self at: aKeyObject add: anObject
 ]
 
+{ #category : #testing }
+SoilIndexIterator >> atEnd [
+	"whether there is no entry left to read with #next. Looks ahead and leaves the position where it was"
+	| page key pageIndex nextAssociation |
+	page := currentPage.
+	key := currentKey.
+	pageIndex := currentPageIndex.
+	nextAssociation := self nextAssociation.
+	currentPage := page.
+	currentKey := key.
+	currentPageIndex := pageIndex.
+	^ nextAssociation isNil
+]
+
 { #category : #accessing }
 SoilIndexIterator >> atIndex: anInteger [
 	| current |
@@ -676,6 +690,16 @@ SoilIndexIterator >> sizeViaIteration [
 	sum := 0.
 	self do: [ :each | sum := sum + 1 ].
 	^ sum
+]
+
+{ #category : #enumerating }
+SoilIndexIterator >> upToEnd [
+	"all values from the current position to the end, in key order. Unlike #do: and #values it
+	does not start over"
+	| result next |
+	result := OrderedCollection new.
+	[ (next := self next) notNil ] whileTrue: [ result add: next ].
+	^ result
 ]
 
 { #category : #transactions }
