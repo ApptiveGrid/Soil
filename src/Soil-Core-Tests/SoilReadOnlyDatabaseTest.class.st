@@ -83,10 +83,12 @@ SoilReadOnlyDatabaseTest >> readerWithItsRecordNotWrittenYet [
 	self writeSecondTransaction.
 	soil close.
 	full := objectsPath binaryReadStreamDo: [ :in | in upToEnd ].
-	self replace: objectsPath with: (full first: before).
+	"the reader lets go of its files first: replacing the objects file deletes it, which
+	Windows refuses while a stream is open on it"
 	objectFile stream close.
-	objectFile stream: objectsPath binaryReadStream.
 	indexFile stream close.
+	self replace: objectsPath with: (full first: before).
+	objectFile stream: objectsPath binaryReadStream.
 	indexFile stream: indexFile path binaryReadStream.
 	^ full
 ]
@@ -167,9 +169,13 @@ SoilReadOnlyDatabaseTest >> testAReaderReadsARecordAppendedAfterItsStreamKnewThe
 SoilReadOnlyDatabaseTest >> testAReaderWaitsForARecordWhoseBytesAreNotWrittenYet [
 	"the writer's index can reach the NFS server before its records: the check of
 	674726be, with the objects file opened anew, found 1:2168 340 KB past its end.
-	Here the record arrives while the check waits"
+	Here the record arrives while the check waits. Not on Windows: the test replaces
+	the objects file a second time in a forked process while the reader has it open
+	and reads from it. That is what it is about, and Windows refuses to delete a file
+	that is open"
 
 	| visitor tracker counter full objectsPath |
+	OSPlatform current isWindows ifTrue: [ ^ self skip ].
 	full := self readerWithItsRecordNotWrittenYet.
 	visitor := SoilTrackingVisitor new
 		soil: readOnly;
