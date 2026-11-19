@@ -128,6 +128,50 @@ SoilDerivedKeyLayout >> rangeFor: aValue [
 		keySize: keySize
 ]
 
+{ #category : #accessing }
+SoilDerivedKeyLayout >> rangeFrom: aLowValue to: aHighValue [
+	"the keys of all entries whose attribute lies from aLowValue to aHighValue, both included"
+	^ self rangeFrom: aLowValue to: aHighValue includeFirst: true includeLast: true
+]
+
+{ #category : #accessing }
+SoilDerivedKeyLayout >> rangeFrom: aLowValue to: aHighValue includeFirst: firstBoolean includeLast: lastBoolean [
+	"the keys of all entries whose attribute lies between aLowValue and aHighValue. A value that
+	is not included leaves out all entries that have it, not just one. A nil value is open: the
+	range goes on to the first or to the last attribute there can be"
+	| fill |
+	fill := keySize - self attributeSize.
+	^ SoilKeyRange
+		firstKey: (aLowValue ifNotNil: [
+			(self encode: aLowValue) , (ByteArray new: fill withAll: (firstBoolean ifTrue: [ 0 ] ifFalse: [ 255 ])) ])
+		lastKey: (aHighValue ifNotNil: [
+			(self encode: aHighValue) , (ByteArray new: fill withAll: (lastBoolean ifTrue: [ 255 ] ifFalse: [ 0 ])) ])
+		keySize: keySize
+		includeFirst: firstBoolean
+		includeLast: lastBoolean
+]
+
+{ #category : #accessing }
+SoilDerivedKeyLayout >> rangeStartingWith: someBytes [
+	"the keys of all entries whose attribute starts with someBytes, a string or a byte array. An
+	attribute is compared by its leading bytes only where it is stored left aligned, which numbers
+	are not, so a number is refused"
+	| bytes |
+	bytes := ((self isByteString: someBytes) or: [ someBytes class == ByteArray ])
+		ifTrue: [ someBytes asByteArray ]
+		ifFalse: [
+			^ SoilUnsupportedError signal:
+				someBytes printString , ' cannot start an attribute, only byte strings and byte arrays can' ].
+	bytes size > self attributeSize ifTrue: [
+		^ SoilUnsupportedError signal:
+			someBytes printString , ' is ' , bytes size asString , ' bytes and longer than the attribute of '
+			, self attributeSize asString , ' bytes' ].
+	^ SoilPrefixRange
+		prefix: (bytes isEmpty ifTrue: [ 0 ] ifFalse: [ bytes asInteger ])
+		width: bytes size
+		keySize: keySize
+]
+
 { #category : #initialization }
 SoilDerivedKeyLayout >> setKeySize: anInteger unique: aBoolean primaryKeySize: anotherInteger [
 	(aBoolean not and: [ anInteger <= anotherInteger ]) ifTrue: [

@@ -57,6 +57,17 @@ SoilIndexedCollection >> addIndex: anIndex [
 ]
 
 { #category : #accessing }
+SoilIndexedCollection >> at: aValue [
+	"the element whose primary attribute is aValue"
+	^ self at: aValue ifAbsent: [ KeyNotFound signalFor: aValue in: self ]
+]
+
+{ #category : #accessing }
+SoilIndexedCollection >> at: aValue ifAbsent: aBlock [
+	^ primaryIndex at: aValue ifAbsent: aBlock
+]
+
+{ #category : #accessing }
 SoilIndexedCollection >> indexFor: aSelector [
 	^ ({ primaryIndex } , indexes)
 		detect: [ :each | each notNil and: [ each selector = aSelector asSymbol ] ]

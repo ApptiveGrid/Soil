@@ -48,6 +48,12 @@ SoilIndexRange >> firstKey [
 ]
 
 { #category : #testing }
+SoilIndexRange >> includesFirst [
+	"whether my first key belongs to me. A reader that starts at it skips it when it does not"
+	^ true
+]
+
+{ #category : #testing }
 SoilIndexRange >> includesKey: aKey [
 	"the stop condition a reader carries. Takes a key in any of the forms an index accepts,
 	including the index key an iterator hands back from an association"
