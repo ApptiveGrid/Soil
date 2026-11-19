@@ -375,3 +375,12 @@ SoilIndexedCollectionTest >> testNoDerivedIndexBeforeThePrimary [
 		should: [ SoilIndexedCollection new addIndex: (SoilDerivedIndex selector: #lastName) ]
 		raise: SoilUnsupportedError
 ]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testPrimaryCannotBeAddedAsADerivedIndex [
+	| collection |
+	collection := self newCollection.
+	self
+		should: [ collection addIndex: collection primaryIndex ]
+		raise: SoilUnsupportedError
+]

@@ -4,7 +4,8 @@ several indexes at once. The primary index (#primary:) is unique and holds every
 element under its primary key. Every SoilDerivedIndex added with #addIndex: derives
 its own key from the objects that are added, so the same object can be looked up by
 different properties; behind the attribute its key carries the primary key of the
-element. The primary index has to be set before derived indexes are added.
+element. The primary index has to be set before derived indexes are added, and it is not added again
+as one of them. It is a SoilDerivedIndex too, a unique one, only its role in the collection differs.
 
 #add: refuses an element whose primary key (or value in a unique derived index) is
 taken already. It builds all keys first, so a value that cannot be indexed fails
@@ -49,6 +50,7 @@ SoilIndexedCollection >> add: anObject [
 { #category : #adding }
 SoilIndexedCollection >> addIndex: anIndex [
 	primaryIndex ifNil: [ ^ SoilUnsupportedError signal: 'set the primary index before adding derived indexes' ].
+	anIndex id = primaryIndex id ifTrue: [ ^ SoilUnsupportedError signal: 'the primary index cannot also be a derived index' ].
 	anIndex primaryKeySize: primaryIndex layout keySize.
 	indexes add: anIndex.
 	^ anIndex
