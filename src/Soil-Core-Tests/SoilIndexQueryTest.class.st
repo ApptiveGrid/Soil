@@ -381,6 +381,44 @@ SoilIndexQueryTest >> testOpenEndsGoOnToTheFirstAndToTheLastEntry [
 ]
 
 { #category : #tests }
+SoilIndexQueryTest >> testExcludedEndsAtTheSmallestAndTheLargestKeyAreEmptyNotAnError [
+	| tx index highest lowest |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root primaryIndex.
+	highest := ByteArray new: 8 withAll: 255.
+	lowest := ByteArray new: 8.
+	self
+		assert: (index query
+			range: (SoilKeyRange firstKey: highest lastKey: nil keySize: 8 includeFirst: false includeLast: true);
+			yourself) count
+		equals: 0.
+	self
+		assert: (index query
+			range: (SoilKeyRange firstKey: nil lastKey: lowest keySize: 8 includeFirst: true includeLast: false);
+			yourself) count
+		equals: 0.
+	self
+		assert: (index query
+			range: (SoilKeyRange firstKey: lowest lastKey: highest keySize: 8 includeFirst: false includeLast: false);
+			yourself) count
+		equals: 8.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testKeyRangeComparesWithoutDoingArithmeticOnKeys [
+	| range |
+	range := SoilKeyRange firstKey: #[0 0 0 5] lastKey: #[0 0 0 9] keySize: 4 includeFirst: false includeLast: false.
+	self deny: (range includesKey: #[0 0 0 5]).
+	self assert: (range includesKey: #[0 0 0 6]).
+	self assert: (range includesKey: #[0 0 0 8]).
+	self deny: (range includesKey: #[0 0 0 9]).
+	self assert: range firstKey equals: #[0 0 0 5].
+	self assert: range lastKey equals: #[0 0 0 9]
+]
+
+{ #category : #tests }
 SoilIndexQueryTest >> testRangeEndsOfAUniqueIndexCanBeLeftOut [
 	| tx |
 	self commitPersons: self rows.

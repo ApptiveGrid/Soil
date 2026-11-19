@@ -54,18 +54,6 @@ SoilIndexQueryIterator >> first [
 ]
 
 { #category : #private }
-SoilIndexQueryIterator >> hitAfter: aKey [
-	"the first hit at or after aKey as key -> object, or nil. Positions the iterator of the index"
-	| found entry |
-	found := iterator nextKeyCloseTo: aKey.
-	found ifNil: [ ^ nil ].
-	(self isInRange: found) ifFalse: [ ^ nil ].
-	entry := found -> (iterator at: found).
-	(self isHit: entry value) ifTrue: [ ^ entry ].
-	^ self hitFollowing
-]
-
-{ #category : #private }
 SoilIndexQueryIterator >> hitFollowing [
 	"the next hit after the entry read last as key -> object, or nil"
 	| found |
@@ -73,6 +61,31 @@ SoilIndexQueryIterator >> hitFollowing [
 		(self isInRange: found key) ifFalse: [ ^ nil ].
 		(self isHit: found value) ifTrue: [ ^ found key -> found value ] ].
 	^ nil
+]
+
+{ #category : #private }
+SoilIndexQueryIterator >> hitFrom: aKey excludingIt: aBoolean [
+	"the first hit at or after aKey as key -> object, or nil. When the entry of aKey itself is not
+	to be delivered it is stepped over. Positions the iterator of the index"
+	| found entry |
+	found := iterator nextKeyCloseTo: aKey.
+	found ifNil: [ ^ nil ].
+	(aBoolean and: [ found = aKey ]) ifTrue: [ ^ self hitFollowing ].
+	(self isInRange: found) ifFalse: [ ^ nil ].
+	entry := found -> (iterator at: found).
+	(self isHit: entry value) ifTrue: [ ^ entry ].
+	^ self hitFollowing
+]
+
+{ #category : #private }
+SoilIndexQueryIterator >> hitFromStart [
+	"the first hit of the query: after the key to start after, else from the first key of the range,
+	else from the first of the index. A range that does not include its first key is started like
+	a start after a key"
+	query after ifNotNil: [ :key | ^ self hitFrom: key excludingIt: true ].
+	^ query range
+		ifNil: [ self hitFrom: 0 excludingIt: false ]
+		ifNotNil: [ :range | self hitFrom: range firstIndexKey excludingIt: range includesFirst not ]
 ]
 
 { #category : #private }
@@ -139,7 +152,7 @@ SoilIndexQueryIterator >> readHit [
 		ifTrue: [ hit := self hitFollowing ]
 		ifFalse: [
 			started := true.
-			hit := self hitAfter: self startKey ].
+			hit := self hitFromStart ].
 	[ hit notNil and: [ skipped < (query offset ifNil: [ 0 ]) ] ] whileTrue: [
 		skipped := skipped + 1.
 		hit := self hitFollowing ].
@@ -154,15 +167,6 @@ SoilIndexQueryIterator >> restart [
 	delivered := 0.
 	ahead := nil.
 	lastKey := nil
-]
-
-{ #category : #private }
-SoilIndexQueryIterator >> startKey [
-	"the key to look for the first entry from: the one after the key to start after, else the first
-	key of the range, else the first of the index"
-	^ query after
-		ifNotNil: [ :key | key + 1 ]
-		ifNil: [ query range ifNil: [ 0 ] ifNotNil: [ :range | range firstIndexKey ] ]
 ]
 
 { #category : #enumerating }

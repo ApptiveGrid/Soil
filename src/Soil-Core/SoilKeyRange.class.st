@@ -3,10 +3,10 @@ A range of keys given by its first and its last key, like an interval: each end 
 included or not, and either end can be open. It is what a range over several attribute values
 is made of, see SoilDerivedKeyLayout>>#rangeFrom:to:.
 
-A key that is nil is open: the range goes on to the first or to the last key there can be. An end
-that is not included moves one key inward, so #firstIndexKey and #lastIndexKey, which a reader
-positions and stops with, are the first and the last key that belong to the range. A range whose
-ends cross is empty.
+A key that is nil is open: the range goes on to the first or to the last key there can be. The
+bounds are kept as they are, #includesFirst and #includesLast say whether they belong to the range
+and #includesKey: compares with them. Keys are ordered, nothing is added to or taken from one. A
+range whose ends cross is empty.
 "
 Class {
 	#name : #SoilKeyRange,
@@ -43,13 +43,6 @@ SoilKeyRange class >> firstKey: aByteArray lastKey: anotherByteArray keySize: an
 ]
 
 { #category : #accessing }
-SoilKeyRange >> firstIndexKey [
-	^ includesFirst
-		ifTrue: [ super firstIndexKey ]
-		ifFalse: [ super firstIndexKey + 1 ]
-]
-
-{ #category : #accessing }
 SoilKeyRange >> firstKey [
 	^ firstKey ifNil: [ ByteArray new: keySize ]
 ]
@@ -64,11 +57,16 @@ SoilKeyRange >> includesLast [
 	^ includesLast
 ]
 
-{ #category : #accessing }
-SoilKeyRange >> lastIndexKey [
-	^ includesLast
-		ifTrue: [ super lastIndexKey ]
-		ifFalse: [ super lastIndexKey - 1 ]
+{ #category : #testing }
+SoilKeyRange >> includesKey: aKey [
+	| key |
+	key := aKey asIndexKeyOfSize: keySize.
+	^ (includesFirst
+		ifTrue: [ key >= self firstIndexKey ]
+		ifFalse: [ key > self firstIndexKey ]) and: [
+			includesLast
+				ifTrue: [ key <= self lastIndexKey ]
+				ifFalse: [ key < self lastIndexKey ] ]
 ]
 
 { #category : #accessing }
