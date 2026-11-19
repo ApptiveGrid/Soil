@@ -10,6 +10,12 @@ Class {
 }
 
 { #category : #accessing }
+SoilPerson >> compositeKey [
+	"an attribute made of two parts of fixed width, three bytes of the last name and two of the first name"
+	^ (lastName first: 3) asByteArray , (firstName first: 2) asByteArray
+]
+
+{ #category : #accessing }
 SoilPerson >> firstName [
 	^ firstName
 ]

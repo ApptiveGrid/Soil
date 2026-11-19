@@ -80,6 +80,18 @@ SoilDerivedIndex >> assertFreeKey: aKey of: anObject [
 			signal ]
 ]
 
+{ #category : #accessing }
+SoilDerivedIndex >> at: aValue ifAbsent: aBlock [
+	"the object whose attribute is aValue, for a unique index. The value is encoded like the one
+	of an added object"
+	| key |
+	key := [ layout keyFor: aValue primaryKey: nil ]
+		on: SoilUnsupportedError
+		do: [ :error |
+			SoilUnsupportedError signal: 'derived index on #' , selector asString , ': ' , error messageText ].
+	^ self newIterator at: key ifAbsent: [ ^ aBlock value ]
+]
+
 { #category : #initialization }
 SoilDerivedIndex >> beUnique [
 	"every object has its own value: the key is the attribute alone, without the primary key"
@@ -164,15 +176,7 @@ SoilDerivedIndex >> isPresentOnDisk [
 { #category : #searching }
 SoilDerivedIndex >> find: aValue [
 	"all objects whose attribute is aValue, in the order of their primary keys"
-	| range iterator found result |
-	range := self rangeFor: aValue.
-	iterator := self newIterator.
-	result := OrderedCollection new.
-	found := iterator nextKeyCloseTo: range firstIndexKey.
-	[ found notNil and: [ range includesKey: found ] ] whileTrue: [
-		result add: (iterator at: found).
-		found := iterator nextKeyCloseTo: found + 1 ].
-	^ result
+	^ (self queryFor: aValue) iterator upToEnd
 ]
 
 { #category : #testing }
@@ -232,6 +236,30 @@ SoilDerivedIndex >> primaryKeySize: anInteger [
 		primaryKeySize: anInteger
 ]
 
+{ #category : #searching }
+SoilDerivedIndex >> query [
+	"a query for the whole index, in key order"
+	^ SoilIndexQuery on: self
+]
+
+{ #category : #searching }
+SoilDerivedIndex >> queryFor: aValue [
+	"a query for the entries whose attribute is aValue"
+	^ self query range: (self rangeSignalling: [ layout rangeFor: aValue ]); yourself
+]
+
+{ #category : #searching }
+SoilDerivedIndex >> queryFrom: aLowValue to: aHighValue [
+	"a query for the entries whose attribute lies from aLowValue to aHighValue, both included"
+	^ self query range: (self rangeSignalling: [ layout rangeFrom: aLowValue to: aHighValue ]); yourself
+]
+
+{ #category : #searching }
+SoilDerivedIndex >> queryStartingWith: someBytes [
+	"a query for the entries whose attribute starts with someBytes, a string or a byte array"
+	^ self query range: (self rangeSignalling: [ layout rangeStartingWith: someBytes ]); yourself
+]
+
 { #category : #removing }
 SoilDerivedIndex >> removeKey: aKey [
 	"takes the entry under aKey out of the index, as SoilIndexedDictionary>>removeKey:ifAbsent: does,
@@ -247,8 +275,9 @@ SoilDerivedIndex >> removeKey: aKey [
 ]
 
 { #category : #private }
-SoilDerivedIndex >> rangeFor: aValue [
-	^ [ layout rangeFor: aValue ]
+SoilDerivedIndex >> rangeSignalling: aBlock [
+	"the range aBlock builds from the layout, an error it signals names this index"
+	^ aBlock
 		on: SoilUnsupportedError
 		do: [ :error |
 			SoilUnsupportedError signal: 'derived index on #' , selector asString , ': ' , error messageText ]
