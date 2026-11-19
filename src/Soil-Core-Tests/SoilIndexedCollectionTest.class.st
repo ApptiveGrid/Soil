@@ -569,3 +569,249 @@ SoilIndexedCollectionTest >> testTwoTransactionsRemovingTheSameElementConflictAt
 	tx1 commit.
 	self should: [ tx2 commit ] raise: SoilIndexHasConcurrentChange
 ]
+
+{ #category : #helpers }
+SoilIndexedCollectionTest >> idsFound: aValue in: aTransaction by: aSelector [
+	^ ((aTransaction root indexFor: aSelector) find: aValue) collect: [ :each | each id ]
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testUpdatedCommittedElementIsFoundUnderTheNewValueOnly [
+	| tx tx2 tx3 person |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+
+	tx := soil newTransaction.
+	person := self personIn: tx id: 'p1'.
+	person lastName: 'Roe'.
+	tx root update: person.
+	self assert: (self idsFound: 'Doe' in: tx by: #lastName) isEmpty.
+	self assert: (self idsFound: 'Roe' in: tx by: #lastName) asArray equals: #( 'p1' ).
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: (self idsFound: 'Doe' in: tx2 by: #lastName) isEmpty.
+	self assert: (self idsFound: 'Roe' in: tx2 by: #lastName) asArray equals: #( 'p1' ).
+	self assert: (self idsFound: 'John' in: tx2 by: #firstName) asArray equals: #( 'p1' ).
+	tx2 abort.
+	soil reopen.
+
+	tx3 := soil newTransaction.
+	self assert: (self idsFound: 'Doe' in: tx3 by: #lastName) isEmpty.
+	self assert: (self idsFound: 'Roe' in: tx3 by: #lastName) asArray equals: #( 'p1' ).
+	tx3 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testSecondUpdateInOneTransactionAndChangingBack [
+	| tx tx2 person |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+
+	tx := soil newTransaction.
+	person := self personIn: tx id: 'p1'.
+	person lastName: 'Roe'.
+	tx root update: person.
+	person lastName: 'Poe'.
+	tx root update: person.
+	self assert: (self idsFound: 'Roe' in: tx by: #lastName) isEmpty.
+	self assert: (self idsFound: 'Poe' in: tx by: #lastName) asArray equals: #( 'p1' ).
+	person lastName: 'Doe'.
+	tx root update: person.
+	self assert: (self idsFound: 'Poe' in: tx by: #lastName) isEmpty.
+	self assert: (self idsFound: 'Doe' in: tx by: #lastName) asArray equals: #( 'p1' ).
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: (self idsFound: 'Doe' in: tx2 by: #lastName) asArray equals: #( 'p1' ).
+	self assert: (self idsFound: 'Roe' in: tx2 by: #lastName) isEmpty.
+	self assert: (self idsFound: 'Poe' in: tx2 by: #lastName) isEmpty.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testUpdateAfterAddInOneTransaction [
+	| tx tx2 person |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	person := self newPersonNamed: 'John' surname: 'Doe' id: 'p1'.
+	tx root add: person.
+	person lastName: 'Roe'.
+	tx root update: person.
+	self assert: (self idsFound: 'Doe' in: tx by: #lastName) isEmpty.
+	self assert: (self idsFound: 'Roe' in: tx by: #lastName) asArray equals: #( 'p1' ).
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: (self idsFound: 'Doe' in: tx2 by: #lastName) isEmpty.
+	self assert: (self idsFound: 'Roe' in: tx2 by: #lastName) asArray equals: #( 'p1' ).
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testUpdatingOneOfTwoNewObjectsMovesOnlyItsEntry [
+	| tx tx2 first second |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	first := self newPersonNamed: 'John' surname: 'Doe' id: 'p1'.
+	second := self newPersonNamed: 'Jane' surname: 'Doe' id: 'p2'.
+	tx root add: first; add: second.
+	second lastName: 'Roe'.
+	tx root update: second.
+	self assert: (self idsFound: 'Doe' in: tx by: #lastName) asArray equals: #( 'p1' ).
+	self assert: (self idsFound: 'Roe' in: tx by: #lastName) asArray equals: #( 'p2' ).
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: (self idsFound: 'Doe' in: tx2 by: #lastName) asArray equals: #( 'p1' ).
+	self assert: (self idsFound: 'Roe' in: tx2 by: #lastName) asArray equals: #( 'p2' ).
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testUpdateOfAnUnchangedElementWritesNothing [
+	| tx person before |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+
+	tx := soil newTransaction.
+	person := self personIn: tx id: 'p1'.
+	before := tx journal entries size.
+	tx root update: person.
+	self assert: tx journal entries size equals: before.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testChangedPrimaryKeyMovesTheElementInEveryIndex [
+	| tx tx2 first |
+	self committedCollectionWith: {
+		self newPersonNamed: 'John' surname: 'Doe' id: 'p1'.
+		self newPersonNamed: 'Jane' surname: 'Doe' id: 'p5'.
+		self newPersonNamed: 'Jim' surname: 'Doe' id: 'p9' }.
+
+	tx := soil newTransaction.
+	first := self personIn: tx id: 'p1'.
+	first id: 'p7'.
+	tx root update: first.
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self
+		assert: ((tx2 root values collect: [ :each | each id ]) asSortedCollection asArray)
+		equals: #( 'p5' 'p7' 'p9' ).
+	"same attribute: the order of the new primary keys"
+	self assert: (self idsFound: 'Doe' in: tx2 by: #lastName) asArray equals: #( 'p5' 'p7' 'p9' ).
+	self assert: (self idsFound: 'John' in: tx2 by: #firstName) asArray equals: #( 'p7' ).
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testUpdateToATakenPrimaryKeyIsRefusedAndChangesNothing [
+	| tx person error |
+	self committedCollectionWith: {
+		self newPersonNamed: 'John' surname: 'Doe' id: 'p1'.
+		self newPersonNamed: 'Jane' surname: 'Roe' id: 'p2' }.
+
+	tx := soil newTransaction.
+	person := self personIn: tx id: 'p1'.
+	person id: 'p2'; lastName: 'Poe'.
+	error := [ tx root update: person. nil ] on: SoilKeyAlreadyPresent do: [ :e | e ].
+	self assert: error notNil.
+	self assert: error indexSelector equals: #id.
+	"the live object carries the new id, so the entries are counted"
+	self assert: ((tx root indexFor: #lastName) find: 'Doe') size equals: 1.
+	self assert: ((tx root indexFor: #lastName) find: 'Poe') isEmpty.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testUpdateToATakenValueOfAUniqueIndexIsRefusedAndChangesNothing [
+	| tx person |
+	tx := soil newTransaction.
+	tx root: (SoilIndexedCollection new
+		primary: (SoilDerivedIndex uniqueSelector: #id keySize: 8);
+		addIndex: (SoilDerivedIndex uniqueSelector: #lastName keySize: 16);
+		addIndex: (SoilDerivedIndex selector: #firstName);
+		yourself).
+	tx root
+		add: (self newPersonNamed: 'John' surname: 'Doe' id: 'p1');
+		add: (self newPersonNamed: 'Jane' surname: 'Roe' id: 'p2').
+	tx commit.
+
+	tx := soil newTransaction.
+	person := self personIn: tx id: 'p1'.
+	person lastName: 'Roe'; firstName: 'Joe'.
+	self should: [ tx root update: person ] raise: SoilKeyAlreadyPresent.
+	self assert: ((tx root indexFor: #lastName) find: 'Doe') size equals: 1.
+	self assert: ((tx root indexFor: #firstName) find: 'John') size equals: 1.
+	self assert: ((tx root indexFor: #firstName) find: 'Joe') isEmpty.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testUpdateWithoutAnOldEntryIsRefused [
+	| tx person |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+
+	tx := soil newTransaction.
+	self
+		should: [ tx root update: (self newPersonNamed: 'Jane' surname: 'Roe' id: 'p3') ]
+		raise: SoilKeyNotPresent.
+	person := self personIn: tx id: 'p1'.
+	tx root remove: person.
+	person lastName: 'Roe'.
+	self should: [ tx root update: person ] raise: SoilKeyNotPresent.
+	self assert: tx root values isEmpty.
+	self assert: ((tx root indexFor: #lastName) find: 'Roe') isEmpty.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testUpdateToAValueThatCannotBeIndexedWritesNothing [
+	| tx person before |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+
+	tx := soil newTransaction.
+	person := self personIn: tx id: 'p1'.
+	person firstName: 'Joe'; lastName: nil.
+	before := tx journal entries size.
+	self should: [ tx root update: person ] raise: SoilUnsupportedError.
+	self assert: tx journal entries size equals: before.
+	self assert: ((tx root indexFor: #firstName) find: 'John') size equals: 1.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testReaderWithAnOlderVersionStillFindsTheOldValue [
+	| reader tx person |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+
+	reader := soil newTransaction.
+	reader root values.
+	tx := soil newTransaction.
+	person := self personIn: tx id: 'p1'.
+	person lastName: 'Roe'.
+	tx root update: person.
+	tx commit.
+
+	self assert: (self idsFound: 'Doe' in: reader by: #lastName) asArray equals: #( 'p1' ).
+	self assert: (self idsFound: 'Roe' in: reader by: #lastName) isEmpty.
+	reader abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testTwoTransactionsUpdatingTheSameElement [
+	| tx1 tx2 person1 person2 error |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+
+	tx1 := soil newTransaction.
+	tx2 := soil newTransaction.
+	person1 := self personIn: tx1 id: 'p1'.
+	person2 := self personIn: tx2 id: 'p1'.
+	person1 lastName: 'Roe'.
+	tx1 root update: person1.
+	person2 lastName: 'Poe'.
+	tx2 root update: person2.
+	tx1 commit.
+	error := [ tx2 commit. nil ] on: SoilObjectHasConcurrentChange do: [ :e | e ].
+	self assert: error notNil.
+	self assert: error class equals: SoilObjectHasConcurrentChange
+]

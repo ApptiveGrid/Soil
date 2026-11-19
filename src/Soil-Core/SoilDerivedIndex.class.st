@@ -150,6 +150,12 @@ SoilDerivedIndex >> includesKey: aKey [
 	^ (self newIterator at: aKey ifAbsent: [ nil ]) notNil
 ]
 
+{ #category : #accessing }
+SoilDerivedIndex >> indexKey: aKey [
+	"the number the index orders aKey by"
+	^ self index indexKey: aKey
+]
+
 { #category : #testing }
 SoilDerivedIndex >> isPresentOnDisk [
 	^ self index isPresentOnDisk
