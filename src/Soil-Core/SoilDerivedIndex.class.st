@@ -250,8 +250,19 @@ SoilDerivedIndex >> queryFor: aValue [
 
 { #category : #searching }
 SoilDerivedIndex >> queryFrom: aLowValue to: aHighValue [
-	"a query for the entries whose attribute lies from aLowValue to aHighValue, both included"
+	"a query for the entries whose attribute lies from aLowValue to aHighValue, both included, nil for
+	an open end"
 	^ self query range: (self rangeSignalling: [ layout rangeFrom: aLowValue to: aHighValue ]); yourself
+]
+
+{ #category : #searching }
+SoilDerivedIndex >> queryFrom: aLowValue to: aHighValue includeFirst: firstBoolean includeLast: lastBoolean [
+	"a query for the entries whose attribute lies between aLowValue and aHighValue, each end
+	included or not, nil for an open end"
+	^ self query
+		range: (self rangeSignalling: [
+			layout rangeFrom: aLowValue to: aHighValue includeFirst: firstBoolean includeLast: lastBoolean ]);
+		yourself
 ]
 
 { #category : #searching }

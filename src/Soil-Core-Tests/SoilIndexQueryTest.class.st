@@ -344,6 +344,54 @@ SoilIndexQueryTest >> testRangeEqualStartingWithAndFromTo [
 ]
 
 { #category : #tests }
+SoilIndexQueryTest >> testRangeEndsCanBeLeftOutAndLeaveOutEveryEntryWithTheValue [
+	| tx index |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root indexFor: #lastName.
+	"Doe Moe Poe Roe Zed: leaving out Moe and Roe leaves out all their entries"
+	self
+		assert: (self ids: (index queryFrom: 'Doe' to: 'Roe' includeFirst: false includeLast: true) iterator upToEnd)
+		equals: #( 'p07' 'p06' 'p04' 'p05' ).
+	self
+		assert: (self ids: (index queryFrom: 'Doe' to: 'Roe' includeFirst: true includeLast: false) iterator upToEnd)
+		equals: #( 'p01' 'p02' 'p03' 'p07' 'p06' ).
+	self
+		assert: (self ids: (index queryFrom: 'Doe' to: 'Roe' includeFirst: false includeLast: false) iterator upToEnd)
+		equals: #( 'p07' 'p06' ).
+	"empty when the ends meet"
+	self assert: (index queryFrom: 'Roe' to: 'Roe' includeFirst: false includeLast: false) count equals: 0.
+	self assert: (index queryFrom: 'Roe' to: 'Roe' includeFirst: true includeLast: true) count equals: 2.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testOpenEndsGoOnToTheFirstAndToTheLastEntry [
+	| tx index |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root indexFor: #lastName.
+	self assert: (self ids: (index queryFrom: 'Poe' to: nil) iterator upToEnd) equals: #( 'p06' 'p04' 'p05' 'p08' ).
+	self
+		assert: (self ids: (index queryFrom: 'Poe' to: nil includeFirst: false includeLast: true) iterator upToEnd)
+		equals: #( 'p04' 'p05' 'p08' ).
+	self assert: (self ids: (index queryFrom: nil to: 'Moe') iterator upToEnd) equals: #( 'p01' 'p02' 'p03' 'p07' ).
+	self assert: (index queryFrom: nil to: nil) count equals: 8.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testRangeEndsOfAUniqueIndexCanBeLeftOut [
+	| tx |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	self
+		assert: (self ids: (tx root primaryIndex queryFrom: 'p02' to: 'p05' includeFirst: false includeLast: false) iterator upToEnd)
+		equals: #( 'p03' 'p04' ).
+	tx abort
+]
+
+{ #category : #tests }
 SoilIndexQueryTest >> testStartingWithReadsTheFrontOfACompositeAttribute [
 	| tx |
 	self commitPersons: self rows.

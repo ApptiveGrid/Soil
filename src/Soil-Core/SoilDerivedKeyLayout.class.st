@@ -131,12 +131,24 @@ SoilDerivedKeyLayout >> rangeFor: aValue [
 { #category : #accessing }
 SoilDerivedKeyLayout >> rangeFrom: aLowValue to: aHighValue [
 	"the keys of all entries whose attribute lies from aLowValue to aHighValue, both included"
+	^ self rangeFrom: aLowValue to: aHighValue includeFirst: true includeLast: true
+]
+
+{ #category : #accessing }
+SoilDerivedKeyLayout >> rangeFrom: aLowValue to: aHighValue includeFirst: firstBoolean includeLast: lastBoolean [
+	"the keys of all entries whose attribute lies between aLowValue and aHighValue. A value that
+	is not included leaves out all entries that have it, not just one. A nil value is open: the
+	range goes on to the first or to the last attribute there can be"
 	| fill |
 	fill := keySize - self attributeSize.
-	^ SoilBoundedRange
-		firstKey: (self encode: aLowValue) , (ByteArray new: fill)
-		lastKey: (self encode: aHighValue) , (ByteArray new: fill withAll: 255)
+	^ SoilKeyRange
+		firstKey: (aLowValue ifNotNil: [
+			(self encode: aLowValue) , (ByteArray new: fill withAll: (firstBoolean ifTrue: [ 0 ] ifFalse: [ 255 ])) ])
+		lastKey: (aHighValue ifNotNil: [
+			(self encode: aHighValue) , (ByteArray new: fill withAll: (lastBoolean ifTrue: [ 255 ] ifFalse: [ 0 ])) ])
 		keySize: keySize
+		includeFirst: firstBoolean
+		includeLast: lastBoolean
 ]
 
 { #category : #accessing }
