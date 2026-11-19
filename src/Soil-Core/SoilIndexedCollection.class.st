@@ -100,9 +100,7 @@ SoilIndexedCollection >> remove: anObject [
 	primaryIndex ifNil: [ ^ SoilUnsupportedError signal: 'the collection has no primary index' ].
 	primaryKey := primaryIndex keyFor: anObject primaryKey: nil.
 	keys := indexes collect: [ :each | each keyFor: anObject primaryKey: primaryKey ].
-	objectId := anObject isSoilProxy
-		ifTrue: [ anObject objectId ]
-		ifFalse: [ transaction objectIndex at: anObject ifPresent: [ :record | record objectId ] ifAbsent: [ nil ] ].
+	objectId := self objectIdOf: anObject.
 	entries := { primaryIndex -> primaryKey } , (indexes with: keys collect: [ :each :key | each -> key ]).
 	entries do: [ :each |
 		(each key holdsKey: each value objectId: objectId) ifFalse: [
@@ -113,6 +111,63 @@ SoilIndexedCollection >> remove: anObject [
 				signal ] ].
 	entries do: [ :each | each key removeKey: each value ].
 	^ anObject
+]
+
+{ #category : #private }
+SoilIndexedCollection >> committedKeyIn: anIndex of: aCopy [
+	"the key anIndex held for the committed state of an element, aCopy of the object as it was
+	read. The primary key it carries is the committed one"
+	^ anIndex indexKey: (anIndex
+		keyFor: aCopy
+		primaryKey: (primaryIndex keyFor: aCopy primaryKey: nil))
+]
+
+{ #category : #private }
+SoilIndexedCollection >> committedCopyOf: anObjectId [
+	"a separate copy of the object as the transaction's read version holds it, made with a
+	materializer of its own. Not the object of the transaction: materializing the record
+	of the transaction would overwrite it"
+	^ (transaction recordWithId: anObjectId)
+		transaction: transaction;
+		materializeObjectUsing: transaction newMaterializer
+]
+
+{ #category : #private }
+SoilIndexedCollection >> journalKeyIn: anIndex of: anObjectId [
+	"the key of the last entry this transaction added to anIndex for the element, or nil. A
+	new element has no object id yet and every new object has the same, so it is told apart
+	by the identity of its object id, the instance the entries were made with"
+	^ (transaction journal entries reverse
+		detect: [ :each |
+			(each isKindOf: SoilAddKeyEntry) and: [
+				each id = anIndex id and: [
+					each value == anObjectId or: [
+						anObjectId isInitialized and: [ each value = anObjectId ] ] ] ] ]
+		ifNone: [ nil ])
+		ifNotNil: [ :entry | entry key ]
+]
+
+{ #category : #private }
+SoilIndexedCollection >> objectIdOf: anObject [
+	"the object id of anObject in the transaction, nil when it is not in the database"
+	^ anObject isSoilProxy
+		ifTrue: [ anObject objectId ]
+		ifFalse: [ transaction objectIndex at: anObject ifPresent: [ :record | record objectId ] ifAbsent: [ nil ] ]
+]
+
+{ #category : #private }
+SoilIndexedCollection >> oldKeysOf: anObject objectId: anObjectId [
+	"the key every index holds the element under: for each index the key of its last entry in
+	the journal of the transaction, else the key from the committed version of the object. nil
+	where there is none, an element that is not in the database and has no entry. A collection
+	of keys per index is what several keys per element will make of it"
+	| copy |
+	^ ({ primaryIndex } , indexes) collect: [ :each |
+		anObjectId ifNotNil: [
+			(self journalKeyIn: each of: anObjectId) ifNil: [
+				anObjectId isInitialized ifTrue: [
+					copy ifNil: [ copy := self committedCopyOf: anObjectId ].
+					self committedKeyIn: each of: copy ] ] ] ]
 ]
 
 { #category : #serializing }
@@ -127,6 +182,42 @@ SoilIndexedCollection >> soilClusterRootIn: aTransaction [
 { #category : #serializing }
 SoilIndexedCollection >> soilLoadedIn: aTransaction [
 	transaction := aTransaction
+]
+
+{ #category : #updating }
+SoilIndexedCollection >> update: anObject [
+	"puts every index of the element under the keys of its attributes as they are now, after one
+	of them was changed. The key an index holds it under is the old one, see #oldKeysOf:objectId:.
+	An index whose key did not change is not written. An index whose key did is changed with a
+	removal of the old and an addition of the new key. Everything is checked before anything is
+	written: every old entry has to be there and to point at the element, else a SoilKeyNotPresent,
+	every new key of the primary and of a unique derived index has to be free, else a
+	SoilKeyAlreadyPresent. The index core overwrites a key it moves to, so that is checked here"
+	| objectId all newPrimaryKey newKeys oldKeys changed |
+	primaryIndex ifNil: [ ^ SoilUnsupportedError signal: 'the collection has no primary index' ].
+	objectId := self objectIdOf: anObject.
+	all := { primaryIndex } , indexes.
+	newPrimaryKey := primaryIndex keyFor: anObject primaryKey: nil.
+	newKeys := all collect: [ :each | each keyFor: anObject primaryKey: newPrimaryKey ].
+	oldKeys := self oldKeysOf: anObject objectId: objectId.
+	all with: oldKeys do: [ :each :old |
+		(old notNil and: [ each holdsKey: old objectId: objectId ]) ifFalse: [
+			SoilKeyNotPresent new
+				indexSelector: each selector;
+				key: (old ifNil: [ newPrimaryKey ] ifNotNil: [ old asByteArrayOfSize: each layout keySize ]);
+				elementId: (anObject perform: primaryIndex selector);
+				signal ] ].
+	changed := (1 to: all size) select: [ :i |
+		((all at: i) indexKey: (newKeys at: i)) ~= (oldKeys at: i) ].
+	changed do: [ :i |
+		| each |
+		each := all at: i.
+		(each == primaryIndex or: [ each isUnique ]) ifTrue: [
+			each assertFreeKey: (newKeys at: i) of: anObject ] ].
+	changed do: [ :i |
+		(all at: i) removeKey: (oldKeys at: i).
+		(all at: i) addKey: (newKeys at: i) objectId: objectId ].
+	^ anObject
 ]
 
 { #category : #accessing }
