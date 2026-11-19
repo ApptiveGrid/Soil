@@ -34,6 +34,7 @@ SoilIndexedCollection class >> soilTransientInstVars [
 SoilIndexedCollection >> add: anObject [
 	| primaryKey keys objectId |
 	primaryIndex ifNil: [ ^ SoilUnsupportedError signal: 'the collection has no primary index' ].
+	self registerRecordCheck.
 	"all keys first, so that nothing is written for a value that cannot be indexed"
 	primaryKey := primaryIndex keyFor: anObject primaryKey: nil.
 	keys := indexes collect: [ :each | each keyFor: anObject primaryKey: primaryKey ].
@@ -49,10 +50,30 @@ SoilIndexedCollection >> add: anObject [
 
 { #category : #adding }
 SoilIndexedCollection >> addIndex: anIndex [
+	"adds a derived index and builds it from the elements the collection holds, in the transaction of
+	the caller. The elements this transaction added before are held as well. Every key is built first,
+	so a value that cannot be indexed, or a value that is held twice in a unique index, fails before
+	anything is written: the collection does not have the index then, and the journal of the
+	transaction holds nothing of it. The keys and the object ids of all elements are kept in memory
+	meanwhile. The commit fails with a SoilIndexHasConcurrentChange when another transaction
+	changed the primary or an element since this one read, see SoilIndexRebuildCheck"
+	| entries elementIds |
 	primaryIndex ifNil: [ ^ SoilUnsupportedError signal: 'set the primary index before adding derived indexes' ].
 	anIndex id = primaryIndex id ifTrue: [ ^ SoilUnsupportedError signal: 'the primary index cannot also be a derived index' ].
+	(self indexFor: anIndex selector) ifNotNil: [
+		^ SoilUnsupportedError signal: 'the collection has an index on #' , anIndex selector asString , ' already' ].
 	anIndex primaryKeySize: primaryIndex layout keySize.
+	transaction ifNil: [
+		"not a root yet, so it holds no element and has nothing to build"
+		indexes add: anIndex.
+		^ anIndex ].
+	entries := OrderedCollection new.
+	elementIds := Set new.
+	self buildEntriesOf: anIndex into: entries elementIds: elementIds.
+	transaction makeRoot: anIndex.
+	entries do: [ :each | anIndex addKey: each key objectId: each value ].
 	indexes add: anIndex.
+	transaction addCommitValidation: (SoilIndexRebuildCheck primaryIndexId: primaryIndex id elementIds: elementIds).
 	^ anIndex
 ]
 
@@ -106,6 +127,13 @@ SoilIndexedCollection >> query [
 	^ SoilQuery on: self
 ]
 
+{ #category : #private }
+SoilIndexedCollection >> registerRecordCheck [
+	"a transaction that adds, removes or updates an element has to find the collection as it read it when it
+	commits, the collection is not written for that. Registered once: the transaction ignores an equal check"
+	transaction ifNotNil: [ transaction addCommitValidation: (SoilCollectionRecordCheck on: self) ]
+]
+
 { #category : #removing }
 SoilIndexedCollection >> remove: anObject [
 	"takes anObject out of the primary and of every derived index. The keys are computed from
@@ -115,6 +143,7 @@ SoilIndexedCollection >> remove: anObject [
 	in the database, only its entries go; what happens to its record is up to the garbage collection"
 	| primaryKey keys objectId entries |
 	primaryIndex ifNil: [ ^ SoilUnsupportedError signal: 'the collection has no primary index' ].
+	self registerRecordCheck.
 	primaryKey := primaryIndex keyFor: anObject primaryKey: nil.
 	keys := indexes collect: [ :each | each keyFor: anObject primaryKey: primaryKey ].
 	objectId := self objectIdOf: anObject.
@@ -128,6 +157,29 @@ SoilIndexedCollection >> remove: anObject [
 				signal ] ].
 	entries do: [ :each | each key removeKey: each value ].
 	^ anObject
+]
+
+{ #category : #private }
+SoilIndexedCollection >> buildEntriesOf: anIndex into: someEntries elementIds: someIds [
+	"the key -> object id of every element for anIndex. Reads all elements through the primary and
+	writes nothing. An element that anIndex cannot take is an error. The object id is that of the
+	record of the transaction, the one a new element is given its index in at the commit"
+	| iterator seen |
+	seen := Set new.
+	iterator := primaryIndex query iterator.
+	[ iterator atEnd ] whileFalse: [ | element key objectId |
+		element := iterator next theNonSoilProxy.
+		key := anIndex keyFor: element primaryKey: (primaryIndex keyFor: element primaryKey: nil).
+		(anIndex isUnique and: [ (seen includes: (anIndex indexKey: key)) ]) ifTrue: [
+			SoilKeyAlreadyPresent new
+				indexSelector: anIndex selector;
+				value: (element perform: anIndex selector);
+				key: key;
+				signal ].
+		seen add: (anIndex indexKey: key).
+		objectId := self objectIdOf: element.
+		objectId isInitialized ifTrue: [ someIds add: objectId ].
+		someEntries add: key -> objectId ]
 ]
 
 { #category : #private }
@@ -187,6 +239,20 @@ SoilIndexedCollection >> oldKeysOf: anObject objectId: anObjectId [
 					self committedKeyIn: each of: copy ] ] ] ]
 ]
 
+{ #category : #removing }
+SoilIndexedCollection >> removeIndex: anIndex [
+	"takes a derived index out of the collection. It is only unhooked: the file of the index stays as an
+	orphan for the garbage collection, there is no second way to delete. The primary cannot be removed"
+	| found |
+	anIndex id = primaryIndex id ifTrue: [ ^ SoilUnsupportedError signal: 'the primary index cannot be removed' ].
+	found := indexes
+		detect: [ :each | each id = anIndex id ]
+		ifNone: [ ^ SoilUnsupportedError signal: 'the index is not an index of this collection' ].
+	"by id, the indexes of a collection that was read are proxies"
+	indexes removeAllSuchThat: [ :each | each id = anIndex id ].
+	^ found
+]
+
 { #category : #serializing }
 SoilIndexedCollection >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
@@ -212,6 +278,7 @@ SoilIndexedCollection >> update: anObject [
 	SoilKeyAlreadyPresent. The index core overwrites a key it moves to, so that is checked here"
 	| objectId all newPrimaryKey newKeys oldKeys changed |
 	primaryIndex ifNil: [ ^ SoilUnsupportedError signal: 'the collection has no primary index' ].
+	self registerRecordCheck.
 	objectId := self objectIdOf: anObject.
 	all := { primaryIndex } , indexes.
 	newPrimaryKey := primaryIndex keyFor: anObject primaryKey: nil.
