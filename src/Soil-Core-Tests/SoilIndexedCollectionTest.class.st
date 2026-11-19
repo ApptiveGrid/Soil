@@ -395,3 +395,177 @@ SoilIndexedCollectionTest >> testPrimaryCannotBeAddedAsADerivedIndex [
 		should: [ collection addIndex: collection primaryIndex ]
 		raise: SoilUnsupportedError
 ]
+
+{ #category : #helpers }
+SoilIndexedCollectionTest >> committedCollectionWith: aCollectionOfPersons [
+	"the persons added and committed, answers nothing"
+	| tx |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	aCollectionOfPersons do: [ :each | tx root add: each ].
+	tx commit
+]
+
+{ #category : #helpers }
+SoilIndexedCollectionTest >> personIn: aTransaction id: anId [
+	^ aTransaction root values detect: [ :each | each id = anId ]
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testRemovedElementIsInNoIndexInTheTransactionAfterCommitAndAfterReopen [
+	| tx tx2 tx3 |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1'. self newPersonNamed: 'Jane' surname: 'Roe' id: 'p2' }.
+
+	tx := soil newTransaction.
+	tx root remove: (self personIn: tx id: 'p1').
+	self assert: (tx root values collect: [ :each | each id ]) asArray equals: #( 'p2' ).
+	self assert: ((tx root indexFor: #lastName) find: 'Doe') isEmpty.
+	self assert: ((tx root indexFor: #firstName) find: 'John') isEmpty.
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: (tx2 root values collect: [ :each | each id ]) asArray equals: #( 'p2' ).
+	self assert: ((tx2 root indexFor: #lastName) find: 'Doe') isEmpty.
+	self assert: ((tx2 root indexFor: #firstName) find: 'John') isEmpty.
+	tx2 abort.
+	soil reopen.
+
+	tx3 := soil newTransaction.
+	self assert: tx3 root values size equals: 1.
+	self assert: ((tx3 root indexFor: #lastName) find: 'Doe') isEmpty.
+	self assert: ((tx3 root indexFor: #lastName) find: 'Roe') size equals: 1.
+	tx3 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testElementAddedAndRemovedInOneTransactionIsNowhere [
+	| tx tx2 person |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	person := self newPersonNamed: 'John' surname: 'Doe' id: 'p1'.
+	tx root add: person.
+	tx root remove: person.
+	self assert: tx root values isEmpty.
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: tx2 root values isEmpty.
+	self assert: ((tx2 root indexFor: #lastName) find: 'Doe') isEmpty.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testPrimaryKeyCanBeAddedAgainAfterRemoval [
+	| tx tx2 |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+
+	tx := soil newTransaction.
+	tx root remove: (self personIn: tx id: 'p1').
+	tx root add: (self newPersonNamed: 'Jim' surname: 'Poe' id: 'p1').
+	self assert: ((tx root indexFor: #lastName) find: 'Poe') size equals: 1.
+	tx commit.
+
+	tx2 := soil newTransaction.
+	tx2 root remove: (self personIn: tx2 id: 'p1').
+	tx2 commit.
+	tx := soil newTransaction.
+	tx root add: (self newPersonNamed: 'Joe' surname: 'Moe' id: 'p1').
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self assert: (tx2 root values collect: [ :each | each lastName ]) asArray equals: #( 'Moe' ).
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testRemovingAnElementThatWasNeverAddedIsRefused [
+	| tx error |
+	tx := soil newTransaction.
+	tx root: self newCollection.
+	error := [ tx root remove: (self newPersonNamed: 'John' surname: 'Doe' id: 'p9'). nil ]
+		on: SoilKeyNotPresent
+		do: [ :e | e ].
+	self assert: error notNil.
+	self assert: error indexSelector equals: #id.
+	self assert: error elementId equals: 'p9'.
+	self assert: error key equals: #[112 57 0 0 0 0 0 0].
+	self assert: error messageText equals: 'derived index on #id holds no entry #[112 57 0 0 0 0 0 0] for the element ''p9'''.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testAnotherElementUnderThePrimaryKeyIsNotTheElement [
+	| tx |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+	tx := soil newTransaction.
+	self
+		should: [ tx root remove: (self newPersonNamed: 'Jane' surname: 'Roe' id: 'p1') ]
+		raise: SoilKeyNotPresent.
+	self assert: tx root values size equals: 1.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testChangedKeyAttributeWithoutUpdateIsRefusedAndRemovesNothing [
+	| tx person error |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+
+	tx := soil newTransaction.
+	person := self personIn: tx id: 'p1'.
+	person lastName: 'Changed'.
+	error := [ tx root remove: person. nil ] on: SoilKeyNotPresent do: [ :e | e ].
+	self assert: error notNil.
+	self assert: error indexSelector equals: #lastName.
+	self assert: error elementId equals: 'p1'.
+	"nothing removed, the primary and the first name index still hold the element"
+	self assert: tx root values size equals: 1.
+	self assert: ((tx root indexFor: #firstName) find: 'John') size equals: 1.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testRemovingOneOfTwoElementsWithTheSameAttributeKeepsTheOther [
+	| tx tx2 |
+	self committedCollectionWith: {
+		self newPersonNamed: 'John' surname: 'Doe' id: 'p1'.
+		self newPersonNamed: 'Jane' surname: 'Doe' id: 'p2' }.
+
+	tx := soil newTransaction.
+	tx root remove: (self personIn: tx id: 'p1').
+	tx commit.
+
+	tx2 := soil newTransaction.
+	self
+		assert: (((tx2 root indexFor: #lastName) find: 'Doe') collect: [ :each | each id ]) asArray
+		equals: #( 'p2' ).
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testReaderWithAnOlderVersionStillSeesARemovedElement [
+	| reader tx |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+
+	reader := soil newTransaction.
+	reader root values.
+	tx := soil newTransaction.
+	tx root remove: (self personIn: tx id: 'p1').
+	tx commit.
+
+	self assert: reader root values size equals: 1.
+	self assert: ((reader root indexFor: #lastName) find: 'Doe') size equals: 1.
+	reader abort
+]
+
+{ #category : #tests }
+SoilIndexedCollectionTest >> testTwoTransactionsRemovingTheSameElementConflictAtTheSecondCommit [
+	| tx1 tx2 |
+	self committedCollectionWith: { self newPersonNamed: 'John' surname: 'Doe' id: 'p1' }.
+
+	tx1 := soil newTransaction.
+	tx2 := soil newTransaction.
+	tx1 root remove: (self personIn: tx1 id: 'p1').
+	tx2 root remove: (self personIn: tx2 id: 'p1').
+	tx1 commit.
+	self should: [ tx2 commit ] raise: SoilIndexHasConcurrentChange
+]

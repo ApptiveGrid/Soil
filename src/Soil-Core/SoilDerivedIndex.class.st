@@ -136,6 +136,16 @@ SoilDerivedIndex >> initialize [
 ]
 
 { #category : #testing }
+SoilDerivedIndex >> holdsKey: aKey objectId: anObjectId [
+	"whether the entry under aKey points to the object with anObjectId, the one
+	a removal would take out"
+	| value |
+	anObjectId ifNil: [ ^ false ].
+	value := self newIterator at: aKey ifAbsent: [ ^ false ].
+	^ value asSoilObjectId = anObjectId
+]
+
+{ #category : #testing }
 SoilDerivedIndex >> includesKey: aKey [
 	^ (self newIterator at: aKey ifAbsent: [ nil ]) notNil
 ]
@@ -214,6 +224,20 @@ SoilDerivedIndex >> primaryKeySize: anInteger [
 		keySize: layout keySize
 		unique: layout isUnique
 		primaryKeySize: anInteger
+]
+
+{ #category : #removing }
+SoilDerivedIndex >> removeKey: aKey [
+	"takes the entry under aKey out of the index, as SoilIndexedDictionary>>removeKey:ifAbsent: does,
+	with the journal entry for the commit"
+	| oldValue |
+	oldValue := self newIterator removeKey: aKey.
+	transaction addJournalEntry: (SoilRemoveKeyEntry new
+			segment: [ self segment ];
+			id: id;
+			key: (self index indexKey: aKey);
+			oldValue: oldValue asSoilObjectId).
+	^ oldValue
 ]
 
 { #category : #private }

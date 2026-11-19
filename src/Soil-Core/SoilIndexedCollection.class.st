@@ -89,6 +89,32 @@ SoilIndexedCollection >> primaryIndex [
 	^ primaryIndex
 ]
 
+{ #category : #removing }
+SoilIndexedCollection >> remove: anObject [
+	"takes anObject out of the primary and of every derived index. The keys are computed from
+	the object as it is now, so a key attribute that was changed without #update: finds no entry
+	and the removal is refused with a SoilKeyNotPresent. Every index is checked before any entry
+	is removed, so a refused removal leaves the element in all of them. The object itself stays
+	in the database, only its entries go; what happens to its record is up to the garbage collection"
+	| primaryKey keys objectId entries |
+	primaryIndex ifNil: [ ^ SoilUnsupportedError signal: 'the collection has no primary index' ].
+	primaryKey := primaryIndex keyFor: anObject primaryKey: nil.
+	keys := indexes collect: [ :each | each keyFor: anObject primaryKey: primaryKey ].
+	objectId := anObject isSoilProxy
+		ifTrue: [ anObject objectId ]
+		ifFalse: [ transaction objectIndex at: anObject ifPresent: [ :record | record objectId ] ifAbsent: [ nil ] ].
+	entries := { primaryIndex -> primaryKey } , (indexes with: keys collect: [ :each :key | each -> key ]).
+	entries do: [ :each |
+		(each key holdsKey: each value objectId: objectId) ifFalse: [
+			SoilKeyNotPresent new
+				indexSelector: each key selector;
+				key: each value;
+				elementId: (anObject perform: primaryIndex selector);
+				signal ] ].
+	entries do: [ :each | each key removeKey: each value ].
+	^ anObject
+]
+
 { #category : #serializing }
 SoilIndexedCollection >> soilClusterRootIn: aTransaction [
 	transaction ifNotNil: [ ^ self ].
