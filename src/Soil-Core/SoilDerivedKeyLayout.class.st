@@ -128,6 +128,38 @@ SoilDerivedKeyLayout >> rangeFor: aValue [
 		keySize: keySize
 ]
 
+{ #category : #accessing }
+SoilDerivedKeyLayout >> rangeFrom: aLowValue to: aHighValue [
+	"the keys of all entries whose attribute lies from aLowValue to aHighValue, both included"
+	| fill |
+	fill := keySize - self attributeSize.
+	^ SoilBoundedRange
+		firstKey: (self encode: aLowValue) , (ByteArray new: fill)
+		lastKey: (self encode: aHighValue) , (ByteArray new: fill withAll: 255)
+		keySize: keySize
+]
+
+{ #category : #accessing }
+SoilDerivedKeyLayout >> rangeStartingWith: someBytes [
+	"the keys of all entries whose attribute starts with someBytes, a string or a byte array. An
+	attribute is compared by its leading bytes only where it is stored left aligned, which numbers
+	are not, so a number is refused"
+	| bytes |
+	bytes := ((self isByteString: someBytes) or: [ someBytes class == ByteArray ])
+		ifTrue: [ someBytes asByteArray ]
+		ifFalse: [
+			^ SoilUnsupportedError signal:
+				someBytes printString , ' cannot start an attribute, only byte strings and byte arrays can' ].
+	bytes size > self attributeSize ifTrue: [
+		^ SoilUnsupportedError signal:
+			someBytes printString , ' is ' , bytes size asString , ' bytes and longer than the attribute of '
+			, self attributeSize asString , ' bytes' ].
+	^ SoilPrefixRange
+		prefix: (bytes isEmpty ifTrue: [ 0 ] ifFalse: [ bytes asInteger ])
+		width: bytes size
+		keySize: keySize
+]
+
 { #category : #initialization }
 SoilDerivedKeyLayout >> setKeySize: anInteger unique: aBoolean primaryKeySize: anotherInteger [
 	(aBoolean not and: [ anInteger <= anotherInteger ]) ifTrue: [
