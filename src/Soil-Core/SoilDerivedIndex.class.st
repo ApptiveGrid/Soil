@@ -73,9 +73,11 @@ SoilDerivedIndex >> addKey: aKey objectId: objectId [
 SoilDerivedIndex >> assertFreeKey: aKey of: anObject [
 	"only for a unique index: the value of anObject must not be held by another element"
 	(self includesKey: aKey) ifTrue: [
-		SoilUnsupportedError signal:
-			'derived index on #' , selector asString , ': another element has the value '
-			, (anObject perform: selector) printString , ' already' ]
+		SoilKeyAlreadyPresent new
+			indexSelector: selector;
+			value: (anObject perform: selector);
+			key: aKey;
+			signal ]
 ]
 
 { #category : #initialization }

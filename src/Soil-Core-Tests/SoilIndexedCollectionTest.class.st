@@ -9,6 +9,16 @@ Class {
 }
 
 { #category : #helpers }
+SoilIndexedCollectionTest >> keyTakenIn: aBlock [
+	"the SoilKeyAlreadyPresent aBlock signals, fails when it signals none"
+	^ [ aBlock value.
+		self fail: 'the key should have been refused'.
+		nil ]
+		on: SoilKeyAlreadyPresent
+		do: [ :error | error ]
+]
+
+{ #category : #helpers }
 SoilIndexedCollectionTest >> newCollection [
 	^ SoilIndexedCollection new
 		primary: (SoilDerivedIndex uniqueSelector: #id keySize: 8);
@@ -233,13 +243,13 @@ SoilIndexedCollectionTest >> testPrimaryIsKeptApartFromTheDerivedIndexes [
 
 { #category : #tests }
 SoilIndexedCollectionTest >> testSamePrimaryKeyTwiceInATransactionIsRefusedAndWritesNothing [
-	| tx tx2 |
+	| tx tx2 error |
 	tx := soil newTransaction.
 	tx root: self newCollection.
 	tx root add: (self newPersonNamed: 'John' surname: 'Doe' id: 'p1').
-	self
-		should: [ tx root add: (self newPersonNamed: 'Jane' surname: 'Roe' id: 'p1') ]
-		raise: SoilUnsupportedError.
+	error := self keyTakenIn: [ tx root add: (self newPersonNamed: 'Jane' surname: 'Roe' id: 'p1') ].
+	self assert: error indexSelector equals: #id.
+	self assert: error value equals: 'p1'.
 	tx commit.
 
 	tx2 := soil newTransaction.
@@ -252,16 +262,16 @@ SoilIndexedCollectionTest >> testSamePrimaryKeyTwiceInATransactionIsRefusedAndWr
 
 { #category : #tests }
 SoilIndexedCollectionTest >> testSamePrimaryKeyAsACommittedElementIsRefused [
-	| tx tx2 |
+	| tx tx2 error |
 	tx := soil newTransaction.
 	tx root: self newCollection.
 	tx root add: (self newPersonNamed: 'John' surname: 'Doe' id: 'p1').
 	tx commit.
 
 	tx2 := soil newTransaction.
-	self
-		should: [ tx2 root add: (self newPersonNamed: 'Jane' surname: 'Roe' id: 'p1') ]
-		raise: SoilUnsupportedError.
+	error := self keyTakenIn: [ tx2 root add: (self newPersonNamed: 'Jane' surname: 'Roe' id: 'p1') ].
+	self assert: error indexSelector equals: #id.
+	self assert: error value equals: 'p1'.
 	self assert: ((tx2 root indexFor: #lastName) find: 'Roe') isEmpty.
 	tx2 abort
 ]
@@ -338,16 +348,17 @@ SoilIndexedCollectionTest >> testEqualAttributesAnswerInPrimaryKeyOrder [
 
 { #category : #tests }
 SoilIndexedCollectionTest >> testUniqueDerivedIndexRefusesASecondElementWithTheSameValue [
-	| tx tx2 |
+	| tx tx2 error |
 	tx := soil newTransaction.
 	tx root: (SoilIndexedCollection new
 		primary: (SoilDerivedIndex uniqueSelector: #id keySize: 8);
 		addIndex: (SoilDerivedIndex uniqueSelector: #lastName keySize: 16);
 		yourself).
 	tx root add: (self newPersonNamed: 'John' surname: 'Doe').
-	self
-		should: [ tx root add: (self newPersonNamed: 'Jane' surname: 'Doe') ]
-		raise: SoilUnsupportedError.
+	error := self keyTakenIn: [ tx root add: (self newPersonNamed: 'Jane' surname: 'Doe') ].
+	self assert: error indexSelector equals: #lastName.
+	self assert: error value equals: 'Doe'.
+	self assert: error messageText equals: 'derived index on #lastName: another element has the value ''Doe'' already'.
 	tx root add: (self newPersonNamed: 'Jane' surname: 'Roe').
 	tx commit.
 
