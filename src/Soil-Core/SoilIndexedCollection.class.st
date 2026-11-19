@@ -100,6 +100,12 @@ SoilIndexedCollection >> primaryIndex [
 	^ primaryIndex
 ]
 
+{ #category : #accessing }
+SoilIndexedCollection >> query [
+	"a new query for the elements of this collection, described in values, see SoilQuery"
+	^ SoilQuery on: self
+]
+
 { #category : #removing }
 SoilIndexedCollection >> remove: anObject [
 	"takes anObject out of the primary and of every derived index. The keys are computed from
