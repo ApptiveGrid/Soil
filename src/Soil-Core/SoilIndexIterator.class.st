@@ -555,6 +555,26 @@ SoilIndexIterator >> previousAssociation [
 ]
 
 { #category : #accessing }
+SoilIndexIterator >> previousKeyCloseTo: key [
+	"Answer the key of the last entry at or before key and leave the cursor on that entry. nil when
+	the index holds nothing at or before key. Note: returned key will be an index key.
+
+	The counterpart of #nextKeyCloseTo:, with the same idea of an entry: one this iterator sees,
+	the same that #at: finds. A key that is not there for my transaction is stepped over, an older
+	reader, for which it is not removed, still gets it"
+	| found item |
+	found := self basicNextKeyCloseTo: key.
+	"on the entry of key itself, when there is one and it is seen"
+	(found notNil and: [ found = (index indexKey: key) and: [ self isCurrentItemVisible ] ]) ifTrue: [ ^ found ].
+	"otherwise the cursor stands on the entry after key, or behind the last one, and the one before
+	is the answer. An index without an entry has no key to step back from"
+	currentKey ifNil: [ ^ nil ].
+	[ (item := self basicPreviousAssociation) notNil ] whileTrue: [
+		(self restoreItem: item) ifNotNil: [ ^ item key ] ].
+	^ nil
+]
+
+{ #category : #accessing }
 SoilIndexIterator >> previousPage [ 
 	| previousPageIndex |
 			

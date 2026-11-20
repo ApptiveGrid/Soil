@@ -12,6 +12,10 @@ that of the whole index, #count of the query counts hits.
 
 #position is the whole key of the last hit delivered, a ByteArray, nil before the first. A query
 that starts after it reads on without a gap and without doubles, in any transaction.
+
+The query decides the direction. A backward query reads from the end of its range, or from before the
+key it starts before, to the beginning, and #next, #position, the offset and the limit follow that
+direction. The last element of a range is #first of a backward query.
 "
 Class {
 	#name : #SoilIndexQueryIterator,
@@ -40,6 +44,21 @@ SoilIndexQueryIterator >> atEnd [
 	^ self lookAhead isNil
 ]
 
+{ #category : #private }
+SoilIndexQueryIterator >> backwardBound [
+	"where a backward read starts as key -> whether that key is left out, or nil for the end of the index.
+	Of the end of the range and the key to start before the one that comes first in the direction of
+	reading counts. Keys are compared, nothing is added to them"
+	| range before bound |
+	range := query range.
+	before := query start.
+	bound := range ifNotNil: [ range lastIndexKey -> range includesLast not ].
+	before ifNil: [ ^ bound ].
+	^ (bound isNil or: [ before <= bound key ])
+		ifTrue: [ before -> true ]
+		ifFalse: [ bound ]
+]
+
 { #category : #enumerating }
 SoilIndexQueryIterator >> do: aBlock [
 	| next |
@@ -54,38 +73,69 @@ SoilIndexQueryIterator >> first [
 ]
 
 { #category : #private }
+SoilIndexQueryIterator >> forwardBound [
+	"where a forward read starts as key -> whether that key is left out, or nil for the start of the index"
+	| range after bound |
+	range := query range.
+	after := query start.
+	bound := range ifNotNil: [ range firstIndexKey -> range includesFirst not ].
+	after ifNil: [ ^ bound ].
+	^ (bound isNil or: [ after >= bound key ])
+		ifTrue: [ after -> true ]
+		ifFalse: [ bound ]
+]
+
+{ #category : #private }
+SoilIndexQueryIterator >> hitAt: aFoundKey leaving: aBoolean key: aKey [
+	"the first hit from the entry the iterator of the index was positioned on, found as aFoundKey, in
+	the direction of reading, as key -> object, or nil. When the entry of aKey itself is to be left
+	out it is stepped over"
+	| entry |
+	aFoundKey ifNil: [ ^ nil ].
+	(aBoolean and: [ aFoundKey = aKey ]) ifTrue: [ ^ self hitFollowing ].
+	(self isInRange: aFoundKey) ifFalse: [ ^ nil ].
+	entry := aFoundKey -> (iterator at: aFoundKey).
+	(self isHit: entry value) ifTrue: [ ^ entry ].
+	^ self hitFollowing
+]
+
+{ #category : #private }
 SoilIndexQueryIterator >> hitFollowing [
-	"the next hit after the entry read last as key -> object, or nil"
+	"the next hit after the entry read last, in the direction of reading, as key -> object, or nil"
 	| found |
-	[ (found := iterator nextAssociation) notNil ] whileTrue: [
+	[ (found := self nextAssociationInDirection) notNil ] whileTrue: [
 		(self isInRange: found key) ifFalse: [ ^ nil ].
 		(self isHit: found value) ifTrue: [ ^ found key -> found value ] ].
 	^ nil
 ]
 
 { #category : #private }
-SoilIndexQueryIterator >> hitFrom: aKey excludingIt: aBoolean [
-	"the first hit at or after aKey as key -> object, or nil. When the entry of aKey itself is not
-	to be delivered it is stepped over. Positions the iterator of the index"
-	| found entry |
-	found := iterator nextKeyCloseTo: aKey.
-	found ifNil: [ ^ nil ].
-	(aBoolean and: [ found = aKey ]) ifTrue: [ ^ self hitFollowing ].
-	(self isInRange: found) ifFalse: [ ^ nil ].
-	entry := found -> (iterator at: found).
-	(self isHit: entry value) ifTrue: [ ^ entry ].
-	^ self hitFollowing
+SoilIndexQueryIterator >> hitFromStart [
+	"the first hit of the query in the direction of reading, as key -> object, or nil. A bound that is
+	left out is started like a start after a key"
+	| bound |
+	query isBackward ifTrue: [
+		bound := self backwardBound.
+		bound ifNil: [ ^ self hitOfLastEntry ].
+		^ self
+			hitAt: (iterator previousKeyCloseTo: bound key)
+			leaving: bound value
+			key: bound key ].
+	bound := self forwardBound.
+	bound ifNil: [ ^ self hitAt: (iterator nextKeyCloseTo: 0) leaving: false key: 0 ].
+	^ self
+		hitAt: (iterator nextKeyCloseTo: bound key)
+		leaving: bound value
+		key: bound key
 ]
 
 { #category : #private }
-SoilIndexQueryIterator >> hitFromStart [
-	"the first hit of the query: after the key to start after, else from the first key of the range,
-	else from the first of the index. A range that does not include its first key is started like
-	a start after a key"
-	query after ifNotNil: [ :key | ^ self hitFrom: key excludingIt: true ].
-	^ query range
-		ifNil: [ self hitFrom: 0 excludingIt: false ]
-		ifNotNil: [ :range | self hitFrom: range firstIndexKey excludingIt: range includesFirst not ]
+SoilIndexQueryIterator >> hitOfLastEntry [
+	"the last hit of the index, for a backward read that has neither a range nor a start"
+	| last |
+	last := iterator lastAssociation ifNil: [ ^ nil ].
+	(self isHit: last value) ifTrue: [ ^ last key -> last value ].
+	^ self hitFollowing
 ]
 
 { #category : #private }
@@ -124,6 +174,13 @@ SoilIndexQueryIterator >> next: anInteger [
 	result := OrderedCollection new: anInteger.
 	[ result size < anInteger and: [ (next := self next) notNil ] ] whileTrue: [ result add: next ].
 	^ result
+]
+
+{ #category : #private }
+SoilIndexQueryIterator >> nextAssociationInDirection [
+	^ query isBackward
+		ifTrue: [ iterator previousAssociation ]
+		ifFalse: [ iterator nextAssociation ]
 ]
 
 { #category : #accessing }

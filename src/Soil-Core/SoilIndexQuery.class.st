@@ -12,7 +12,14 @@ used again; #iterator makes a new SoilIndexQueryIterator that runs it.
 The start is exclusive: the key it names is not delivered. It is the way to read on, offset is
 offered as well but costs as many steps as it skips, and with a predicate each skipped hit is
 loaded. The limit counts hits, not entries read. #count reads to the end and counts what range
-and predicate let through, whatever start, offset and limit say. Reading is forwards only.
+and predicate let through, whatever start, offset, limit and direction say.
+
+Reading goes forwards unless the query is told #backwards. Then it reads from the end of the range to
+its beginning, and offset, limit and predicate count in the direction of reading. #after: starts
+forwards after a key, #before: starts backwards before a key; each also sets the direction. The page
+before a position is read backwards from it and turned around:
+
+	page := (query copy before: position; yourself) iterator upToEnd reverse.
 
 The index is read through its transaction, the iterator sees what the transaction changed and a
 reader with an older version sees the older state.
@@ -23,7 +30,8 @@ Class {
 	#instVars : [
 		'index',
 		'range',
-		'after',
+		'start',
+		'backward',
 		'offset',
 		'limit',
 		'predicate'
@@ -40,15 +48,39 @@ SoilIndexQuery class >> on: aSoilDerivedIndex [
 
 { #category : #accessing }
 SoilIndexQuery >> after [
-	"the key to start after, not included, as an index key or nil"
-	^ after
+	"the key a forward query starts after, not included, as an index key; nil for a backward query
+	and when there is no start"
+	^ backward ifTrue: [ nil ] ifFalse: [ start ]
 ]
 
 { #category : #accessing }
 SoilIndexQuery >> after: aKey [
-	"start after aKey, a whole key as #position of an iterator hands it out. Not included, and
-	not an error if no entry has it any more: reading begins with the next one there is"
-	after := aKey ifNotNil: [ index indexKey: aKey ]
+	"read forwards, starting after aKey, a whole key as #position of an iterator hands it out. Not
+	included, and not an error if no entry has it any more: reading begins with the next one there
+	is. nil for no start"
+	backward := false.
+	start := aKey ifNotNil: [ index indexKey: aKey ]
+]
+
+{ #category : #accessing }
+SoilIndexQuery >> backwards [
+	"read from the end of the range to its beginning"
+	backward := true
+]
+
+{ #category : #accessing }
+SoilIndexQuery >> before [
+	"the key a backward query starts before, not included, as an index key; nil for a forward query
+	and when there is no start"
+	^ backward ifTrue: [ start ] ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
+SoilIndexQuery >> before: aKey [
+	"read backwards, starting before aKey, not included, and not an error if no entry has it any
+	more: reading begins with the previous one there is. nil for no start"
+	backward := true.
+	start := aKey ifNotNil: [ index indexKey: aKey ]
 ]
 
 { #category : #reading }
@@ -66,6 +98,12 @@ SoilIndexQuery >> count [
 ]
 
 { #category : #accessing }
+SoilIndexQuery >> forwards [
+	"read from the beginning of the range to its end, the default"
+	backward := false
+]
+
+{ #category : #accessing }
 SoilIndexQuery >> index [
 	^ index
 ]
@@ -73,6 +111,17 @@ SoilIndexQuery >> index [
 { #category : #accessing }
 SoilIndexQuery >> index: aSoilDerivedIndex [
 	index := aSoilDerivedIndex
+]
+
+{ #category : #initialization }
+SoilIndexQuery >> initialize [
+	super initialize.
+	backward := false
+]
+
+{ #category : #testing }
+SoilIndexQuery >> isBackward [
+	^ backward
 ]
 
 { #category : #reading }
@@ -130,4 +179,10 @@ SoilIndexQuery >> range [
 { #category : #accessing }
 SoilIndexQuery >> range: aSoilIndexRange [
 	range := aSoilIndexRange
+]
+
+{ #category : #accessing }
+SoilIndexQuery >> start [
+	"the key reading starts after, in the direction of reading, as an index key, or nil"
+	^ start
 ]

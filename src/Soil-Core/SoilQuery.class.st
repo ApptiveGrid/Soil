@@ -17,6 +17,12 @@ the rest at the object. The order of the result is that of the property by its S
 of the primary key. The position is exclusive, offset and limit count hits.
 
 A query can be kept and used again. It brings its own encoding with #encoding: for a read without an index.
+
+It reads forwards unless it is told #backwards. A backward query reads the same elements in the reverse order,
+and offset, limit and the position count in the direction of reading. #after: starts forwards after a position,
+#before: starts backwards before it, each also sets the direction. The page before a position:
+
+	page := (query copy before: position; limit: 20; yourself) iterator upToEnd reverse.
 "
 Class {
 	#name : #SoilQuery,
@@ -26,7 +32,8 @@ Class {
 		'property',
 		'comparison',
 		'predicate',
-		'after',
+		'start',
+		'backward',
 		'offset',
 		'limit',
 		'encoding'
@@ -43,13 +50,36 @@ SoilQuery class >> on: aSoilIndexedCollection [
 
 { #category : #accessing }
 SoilQuery >> after [
-	^ after
+	"the position a forward query starts after, nil for a backward query and when there is none"
+	^ backward ifTrue: [ nil ] ifFalse: [ start ]
 ]
 
 { #category : #accessing }
 SoilQuery >> after: aSoilQueryPosition [
-	"start after this position, not at it. Not an error if no element is there any more"
-	after := aSoilQueryPosition
+	"read forwards, starting after this position, not at it. Not an error if no element is there any
+	more. nil for no start"
+	backward := false.
+	start := aSoilQueryPosition
+]
+
+{ #category : #accessing }
+SoilQuery >> backwards [
+	"read in the reverse order"
+	backward := true
+]
+
+{ #category : #accessing }
+SoilQuery >> before [
+	"the position a backward query starts before, nil for a forward query and when there is none"
+	^ backward ifTrue: [ start ] ifFalse: [ nil ]
+]
+
+{ #category : #accessing }
+SoilQuery >> before: aSoilQueryPosition [
+	"read backwards, starting before this position, not at it. Not an error if no element is there any
+	more. nil for no start"
+	backward := true.
+	start := aSoilQueryPosition
 ]
 
 { #category : #accessing }
@@ -105,6 +135,12 @@ SoilQuery >> equalTo: aValue [
 	comparison := SoilQueryComparison equalTo: aValue
 ]
 
+{ #category : #accessing }
+SoilQuery >> forwards [
+	"read in the order of the property and the primary key, the default"
+	backward := false
+]
+
 { #category : #comparing }
 SoilQuery >> from: aLowValue to: aHighValue [
 	comparison := SoilQueryComparison from: aLowValue to: aHighValue
@@ -117,6 +153,17 @@ SoilQuery >> from: aLowValue to: aHighValue includeFirst: firstBoolean includeLa
 		to: aHighValue
 		includeFirst: firstBoolean
 		includeLast: lastBoolean
+]
+
+{ #category : #initialization }
+SoilQuery >> initialize [
+	super initialize.
+	backward := false
+]
+
+{ #category : #testing }
+SoilQuery >> isBackward [
+	^ backward
 ]
 
 { #category : #reading }
@@ -187,6 +234,12 @@ SoilQuery >> property: aSymbol [
 	"the property that comparison and order are about, the selector of an index on it if there is one.
 	nil for none"
 	property := aSymbol ifNotNil: [ :each | each asSymbol ]
+]
+
+{ #category : #accessing }
+SoilQuery >> start [
+	"the position reading starts after, in the direction of reading, or nil"
+	^ start
 ]
 
 { #category : #comparing }

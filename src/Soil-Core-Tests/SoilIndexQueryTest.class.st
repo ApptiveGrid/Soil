@@ -33,16 +33,16 @@ SoilIndexQueryTest >> newCollection [
 		yourself
 ]
 
+{ #category : #accessing }
+SoilIndexQueryTest >> path [
+	^ 'soil-tests'
+]
+
 { #category : #helpers }
 SoilIndexQueryTest >> rows [
 	^ #( #( 'p01' 'Doe' 'John' ) #( 'p02' 'Doe' 'Jane' ) #( 'p03' 'Doe' 'Jim' )
 		#( 'p04' 'Roe' 'Rick' ) #( 'p05' 'Roe' 'Rose' ) #( 'p06' 'Poe' 'Pat' )
 		#( 'p07' 'Moe' 'Max' ) #( 'p08' 'Zed' 'Zoe' ) )
-]
-
-{ #category : #accessing }
-SoilIndexQueryTest >> path [
-	^ 'soil-tests'
 ]
 
 { #category : #running }
@@ -58,19 +58,6 @@ SoilIndexQueryTest >> setUp [
 SoilIndexQueryTest >> tearDown [
 	soil ifNotNil: [ soil close ].
 	super tearDown
-]
-
-{ #category : #tests }
-SoilIndexQueryTest >> testAfterIsExclusive [
-	| tx query position |
-	self commitPersons: self rows.
-	tx := soil newTransaction.
-	query := (tx root indexFor: #lastName) queryFor: 'Doe'.
-	position := query iterator next; next; position.
-	self
-		assert: (self ids: (query copy after: position; yourself) iterator upToEnd)
-		equals: #( 'p03' ).
-	tx abort
 ]
 
 { #category : #tests }
@@ -93,6 +80,34 @@ SoilIndexQueryTest >> testAfterAKeyThatIsGoneReadsOnFromTheNextOne [
 ]
 
 { #category : #tests }
+SoilIndexQueryTest >> testAfterIsExclusive [
+	| tx query position |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	query := (tx root indexFor: #lastName) queryFor: 'Doe'.
+	position := query iterator next; next; position.
+	self
+		assert: (self ids: (query copy after: position; yourself) iterator upToEnd)
+		equals: #( 'p03' ).
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testAnOlderReaderReadsBackwardsTheOldState [
+	| reader tx |
+	self commitPersons: self rows.
+	reader := soil newTransaction.
+	reader root values.
+	tx := soil newTransaction.
+	tx root remove: (tx root at: 'p03').
+	tx commit.
+	self
+		assert: (self ids: (((reader root indexFor: #lastName) queryFor: 'Doe') backwards; yourself) iterator upToEnd)
+		equals: #( 'p03' 'p02' 'p01' ).
+	reader abort
+]
+
+{ #category : #tests }
 SoilIndexQueryTest >> testAtAnsAtIfAbsentFindByPrimaryValue [
 	| tx |
 	self commitPersons: self rows.
@@ -100,6 +115,132 @@ SoilIndexQueryTest >> testAtAnsAtIfAbsentFindByPrimaryValue [
 	self assert: (tx root at: 'p04') lastName equals: 'Roe'.
 	self assert: (tx root at: 'p99' ifAbsent: [ #none ]) equals: #none.
 	self should: [ tx root at: 'p99' ] raise: KeyNotFound.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testAtEndLooksAheadWithAPredicateAndKeepsTheHit [
+	| tx iterator |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	iterator := ((tx root indexFor: #lastName) query predicate: [ :each | each lastName = 'Zed' ]; yourself) iterator.
+	self deny: iterator atEnd.
+	self assert: iterator position isNil.
+	self assert: iterator next id equals: 'p08'.
+	self assert: iterator atEnd.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testBackwardsBeforeTheSmallestKeyIsEmptyNotAnError [
+	| tx index position |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root indexFor: #lastName.
+	position := (index query iterator next; yourself) position.
+	self assert: ((index query before: position; yourself) iterator upToEnd) isEmpty.
+	self assert: ((index query before: position; yourself) iterator atEnd).
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testBackwardsInEveryRange [
+	| tx index |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root indexFor: #lastName.
+	self
+		assert: (self ids: ((index queryFor: 'Doe') backwards; yourself) iterator upToEnd)
+		equals: #( 'p03' 'p02' 'p01' ).
+	self
+		assert: (self ids: ((index queryStartingWith: 'Do') backwards; yourself) iterator upToEnd)
+		equals: #( 'p03' 'p02' 'p01' ).
+	self
+		assert: (self ids: ((index queryFrom: 'Moe' to: 'Roe') backwards; yourself) iterator upToEnd)
+		equals: #( 'p05' 'p04' 'p06' 'p07' ).
+	self
+		assert: (self ids: ((index queryFrom: 'Moe' to: 'Roe' includeFirst: false includeLast: false) backwards; yourself) iterator upToEnd)
+		equals: #( 'p06' ).
+	self
+		assert: (self ids: ((index queryFrom: 'Poe' to: nil) backwards; yourself) iterator upToEnd)
+		equals: #( 'p08' 'p05' 'p04' 'p06' ).
+	self
+		assert: (self ids: ((index queryFrom: nil to: 'Moe' includeFirst: true includeLast: false) backwards; yourself) iterator upToEnd)
+		equals: #( 'p03' 'p02' 'p01' ).
+	self assert: (self ids: ((index queryFor: 'nobody') backwards; yourself) iterator upToEnd) isEmpty.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testBackwardsLimitOffsetAndPredicateCountInTheDirectionOfReading [
+	| tx query |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	query := (tx root indexFor: #lastName) queryFor: 'Doe'.
+	query backwards; limit: 2.
+	self assert: (self ids: query iterator upToEnd) equals: #( 'p03' 'p02' ).
+	query offset: 1.
+	self assert: (self ids: query iterator upToEnd) equals: #( 'p02' 'p01' ).
+	query limit: nil; offset: nil; predicate: [ :each | each firstName size = 4 ].
+	self assert: (self ids: query iterator upToEnd) equals: #( 'p02' 'p01' ).
+	self assert: query count equals: 2.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testBackwardsReadsTheWholeIndexInReverse [
+	| tx index |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root indexFor: #lastName.
+	self
+		assert: (self ids: (index query backwards; yourself) iterator upToEnd)
+		equals: #( 'p08' 'p05' 'p04' 'p06' 'p07' 'p03' 'p02' 'p01' ).
+	self
+		assert: (self ids: (index query backwards; yourself) iterator upToEnd) reversed
+		equals: (self ids: index query iterator upToEnd).
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testBackwardsSeesWhatTheTransactionChanged [
+	| tx person |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	tx root add: (SoilPerson new id: 'p09'; lastName: 'Doe'; firstName: 'Dan'; yourself).
+	person := tx root at: 'p01'.
+	person lastName: 'Zip'.
+	tx root update: person.
+	tx root remove: (tx root at: 'p02').
+	self
+		assert: (self ids: (((tx root indexFor: #lastName) queryFor: 'Doe') backwards; yourself) iterator upToEnd)
+		equals: #( 'p09' 'p03' ).
+	self
+		assert: (self ids: ((tx root indexFor: #lastName) query backwards; limit: 1; yourself) iterator upToEnd)
+		equals: #( 'p01' ).
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testBackwardsStartIsExclusiveAndMissingKeyReadsOnFromThePreviousOne [
+	| tx index position |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root indexFor: #lastName.
+	position := (index query iterator next: 4; yourself) position.
+	"the fourth entry is p07, reading backwards before it"
+	self
+		assert: (self ids: ((index query before: position; yourself) iterator upToEnd))
+		equals: #( 'p03' 'p02' 'p01' ).
+	tx abort.
+	"p07 is gone, the key the position names is not there any more"
+	tx := soil newTransaction.
+	tx root remove: (tx root at: 'p07').
+	tx commit.
+	tx := soil newTransaction.
+	self
+		assert: (self ids: ((tx root indexFor: #lastName) query before: position; yourself) iterator upToEnd)
+		equals: #( 'p03' 'p02' 'p01' ).
 	tx abort
 ]
 
@@ -146,11 +287,48 @@ SoilIndexQueryTest >> testEntriesAreSeenThatTheTransactionChanged [
 ]
 
 { #category : #tests }
+SoilIndexQueryTest >> testExcludedEndsAtTheSmallestAndTheLargestKeyAreEmptyNotAnError [
+	| tx index highest lowest |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root primaryIndex.
+	highest := ByteArray new: 8 withAll: 255.
+	lowest := ByteArray new: 8.
+	self
+		assert: (index query
+			range: (SoilKeyRange firstKey: highest lastKey: nil keySize: 8 includeFirst: false includeLast: true);
+			yourself) count
+		equals: 0.
+	self
+		assert: (index query
+			range: (SoilKeyRange firstKey: nil lastKey: lowest keySize: 8 includeFirst: true includeLast: false);
+			yourself) count
+		equals: 0.
+	self
+		assert: (index query
+			range: (SoilKeyRange firstKey: lowest lastKey: highest keySize: 8 includeFirst: false includeLast: false);
+			yourself) count
+		equals: 8.
+	tx abort
+]
+
+{ #category : #tests }
 SoilIndexQueryTest >> testFindStaysAThinWrapAroundTheQuery [
 	| tx |
 	self commitPersons: self rows.
 	tx := soil newTransaction.
 	self assert: (self ids: ((tx root indexFor: #lastName) find: 'Roe')) equals: #( 'p04' 'p05' ).
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testFirstOfABackwardQueryIsTheLastOfTheRange [
+	| tx iterator |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	iterator := (((tx root indexFor: #lastName) queryFor: 'Doe') backwards; yourself) iterator.
+	self assert: iterator first id equals: 'p03'.
+	self assert: iterator next id equals: 'p02'.
 	tx abort
 ]
 
@@ -164,6 +342,18 @@ SoilIndexQueryTest >> testFirstStartsTheQueryOver [
 	self assert: iterator first id equals: 'p01'.
 	self assert: iterator next id equals: 'p02'.
 	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testKeyRangeComparesWithoutDoingArithmeticOnKeys [
+	| range |
+	range := SoilKeyRange firstKey: #[0 0 0 5] lastKey: #[0 0 0 9] keySize: 4 includeFirst: false includeLast: false.
+	self deny: (range includesKey: #[0 0 0 5]).
+	self assert: (range includesKey: #[0 0 0 6]).
+	self assert: (range includesKey: #[0 0 0 8]).
+	self deny: (range includesKey: #[0 0 0 9]).
+	self assert: range firstKey equals: #[0 0 0 5].
+	self assert: range lastKey equals: #[0 0 0 9]
 ]
 
 { #category : #tests }
@@ -207,6 +397,21 @@ SoilIndexQueryTest >> testOlderReaderStillSeesTheOldState [
 	self assert: (self ids: ((reader root indexFor: #lastName) find: 'Doe')) equals: #( 'p01' 'p02' 'p03' ).
 	self assert: (reader root at: 'p01' ifAbsent: [ nil ]) notNil.
 	reader abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testOpenEndsGoOnToTheFirstAndToTheLastEntry [
+	| tx index |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root indexFor: #lastName.
+	self assert: (self ids: (index queryFrom: 'Poe' to: nil) iterator upToEnd) equals: #( 'p06' 'p04' 'p05' 'p08' ).
+	self
+		assert: (self ids: (index queryFrom: 'Poe' to: nil includeFirst: false includeLast: true) iterator upToEnd)
+		equals: #( 'p04' 'p05' 'p08' ).
+	self assert: (self ids: (index queryFrom: nil to: 'Moe') iterator upToEnd) equals: #( 'p01' 'p02' 'p03' 'p07' ).
+	self assert: (index queryFrom: nil to: nil) count equals: 8.
+	tx abort
 ]
 
 { #category : #tests }
@@ -262,6 +467,24 @@ SoilIndexQueryTest >> testPrimaryAndUniqueDerivedIndexCanBeQueried [
 ]
 
 { #category : #tests }
+SoilIndexQueryTest >> testProtocolDoRestartsForBothIterators [
+	| tx plain query fromPlain fromQuery |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	plain := (tx root indexFor: #lastName) newIterator.
+	query := (tx root indexFor: #lastName) query iterator.
+	plain next; next.
+	query next; next.
+	fromPlain := OrderedCollection new.
+	fromQuery := OrderedCollection new.
+	plain do: [ :each | fromPlain add: each id ].
+	query do: [ :each | fromQuery add: each id ].
+	self assert: fromPlain asArray equals: fromQuery asArray.
+	self assert: fromQuery size equals: 8.
+	tx abort
+]
+
+{ #category : #tests }
 SoilIndexQueryTest >> testProtocolIsTheSameAsTheIndexIteratorsForTheWholeIndex [
 	| tx plain query |
 	self commitPersons: self rows.
@@ -282,37 +505,6 @@ SoilIndexQueryTest >> testProtocolIsTheSameAsTheIndexIteratorsForTheWholeIndex [
 ]
 
 { #category : #tests }
-SoilIndexQueryTest >> testProtocolDoRestartsForBothIterators [
-	| tx plain query fromPlain fromQuery |
-	self commitPersons: self rows.
-	tx := soil newTransaction.
-	plain := (tx root indexFor: #lastName) newIterator.
-	query := (tx root indexFor: #lastName) query iterator.
-	plain next; next.
-	query next; next.
-	fromPlain := OrderedCollection new.
-	fromQuery := OrderedCollection new.
-	plain do: [ :each | fromPlain add: each id ].
-	query do: [ :each | fromQuery add: each id ].
-	self assert: fromPlain asArray equals: fromQuery asArray.
-	self assert: fromQuery size equals: 8.
-	tx abort
-]
-
-{ #category : #tests }
-SoilIndexQueryTest >> testAtEndLooksAheadWithAPredicateAndKeepsTheHit [
-	| tx iterator |
-	self commitPersons: self rows.
-	tx := soil newTransaction.
-	iterator := ((tx root indexFor: #lastName) query predicate: [ :each | each lastName = 'Zed' ]; yourself) iterator.
-	self deny: iterator atEnd.
-	self assert: iterator position isNil.
-	self assert: iterator next id equals: 'p08'.
-	self assert: iterator atEnd.
-	tx abort
-]
-
-{ #category : #tests }
 SoilIndexQueryTest >> testQueryDescribesAndIteratorsAreIndependent [
 	| tx query one two |
 	self commitPersons: self rows.
@@ -323,23 +515,6 @@ SoilIndexQueryTest >> testQueryDescribesAndIteratorsAreIndependent [
 	one next.
 	self assert: two next id equals: 'p01'.
 	self assert: one next id equals: 'p02'.
-	tx abort
-]
-
-{ #category : #tests }
-SoilIndexQueryTest >> testRangeEqualStartingWithAndFromTo [
-	| tx index |
-	self commitPersons: self rows.
-	tx := soil newTransaction.
-	index := tx root indexFor: #lastName.
-	self assert: (self ids: (index queryFor: 'Roe') iterator upToEnd) equals: #( 'p04' 'p05' ).
-	self assert: (self ids: (index queryStartingWith: 'Do') iterator upToEnd) equals: #( 'p01' 'p02' 'p03' ).
-	self assert: (self ids: (index queryStartingWith: '') iterator upToEnd) size equals: 8.
-	"from Moe to Roe, both included, in the order of the attribute"
-	self
-		assert: (self ids: (index queryFrom: 'Moe' to: 'Roe') iterator upToEnd)
-		equals: #( 'p07' 'p06' 'p04' 'p05' ).
-	self assert: (self ids: index query iterator upToEnd) size equals: 8.
 	tx abort
 ]
 
@@ -366,59 +541,6 @@ SoilIndexQueryTest >> testRangeEndsCanBeLeftOutAndLeaveOutEveryEntryWithTheValue
 ]
 
 { #category : #tests }
-SoilIndexQueryTest >> testOpenEndsGoOnToTheFirstAndToTheLastEntry [
-	| tx index |
-	self commitPersons: self rows.
-	tx := soil newTransaction.
-	index := tx root indexFor: #lastName.
-	self assert: (self ids: (index queryFrom: 'Poe' to: nil) iterator upToEnd) equals: #( 'p06' 'p04' 'p05' 'p08' ).
-	self
-		assert: (self ids: (index queryFrom: 'Poe' to: nil includeFirst: false includeLast: true) iterator upToEnd)
-		equals: #( 'p04' 'p05' 'p08' ).
-	self assert: (self ids: (index queryFrom: nil to: 'Moe') iterator upToEnd) equals: #( 'p01' 'p02' 'p03' 'p07' ).
-	self assert: (index queryFrom: nil to: nil) count equals: 8.
-	tx abort
-]
-
-{ #category : #tests }
-SoilIndexQueryTest >> testExcludedEndsAtTheSmallestAndTheLargestKeyAreEmptyNotAnError [
-	| tx index highest lowest |
-	self commitPersons: self rows.
-	tx := soil newTransaction.
-	index := tx root primaryIndex.
-	highest := ByteArray new: 8 withAll: 255.
-	lowest := ByteArray new: 8.
-	self
-		assert: (index query
-			range: (SoilKeyRange firstKey: highest lastKey: nil keySize: 8 includeFirst: false includeLast: true);
-			yourself) count
-		equals: 0.
-	self
-		assert: (index query
-			range: (SoilKeyRange firstKey: nil lastKey: lowest keySize: 8 includeFirst: true includeLast: false);
-			yourself) count
-		equals: 0.
-	self
-		assert: (index query
-			range: (SoilKeyRange firstKey: lowest lastKey: highest keySize: 8 includeFirst: false includeLast: false);
-			yourself) count
-		equals: 8.
-	tx abort
-]
-
-{ #category : #tests }
-SoilIndexQueryTest >> testKeyRangeComparesWithoutDoingArithmeticOnKeys [
-	| range |
-	range := SoilKeyRange firstKey: #[0 0 0 5] lastKey: #[0 0 0 9] keySize: 4 includeFirst: false includeLast: false.
-	self deny: (range includesKey: #[0 0 0 5]).
-	self assert: (range includesKey: #[0 0 0 6]).
-	self assert: (range includesKey: #[0 0 0 8]).
-	self deny: (range includesKey: #[0 0 0 9]).
-	self assert: range firstKey equals: #[0 0 0 5].
-	self assert: range lastKey equals: #[0 0 0 9]
-]
-
-{ #category : #tests }
 SoilIndexQueryTest >> testRangeEndsOfAUniqueIndexCanBeLeftOut [
 	| tx |
 	self commitPersons: self rows.
@@ -427,6 +549,31 @@ SoilIndexQueryTest >> testRangeEndsOfAUniqueIndexCanBeLeftOut [
 		assert: (self ids: (tx root primaryIndex queryFrom: 'p02' to: 'p05' includeFirst: false includeLast: false) iterator upToEnd)
 		equals: #( 'p03' 'p04' ).
 	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testRangeEqualStartingWithAndFromTo [
+	| tx index |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root indexFor: #lastName.
+	self assert: (self ids: (index queryFor: 'Roe') iterator upToEnd) equals: #( 'p04' 'p05' ).
+	self assert: (self ids: (index queryStartingWith: 'Do') iterator upToEnd) equals: #( 'p01' 'p02' 'p03' ).
+	self assert: (self ids: (index queryStartingWith: '') iterator upToEnd) size equals: 8.
+	"from Moe to Roe, both included, in the order of the attribute"
+	self
+		assert: (self ids: (index queryFrom: 'Moe' to: 'Roe') iterator upToEnd)
+		equals: #( 'p07' 'p06' 'p04' 'p05' ).
+	self assert: (self ids: index query iterator upToEnd) size equals: 8.
+	tx abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testStartingWithIsRefusedForANumberAndForTooMuch [
+	| layout |
+	layout := SoilDerivedKeyLayout keySize: 16 unique: false primaryKeySize: 8.
+	self should: [ layout rangeStartingWith: 5 ] raise: SoilUnsupportedError.
+	self should: [ layout rangeStartingWith: '123456789' ] raise: SoilUnsupportedError
 ]
 
 { #category : #tests }
@@ -444,11 +591,45 @@ SoilIndexQueryTest >> testStartingWithReadsTheFrontOfACompositeAttribute [
 ]
 
 { #category : #tests }
-SoilIndexQueryTest >> testStartingWithIsRefusedForANumberAndForTooMuch [
-	| layout |
-	layout := SoilDerivedKeyLayout keySize: 16 unique: false primaryKeySize: 8.
-	self should: [ layout rangeStartingWith: 5 ] raise: SoilUnsupportedError.
-	self should: [ layout rangeStartingWith: '123456789' ] raise: SoilUnsupportedError
+SoilIndexQueryTest >> testThePageBeforeIsReadBackwardsAndTurnedAround [
+	"three pages forwards, then from the place of the first hit of the third page backwards: that is
+	the second page, also inside a run of equal values and over two transactions"
+	| tx tx2 index first second third position expected |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root indexFor: #lastName.
+	first := index query limit: 3; iterator.
+	first upToEnd.
+	second := (index query after: first position; limit: 3; yourself) iterator.
+	second upToEnd.
+	third := (index query after: second position; limit: 3; yourself) iterator.
+	third next.
+	"the first hit of the third page is in the middle of the run of Roe"
+	position := third position.
+	expected := self ids: second query iterator upToEnd.
+	tx abort.
+	tx2 := soil newTransaction.
+	self
+		assert: (self ids: ((tx2 root indexFor: #lastName) query before: position; limit: 3; yourself) iterator upToEnd) reversed
+		equals: expected.
+	tx2 abort
+]
+
+{ #category : #tests }
+SoilIndexQueryTest >> testTheStartIsKeptInsideTheRangeInBothDirections [
+	| tx index late early |
+	self commitPersons: self rows.
+	tx := soil newTransaction.
+	index := tx root indexFor: #lastName.
+	late := (index query iterator next: 8; yourself) position.
+	early := (index query iterator next; yourself) position.
+	self
+		assert: (self ids: ((index queryFor: 'Doe') before: late; yourself) iterator upToEnd)
+		equals: #( 'p03' 'p02' 'p01' ).
+	self
+		assert: (self ids: ((index queryFor: 'Roe') after: early; yourself) iterator upToEnd)
+		equals: #( 'p04' 'p05' ).
+	tx abort
 ]
 
 { #category : #tests }

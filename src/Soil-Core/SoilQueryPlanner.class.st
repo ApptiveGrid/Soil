@@ -42,8 +42,12 @@ SoilQueryPlanner >> indexQueryFor: aSoilQuery on: anIndex [
 		predicate: aSoilQuery predicate;
 		offset: aSoilQuery offset;
 		limit: aSoilQuery limit.
-	aSoilQuery after ifNotNil: [ :position |
-		indexQuery after: (self keyOf: position in: anIndex for: aSoilQuery) ].
+	aSoilQuery isBackward ifTrue: [ indexQuery backwards ].
+	aSoilQuery start ifNotNil: [ :position | | key |
+		key := self keyOf: position in: anIndex for: aSoilQuery.
+		aSoilQuery isBackward
+			ifTrue: [ indexQuery before: key ]
+			ifFalse: [ indexQuery after: key ] ].
 	^ indexQuery
 ]
 

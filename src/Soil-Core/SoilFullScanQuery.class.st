@@ -74,6 +74,20 @@ SoilFullScanQuery >> isHit: anObject after: aPosition [
 ]
 
 { #category : #private }
+SoilFullScanQuery >> isHit: anObject before: aPosition [
+	"whether anObject comes before the position: by the property, then by the primary key"
+	| order |
+	query property ifNotNil: [ :property |
+		aPosition attribute isNil ifTrue: [
+			^ SoilUnsupportedError signal: 'a position without a value of the property cannot start a query on #' , property asString ].
+		order := self encoding compare: (anObject perform: property) with: aPosition attribute.
+		order = 0 ifFalse: [ ^ order < 0 ] ].
+	^ (collection primaryIndex layout encoding
+		compare: (anObject perform: collection primaryIndex selector)
+		with: aPosition primary) < 0
+]
+
+{ #category : #private }
 SoilFullScanQuery >> isOrderedByPrimaryKey [
 	"whether the primary key order is the order asked for: all hits have the one value of an equal comparison"
 	^ query comparison notNil and: [ query comparison isEqual ]
@@ -119,8 +133,12 @@ SoilFullScanQuery >> sortedIterator [
 		predicate: self hitBlock;
 		yourself) iterator upToEnd.
 	sorted := hits asArray sort: [ :one :other | self orderOf: one before: other ].
-	query after ifNotNil: [ :position |
-		sorted := sorted select: [ :each | self isHit: each after: position ] ].
+	query start ifNotNil: [ :position |
+		sorted := sorted select: [ :each |
+			query isBackward
+				ifTrue: [ self isHit: each before: position ]
+				ifFalse: [ self isHit: each after: position ] ] ].
+	query isBackward ifTrue: [ sorted := sorted reversed ].
 	sorted := query offset
 		ifNil: [ sorted ]
 		ifNotNil: [ :offset | sorted allButFirst: (offset min: sorted size) ].
@@ -137,7 +155,11 @@ SoilFullScanQuery >> unsortedIterator [
 		offset: query offset;
 		limit: query limit;
 		yourself.
-	query after ifNotNil: [ :position |
-		indexQuery after: (collection primaryIndex layout keyFor: position primary primaryKey: nil) ].
+	query isBackward ifTrue: [ indexQuery backwards ].
+	query start ifNotNil: [ :position | | key |
+		key := collection primaryIndex layout keyFor: position primary primaryKey: nil.
+		query isBackward
+			ifTrue: [ indexQuery before: key ]
+			ifFalse: [ indexQuery after: key ] ].
 	^ indexQuery iterator
 ]
