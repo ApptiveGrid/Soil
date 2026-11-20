@@ -15,7 +15,8 @@ Class {
 		'indexUpdatesToCommit',
 		'commitStrategy',
 		'changedBehaviorDescriptions',
-		'needsCheckpoint'
+		'needsCheckpoint',
+		'commitValidations'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -70,6 +71,17 @@ SoilTransaction >> addJournalEntry: anEntry head: aBoolean [
 	aBoolean 
 		ifTrue: [ self journal addEntryToHead: anEntry  ]
 		ifFalse: [ self journal addEntryToTail: anEntry ]
+]
+
+{ #category : #adding }
+SoilTransaction >> addCommitValidation: aValidation [
+	"a check that runs when this transaction commits, under the commit lock and before the journal is
+	written, as #validateIn: of its entries does. aValidation understands #validateIn: and gets the
+	transaction. It signals what it finds wrong, and the commit fails like it does for a conflict:
+	nothing is written and the locks are released. It is not part of the journal, it has no type code
+	and is gone with the transaction. Added again, an equal one is ignored. A transaction that has
+	nothing to commit does not run it"
+	(commitValidations includes: aValidation) ifFalse: [ commitValidations add: aValidation ]
 ]
 
 { #category : #adding }
@@ -193,6 +205,7 @@ SoilTransaction >> basicCommit [
 		journal := self buildJournal.
 		self detectIndexConflicts.
 		journal validateIn: self.
+		self runCommitValidations.
 		soil journal writeTransactionJournal: journal.
 		journal commitIn: soil.
 		soil journal addTransactionJournal: journal ]
@@ -504,6 +517,7 @@ SoilTransaction >> initialize [
 	locks := OrderedCollection new.
 	indexUpdatesToCommit := OrderedCollection new.
 	changedBehaviorDescriptions := OrderedCollection new.
+	commitValidations := OrderedCollection new.
 	self beAutomaticWriteTracking
 ]
 
@@ -852,6 +866,11 @@ SoilTransaction >> removeLock: aLock [
 { #category : #accessing }
 SoilTransaction >> resetLastObjectIndexes [
 	lastObjectIndexes := Dictionary new
+]
+
+{ #category : #committing }
+SoilTransaction >> runCommitValidations [
+	commitValidations do: [ :each | each validateIn: self ]
 ]
 
 { #category : #accessing }
