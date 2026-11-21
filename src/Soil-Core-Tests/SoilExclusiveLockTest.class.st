@@ -62,6 +62,7 @@ SoilExclusiveLockTest >> testForeignOwnerIsReported [
 	error := [ foreign lockExclusive. nil ] on: SoilDatabaseOwned do: [ :e | e ].
 	self assert: (error isKindOf: SoilDatabaseOwned).
 	self assert: error owner equals: 'image-b:8080'.
+	self deny: error isHeldInThisImage.
 	self deny: foreign holdsExclusiveLock
 ]
 
@@ -96,6 +97,7 @@ SoilExclusiveLockTest >> testSecondClaimInThisImageIsRefused [
 	soil lockExclusiveAs: 'image-a:8080'.
 	error := [ other lockExclusive. nil ] on: SoilDatabaseOwned do: [ :e | e ].
 	self assert: error owner equals: 'image-a:8080'.
+	self assert: error isHeldInThisImage.
 	self deny: other holdsExclusiveLock.
 	self assert: soil holdsExclusiveLock.
 	self assert: (SoilFileLockRegistry forPath: soil exclusiveLockFilePath) numberOfLocks equals: 1
