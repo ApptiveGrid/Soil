@@ -40,7 +40,8 @@ Class {
 		'fabric',
 		'metadata',
 		'transactionManager',
-		'readOnly'
+		'readOnly',
+		'ownership'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -133,6 +134,9 @@ Soil >> backupTo: aStringOrFileReference [
 { #category : #'opening/closing' }
 Soil >> basicOpen [
 	self isOpen ifTrue: [ self error: 'Database already open' ].
+	"tested before any file is touched: a database marked for maintenance may be in a
+	state nobody should read, a half restored copy for instance"
+	self refuseIfMarkedForMaintenance.
 	self emit: 'open database at ', path fullName.
 	control := SoilControlFile new
 		soil: self;
@@ -212,7 +216,25 @@ Soil >> close [
 	"said before rather than after, because the interesting case is the one where
 	closing does not return"
 	self emit: 'closing database'.
-	Soil closeAll: { objectRepository . behaviorRegistry . control . journal . metadata }
+	"the claim of #lockExclusive goes last: the process that gets it next must find
+	every file closed"
+	[ Soil closeAll: { objectRepository . behaviorRegistry . control . journal . metadata } ]
+		ensure: [ self unlockExclusive ]
+]
+
+{ #category : #gate }
+Soil >> closeGate [
+	"Refuse new transactions and commits of every other process in this image until
+	#openGate, see SoilTransactionManager>>#closeGate. Prefer #gateDo:, which cannot
+	forget to open it again."
+	self transactionManager closeGate
+]
+
+{ #category : #gate }
+Soil >> closeGateAndDrainWithin: aDuration [
+	"like #closeGate, and wait up to aDuration until no other transaction is open; fails
+	with SoilDatabaseBusy, the gate open again, if some still are"
+	self transactionManager closeGateAndDrainWithin: aDuration
 ]
 
 { #category : #accessing }
@@ -231,6 +253,11 @@ Soil >> defaultFabricClass [
 	^ SoilFabric 
 ]
 
+{ #category : #locking }
+Soil >> defaultOwnership [
+	^ SoilFileOwnership path: self exclusiveLockFilePath
+]
+
 { #category : #public }
 Soil >> destroy [
 	self isOpen ifTrue: [ 
@@ -238,6 +265,22 @@ Soil >> destroy [
 	path exists ifFalse: [ ^ self ].
 	path children do: #deleteAll.
 	path delete
+]
+
+{ #category : #gate }
+Soil >> drainedGateDo: aBlock [
+	"Run aBlock as the only one in this database: the gate closed and no transaction of
+	anybody else open. Fails with SoilDatabaseBusy if there are open transactions, see
+	#drainedGateWithin:do: to wait for them."
+	^ self drainedGateWithin: 0 seconds do: aBlock
+]
+
+{ #category : #gate }
+Soil >> drainedGateWithin: aDuration do: aBlock [
+	"like #drainedGateDo:, waiting up to aDuration for open transactions to end. The
+	process that runs aBlock uses the database as usual, #garbageCollect included"
+	self closeGateAndDrainWithin: aDuration.
+	^ [ aBlock value ] ensure: [ self openGate ]
 ]
 
 { #category : #logging }
@@ -260,6 +303,19 @@ Soil >> emit: aString [
 		emit
 ]
 
+{ #category : #locking }
+Soil >> exclusiveLockFilePath [
+	"the file whose lock says that a process owns this database, and whose contents say
+	who that is. See #lockExclusive and SoilFileOwnership.
+
+	The lock is an fcntl lock (F_SETLK), and those belong to the process, not to the
+	stream: when the owning process closes any other stream on this file, reading it for
+	instance, the lock is gone without a word. Another database object of this image on
+	the same path is refused before it opens the file; anything else that reads it has
+	to be another process"
+	^ path / #'owner.lock'
+]
+
 { #category : #accessing }
 Soil >> fabric [
 	^ fabric ifNil: [ 
@@ -279,6 +335,19 @@ Soil >> findRecord: aBlock [
 		ensure: [ tx abort ]
 ]
 
+{ #category : #maintenance }
+Soil >> forMaintenanceDo: aBlock [
+	"run aBlock as the one who does the maintenance: what this database's marker refuses
+	in it, #open and #lockExclusive, goes ahead. The permission is the block and nothing
+	more, and a later #open is refused again"
+	^ aBlock
+		on: SoilDatabaseInMaintenance
+		do: [ :refusal |
+			refusal marker = self maintenanceMarkerPath
+				ifTrue: [ refusal resume ]
+				ifFalse: [ refusal pass ] ]
+]
+
 { #category : #hooks }
 Soil >> fuelAccept: aGeneralMapper [
 	"We do not want to serialize a complete database to fuel"
@@ -289,10 +358,28 @@ Soil >> fuelAccept: aGeneralMapper [
 Soil >> garbageCollect [
 	"Offline object-heap garbage collection (Track A): compact each object segment,
 	dropping unreachable objects and version-chain entries no open reader still needs.
-	Quiescent - no concurrent writers during the run. Meta segment untouched."
-	SoilGarbageCollectVisitor new
-		soil: self;
-		run
+	Quiescent - no concurrent writers during the run. Meta segment untouched.
+	The collect runs behind the closed gate: no new transaction, no commit but the
+	caller's, see #gateDo:. Transactions that are open stay readable, the collect keeps
+	the versions they need. A caller that holds the gate already just runs it."
+	self gateDo: [
+		SoilGarbageCollectVisitor new
+			soil: self;
+			run ]
+]
+
+{ #category : #gate }
+Soil >> gateDo: aBlock [
+	"Run aBlock with the gate closed and open it again however aBlock ends. Open
+	transactions of others can still read, but not commit. The process that holds the
+	gate already just runs aBlock."
+	^ self transactionManager gateDo: aBlock
+]
+
+{ #category : #testing }
+Soil >> holdsExclusiveLock [
+	"whether this database object owns its database, see #lockExclusive"
+	^ self ownership isHeld
 ]
 
 { #category : #initialization }
@@ -360,8 +447,20 @@ Soil >> inspectionMetadata: aBuilder [
 ]
 
 { #category : #testing }
+Soil >> isGateClosed [
+	"whether some process of this image has closed the gate, see #closeGate"
+	^ self transactionManager isGateClosed
+]
+
+{ #category : #testing }
 Soil >> isInitialized [ 
 	^ path exists and: [ path hasChildren ]
+]
+
+{ #category : #testing }
+Soil >> isMarkedForMaintenance [
+	"whether the maintenance marker is there, see #maintenanceMarkerPath"
+	^ self maintenanceMarkerPath exists
 ]
 
 { #category : #testing }
@@ -380,6 +479,28 @@ Soil >> lockDatabaseVersionFor: lockContext [
 ]
 
 { #category : #locking }
+Soil >> lockExclusive [
+	"Claim this database for this process, across processes. See #lockExclusiveAs:, the
+	owner written is #ownerDescription"
+	self lockExclusiveAs: self ownerDescription
+]
+
+{ #category : #locking }
+Soil >> lockExclusiveAs: aString [
+	"Claim this database for this process, across processes, and leave aString for
+	whoever fails to claim it - an endpoint to forward to, for instance. Fails with
+	SoilDatabaseOwned, carrying what the owner left. The claim ends with #unlockExclusive
+	or #close, or when the process dies. Claiming again while holding it does nothing.
+	How the claim is kept is up to #ownership.
+
+	A database marked for maintenance is refused before it is claimed, with
+	SoilDatabaseInMaintenance as #open refuses it: claimed first, the claim would stay
+	with a process that cannot open the database, and everybody else would be sent there"
+	self refuseIfMarkedForMaintenance.
+	self ownership claimAs: aString
+]
+
+{ #category : #locking }
 Soil >> lockableStream [
 	^ self lockableStreamClass new
 ]
@@ -387,6 +508,15 @@ Soil >> lockableStream [
 { #category : #accessing }
 Soil >> lockableStreamClass [
 	^ SoilLockableStream 
+]
+
+{ #category : #maintenance }
+Soil >> maintenanceMarkerPath [
+	"a file that keeps this database from being opened just by being there. It is set
+	from the outside, by touch, while the database is closed, and stays until somebody
+	removes it, a crash in between included. #openForMaintenance opens anyway. A
+	database that is open already is not affected"
+	^ path / #'maintenance.lock'
 ]
 
 { #category : #'instance creation' }
@@ -506,9 +636,43 @@ Soil >> open [
 ]
 
 { #category : #'opening/closing' }
+Soil >> openForMaintenance [
+	"open although the database is marked for maintenance, for the one who does the
+	maintenance. Like #open for a database that is not marked, see #forMaintenanceDo:"
+	self forMaintenanceDo: [ self open ]
+]
+
+{ #category : #gate }
+Soil >> openGate [
+	"open the gate again after #closeGate. Only the process that closed it can"
+	self transactionManager openGate
+]
+
+{ #category : #'opening/closing' }
 Soil >> openLogged [
 	self open.
 	self metadata updateLastOpened
+]
+
+{ #category : #locking }
+Soil >> ownerDescription [
+	"what #lockExclusive writes into the lock file. Say something more useful with
+	#lockExclusiveAs:"
+	^ 'unknown'
+]
+
+{ #category : #locking }
+Soil >> ownership [
+	"what keeps the claim of #lockExclusive: a lock on #exclusiveLockFilePath unless
+	somebody set another. It answers #claimAs:, #release and #isHeld, and a claim it
+	refuses signals SoilDatabaseOwned"
+	^ ownership ifNil: [ ownership := self defaultOwnership ]
+]
+
+{ #category : #locking }
+Soil >> ownership: anOwnership [
+	"set before claiming: a claim held by the one this replaces is not released"
+	ownership := anOwnership
 ]
 
 { #category : #accessing }
@@ -545,6 +709,16 @@ Soil >> readOnly: aBoolean [
 	on an open database does not reopen what is already open."
 
 	readOnly := aBoolean
+]
+
+{ #category : #maintenance }
+Soil >> refuseIfMarkedForMaintenance [
+	"signal SoilDatabaseInMaintenance while the marker is there. Resumed, see
+	#forMaintenanceDo:, it lets the caller go on"
+	self isMarkedForMaintenance ifTrue: [
+		SoilDatabaseInMaintenance new
+			marker: self maintenanceMarkerPath;
+			signal ]
 ]
 
 { #category : #refactorings }
@@ -633,6 +807,12 @@ Soil >> transactionClass [
 Soil >> transactionManager [
 
 	^ transactionManager
+]
+
+{ #category : #locking }
+Soil >> unlockExclusive [
+	"Give up the claim of #lockExclusive"
+	ownership ifNotNil: [ :claim | claim release ]
 ]
 
 { #category : #writing }
