@@ -33,6 +33,25 @@ SoilLockableStreamTest >> tearDown [
 ]
 
 { #category : #tests }
+SoilLockableStreamTest >> testCloseAfterTheFileWasClosedReleasesTheLocks [
+	"the file stream finalizes itself, and in the same garbage collection it can come
+	before the lockable stream: then the locks are released on a closed file. The
+	operating system dropped the file lock with the file already, what is left to undo
+	is the registry. Locked in the image as well whatever the class default says, so
+	that there is a registry entry to see"
+	| registry |
+	stream := (SoilLockableStream path: self path) lockInImageAndInFile.
+	stream nextPutAll: 'hello world'; flush.
+	stream lockFrom: 7 to: 12 for: Object new.
+	registry := SoilFileLockRegistry forPath: self path.
+	self assert: registry numberOfLocks equals: 1.
+	stream fileStream close.
+	stream close.
+	self assert: stream locks isEmpty.
+	self assert: registry numberOfLocks equals: 0
+]
+
+{ #category : #tests }
 SoilLockableStreamTest >> testMemoryLock [
 	| objA objB registry |
 	objA := Object new.

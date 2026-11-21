@@ -262,7 +262,11 @@ SoilLockableStream >> unlockFrom: from to: to for: lockContext [
 		detect: [ :each | 
 			(each from = from) and: [ (each to = to) and: [ each context = lockContext ] ] ]
 		ifNone: [ NotFound signal: 'cannot find lock' ].
-	fileStream wrappedStream unlockAt: from length: to - from. 
+	"a closed file has no lock left to give back: the operating system dropped it with
+	the file. It happens when the file stream finalizes itself before me in the same
+	garbage collection, and my #finalize then releases the locks on a closed file"
+	fileStream wrappedStream closed ifFalse: [
+		fileStream wrappedStream unlockAt: from length: to - from ].
 	locks remove: lock
 	
 ]
