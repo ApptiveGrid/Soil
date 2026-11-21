@@ -1,11 +1,12 @@
 "
-I test claiming a database for one process across processes (#lockExclusive): the lock file says who owns it, and another process that tries is told who that is.
+I test claiming a database for one process across processes (#lockExclusive): the lock file says who owns it, and another process that tries is told who that is. Another process is played by SoilTestForeignFileOwnership; another database object of this image on the same path is the real thing.
 "
 Class {
 	#name : #SoilExclusiveLockTest,
 	#superclass : #TestCase,
 	#instVars : [
-		'soil'
+		'soil',
+		'other'
 	],
 	#category : #'Soil-Core-Tests'
 }
@@ -16,12 +17,14 @@ SoilExclusiveLockTest >> setUp [
 	soil := (Soil new path: 'soil-exclusive-lock-tests')
 		destroy;
 		initializeFilesystem;
-		yourself
+		yourself.
+	other := Soil new path: soil path
 ]
 
 { #category : #running }
 SoilExclusiveLockTest >> tearDown [
 	super tearDown.
+	other unlockExclusive.
 	soil ifNotNil: [ soil close ]
 ]
 
@@ -53,7 +56,9 @@ SoilExclusiveLockTest >> testCloseReleasesTheClaim [
 SoilExclusiveLockTest >> testForeignOwnerIsReported [
 	| foreign error |
 	soil exclusiveLockFilePath writeStreamDo: [ :stream | stream nextPutAll: 'image-b:8080' ].
-	foreign := SoilTestForeignOwnerDatabase new path: soil path.
+	foreign := (Soil new path: soil path)
+		ownership: (SoilTestForeignFileOwnership path: soil exclusiveLockFilePath);
+		yourself.
 	error := [ foreign lockExclusive. nil ] on: SoilDatabaseOwned do: [ :e | e ].
 	self assert: (error isKindOf: SoilDatabaseOwned).
 	self assert: error owner equals: 'image-b:8080'.
@@ -66,9 +71,34 @@ SoilExclusiveLockTest >> testForeignOwnerThatHasNotWrittenYetIsEmpty [
 	then reports an empty owner rather than nothing"
 	| foreign error |
 	soil exclusiveLockFilePath ensureCreateFile.
-	foreign := SoilTestForeignOwnerDatabase new path: soil path.
+	foreign := (Soil new path: soil path)
+		ownership: (SoilTestForeignFileOwnership path: soil exclusiveLockFilePath);
+		yourself.
 	error := [ foreign lockExclusive. nil ] on: SoilDatabaseOwned do: [ :e | e ].
 	self assert: error owner equals: ''
+]
+
+{ #category : #tests }
+SoilExclusiveLockTest >> testReleaseInThisImageAllowsAnotherClaim [
+	soil lockExclusiveAs: 'image-a:8080'.
+	soil unlockExclusive.
+	other lockExclusiveAs: 'image-a:8081'.
+	self assert: other holdsExclusiveLock.
+	self assert: soil exclusiveLockFilePath contents equals: 'image-a:8081'
+]
+
+{ #category : #tests }
+SoilExclusiveLockTest >> testSecondClaimInThisImageIsRefused [
+	"the file system would let it through, the lock belongs to the process. The registry
+	refuses it before the file is opened: opening and closing it again would end the
+	first claim"
+	| error |
+	soil lockExclusiveAs: 'image-a:8080'.
+	error := [ other lockExclusive. nil ] on: SoilDatabaseOwned do: [ :e | e ].
+	self assert: error owner equals: 'image-a:8080'.
+	self deny: other holdsExclusiveLock.
+	self assert: soil holdsExclusiveLock.
+	self assert: (SoilFileLockRegistry forPath: soil exclusiveLockFilePath) numberOfLocks equals: 1
 ]
 
 { #category : #tests }

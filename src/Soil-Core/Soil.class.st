@@ -41,8 +41,7 @@ Class {
 		'metadata',
 		'transactionManager',
 		'readOnly',
-		'ownerLockStream',
-		'maintenanceAccess'
+		'ownership'
 	],
 	#category : #'Soil-Core-Model'
 }
@@ -110,15 +109,6 @@ Soil >> acceptSoil: aSoilVisitor [
 	^ aSoilVisitor visitSoil: self 
 ]
 
-{ #category : #locking }
-Soil >> acquiredExclusiveLockOn: aStream [
-	"whether this process now holds the lock on the owner file. The one place where the
-	file system decides, and its own method because it is what a test replaces: an fcntl
-	lock belongs to a process, so a second attempt from this image succeeds and cannot
-	show what another process holding it looks like"
-	^ aStream wrappedStream lockEntireFileAndBeyond
-]
-
 { #category : #accessing }
 Soil >> applicationMigrationClass [
 
@@ -146,10 +136,7 @@ Soil >> basicOpen [
 	self isOpen ifTrue: [ self error: 'Database already open' ].
 	"tested before any file is touched: a database marked for maintenance may be in a
 	state nobody should read, a half restored copy for instance"
-	(self isMarkedForMaintenance and: [ maintenanceAccess ~~ true ]) ifTrue: [
-		SoilDatabaseInMaintenance new
-			marker: self maintenanceMarkerPath;
-			signal ].
+	self refuseIfMarkedForMaintenance.
 	self emit: 'open database at ', path fullName.
 	control := SoilControlFile new
 		soil: self;
@@ -266,6 +253,11 @@ Soil >> defaultFabricClass [
 	^ SoilFabric 
 ]
 
+{ #category : #locking }
+Soil >> defaultOwnership [
+	^ SoilFileOwnership path: self exclusiveLockFilePath
+]
+
 { #category : #public }
 Soil >> destroy [
 	self isOpen ifTrue: [ 
@@ -314,12 +306,13 @@ Soil >> emit: aString [
 { #category : #locking }
 Soil >> exclusiveLockFilePath [
 	"the file whose lock says that a process owns this database, and whose contents say
-	who that is. See #lockExclusive.
+	who that is. See #lockExclusive and SoilFileOwnership.
 
 	The lock is an fcntl lock (F_SETLK), and those belong to the process, not to the
 	stream: when the owning process closes any other stream on this file, reading it for
-	instance, the lock is gone without a word. The owner must not open it a second time,
-	neither through another database object on the same path"
+	instance, the lock is gone without a word. Another database object of this image on
+	the same path is refused before it opens the file; anything else that reads it has
+	to be another process"
 	^ path / #'owner.lock'
 ]
 
@@ -340,6 +333,19 @@ Soil >> findRecord: aBlock [
 	tx := self newTransaction.
 	^ [ tx findRecord: aBlock ]
 		ensure: [ tx abort ]
+]
+
+{ #category : #maintenance }
+Soil >> forMaintenanceDo: aBlock [
+	"run aBlock as the one who does the maintenance: what this database's marker refuses
+	in it, #open and #lockExclusive, goes ahead. The permission is the block and nothing
+	more, and a later #open is refused again"
+	^ aBlock
+		on: SoilDatabaseInMaintenance
+		do: [ :refusal |
+			refusal marker = self maintenanceMarkerPath
+				ifTrue: [ refusal resume ]
+				ifFalse: [ refusal pass ] ]
 ]
 
 { #category : #hooks }
@@ -373,7 +379,7 @@ Soil >> gateDo: aBlock [
 { #category : #testing }
 Soil >> holdsExclusiveLock [
 	"whether this database object owns its database, see #lockExclusive"
-	^ ownerLockStream notNil
+	^ self ownership isHeld
 ]
 
 { #category : #initialization }
@@ -481,36 +487,17 @@ Soil >> lockExclusive [
 
 { #category : #locking }
 Soil >> lockExclusiveAs: aString [
-	"Claim this database for this process, across processes, and write aString into the
-	lock file, so that another process that fails to claim it learns who has it - an
-	endpoint to forward to, for instance. Fails with SoilDatabaseOwned, carrying what the
-	owner wrote. The claim ends with #unlockExclusive or #close, or when the process
-	dies: the file lock goes with it. Claiming again while holding it does nothing."
-	| lockPath stream owner retries |
-	self holdsExclusiveLock ifTrue: [ ^ self ].
-	lockPath := self exclusiveLockFilePath.
-	lockPath exists ifFalse: [ lockPath ensureCreateFile ].
-	stream := lockPath binaryReadWriteStream.
-	(self acquiredExclusiveLockOn: stream) ifFalse: [
-		"the owner may hold the lock and not have written who it is yet"
-		owner := ''.
-		retries := 3.
-		[ retries >= 0 and: [ owner isEmpty ] ] whileTrue: [
-			50 milliSeconds wait.
-			stream position: 0.
-			owner := stream upToEnd utf8Decoded.
-			retries := retries - 1 ].
-		stream close.
-		^ SoilDatabaseOwned new
-			owner: owner;
-			signal ].
-	stream
-		truncate: 0;
-		position: 0;
-		nextPutAll: aString utf8Encoded;
-		flush.
-	stream wrappedStream fsync.
-	ownerLockStream := stream
+	"Claim this database for this process, across processes, and leave aString for
+	whoever fails to claim it - an endpoint to forward to, for instance. Fails with
+	SoilDatabaseOwned, carrying what the owner left. The claim ends with #unlockExclusive
+	or #close, or when the process dies. Claiming again while holding it does nothing.
+	How the claim is kept is up to #ownership.
+
+	A database marked for maintenance is refused before it is claimed, with
+	SoilDatabaseInMaintenance as #open refuses it: claimed first, the claim would stay
+	with a process that cannot open the database, and everybody else would be sent there"
+	self refuseIfMarkedForMaintenance.
+	self ownership claimAs: aString
 ]
 
 { #category : #locking }
@@ -651,9 +638,8 @@ Soil >> open [
 { #category : #'opening/closing' }
 Soil >> openForMaintenance [
 	"open although the database is marked for maintenance, for the one who does the
-	maintenance. Like #open for a database that is not marked"
-	maintenanceAccess := true.
-	self open
+	maintenance. Like #open for a database that is not marked, see #forMaintenanceDo:"
+	self forMaintenanceDo: [ self open ]
 ]
 
 { #category : #gate }
@@ -673,6 +659,20 @@ Soil >> ownerDescription [
 	"what #lockExclusive writes into the lock file. Say something more useful with
 	#lockExclusiveAs:"
 	^ 'unknown'
+]
+
+{ #category : #locking }
+Soil >> ownership [
+	"what keeps the claim of #lockExclusive: a lock on #exclusiveLockFilePath unless
+	somebody set another. It answers #claimAs:, #release and #isHeld, and a claim it
+	refuses signals SoilDatabaseOwned"
+	^ ownership ifNil: [ ownership := self defaultOwnership ]
+]
+
+{ #category : #locking }
+Soil >> ownership: anOwnership [
+	"set before claiming: a claim held by the one this replaces is not released"
+	ownership := anOwnership
 ]
 
 { #category : #accessing }
@@ -709,6 +709,16 @@ Soil >> readOnly: aBoolean [
 	on an open database does not reopen what is already open."
 
 	readOnly := aBoolean
+]
+
+{ #category : #maintenance }
+Soil >> refuseIfMarkedForMaintenance [
+	"signal SoilDatabaseInMaintenance while the marker is there. Resumed, see
+	#forMaintenanceDo:, it lets the caller go on"
+	self isMarkedForMaintenance ifTrue: [
+		SoilDatabaseInMaintenance new
+			marker: self maintenanceMarkerPath;
+			signal ]
 ]
 
 { #category : #refactorings }
@@ -801,16 +811,8 @@ Soil >> transactionManager [
 
 { #category : #locking }
 Soil >> unlockExclusive [
-	"Give up the claim of #lockExclusive. The file is emptied, not deleted: deleted, a
-	process that has it open already would lock a file nobody else sees any more, while
-	the next one creates a new file and locks that, and two would own the database"
-	ownerLockStream ifNil: [ ^ self ].
-	[ ownerLockStream
-		truncate: 0;
-		flush.
-	  ownerLockStream wrappedStream unlockEntireFileAndBeyond.
-	  ownerLockStream close ]
-		ensure: [ ownerLockStream := nil ]
+	"Give up the claim of #lockExclusive"
+	ownership ifNotNil: [ :claim | claim release ]
 ]
 
 { #category : #writing }

@@ -26,7 +26,28 @@ SoilMaintenanceMarkerTest >> setUp [
 SoilMaintenanceMarkerTest >> tearDown [
 	super tearDown.
 	other isOpen ifTrue: [ other close ].
+	other unlockExclusive.
 	soil maintenanceMarkerPath ensureDelete
+]
+
+{ #category : #tests }
+SoilMaintenanceMarkerTest >> testClaimOfAMarkedDatabaseIsRefused [
+	"refused before the claim: claimed, the database would stay with a process that
+	cannot open it"
+	soil maintenanceMarkerPath ensureCreateFile.
+	self should: [ other lockExclusive ] raise: SoilDatabaseInMaintenance.
+	self deny: other holdsExclusiveLock
+]
+
+{ #category : #tests }
+SoilMaintenanceMarkerTest >> testForMaintenanceDoClaimsAndOpensAMarkedDatabase [
+	soil maintenanceMarkerPath ensureCreateFile.
+	other forMaintenanceDo: [
+		other
+			lockExclusive;
+			open ].
+	self assert: other holdsExclusiveLock.
+	self assert: other isOpen
 ]
 
 { #category : #tests }
@@ -46,6 +67,16 @@ SoilMaintenanceMarkerTest >> testMarkerDoesNotTouchAnOpenDatabase [
 	soil maintenanceMarkerPath ensureCreateFile.
 	other newTransaction abort.
 	self assert: other isOpen
+]
+
+{ #category : #tests }
+SoilMaintenanceMarkerTest >> testOpenForMaintenanceDoesNotLast [
+	"the permission is the call: closed and opened again, the marker refuses"
+	soil maintenanceMarkerPath ensureCreateFile.
+	other openForMaintenance.
+	other close.
+	self should: [ other open ] raise: SoilDatabaseInMaintenance.
+	self deny: other isOpen
 ]
 
 { #category : #tests }

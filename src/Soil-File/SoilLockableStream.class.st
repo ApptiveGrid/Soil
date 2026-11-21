@@ -138,6 +138,13 @@ SoilLockableStream >> lockFrom: from to: to for: lockContext [
 ]
 
 { #category : #initialization }
+SoilLockableStream >> lockInImageAndInFile [
+	"whatever the class defaults say: for a lock that is wrong without either"
+	imageLocked := true.
+	fileLocked := true
+]
+
+{ #category : #initialization }
 SoilLockableStream >> lockOnlyInImage [
 	imageLocked := true.
 	fileLocked := false.
@@ -242,6 +249,11 @@ SoilLockableStream >> sync [
 	fileStream wrappedStream fsync 
 ]
 
+{ #category : #writing }
+SoilLockableStream >> truncate: anInteger [
+	fileStream truncate: anInteger
+]
+
 { #category : #locking }
 SoilLockableStream >> unlockFrom: from to: to for: lockContext [ 
 	
@@ -253,4 +265,9 @@ SoilLockableStream >> unlockFrom: from to: to for: lockContext [
 	fileStream wrappedStream unlockAt: from length: to - from. 
 	locks remove: lock
 	
+]
+
+{ #category : #reading }
+SoilLockableStream >> upToEnd [
+	^ fileStream upToEnd
 ]

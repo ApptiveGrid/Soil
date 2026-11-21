@@ -61,6 +61,15 @@ SoilFileLockRegistry >> initialize [
 	semaphore := Semaphore forMutualExclusion
 ]
 
+{ #category : #accessing }
+SoilFileLockRegistry >> lockConflictingWith: aLock ifNone: aBlock [
+	"the lock that aLock would run into, without taking aLock"
+	^ semaphore critical: [
+		locks
+			detect: [ :lock | lock conflictsWith: aLock ]
+			ifNone: aBlock ]
+]
+
 { #category : #locking }
 SoilFileLockRegistry >> lockFrom: from to: to for: currentLockingObject [ 
 	^ self addLock: (SoilRangeLock from: from to: to context: currentLockingObject)
