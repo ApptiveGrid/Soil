@@ -36,13 +36,15 @@ SoilFileOwnership >> claimAs: aString [
 	"Claim the database for this process and write aString into the file, so that
 	whoever fails to claim it learns who has it - an endpoint to forward to, for
 	instance. Fails with SoilDatabaseOwned, carrying what the owner wrote, when another
-	process or another claim of this image holds it. Claiming again while holding it
-	does nothing."
-	| foreignOwner |
+	process or another claim of this image holds it, and saying which of the two it is.
+	Claiming again while holding it does nothing."
+	| foreignOwner inThisImage |
 	self isHeld ifTrue: [ ^ self ].
 	ClaimMutex critical: [
-		foreignOwner := self ownerInImage ifNil: [
-			self lockFile
+		foreignOwner := self ownerInImage.
+		inThisImage := foreignOwner notNil.
+		inThisImage ifFalse: [
+			foreignOwner := self lockFile
 				ifTrue: [
 					owner := aString.
 					nil ]
@@ -50,6 +52,7 @@ SoilFileOwnership >> claimAs: aString [
 	foreignOwner ifNotNil: [
 		^ SoilDatabaseOwned new
 			owner: foreignOwner;
+			heldInThisImage: inThisImage;
 			signal ].
 	self writeOwner
 ]
