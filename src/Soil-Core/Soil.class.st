@@ -289,10 +289,14 @@ Soil >> fuelAccept: aGeneralMapper [
 Soil >> garbageCollect [
 	"Offline object-heap garbage collection (Track A): compact each object segment,
 	dropping unreachable objects and version-chain entries no open reader still needs.
-	Quiescent - no concurrent writers during the run. Meta segment untouched."
-	SoilGarbageCollectVisitor new
-		soil: self;
-		run
+	Quiescent - no concurrent writers during the run. Meta segment untouched.
+	The database is locked against new transactions and foreign commits while it runs,
+	see #lockExclusive. Transactions that are open stay readable: the collect keeps the
+	versions they need. Under #maintenanceDo: the lock is the caller's already."
+	self transactionManager gateDo: [
+		SoilGarbageCollectVisitor new
+			soil: self;
+			run ]
 ]
 
 { #category : #initialization }
@@ -365,6 +369,12 @@ Soil >> isInitialized [
 ]
 
 { #category : #testing }
+Soil >> isLockedExclusively [
+	"whether the database is locked for maintenance, by whichever process"
+	^ self transactionManager isGateClosed
+]
+
+{ #category : #testing }
 Soil >> isOpen [
 	^control notNil and: [control isOpen]
 ]
@@ -376,7 +386,22 @@ Soil >> journal [
 
 { #category : #locking }
 Soil >> lockDatabaseVersionFor: lockContext [ 
-	^ control lockDatabaseVersionFor: lockContext 
+	^ control lockDatabaseVersionFor: lockContext
+]
+
+{ #category : #locking }
+Soil >> lockExclusive [
+	"Lock the database for everybody else in this image: no new transaction, no commit
+	but the ones of the calling process, until #unlockExclusive. Fails with
+	SoilDatabaseBusy if transactions are open, use #lockExclusiveWithin: to wait for
+	them. Prefer #maintenanceDo:, which cannot forget to unlock."
+	self lockExclusiveWithin: 0 seconds
+]
+
+{ #category : #locking }
+Soil >> lockExclusiveWithin: aDuration [
+	"like #lockExclusive, but waits up to aDuration for the open transactions to end"
+	self transactionManager lockExclusiveWithin: aDuration
 ]
 
 { #category : #locking }
@@ -386,7 +411,24 @@ Soil >> lockableStream [
 
 { #category : #accessing }
 Soil >> lockableStreamClass [
-	^ SoilLockableStream 
+	^ SoilLockableStream
+]
+
+{ #category : #locking }
+Soil >> maintenanceDo: aBlock [
+	"Run aBlock as the only one in the database, e.g. an exclusive operation. Fails with
+	SoilDatabaseBusy if transactions are open, see #maintenanceWithin:do: to wait for
+	them. The database is unlocked afterwards however aBlock ends."
+	^ self maintenanceWithin: 0 seconds do: aBlock
+]
+
+{ #category : #locking }
+Soil >> maintenanceWithin: aDuration do: aBlock [
+	"like #maintenanceDo:, but waits up to aDuration for open transactions to end. The
+	process that runs aBlock can use the database as usual, and so can #garbageCollect:
+	it finds the lock taken by its own process."
+	self lockExclusiveWithin: aDuration.
+	^ [ aBlock value ] ensure: [ self unlockExclusive ]
 ]
 
 { #category : #'instance creation' }
@@ -633,6 +675,13 @@ Soil >> transactionClass [
 Soil >> transactionManager [
 
 	^ transactionManager
+]
+
+{ #category : #locking }
+Soil >> unlockExclusive [
+	"Open the database again after #lockExclusive. Only the process that locked it
+	can do that."
+	self transactionManager openGate
 ]
 
 { #category : #writing }

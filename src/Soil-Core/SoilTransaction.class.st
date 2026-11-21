@@ -187,7 +187,11 @@ SoilTransaction >> basicCommit [
 		^ self ].
 	"only one transactions is allowed at a time. We use the critical block of the database
 	to avoid parallel committing"
-	soil critical: [ 
+	soil critical: [
+	"a database locked for maintenance takes no commit from anybody else. The test is
+	made in here, because locking the database waits for this critical section: a commit
+	that gets in is done before the lock is in force, one that comes later is refused"
+		self transactionManager assertGateOpenFor: 'a commit'.
 	"enter lock phase. Acquire lock on global databaseVersion which centrally locks
 	the database for commiting until this checkpoint is done. The ensure block is needed
 	to be sure to release all locks at the end."
