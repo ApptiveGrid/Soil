@@ -95,7 +95,7 @@ BinaryFileStream >> unlockEntireFileAndBeyond [
 	since the lock was set. Releasing the same region that was used for locking
 	avoids subtle problems"
 	^ self flockClass
-		lock: self fileHandle
+		unlock: self fileHandle
 		from: 0
 		length: 0
 ]
