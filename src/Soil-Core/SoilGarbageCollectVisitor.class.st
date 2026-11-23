@@ -17,6 +17,22 @@ SoilGarbageCollectVisitor >> carryIndexesInto: cloneSegment from: sourceSegment 
 ]
 
 { #category : #copying }
+SoilGarbageCollectVisitor >> copyAllClusterVersions: aSoilPersistentClusterVersion [
+	"the versions that are kept, and not the whole chain cut afterwards. The inherited
+	method reads every version of the chain with its payload before #keptVersionsOf: cuts
+	it, which makes the collect read, and hold in memory, all of the history it is there
+	to throw away. The segment walks the chain by its heads and reads the payload of the
+	kept versions only, see SoilObjectSegment>>keptVersionsAt:upToReadVersion:. An object
+	without a previous version has nothing to walk, the record in hand is the chain"
+	aSoilPersistentClusterVersion hasPreviousVersion
+		ifFalse: [ ^ self copyClusterVersionChain: { aSoilPersistentClusterVersion } ].
+	^ self copyClusterVersionChain:
+		((soil objectRepository segmentAt: aSoilPersistentClusterVersion objectId segment)
+			keptVersionsAt: aSoilPersistentClusterVersion objectId index
+			upToReadVersion: readVersion)
+]
+
+{ #category : #copying }
 SoilGarbageCollectVisitor >> copyIndexAt: indexId segment: segmentId [
 	"indexes are carried verbatim per segment (see run); nothing to do per index, and
 	the reachability of index values comes from the inherited traversal"
