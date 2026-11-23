@@ -270,17 +270,59 @@ SoilObjectSegment >> isMetaSegment [
 ]
 
 { #category : #copying }
+SoilObjectSegment >> keptVersionsAt: index upToReadVersion: aNumberOrNil [
+	"The versions of the object at index that #keptVersionsOf:upToReadVersion: keeps of
+	its whole chain - newest first, each a whole record - without reading the rest of the
+	chain. #allVersionsAt: reads every version with its payload, and only then is the chain
+	cut: of a database with far more history than live data, that is all of the history,
+	read to be thrown away. Here the chain is walked by the heads of its records,
+	#headAtPosition:, and left where #needsAnOlderVersionThan:upToReadVersion: says that no
+	older version is needed - with no reader open that is behind the first head. The
+	payload is read for the versions kept, and for them only. What lies behind them, a
+	damaged chain included, is not touched.
+
+	The chain starts at the newest version, the one in the slot of the object, as
+	#allVersionsAt: does. A change that lets a caller say where it starts - the backup
+	wants the one version at its pinned database version - would take that start as a
+	parameter here, and the rule would stay as it is"
+	| position objectId head heads positions |
+	position := indexFile positionAt: index.
+	position == 0 ifTrue: [ ^ OrderedCollection new ].
+	objectId := SoilObjectId segment: id index: index.
+	heads := OrderedCollection new.
+	positions := Set new.
+	[ (positions includes: position) ifTrue: [
+		SoilDatabaseIsInconsistent signal: 'version chain of ' , objectId printString
+			, ' returns to position ' , position printString ].
+	positions add: position.
+	head := (objectFile headAtPosition: position)
+		objectId: objectId;
+		yourself.
+	heads add: head.
+	head hasPreviousVersion and: [
+		self needsAnOlderVersionThan: head version upToReadVersion: aNumberOrNil ] ]
+			whileTrue: [ position := head previousVersionPosition ].
+	^ heads collect: [ :each |
+		(objectFile atPosition: each position)
+			objectId: objectId;
+			yourself ]
+]
+
+{ #category : #copying }
 SoilObjectSegment >> keptVersionsOf: aCollectionOfClusterVersions upToReadVersion: aNumberOrNil [
 	"Return the suffix (newest->oldest) of the chain still needed by a reader at
 	aNumberOrNil (nil = no open transaction): a superseded version is droppable once the
 	smallest read version has reached the version that superseded it. The current version
-	is always kept. Mirrors SoilIndexCleaner>>canDiscardOldState:."
+	is always kept. Mirrors SoilIndexCleaner>>canDiscardOldState:. The rule is
+	#needsAnOlderVersionThan:upToReadVersion:, the one #keptVersionsAt:upToReadVersion:
+	walks a chain by."
 	| kept newerVersion |
 	kept := OrderedCollection new.
 	newerVersion := nil.
 	aCollectionOfClusterVersions do: [ :each |
-		(newerVersion notNil and: [ aNumberOrNil isNil or: [ aNumberOrNil >= newerVersion ] ])
-			ifTrue: [ ^ kept ].
+		(newerVersion notNil and: [
+			(self needsAnOlderVersionThan: newerVersion upToReadVersion: aNumberOrNil) not ])
+				ifTrue: [ ^ kept ].
 		kept add: each.
 		newerVersion := each version ].
 	^ kept
@@ -344,6 +386,22 @@ SoilObjectSegment >> makeGCClone [
 		objectRepository: objectRepository;
 		path: self path, #gc;
 		initializeFilesystem 
+]
+
+{ #category : #copying }
+SoilObjectSegment >> needsAnOlderVersionThan: newerVersion upToReadVersion: aNumberOrNil [
+	"Whether the version before the one at newerVersion is still needed, once that one is
+	kept: by a reader at aNumberOrNil (nil = no open transaction) while its version lies
+	before newerVersion - it does not see newerVersion yet, but the one before. This is the
+	single rule of what a copy keeps of a chain: #keptVersionsOf:upToReadVersion: asks it
+	of the versions it has, #keptVersionsAt:upToReadVersion: of the heads it reads.
+
+	This is where a later setting to keep older versions would come in. Every version that
+	a reader from some database version on must still find - the last N database versions -
+	is a smaller aNumberOrNil and needs nothing else. A rule per object, the last N versions
+	of each, would be asked here in place of the number"
+	aNumberOrNil ifNil: [ ^ false ].
+	^ aNumberOrNil < newerVersion
 ]
 
 { #category : #ids }
