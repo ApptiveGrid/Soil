@@ -431,22 +431,21 @@ SoilTransaction >> detectIndexConflicts [
 		(entry isKindOf: SoilAddKeyEntry)
 			ifTrue: [ entry value ]
 			ifFalse: [ entry oldValue ] ].
-	ours := Dictionary new.
+	ours := SoilJournalEntriesByKey new.
 	journal entries do: [ :each |
-		each modifiesIndex ifTrue: [
-			(ours at: each id -> each key ifAbsentPut: [ OrderedCollection new ]) add: each ] ].
-	ours ifEmpty: [ ^ self ].
+		each modifiesIndex ifTrue: [ ours add: each ] ].
+	ours isEmpty ifTrue: [ ^ self ].
 	readVersion + 1 to: writeVersion - 1 do: [ :version | | committed |
 		committed := soil journal
 			transactionJournalAt: version
 			ifAbsent: [
 				"what the transaction did is not known any more, so it cannot be ruled out"
 				^ SoilIndexHasConcurrentChange new
-					indexId: ours keys anyOne key;
+					indexId: ours anyIndexId;
 					signal ].
 		committed entries do: [ :theirs |
 			theirs modifiesIndex ifTrue: [
-				(ours at: theirs id -> theirs key ifAbsent: [ #() ]) do: [ :mine |
+				(ours entriesFor: theirs) do: [ :mine |
 					(((soil objectRepository segmentAt: mine segment) indexAt: mine id) hasUniqueKeys or: [
 						SoilIndexItemsPage value: (valueOf value: mine) matches: (valueOf value: theirs) ])
 							ifTrue: [
