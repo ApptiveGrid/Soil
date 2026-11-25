@@ -106,6 +106,34 @@ SoilTransactionJournalTest >> testConsistency [
 ]
 
 { #category : #tests }
+SoilTransactionJournalTest >> testManyKeysOfOneIndexAddedAndRemovedAgainNeedFewComparisons [
+	"the work of the normalization grows with the number of key entries, not with its
+	square. The keys count their comparisons: if all keys of an index were looked up along
+	one chain, 4000 of them would be compared some 16 million times"
+	| journal count value |
+	count := 4000.
+	value := SoilObjectId segment: 1 index: 5.
+	journal := SoilTransactionJournal new.
+	1 to: count do: [ :each |
+		journal addEntry: (SoilAddKeyEntry new
+			id: 'idx';
+			key: (SoilJournalCountingKey number: each);
+			value: value;
+			oldValue: nil;
+			yourself) ].
+	1 to: count do: [ :each |
+		journal addEntry: (SoilRemoveKeyEntry new
+			id: 'idx';
+			key: (SoilJournalCountingKey number: each);
+			oldValue: value;
+			yourself) ].
+	SoilJournalCountingKey resetComparisons.
+	journal dropKeysAddedAndRemovedAgain.
+	self assert: journal entries isEmpty.
+	self assert: SoilJournalCountingKey comparisons < (count * 50)
+]
+
+{ #category : #tests }
 SoilTransactionJournalTest >> testNewRootObject [
 	| tx journal |
 	tx := soil newTransaction.
