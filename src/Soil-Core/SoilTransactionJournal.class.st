@@ -96,13 +96,13 @@ SoilTransactionJournal >> dropKeysAddedAndRemovedAgain [
 	the last add before it of its key and of the value it removes, and again with the add
 	before that one if the value it removes now was added in this transaction as well"
 	| adds dropped |
-	adds := Dictionary new.
+	adds := SoilJournalEntriesByKey new.
 	dropped := IdentitySet new.
 	entries do: [ :each |
 		(each isKindOf: SoilAddKeyEntry) ifTrue: [
-			(adds at: each id -> each key ifAbsentPut: [ OrderedCollection new ]) add: each ].
+			adds add: each ].
 		(each isKindOf: SoilRemoveKeyEntry) ifTrue: [ | candidates add pairing |
-			candidates := adds at: each id -> each key ifAbsent: [ OrderedCollection new ].
+			candidates := adds entriesFor: each.
 			pairing := true.
 			[ pairing and: [
 				(add := candidates reversed
