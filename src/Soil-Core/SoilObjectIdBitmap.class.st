@@ -3,7 +3,7 @@ I remember which objects a walk through the graph has met: one bit for each obje
 
 A segment has as many bits as its last object index asks for, fixed when I am made, see #lastObjectIndexes:. The bits of the segments sit in an Array at the segment id plus one, as many slots as the highest segment id asks for. A slot of a segment I was not given holds an empty ByteArray, and so does a position past the end of the Array, so that an id of such a segment has no room, like an index past the last object index of its segment.
 
-An id that has no room is kept in a Set, the outliers, as the walk kept every id before. That is a reference gone wrong, or an object made after I was, and the walk goes on with them as it did.
+An id that has no room is kept in a Set of its own, outOfBounds, as the walk kept every id before. That is a reference gone wrong, or an object made after I was, and the walk goes on with them as it did.
 
 The object id 0:0, the marker of a removed value, takes the first bit like any other id. It is met once.
 "
@@ -12,7 +12,7 @@ Class {
 	#superclass : #Object,
 	#instVars : [
 		'bitsBySegment',
-		'outliers'
+		'outOfBounds'
 	],
 	#category : #'Soil-Core-Visitor'
 }
@@ -42,7 +42,7 @@ SoilObjectIdBitmap >> add: anObjectId [
 	index := anObjectId index.
 	byteIndex := (index bitShift: -3) + 1.
 	byteIndex <= bits size ifFalse: [
-		outliers add: anObjectId.
+		outOfBounds add: anObjectId.
 		^ anObjectId ].
 	bits
 		at: byteIndex
@@ -56,7 +56,7 @@ SoilObjectIdBitmap >> includes: anObjectId [
 	bits := bitsBySegment at: anObjectId segment + 1 ifAbsent: [ #[] ].
 	index := anObjectId index.
 	byteIndex := (index bitShift: -3) + 1.
-	byteIndex <= bits size ifFalse: [ ^ outliers includes: anObjectId ].
+	byteIndex <= bits size ifFalse: [ ^ outOfBounds includes: anObjectId ].
 	^ ((bits at: byteIndex) bitAnd: (1 bitShift: (index bitAnd: 7))) ~= 0
 ]
 
@@ -69,5 +69,5 @@ SoilObjectIdBitmap >> initializeWith: aDictionary [
 		bitsBySegment
 			at: segmentId + 1
 			put: (ByteArray new: lastObjectIndex // 8 + 1) ].
-	outliers := Set new
+	outOfBounds := Set new
 ]
