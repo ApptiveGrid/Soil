@@ -15,14 +15,14 @@ Class {
 { #category : #api }
 SoilVisitor >> beBreadthFirst [ 
 	depthFirst := false.
-	seen := Set new.
+	seen := nil.
 	toBeProcessed := OrderedCollection new
 ]
 
 { #category : #api }
 SoilVisitor >> beDepthFirst [
 	depthFirst := true.
-	seen := Set new.
+	seen := nil.
 	toBeProcessed := nil
 ]
 
@@ -49,8 +49,8 @@ SoilVisitor >> processLoop [
 { #category : #accessing }
 SoilVisitor >> processObjectId: aSoilObjectId [ 
 	((aSoilObjectId segment == 0) and: [ aSoilObjectId index == 2 ]) ifTrue: [ ^ self ].
-	(seen includes: aSoilObjectId) ifTrue: [ ^ aSoilObjectId ].
-	seen add: aSoilObjectId.
+	(self seen includes: aSoilObjectId) ifTrue: [ ^ aSoilObjectId ].
+	self seen add: aSoilObjectId.
 	^ depthFirst 
 		ifTrue: [
 			self visitRecordAt: aSoilObjectId.
@@ -84,6 +84,14 @@ SoilVisitor >> recordAt: aSoilObjectId [
 				version: self databaseVersion
 				in: segment
 				reason: error) signal ]
+]
+
+{ #category : #accessing }
+SoilVisitor >> seen [
+	"the objects the walk has met, a bit each. Made on the first use and not in
+	#initialize, because it is sized by the segments of the database and the visitor has
+	none yet there. A visitor that runs again keeps it, as it kept its Set"
+	^ seen ifNil: [ seen := SoilObjectIdBitmap forRepository: soil objectRepository ]
 ]
 
 { #category : #accessing }

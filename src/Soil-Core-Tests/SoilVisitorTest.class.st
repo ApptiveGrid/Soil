@@ -114,6 +114,24 @@ SoilVisitorTest >> testBreadthFirstIsDefault [
 ]
 
 { #category : #tests }
+SoilVisitorTest >> testBreadthFirstWalkMarksTheObjectsItMet [
+	"what the walk met is in #seen, an id far past the objects of the database is not"
+	| tx graph visitor |
+	tx := soil newTransaction.
+	graph := self simpleGraph.
+	tx makeRoot: graph nested reference.
+	tx root: graph.
+	tx basicCommit.
+
+	visitor := SoilVisitor new.
+	visitor soil: soil.
+	visitor visit: soil.
+
+	self assert: (visitor seen includes: SoilObjectId root).
+	self deny: (visitor seen includes: (SoilObjectId segment: 1 index: 1000000))
+]
+
+{ #category : #tests }
 SoilVisitorTest >> testDepthFirstTraversalDoesNotRaiseError [
 	"SoilVisitor>>beDepthFirst used to set seen to nil, while processObjectId:/processReference:
 	unconditionally send #includes: to seen regardless of the depthFirst/breadthFirst mode.
@@ -133,4 +151,26 @@ SoilVisitorTest >> testDepthFirstTraversalDoesNotRaiseError [
 	visitor beDepthFirst.
 
 	self shouldnt: [ visitor visit: soil ] raise: Error
+]
+
+{ #category : #tests }
+SoilVisitorTest >> testDepthFirstWalkMarksTheObjectsItMet [
+	"as the breadth first walk: what the walk met is in #seen, an id far past the objects
+	of the database is not. The root is not asked for, the depth first walk reads it
+	without #processObjectId:, see #visitFirstSegment:. The cluster under it is met
+	through #processObjectId: in both walks"
+	| tx graph visitor |
+	tx := soil newTransaction.
+	graph := self simpleGraph.
+	tx makeRoot: graph nested reference.
+	tx root: graph.
+	tx basicCommit.
+
+	visitor := SoilVisitor new.
+	visitor soil: soil.
+	visitor beDepthFirst.
+	visitor visit: soil.
+
+	self assert: (visitor seen includes: (SoilObjectId segment: 1 index: 2)).
+	self deny: (visitor seen includes: (SoilObjectId segment: 1 index: 1000000))
 ]
