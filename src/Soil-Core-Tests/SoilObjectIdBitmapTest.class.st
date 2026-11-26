@@ -54,6 +54,20 @@ SoilObjectIdBitmapTest >> testIdNotAddedIsNotIncluded [
 ]
 
 { #category : #tests }
+SoilObjectIdBitmapTest >> testIdOfASegmentBetweenKnownSegmentsIsKept [
+	"segment ids are ids and not positions: a removed segment leaves its id vacant, and
+	the segments I was given can be fewer than the highest id"
+	| gap |
+	gap := SoilObjectIdBitmap lastObjectIndexes: { 0 -> 10. 3 -> 100 } asDictionary.
+	gap add: (self id: 2 index: 5).
+	gap add: (self id: 3 index: 5).
+	self assert: (gap includes: (self id: 2 index: 5)).
+	self assert: (gap includes: (self id: 3 index: 5)).
+	self deny: (gap includes: (self id: 2 index: 6)).
+	self deny: (gap includes: (self id: 3 index: 6))
+]
+
+{ #category : #tests }
 SoilObjectIdBitmapTest >> testIdOfASegmentThatIsNotThereIsKept [
 	"no room for it, it goes where an id with no room goes. Segment 65535 is the highest
 	a segment id can be"

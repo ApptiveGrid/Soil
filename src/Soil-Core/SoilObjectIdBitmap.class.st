@@ -1,7 +1,7 @@
 "
 I remember which objects a walk through the graph has met: one bit for each object index of a segment, instead of the object id itself in a Set. A hundred million objects take 12.5 MB.
 
-A segment has as many bits as its last object index asks for, fixed when I am made, see #lastObjectIndexes:. The bits of the segments sit in an Array at the segment id plus one, one slot for each of the 65536 ids a segment can have. A slot of a segment that does not exist holds an empty ByteArray, so that an id of such a segment has no room, like an index past the last object index of its segment.
+A segment has as many bits as its last object index asks for, fixed when I am made, see #lastObjectIndexes:. The bits of the segments sit in an Array at the segment id plus one, as many slots as the highest segment id asks for. A slot of a segment I was not given holds an empty ByteArray, and so does a position past the end of the Array, so that an id of such a segment has no room, like an index past the last object index of its segment.
 
 An id that has no room is kept in a Set, the outliers, as the walk kept every id before. That is a reference gone wrong, or an object made after I was, and the walk goes on with them as it did.
 
@@ -38,7 +38,7 @@ SoilObjectIdBitmap class >> lastObjectIndexes: aDictionary [
 { #category : #adding }
 SoilObjectIdBitmap >> add: anObjectId [
 	| bits index byteIndex |
-	bits := bitsBySegment at: anObjectId segment + 1.
+	bits := bitsBySegment at: anObjectId segment + 1 ifAbsent: [ #[] ].
 	index := anObjectId index.
 	byteIndex := (index bitShift: -3) + 1.
 	byteIndex <= bits size ifFalse: [
@@ -53,7 +53,7 @@ SoilObjectIdBitmap >> add: anObjectId [
 { #category : #testing }
 SoilObjectIdBitmap >> includes: anObjectId [
 	| bits index byteIndex |
-	bits := bitsBySegment at: anObjectId segment + 1.
+	bits := bitsBySegment at: anObjectId segment + 1 ifAbsent: [ #[] ].
 	index := anObjectId index.
 	byteIndex := (index bitShift: -3) + 1.
 	byteIndex <= bits size ifFalse: [ ^ outliers includes: anObjectId ].
@@ -62,9 +62,9 @@ SoilObjectIdBitmap >> includes: anObjectId [
 
 { #category : #initialization }
 SoilObjectIdBitmap >> initializeWith: aDictionary [
-	| noBits |
-	noBits := ByteArray new.
-	bitsBySegment := Array new: 65536 withAll: noBits.
+	bitsBySegment := Array
+		new: (aDictionary keys inject: 0 into: [ :highest :each | highest max: each ]) + 1
+		withAll: #[].
 	aDictionary keysAndValuesDo: [ :segmentId :lastObjectIndex |
 		bitsBySegment
 			at: segmentId + 1
