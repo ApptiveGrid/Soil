@@ -89,6 +89,30 @@ SoilExclusiveLockTest >> testReleaseInThisImageAllowsAnotherClaim [
 ]
 
 { #category : #tests }
+SoilExclusiveLockTest >> testReopenKeepsTheClaim [
+	"a migration reopens the database it migrated. Close and open would give up the claim
+	and not take it again, and the database would stay open with the lock file free for
+	any other process. The owner is asked of the registry, not read from the file: reading
+	the file here would end the claim of this process"
+	| error |
+	soil lockExclusiveAs: 'image-a:8080'.
+	soil reopen.
+	self assert: soil isOpen.
+	self assert: soil holdsExclusiveLock.
+	self assert: (SoilFileLockRegistry forPath: soil exclusiveLockFilePath) numberOfLocks equals: 1.
+	error := [ other lockExclusive. nil ] on: SoilDatabaseOwned do: [ :e | e ].
+	self assert: error owner equals: 'image-a:8080'.
+	self assert: error isHeldInThisImage
+]
+
+{ #category : #tests }
+SoilExclusiveLockTest >> testReopenWithoutAClaimClaimsNothing [
+	soil reopen.
+	self assert: soil isOpen.
+	self deny: soil holdsExclusiveLock
+]
+
+{ #category : #tests }
 SoilExclusiveLockTest >> testSecondClaimInThisImageIsRefused [
 	"the file system would let it through, the lock belongs to the process. The registry
 	refuses it before the file is opened: opening and closing it again would end the
