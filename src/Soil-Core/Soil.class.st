@@ -749,9 +749,22 @@ Soil >> renameClassNamed: oldName to: newName [
 
 { #category : #public }
 Soil >> reopen [
-	self 
-		close;
-		open 
+	"close and open again, and stay the owner all the while. #close gives up the claim of
+	#lockExclusive and #open does not take one, so close and open left the database open
+	without a claim: the lock file was empty and unlocked, and another process could claim
+	the database and open it beside this one. A migration reopens (AGDatabase>>migrate: in
+	apptive-common), and on 2026-11-27 that is how two images came to write into one
+	database at the same time.
+
+	The claim is kept out of the close rather than taken again after the open: taken again,
+	there would be a moment between the two in which another process finds the file free.
+	Kept out, the stream that holds the lock stays open from before the close to after the
+	open. The close itself is the whole #close of the receiver, overrides included"
+	| claim |
+	claim := ownership.
+	ownership := nil.
+	[ self close ] ensure: [ ownership := claim ].
+	self open
 ]
 
 { #category : #journal }
